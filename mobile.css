@@ -1,0 +1,45 @@
+@viewport {
+/*	width: 320 ; */
+	width: device-width; /* largeur du viewport */
+	zoom: 1; /* zoom initial à 1.0 (et clin d'oeil aux fans d'IE6/7) */
+}
+
+
+#logDiv { color: gray; font-size: 8; X-border-top-style: solid ; X-border-width: 1px; position: relative;}
+
+#bookingTable { background-color: lightgray; border-style: solid; border-width: 2px; border-radius: 10px; margin-left:auto; margin-right: auto;
+	box-shadow: 3px 3px 10px gray;
+	}
+
+/* #cancelButton { background-color: red; border-width: 2px; margin-left:auto; margin-right: auto; } */
+#confirmCancellation { visibility: hidden ; display: none; }
+
+.bookingLabel { text-align: right ; font-weight: bold; padding-right: 3px; }
+
+.bookingValue { text-align: left ; padding-left: 3px;}
+
+
+body {
+/*
+	background-image: url("/LogoRAPCS-dim.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+*/
+}
+
+.logbookTable { background-color: lightgray; border-style: solid; border-width: 2px; margin-left:auto; margin-right: auto;
+	margin-bottom: 10px; box-shadow: 3px 3px 10px gray;
+}
+
+.logbookSeparator { text-align: center ; background-color: yellow; font-weight: bold; }
+.logbookLabel { text-align: right ; font-weight: bold; padding-right: 3px; }
+.logbookValue { text-align: left ; padding-left: 3px;}
+
+.vertical-center {
+  min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+  min-height: 100vh; /* These two lines are counted as one :-)       */
+
+  display: flex;
+  align-items: center;
+}

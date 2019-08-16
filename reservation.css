@@ -1,0 +1,112 @@
+/*
+   Copyright 2014-2017 Eric Vyncke
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
+
+@media (max-width : 768px) {
+  .hidden-phone {
+        display: none;
+  }
+}
+
+body { background: #f0f0f0; color: #363636; font-family: Arial, Helvetica, sans-serif; font-size: 12;}
+
+td { border: 1px; margin: 0px; padding: 1px;}
+
+td.plane_cell {border-top-style: dotted;}
+td.header_hour { background-color: white; width: 15px; border-left-style: dotted; font-size: 12;}
+td.header_last_hour { width: 15px; border-left-style: dotted; font-size: 12;}
+td.header_not_hour { background-color: white; width: 15px; }
+/* td.engine_hours {color: gray; font-size: 12;} */
+
+/* for the first cell, there was width: 15px which was looking weird on IE */
+td.available { background-color: Gainsboro; width: 15px; height: 40px; border-spacing: 1px;}
+td.available_for_fi { background-color: MistyRose; width: 15px; height: 40px; border-spacing: 1px;}
+td.ressource_available { background-color: PowderBlue; width: 15px; height: 40px; border-spacing: 1px;}
+td.now { background-color: orange; width: 15px; height: 40px; border-spacing: 1px;}
+td.booked { background-color: #E57CD1; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap;}
+td.booked2 { background-color: #E57CD1; width: 15px; height: 40px; border-left-width: 0px; border-right-width: 0px; padding-right: 0px; padding-left: 0px;}
+td.booked_by_me { background-color: #97F024; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap;}
+td.booked2_by_me { background-color: #97F024; width: 15px; height: 40px; border-left-width: 0px; border-right-width: 0px; padding-right: 0px; padding-left: 0px;}
+td.booked_dc { background-color: salmon; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap;}
+td.booked2_dc { background-color: salmon; width: 15px; height: 40px; border-left-width: 0px; border-right-width: 0px; padding-right: 0px; padding-left: 0px;}
+td.maintenance { background-color: red; width: 15px; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap ;} 
+td.customer { background-color: white; width: 15px; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap ;} 
+td.onhold { background-color: tan; width: 15px; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap ;} 
+td.night { background-color: blue ; width: 15px; height: 40px; }
+td.onsite { background-color: #97F024; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap;}
+td.onsite2 { background-color: #97F024; width: 15px; height: 40px; border-left-width: 0px; border-right-width: 0px; padding-right: 0px; padding-left: 0px;}
+td.oncall { background-color: yellow; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap;}
+td.oncall2 { background-color: yellow; width: 15px; height: 40px; border-left-width: 0px; border-right-width: 0px; padding-right: 0px; padding-left: 0px;}
+td.unavailable { background-color: lightblue; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap;}
+td.unavailable2 { background-color: lightblue; width: 15px; height: 40px; border-left-width: 0px; border-right-width: 0px; padding-right: 0px; padding-left: 0px;}
+
+
+#bookingDiv { visibility: hidden; display: none; border-style: solid; border-radius: 10px ; background: lightgray;
+	width:400px; border-width: 1px; padding: 5px ; box-shadow: 5px 5px 10px gray;
+	font-size: 12; position: absolute;}
+
+#cancelBookingDiv { visibility: hidden; display: none; border-style: solid; border-radius: 10px ; background: salmon;
+	width:400px; border-width: 1px; padding: 5px ; box-shadow: 5px 5px 10px gray;
+	font-size: 12; position: absolute;}
+
+#agendaItemDiv { visibility: hidden; display: none; border-style: solid; border-radius: 10px ; background: lightgray;
+	width:400px; border-width: 1px; padding: 5px ; box-shadow: 5px 5px 10px gray;
+	font-size: 12; position: absolute;}
+
+.bookingErrorMessage { background-color: red; }
+#bookingMessageDiv {width: 300px; z-index: 3; background-color: lightgray; border-width: 1px; border-style: solid; border-color: black;
+	padding: 5px; font-size: 12; visibility: hidden; border-radius: 5px; box-shadow: 3px 3px 10px gray;
+	position: absolute; }
+
+#pilotDetailsDiv {width: 400px; z-index: 3; background-color: lightgray; border-width: 1px; border-style: solid; border-color: black;
+	padding: 5px; font-size: 12; visibility: hidden; border-radius: 5px; box-shadow: 3px 3px 10px gray;
+	position: absolute; }
+#pilotDetailsImage {float: right; } 
+
+.userPrivileges {color: gray; }
+.copyright {color: gray; font-size: smaller; font-style: oblique; text-align: center; border-top: 1px gray ;}
+.validityBox {background-color: white; margin-left: auto; margin-right: auto;  border-width: 4px; border-style: dashed; border-color: red; border-radius: 10px; 
+	padding: 10px; Xfont-size: larger;}
+.validityWarning {color: orange; }
+.validityExpired {color: red; }
+
+.planningRuler { height: 32px ; margin-left: auto; vertical-align: text-top ;  margin-right: auto; }
+.planningRulerCell { height: 32px ; padding-left: 10px; padding-right: 10px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
+.planningRulerCellCalendar { height: 32px ; padding-left: 1px; padding-right: 1px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
+.planningRulerCellLarge { height: 32px ; width: 170px; padding-left: 5px; padding-right: 1px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
+span#planningDayOfWeek { width: 80px; font-size: 14; text-align: center; vertical-align: top; }
+input#planningDate { width: 90px; font-size: 14; text-align: center; vertical-align: top; }
+.planningTable { border-spacing: 1px; margin-left: auto; margin-right: auto; font-size: 10;}
+
+#reservationDetails {border-style: dotted; height: 120px; max-height: 120px; overflow: hidden; background: lightgray; vertical-align: top; font-size: 12; visibility: visible;}
+#ephemeridesTable {color: gray; border-style: solid; border-radius: 5px; background: white ; font-size: 10;}
+#ephemeridesCell {color: gray; border-style: solid; }
+
+#newsDiv {border-style: dotted; background: lightblue;
+	border-width: 1px; padding: 5px ;
+	font-size: 12; margin-right: 20px ;
+}
+
+.toggleInstructorAgendaSpan {
+	display: block; font-size: small; text-align: center ;
+}
+
+.planningLegend {
+	display: block; font-size: x-small; text-align: center ;
+}
+
+#waitingDiv { visibility: hidden ; z-index: 4 ; opacity: 0.4; width: 256px; height: 256px; position: absolute;}
+#waitingImage { width: 256px; height: 256px;}
