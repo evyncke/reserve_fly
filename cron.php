@@ -232,7 +232,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$email_message .= " Afin de conna&icirc;tre les autres membres de notre club\n" ;
 		$email_message .= "il vous est conseill&eacute; de compl&egrave;ter votre profil: " ;
 		$email_message .= "<a href=https://www.spa-aviation.be/resa/profile.php>profil r&eacute;servation</a>; profitez-en pour mettre une photo de vous afin de vous faire reconna&icirc;tre ;-).</p>\n" ;
-		$email_message .= "<p>Pour rappel, votre identifiant est <b>$row[username]</b> (vous pouvez le changer en contactant <a href=mailto:eric@vyncke.org>eric@vyncke.org</a>).</p>\r\n" ;
+		$email_message .= "<p>Pour rappel, votre identifiant est <b>$row[username]</b> (vous pouvez le changer en contactant <a href=mailto:webmastere@spa-aviation.be>webmastere@spa-aviation.be</a>).</p>\r\n" ;
 		$email_message .= "<hr>Ceci est un message automatique. En cas de soucis, veuillez contacter <a href=mailto:webmaster@spa-aviation.be>webmaster@spa-aviation.be</a>." ;
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 		$email_header = "From: Webmaster RAPCS <webmaster@spa-aviation.be>\r\n" ;
@@ -263,10 +263,7 @@ while ($row = mysqli_fetch_array($result)) {
 		print(date('Y-m-d H:i:s').": $row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
 		journalise($row['id'], 'W', "$row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
 		$status = mysqli_query($mysqli_link, "update $table_person set email = '$row[j_email]' where jom_id = $row[j_id]");
-		if ($status) {
-			mail("eric.vyncke@ulg.ac.be", "RAPCS update email", "$row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
-		} else {
-			mail("eric.vyncke@ulg.ac.be", "RAPCS update email (failed!)", "$row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)\n" . mysqli_error($mysqli_link)) ;
+		if (!$status) {
 			journalise($row['j_id'], 'E', mysqli_error($mysqli_link) . " for row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
 		}
 	}
@@ -407,7 +404,6 @@ else {
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
-	fwrite($f, "eric@vyncke.org\n") ;
 	fclose($f) ;
 }
 
