@@ -64,7 +64,7 @@ if (isset($_POST['action']) and $_POST['action'] == 'photo' and !$read_only) {
 	$image_size = getimagesize($source_file) ;
 	if ($image_size === FALSE) {
 		journalise($userId, 'E', "Ce fichier n'est pas une photo($displayed_id): " . $_FILES['photoFile']['name'] . '/' . $source_file) ;
-		die("Ce fichier ne semble pas être une image, veuillez l'envoyer par email à eric@vyncke.org") ;
+		die("Ce fichier ne semble pas être une image, veuillez l'envoyer par email à webmaster@spa-aviation.be") ;
 	}
 	$image_width = $image_size[0] ;
 	$image_height = $image_size[1] ;
@@ -312,7 +312,7 @@ $read_only_attribute = ($read_only) ? 'readonly' : '' ;
 	<label class="control-label col-sm-4 col-md-2">Nom d'utilisateur:</label>
 	<div class="col-sm-4">
 		<input type="text" class="form-control" name="username" value="<?=$me['username']?>" readonly>
-		<span class="input-group-addon">(contacter eric@vyncke.org pour changer)</span>
+		<span class="input-group-addon">(contacter webmaster@spa-aviation.be pour changer)</span>
 	</div> <!-- col -->
 </div> <!-- form-group -->
 <div class="form-group">
