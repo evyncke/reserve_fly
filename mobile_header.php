@@ -108,7 +108,13 @@ if ($userId > 0) {
           <a class="dropdown-toggle" data-toggle="dropdown" href="#">Aéroport<span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="mobile_ephemerides.php">Ephémérides</a></li>
+<?php
+if ($userId > 0) {
+?> 
             <li><a href="mobile_team.php">Equipe SPW</a></li>
+<?php
+}
+?>
             <li><a href="mobile_metar.php">METAR</a></li>
             <li><a href="mobile_webcam.php?cam=0">Webcam Apron</a></li>
             <li><a href="mobile_webcam.php?cam=1">Webcam Fuel</a></li>
