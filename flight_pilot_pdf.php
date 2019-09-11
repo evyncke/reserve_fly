@@ -68,12 +68,12 @@ function NouveauChapitre($libelle) {
     $this->SetFont('Arial','',12);
 }
 
-function MulticellUtf8($w, $h, $t, $border = 0, $align = 'L', $fill = false) {
-	$this->Multicell($w, $h, iconv('UTF-8', 'windows-1252', $t), $border, $align, $fill) ;
+function MulticellUtf8($w, $h, $txt = '', $border = 0, $align = 'L', $fill = false) {
+	$this->Multicell($w, $h, iconv('UTF-8', 'windows-1252', $txt), $border, $align, $fill) ;
 }
 
-function CellUtf8($w, $h = 0, $t, $border = 0, $ln = 0, $align = 'L', $fill = false, $link) {
-	$this->Cell($w, $h, iconv('UTF-8', 'windows-1252', $t), $border, $ln, $align, $fill, $link) ;
+function CellUtf8($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = 'L', $fill = false, $link = NULL) {
+	$this->Cell($w, $h, iconv('UTF-8', 'windows-1252', $txt), $border, $ln, $align, $fill, $link) ;
 }
 
 function SetColumnsWidth($array) {
