@@ -483,12 +483,20 @@ else {
 	fclose($f) ;
 }
 print(date('Y-m-d H:i:s').": purging old journal entries.\n") ;
-mysqli_query($mysqli_link, "DELETE FROM $table_journal WHERE j_datetime < DATE_SUB(NOW(), INTERVAL 3 MONTH)")
+mysqli_query($mysqli_link, "DELETE FROM $table_journal WHERE j_datetime < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
 	or die("Cannot purge old entries in journal: " . mysqli_error($mysqli_link)) ;
 
 print(date('Y-m-d H:i:s').": end of job.\n") ;
 $load = sys_getloadavg(); 
 // TODO also use http://php.net/manual/fr/function.getrusage.php
+
+// Clean-up Joomla session table (growing for ever...)
+$hour = intval(date('H')) ;
+if ($hour == '03') { // Only run it at 3 AM
+	print(date('Y-m-d H:i:s').": purging old anonymous sessions.\n") ;
+	mysqli_query($mysqli_link, "DELETE FROM jom_session WHERE userid != 0")
+		or die("Cannot purge anonymous entries in jom_session: " . mysqli_error($mysqli_link)) ;
+}
 
 // Historique des METAR (move to the end as vyncke.org tends to be too slow and cause a mySql disconnect
 print(date('Y-m-d H:i:s').": building METAR history.\n") ;
