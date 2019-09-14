@@ -492,9 +492,9 @@ $load = sys_getloadavg();
 
 // Clean-up Joomla session table (growing for ever...)
 $hour = intval(date('H')) ;
-if ($hour == '03') { // Only run it at 3 AM
+if ($hour == 3) { // Only run it at 3 AM
 	print(date('Y-m-d H:i:s').": purging old anonymous sessions.\n") ;
-	mysqli_query($mysqli_link, "DELETE FROM jom_session WHERE userid != 0")
+	mysqli_query($mysqli_link, "DELETE FROM jom_session WHERE userid = 0")
 		or die("Cannot purge anonymous entries in jom_session: " . mysqli_error($mysqli_link)) ;
 }
 
