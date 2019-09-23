@@ -333,13 +333,14 @@ if ($this_segment_id > 1) {
 <div class="col-xs-12 col-md-4">
 
 <table class="logbookTable">
+  <tbody>
 	<tr><td class="logbookSeparator" colspan="2">Temps/index <?=$engine_flight_label?></td><tr>
 	<tr><td class="logbookLabel">D&eacute;but:</td>
 	<td class="logbookValue">
-		<input type="number" size="6" name="engineStartHour" max="<?=$engineStartHour+50?>" value="<?=$engineStartHour?>" onchange="engineTimeChanged(false);"> H
+		<input type="number" size="6" maxlength="6" max="<?=$engineStartHour+50?>" name="engineStartHour" value="<?=$engineStartHour?>" onchange="engineTimeChanged(false);" autofocus> H
 <?php
 if ($booking['compteur_type'] == 1) 
-		print("<input type=\"number\" size=\"4\" maxlength=\"2\" min=\"0\" max=\"59\" name=\"engineStartMinute\" value=\"$engineStartMinute\" onchange=\"engineTimeChanged(false);\"> min.\n") ;
+		print("<input type=\"number\" size=\"4\" maxlength=\"2\" min=\"0\" max=\"59\" name=\"engineStartMinute\" value=\"$engineStartMinute\" onchange=\"engineTimeChanged(false);\" style=\"padding-left: 10px; padding-right: 10px;\"> min.\n") ;
 elseif ($booking['compteur_type'] == 6)
 		print("<input type=\"number\" size=\"3\" maxlength=\"1\" min=\"0\" max=\"9\" name=\"engineStartMinute\" value=\"" . round($engineStartMinute/6) . "\" onchange=\"engineTimeChanged(false);\"> dixi&egrave;mes\n") ;
 else
@@ -348,7 +349,7 @@ else
 		</td></tr>
 	<tr><td class="logbookLabel">Fin:</td>
 	<td class="logbookValue">
-		<input type="number" size="6" name="engineEndHour" max="<?=$engineStartHour+50?>" value="<?=$engineEndHour?>" onchange="engineTimeChanged(false);"> H
+		<input type="number" size="6" max="<?=$engineStartHour+50?>" name="engineEndHour" value="<?=$engineEndHour?>" onchange="engineTimeChanged(false);"> H
 <?php
 if ($booking['compteur_type'] == 1) 
 		print("<input type=\"number\" size=\"4\" maxlength=\"2\" min=\"0\" max=\"59\" name=\"engineEndMinute\" value=\"$engineEndMinute\" onchange=\"engineTimeChanged(false);\"> min.\n") ;
@@ -360,7 +361,8 @@ else
 		</td></tr>
 	<tr><td class="logbookLabel">Dur&eacute;e:</td><td class="logbookValue"><input type="text" size="5" maxlength="5" name="engineDurationHour" value="<?=$durationHour?>" disabled> H
 		<input type="text" size="2" maxlength="2" name="engineDurationMinute" value="<?=$durationMinute?>" disabled> min.</td><tr>
-</table>
+  </tbody>
+</table> <!-- logbookTable -->
 
 <?php 
 if ($booking['compteur_vol'] != 0) {
@@ -371,12 +373,12 @@ if ($booking['compteur_vol'] != 0) {
 		<input type="number" size="4" maxlength="2" min="0" max="59" name="flightStartMinute" value="<?=$flightStartMinute?>" onchange="flightTimeChanged(false);"> min
 	</td></tr>
 	<tr><td class="logbookLabel">Fin:</td><td class="logbookValue">
-		<input type="number" size="6" name="flightEndHour" max="<?=$flightStartHour+50?>" value="<?=$flightEndHour?>" onchange="flightTimeChanged(false);"> H
+		<input type="number" size="6" maxlength="6" max="<?=$flightStartHour+50?>" name="flightEndHour" value="<?=$flightEndHour?>" onchange="flightTimeChanged(false);"> H
 		<input type="number" size="4" maxlength="2" min="0" max="59" name="flightEndMinute" value="<?=$flightEndMinute?>" onchange="flightTimeChanged(false);"> min
 	</td></tr>
 	<tr><td class="logbookLabel">Dur&eacute;e:</td><td class="logbookValue"><input type="text" size="6" maxlength="5" name="flightDurationHour" value="<?=$durationHour?>" disabled> H
 		<input type="text" size="3" maxlength="2" name="flightDurationMinute" value="<?=$durationMinute?>" disabled> min.</td><tr>
-</table>
+</table> <!-- logbookTable -->
 <?php
 } // End of if ($booking['compteur_vol'] != 0)
 ?> 
@@ -474,7 +476,7 @@ if ($booking['compteur_vol'] != 0) {
 
 <!-- Display previous / next -->
 <div class="row">
-<ul class="pager col-xs-12">
+<ul class="pager col-xs-12 offset-sm-1">
 <?php
 if ($previous_id != '') {
 	print("<li class=\"previous\"><a href=\"$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth\">Ma r&eacute;servation pr&eacute;c&eacute;dente</a></li>\n") ;
@@ -511,7 +513,7 @@ if ($auth != '') {
 		<form action="mobile.php">
 		<input type="hidden" name="id" value="<?=$id?>">
 		<input type="hidden" name="auth" value="<?=$auth?>">
-		<input type="submit" class="col-xs-12 col-sm-6 btn btn-success center" value="Retour &agrave; la r&eacute;servation" style="margin-left: auto; margin-right: auto;">
+		<input type="submit" class="btn btn-success center" value="Retour &agrave; la r&eacute;servation" style="margin-left: auto; margin-right: auto;">
 		</form>
 	</div> <!-- col-->
 <?php
