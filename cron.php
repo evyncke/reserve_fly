@@ -232,7 +232,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$email_message .= " Afin de conna&icirc;tre les autres membres de notre club\n" ;
 		$email_message .= "il vous est conseill&eacute; de compl&egrave;ter votre profil: " ;
 		$email_message .= "<a href=https://www.spa-aviation.be/resa/profile.php>profil r&eacute;servation</a>; profitez-en pour mettre une photo de vous afin de vous faire reconna&icirc;tre ;-).</p>\n" ;
-		$email_message .= "<p>Pour rappel, votre identifiant est <b>$row[username]</b> (vous pouvez le changer en contactant <a href=mailto:webmastere@spa-aviation.be>webmastere@spa-aviation.be</a>).</p>\r\n" ;
+		$email_message .= "<p>Pour rappel, votre identifiant est <b>$row[username]</b> (vous pouvez le changer en contactant <a href=mailto:webmaster@spa-aviation.be>webmaster@spa-aviation.be</a>).</p>\r\n" ;
 		$email_message .= "<hr>Ceci est un message automatique. En cas de soucis, veuillez contacter <a href=mailto:webmaster@spa-aviation.be>webmaster@spa-aviation.be</a>." ;
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 		$email_header = "From: Webmaster RAPCS <webmaster@spa-aviation.be>\r\n" ;
