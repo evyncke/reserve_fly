@@ -41,7 +41,7 @@ $sql_date = date('Y-m-d', $displayTimestamp) ;
 	<tr><th>Avion</th><th>De</th><th>A</th><th>Pilote</th><th>Commentaire</th></tr>
 <?php
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.cell_phone as icell_phone, i.jom_id as iid,
-		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.cell_phone as pcell_phone, pi.jom_id as pid
+		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.name as pname, pi.cell_phone as pcell_phone, pi.jom_id as pid
 		FROM $table_bookings 
 		JOIN $table_person pi ON pi.jom_id = r_pilot
 		LEFT JOIN $table_person i ON i.jom_id = r_instructor		
@@ -51,6 +51,8 @@ $sql_date = date('Y-m-d', $displayTimestamp) ;
 		or die("Cannot retrieve bookings($plane): " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
+		$pname = ($row['pfirst_name'] == '') ? $row['pname'] : 
+			'<span class="hidden-xs">' . db2web($row['pfirst_name']) . ' </span><b>' . db2web($row['plast_name']) . '</b>' ;
 		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
 		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-toggle="tooltip" data-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
@@ -64,8 +66,7 @@ $sql_date = date('Y-m-d', $displayTimestamp) ;
 			$row['r_stop'] = substr($row['r_stop'], 11) ;
 		else
 			$row['r_stop'] = substr($row['r_stop'], 0, 10) ;
-		print("<tr$class><td>$row[r_plane]</td><td>$row[r_start]</td><td>$row[r_stop]</td><td><span class=\"hidden-xs\">" . db2web($row['pfirst_name']) . " </span><b>" . 
-			db2web($row['plast_name']) . "</b>$ptelephone$instructor</td><td>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
+		print("<tr$class><td>$row[r_plane]</td><td>$row[r_start]</td><td>$row[r_stop]</td><td>$pname$ptelephone$instructor</td><td>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
 	}
 ?>
 </table>
