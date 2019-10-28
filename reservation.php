@@ -590,11 +590,12 @@ Raison de l'annulation (obligatoire):<br/>
 if ($userIsMechanic || $userIsInstructor || $userIsAdmin)
 	print('<button id="cancelMaintenanceButton" onclick="javascript:document.getElementById(\'reasonTextArea\').value=\'Mise en maintenance\';cancelBooking(true);">Annuler pour mise en maintenance</button><br/>') ;
 if ($userIsInstructor) {
-	print('<button id="cancelMaintenanceButton" onclick="javascript:document.getElementById(\'reasonTextArea\').value=\'Elève indisponible\';cancelBooking(true);">Elève indisponible</button><br/>') ;
-	print('<button id="cancelMaintenanceButton" onclick="javascript:document.getElementById(\'reasonTextArea\').value=\'Scheduling\';cancelBooking(true);">Scheduling</button><br/>') ;
+	print('<button id="cancelStudentButton" onclick="javascript:document.getElementById(\'reasonTextArea\').value=\'Elève indisponible\';cancelBooking(true);">Elève indisponible</button><br/>') ;
+	print('<button id="cancelSchedulingButton" onclick="javascript:document.getElementById(\'reasonTextArea\').value=\'Scheduling\';cancelBooking(true);">Scheduling</button><br/>') ;
 }
 ?>
-<button id="cancelPilotHealthButton" onclick="javascript:document.getElementById('reasonTextArea').value='Passager indisponible';cancelBooking(true);">Passager indisponible</button>
+<button id="cancelPassengerButton" onclick="javascript:document.getElementById('reasonTextArea').value='Passager indisponible';cancelBooking(true);">Passager indisponible</button>
+<button id="cancelInstructorButton" onclick="javascript:document.getElementById('reasonTextArea').value='Instructeur indisponible';cancelBooking(true);">Instructeur indisponible</button>
 <button id="cancelPilotHealthButton" onclick="javascript:document.getElementById('reasonTextArea').value='Santé pilote';cancelBooking(true);">Santé pilote</button>
 <button id="cancelWeatherButton" onclick="javascript:document.getElementById('reasonTextArea').value='Météo';cancelBooking(true);">Conditions météo</button>
 <button id="cancelADClosedButton" onclick="javascript:document.getElementById('reasonTextArea').value='Aéroport fermé';cancelBooking(true);">Aéroport fermé</button><br/>
