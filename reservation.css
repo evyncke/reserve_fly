@@ -56,11 +56,11 @@ td.unavailable2 { background-color: lightblue; width: 15px; height: 40px; border
 
 #bookingDiv { visibility: hidden; display: none; border-style: solid; border-radius: 10px ; background: lightgray;
 	width:400px; border-width: 1px; padding: 5px ; box-shadow: 5px 5px 10px gray;
-	font-size: 12; position: absolute;}
+	font-size: 12; z-index: 10;}
 
 #cancelBookingDiv { visibility: hidden; display: none; border-style: solid; border-radius: 10px ; background: salmon;
 	width:400px; border-width: 1px; padding: 5px ; box-shadow: 5px 5px 10px gray;
-	font-size: 12; position: absolute;}
+	font-size: 12; position: absolute; z-index: 10;}
 
 #agendaItemDiv { visibility: hidden; display: none; border-style: solid; border-radius: 10px ; background: lightgray;
 	width:400px; border-width: 1px; padding: 5px ; box-shadow: 5px 5px 10px gray;
