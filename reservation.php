@@ -38,13 +38,13 @@ for ($i = 0, $all_minute_options = '' ; $i <= 45  ; $i+=15)
 	$all_minute_options .= '<option value="' . $i . '">' . $i . "</option>\n" ;
 
 // Check all validity ratings
-$result = mysqli_query($mysqli_link, "select *,datediff(sysdate(), expire_date) as delta
-	from $table_validity_type t left join $table_validity v on validity_type_id = t.id and jom_id = $userId")
-	or die("Erreur systeme lors de la lecture de vos validites: " . mysqli_error($mysqli_link)) ;
 $validity_msg = '' ;
 $userRatingValid = true ;
 $userValidities = array() ;
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
+$result = mysqli_query($mysqli_link, "select *,datediff(sysdate(), expire_date) as delta
+	from $table_validity_type t left join $table_validity v on validity_type_id = t.id and jom_id = $userId")
+	or die("Erreur systeme lors de la lecture de vos validites: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
 	$userValidities[$row['validity_type_id']] = true ;
 	$row['name'] = db2web($row['name']) ;
