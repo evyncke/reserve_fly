@@ -4,7 +4,7 @@
 // add pilot/booker's name in error messages...
 
 /*
-   Copyright 2013-2019 Eric Vyncke
+   Copyright 2013 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.

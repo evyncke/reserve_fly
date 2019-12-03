@@ -201,7 +201,7 @@ print("EVY: exception " .  $e->getMessage()) ;
 
 global $user ;
 
-$user = &JFactory::getUser(); //gets user objects
+$user = &JFactory::getUser(); //gets user object
 
 $canview = FALSE ;
 $canedit = FALSE ;

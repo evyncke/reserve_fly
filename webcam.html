@@ -1,9 +1,16 @@
-<img id="webcamRapcs" src="//www.spa-aviation.be/webcam.php" width="100%" onclick="popup = window.open('//www.spa-aviation.be/webcam.php', '_blank', 'width=640,height=480,menubar=no,status=no,toolbar=no,location=no'); popup.document.title='Webcam';">
-
-<img id="webcamRapcs" src="//www.spa-aviation.be/webcam.php" width="100%">
+<html>
+<head>
+<title>Apron webcam</title>
 <script>
 setInterval(function() {
       var image = document.getElementById("webcamRapcs") ;
       image.src = '//www.spa-aviation.be/webcam.php';
   }, 60 * 1000);
 </script>
+</head>
+<body style="background-image: url('/images/CLOUDS.jpg') ; background-attachment: fixed:">
+<img id="webcamRapcs" src="//www.spa-aviation.be/webcam.php" width="100%" onclick="popup = window.open('//www.spa-aviation.be/webcam.php', '_blank', 'width=640,height=480,menubar=no,status=no,toolbar=no,location=no'); popup.document.title='Webcam';">
+
+<img id="webcamRapcs" src="//www.spa-aviation.be/webcam.php" width="100%">
+</body>
+</html>
