@@ -336,6 +336,7 @@ $sql = "select l_id, date_format(l_start, '%d/%m/%y') as date,
 	l_model, l_plane, l_pilot, l_instructor, p.last_name as instructor_name,
 	upper(l_from) as l_from, upper(l_to) as l_to, 
 	l_start, l_end, timediff(l_end, l_start) as duration,
+	timediff(addtime(l_end, '24:00:00'), l_start) as duration_rollover,
 	l_day_landing, l_night_landing
 	from $table_logbook l 
 	left join $table_person p on p.jom_id = l_instructor
@@ -376,7 +377,10 @@ $fi_total_minute =  0;
 $line_count = 0 ;
 while (($row = mysqli_fetch_array($result)) && ($line_count < $items)) {
 	$line_count ++ ;
-	$duration = explode(':', $row['duration']) ;
+	if (substr($row['duration'], 0, 1) == '-')
+		$duration = explode(':', $row['duration_rollover']) ; // Looking like 01:33:00 (in case of over rolling the 24:00:00 mark)
+	else
+		$duration = explode(':', $row['duration']) ; // Looking like 01:33:00
 	$duration_total_hour += $duration[0] ;
 	$duration_total_minute += $duration[1] ;
 	$day_landing_total += $row['l_day_landing'] ;
