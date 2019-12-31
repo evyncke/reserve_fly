@@ -128,14 +128,14 @@ $email_header = "From: $managerName <$managerEmail>\r\n" ;
 $email_header .= "To: info@spa-aviation.be, ca@spa-aviation.be\r\n" ;
 $email_header .= "Cc: fis@spa-aviation.be\r\n" ;
 if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
-$email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
+$email_header .= "Reply-To: $managerName <$managerEmail>\r\n" ;
 $email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
 $email_header .= "MIME-Version: 1.0\r\n" ;
 
 if ($test_mode)
-	@mail("eric.vyncke@ulg.ac.be", "Statistiques utilisations des avions", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
+	@smtp_mail("eric.vyncke@ulg.ac.be,evyncke@cisco.com", "Statistiques utilisations des avions (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 else
-	@mail("info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be", "Statistiques utilisations des avions", $email_body, $email_header) ;
+	@smtp_mail("info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be", "Statistiques sur l'utilisation des avions", $email_body, $email_header) ;
 
 if (strpos($actions, 'p') !== FALSE) {
 
@@ -201,7 +201,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "MIME-Version: 1.0\r\n" ;
 	$email_header .= "X-Comment: joomla user is $row[jom_id]\r\n" ;
 	if ($test_mode)
-		mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
+		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 	else
 		@mail("$row[full_name] <$row[email]>", substr($email_subject, 9), $email_message, $email_header) ;
 }
@@ -284,9 +284,9 @@ $email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
 $email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
 $email_header .= "MIME-Version: 1.0\r\n" ;
 if ($test_mode)
-	@mail("eric.vyncke@ulg.ac.be", "Listes diverses", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
+	@smtp_mail("eric.vyncke@ulg.ac.be", "Listes diverses (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 else
-	@mail("info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be, webmaster@spa-aviation.be", "Listes diverses", $email_body, $email_header) ;
+	@smtp_mail("info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be, webmaster@spa-aviation.be", "Listes diverses", $email_body, $email_header) ;
 }
 
 print(date('Y-m-d H:i:s').": end of job.\n") ;
