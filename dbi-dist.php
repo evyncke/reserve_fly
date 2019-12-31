@@ -1,6 +1,8 @@
 <?php
 // TODO fix the mysql interface !!
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
+include 'Mail.php';
+
 /*
    Copyright 2014-2019 Eric Vyncke
 
@@ -34,6 +36,13 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
 	$bccTo = "" ;
 	$cache_directory = getcwd() ;
 	$rapcs_metar = 'rapcs_metar' ;
+	// SMTP local parameters
+	$smtp_host = 'xxx.net' ;
+	$smtp_port = 587 ;
+	$smtp_user = 'no-reply@xxxx' ;
+	$smtp_password = 'xxxx' ;
+	$smtp_return_path = 'xxx@xxx.org' ;
+	$smtp_localhost = 'xxx.be' ;
 	// Need to change when jom_usergroups content changes!!!!!
 	$joomla_member_group = 2 ;
 	$joomla_admin_group = 7 ; // Board member
@@ -253,6 +262,37 @@ function db2web($msg) {
 		return(iconv("ISO-8859-1", "UTF-8//TRANSLIT", $msg)) ; 
 	else
 		return $msg ;
+}
+
+// SMTP server name, port, user/passwd
+$smtp_info['host'] = $smtp_host ;
+$smtp_info['localhost'] = $smtp_localhost ;
+$smtp_info['port'] = $smtp_port ;
+$smtp_info['auth'] = True;
+$smtp_info['username'] = $smtp_user ;
+$smtp_info['password'] = $smtp_password ;
+$smtp_info['debug'] = False;
+$smtp_info['persist'] = False;
+
+// Create the mail object using the Mail::factory method
+$mail = & Mail::factory('smtp', $smtp_info);
+
+function smtp_mail( $smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
+	global $smtp_from, $smtp_return_path, $smtp_info ;
+	global $mail ;
+	
+	if (isset($smtp_from) and $smtp_from != '') $headers['From'] = $smtp_from ;
+	if (isset($smtp_return_path) and $smtp_return_path != '') $headers['Return-Path'] = $smtp_return_path ;
+	$headers['To'] = $smtp_to ;
+	$headers['Subject'] = $smtp_subject ;
+	$headers['MIME-Version'] = '1.0' ;
+	$headers['Content-Type'] = 'text/html; charset="UTF-8"' ;
+	foreach (explode( "\r\n", $str_headers) as $header_line) {
+			$token = explode(':', $header_line) ;
+			if ($token[0] != '' and $token[1] != '')
+				$headers[$token[0]] = trim($token[1]) ;
+	}
+	$mail->send($smtp_to, $headers, $smtp_body);
 }
 
 //Try to sanitize input
