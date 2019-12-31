@@ -42,6 +42,7 @@ include 'Mail.php';
 	$smtp_user = 'no-reply@xxxx' ;
 	$smtp_password = 'xxxx' ;
 //	$smtp_return_path = 'xxx@xxx.org' ;
+	$smtp_from = 'xxx@xxx.org' ;
 	$smtp_localhost = 'xxx.be' ;
 	// Need to change when jom_usergroups content changes!!!!!
 	$joomla_member_group = 2 ;
@@ -274,13 +275,13 @@ $smtp_info['password'] = $smtp_password ;
 $smtp_info['debug'] = False;
 $smtp_info['persist'] = False;
 
-// Create the mail object using the Mail::factory method
-$mail = & Mail::factory('smtp', $smtp_info);
+$mail = NULL;
 
 function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
 	global $smtp_from, $smtp_return_path, $smtp_info ;
 	global $mail ;
-	
+
+	if (!$mail) $mail = & Mail::factory('smtp', $smtp_info); // Create the mail object using the Mail::factory method
 	if (isset($smtp_from) and $smtp_from != '') $headers['From'] = $smtp_from ;
 //	if (isset($smtp_return_path) and $smtp_return_path != '') $headers['Return-Path'] = $smtp_return_path ; // Normally done by the recipient MTA	$headers['To'] = $smtp_to ;
 	$headers['Subject'] = $smtp_subject ;
