@@ -292,7 +292,15 @@ function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
 			if ($token[0] != '' and $token[1] != '')
 				$headers[$token[0]] = trim($token[1]) ;
 	}
-	$mail->send($smtp_to, $headers, $smtp_body);
+	if ($smtp_info['debug']) print_r($headers) ;
+	try {
+		$mail->send($smtp_to, $headers, $smtp_body);
+	} 
+	catch(Exception $e) {
+  		Journalise($userId, 'E', "Cannot send mail to $smtp_to: " . $e->getMessage());
+  		return False ;
+	}
+	return True ;
 }
 
 //Try to sanitize input
