@@ -185,17 +185,14 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 		mysqli_free_result($result) ;
 	}
 	$message .= '</p>' ;
-	$email_header = "From: Eric Vyncke <eric@vyncke.org>\r\n" ;
-	$email_header .= "Return-Path: Eric Vyncke <eric@vyncke.org>\r\n" ;
+	$email_header = "From: no-reply@spa-aviation.be\r\n" ;
 //	$email_header = "Return-Path: $managerName <$managerEmail>\r\n" ;
 	$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
 	$email_header .= "MIME-Version: 1.0\r\n" ;
 	if (!$reservation_permise) {
 		$message .= "<p style='color: red;'>Cette réservation devrait être refusée, mais, acceptée en phase de test.</p>" ;
 		$email_header .= "To: Fleet manager <fleet@spa-aviation.be>\r\n" ;
-		@mail('fleet@spa-aviation.be', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $userFullName"), 9), $message, $email_header) ;
-//	} else {
-//		@mail('evyncke@gmail.com', substr(iconv_mime_encode('Subject',"Réservation $plane acceptée pour $userFullName"), 9), $message, $email_header) ;
+		@smtp_mail('fleet@spa-aviation.be', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $userFullName"), 9), $message, $email_header) ;
 	}
 } // End of checks for normal pilot
  
@@ -307,14 +304,15 @@ if ($response['error'] == '') {
 			if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
 //			$email_header .= iconv_mime_encode('Bcc', "$managerName <$managerEmail>, <eric.vyncke@edpnet.be>\r\n", $mime_preferences) ;
 		}
-		$email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
+//		$email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
 		$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
 		$email_header .= "MIME-Version: 1.0\r\n" ;
 		$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
 		if ($test_mode)
-			@mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header_recipients . $email_header) ;
+			@smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header_recipients . $email_header) ;
 		else
-			@mail("$pilot[name] <$pilot[email]>", substr($email_subject, 9), $email_message, $email_header_recipients . $email_header) ;
+//			@smtp_mail("$pilot[name] <$pilot[email]>", substr($email_subject, 9), $email_message, $email_header_recipients . $email_header) ;
+			@smtp_mail("$pilot[name] <$pilot[email]>", substr($email_subject, 9), $email_message, $email_header) ;
 		if ($booking_type == BOOKING_MAINTENANCE)
 			journalise($userId, 'W', "$plane is out for maintenance by $booker[name] ($comment). $start => $end") ;
 		else {
@@ -323,7 +321,7 @@ if ($response['error'] == '') {
 			date_default_timezone_set('Europe/Brussels') ;
 			$interval = date_diff(date_create($end), date_create($start)) ;
 			if ($interval and ($interval->d > 0 or $interval->m > 0))
-				@mail("$managerEmail, $fleetEmail", "!!! Longue reservation ($start / $end): " . substr($email_subject, 9), $email_message, "To: $managerName <$managerEmail>, $fleetName <$fleetEmail>\r\n" . $email_header) ;
+				@smtp_mail("$managerEmail, $fleetEmail", "!!! Longue reservation ($start / $end): " . substr($email_subject, 9), $email_message, "To: $managerName <$managerEmail>, $fleetName <$fleetEmail>\r\n" . $email_header) ;
 		}
 	} else {
 		$response['error'] .= "Un probl&egrave;me technique s'est produit, r&eacute;servation non effectu&eacute;e..." . mysqli_error($mysqli_link) . "<br/>" ;
