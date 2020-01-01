@@ -21,6 +21,7 @@
 // TODO: every month, statistics on WE ?
 
 require_once 'dbi.php' ;
+$smtp_info['debug'] = True;
 
 $test_mode = false ; // Only send to eric@vyncke.org when test_mode is true
 $debug = true ;
@@ -124,18 +125,21 @@ $sql = "select r_plane, r_start, r_stop, r_comment
 print_plane_table("Avions en maintenance", $sql, ['Avion', 'D&eacute;but', 'Fin', 'Commentaire']) ;
 }
 
+$email_recipients = "info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be" ;
 $email_header = "From: $managerName <$managerEmail>\r\n" ;
 $email_header .= "To: info@spa-aviation.be, ca@spa-aviation.be\r\n" ;
 $email_header .= "Cc: fis@spa-aviation.be\r\n" ;
-if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
+if ($bccTo != '') {
+	$email_header .= "Bcc: $bccTo\r\n" ;
+	$email_recipients .= ", $bccTo" ;
+}
 $email_header .= "Reply-To: $managerName <$managerEmail>\r\n" ;
-$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
-$email_header .= "MIME-Version: 1.0\r\n" ;
 
-if ($test_mode)
-	@smtp_mail("eric.vyncke@ulg.ac.be,evyncke@cisco.com", "Statistiques utilisations des avions (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
-else
-	@smtp_mail("info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be", "Statistiques sur l'utilisation des avions", $email_body, $email_header) ;
+if ($test_mode) {
+	$smtp_info['debug'] = True ;
+	smtp_mail("evyncke@cisco.com", "Statistiques utilisations des avions (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
+} else
+	@smtp_mail($email_recipients, "Statistiques sur l'utilisation des avions", $email_body, $email_header) ;
 
 if (strpos($actions, 'p') !== FALSE) {
 
@@ -279,14 +283,16 @@ print_table("Administrateurs syst&egrave;me du site (webmaster@spa-aviation.be)"
 $email_header = "From: $managerName <$managerEmail>\r\n" ;
 $email_header .= "To: info@spa-aviation.be, ca@spa-aviation.be\r\n" ;
 $email_header .= "Cc: fis@spa-aviation.be, webmaster@spa-aviation.be\r\n" ;
-if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
-$email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
-$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
-$email_header .= "MIME-Version: 1.0\r\n" ;
-if ($test_mode)
-	@smtp_mail("eric.vyncke@ulg.ac.be", "Listes diverses (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
-else
-	@smtp_mail("info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be, webmaster@spa-aviation.be", "Listes diverses", $email_body, $email_header) ;
+$email_recipients = "info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be, webmaster@spa-aviation.be" ;
+if ($bccTo != '') {
+	$email_header .= "Bcc: $bccTo\r\n" ;
+	$email_recipients .= ", $bccTo" ;
+}
+if ($test_mode) {
+	$smtp_info['debug'] = True;
+	smtp_mail("eric.vyncke@ulg.ac.be", "Listes diverses (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
+} else
+	smtp_mail($email_recipients, "Listes diverses", $email_body, $email_header) ;
 }
 
 print(date('Y-m-d H:i:s').": end of job.\n") ;
