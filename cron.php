@@ -121,20 +121,25 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header = "From: $managerName <$managerEmail>\r\n" ;
 	if (!$test_mode) {
 		$email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
-		if ($row['r_instructor'] != '')
+		$email_recipients = $row['email'] ;
+		if ($row['r_instructor'] != '') {
 			$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
-		if ($row['r_pilot'] != $row['r_who'])
+			$email_recipients .= ", $instructor[email]" ;
+		}
+		if ($row['r_pilot'] != $row['r_who']) {
 			$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
-		if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
+			$email_recipients .= ", $booker[email]" ;
+		}
+		if ($bccTo != '') {
+			$email_header .= "Bcc: $bccTo\r\n" ;
+			$email_recipients .= ", $bccTo" ;
+		}
 	}
-	$email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
-	$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
-	$email_header .= "MIME-Version: 1.0\r\n" ;
 	$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
 	if ($test_mode)
-		mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
+		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 	else
-		@mail("$row[full_name] <$row[email]>", substr($email_subject, 9), $email_message, $email_header) ;
+		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 	$flight_reminders ++ ;
 }
 
@@ -190,19 +195,22 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 	$email_header = "From: $managerName <$managerEmail>\r\n" ;
 	if (! $test_mode) {
-		 $email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
-		if ($row['r_pilot'] != $row['r_who'])
+		$email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
+		$email_recipients = $row['email'] ;
+		if ($row['r_pilot'] != $row['r_who']) {
 			$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
-		if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
+			$email_recipients .= ", $booker[email]" ;
+		}
+		if ($bccTo != '') {
+			$email_header .= "Bcc: $bccTo\r\n" ;
+			$email_recipients .= ", $bccTo" ;
+		}
 	}
-	$email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
-	$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
-	$email_header .= "MIME-Version: 1.0\r\n" ;
 	$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
 	if ($test_mode)
-		mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
+		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 	else
-		@mail("$row[full_name] <$row[email]>", substr($email_subject, 9), $email_message, $email_header) ;
+		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 	$engine_reminders ++ ;
 
 }
@@ -238,15 +246,11 @@ while ($row = mysqli_fetch_array($result)) {
 		$email_header = "From: Webmaster RAPCS <webmaster@spa-aviation.be>\r\n" ;
 		$email_header .= "To: $row[name] <$row[email]>\r\n" ;
 		if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
-$email_header .= "Bcc: eric.vyncke@ulg.ac.be\r\n" ;
-		$email_header .= "Return-Path: Webmaster RAPCS <webmaster@spa-aviation.be>\r\n" ;
-		$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
-		$email_header .= "MIME-Version: 1.0\r\n" ;
 		$email_header .= "X-Comment: joomla user is $row[jom_id]\r\n" ;
 		if ($test_mode)
 			mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 		else
-			@mail("$row[full_name] <$row[email]>", substr($email_subject, 9), $email_message, $email_header) ;
+			@smtp_mail("$row[email],eric@vyncke.org", substr($email_subject, 9), $email_message, $email_header) ;
 	}
 }
 
