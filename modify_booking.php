@@ -166,7 +166,7 @@ if ($response['error'] == '') {
 		$email_message .= "<li>Commentaire: $response[previous_comment];</li>\n" ;
 		$email_message .= "</ul>\n" ;
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
-		$email_header = "From: $managerName <$managerEmail>\r\n" ;
+		$email_header = "From: $managerName <$managerEmail>\r\n" ; // Currently different than in create_booking
 		if (!$test_mode) {
 			$email_header .= "To: $pilot[name] <$pilot[email]>\r\n" ;
 			$email_recipients = $pilot['email'] ;
@@ -188,6 +188,7 @@ if ($response['error'] == '') {
 		}
 		$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
 		$email_header .= "References: booking-$booking_id@$smtp_localhost\r\n" ;
+		$email_header .= "In-Reply-To: booking-$booking_id@$smtp_localhost\r\n" ;
 		// $smtp_info['debug'] = True;
 		if ($test_mode)
 			@smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
