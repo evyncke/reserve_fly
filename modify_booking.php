@@ -169,22 +169,30 @@ if ($response['error'] == '') {
 		$email_header = "From: $managerName <$managerEmail>\r\n" ;
 		if (!$test_mode) {
 			$email_header .= "To: $pilot[name] <$pilot[email]>\r\n" ;
-			if ($pilot_id != $userId)
+			$email_recipients = $pilot['email'] ;
+			if ($pilot_id != $userId and $booker['email'] != '') {
 				$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
-			if ($instructor_id != $userId)
+				$email_recipients .= ", $booker[email]" ;
+			}
+			if ($instructor_id != $userId and $instructor['email'] != '') {
 				$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
-			if ($booking_type == BOOKING_MAINTENANCE)
+				$email_recipients .= ", $instructor[email]" ;
+			}
+			if ($booking_type == BOOKING_MAINTENANCE) {
 				$email_header_recipients .= "Cc: $fleetName <$fleetEmail>\r\n" ;
-			if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
+				$email_recipients .= ", $fleetEmail" ;
+			}
+			if ($bccTo != '') {
+					$email_recipients .= ", $bccTo" ;
+			}
 		}
-		$email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
-		$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
-		$email_header .= "MIME-Version: 1.0\r\n" ;
 		$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
+		$email_header .= "References: booking-$booking_id@$smtp_localhost\r\n" ;
+		// $smtp_info['debug'] = True;
 		if ($test_mode)
-			@mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
+			@smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 		else
-			@mail("$pilot[name] <$pilot[email]>", substr($email_subject, 9), $email_message, $email_header) ;
+			@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 		$modif_log = '' ;
 		if ($plane != $response['previous_plane']) $modif_log .= "$response[previous_plane]=>$plane " ;
 		if (intval($pilot_id) != intval($response['previous_pilot_id'])) $modif_log .= "pilot: $response[previous_pilot_id]=>$pilot_id. " . 

@@ -293,26 +293,32 @@ if ($response['error'] == '') {
 // TODO: should try to iconv_mime_encode the pilot name? iconv_mime_encode seems to mess up the < > around email address
 //			$email_header_recipients .= iconv_mime_encode('To', "$pilot[name] <$pilot[email]>", $mime_preferences) ;
 			$email_header_recipients .= "To: $pilot[name] <$pilot[email]>\r\n" ;
-			if ($pilot_id != $userId) // If booked by somebody else
-				$email_header_recipients .= "Cc: $booker[name] <$booker[email]>\r\n" ;
-//				$email_header_recipients .= iconv_mime_encode('Cc', "$booker[name] <$booker[email]>\r\n", $mime_preferences) ;
-			if ($instructor_id != 'NULL')
-				$email_header_recipients .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
-//				$email_header_recipients .= iconv_mime_encode('Cc', "$instructor[name] <$instructor[email]>\r\n", $mime_preferences) ;
-			if ($booking_type == BOOKING_MAINTENANCE)
-				$email_header_recipients .= "Cc: $fleetName <$fleetEmail>\r\n" ;
-			if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
+			$email_recipients = $pilot['email'] ;
+			if ($pilot_id != $userId and $booker['email'] != '') { // If booked by somebody else
+				$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
+//				$email_header .= iconv_mime_encode('Cc', "$booker[name] <$booker[email]>\r\n", $mime_preferences) ;
+				$email_recipients .= ", $booker[email]" ;
+			}
+			if ($instructor_id != 'NULL') {
+				$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
+//				$email_header .= iconv_mime_encode('Cc', "$instructor[name] <$instructor[email]>\r\n", $mime_preferences) ;
+				$email_recipients .= ", $instructor[email]" ;
+			}
+			if ($booking_type == BOOKING_MAINTENANCE) {
+				$email_header .= "Cc: $fleetName <$fleetEmail>\r\n" ;
+				$email_recipients .= ", $fleetEmail" ;
+			}
+			if ($bccTo != '') {
+					$email_recipients .= ", $bccTo" ;
+			}
 //			$email_header .= iconv_mime_encode('Bcc', "$managerName <$managerEmail>, <eric.vyncke@edpnet.be>\r\n", $mime_preferences) ;
 		}
-//		$email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
-		$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
-		$email_header .= "MIME-Version: 1.0\r\n" ;
-		$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
+		$email_header .= "Message-ID: booking-$booking_id@$smtp_localhost\r\n" ; 
 		if ($test_mode)
 			@smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header_recipients . $email_header) ;
 		else
 //			@smtp_mail("$pilot[name] <$pilot[email]>", substr($email_subject, 9), $email_message, $email_header_recipients . $email_header) ;
-			@smtp_mail("$pilot[name] <$pilot[email]>", substr($email_subject, 9), $email_message, $email_header) ;
+			@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 		if ($booking_type == BOOKING_MAINTENANCE)
 			journalise($userId, 'W', "$plane is out for maintenance by $booker[name] ($comment). $start => $end") ;
 		else {

@@ -110,22 +110,29 @@ if ($response['error'] == '') {
 		$email_header = "From: $managerName <$managerEmail>\r\n" ;
 		if (!$test_mode) {
 			$email_header .= "To: $pilot[name] <$pilot[email]>\r\n" ;
-			if ($pilot_id != $userId)
+			$email_recipients = $pilot['email'] ;
+			if ($pilot_id != $userId and $booker['email'] != '') {
 				$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
-			if ($booking['r_instructor'])
+				$email_recipients .= ", $booker[email]" ;
+			}
+			if ($booking['r_instructor']) {
 				$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
-			if ($booking_type == BOOKING_MAINTENANCE)
+				$email_recipients .= ", $instructor[name]" ;
+			}
+			if ($booking_type == BOOKING_MAINTENANCE) {
 				$email_header_recipients .= "Cc: $fleetName <$fleetEmail>\r\n" ;
-			if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
+				$email_recipients .= ", $fleetEmail" ;
+			}
+			if ($bccTo != '') {
+				$email_recipients .= ", $bccTo" ;
+			}
 		}
-		$email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
-		$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
-		$email_header .= "MIME-Version: 1.0\r\n" ;
 		$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
+		$email_header .= "References: booking-$booking_id@$smtp_localhost\r\n" ;
 		if ($test_mode)
-			@mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
+			smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 		else
-			@mail("$pilot[name] <$pilot[email]>", substr($email_subject, 9), $email_message, $email_header) ;
+			@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 		if ($booking_type == BOOKING_MAINTENANCE)
 			journalise($userId, 'W', "Cancellation of maintenance of $plane. $booking_start => $booking_end") ;
 		else
@@ -162,13 +169,11 @@ function email_adjacent($result, $booking, $booker) {
 	if ($row['r_pilot'] == $booking['r_pilot']) return ;
 	$row['name'] = db2web($row['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 	$email_header  = "From: $managerName <$managerEmail>\r\n" ;
-	$email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
-	$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
-	$email_header .= "MIME-Version: 1.0\r\n" ;
+	$email_header .= "To: $row[name] <$row[email]>\r\n" ;
 	$email_message = "<p>Bonjour,</p><p>Pour votre information, suite &agrave; une annulation d'une autre r&eacute;servation par $booker[name], le $row[r_plane] 
 		est maintenant disponible du $booking[r_start] au $booking[r_stop]. N'h&eacute;sitez donc pas &agrave; &eacute;tendre votre
 		r&eacute;servation.</p>" ;
-	@mail("$row[name] <$row[email]>", "$row[r_plane] est disponible du $booking[r_start] au $booking[r_stop]", $email_message, $email_header) ;
+	@smtp_mail($row['email'], "$row[r_plane] est disponible du $booking[r_start] au $booking[r_stop]", $email_message, $email_header) ;
 	journalise($userId, 'I', "Warning $row[name] by email that booking can be extended") ;
 }
 ?>
