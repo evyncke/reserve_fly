@@ -127,8 +127,9 @@ if ($response['error'] == '') {
 				$email_recipients .= ", $bccTo" ;
 			}
 		}
-		$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
-		$email_header .= "References: booking-$booking_id@$smtp_localhost\r\n" ;
+		$email_header .= "X-Comment: reservation is $id\r\n" ;
+		$email_header .= "References: booking-$id@$smtp_localhost\r\n" ;
+		$email_header .= "In-Reply-To: booking-$id@$smtp_localhost\r\n" ;
 		if ($test_mode)
 			smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 		else
