@@ -32,6 +32,9 @@ require_once 'dbi.php' ;
 
 //$test_mode =true ;
 $debug = true ;
+// SMTP email debuging & optimization
+$smtp_info['debug'] = True;
+$smtp_info['persist'] = True;
 
 print(date('Y-m-d H:i:s').": starting.\n") ;
 $load = sys_getloadavg(); 
@@ -118,7 +121,8 @@ while ($row = mysqli_fetch_array($result)) {
 		"(&agrave; conserver si souhait&eacute; et pr&eacute;vu pour smartphones et tablettes)." ;
 	$email_message .= allBookings($row['r_plane'], $tomorrow, $row['r_pilot']) ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
-	$email_header = "From: $managerName <$managerEmail>\r\n" ;
+//	$email_header = "From: $managerName <$managerEmail>\r\n" ;
+	$email_header = '' ; // let's use the Reply-To
 	if (!$test_mode) {
 		$email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
 		$email_recipients = $row['email'] ;
@@ -136,6 +140,8 @@ while ($row = mysqli_fetch_array($result)) {
 		}
 	}
 	$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
+	$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
+	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	if ($test_mode)
 		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 	else
