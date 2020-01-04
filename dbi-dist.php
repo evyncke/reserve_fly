@@ -281,14 +281,17 @@ function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
 	global $smtp_from, $smtp_return_path, $smtp_info ;
 	global $mail ;
 
-	if (!$mail) $mail = & Mail::factory('smtp', $smtp_info); // Create the mail object using the Mail::factory method
+	if (!$mail) 
+		$mail = & Mail::factory('smtp', $smtp_info); // Create the mail object using the Mail::factory method
 	if (isset($smtp_from) and $smtp_from != '') $headers['From'] = $smtp_from ;
-//	if (isset($smtp_return_path) and $smtp_return_path != '') $headers['Return-Path'] = $smtp_return_path ; // Normally done by the recipient MTA	$headers['To'] = $smtp_to ;
+	PEAR::setErrorHandling(PEAR_ERROR_EXCEPTION) ;
 	$headers['Subject'] = $smtp_subject ;
 	$headers['MIME-Version'] = '1.0' ;
 	$headers['Content-Type'] = 'text/html; charset="UTF-8"' ;
+	// Override the default headers generated above by the ones passed as parameters
+	// Just beware of case in headers...
 	foreach (explode( "\r\n", $str_headers) as $header_line) {
-			$token = explode(':', $header_line) ;
+			$token = explode(':', $header_line, 2) ;
 			if ($token[0] != '' and $token[1] != '')
 				$headers[$token[0]] = trim($token[1]) ;
 	}
@@ -297,7 +300,7 @@ function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
 		$mail->send($smtp_to, $headers, $smtp_body);
 	} 
 	catch(Exception $e) {
-  		Journalise($userId, 'E', "Cannot send mail to $smtp_to: " . $e->getMessage());
+  		Journalise($userId, 'E', "Cannot send mail to <$smtp_to>: " . $e->getMessage() . '(' . $e->getCode() . ')');
   		return False ;
 	}
 	return True ;
