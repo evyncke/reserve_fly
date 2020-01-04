@@ -186,13 +186,10 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 	}
 	$message .= '</p>' ;
 	$email_header = "From: no-reply@spa-aviation.be\r\n" ;
-//	$email_header = "Return-Path: $managerName <$managerEmail>\r\n" ;
-	$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
-	$email_header .= "MIME-Version: 1.0\r\n" ;
 	if (!$reservation_permise) {
-		$message .= "<p style='color: red;'>Cette réservation devrait être refusée, mais, acceptée en phase de test.</p>" ;
-		$email_header .= "To: Fleet manager <fleet@spa-aviation.be>\r\n" ;
-		@smtp_mail('fleet@spa-aviation.be', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $userFullName"), 9), $message, $email_header) ;
+		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
+		$email_header .= "To: $fleetName <$fleetEmail>\r\n" ;
+		@smtp_mail($fleetEmail, substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $userFullName"), 9), $message, $email_header) ;
 	}
 } // End of checks for normal pilot
  
@@ -313,7 +310,8 @@ if ($response['error'] == '') {
 			}
 //			$email_header .= iconv_mime_encode('Bcc', "$managerName <$managerEmail>, <eric.vyncke@edpnet.be>\r\n", $mime_preferences) ;
 		}
-		$email_header .= "Message-ID: booking-$booking_id@$smtp_localhost\r\n" ; 
+		$email_header .= "Message-ID: <booking-$booking_id@$smtp_localhost>\r\n" ; 
+//		$smtp_info['debug'] = True;
 		if ($test_mode)
 			@smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 		else
