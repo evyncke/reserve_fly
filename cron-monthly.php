@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,11 +17,15 @@
 */
 
 // TODO: every month, if no connection in the last month & if pilot/student/instructor => send reminder about the userid
-// TODO: every month, end email about maintenance of the plane + inactive planes
+// TODO: every month, send email about maintenance of the plane + inactive planes
 // TODO: every month, statistics on WE ?
 
 require_once 'dbi.php' ;
+
+// SMTP email debuging & optimization
 $smtp_info['debug'] = True;
+$smtp_info['persist'] = True;
+$managerEmail = $smtp_from ; // Allow more debugging
 
 $test_mode = false ; // Only send to eric@vyncke.org when test_mode is true
 $debug = true ;
@@ -126,18 +130,18 @@ print_plane_table("Avions en maintenance", $sql, ['Avion', 'D&eacute;but', 'Fin'
 }
 
 $email_recipients = "info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be" ;
-$email_header = "From: $managerName <$managerEmail>\r\n" ;
+$email_header = "From: $managerName <$smtp_from>\r\n" ;
 $email_header .= "To: info@spa-aviation.be, ca@spa-aviation.be\r\n" ;
 $email_header .= "Cc: fis@spa-aviation.be\r\n" ;
 if ($bccTo != '') {
 	$email_header .= "Bcc: $bccTo\r\n" ;
 	$email_recipients .= ", $bccTo" ;
 }
-$email_header .= "Reply-To: $managerName <$managerEmail>\r\n" ;
+//$email_header .= "Reply-To: $managerName <$managerEmail>\r\n" ;
 
 if ($test_mode) {
 	$smtp_info['debug'] = True ;
-	smtp_mail("evyncke@cisco.com", "Statistiques utilisations des avions (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
+	smtp_mail("evyncke@cisco.com", "Statistiques utilisations des avions (test)", $email_body) ;
 } else
 	@smtp_mail($email_recipients, "Statistiques sur l'utilisation des avions", $email_body, $email_header) ;
 
@@ -185,29 +189,31 @@ while ($row = mysqli_fetch_array($result)) {
 		"Votre profil sur www.spa-aviation.be est incomplet", $mime_preferences) ;
 	$email_message = '' ;
 	if ($first_name != '')
-		$email_message .= "$first_name,<br/>" ;
+		$email_message .= "<p>Bonjour $first_name,<br/>" ;
 	else
 		$email_message .= "<p>Bonjour,<br/>" ;
-	$email_message .= "&Agrave; titre informatif, votre profil sur le site de notre club est incomplet (seulement $profile_count informations sur $max_profile_count)...<br/>Ces informations ne sont visibles que pour les autres membres RAPCS (+ le SPW et notre atelier) connect&eacute;s.
+	$email_message .= "&Agrave; titre informatif, votre profil sur le site de notre club est incomplet: seulement $profile_count informations sur $max_profile_count...<br/>
+		Ces informations ne sont visibles que pour les autres membres RAPCS (+ le SPW et notre atelier).
 		<b>Seules certaines donn&eacute;es sont obligatoires pour effectuer une r&eacute;servation: nom, pr&eacute;nom, email et num&eacute;ro
 		de t&eacute;l&eacute;phone mobile</b> (ceci afin de vous contacter si n&eacute;cessaire); les autres informations sont simplement
 		pour permettre de nous conna&icirc;tre au sein de notre club.
-		\nVeuillez visiter le lien ci-dessous et compl&eacute;ter les donn&eacute;es manquantes ($missing_items_string):\n" ;
+		<br/>Veuillez visiter le lien ci-dessous et compl&eacute;ter les donn&eacute;es manquantes ($missing_items_string):\n" ;
 	$email_message .= "<a href=https://www.spa-aviation.be/resa/profile.php>profil r&eacute;servation</a>.</p>\n" ;
 	$email_message .= "<p>Pour rappel, votre identifiant est <b>$row[username]</b>.</p>\r\n" ;
 	$email_message .= "<hr>Ceci est un message automatique envoy&eacute; tous les mois tant que votre profil n'est pas complet." ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 	$email_header = "From: $managerName <$managerEmail>\r\n" ;
 	$email_header .= "To: $full_name <$row[email]>\r\n" ;
-	if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
-	$email_header .= "Return-Path: $managerName <$managerEmail>\r\n" ;
-	$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
-	$email_header .= "MIME-Version: 1.0\r\n" ;
-	$email_header .= "X-Comment: joomla user is $row[jom_id]\r\n" ;
+	$email_recipients = $row['email'] ;
+	if ($bccTo != '') {
+		$email_header .= "Bcc: $bccTo\r\n" ;
+		$email_recipients .= ", $bccTo" ;
+	}
+	$email_header .= "X-Comment: joomla user ID is $row[jom_id]\r\n" ;
 	if ($test_mode)
 		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 	else
-		@mail("$row[full_name] <$row[email]>", substr($email_subject, 9), $email_message, $email_header) ;
+		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 }
 mysqli_free_result($result) ;
 
@@ -227,8 +233,8 @@ function print_table($title, $sql) {
 	$result = mysqli_query($mysqli_link, $sql) or die(date('Y-m-d H:i:s') . ": Erreur systeme lors de la lecture des profils: " . mysqli_error($mysqli_link)) ;
 	$n = 0 ;
 	while ($row = mysqli_fetch_array($result)) {
-		if ($convertToUtf8 ) $row['name'] = iconv("ISO-8859-1", "UTF-8", $row['name']) ; // SQL DB is latin1 and the rest is in UTF-8
-		if ($convertToUtf8 ) $row['username'] = iconv("ISO-8859-1", "UTF-8", $row['username']) ; // SQL DB is latin1 and the rest is in UTF-8
+		$row['name'] = db2web($row['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+		$row['username'] = db2web($row['username']) ; // SQL DB is latin1 and the rest is in UTF-8
 		$email_body .= "<tr><td>$row[username]</td><td>$row[name]</td><td>$row[email]</td></tr>\n" ;
 		$n ++ ;
 	}
