@@ -117,7 +117,7 @@ if ($response['error'] == '') {
 			}
 			if ($booking['r_instructor']) {
 				$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
-				$email_recipients .= ", $instructor[name]" ;
+				$email_recipients .= ", $instructor[email]" ;
 			}
 			if ($booking_type == BOOKING_MAINTENANCE) {
 				$email_header_recipients .= "Cc: $fleetName <$fleetEmail>\r\n" ;
