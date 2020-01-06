@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ $debug = true ;
 // SMTP email debuging & optimization
 $smtp_info['debug'] = True;
 $smtp_info['persist'] = True;
+$managerEmail = $smtp_from ; // Allow more debugging
 
 print(date('Y-m-d H:i:s').": starting.\n") ;
 $load = sys_getloadavg(); 
@@ -87,9 +88,9 @@ while ($row = mysqli_fetch_array($result)) {
 		continue ;
 	}
 	$auth = md5($booking_id . $shared_secret) ;
-	if ($convertToUtf8 ) $row['full_name'] = iconv("ISO-8859-1", "UTF-8", $row['full_name']) ; // SQL DB is latin1 and the rest is in UTF-8
-	if ($convertToUtf8 ) $row['first_name'] = iconv("ISO-8859-1", "UTF-8", $row['first_name']) ; // SQL DB is latin1 and the rest is in UTF-8
-	if ($convertToUtf8 ) $row['r_comment'] = iconv("ISO-8859-1", "UTF-8", $row['r_comment']) ; // SQL DB is latin1 and the rest is in UTF-8
+	$row['full_name'] = db2web($row['full_name']) ; // SQL DB is latin1 and the rest is in UTF-8
+	$row['first_name'] = db2web($row['first_name']) ; // SQL DB is latin1 and the rest is in UTF-8
+	$row['r_comment'] = db2web($row['r_comment']) ; // SQL DB is latin1 and the rest is in UTF-8
 	$result_booker = mysqli_query($mysqli_link, "select name, email from jom_users where id = $row[r_who]") ;
 	$booker = mysqli_fetch_array($result_booker) ;
 	$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
@@ -169,22 +170,21 @@ while ($row = mysqli_fetch_array($result)) {
 		continue ;
 	}
 	$auth = md5($booking_id . $shared_secret) ;
-	if ($convertToUtf8 ) $row['full_name'] = iconv("ISO-8859-1", "UTF-8", $row['full_name']) ; // SQL DB is latin1 and the rest is in UTF-8
-	if ($convertToUtf8 ) $row['first_name'] = iconv("ISO-8859-1", "UTF-8", $row['first_name']) ; // SQL DB is latin1 and the rest is in UTF-8
+	$row['full_name'] = db2web($row['full_name']) ; // SQL DB is latin1 and the rest is in UTF-8
+	$row['first_name'] = db2web($row['first_name']) ; // SQL DB is latin1 and the rest is in UTF-8
 	if ($row['first_name'] == '') $row['first_name'] = '<i>[Votre profil est incomplet et votre pr&eacute;nom est inconnu]</i>' ;
-	if ($convertToUtf8 ) $row['r_comment'] = iconv("ISO-8859-1", "UTF-8", $row['r_comment']) ; // SQL DB is latin1 and the rest is in UTF-8
+	$row['r_comment'] = db2web($row['r_comment']) ; // SQL DB is latin1 and the rest is in UTF-8
 	$result_booker = mysqli_query($mysqli_link, "select name, email from jom_users where id = $row[r_who]") ;
 	$booker = mysqli_fetch_array($result_booker) ;
-	if ($convertToUtf8 ) $booker['name'] = iconv("ISO-8859-1", "UTF-8", $booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+	$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 	$email_subject = iconv_mime_encode('Subject',
 		"Ne pas oublier d'entrer les heures moteur du $row[r_plane] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
 	if ($email_subject === FALSE)
 		$email_subject = "Cannot iconv(pilot/$row[name])" ;
 	$email_message = "$row[first_name],<br/><br/>" ;
-	$email_message .= "Afin de garder une trace des compteurs moteur des avions, le RAPCS fait un essai en demandant\n" .
-		"&agrave; tous les pilotes d'entrer les heures moteur (et en option les heures de vol ainsi que les a&eacute;roports de d&eacute;part et de destination).\n" .
-		" C'est optionel pour\n" .
-		"l'instant mais cela aiderait TOUS les pilotes d'avoir ces compteurs &agrave; jour. <b>Nous comptons tous sur vous</b>. La proc&eacute;dure\n" .
+	$email_message .= "Afin de garder une trace des compteurs moteur des avions et de planifier les maintenances, le RAPCS demande\n" .
+		"&agrave; tous les pilotes et &eacute;l&egrave;ves d'entrer les heures moteur (et en option les heures de vol ainsi que les a&eacute;roports de d&eacute;part et de destination).\n" .
+		" Cela aide TOUS les pilotes d'avoir ces compteurs &agrave; jour. <b>Nous comptons tous sur vous</b>. La proc&eacute;dure\n" .
 		"est simple et peut &ecirc;tre effectu&eacute;e sur un smartphone ou une tablette depuis l'a&eacute;rodrome (3G ou WiFi du club).<br/><br/>" .
 		"Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] " .
 		"avec $row[full_name] en tant que pilote.<br/>\n" ;
@@ -213,6 +213,8 @@ while ($row = mysqli_fetch_array($result)) {
 		}
 	}
 	$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
+	$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
+	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	if ($test_mode)
 		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 	else

@@ -232,12 +232,12 @@ if ($response['error'] == '') {
 		// Get information abour pilot
 		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $pilot_id") ;
 		$pilot = mysqli_fetch_array($result) ;
-		if ($convertToUtf8 ) $pilot['name'] = iconv("ISO-8859-1", "UTF-8", $pilot['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+		$pilot['name'] = db2web($pilot['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		// If instructor is on board, then get information about instructor
 		if ($instructor_id != 'NULL') {
 			$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $instructor_id") ;
 			$instructor = mysqli_fetch_array($result) ;
-			if ($convertToUtf8 ) $instructor['name'] = iconv("ISO-8859-1", "UTF-8", $instructor['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+			$instructor['name'] = db2web($instructor['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		}
 		// Get information about booker
 		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $userId") ;
@@ -249,7 +249,7 @@ if ($response['error'] == '') {
 			$booker_quality = 'm&eacute;cano' ;
 		elseif ($useIsAdmin)
 			$booker_quality = 'administrateur web' ;
-		if ($convertToUtf8 ) $booker['name'] = iconv("ISO-8859-1", "UTF-8", $booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+		$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		if ($booking_type == BOOKING_MAINTENANCE) {
 			$response['message'] = "La maintenance de $plane du $start au $end: est confirm&eacute;e" ;
 			$email_subject = "Subject: Confirmation de la mise en maintenance de $plane par $booker[name]" ;
@@ -259,11 +259,11 @@ if ($response['error'] == '') {
 			$response['message'] = "La r&eacute;servation de $plane du $start au $end: est confirm&eacute;e" ;
 			if ($pilot_id == $userId)
 				$email_subject = iconv_mime_encode('Subject',
-					"Confirmation d'une nouvelle réservation de $plane pour $pilot[name]",
+					"Confirmation d'une nouvelle réservation de $plane pour $pilot[name] [#$booking_id]",
 						$mime_preferences) ;
 			else
 				$email_subject = iconv_mime_encode('Subject',
-					"Confirmation d'une nouvelle réservation de $plane par $booker[name] pour $pilot[name]",
+					"Confirmation d'une nouvelle réservation de $plane par $booker[name] pour $pilot[name]  [#$booking_id]",
 						$mime_preferences) ;
 			if ($email_subject === FALSE)
 				$email_subject = "Subject: Cannot iconv(pilot/$pilot[name])" ;
