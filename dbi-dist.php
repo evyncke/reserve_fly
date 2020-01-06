@@ -37,6 +37,7 @@ include 'Mail.php';
 	$cache_directory = getcwd() ;
 	$rapcs_metar = 'rapcs_metar' ;
 	// SMTP local parameters
+	// The MTA where the email will be submitted. Beware MUST be IPv4 and NOT IPv6 :-(
 	$smtp_host = 'xxx.net' ;
 	$smtp_port = 587 ;
 	$smtp_user = 'no-reply@xxxx' ;
@@ -300,7 +301,7 @@ function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
 		$mail->send($smtp_to, $headers, $smtp_body);
 	} 
 	catch(Exception $e) {
-  		Journalise($userId, 'E', "Cannot send mail to <$smtp_to>: " . $e->getMessage() . '(' . $e->getCode() . ')');
+  		Journalise($userId, 'E', "Cannot send mail to '$smtp_to': " . $e->getMessage() . '(' . $e->getCode() . ')');
   		return False ;
 	}
 	return True ;
