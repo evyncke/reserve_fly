@@ -279,22 +279,39 @@ $smtp_info['persist'] = False;
 $mail = NULL;
 
 function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
-	global $smtp_from, $smtp_return_path, $smtp_info ;
-	global $mail ;
+	require_once 'PEAR.php';
+	require_once 'Mail.php';
 
-	if (!$mail) 
+	global $smtp_from, $smtp_return_path, $smtp_info, $mime_preferences ;
+	global $mail, $userId ;
+	
+	if (! isset($mail) or $mail == NULL or $smtp_info['persist'] == False) 
 		$mail = & Mail::factory('smtp', $smtp_info); // Create the mail object using the Mail::factory method
+	PEAR::setErrorHandling(PEAR_ERROR_EXCEPTION) ; // Force an exception to be trapped
 	if (isset($smtp_from) and $smtp_from != '') $headers['From'] = $smtp_from ;
-	PEAR::setErrorHandling(PEAR_ERROR_EXCEPTION) ;
+	$headers['To'] = $smtp_to ;
 	$headers['Subject'] = $smtp_subject ;
 	$headers['MIME-Version'] = '1.0' ;
 	$headers['Content-Type'] = 'text/html; charset="UTF-8"' ;
+	$headers['Message-ID'] = '<' . sha1(microtime()) . '@' . $smtp_info['localhost'] . '>' ;
+	$headers['Date'] = date('r') ;
 	// Override the default headers generated above by the ones passed as parameters
-	// Just beware of case in headers...
+	// Just beware of character case in headers...
 	foreach (explode( "\r\n", $str_headers) as $header_line) {
 			$token = explode(':', $header_line, 2) ;
-			if ($token[0] != '' and $token[1] != '')
-				$headers[$token[0]] = trim($token[1]) ;
+			if ($token[0] != '' and $token[1] != '') {
+				// Ensure that only US-ASCII is actually used in the SMTP headers cfr RFC 2047 else use Q-encoding
+				// https://dogmamix.com/MimeHeadersDecoder/
+				$header_value = '' ;
+				foreach (explode(" ", $token[1]) as $word)
+					if (mb_check_encoding($word, 'ASCII'))
+						$header_value .= " $word" ;
+					else {
+						$word = '=?utf-8?Q?' . quoted_printable_encode($word) . '_?=' ; // Adding a '_' at the end to replace a word-encoded space
+						$header_value .= "\r\n $word" ; // split on multiple lines to ensure lines are not longer than 76 characters
+					}
+				$headers[$token[0]] = trim($header_value) ;
+			}
 	}
 	if ($smtp_info['debug']) print_r($headers) ;
 	try {
