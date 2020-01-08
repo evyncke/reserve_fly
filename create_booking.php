@@ -209,7 +209,7 @@ $result = mysqli_query($mysqli_link, $sql) ;
 if ($result) {
 	$row = mysqli_fetch_array($result) ;
 	if ($row) {  
-		if ($convertToUtf8 ) $row['name'] = iconv("ISO-8859-1", "UTF-8", $row['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+		$row['name'] = db2web($row['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		$response['error'] .= "Cette r&eacute;servation ($plane) est en conflit avec une r&eacute;servation de $row[name] d&eacute;butant le $row[r_start]!<br/>R&eacute;servation non effectu&eacute;e...<br/>" ;
 	}
 } else
@@ -282,23 +282,18 @@ if ($response['error'] == '') {
 			"<a href=\"$request_scheme://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> (&agrave; conserver si souhait&eacute;)." ;
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 //		$email_header = "From: $managerName <$managerEmail>\r\n" ;
-//		$email_header = iconv_mime_encode('From',"$managerName <$managerEmail>\r\n", $mime_preferences) ;
 		$email_header = '' ; // Let's use the default From -- currently defined as no-reply
 		if ($test_mode) {
 			$email_header .= "To: eric-test <eric@vyncke.org>\r\n" ;
 		} else {
-// TODO: should try to iconv_mime_encode the pilot name? iconv_mime_encode seems to mess up the < > around email address
-//			$email_header .= iconv_mime_encode('To', "$pilot[name] <$pilot[email]>", $mime_preferences) ;
 			$email_header .= "To: $pilot[name] <$pilot[email]>\r\n" ;
 			$email_recipients = $pilot['email'] ;
 			if ($pilot_id != $userId and $booker['email'] != '') { // If booked by somebody else
 				$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
-//				$email_header .= iconv_mime_encode('Cc', "$booker[name] <$booker[email]>\r\n", $mime_preferences) ;
 				$email_recipients .= ", $booker[email]" ;
 			}
 			if ($instructor_id != 'NULL') {
 				$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
-//				$email_header .= iconv_mime_encode('Cc', "$instructor[name] <$instructor[email]>\r\n", $mime_preferences) ;
 				$email_recipients .= ", $instructor[email]" ;
 			}
 			if ($booking_type == BOOKING_MAINTENANCE) {
@@ -308,14 +303,12 @@ if ($response['error'] == '') {
 			if ($bccTo != '') {
 					$email_recipients .= ", $bccTo" ;
 			}
-//			$email_header .= iconv_mime_encode('Bcc', "$managerName <$managerEmail>, <eric.vyncke@edpnet.be>\r\n", $mime_preferences) ;
 		}
 		$email_header .= "Message-ID: <booking-$booking_id@$smtp_localhost>\r\n" ; 
 //		$smtp_info['debug'] = True;
 		if ($test_mode)
 			@smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 		else
-//			@mail("$pilot[name] <$pilot[email]>", substr($email_subject, 9), $email_message, $email_header_recipients . $email_header) ;
 			@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 		if ($booking_type == BOOKING_MAINTENANCE)
 			journalise($userId, 'W', "$plane is out for maintenance by $booker[name] ($comment). $start => $end") ;
