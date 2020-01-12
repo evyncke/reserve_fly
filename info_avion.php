@@ -4,6 +4,7 @@
 /*
 	Copyright Joseph La China 2013-2014
    Copyright 2014-2019 Eric Vyncke
+   Copyright 2020 Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -48,7 +49,7 @@ function getAvion2() {
 
 function update_aircraft($avion, $cout, $compteur, $compteur_vol_valeur, $entretien, $type_entretien, 
 	$consommation, $fabrication, $cn, $limite_moteur_12ans, $limite_moteur_heure,
-	$limite_helice, $pesage, $commentaire, $poids, $bras, $wb_date) {
+	$limite_helice, $limite_magnetos, $pesage, $commentaire, $poids, $bras, $wb_date) {
 	global $db, $savesuccess, $user ;
 
 	try {
@@ -70,6 +71,7 @@ function update_aircraft($avion, $cout, $compteur, $compteur_vol_valeur, $entret
 		$fields[] =	$db->quoteName('limite_moteur_12ans'). "= " . $db->quote(web2db($limite_moteur_12ans)) ;
 		$fields[] =	$db->quoteName('limite_moteur_heure'). "= " . $db->quote(web2db($limite_moteur_heure)) ;
 		$fields[] =	$db->quoteName('limite_helice'). "= " . $db->quote(web2db($limite_helice)) ;
+		$fields[] =	$db->quoteName('limite_magnetos'). "= " . $db->quote(web2db($limite_magnetos)) ;
 		$fields[] =	$db->quoteName('pesage'). "= " . $db->quote(web2db($pesage)) ;
 		if ($commentaire !== FALSE)
 			$fields[] =	$db->quoteName('commentaire'). "= " . $db->quote(web2db($commentaire)) ;
@@ -223,7 +225,8 @@ if($canedit and isset($_POST["Enregistrer"]) and $_POST["Enregistrer"] == "Enreg
 	$db = &JFactory::getDBO();
 	$savesuccess = '' ;
 	update_aircraft(getAvion2(), $_POST['cout'], $_POST['compteur'], $_POST['compteur_vol_valeur'], $_POST['entretien'], $_POST['type_entretien'], 
-		$_POST['consommation'], $_POST['fabrication'], $_POST['cn'], $_POST['limite_moteur_12ans'], $_POST['limite_moteur_heure'], $_POST['limite_helice'], $_POST['pesage'], 
+		$_POST['consommation'], $_POST['fabrication'], $_POST['cn'], $_POST['limite_moteur_12ans'], $_POST['limite_moteur_heure'], $_POST['limite_helice'],
+		$_POST['limite_magnetos'], $_POST['pesage'], 
 		$_POST['commentaire'], $_POST['poids'], $_POST['bras'], $_POST['wb_date']) ;
 } else if ($canedit and isset($_POST["Enregistrer_tout"]) and $_POST["Enregistrer_tout"] != "") {
 	global $db, $savesuccess ;
@@ -241,13 +244,14 @@ if($canedit and isset($_POST["Enregistrer"]) and $_POST["Enregistrer"] == "Enreg
 		$limite_moteur_12ans = $_POST['limite_moteur_12ans'][$i] ;
 		$limite_moteur_heure = $_POST['limite_moteur_heure'][$i] ;
 		$limite_helice = $_POST['limite_helice'][$i] ;
+		$limite_magnetos = $_POST['limite_magnetos'][$i] ;
 		$pesage = $_POST['pesage'][$i] ;
 		$poids = $_POST['poids'][$i] ;
 		$bras = $_POST['bras'][$i] ;
 		$wb_date = $_POST['wb_date'][$i] ;
 		update_aircraft($id, $cout, $compteur, $compteur_vol_valeur, $entretien, $type_entretien, 
 			$consommation, $fabrication, $cn, $limite_moteur_12ans, $limite_moteur_heure,
-	 		$limite_helice, $pesage, FALSE, $poids, $bras, $wb_date) ;
+	 		$limite_helice, $limite_magnetos, $pesage, FALSE, $poids, $bras, $wb_date) ;
 	}
 }
 
@@ -300,6 +304,7 @@ if ($canview) {
 		<TR><TD><B>Limite moteur 12 ans:</B></TD><TD><INPUT type="date" name="limite_moteur_12ans" value="<?=$info[0]->limite_moteur_12ans?>"> </TD></TR>
 		<TR><TD><B>Limite moteur:</B></TD><TD><INPUT type="number" name="limite_moteur_heure" value="<?=$info[0]->limite_moteur_heure?>"> </TD></TR>
 		<TR><TD><B>Limite h&eacute;lice:</B></TD><TD><INPUT type="text" name="limite_helice" value="<?=$info[0]->limite_helice?>"> </TD></TR>
+		<TR><TD><B>Limite magn&eacute;tos:</B></TD><TD><INPUT type="text" name="limite_magnetos" value="<?=$info[0]->limite_magnetos?>"> </TD></TR>	
 		<TR><TD><B>Prochain pesage:</B></TD><TD><INPUT type="date" name="pesage" value="<?=$info[0]->pesage?>"> </TD></TR>
 		<TR><TD><B>Weight and Balance:</B></TD><TD> poids &agrave; vide <INPUT type="number" step="0.01" name="poids" value="<?=$info[0]->poids?>">  livres, 
 		      bras: <INPUT type="number" step="0.01" name="bras" value="<?=$info[0]->bras?>"> pouces,<br/>
@@ -347,6 +352,7 @@ if ($canview) {
 		                <td><input type=date name=\"limite_moteur_12ans[$i]\" value=\"$plane->limite_moteur_12ans\" size=8></td>
 		                <td><input type=number name=\"limite_moteur_heure[$i]\" value=\"$plane->limite_moteur_heure\" size=8></td>
 		                <td><input type=number name=\"limite_helice[$i]\" value=\"$plane->limite_helice\" size=5></td>
+						<td><input type=number name=\"limite_magnetos[$i]\" value=\"$plane->limite_magnetos\" size=5></td>
 		                <td><input type=date  name=\"pesage[$i]\" value=\"$plane->pesage\" size=5></td>
 		                <td><input type=number step=\"0.01\" name=\"poids[$i]\" value=\"$plane->poids\" size=8></td>
 		                <td><input type=number step=\"0.01\" name=\"bras[$i]\" value=\"$plane->bras\" size=8></td>
@@ -389,6 +395,7 @@ if ($canview) {
 			<LI><B>Limite moteur 12 ans:</B><?=$info[0]->limite_moteur_12ans?></LI>
 			<LI><B>Limite moteur:</B> <?=$info[0]->limite_moteur_heure?></LI>
 			<LI><B>Limite h&eacute;lice:</B> <?=$info[0]->limite_helice?></LI>
+			<LI><B>Limite magn&eacute;tos:</B> <?=$info[0]->limite_magnetos?></LI>
 			<LI><B>Prochain pesage:</B> <?=$info[0]->pesage?></LI>
 			<LI><B>Masse et centrage (<a style="text-decoration: underline;color: blue;" 
 				href="/TippingPoint/index.php?tailnumber=<?=$avion?>">Calcul en ligne</a>):</B>
