@@ -122,8 +122,8 @@ while ($row = mysqli_fetch_array($result)) {
 		"(&agrave; conserver si souhait&eacute; et pr&eacute;vu pour smartphones et tablettes)." ;
 	$email_message .= allBookings($row['r_plane'], $tomorrow, $row['r_pilot']) ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
-//	$email_header = "From: $managerName <$managerEmail>\r\n" ;
-	$email_header = '' ; // let's use the Reply-To
+	$email_header = "From: $managerName <$smtp_from>\r\n" ;
+//	$email_header = '' ; // let's use the Reply-To
 	if (!$test_mode) {
 		$email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
 		$email_recipients = $row['email'] ;
@@ -199,7 +199,7 @@ while ($row = mysqli_fetch_array($result)) {
 		"<hr>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!\n" ;
 	$email_message .= allBookings($row['r_plane'], $today, $row['r_pilot']) ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
-	$email_header = "From: $managerName <$managerEmail>\r\n" ;
+	$email_header = "From: $managerName <$smtp_from>\r\n" ;
 	if (! $test_mode) {
 		$email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
 		$email_recipients = $row['email'] ;
@@ -256,7 +256,7 @@ while ($row = mysqli_fetch_array($result)) {
 		if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
 		$email_header .= "X-Comment: joomla user is $row[jom_id]\r\n" ;
 		if ($test_mode)
-			mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
+			smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 		else
 			@smtp_mail("$row[email],eric@vyncke.org", substr($email_subject, 9), $email_message, $email_header) ;
 	}
