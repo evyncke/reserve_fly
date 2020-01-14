@@ -137,7 +137,6 @@ if ($bccTo != '') {
 	$email_header .= "Bcc: $bccTo\r\n" ;
 	$email_recipients .= ", $bccTo" ;
 }
-//$email_header .= "Reply-To: $managerName <$managerEmail>\r\n" ;
 
 if ($test_mode) {
 	$smtp_info['debug'] = True ;
@@ -202,7 +201,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_message .= "<p>Pour rappel, votre identifiant est <b>$row[username]</b>.</p>\r\n" ;
 	$email_message .= "<hr>Ceci est un message automatique envoy&eacute; tous les mois tant que votre profil n'est pas complet." ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
-	$email_header = "From: $managerName <$managerEmail>\r\n" ;
+	$email_header = "From: $managerName <$smtp_from>\r\n" ;
 	$email_header .= "To: $full_name <$row[email]>\r\n" ;
 	$email_recipients = $row['email'] ;
 	if ($bccTo != '') {
@@ -286,7 +285,7 @@ $sql = "select *,u.name as full_name
 	order by name" ; 
 print_table("Administrateurs syst&egrave;me du site (webmaster@spa-aviation.be)", $sql) ;
 
-$email_header = "From: $managerName <$managerEmail>\r\n" ;
+$email_header = "From: $managerName <$smtp_from>\r\n" ;
 $email_header .= "To: info@spa-aviation.be, ca@spa-aviation.be\r\n" ;
 $email_header .= "Cc: fis@spa-aviation.be, webmaster@spa-aviation.be\r\n" ;
 $email_recipients = "info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be, webmaster@spa-aviation.be" ;
