@@ -2,7 +2,7 @@
 // This PHP script is fully integrated as a component of Joomla
 // Developped by Joseph La Chine in 2013, Eric Vyncke 2014/2018
 /*
-	Copyright Joseph La China 2013-2014
+   Copyright Joseph La China 2013-2014
    Copyright 2014-2019 Eric Vyncke
    Copyright 2020 Patrick Reginster
 

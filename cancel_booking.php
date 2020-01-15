@@ -107,7 +107,7 @@ if ($response['error'] == '') {
 		$email_message .= "Cette op&eacute;ration a &eacute;t&eacute; effectu&eacute;e par $booker[name]. " ;
 		if ($reason) $email_message .= "La raison donn&eacute;e est: <i>" . trim($_REQUEST['reason']) . "</i>." ;
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
-		$email_header = "From: $managerName <$managerEmail>\r\n" ;
+		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		if (!$test_mode) {
 			$email_header .= "To: $pilot[name] <$pilot[email]>\r\n" ;
 			$email_recipients = $pilot['email'] ;
@@ -130,6 +130,7 @@ if ($response['error'] == '') {
 		$email_header .= "X-Comment: reservation is $id\r\n" ;
 		$email_header .= "References: <booking-$id@$smtp_localhost>\r\n" ;
 		$email_header .= "In-Reply-To: <booking-$id@$smtp_localhost>\r\n" ;
+		$email_header .= "Thread-Topic: Réservation RAPCS #$id\r\n" ; 
 		if ($test_mode)
 			smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 		else
@@ -161,7 +162,7 @@ else {
 }
 
 function email_adjacent($result, $booking, $booker) {
-	global $managerName, $managerEmail, $userId, $convertToUtf8 ;
+	global $managerName, $managerEmail, $userId, $convertToUtf8, $smtp_localhost, $smtp_from ;
 
 	$row = mysqli_fetch_array($result) ;
 	if (!$row) return ;
@@ -169,8 +170,13 @@ function email_adjacent($result, $booking, $booker) {
 	if ($row['r_instructor'] == $booking['r_instructor']) return ;
 	if ($row['r_pilot'] == $booking['r_pilot']) return ;
 	$row['name'] = db2web($row['name']) ; // SQL DB is latin1 and the rest is in UTF-8
-	$email_header  = "From: $managerName <$managerEmail>\r\n" ;
+	$id = $row['r_id'] ; // Get back the adjacent booking ID
+	$email_header = "From: $managerName <$smtp_from>\r\n" ;
 	$email_header .= "To: $row[name] <$row[email]>\r\n" ;
+	$email_header .= "X-Comment: reservation is $id\r\n" ;
+	$email_header .= "References: <booking-$id@$smtp_localhost>\r\n" ;
+	$email_header .= "In-Reply-To: <booking-$id@$smtp_localhost>\r\n" ;
+	$email_header .= "Thread-Topic: Réservation RAPCS #$id\r\n" ; 
 	$email_message = "<p>Bonjour,</p><p>Pour votre information, suite &agrave; une annulation d'une autre r&eacute;servation par $booker[name], le $row[r_plane] 
 		est maintenant disponible du $booking[r_start] au $booking[r_stop]. N'h&eacute;sitez donc pas &agrave; &eacute;tendre votre
 		r&eacute;servation.</p>" ;

@@ -185,7 +185,7 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 		mysqli_free_result($result) ;
 	}
 	$message .= '</p>' ;
-	$email_header = "From: no-reply@spa-aviation.be\r\n" ;
+	$email_header = "From: $managerName <$smtp_from>\r\n" ;
 	if (!$reservation_permise) {
 		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
 		$email_header .= "To: $fleetName <$fleetEmail>\r\n" ;
@@ -281,8 +281,8 @@ if ($response['error'] == '') {
 		$email_message .= "<br/>Vous pouvez g&eacute;rer cette r&eacute;servation via le site ou via ce lien "  .
 			"<a href=\"$request_scheme://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> (&agrave; conserver si souhait&eacute;)." ;
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
-//		$email_header = "From: $managerName <$managerEmail>\r\n" ;
-		$email_header = '' ; // Let's use the default From -- currently defined as no-reply
+//		$email_header = '' ; // Let's use the default From -- currently defined as no-reply
+		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		if ($test_mode) {
 			$email_header .= "To: eric-test <eric@vyncke.org>\r\n" ;
 		} else {
@@ -304,7 +304,8 @@ if ($response['error'] == '') {
 					$email_recipients .= ", $bccTo" ;
 			}
 		}
-		$email_header .= "Message-ID: <booking-$booking_id@$smtp_localhost>\r\n" ; 
+		$email_header .= "Message-ID: <booking-$booking_id@$smtp_localhost>\r\n" ;
+		$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
 //		$smtp_info['debug'] = True;
 		if ($test_mode)
 			@smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
