@@ -34,11 +34,18 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 // header('Cache-Control: max-age=0, private, must-revalidate' ) ;
 
 $eol = "\r\n" ;
+$content = '' ;
+
+function emit($line) {
+	global $content ;
+	
+	$content .= $line ;
+}
 
 function emit_header() {
 	global $eol, $test_mode ;
 
-	print("BEGIN:VCALENDAR" . $eol .
+	emit("BEGIN:VCALENDAR" . $eol .
 		"METHOD:PUBLISH" . $eol .
 		"ORGANIZER:RAPCS" . $eol .
 		"PRODID:$_SERVER[HTTP_HOST]//FR" . $eol .
@@ -54,7 +61,7 @@ function emit_header() {
 		"X-PUBLISHED-TTL:PT15M" . $eol) ;
 }
 
-function emit_booking($booking) {
+function emit_booking($booking, $cancellation) {
 	global $eol, $default_timezone, $shared_secret, $mysqli_link ;
 
 	$date_flight_start = gmdate('Ymd\THis\Z', strtotime("$booking[r_start] $default_timezone")) ;
@@ -63,8 +70,11 @@ function emit_booking($booking) {
 	$date_alert =        gmdate('Ymd\THis\Z', strtotime("$booking[alert] $default_timezone")) ;
 	$auth = md5($booking['r_id'] . $shared_secret) ;
 	$booking['full_name'] =db2web($booking['full_name']) ;
-	print("BEGIN:VEVENT" . $eol .
-		"DTSTART:$date_flight_start" . $eol .
+	emit("BEGIN:VEVENT" . $eol) ;
+		if ($cancellation) 
+			emit("METHOD:CANCEL" . $eol .
+				"STATUS:CANCELLED" . $eol) ;
+		emit("DTSTART:$date_flight_start" . $eol .
 		"DTEND:$date_flight_end" . $eol .
 //		"TRANSP:TRANSPARENT" . $eol .
 		"DTSTAMP:$date_time_booking" . $eol .
@@ -77,53 +87,64 @@ function emit_booking($booking) {
 		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $booking[r_instructor]") ;
 		$instructor = mysqli_fetch_array($result) ;
 		$instructor['name'] = db2web($instructor['name']) ; // SQL DB is latin1 and the rest is in UTF-8
-		print("\tInstructeur: $instructor[name]\\n" . $eol) ;
+		emit("\tInstructeur: $instructor[name]\\n" . $eol) ;
 	}
-	print("URL:" . ((isset($_SERVER['HTTPS'])) ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]/resa/booking.php?" . $eol . "\tid=$booking[r_id]&auth=$auth" . $eol .
+	emit("URL:" . ((isset($_SERVER['HTTPS'])) ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]/resa/booking.php?" . $eol . "\tid=$booking[r_id]&auth=$auth" . $eol .
 		"SUMMARY:Vol sur $booking[r_plane]" . $eol . // SUMMARY is the main visible thing in the calendar
 //		"SEQUENCE:0" . $eol .
 		"X-MICROSOFT-CDO-BUSYSTATUS:BUSY" . $eol ) ;
-// generate also an alarm one hour before
-	print("BEGIN:VALARM" . $eol .
-		"ACTION:DISPLAY" . $eol .
-		"DESCRIPTION:Vol sur $booking[r_plane]" . $eol .
+// generate also an alarm one hour before or should we close the event first ?
+	emit("BEGIN:VALARM" . $eol) ;
+	if ($cancellation) 
+		emit("METHOD:CANCEL" . $eol .
+			"STATUS:CANCELLED" . $eol) ;
+	else
+		emit("ACTION:DISPLAY" . $eol) ;
+	emit("DESCRIPTION:Vol sur $booking[r_plane]" . $eol .
 // X-WR-ALARMUID:DB9FA73B-2A92-4AA1-9210-0D9A34C37A09
 // UID:DB9FA73B-2A92-4AA1-9210-0D9A34C37A09
 //		"TRIGGER;RELATED=start:-PT1H" . $eol .
+		"X-WR-ALARMUID:alert-$booking[r_id]-$_SERVER[HTTP_HOST]" . $eol .
+		"UID:alert-$booking[r_id]-$_SERVER[HTTP_HOST]" . $eol .
 		"TRIGGER:$date_alert" . $eol .
 		"X-APPLE-DEFAULT-ALARM:TRUE" . $eol .
 //		"ATTACH;VALUE=URI:Basso" . $eol . 
 //		"ACTION:AUDIO" . $eol .
 		"END:VALARM" . $eol);
 // End of event
-	print("END:VEVENT" . $eol ) ;
+	emit("END:VEVENT" . $eol ) ;
 }
 
 function emit_trailer() {
 	global $eol ;
 
-	print("END:VCALENDAR" . $eol) ;
+	emit("END:VCALENDAR" . $eol) ;
 }
 
 emit_header() ;
+// r_cancel_who is null removed so that we can emit a cancel operation
 $result = mysqli_query($mysqli_link, "select *,u.name as full_name, date_sub(r_start, interval 1 hour) as alert
 		from $table_bookings b join jom_users u on b.r_pilot = u.id, $table_person p
-		where p.jom_id=u.id and (r_pilot = $user_id or r_instructor = $user_id) and r_cancel_who is null
+		where p.jom_id=u.id and (r_pilot = $user_id or r_instructor = $user_id) 
 		order by r_start desc limit 0,20") or die("impossible de lire les reservations: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
-	emit_booking($row) ;
+	emit_booking($row, $row['r_cancel_who'] == '') ;
 }
 emit_trailer() ;
+print($content) ;
 
-if ($user_id == 62123123) @mail('eric@vyncke.org', "$_SERVER[PHP_SELF]", "La page s'est executee
-HTTP request scheme: $_SERVER[REQUEST_SCHEME]
-HTTP request URI: $_SERVER[REQUEST_URI]
-HTTP query: $_SERVER[QUERY_STRING]
-Script name: $_SERVER[SCRIPT_NAME]
-Path info: $_SERVER[PATH_INFO]
-User-Agent: $_SERVER[HTTP_USER_AGENT]
-IP: " . getClientAddress() . "
+if ($user_id == 62) @smtp_mail('eric@vyncke.org', "$_SERVER[PHP_SELF]", "La page s'est executee
+HTTP request scheme: $_SERVER[REQUEST_SCHEME]<br/>
+HTTP request URI: $_SERVER[REQUEST_URI]<br/>
+HTTP query: $_SERVER[QUERY_STRING]<br/>
+Script name: $_SERVER[SCRIPT_NAME]<br/>
+Path info: $_SERVER[PATH_INFO]<br/>
+User-Agent: $_SERVER[HTTP_USER_AGENT]<br/>
+IP: " . getClientAddress() . "<br/>
 userid: $user_id/$userName/$userFullName (FI $userIsInstructor, Admin $userIsAdmin, mecano: $userIsMechanic)
-") ;
+<hr>
+$content)
+", 'Content-type: text/plain; charset="UTF-8"') ;
 
+//journalise($user_id, "I", "ICS download: $content") ;
 ?>
