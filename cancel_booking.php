@@ -91,13 +91,15 @@ if ($response['error'] == '') {
 			"scheme" => "Q") ;
 		if ($booking_type == BOOKING_MAINTENANCE) {
 			$response['message'] = "La maintenance de $plane du $booking_start au $booking_end: est annul&eacute;e" ;
-			$email_subject = "Annulation de la mise en maintenance de $plane par $booker[name]" ;
+			$email_subject =  iconv_mime_encode('Subject',
+				"Annulation de la mise en maintenance de $plane par $booker[name] [#id]",
+					$mime_preferences) ;
 			$email_message = "La maintenance du $booking_start au $booking_end sur le $plane " ;
 			$email_message .= "est annul&eacute;e.<br/>" ;
 		} else {
 			$response['message'] = "La r&eacute;servation de $plane du $booking_start au $booking_end: est annul&eacute;e" ;
 			$email_subject = iconv_mime_encode('Subject',
-				"Annulation d'une réservation de $plane par $booker[name] pour $pilot[name]",
+				"Annulation d'une réservation de $plane par $booker[name] pour $pilot[name]  [#id]",
 					$mime_preferences) ;
 			if ($email_subject === FALSE)
 				$email_subject = "Cannot iconv(pilot/$pilot[name])" ;
@@ -136,9 +138,9 @@ if ($response['error'] == '') {
 		else
 			@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 		if ($booking_type == BOOKING_MAINTENANCE)
-			journalise($userId, 'W', "Cancellation of maintenance of $plane. $booking_start => $booking_end") ;
+			journalise($userId, 'W', "Cancellation of maintenance #$id of $plane. $booking_start => $booking_end") ;
 		else
-			journalise($userId, 'W', "Cancellation of booking of $plane done for $pilot[name] by $booker[name]. $booking_start => $booking_end. Reason: " . trim($_REQUEST['reason'])) ;
+			journalise($userId, 'W', "Cancellation of booking #$id of $plane done for $pilot[name] by $booker[name]. $booking_start => $booking_end. Reason: " . trim($_REQUEST['reason'])) ;
 	} else
 		$response['error'] .= "Un probl&egrave;me technique s'est produit, annulation non effectu&eacute;e..." . mysqli_error($mysqli_link) . "<br/>" ;
 }
@@ -148,7 +150,7 @@ header('Content-type: application/json');
 print(json_encode($response)) ;
 
 if ($response['error'])
-	journalise($userId, 'E', "Error ($response[error]) while cancelling booking of $plane done for $pilot[name] by $booker[name]. $booking_start => $booking_end") ;
+	journalise($userId, 'E', "Error ($response[error]) while cancelling booking #$id of $plane done for $pilot[name] by $booker[name]. $booking_start => $booking_end") ;
 else {
 	// Warn by email the previous and next bookings if any
 	$result = mysqli_query($mysqli_link, "select * from $table_bookings, jom_users
