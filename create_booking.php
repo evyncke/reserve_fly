@@ -186,6 +186,7 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 	}
 	$message .= '</p>' ;
 	$email_header = "From: $managerName <$smtp_from>\r\n" ;
+	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
 	if (!$reservation_permise) {
 		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
 		$email_header .= "To: $fleetName <$fleetEmail>\r\n" ;
@@ -252,7 +253,7 @@ if ($response['error'] == '') {
 		$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		if ($booking_type == BOOKING_MAINTENANCE) {
 			$response['message'] = "La maintenance de $plane du $start au $end: est confirm&eacute;e" ;
-			$email_subject = "Subject: Confirmation de la mise en maintenance de $plane par $booker[name]" ;
+			$email_subject = "Subject: Confirmation de la mise en maintenance de $plane par $booker[name] [#$booking_id]" ;
 			$email_message = "La maintenance du $start au $end sur le $plane avec comme commentaires: <i>$comment</i> " ;
 			$email_message .= "est confirm&eacute;e.<br/>" ;
 		} else {
@@ -312,9 +313,9 @@ if ($response['error'] == '') {
 		else
 			@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 		if ($booking_type == BOOKING_MAINTENANCE)
-			journalise($userId, 'W', "$plane is out for maintenance by $booker[name] ($comment). $start => $end") ;
+			journalise($userId, 'W', "$plane is out for maintenance #$booking_ido by $booker[name] ($comment). $start => $end") ;
 		else {
-			journalise($userId, 'I', "Booking of $plane done for $pilot[name] by $booker[name] ($comment). $start => $end") ;
+			journalise($userId, 'I', "Booking #$booking_id of $plane done for $pilot[name] by $booker[name] ($comment). $start => $end") ;
 			// Check for long booking...
 			date_default_timezone_set('Europe/Brussels') ;
 			$interval = date_diff(date_create($end), date_create($start)) ;
