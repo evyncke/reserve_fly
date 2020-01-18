@@ -81,13 +81,13 @@ function emit_booking($booking, $cancellation) {
 		"UID:$booking[r_id]-$_SERVER[HTTP_HOST]" . $eol .
 		// DESCRIPTION: the details in the description
 		"DESCRIPTION:Réservation du $booking[r_plane] du " . $eol .
-			"\t$booking[r_start] au $booking[r_stop].\\n" . $eol . 
-			"\tPilote: $booking[full_name]\\n" . $eol ) ;
+			"\t$booking[r_start] au $booking[r_stop]." . $eol . 
+			"\tPilote: $booking[full_name]" . $eol ) ;
 	if ($booking['r_instructor'] > 0) {
 		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $booking[r_instructor]") ;
 		$instructor = mysqli_fetch_array($result) ;
 		$instructor['name'] = db2web($instructor['name']) ; // SQL DB is latin1 and the rest is in UTF-8
-		emit("\tInstructeur: $instructor[name]\\n" . $eol) ;
+		emit("\tInstructeur: $instructor[name]" . $eol) ;
 	}
 	emit("URL:" . ((isset($_SERVER['HTTPS'])) ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]/resa/booking.php?" . $eol . "\tid=$booking[r_id]&auth=$auth" . $eol .
 		"SUMMARY:Vol sur $booking[r_plane]" . $eol . // SUMMARY is the main visible thing in the calendar
@@ -142,7 +142,9 @@ Path info: $_SERVER[PATH_INFO]<br/>
 User-Agent: $_SERVER[HTTP_USER_AGENT]<br/>
 IP: " . getClientAddress() . "<br/>
 userid: $user_id/$userName/$userFullName (FI $userIsInstructor, Admin $userIsAdmin, mecano: $userIsMechanic)
+
 <hr>
+
 $content)
 ", 'Content-type: text/plain; charset="UTF-8"') ;
 
