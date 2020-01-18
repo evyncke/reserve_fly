@@ -371,8 +371,8 @@ if ($userId == 0) {
 	print('<input type="button" value="Mon profil" onclick="javascript:document.location.href=\'profile.php\';"> ') ;
 	print('<input type="button" value="Mon carnet de vol" onclick="javascript:document.location.href=\'mylog.php\';"> ') ;
 	print('<input type="button" value="Carte de mes vols" onclick="javascript:document.location.href=\'mymap.php\';"> ') ;
-	print('<input type="button" value="Mobile" onclick="javascript:document.location.href=\'booking.php?me=' . $userId .
-		'&auth=' . md5($userId . $shared_secret) . '\';"> ') ;
+	print('<input type="button" value="Mobile" onclick="javascript:document.location.href=\'mobile.php?news\';"> ') ;
+	if ($userIsAdmin) print('<input type="button" value="Journal des opérations" onclick="javascript:document.location.href=\'journal.php\';"> ') ;
 	print('<input type="button" value="No log" style="background-color: yellow; visibility: hidden;" id="logButton" onclick="javascript:toggleLogDisplay();"> ') ;
 	// TODO check whether webcall works with Clouflare
 	print("<a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">lier &agrave; mon calendrier (iCal)</a>") ;
