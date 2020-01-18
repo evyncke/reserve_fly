@@ -160,11 +160,11 @@ if ($response['error'] == '') {
 		$response['message'] = "La r&eacute;servation de $plane du $start au $end: est modifi&eacute;e" ;
 		if ($pilot_id == $userId)
 			$email_subject = iconv_mime_encode('Subject',
-				"Modification d'une réservation de $plane pour $pilot[name]",
+				"Modification d'une réservation de $plane pour $pilot[name] [#$booking_id]",
 					$mime_preferences) ;
 		else
 			$email_subject = iconv_mime_encode('Subject',
-				"Modification d'une réservation de $plane par $booker[name] pour $pilot[name]",
+				"Modification d'une réservation de $plane par $booker[name] pour $pilot[name] [#$booking_id]",
 					$mime_preferences) ;
 		if ($email_subject === FALSE)
 			$email_subject = "Cannot iconv(pilot/$pilot[name])" ;
@@ -221,9 +221,9 @@ if ($response['error'] == '') {
 		if (strtotime($end) != strtotime($response['previous_booking_stop'])) $modif_log .= "end: $response[previous_booking_stop]=>$end " ;
 
 		if ($booking_type == BOOKING_MAINTENANCE)
-			journalise($userId, 'W', "Modification of maintenance booking by $booker[name] ($modif_log)") ;
+			journalise($userId, 'W', "Modification of maintenance booking #$booking_id by $booker[name] ($modif_log)") ;
 		else
-			journalise($userId, 'W', "Modification of booking for $pilot[name] by $booker[name] ($modif_log)") ;
+			journalise($userId, 'W', "Modification of booking #$booking_id for $pilot[name] by $booker[name] ($modif_log)") ;
 	} else
 		$response['error'] .= "Un probl&egrave;me technique s'est produite... modification non effectu&eacute;e..." . mysqli_error($mysqli_link) . "<br/>" ;
 }
@@ -239,5 +239,5 @@ if ($json_encoded === FALSE) {
 	print($json_encoded) ;
 
 if ($response['error'])
-	journalise($userId, 'E', "Error ($response[error]) while modifying booking of $response[previous_plane]=>$plane done for $pilot[name] by $booker[name] ($comment). $start => $end") ;
+	journalise($userId, 'E', "Error ($response[error]) while modifying booking #$booking_id of $response[previous_plane]=>$plane done for $pilot[name] by $booker[name] ($comment). $start => $end") ;
 ?>
