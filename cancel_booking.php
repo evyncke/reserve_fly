@@ -64,7 +64,7 @@ else {
 
 if ($response['error'] == '') {
 	$result = mysqli_query($mysqli_link, "update $table_bookings set r_cancel_date = sysdate(), r_cancel_reason = '$reason', 
-		r_cancel_who = $userId, r_cancel_address = '" . getClientAddress() . "' where r_id = $id") ;
+		r_cancel_who = $userId, r_cancel_address = '" . getClientAddress() . "', r_sequence = r_sequence + 1 where r_id = $id") ;
 	if ($result && mysqli_affected_rows($mysqli_link) == 1) {
 		if ($booking_type == BOOKING_CUSTOMER) {
 			mysqli_query($mysqli_link, "UPDATE $table_flights SET f_booking = NULL, f_date_scheduled = NULL WHERE f_booking = $id")

@@ -218,9 +218,9 @@ if ($result) {
 
 if ($response['error'] == '') {
 	$result = mysqli_query($mysqli_link, "INSERT INTO $table_bookings(r_plane, r_start, r_stop, r_duration, r_pilot, r_instructor, r_comment, r_crew_wanted, r_pax_wanted,
-			r_from, r_via1, r_via2, r_to, r_type, r_date, r_address, r_who)
+			r_from, r_via1, r_via2, r_to, r_type, r_date, r_address, r_who, r_sequence)
 		VALUES('$plane', '$start', '$end', $duration, $pilot_id, $instructor_id, '$comment_db', $crew_wanted, $pax_wanted,
-			'$from_apt', '$via1_apt', '$via2_apt', '$to_apt', $booking_type, sysdate(), '" . getClientAddress() . "', $userId)") or die(mysqli_error($mysqli_link));
+			'$from_apt', '$via1_apt', '$via2_apt', '$to_apt', $booking_type, sysdate(), '" . getClientAddress() . "', $userId, 0)") or die(mysqli_error($mysqli_link));
 
 	if (mysqli_affected_rows($mysqli_link) == 1) {
 		$booking_id = mysqli_insert_id($mysqli_link) ;
