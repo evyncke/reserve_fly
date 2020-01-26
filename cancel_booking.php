@@ -99,7 +99,7 @@ if ($response['error'] == '') {
 		} else {
 			$response['message'] = "La r&eacute;servation de $plane du $booking_start au $booking_end: est annul&eacute;e" ;
 			$email_subject = iconv_mime_encode('Subject',
-				"Annulation d'une réservation de $plane par $booker[name] pour $pilot[name]  [#id]",
+				"Annulation d'une réservation de $plane par $booker[name] pour $pilot[name]  [#$id]",
 					$mime_preferences) ;
 			if ($email_subject === FALSE)
 				$email_subject = "Cannot iconv(pilot/$pilot[name])" ;
