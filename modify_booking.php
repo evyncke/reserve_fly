@@ -40,8 +40,10 @@ $start = mysqli_real_escape_string($mysqli_link, $_REQUEST['start']) ;
 $end = mysqli_real_escape_string($mysqli_link, $_REQUEST['end']) ;
 $comment = mysqli_real_escape_string($mysqli_link, $_REQUEST['comment']) ;
 $comment_db = web2db($comment) ;
-$crew_wanted = mysqli_real_escape_string($mysqli_link, $_REQUEST['crewWanted']) ;
+$crew_wanted = mysqli_real_escape_string($mysqli_link, $_REQUEST['crewWanted']) ; // TODO verify the value... should not be empty
+if ($crew_wanted == '' or ! is_numeric($crew_wanted)) $crew_wanted = 0 ;
 $pax_wanted = mysqli_real_escape_string($mysqli_link, $_REQUEST['paxWanted']) ;
+if ($pax_wanted == '' or ! is_numeric($pax_wanted)) $pax_wanted = 0 ;
 $from_apt = mysqli_real_escape_string($mysqli_link, $_REQUEST['fromApt']) ;
 $via1_apt = mysqli_real_escape_string($mysqli_link, $_REQUEST['via1Apt']) ;
 $via2_apt = mysqli_real_escape_string($mysqli_link, $_REQUEST['via2Apt']) ;
