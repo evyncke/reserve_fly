@@ -49,72 +49,69 @@ function emit($line) {
 }
 
 function emit_header() {
-	global $eol, $test_mode ;
+	global $eol, $test_mode, $user_id, $auth, $favicon ;
 
 	emit("BEGIN:VCALENDAR" . $eol .
 		"VERSION:2.0" . $eol .
 		"METHOD:PUBLISH" . $eol .
 		"ORGANIZER:RAPCS Réservation" . $eol .
 		"PRODID:-//$_SERVER[HTTP_HOST]//FR" . $eol .
+		"IMAGE;VALUE=URI;DISPLAY=BADGE:$favicon" . $eol .
 //		'PRODID:-//Apple Inc.//Mac OS X 10.9.4//EN' . $eol .
 //		"CALSCALE:GREGORIAN" . $eol .
-		"X-PUBLISHED-TTL:PT1H" . $eol .
 		"X-WR-CALNAME:Réservations RAPCS" . (($test_mode) ? ' test' : '') . $eol . 
 //		"X-WR-TIMEZONE:Europe/Brussels" . $eol .
 	// If this iCalendar is being automatically published to a remote location at regular intervals,
 	// this property SHOULD<33> be set to that interval with a minimum granularity of minutes.
-	// X-PUBLISHED-TTL::PT20M for a 20 minute refresh
-		"X-PUBLISHED-TTL:PT15M" . $eol) ;
+	// X-PUBLISHED-TTL::PT15M for a 15- minute refresh
+		"X-PUBLISHED-TTL:PT15M" . $eol .
+		"REFRESH-INTERVAL;VALUE=DURATION:P15M" . $eol .
+		"SOURCE;VALUE=URI:https://$_SERVER[SERVER_NAME]:$_SERVER[SERVER_PORT]/$_SERVER[PHP_SELF]?user=$user_id&auth=$auth" . $eol ) ;
 }
 
-function emit_booking($booking, $cancellation) {
+function emit_booking($booking) {
 	global $eol, $default_timezone, $shared_secret, $mysqli_link ;
 
 	$date_flight_start = gmdate('Ymd\THis\Z', strtotime("$booking[r_start] $default_timezone")) ;
 	$date_flight_end =   gmdate('Ymd\THis\Z', strtotime("$booking[r_stop] $default_timezone")) ;
 	$date_time_booking = gmdate('Ymd\THis\Z', strtotime("$booking[r_date] $default_timezone")) ;
 	$date_alert =        gmdate('Ymd\THis\Z', strtotime("$booking[alert] $default_timezone")) ;
+	if ($cancellation)
+		$date_cancel = gmdate('Ymd\THis\Z', strtotime("$booking[r_cancel_date] $default_timezone")) ;
 	$auth = md5($booking['r_id'] . $shared_secret) ;
 	emit("BEGIN:VEVENT" . $eol) ;
-	if ($cancellation) 
-		emit( //"METHOD:CANCEL" . $eol .
-			"STATUS:CANCELLED" . $eol .
-			"SEQUENCE:2" . $eol . // TODO, improve this as modification should bump up the sequence number...
-			"X-MICROSOFT-CDO-BUSYSTATUS:FREE" . $eol ) ;
-	else
-		emit("STATUS:CONFIRMED" . $eol .
-			"SEQUENCE:0" . $eol .
-			"X-MICROSOFT-CDO-BUSYSTATUS:BUSY" . $eol ) ;
+	emit("METHOD:PUBLISH" . $eol .
+		"STATUS:CONFIRMED" . $eol .
+		"X-MICROSOFT-CDO-BUSYSTATUS:BUSY" . $eol .
+		"DTSTAMP:$date_time_booking" . $eol) ;
 	emit("DTSTART:$date_flight_start" . $eol .
 		"DTEND:$date_flight_end" . $eol .
-		"DTSTAMP:$date_time_booking" . $eol .
+		"ORGANIZER:RAPCS Réservation" . $eol .
 		"UID:booking-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		// DESCRIPTION: the details in the description
 		"DESCRIPTION:Réservation du $booking[r_plane] du " . $eol .
-			"\t$booking[r_start] au $booking[r_stop]. " . $eol . 
+			"\t$booking[r_start] au $booking[r_stop].\n " . $eol . 
 			"\tPilote: " . db2web($booking['full_name']) . '. ' . $eol ) ;
 	if ($booking['r_instructor'] > 0) {
 		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $booking[r_instructor]") ;
 		$instructor = mysqli_fetch_array($result) ;
 		emit("\tInstructeur: " . db2web($instructor['name']) . '. ' . $eol) ;
 	}
-	emit("SEQUENCE:$bookin[r_sequence]" . $eol .
+	if ($booking['r_comment'] != '')
+		emit("\tCommentaire: " . db2web($booking['r_comment']) . $eol) ;
+
+	emit("SEQUENCE:$booking[r_sequence]" . $eol .
 		"URL:" . ((isset($_SERVER['HTTPS'])) ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]/resa/booking.php?" . $eol . "\tid=$booking[r_id]&auth=$auth" . $eol .
 		"SUMMARY:Vol sur $booking[r_plane]" . $eol ) ; // SUMMARY is the main visible thing in the calendar
 // generate also an alarm one hour before, per RFC 5545 it MUST be included in the VEVENT
 // it MUST also include ACTION & TRIGGER
 	emit("BEGIN:VALARM" . $eol) ;
-	if ($cancellation) 
-		emit("METHOD:CANCEL" . $eol .
-			"STATUS:CANCELLED" . $eol) ;
-	else {
-		emit("ACTION:DISPLAY" . $eol) ; // ACTION:DISPLAY MUST inclide a DESCRIPTION
-		emit("DESCRIPTION:Vol sur $booking[r_plane]" . $eol) ;
-	}
+	emit("ACTION:DISPLAY" . $eol) ; // ACTION is mandatory... ACTION:DISPLAY MUST include a DESCRIPTION
+	emit("DESCRIPTION:Vol sur $booking[r_plane]" . $eol) ;
 	emit(
 //		"TRIGGER;RELATED=start:-PT1H" . $eol .
 		"X-WR-ALARMUID:alert-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
-		"UID:alert-$booking[r_id]-$_SERVER[HTTP_HOST]" . $eol .
+		"UID:alert-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		"TRIGGER:$date_alert" . $eol .
 		"X-APPLE-DEFAULT-ALARM:TRUE" . $eol .
 		"END:VALARM" . $eol);
@@ -131,12 +128,13 @@ function emit_trailer() {
 $content = '' ;
 emit_header() ;
 // r_cancel_who is null removed so that we can emit a cancel operation
-$result = mysqli_query($mysqli_link, "select *,u.name as full_name, date_sub(r_start, interval 1 hour) as alert
-		from $table_bookings b join jom_users u on b.r_pilot = u.id, $table_person p
-		where p.jom_id=u.id and (b.r_pilot = $user_id or b.r_instructor = $user_id) 
-		order by r_start desc limit 0,20") or die("impossible de lire les reservations: " . mysqli_error($mysqli_link));
+$result = mysqli_query($mysqli_link, "SELECT *,u.name AS full_name, DATE_SUB(r_start, INTERVAL 1 HOUT) AS alert
+		FROM $table_bookings b JOIN jom_users u ON b.r_pilot = u.id, $table_person p
+		WHERE p.jom_id=u.id AND (b.r_pilot = $user_id OR b.r_instructor = $user_id) AND r_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH) AND r_cancel_who is null
+		ORDER BY r_start LIMIT 0,100") or die("impossible de lire les reservations: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
-	emit_booking($row, $row['r_cancel_who'] != '') ;
+	if ($row['r_cancel_who'] == '') // Do not generate VCALENDAR entries for cancelled bookings, they will 'disappear' automagically
+		emit_booking($row) ;
 }
 emit_trailer() ;
 print($content) ;
