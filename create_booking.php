@@ -186,7 +186,6 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 	}
 	$message .= '</p>' ;
 	$email_header = "From: $managerName <$smtp_from>\r\n" ;
-	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
 	if (!$reservation_permise) {
 		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
 		$email_header .= "To: $fleetName <$fleetEmail>\r\n" ;
@@ -319,8 +318,13 @@ if ($response['error'] == '') {
 			// Check for long booking...
 			date_default_timezone_set('Europe/Brussels') ;
 			$interval = date_diff(date_create($end), date_create($start)) ;
-			if ($interval and ($interval->d > 0 or $interval->m > 0))
+			if ($interval and ($interval->d > 0 or $interval->m > 0)) {
+				$email_header = "From: $managerName <$smtp_from>\r\n" ;
+				$email_header .= "To: $fleetEmail, $managerName <$managerEmail>\r\n" ;
+				$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
+				$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
 				@smtp_mail("$managerEmail, $fleetEmail", "!!! Longue reservation ($start / $end): " . substr($email_subject, 9), $email_message, "To: $managerName <$managerEmail>, $fleetName <$fleetEmail>\r\n" . $email_header) ;
+			}
 		}
 	} else {
 		$response['error'] .= "Un probl&egrave;me technique s'est produit, r&eacute;servation non effectu&eacute;e..." . mysqli_error($mysqli_link) . "<br/>" ;
