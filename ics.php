@@ -128,7 +128,7 @@ function emit_trailer() {
 $content = '' ;
 emit_header() ;
 // r_cancel_who is null removed so that we can emit a cancel operation
-$result = mysqli_query($mysqli_link, "SELECT *,u.name AS full_name, DATE_SUB(r_start, INTERVAL 1 HOUT) AS alert
+$result = mysqli_query($mysqli_link, "SELECT *,u.name AS full_name, DATE_SUB(r_start, INTERVAL 1 HOUR) AS alert
 		FROM $table_bookings b JOIN jom_users u ON b.r_pilot = u.id, $table_person p
 		WHERE p.jom_id=u.id AND (b.r_pilot = $user_id OR b.r_instructor = $user_id) AND r_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH) AND r_cancel_who is null
 		ORDER BY r_start LIMIT 0,100") or die("impossible de lire les reservations: " . mysqli_error($mysqli_link));
@@ -139,7 +139,7 @@ while ($row = mysqli_fetch_array($result)) {
 emit_trailer() ;
 print($content) ;
 
-if ($user_id == 62) 
+if (false and $user_id == 62) 
 	@smtp_mail('eric@vyncke.org', "$_SERVER[PHP_SELF]", "La page s'est executée
 HTTP request scheme: $_SERVER[REQUEST_SCHEME]<br/>
 HTTP request URI: $_SERVER[REQUEST_URI]<br/>

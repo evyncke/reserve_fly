@@ -29,7 +29,7 @@ $managerEmail = $smtp_from ; // Allow more debugging
 
 $test_mode = false ; // Only send to eric@vyncke.org when test_mode is true
 $debug = true ;
-$bccTo = 'eric@vyncke.org' ;
+$bccTo = "eric.vyncke@edpnet.be" ;
 
 $mime_preferences = array(
 	"input-charset" => "UTF-8",
