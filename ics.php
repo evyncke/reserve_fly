@@ -54,12 +54,12 @@ function emit_header() {
 	emit("BEGIN:VCALENDAR" . $eol .
 		"VERSION:2.0" . $eol .
 		"METHOD:PUBLISH" . $eol .
-		"ORGANIZER:RAPCS Réservation" . $eol .
+		"ORGANIZER:$ical_name" . $eol .
 		"PRODID:-//$_SERVER[HTTP_HOST]//FR" . $eol .
 		"IMAGE;VALUE=URI;DISPLAY=BADGE:$favicon" . $eol .
 //		'PRODID:-//Apple Inc.//Mac OS X 10.9.4//EN' . $eol .
 //		"CALSCALE:GREGORIAN" . $eol .
-		"X-WR-CALNAME:Réservations RAPCS" . (($test_mode) ? ' test' : '') . $eol . 
+		"X-WR-CALNAME:$ical_name" . (($test_mode) ? ' test' : '') . $eol . 
 //		"X-WR-TIMEZONE:Europe/Brussels" . $eol .
 	// If this iCalendar is being automatically published to a remote location at regular intervals,
 	// this property SHOULD<33> be set to that interval with a minimum granularity of minutes.
@@ -86,7 +86,7 @@ function emit_booking($booking) {
 		"DTSTAMP:$date_time_booking" . $eol) ;
 	emit("DTSTART:$date_flight_start" . $eol .
 		"DTEND:$date_flight_end" . $eol .
-		"ORGANIZER:RAPCS Réservation" . $eol .
+		"ORGANIZER:$ical_name" . $eol .
 		"UID:booking-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		// DESCRIPTION: the details in the description
 		"DESCRIPTION:Réservation du $booking[r_plane] du " . $eol .

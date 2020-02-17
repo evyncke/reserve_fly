@@ -146,7 +146,10 @@ $validity_warning = 30 ; // Number of days before validity expiration to flag as
 
 // List of webcam to display... should be at least two (can repeat one of course)
 $webcam_uris = array("https://www.example.org/webcam.php", "https://example.org/mjpg/video.mjpg") ;
-$favicon = "https://www.example.org/favicon32x32.ico" ;
+$favicon = "https://www.example.org/favicon32x32.ico" ; // The usual web browser favicon + also used in Calendar
+$ical_name = "My club calendar" ; // Name of the iCAL calendar
+
+// More Joomla dependencies
 $avatar_root_resized_uri = "https://www.example.org/media/kunena/avatars/resized/size144" ;
 $avatar_root_resized_directory = "media/kunena/avatars/resized/size144" ;
 $avatar_root_uri = "https://www.example.org/media/kunena/avatars" ;
