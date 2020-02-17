@@ -29,7 +29,7 @@ include 'Mail.php';
 	$convertToUtf8 = false ;
 	$test_mode = false ;
 	$managerEmail = "info@example.org" ;
-	$managerName = "Blabla" ;
+	$managerName = "Joe Doe" ;
 	$fleetEmail = "fleet@example.org"
 	$fleetName = "Fleet Management" ;
 	$bccTo = "foo@example.org" ;
