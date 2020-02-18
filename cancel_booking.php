@@ -92,7 +92,7 @@ if ($response['error'] == '') {
 		if ($booking_type == BOOKING_MAINTENANCE) {
 			$response['message'] = "La maintenance de $plane du $booking_start au $booking_end: est annul&eacute;e" ;
 			$email_subject =  iconv_mime_encode('Subject',
-				"Annulation de la mise en maintenance de $plane par $booker[name] [#id]",
+				"Annulation de la mise en maintenance de $plane par $booker[name] [#$id]",
 					$mime_preferences) ;
 			$email_message = "La maintenance du $booking_start au $booking_end sur le $plane " ;
 			$email_message .= "est annul&eacute;e.<br/>" ;
