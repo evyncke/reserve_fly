@@ -234,12 +234,13 @@ $result = mysqli_query($mysqli_link, "select id,name,email,username
 	group by id")
 	or die(date('Y-m-d H:i:s').": cannot read $table_person, " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
-	print(date('Y-m-d H:i:s').": $row[name]/$row[id] has no entry in $table_person.\n") ;
-	journalise($row['id'], 'W', "$row[name]/$row[id] has no entry in $table_person.") ;
-	$status = mysqli_query($mysqli_link, "insert into $table_person(jom_id, name, email) values($row[id], '$row[name]', '$row[email]')") ;
+	print(date('Y-m-d H:i:s').": $row[name]/$row[email]/$row[id] has no entry in $table_person.\n") ;
+	journalise($row['id'], 'W', "$row[name]/$row[email]/$row[id] has no entry in $table_person.") ;
+	$status = mysqli_query($mysqli_link, "INSERT INTO $table_person(jom_id, name, email) 
+				VALUES($row[id], '$row[name]', '$row[email]')") ;
 	if (!$status) {
-			print(date('Y-m-d H:i:s').": cannot insert into $table_person($row[name]), " . mysqli_error($myqsli_link) . "\n") ;
-			journalise($row['id'], 'E', " cannot insert into $table_person($row[name]), " . mysqli_error($myqsli_link)) ;
+			print(date('Y-m-d H:i:s').": cannot insert into $table_person($row[id], $row[name], $row[email]): " . mysqli_error($mysqli_link) . "\n") ;
+			journalise($row['id'], 'E', " cannot insert into $table_person($row[id], $row[name], $row[email]): " . mysqli_error($mysqli_link)) ;
 	} else {
 		$email_subject = iconv_mime_encode('Subject', "Bienvenue sur le site des réservations du RAPCS", $mime_preferences) ;
         $email_message = "<p>Bonjour,</p><p>Vous avez d&eacute;j&agrave; re&ccedil;u un email avec votre identifiant et votre mot de passe pour le site du RAPCS:\n" ;
