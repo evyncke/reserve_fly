@@ -358,11 +358,11 @@ function displayMETAR() {
 							if (qfuComponent >= 0) {
 								li.innerHTML += 'headwind = ' + qfuComponent ;
 								if (response.wind_gust) li.innerHTML +=  ' g' + qfuGustComponent ;
-								li.innerHTML +=  ', ' ;
+								li.innerHTML +=  ' kt, ' ;
 							} else {
 								li.innerHTML += 'tailwind = ' + (-qfuComponent) ;
 								if (response.wind_gust) li.innerHTML +=  ' g' + (-qfuGustComponent) ;
-								li.innerHTML +=  ', ' ;
+								li.innerHTML +=  ' kt, ' ;
 							}
 							if (crossComponent >= 0) {
 								li.innerHTML += 'left crosswind = ' + crossComponent  ;
