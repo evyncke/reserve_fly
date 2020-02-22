@@ -49,7 +49,7 @@ function emit($line) {
 }
 
 function emit_header() {
-	global $eol, $test_mode, $user_id, $auth, $favicon ;
+	global $eol, $test_mode, $user_id, $auth, $favicon, $ical_name ;
 
 	emit("BEGIN:VCALENDAR" . $eol .
 		"VERSION:2.0" . $eol .
@@ -70,7 +70,7 @@ function emit_header() {
 }
 
 function emit_booking($booking) {
-	global $eol, $default_timezone, $shared_secret, $mysqli_link ;
+	global $eol, $default_timezone, $shared_secret, $mysqli_link, $ical_name ;
 
 	$date_flight_start = gmdate('Ymd\THis\Z', strtotime("$booking[r_start] $default_timezone")) ;
 	$date_flight_end =   gmdate('Ymd\THis\Z', strtotime("$booking[r_stop] $default_timezone")) ;
@@ -83,8 +83,8 @@ function emit_booking($booking) {
 	emit("METHOD:PUBLISH" . $eol .
 		"STATUS:CONFIRMED" . $eol .
 		"X-MICROSOFT-CDO-BUSYSTATUS:BUSY" . $eol .
-		"DTSTAMP:$date_time_booking" . $eol) ;
-	emit("DTSTART:$date_flight_start" . $eol .
+		"DTSTAMP:$date_time_booking" . $eol .
+	    "DTSTART:$date_flight_start" . $eol .
 		"DTEND:$date_flight_end" . $eol .
 		"ORGANIZER:$ical_name" . $eol .
 		"UID:booking-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
@@ -119,6 +119,44 @@ function emit_booking($booking) {
 	emit("END:VEVENT" . $eol ) ;
 }
 
+function emit_agenda($event) {
+	global $eol, $default_timezone, $mysqli_link, $ical_name ;
+
+	$date_event_start = gmdate('Ymd\THis\Z', strtotime("$event[ag_start] $default_timezone")) ;
+	$date_event_end =   gmdate('Ymd\THis\Z', strtotime("$event[ag_end] $default_timezone")) ;
+	$date_event_created = gmdate('Ymd\THis\Z', strtotime("$event[ag_date] $default_timezone")) ;
+	$date_alert =        gmdate('Ymd\THis\Z', strtotime("$event[alert] $default_timezone")) ;
+	emit("BEGIN:VEVENT" . $eol) ;
+	emit("METHOD:PUBLISH" . $eol .
+		"STATUS:CONFIRMED" . $eol .
+//		"X-MICROSOFT-CDO-BUSYSTATUS:TENTATIVE" . $eol .
+		"X-MICROSOFT-CDO-BUSYSTATUS:BUSY" . $eol .
+		"DTSTAMP:$date_event_created" . $eol .
+	    "DTSTART:$date_event_start" . $eol .
+		"DTEND:$date_event_end" . $eol .
+		"ORGANIZER:$ical_name" . $eol .
+		"UID:event-$event[ag_id]@$_SERVER[HTTP_HOST]" . $eol .
+		"DESCRIPTION:" . db2web($event['ag_description']) . $eol .
+	    "SEQUENCE:$event[ag_sequence]" . $eol) ;
+	if ($event['ag_url'] != '')
+		emit("URL:$event[ag_url]"  . $eol) ;
+	emit("SUMMARY:" . db2web($event['ag_description']) . $eol ) ;
+// generate also an alarm one hour before, per RFC 5545 it MUST be included in the VEVENT
+// it MUST also include ACTION & TRIGGER
+	emit("BEGIN:VALARM" . $eol) ;
+	emit("ACTION:DISPLAY" . $eol) ; // ACTION is mandatory... ACTION:DISPLAY MUST include a DESCRIPTION
+	emit("DESCRIPTION:" . db2web($event['ag_description']) . $eol) ;
+	emit(
+//		"TRIGGER;RELATED=start:-PT1H" . $eol .
+		"X-WR-ALARMUID:alert-event-$event[ag_id]@$_SERVER[HTTP_HOST]" . $eol .
+		"UID:alert-event-$event[ag_id]@$_SERVER[HTTP_HOST]" . $eol .
+		"TRIGGER:$date_alert" . $eol .
+		"X-APPLE-DEFAULT-ALARM:TRUE" . $eol .
+		"END:VALARM" . $eol);
+// End of event
+	emit("END:VEVENT" . $eol ) ;
+}
+
 function emit_trailer() {
 	global $eol ;
 
@@ -127,7 +165,8 @@ function emit_trailer() {
 
 $content = '' ;
 emit_header() ;
-// r_cancel_who is null removed so that we can emit a cancel operation
+
+// Start with the specific user bookings
 $result = mysqli_query($mysqli_link, "SELECT *,u.name AS full_name, DATE_SUB(r_start, INTERVAL 1 HOUR) AS alert
 		FROM $table_bookings b JOIN jom_users u ON b.r_pilot = u.id, $table_person p
 		WHERE p.jom_id=u.id AND (b.r_pilot = $user_id OR b.r_instructor = $user_id) AND r_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH) AND r_cancel_who is null
@@ -136,10 +175,20 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['r_cancel_who'] == '') // Do not generate VCALENDAR entries for cancelled bookings, they will 'disappear' automagically
 		emit_booking($row) ;
 }
+
+// Then the generic agenda
+$result = mysqli_query($mysqli_link, "SELECT *, DATE_SUB(ag_start, INTERVAL 1 DAY) AS alert
+		FROM $table_agenda a 
+		WHERE ag_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH)
+		ORDER BY ag_start LIMIT 0,100") or die("impossible de lire l'agenda: " . mysqli_error($mysqli_link));
+while ($row = mysqli_fetch_array($result)) {
+	emit_agenda($row) ;
+}
+
 emit_trailer() ;
 print($content) ;
 
-if (false and $user_id == 62) 
+if (true and $user_id == 62) 
 	@smtp_mail('eric@vyncke.org', "$_SERVER[PHP_SELF]", "La page s'est executée
 HTTP request scheme: $_SERVER[REQUEST_SCHEME]<br/>
 HTTP request URI: $_SERVER[REQUEST_URI]<br/>

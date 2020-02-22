@@ -168,6 +168,7 @@ $table_validity_type = 'rapcs_validity_type' ;
 $table_logbook = 'rapcs_logbook' ;
 $table_journal = 'rapcs_journal' ;
 $table_fi_agenda = 'rapcs_fi_agenda' ;
+$table_agenda = 'rapcs_agenda' ;
 $table_metar_history = 'rapcs_metar_history' ;
 $table_webcam = 'rapcs_webcam' ;
 $table_flight = 'rapcs_flight' ;
