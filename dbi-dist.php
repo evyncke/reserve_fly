@@ -148,6 +148,7 @@ $validity_warning = 30 ; // Number of days before validity expiration to flag as
 $webcam_uris = array("https://www.example.org/webcam.php", "https://example.org/mjpg/video.mjpg") ;
 $favicon = "https://www.example.org/favicon32x32.ico" ; // The usual web browser favicon + also used in Calendar
 $ical_name = "My club calendar" ; // Name of the iCAL calendar
+$ical_organizer = "My flighht club" ; // Name of the organizer for iCAL calendar
 
 // More Joomla dependencies
 $avatar_root_resized_uri = "https://www.example.org/media/kunena/avatars/resized/size144" ;

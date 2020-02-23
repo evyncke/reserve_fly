@@ -18,6 +18,7 @@
 
 /* Reference is https://tools.ietf.org/html/rfc5545
 Charset is UTF-8
+https://icalendar.org/validator.html
 TODO
 The "charset" Content-Type parameter MUST be used in MIME transports
    to specify the charset being used. */
@@ -33,11 +34,12 @@ $auth = $_REQUEST['auth'] ;
 if ($auth != md5($user_id . $shared_secret)) die("Wrong key for calendar#$user_id: $auth ") ;
 if (! is_numeric($user_id)) die("Wrong user id: $user_id") ;
 
-//header('Content-Type: text/calendar; charset=utf-8') ;
 header('Content-Type: text/calendar; charset="UTF-8"') ;
 header("Content-Disposition: inline; filename=rapcs-${user_id}.ics") ;
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-// header('Cache-Control: max-age=0, private, must-revalidate' ) ;
+header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate') ;
+header('Pragma: no-cache') ;
+header('Expires: Mon, 01 Jan 1990 00:00:00 GMT') ; // force automatic expiration ;-)
 
 $eol = "\r\n" ;
 
@@ -49,24 +51,26 @@ function emit($line) {
 }
 
 function emit_header() {
-	global $eol, $test_mode, $user_id, $auth, $favicon, $ical_name ;
+	global $eol, $test_mode, $user_id, $auth, $favicon, $ical_name, $ical_organizer ;
 
 	emit("BEGIN:VCALENDAR" . $eol .
+		"PRODID:-//$_SERVER[HTTP_HOST]//Fly-Reserve//FR" . $eol .
 		"VERSION:2.0" . $eol .
+		"CALSCALE:GREGORIAN" . $eol .
 		"METHOD:PUBLISH" . $eol .
-		"ORGANIZER:$ical_name" . $eol .
-		"PRODID:-//$_SERVER[HTTP_HOST]//FR" . $eol .
-		"IMAGE;VALUE=URI;DISPLAY=BADGE:$favicon" . $eol .
-//		'PRODID:-//Apple Inc.//Mac OS X 10.9.4//EN' . $eol .
-//		"CALSCALE:GREGORIAN" . $eol .
 		"X-WR-CALNAME:$ical_name" . (($test_mode) ? ' test' : '') . $eol . 
+		"ORGANIZER:$ical_organizer" . $eol .
+		"DESCRIPTION:$ical_name" . $eol .
+		"X-WR-CALDESC:$ical_name" . $eol .
+		"IMAGE;VALUE=URI;DISPLAY=BADGE:$favicon" . $eol .
 //		"X-WR-TIMEZONE:Europe/Brussels" . $eol .
 	// If this iCalendar is being automatically published to a remote location at regular intervals,
 	// this property SHOULD<33> be set to that interval with a minimum granularity of minutes.
 	// X-PUBLISHED-TTL::PT15M for a 15- minute refresh
 		"X-PUBLISHED-TTL:PT15M" . $eol .
 		"REFRESH-INTERVAL;VALUE=DURATION:P15M" . $eol .
-		"SOURCE;VALUE=URI:https://$_SERVER[SERVER_NAME]:$_SERVER[SERVER_PORT]/$_SERVER[PHP_SELF]?user=$user_id&auth=$auth" . $eol ) ;
+		"SOURCE;VALUE=URI:https://$_SERVER[SERVER_NAME]:$_SERVER[SERVER_PORT]/" . $eol . 
+			"\t$_SERVER[PHP_SELF]?user=$user_id&auth=$auth" . $eol ) ;
 }
 
 function emit_booking($booking) {
@@ -90,7 +94,7 @@ function emit_booking($booking) {
 		"UID:booking-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		// DESCRIPTION: the details in the description
 		"DESCRIPTION:Réservation du $booking[r_plane] du " . $eol .
-			"\t$booking[r_start] au $booking[r_stop].\n " . $eol . 
+			"\t$booking[r_start] au $booking[r_stop]." . $eol . 
 			"\tPilote: " . db2web($booking['full_name']) . '. ' . $eol ) ;
 	if ($booking['r_instructor'] > 0) {
 		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $booking[r_instructor]") ;
@@ -116,6 +120,7 @@ function emit_booking($booking) {
 		"X-APPLE-DEFAULT-ALARM:TRUE" . $eol .
 		"END:VALARM" . $eol);
 // End of event
+	emit('TRANSP:OPAQUE' . $eol) ;
 	emit("END:VEVENT" . $eol ) ;
 }
 
@@ -145,6 +150,8 @@ function emit_agenda($event) {
 // it MUST also include ACTION & TRIGGER
 	emit("BEGIN:VALARM" . $eol) ;
 	emit("ACTION:DISPLAY" . $eol) ; // ACTION is mandatory... ACTION:DISPLAY MUST include a DESCRIPTION
+// TODO maximum line length is 75 characters
+// TODO translates \n into $eol
 	emit("DESCRIPTION:" . db2web($event['ag_description']) . $eol) ;
 	emit(
 //		"TRIGGER;RELATED=start:-PT1H" . $eol .
@@ -154,6 +161,7 @@ function emit_agenda($event) {
 		"X-APPLE-DEFAULT-ALARM:TRUE" . $eol .
 		"END:VALARM" . $eol);
 // End of event
+	emit('TRANSP:OPAQUE' . $eol) ;
 	emit("END:VEVENT" . $eol ) ;
 }
 
@@ -180,7 +188,7 @@ while ($row = mysqli_fetch_array($result)) {
 $result = mysqli_query($mysqli_link, "SELECT *, DATE_SUB(ag_start, INTERVAL 1 DAY) AS alert
 		FROM $table_agenda a 
 		WHERE ag_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH)
-		ORDER BY ag_start LIMIT 0,100") or die("impossible de lire l'agenda: " . mysqli_error($mysqli_link));
+		ORDER BY ag_start LIMIT 0,1") or die("impossible de lire l'agenda: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
 	emit_agenda($row) ;
 }
@@ -190,19 +198,18 @@ print($content) ;
 
 if (true and $user_id == 62) 
 	@smtp_mail('eric@vyncke.org', "$_SERVER[PHP_SELF]", "La page s'est executée
-HTTP request scheme: $_SERVER[REQUEST_SCHEME]<br/>
-HTTP request URI: $_SERVER[REQUEST_URI]<br/>
-HTTP query: $_SERVER[QUERY_STRING]<br/>
-Script name: $_SERVER[SCRIPT_NAME]<br/>
-Path info: $_SERVER[PATH_INFO]<br/>
-User-Agent: $_SERVER[HTTP_USER_AGENT]<br/>
-IP: " . getClientAddress() . "<br/>
-userid: $user_id/$userName/$userFullName (FI $userIsInstructor, Admin $userIsAdmin, mecano: $userIsMechanic)
-Cancellation == " . ($row['r_cancel_who'] != '') . "
+HTTP request scheme: $_SERVER[REQUEST_SCHEME]
+HTTP request URI: $_SERVER[REQUEST_URI]
+HTTP query: $_SERVER[QUERY_STRING]
+Script name: $_SERVER[SCRIPT_NAME]
+Path info: $_SERVER[PATH_INFO]
+User-Agent: $_SERVER[HTTP_USER_AGENT]
+IP: " . getClientAddress() . "
+userid: $user_id/$userName/$userFullName (FI $userIsInstructor, Admin $userIsAdmin, mecano $userIsMechanic)
 
-<hr>
-
+---
 $content
+---
 ", 'Content-type: text/plain; charset="UTF-8"') ;
 
 //journalise($user_id, "I", "ICS download: $content") ;
