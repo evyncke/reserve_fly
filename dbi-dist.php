@@ -30,7 +30,7 @@ include 'Mail.php';
 	$test_mode = false ;
 	$managerEmail = "info@example.org" ;
 	$managerName = "Joe Doe" ;
-	$fleetEmail = "fleet@example.org"
+	$fleetEmail = "fleet@example.org" ;
 	$fleetName = "Fleet Management" ;
 	$bccTo = "foo@example.org" ;
 	$bccTo = "" ;
@@ -71,7 +71,7 @@ include 'Mail.php';
 	CheckJoomlaUser($joomla_user) ;
 	$joomla_session = JFactory::getSession() ;
 	$joomla_session->start() ; // Keep alive?
-}
+
 
 function CheckJoomlaUser($joomla_user) {
 	global $userIsPilot, $userIsAdmin, $userIsInstructor, $userIsMechanic,$userIsStudent ;
@@ -158,6 +158,7 @@ $avatar_root_directory = "media/kunena/avatars" ;
 
 // Table names
 
+// Application specific table names
 $table_planes = 'rapcs_planes' ;
 $table_planes_history = 'rapcs_planes_history' ;
 $table_planes_validity = 'rapcs_planes_validity' ;
@@ -178,6 +179,11 @@ $table_flights_pilots = 'rapcs_flights_pilots' ;
 $table_pax = 'rapcs_pax' ;
 $table_pax_role = 'rapcs_pax_role' ;
 $table_news = 'rapcs_news' ;
+
+// Joomla specific table names
+$table_user_usergroup_map = 'jom_user_usergroup_map' ;
+$table_users = 'jom_users' ;
+$table_session = 'jom_session' ;
 
 // The shared secret for direct access to booking
 $shared_secret = "xxxx" ;
