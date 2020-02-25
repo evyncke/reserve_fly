@@ -509,8 +509,8 @@ $load = sys_getloadavg();
 $hour = intval(date('H')) ;
 if ($hour == 3) { // Only run it at 3 AM, TODO use from_unixtime(time) to only delete 'old anonymous'
 	print(date('Y-m-d H:i:s').": purging old anonymous sessions.\n") ;
-	mysqli_query($mysqli_link, "DELETE FROM jom_session WHERE userid = 0")
-		or die("Cannot purge anonymous entries in jom_session: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "DELETE FROM $table_session WHERE userid = 0")
+		or die("Cannot purge anonymous entries in $table_session: " . mysqli_error($mysqli_link)) ;
 }
 
 // Historique des METAR (move to the end as vyncke.org tends to be too slow and cause a mySql disconnect
