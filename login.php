@@ -35,7 +35,7 @@ $cookie_name = bin2hex(random_bytes(16)) ;
 $session_id = bin2hex(random_bytes(16)) ;
 $timestamp = sprintf("%d", time()) ;
 setcookie($cookie_name, $session_id, time() + 600, '/', 'www.spa-aviation.be') ;
-mysqli_query($mysqli_link, "insert into jom_session(session_id, client_id, guest, time, data, userid, username)
+mysqli_query($mysqli_link, "insert into $table_session(session_id, client_id, guest, time, data, userid, username)
 	values('$session_id', 1, 0, '$timestamp', NULL, 62, 'evyncke')")
 	or die("Erreur SQL: " . mysqli_error($mysqli_link)) ;
 print("Logged in, cookie = $cookie_name, session_id = $session_id<hr>") ;
