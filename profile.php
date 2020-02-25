@@ -43,7 +43,7 @@ $change_profile_message = '' ;
 
 // Fetch all information about the user
 $result = mysqli_query($mysqli_link, "select *,u.username as username,u.email as email, date(p.birthdate) as birthdate
-	from $table_person p join jom_users u on p.jom_id = u.id left join jom_kunena_users k on k.userid=u.id
+	from $table_person p join $table_users u on p.jom_id = u.id left join jom_kunena_users k on k.userid=u.id
 	where u.id = $displayed_id") or die("Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) or die("Utilisateur inconnu") ;
 $me['name'] = db2web($me['name']) ; 
@@ -199,13 +199,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 		or die("Erreur systeme lors de la mise a jour de $table_person: " . mysqli_error($mysqli_link)) ;
 	$affected_rows = mysqli_affected_rows($mysqli_link) ;
 	if ($first_name != '' and $last_name != '') {
-		mysqli_query($mysqli_link, "update jom_users set name='$first_name $last_name' where id = $displayed_id")
-			or die("Erreur systeme lors de la mise a jour de jom_users: " . mysqli_error($mysqli_link)) ;
+		mysqli_query($mysqli_link, "update $table_users set name='$first_name $last_name' where id = $displayed_id")
+			or die("Erreur systeme lors de la mise a jour de $table_users: " . mysqli_error($mysqli_link)) ;
 		$affected_rows += mysqli_affected_rows($mysqli_link) ;
 	}
 	if ($email != '') {
-		mysqli_query($mysqli_link, "update jom_users set email='$email' where id = $displayed_id")
-			or die("Erreur systeme lors de la mise a jour de jom_users/email: " . mysqli_error($mysqli_link)) ;
+		mysqli_query($mysqli_link, "update $table_users set email='$email' where id = $displayed_id")
+			or die("Erreur systeme lors de la mise a jour de $table_users/email: " . mysqli_error($mysqli_link)) ;
 		$affected_rows += mysqli_affected_rows($mysqli_link) ;
 	}
 	$change_profile_message = ($affected_rows > 0) ? "Changement(s) effectu&eacute;(s).<br/>" : "Aucun changement effectu&eacute;.<br/>" ;
@@ -216,7 +216,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 
 // Fetch AGAIN all information about the user since they may have been modified by the above...
 $result = mysqli_query($mysqli_link, "select *,u.username as username,u.email as email, date(p.birthdate) as birthdate
-	from $table_person p join jom_users u on p.jom_id = u.id left join jom_kunena_users k on k.userid=u.id
+	from $table_person p join $table_users u on p.jom_id = u.id left join jom_kunena_users k on k.userid=u.id
 	where u.id = $displayed_id") or die("Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) or die("Utilisateur inconnu") ;
 $me['name'] = db2web($me['name']) ; 
@@ -510,7 +510,7 @@ if ($displayed_id == $userId)
 else
 	print("Ce membre fait partie des groupes: ") ;
 $joomla_groups = array() ;
-$result = mysqli_query($mysqli_link, "select group_id from jom_user_usergroup_map where user_id = $displayed_id")
+$result = mysqli_query($mysqli_link, "select group_id from $table_user_usergroup_map where user_id = $displayed_id")
 	or die("Cannot access groups: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) 
 	$joomla_groups[$row['group_id']] = true ;

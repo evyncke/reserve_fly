@@ -92,7 +92,7 @@ $sql = "select r_plane, count(*), sum(r_duration)
 print_plane_table("R&eacute;servations du dernier mois", $sql, ['Avion', 'Nbr r&eacute;servations', 'Dur&eacute;e pr&eacute;vue<br/>en heures']) ;
 
 $sql = "select name, count(*), sum(r_duration) as total_duration  
-	from jom_users p left join $table_bookings on p.id = r_pilot
+	from $table_users p left join $table_bookings on p.id = r_pilot
 	where r_plane = 'PH-AML' and r_cancel_date is null and r_start > date_sub(sysdate(), interval 1 month) and r_type != " . BOOKING_MAINTENANCE . "
 	group by r_pilot
 	order by total_duration desc
@@ -101,7 +101,7 @@ $sql = "select name, count(*), sum(r_duration) as total_duration
 print_plane_table("R&eacute;servations PH-AML top-10 du dernier mois", $sql, ['Pilote', 'Nbr r&eacute;servations', 'Dur&eacute;e pr&eacute;vue<br/>en heures']) ;
 
 $sql = "select name, count(*), sum(r_duration) as total_duration  
-	from jom_users p left join $table_bookings on p.id = r_pilot
+	from $table_users p left join $table_bookings on p.id = r_pilot
 	where r_plane = 'OO-SPQ' and r_cancel_date is null and r_start > date_sub(sysdate(), interval 1 month) and r_type != " . BOOKING_MAINTENANCE . "
 	group by r_pilot
 	order by total_duration desc
@@ -154,8 +154,8 @@ if (strpos($actions, 'p') !== FALSE) {
 //$joomla_mechanic_group = 17 ;
 
 $sql = "select *,u.name as full_name
-	from jom_users u left join $table_person p on u.id = p.jom_id
-	where block = 0 and exists (select * from jom_user_usergroup_map m
+	from $table_users u left join $table_person p on u.id = p.jom_id
+	where block = 0 and exists (select * from $table_user_usergroup_map m
 		where u.id = m.user_id and m.group_id in ($joomla_admin_group, $joomla_pilot_group, $joomla_student_group, $joomla_instructor_group))" ; 
 print(date('Y-m-d H:i:s') . ": executing: $sql\n") ;
 $result = mysqli_query($mysqli_link, $sql) or die(date('Y-m-d H:i:s') . ": Erreur systeme lors de la lecture des profils: " . mysqli_error($mysqli_link)) ;
@@ -243,28 +243,28 @@ function print_table($title, $sql) {
 }
 
 $sql = "select *,u.name as full_name
-	from jom_users u 
-	where block = 0 and not exists (select * from jom_user_usergroup_map m
+	from $table_users u 
+	where block = 0 and not exists (select * from $table_user_usergroup_map m
 		where u.id = m.user_id and m.group_id in ($joomla_admin_group, $joomla_pilot_group, $joomla_student_group, $joomla_instructor_group))
 	order by name" ; 
 print_table("Utilisateurs qui ne sont ni pilotes ni &eacute;l&egrave;ves", $sql) ;
 
 $sql = "select *,u.name as full_name
-	from jom_users u 
-	where block = 0 and exists (select * from jom_user_usergroup_map m
+	from $table_users u 
+	where block = 0 and exists (select * from $table_user_usergroup_map m
 		where u.id = m.user_id and m.group_id in ($joomla_student_group)) 
 	order by name" ; 
 print_table("Utilisateurs &eacute;l&egrave;ves", $sql) ;
 
 $sql = "select *,u.name as full_name
-	from jom_users u 
-	where block = 0 and exists (select * from jom_user_usergroup_map m
+	from $table_users u 
+	where block = 0 and exists (select * from $table_user_usergroup_map m
 		where u.id = m.user_id and m.group_id in ($joomla_pilot_group)) 
 	order by name" ; 
 print_table("Utilisateurs pilotes (pilotes@spa-aviation.be)", $sql) ;
 
 $sql = "select *,u.name as full_name
-	from jom_users u 
+	from $table_users u 
 	where block = 0 and not exists (select * from $table_bookings b
 		where b.r_start > date_sub(sysdate(), interval 1 year) and b.r_pilot = u.id and b.r_cancel_date is null
 		)
@@ -272,15 +272,15 @@ $sql = "select *,u.name as full_name
 print_table("Utilisateurs sans aucune r&eacute;servation dans les 12 derniers mois", $sql) ;
 
 $sql = "select *,u.name as full_name
-	from jom_users u 
-	where block = 0 and exists (select * from jom_user_usergroup_map m
+	from $table_users u 
+	where block = 0 and exists (select * from $table_user_usergroup_map m
 		where u.id = m.user_id and m.group_id in ($joomla_admin_group)) 
 	order by name" ; 
 print_table("Membres du Conseil d'Administration (ca@spa-aviation.be)", $sql) ;
 
 $sql = "select *,u.name as full_name
-	from jom_users u 
-	where block = 0 and u.username != 'admin' and exists (select * from jom_user_usergroup_map m
+	from $table_users u 
+	where block = 0 and u.username != 'admin' and exists (select * from $table_user_usergroup_map m
 		where u.id = m.user_id and m.group_id in ($joomla_sysadmin_group, $joomla_superuser_group, $joomla_admin_group)) 
 	order by name" ; 
 print_table("Administrateurs syst&egrave;me du site (webmaster@spa-aviation.be)", $sql) ;
