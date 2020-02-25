@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013 Eric Vyncke
+   Copyright 2013-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ if ($id) {
 		p.email as email, home_phone, work_phone, cell_phone,
 		if (date(r_start) = current_date(), 1, 0) as today,
 		if(r_stop >= sysdate(), 1, 0) as can_cancel, if (r_start < sysdate(), 1, 0) as can_log
-		from $table_bookings join jom_users p on r_pilot = p.id left join jom_users i on r_instructor = i.id,
-		jom_users as w, $table_person
+		from $table_bookings join $table_users p on r_pilot = p.id left join $table_users i on r_instructor = i.id,
+		$table_users as w, $table_person
 		where r_id = $id and r_who = w.id and r_cancel_date is null") or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 } elseif ($me) {
 	if ($auth != md5($me . $shared_secret)) die("Wrong key for booking#$me: $auth ") ;
@@ -51,8 +51,8 @@ if ($id) {
 		if (date(r_start) = current_date(), 1, 0) as today,
 		abs(date(r_start) - current_date()) as today_distance,
 		if(r_stop >= sysdate(), 1, 0) as can_cancel, if (r_start < sysdate(), 1, 0) as can_log
-		from $table_bookings join jom_users p on r_pilot = p.id left join jom_users i on r_instructor = i.id,
-		jom_users as w, $table_person
+		from $table_bookings join $table_users p on r_pilot = p.id left join $table_users i on r_instructor = i.id,
+		$table_users as w, $table_person
 		where (r_pilot = $me or r_instructor = $me) and r_who = w.id and r_cancel_date is null
 		order by today_distance asc limit 0,1") or die("Cannot access the booking #$me 2: " . mysqli_error($mysqli_link)) ;
 } else 

@@ -31,7 +31,7 @@ if ($userId < 0 or $userId == '') die("Vous devez être connecté") ;
 
 // Fetch all information about the user
 $result = mysqli_query($mysqli_link, "select *,u.username as username,u.email as email, date(p.birthdate) as birthdate
-	from $table_person p join jom_users u on p.jom_id = u.id left join jom_kunena_users k on k.userid=u.id
+	from $table_person p join $table_users u on p.jom_id = u.id left join jom_kunena_users k on k.userid=u.id
 	where u.id = $displayed_id") or die("Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) ;
 $name_db = $me['name'] ;

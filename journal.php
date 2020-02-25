@@ -56,7 +56,7 @@ if (isset($_REQUEST['id']) and is_numeric($_REQUEST['id']))
 	$sql_filter = " AND j_jom_id = $_REQUEST[id]" ;
 else if (isset($_REQUEST['user']))
 	$sql_filter = " AND name like '%" . web2db($_REQUEST['user']) . "%'" ;
-$sql = "SELECT * FROM $table_journal LEFT JOIN jom_users u ON j_jom_id = u.id
+$sql = "SELECT * FROM $table_journal LEFT JOIN $table_users u ON j_jom_id = u.id
 		WHERE j_id <= $start $sql_filter
 		ORDER BY j_id desc
 		LIMIT 0, 50" ;

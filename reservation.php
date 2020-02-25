@@ -1,7 +1,7 @@
 <?php
 // Some icons (fast forward & co) by Snowish Icon Pack by Alexander Moore 
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -328,7 +328,7 @@ Ce n'est pas le cas avec votre navigateur Internet.</span>
 <?php
 // Based on fb_accessToken and joomla connection => propose login via FB, disconnect FB account, associate FB account, ...
 if ($userId != 0) {
-	$result = mysqli_query($mysqli_link, "select * from jom_users u left join $table_person p on u.id = p.jom_id where u.id = $userId")
+	$result = mysqli_query($mysqli_link, "select * from $table_users u left join $table_person p on u.id = p.jom_id where u.id = $userId")
 		or die("Erreur systeme lors de la lecture de votre profil: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
 }

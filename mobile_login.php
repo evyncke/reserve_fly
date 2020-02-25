@@ -34,7 +34,7 @@ if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
 	// If not, use PHP's `password_verify()` function to validate the password (native to PHP 5.5+, 
 	$username = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['username'])) ;
 	$password = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['password'])) ;
-	$result = mysqli_query($mysqli_link, "SELECT * FROM jom_users
+	$result = mysqli_query($mysqli_link, "SELECT * FROM $table_users
 		WHERE username='$username'")
 		or die("Error retrieving user: " . mysqli_error($mysqli_link)) ;
 	if (!$result)

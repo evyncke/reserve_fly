@@ -137,15 +137,15 @@ if ($response['error'] == '') {
 
 	if ($result and mysqli_affected_rows($mysqli_link) == 2) { // a REPLACE is actually a DELETE followed by INSERT
 		$booking_id = $id ;
-		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $pilot_id") ;
+		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $pilot_id") ;
 		$pilot = mysqli_fetch_array($result) ;
 		$pilot['name'] = db2web($pilot['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		if ($instructor_id != 'NULL') {
-			$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $instructor_id") ;
+			$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $instructor_id") ;
 			$instructor = mysqli_fetch_array($result) ;
 			$instructor['name'] = db2web($instructor['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		}
-		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $userId") ;
+		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $userId") ;
 		$booker = mysqli_fetch_array($result) ;
 		$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		$booker_quality = 'pilote' ;

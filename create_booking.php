@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -195,7 +195,7 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
  
 // Check whether this period overlaps with other ones
 // TODO should give more information about other reservations => do not count(*) but mysqli_num_rows()
-$sql = "select * from $table_bookings b join jom_users u on b.r_pilot = u.id
+$sql = "select * from $table_bookings b join $table_users u on b.r_pilot = u.id
         where r_plane = '$plane' and r_cancel_date is null and
                 ('$start' between r_start and date_sub(r_stop, interval 1 minute) or
                 date_sub('$end', interval 1 minute) between r_start and r_stop or
@@ -230,17 +230,17 @@ if ($response['error'] == '') {
 				or die("Cannot update flight: " . mysqli_error($mysqli_link)) ;
 		}
 		// Get information abour pilot
-		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $pilot_id") ;
+		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $pilot_id") ;
 		$pilot = mysqli_fetch_array($result) ;
 		$pilot['name'] = db2web($pilot['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		// If instructor is on board, then get information about instructor
 		if ($instructor_id != 'NULL') {
-			$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $instructor_id") ;
+			$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $instructor_id") ;
 			$instructor = mysqli_fetch_array($result) ;
 			$instructor['name'] = db2web($instructor['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		}
 		// Get information about booker
-		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $userId") ;
+		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $userId") ;
 		$booker = mysqli_fetch_array($result) ;
 		$booker_quality = 'pilote' ;
 		if ($useIsInstructeur)
