@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ if ($error_message != '') {
 		convert(r_comment using utf8) as r_comment, r_from, r_via1, r_via2, r_to, r_duration, r_crew_wanted, r_pax_wanted,
 		p.username as username, p.name as name, w.username as username2, w.name as name2,
 		p.email as email, home_phone, work_phone, cell_phone, avatar, ressource, r.id as plane_id
-		from $table_bookings join $table_planes as r on r_plane = r.id join jom_users as p on r_pilot = p.id join jom_kunena_users k on k.userid = r_pilot,
-		jom_users as w, $table_person
+		from $table_bookings join $table_planes as r on r_plane = r.id join $table_users as p on r_pilot = p.id join jom_kunena_users k on k.userid = r_pilot,
+		$table_users as w, $table_person
 		where r_plane = '$plane' and date(r_start) <= '$date' and '$date' <= date(r_stop) and
 		r_who = w.id and jom_id = p.id and r_cancel_date is null
 		order by r_plane, r_start") ;
@@ -92,7 +92,7 @@ if ($error_message != '') {
 			if ($row['r_instructor']) {
 				$booking['instructorId'] = $row['r_instructor']  ;
 				$result_fi = mysqli_query($mysqli_link, "select u.name as name, u.email as email, home_phone, work_phone, cell_phone
-					 from jom_users u left join $table_person p on u.id=p.jom_id where u.id=$row[r_instructor]") ;
+					 from $table_users u left join $table_person p on u.id=p.jom_id where u.id=$row[r_instructor]") ;
 				if ($result_fi) {
 					$row_fi = mysqli_fetch_array($result_fi) ;
 					$booking['instructorName'] = ($convertToUtf8 ) ? iconv( "ISO-8859-1", "UTF-8", $row_fi['name']) : $row_fi['name'] ;

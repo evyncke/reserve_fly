@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013 Eric Vyncke
+   Copyright 2013-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ if ($id and is_numeric($id)) {
 		convert(i.name using utf8) as instructor_name, w.username as username2, convert(w.name using utf8) as booker_name,
 		if (date(r_start) = current_date(), 1, 0) as today,
 		if(r_stop >= sysdate(), 1, 0) as can_cancel, if (r_start < sysdate(), 1, 0) as can_log
-		from $table_bookings join jom_users p on r_pilot = p.id left join jom_users i on r_instructor = i.id,
-		jom_users as w, $table_person
+		from $table_bookings join $table_users p on r_pilot = p.id left join $table_users i on r_instructor = i.id,
+		$table_users as w, $table_person
 		where r_id = $id and r_who = w.id and r_cancel_date is null") or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 	$booking = mysqli_fetch_array($result) or die("Réservation inconnue") ;
 	$action = "Modifier" ;

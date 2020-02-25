@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -74,8 +74,8 @@ print("</select> Page: ") ;
 // Find how many rows in the whole logbook, it must be IDENTICAL to the real display SQL SELECT further down as some pilots are no more members...
 $result = mysqli_query($mysqli_link, "select count(*)
 	from $table_logbook l
-        join jom_users p on l_pilot=p.id
-	left join jom_users i on l_instructor = i.id
+        join $table_users p on l_pilot=p.id
+	left join $table_users i on l_instructor = i.id
 	where l_plane = '$plane' and l_booking is not null") ;
 $row = mysqli_fetch_array($result) ;
 $row_count = $row[0] ;
@@ -134,12 +134,12 @@ $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_h
 	l_flight_end_hour, l_flight_end_minute,
 	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name
 	from $table_logbook l 
-	join jom_users p on l_pilot=p.id
-	left join jom_users i on l_instructor = i.id
+	join $table_users p on l_pilot=p.id
+	left join $table_users i on l_instructor = i.id
 	where l_plane = '$plane' and l_booking is not null
 	order by l_start asc
 	limit $first_row, $rows_per_page" ;
-$result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
+$result = mysqli_query($mysqli_link, $sql) or die("Erreur système à propos de l'accès au carnet de route: " . mysqli_error($mysqli_link)) ;
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
 $pic_total_hour = 0 ;

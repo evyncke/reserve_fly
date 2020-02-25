@@ -4,7 +4,7 @@
 // add pilot/booker's name in error messages...
 
 /*
-   Copyright 2013 Eric Vyncke
+   Copyright 2013-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -70,18 +70,18 @@ if ($response['error'] == '') {
 			mysqli_query($mysqli_link, "UPDATE $table_flights SET f_booking = NULL, f_date_scheduled = NULL WHERE f_booking = $id")
 				or $response['error'] .= "Cannot delete customer booking: " . mysqli_error($mysqli_link) ;
 		}
-		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $pilot_id") ;
+		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $pilot_id") ;
 		$pilot = mysqli_fetch_array($result) ;
 		$pilot['name'] = db2web($pilot['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		if (($auth != '') or ($pilot_id == $userId))
 			$booker = $pilot ;
 		else {
-			$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $userId") ;
+			$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $userId") ;
 			$booker = mysqli_fetch_array($result) ;
 			$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		}
 		if ($booking['r_instructor']) {
-			$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $booking[r_instructor]") ;
+			$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $booking[r_instructor]") ;
 			$instructor = mysqli_fetch_array($result) ;
 			$instructor['name'] = db2web($instructor['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		}
@@ -153,11 +153,11 @@ if ($response['error'])
 	journalise($userId, 'E', "Error ($response[error]) while cancelling booking #$id of $plane done for $pilot[name] by $booker[name]. $booking_start => $booking_end") ;
 else {
 	// Warn by email the previous and next bookings if any
-	$result = mysqli_query($mysqli_link, "select * from $table_bookings, jom_users
+	$result = mysqli_query($mysqli_link, "select * from $table_bookings, $table_users
 		where r_plane = '$plane' and r_cancel_date is null and r_start = '$booking_end' and (id = r_pilot or id = r_instructor)") 
 		or die("Cannot fetch previous booking: " . mysqli_error($mysqli_link)) ;
 	email_adjacent($result, $booking, $booker) ;
-	$result = mysqli_query($mysqli_link, "select * from $table_bookings, jom_users
+	$result = mysqli_query($mysqli_link, "select * from $table_bookings, $table_users
 		where r_plane = '$plane' and r_cancel_date is null and r_stop = '$booking_start' and (id = r_pilot or id = r_instructor)") 
 		or die("Cannot fetch previous booking: " . mysqli_error($mysqli_link)) ;
 	email_adjacent($result, $booking, $booker) ;

@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -34,16 +34,16 @@ if ($id) {
 	$result = mysqli_query($mysqli_link, "select r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
 		r_from, r_to, compteur_type, compteur_vol, model, compteur, compteur_date, 
 		r_duration,date_add(r_start, interval 15 minute) as r_takeoff, date(r_start) as r_day
-		from $table_bookings join jom_users as p on r_pilot = p.id, $table_planes as a,
-		jom_users as w
+		from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a,
+		$table_users as w
 		where r_id = $id and a.id = r_plane") or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 } else { // Retrieve the nearest one
 	if ($userId <= 0) die("Vous devez être connecté") ;
 	$result = mysqli_query($mysqli_link, "select r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
 		r_from, r_to, compteur_type, compteur_vol, model, compteur, compteur_date, 
 		r_duration,date_add(r_start, interval 15 minute) as r_takeoff, date(r_start) as r_day
-		from $table_bookings join jom_users as p on r_pilot = p.id, $table_planes as a,
-		jom_users as w
+		from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a,
+		$table_users as w
 		where r_pilot = $userId and r_start < sysdate() and r_cancel_date is null and a.ressource = 0
 		order by r_start desc
 		limit 0,1") or die("Cannot access closest booking in the past: " . mysqli_error($mysqli_link)) ;

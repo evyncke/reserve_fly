@@ -34,7 +34,7 @@ $sql_filter = [] ;
 
 if (isset($_REQUEST['pilot']) && is_numeric($_REQUEST['pilot'])) {
 	$pilot = $_REQUEST['pilot'] ;
-	$result = mysqli_query($mysqli_link, "select name from jom_users where id = $pilot") 
+	$result = mysqli_query($mysqli_link, "select name from $table_users where id = $pilot") 
 		or die("Cannot read the pilot name " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) 
 		or die("Unknown pilot") ;
