@@ -44,10 +44,22 @@ header('Expires: Mon, 01 Jan 1990 00:00:00 GMT') ; // force automatic expiration
 $eol = "\r\n" ;
 
 
+// Emit a single/multiple line(s) guaranteed to be shorter than 75 chararters
 function emit($line) {
-	global $content ;
+	global $content, $eol ;
 	
+	if (substr($line, -strlen($eol)) != $eol)
+		$line .= $eol ;
 	$content .= $line ;
+}
+
+// Emit a single header, cutting it in piece shorter than 75 characters
+function emit_long($line) {
+	global $content, $eol ;
+	
+	if (substr($line, -strlen($eol)) != $eol)
+		$line .= $eol ;
+	$content .= wordwrap($line, 75, $eol . "\t", true) ;
 }
 
 function emit_header() {
@@ -74,7 +86,7 @@ function emit_header() {
 }
 
 function emit_booking($booking) {
-	global $eol, $default_timezone, $shared_secret, $mysqli_link, $ical_name ;
+	global $eol, $default_timezone, $shared_secret, $mysqli_link, $ical_name, $ical_organizer, $table_users ;
 
 	$date_flight_start = gmdate('Ymd\THis\Z', strtotime("$booking[r_start] $default_timezone")) ;
 	$date_flight_end =   gmdate('Ymd\THis\Z', strtotime("$booking[r_stop] $default_timezone")) ;
@@ -90,14 +102,14 @@ function emit_booking($booking) {
 		"DTSTAMP:$date_time_booking" . $eol .
 	    "DTSTART:$date_flight_start" . $eol .
 		"DTEND:$date_flight_end" . $eol .
-		"ORGANIZER:$ical_name" . $eol .
+		"ORGANIZER:$ical_organizer" . $eol .
 		"UID:booking-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		// DESCRIPTION: the details in the description
 		"DESCRIPTION:Réservation du $booking[r_plane] du " . $eol .
 			"\t$booking[r_start] au $booking[r_stop]." . $eol . 
 			"\tPilote: " . db2web($booking['full_name']) . '. ' . $eol ) ;
 	if ($booking['r_instructor'] > 0) {
-		$result = mysqli_query($mysqli_link, "select name, email from jom_users where id = $booking[r_instructor]") ;
+		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $booking[r_instructor]") ;
 		$instructor = mysqli_fetch_array($result) ;
 		emit("\tInstructeur: " . db2web($instructor['name']) . '. ' . $eol) ;
 	}
@@ -107,6 +119,7 @@ function emit_booking($booking) {
 	emit("SEQUENCE:$booking[r_sequence]" . $eol .
 		"URL:" . ((isset($_SERVER['HTTPS'])) ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]/resa/booking.php?" . $eol . "\tid=$booking[r_id]&auth=$auth" . $eol .
 		"SUMMARY:Vol sur $booking[r_plane]" . $eol ) ; // SUMMARY is the main visible thing in the calendar
+	emit('TRANSP:OPAQUE' . $eol) ;
 // generate also an alarm one hour before, per RFC 5545 it MUST be included in the VEVENT
 // it MUST also include ACTION & TRIGGER
 	emit("BEGIN:VALARM" . $eol) ;
@@ -120,12 +133,11 @@ function emit_booking($booking) {
 		"X-APPLE-DEFAULT-ALARM:TRUE" . $eol .
 		"END:VALARM" . $eol);
 // End of event
-	emit('TRANSP:OPAQUE' . $eol) ;
 	emit("END:VEVENT" . $eol ) ;
 }
 
 function emit_agenda($event) {
-	global $eol, $default_timezone, $mysqli_link, $ical_name ;
+	global $eol, $default_timezone, $mysqli_link, $ical_name, $ical_organizer ;
 
 	$date_event_start = gmdate('Ymd\THis\Z', strtotime("$event[ag_start] $default_timezone")) ;
 	$date_event_end =   gmdate('Ymd\THis\Z', strtotime("$event[ag_end] $default_timezone")) ;
@@ -133,25 +145,25 @@ function emit_agenda($event) {
 	$date_alert =        gmdate('Ymd\THis\Z', strtotime("$event[alert] $default_timezone")) ;
 	emit("BEGIN:VEVENT" . $eol) ;
 	emit("METHOD:PUBLISH" . $eol .
-		"STATUS:CONFIRMED" . $eol .
-//		"X-MICROSOFT-CDO-BUSYSTATUS:TENTATIVE" . $eol .
-		"X-MICROSOFT-CDO-BUSYSTATUS:BUSY" . $eol .
+		"STATUS:TENTATIVE" . $eol .
+		"X-MICROSOFT-CDO-BUSYSTATUS:TENTATIVE" . $eol .
 		"DTSTAMP:$date_event_created" . $eol .
 	    "DTSTART:$date_event_start" . $eol .
 		"DTEND:$date_event_end" . $eol .
-		"ORGANIZER:$ical_name" . $eol .
-		"UID:event-$event[ag_id]@$_SERVER[HTTP_HOST]" . $eol .
-		"DESCRIPTION:" . db2web($event['ag_description']) . $eol .
-	    "SEQUENCE:$event[ag_sequence]" . $eol) ;
+		"ORGANIZER:$ical_organizer" . $eol .
+		"UID:event-$event[ag_id]@$_SERVER[HTTP_HOST]" . $eol) ;
+	emit_long("DESCRIPTION:" . db2web($event['ag_description'])) ;
+	emit("SEQUENCE:$event[ag_sequence]" . $eol) ;
 	if ($event['ag_url'] != '')
 		emit("URL:$event[ag_url]"  . $eol) ;
-	emit("SUMMARY:" . db2web($event['ag_description']) . $eol ) ;
+	emit_long("SUMMARY:" . db2web($event['ag_description'])) ;
+	emit('TRANSP:OPAQUE' . $eol) ;
+//	emit('TRANSP:TRANSPARENT' . $eol) ; // it really seems that TRANSPARENT causes outlook for Mac to ignore the whole file :-(
 // generate also an alarm one hour before, per RFC 5545 it MUST be included in the VEVENT
 // it MUST also include ACTION & TRIGGER
+if (FALSE) {
 	emit("BEGIN:VALARM" . $eol) ;
 	emit("ACTION:DISPLAY" . $eol) ; // ACTION is mandatory... ACTION:DISPLAY MUST include a DESCRIPTION
-// TODO maximum line length is 75 characters
-// TODO translates \n into $eol
 	emit("DESCRIPTION:" . db2web($event['ag_description']) . $eol) ;
 	emit(
 //		"TRIGGER;RELATED=start:-PT1H" . $eol .
@@ -160,8 +172,8 @@ function emit_agenda($event) {
 		"TRIGGER:$date_alert" . $eol .
 		"X-APPLE-DEFAULT-ALARM:TRUE" . $eol .
 		"END:VALARM" . $eol);
+}
 // End of event
-	emit('TRANSP:OPAQUE' . $eol) ;
 	emit("END:VEVENT" . $eol ) ;
 }
 
@@ -176,7 +188,7 @@ emit_header() ;
 
 // Start with the specific user bookings
 $result = mysqli_query($mysqli_link, "SELECT *,u.name AS full_name, DATE_SUB(r_start, INTERVAL 1 HOUR) AS alert
-		FROM $table_bookings b JOIN jom_users u ON b.r_pilot = u.id, $table_person p
+		FROM $table_bookings b JOIN $table_users u ON b.r_pilot = u.id, $table_person p
 		WHERE p.jom_id=u.id AND (b.r_pilot = $user_id OR b.r_instructor = $user_id) AND r_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH) AND r_cancel_who is null
 		ORDER BY r_start LIMIT 0,100") or die("impossible de lire les reservations: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
@@ -188,7 +200,16 @@ while ($row = mysqli_fetch_array($result)) {
 $result = mysqli_query($mysqli_link, "SELECT *, DATE_SUB(ag_start, INTERVAL 1 DAY) AS alert
 		FROM $table_agenda a 
 		WHERE ag_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH)
-		ORDER BY ag_start LIMIT 0,1") or die("impossible de lire l'agenda: " . mysqli_error($mysqli_link));
+		ORDER BY ag_start LIMIT 0,5") or die("impossible de lire l'agenda: " . mysqli_error($mysqli_link));
+// LIMIT 0, 1 works
+// LIMIT 0, 2 with transparent and BUSYSTATUS:tentative => failing
+// LIMIT 0, 2 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:CONFIRMED => working included 'tentative'
+// LIMIT 0, 2 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE => working
+// LIMIT 0, 3 with TRANSP:TRANSPARENT and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap...=> failing
+// LIMIT 0, 3 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap...=> working
+// LIMIT 0, 4 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap + V => working
+// LIMIT 0, 5 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap + "CALSCALE:GREGORIAN" => works on Google
+
 while ($row = mysqli_fetch_array($result)) {
 	emit_agenda($row) ;
 }
