@@ -454,7 +454,7 @@ else {
 $f = fopen("email.webmasters", "w") ;
 if (! $f) journalise(0, "E", "Cannot open email.webmasters for writing") ;
 else {
-	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $tale_user_usergroup_map on id=user_id
+	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id in ($joomla_admin_group, $joomla_sysadmin_group, $joomla_superuser_group)
 		order by name") or die("Erreur SQL while creating webmasters: " . mysqli_error($mysqli_link));
 	$first = true ;
@@ -482,6 +482,21 @@ else {
 	}
 	fclose($f) ;
 }
+
+# Generate email aliases for Fleet
+$f = fopen("email.fleet", "w") ;
+if (! $f) journalise(0, "E", "Cannot open email.fleet for writing") ;
+else {
+	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
+		where block = 0 and group_id in ($joomla_mechanic_group)
+		order by name") or die("Erreur SQL while creating fleet: " . mysqli_error($mysqli_link));
+	$first = true ;
+	while ($row = mysqli_fetch_array($result)) {
+		fwrite($f, "$row[email]\n") ;
+	}
+	fclose($f) ;
+}
+
 
 
 # Generate email aliases for eric
