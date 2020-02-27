@@ -200,7 +200,7 @@ while ($row = mysqli_fetch_array($result)) {
 $result = mysqli_query($mysqli_link, "SELECT *, DATE_SUB(ag_start, INTERVAL 1 DAY) AS alert
 		FROM $table_agenda a 
 		WHERE ag_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH)
-		ORDER BY ag_start LIMIT 0,5") or die("impossible de lire l'agenda: " . mysqli_error($mysqli_link));
+		ORDER BY ag_start LIMIT 0,50") or die("impossible de lire l'agenda: " . mysqli_error($mysqli_link));
 // LIMIT 0, 1 works
 // LIMIT 0, 2 with transparent and BUSYSTATUS:tentative => failing
 // LIMIT 0, 2 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:CONFIRMED => working included 'tentative'
@@ -208,7 +208,7 @@ $result = mysqli_query($mysqli_link, "SELECT *, DATE_SUB(ag_start, INTERVAL 1 DA
 // LIMIT 0, 3 with TRANSP:TRANSPARENT and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap...=> failing
 // LIMIT 0, 3 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap...=> working
 // LIMIT 0, 4 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap + V => working
-// LIMIT 0, 5 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap + "CALSCALE:GREGORIAN" => works on Google
+// LIMIT 0, 5 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap + "CALSCALE:GREGORIAN" => works on Google, Outlook
 
 while ($row = mysqli_fetch_array($result)) {
 	emit_agenda($row) ;
@@ -217,7 +217,7 @@ while ($row = mysqli_fetch_array($result)) {
 emit_trailer() ;
 print($content) ;
 
-if (true and $user_id == 62) 
+if (false and $user_id == 62) 
 	@smtp_mail('eric@vyncke.org', "$_SERVER[PHP_SELF]", "La page s'est executée
 HTTP request scheme: $_SERVER[REQUEST_SCHEME]
 HTTP request URI: $_SERVER[REQUEST_URI]
@@ -233,5 +233,5 @@ $content
 ---
 ", 'Content-type: text/plain; charset="UTF-8"') ;
 
-//journalise($user_id, "I", "ICS download: $content") ;
+journalise($user_id, "I", "ICS download: $_SERVER[HTTP_USER_AGENT]") ;
 ?>
