@@ -296,17 +296,6 @@ function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
 	global $smtp_from, $smtp_return_path, $smtp_info, $mime_preferences ;
 	global $mail, $userId ;
 	
-	// Ensure the body and its type are canonical
-	$plain_text_body = strip_tags($smtp_body) ;
-	$is_HTML = $smtp_body != $pain_text_body ;
-	$MIME_subtype = ($is_HTML) ? 'html' : 'plain' ;
-	if ($is_HTML) { // Let's even be more canonical for HTML
-		if (stripos($smtp_body, '<body') === FALSE)
-			$smtp_body = "<body>\n$smtp_body\n</body>" ;
-		if (stripos($smtp_body, '<html') === FALSE)
-			$smtp_body = "<html lang=\"fr\">\n$smtp_body\n</html>" ;
-	}
-
 	if (! isset($mail) or $mail == NULL or $smtp_info['persist'] == False) 
 		$mail = & Mail::factory('smtp', $smtp_info); // Create the mail object using the Mail::factory method
 	PEAR::setErrorHandling(PEAR_ERROR_EXCEPTION) ; // Force an exception to be trapped
@@ -335,6 +324,21 @@ function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
 				$headers[$token[0]] = trim($header_value) ;
 			}
 	}
+	// This handling must be done after processing headers as parameters as guessing MIME type is just a 2nd guess and we should change the HTML content only when unsure
+	if (!isset($headers['Content-Type']) or $headers['Content-Type'] == '') {
+		// Ensure the body and its type are canonical
+		$plain_text_body = strip_tags($smtp_body) ;
+		$is_HTML = $smtp_body != $pain_text_body ;
+		$MIME_subtype = ($is_HTML) ? 'html' : 'plain' ;
+		if ($is_HTML) { // Let's even be more canonical for HTML
+			if (stripos($smtp_body, '<body') === FALSE)
+				$smtp_body = "<body>\n$smtp_body\n</body>" ;
+			if (stripos($smtp_body, '<html') === FALSE)
+				$smtp_body = "<html lang=\"fr\">\n$smtp_body\n</html>" ;
+		}
+		$headers['Content-Type'] = "text/$MIME_subtype; charset=\"UTF-8\"" ;
+	}
+
 	if ($smtp_info['debug']) print_r($headers) ;
 	try {
 		$mail->send($smtp_to, $headers, $smtp_body);
