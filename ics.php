@@ -158,21 +158,6 @@ function emit_agenda($event) {
 		emit("URL:$event[ag_url]"  . $eol) ;
 	emit_long("SUMMARY:" . db2web($event['ag_description'])) ;
 	emit('TRANSP:OPAQUE' . $eol) ;
-//	emit('TRANSP:TRANSPARENT' . $eol) ; // it really seems that TRANSPARENT causes outlook for Mac to ignore the whole file :-(
-// generate also an alarm one hour before, per RFC 5545 it MUST be included in the VEVENT
-// it MUST also include ACTION & TRIGGER
-if (FALSE) {
-	emit("BEGIN:VALARM" . $eol) ;
-	emit("ACTION:DISPLAY" . $eol) ; // ACTION is mandatory... ACTION:DISPLAY MUST include a DESCRIPTION
-	emit("DESCRIPTION:" . db2web($event['ag_description']) . $eol) ;
-	emit(
-//		"TRIGGER;RELATED=start:-PT1H" . $eol .
-		"X-WR-ALARMUID:alert-event-$event[ag_id]@$_SERVER[HTTP_HOST]" . $eol .
-		"UID:alert-event-$event[ag_id]@$_SERVER[HTTP_HOST]" . $eol .
-		"TRIGGER:$date_alert" . $eol .
-		"X-APPLE-DEFAULT-ALARM:TRUE" . $eol .
-		"END:VALARM" . $eol);
-}
 // End of event
 	emit("END:VEVENT" . $eol ) ;
 }
@@ -201,15 +186,6 @@ $result = mysqli_query($mysqli_link, "SELECT *, DATE_SUB(ag_start, INTERVAL 1 DA
 		FROM $table_agenda a 
 		WHERE ag_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH)
 		ORDER BY ag_start LIMIT 0,50") or die("impossible de lire l'agenda: " . mysqli_error($mysqli_link));
-// LIMIT 0, 1 works
-// LIMIT 0, 2 with transparent and BUSYSTATUS:tentative => failing
-// LIMIT 0, 2 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:CONFIRMED => working included 'tentative'
-// LIMIT 0, 2 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE => working
-// LIMIT 0, 3 with TRANSP:TRANSPARENT and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap...=> failing
-// LIMIT 0, 3 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap...=> working
-// LIMIT 0, 4 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap + V => working
-// LIMIT 0, 5 with TRANSP:OPAQUE and BUSYSTATUS:TENTATIVE and STATUS:TENTATIVE + wordwrap + "CALSCALE:GREGORIAN" => works on Google, Outlook
-
 while ($row = mysqli_fetch_array($result)) {
 	emit_agenda($row) ;
 }
@@ -233,5 +209,5 @@ $content
 ---
 ", 'Content-type: text/plain; charset="UTF-8"') ;
 
-journalise($user_id, "I", "ICS download: $_SERVER[HTTP_USER_AGENT]") ;
+//journalise($user_id, "I", "ICS download: $_SERVER[HTTP_USER_AGENT]") ;
 ?>
