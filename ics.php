@@ -152,11 +152,16 @@ function emit_agenda($event) {
 		"DTEND:$date_event_end" . $eol .
 		"ORGANIZER:$ical_organizer" . $eol .
 		"UID:event-$event[ag_id]@$_SERVER[HTTP_HOST]" . $eol) ;
-	emit_long("DESCRIPTION:" . db2web($event['ag_description'])) ;
+	emit_long("SUMMARY:" . db2web($event['ag_summary'])) ;
+	if ($event['ag_description'] != '')
+		emit_long("DESCRIPTION:" . db2web($event['ag_description'])) ;
+	else
+		emit_long("DESCRIPTION:" . db2web($event['ag_description'])) ;
+	if ($event['ag_location'] != '')
+		emit_long("LOCATION:" . db2web($event['ag_location'])) ;
 	emit("SEQUENCE:$event[ag_sequence]" . $eol) ;
 	if ($event['ag_url'] != '')
 		emit("URL:$event[ag_url]"  . $eol) ;
-	emit_long("SUMMARY:" . db2web($event['ag_description'])) ;
 	emit('TRANSP:OPAQUE' . $eol) ;
 // End of event
 	emit("END:VEVENT" . $eol ) ;
@@ -193,7 +198,7 @@ while ($row = mysqli_fetch_array($result)) {
 emit_trailer() ;
 print($content) ;
 
-if (false and $user_id == 62) 
+if (true and $user_id == 62) 
 	@smtp_mail('eric@vyncke.org', "$_SERVER[PHP_SELF]", "La page s'est executée
 HTTP request scheme: $_SERVER[REQUEST_SCHEME]
 HTTP request URI: $_SERVER[REQUEST_URI]
