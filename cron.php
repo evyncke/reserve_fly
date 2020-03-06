@@ -50,13 +50,13 @@ $mime_preferences = array(
 
 
 function allBookings($plane, $day, $me) {
-	global $table_bookings, $table_person, $convertToUtf8, $mysqli_link ;
+	global $table_bookings, $table_person, $table_users, $mysqli_link ;
 
 	$result = mysqli_query($mysqli_link, "select *, time(r_start) as start, time(r_stop) as stop, u.name as full_name
 		from $table_bookings b join $table_users u on b.r_pilot = u.id, $table_person p
 		where p.jom_id = u.id and date(r_start) = '$day' and r_plane = '$plane' and r_pilot != $me and r_type != " . BOOKING_MAINTENANCE . "
 		and r_cancel_date is null
-		order by r_start") or die("allBookings($plane, $day, $me) : " . mysqli_error($mysqi_link)) ;
+		order by r_start") or die("allBookings($plane, $day, $me) : " . mysqli_error($mysqli_link)) ;
 	if (mysqli_num_rows($result) == 0)
 		return "<p><i>Pour votre information, vous &ecirc;tes le/la seul(e) &agrave; avoir r&eacute;serv&eacute; cet avion ce jour-l&agrave;.</i>\n" ;
 	$msg = "<p><i>Pour votre information, d'autres pilotes ont r&eacute;serv&eacute; cet avion le m&ecirc;me jour (utile en cas de retard par exemple):
@@ -73,6 +73,7 @@ function allBookings($plane, $day, $me) {
 
 // Reminder 24 hours before the flight
 
+print(date('Y-m-d H:i:s').": start of booking reminder(s).\n") ;
 $flight_reminders = 0 ;
 $result = mysqli_query($mysqli_link, "select *,u.name as full_name
 	from $table_bookings b join $table_users u on b.r_pilot = u.id join $table_planes a on r_plane = a.id, $table_person p
@@ -149,10 +150,11 @@ while ($row = mysqli_fetch_array($result)) {
 	else
 		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 	$flight_reminders ++ ;
+	print(date('Y-m-d H:i:s').": $flight_reminders flight reminder(s) sent.\n") ;
 }
 
 // Reminder after start to enter engine time
-print(date('Y-m-d H:i:s').": start of log book reminder.\n") ;
+print(date('Y-m-d H:i:s').": start of log book reminder(s).\n") ;
 
 $engine_reminders = 0 ;
 $sql ="select *,u.name as full_name
@@ -175,7 +177,8 @@ while ($row = mysqli_fetch_array($result)) {
 	$row['first_name'] = db2web($row['first_name']) ; // SQL DB is latin1 and the rest is in UTF-8
 	if ($row['first_name'] == '') $row['first_name'] = '<i>[Votre profil est incomplet et votre pr&eacute;nom est inconnu]</i>' ;
 	$row['r_comment'] = db2web($row['r_comment']) ; // SQL DB is latin1 and the rest is in UTF-8
-	$result_booker = mysqli_query($mysqli_link, "select name, email from $table_users where id = $row[r_who]") ;
+	$result_booker = mysqli_query($mysqli_link, "select name, email from $table_users where id = $row[r_who]") 
+		or journalise($row['r_who'], 'E', "Cannot find user $row[r_rwho] in $table_users: " . mysqli_error($mysqli_link)) ;
 	$booker = mysqli_fetch_array($result_booker) ;
 	$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 	$email_subject = iconv_mime_encode('Subject',
@@ -222,8 +225,9 @@ while ($row = mysqli_fetch_array($result)) {
 	else
 		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 	$engine_reminders ++ ;
-
+	print(date('Y-m-d H:i:s').": engine reminder sent by email to $email_recipients.\n") ;
 }
+print(date('Y-m-d H:i:s').": total of $engine_reminder engine reminders sent.\n") ;
 
 // Vérifier si tous les pilotes/élèves/membres ont bel et bien une entrée dans la table $rapcs_person (ex OpenFlyers)
 // Ajouter/enlever si nécessaire
@@ -236,7 +240,12 @@ $result = mysqli_query($mysqli_link, "select id,name,email,username
 while ($row = mysqli_fetch_array($result)) {
 	print(date('Y-m-d H:i:s').": $row[name]/$row[email]/$row[id] has no entry in $table_person.\n") ;
 	journalise($row['id'], 'W', "$row[name]/$row[email]/$row[id] has no entry in $table_person.") ;
-	$status = mysqli_query($mysqli_link, "INSERT INTO $table_person(jom_id, name, email) 
+	// Let's re-use an existing entry for the same users
+	mysqli_query($mysqli_link, "UPDATE $table_person SET jom_id = $row[id] WHERE name='$row[name]' AND email='$row[email]'")
+		or journalise($row['id'], 'E', " cannot replace jom_id=$row[id] into $table_person($row[name], $row[email]): " . mysqli_error($mysqli_link)) ;
+	$status = mysqli_affected_rows($mysqli_link) > 0 ; // Check whether some rows were updated
+	if (!$status) // Else, create a new row
+		$status = mysqli_query($mysqli_link, "INSERT INTO $table_person(jom_id, name, email) 
 				VALUES($row[id], '$row[name]', '$row[email]')") ;
 	if (!$status) {
 			print(date('Y-m-d H:i:s').": cannot insert into $table_person($row[id], $row[name], $row[email]): " . mysqli_error($mysqli_link) . "\n") ;
@@ -512,11 +521,11 @@ else {
 	fwrite($f, "eric.vyncke@ulg.ac.be\n") ;
 	fclose($f) ;
 }
+
 print(date('Y-m-d H:i:s').": purging old journal entries.\n") ;
 mysqli_query($mysqli_link, "DELETE FROM $table_journal WHERE j_datetime < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
 	or die("Cannot purge old entries in journal: " . mysqli_error($mysqli_link)) ;
 
-print(date('Y-m-d H:i:s').": end of job.\n") ;
 $load = sys_getloadavg(); 
 // TODO also use http://php.net/manual/fr/function.getrusage.php
 
@@ -559,8 +568,10 @@ if (time() + 3600 >= airport_opening_local_time($year, $month, $day) and time() 
 		on duplicate key update mh_unknown=mh_unknown+$metar_unknown, mh_vmc=mh_vmc+$metar_vmc,
 			mh_mmc=mh_mmc+$metar_mmc, mh_imc=mh_imc+$metar_imc")
 		or journalise(0, 'E', "Cannot update METAR history: " . mysqli_error($mysqli_link)) ;
+	print(date('Y-m-d H:i:s').": Latest METAR for $default_metar_station: VMC=$metar_vmc, MMC=$metar_mmc, IMC=$metar_imc, UNKNOWN=$metar_unknown.\n") ;
 }
 
+print(date('Y-m-d H:i:s').": End of CRON.\n") ;
 journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2].") ;
 ?>
 	
