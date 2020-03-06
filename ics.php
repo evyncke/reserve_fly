@@ -198,7 +198,7 @@ while ($row = mysqli_fetch_array($result)) {
 emit_trailer() ;
 print($content) ;
 
-if (true and $user_id == 62) 
+if (false and $user_id == 62) 
 	@smtp_mail('eric@vyncke.org', "$_SERVER[PHP_SELF]", "La page s'est executée
 HTTP request scheme: $_SERVER[REQUEST_SCHEME]
 HTTP request URI: $_SERVER[REQUEST_URI]
@@ -212,7 +212,7 @@ userid: $user_id/$userName/$userFullName (FI $userIsInstructor, Admin $userIsAdm
 ---
 $content
 ---
-", 'Content-type: text/plain; charset="UTF-8"') ;
+", 'Content-Type: text/plain; charset="UTF-8"') ;
 
 //journalise($user_id, "I", "ICS download: $_SERVER[HTTP_USER_AGENT]") ;
 ?>

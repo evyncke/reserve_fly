@@ -90,7 +90,7 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('journal.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 ?>
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, octobre 2017, pour RAPCS, Royal A&eacute;ro Para Club de Spa<br>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, octobre 2017-2020, pour RAPCS, Royal A&eacute;ro Para Club de Spa<br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
 </body>
 </html>
