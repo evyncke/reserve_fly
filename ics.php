@@ -34,7 +34,7 @@ $auth = $_REQUEST['auth'] ;
 if ($auth != md5($user_id . $shared_secret)) die("Wrong key for calendar#$user_id: $auth ") ;
 if (! is_numeric($user_id)) die("Wrong user id: $user_id") ;
 
-header('Content-Type: text/calendar; charset="UTF-8"') ;
+header('Content-Type: text/calendar; charset=UTF-8') ;
 header("Content-Disposition: inline; filename=rapcs-${user_id}.ics") ;
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate') ;
@@ -189,7 +189,7 @@ while ($row = mysqli_fetch_array($result)) {
 // Then the generic agenda
 $result = mysqli_query($mysqli_link, "SELECT *, DATE_SUB(ag_start, INTERVAL 1 DAY) AS alert
 		FROM $table_agenda a 
-		WHERE ag_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH)
+		WHERE ag_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH) AND ag_active != 0
 		ORDER BY ag_start LIMIT 0,50") or die("impossible de lire l'agenda: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
 	emit_agenda($row) ;
