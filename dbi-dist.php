@@ -330,15 +330,14 @@ function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
 		$plain_text_body = strip_tags($smtp_body) ;
 		$is_HTML = $smtp_body != $pain_text_body ;
 		$MIME_subtype = ($is_HTML) ? 'html' : 'plain' ;
-		if ($is_HTML) { // Let's even be more canonical for HTML
-			if (stripos($smtp_body, '<body') === FALSE)
-				$smtp_body = "<body>\n$smtp_body\n</body>" ;
-			if (stripos($smtp_body, '<html') === FALSE)
-				$smtp_body = "<html lang=\"fr\">\n$smtp_body\n</html>" ;
-		}
-		$headers['Content-Type'] = "text/$MIME_subtype; charset=\"UTF-8\"" ;
+		$headers['Content-Type'] = "text/$MIME_subtype; charset=UTF-8" ;
 	}
-
+	if (stripos($headers['Content-Type'], 'html') !== 0) { // Let's even be more canonical for HTML
+		if (stripos($smtp_body, '<body') === FALSE)
+			$smtp_body = "<body>\n$smtp_body\n</body>" ;
+		if (stripos($smtp_body, '<html') === FALSE)
+			$smtp_body = "<html lang=\"fr\">\n$smtp_body\n</html>" ;
+	}
 	if ($smtp_info['debug']) print_r($headers) ;
 	try {
 		$mail->send($smtp_to, $headers, $smtp_body);
