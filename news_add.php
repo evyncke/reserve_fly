@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ const
 
 <div class="row">
 
-<form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
+<form action="<?=$_SERVER['PHP_SELF']?>" method="post" role="form" class="form-horizontal">
 <input type="hidden" name="action" value="news_add">
 <div class="form-group">
 	<label class="control-label col-sm-2 col-md-1">Date début affichage:</label>
@@ -101,8 +101,7 @@ const
 <div class="form-group">
 	<label class="control-label col-sm-2 col-md-1">Texte:</label>
 	<div class="col-sm-4 col-md-2">
-		<textarea class="form-control" name="text" rows="2">
-		</textarea>
+		<textarea class="form-control" name="text" rows="3"></textarea>
 	</div> <!-- col -->
 </div> <!-- form-group -->
 <div class="form-group"><button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Ajouter la nouvelle</button></div>
