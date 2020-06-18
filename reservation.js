@@ -1,4 +1,4 @@
-//   Copyright 2014 Eric Vyncke
+//   Copyright 2014-2020 Eric Vyncke
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -296,102 +296,116 @@ function displayMETAR() {
 	var elem = document.getElementById('reservationDetails') ;
 	
 	timeNow = new Date().getTime() ; // in msec
+	console.log("Start of displayMETAR(), timeNow=" + timeNow + ", metarTime=" + metarTime) ;
+	console.trace() ;
+	if (metarTime < 0) { // Another request is pending
+		console.log("End of displayMETAR() aborting as another request is pending") ;
+		return ;
+	}
 	if (timeNow < metarTime + 1000 * 60) { // Allow the caching for 1 minute
 		elem.innerHTML = metarHTML ;
 		elem.style.backgroundColor = metarBackgroundColor ;
+		console.log("End of displayMETAR() re-using cache") ;
 		return ;
 	}
-	displayWaiting() ;
+// TODO as this is asynchronous...
+//	displayWaiting() ;
 	var XHR=new XMLHttpRequest();
+//	XHR.timeout = 2000 ; // 2000 msec, cannot set time on synchronous requests
 	XHR.onreadystatechange = function() {
 		if(XHR.readyState  == 4) {
 			if(XHR.status  == 200) {
+				console.log("displayMETAR() call-back") ;
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var metar_response = eval('(' + XHR.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
 				var elem = document.getElementById('reservationDetails') ;
-				if (response.error != '') {
-					elem.innerHTML = response.error ;
+				if (metar_response.error != '') {
+					elem.innerHTML =  metar_response.error ;
 				} else {
-					elem.innerHTML = '<b>' + response.METAR + '</b>' ;
-					if (response.temperature && response.dew_point && ((response.temperature - response.dew_point) <= 10))
+					elem.innerHTML = '<b>' +  metar_response.METAR + '</b>' ;
+					if (metar_response.temperature &&  metar_response.dew_point && (( metar_response.temperature -  metar_response.dew_point) <= 10))
 						elem.innerHTML += '<br/>Relative humidity: ' +
-							Math.round(100.0 - 5.0 * (response.temperature - response.dew_point)) + '%' ;
-					if (response.clouds_base) {
-						elem.innerHTML += '<br/>Theorical clouds base at ' + response.station + ': ' + response.clouds_base + ' ft' ;
+							Math.round(100.0 - 5.0 * ( metar_response.temperature - metar_response.dew_point)) + '%' ;
+					if (metar_response.clouds_base) {
+						elem.innerHTML += '<br/>Theorical clouds base at ' +  metar_response.station + ': ' +  metar_response.clouds_base + ' ft' ;
 					}
-					if (response.density_altitude) {
-						elem.innerHTML += '<br/>Density altitude at ' + response.station + ': ' + response.density_altitude +
-							' ft, elevation: ' + response.elevation + ' ft';
-						if (response.density_altitude > response.elevation + 1500)
+					if (metar_response.density_altitude) {
+						elem.innerHTML += '<br/>Density altitude at ' +  metar_response.station + ': ' +  metar_response.density_altitude +
+							' ft, elevation: ' +  metar_response.elevation + ' ft';
+						if ( metar_response.density_altitude >  metar_response.elevation + 1500)
 							elem.innerHTML += '<br/><span style="color: red; font-size: x-large;">Caution, high density altitude!!!</span>' ;
 					}
-					if (response.pressure_altitude) {
-						elem.innerHTML += '<br/>Pressure altitude at ' + response.station + ': ' + response.pressure_altitude + ' ft' ;
+					if (metar_response.pressure_altitude) {
+						elem.innerHTML += '<br/>Pressure altitude at ' +  metar_response.station + ': ' +  metar_response.pressure_altitude + ' ft' ;
 					}
-					if (response.condition != null && response.condition == 'VMC')
+					if (metar_response.condition != null &&  metar_response.condition == 'VMC')
 						elem.style.backgroundColor =  'paleGreen' ;
-					else if (response.condition != null && response.condition == 'MMC')
+					else if ( metar_response.condition != null &&  metar_response.condition == 'MMC')
 						elem.style.backgroundColor = 'orange' ;
-					else if (response.condition != null && response.condition == 'IMC')
+					else if ( metar_response.condition != null &&  metar_response.condition == 'IMC')
 						elem.style.backgroundColor = 'pink' ;
 					else
 						elem.style.backgroundColor = 'lightGray' ;
-					if (response.wind_velocity != null && response.wind_direction != null && response.wind_direction != 'VRB' && runwaysQFU.length > 0) {
+					if (metar_response.wind_velocity != null &&  metar_response.wind_direction != null &&  metar_response.wind_direction != 'VRB' && runwaysQFU.length > 0) {
 						elem.innerHTML += '<br/><b>Wind components</b>' ;
 						var ul = document.createElement('ul');
 						elem.appendChild(ul);
 						ul.style.display = 'inherit' ; // CSS magic to avoid empty space before first list item
 						for (i = 0; i < runwaysQFU.length ; i++) {
-							var qfuWindAngle = (runwaysQFU[i] - response.wind_direction) *  2 * Math.PI / 360 ; // In radians
-							var qfuComponent =  Math.round(response.wind_velocity * Math.cos(qfuWindAngle)) ;
-							var crossComponent =  Math.round(response.wind_velocity * Math.sin(qfuWindAngle)) ;
-							if (response.wind_gust) {
-								var qfuGustComponent =  Math.round(response.wind_gust * Math.cos(qfuWindAngle)) ;
-								var crossGustComponent =  Math.round(response.wind_gust * Math.sin(qfuWindAngle)) ;
+							var qfuWindAngle = (runwaysQFU[i] -  metar_response.wind_direction) *  2 * Math.PI / 360 ; // In radians
+							var qfuComponent =  Math.round(metar_response.wind_velocity * Math.cos(qfuWindAngle)) ;
+							var crossComponent =  Math.round(metar_response.wind_velocity * Math.sin(qfuWindAngle)) ;
+							if (metar_response.wind_gust) {
+								var qfuGustComponent =  Math.round(metar_response.wind_gust * Math.cos(qfuWindAngle)) ;
+								var crossGustComponent =  Math.round(metar_response.wind_gust * Math.sin(qfuWindAngle)) ;
 							}
 							var li = document.createElement('li') ; 
 							ul.appendChild(li) ;
 							li.innerHTML = 'Runway ' + Math.round(runwaysQFU[i]/10) + ': ' ;
 							if (qfuComponent >= 0) {
 								li.innerHTML += 'headwind = ' + qfuComponent ;
-								if (response.wind_gust) li.innerHTML +=  ' g' + qfuGustComponent ;
+								if (metar_response.wind_gust) li.innerHTML +=  ' g' + qfuGustComponent ;
 								li.innerHTML +=  ' kt, ' ;
 							} else {
 								li.innerHTML += 'tailwind = ' + (-qfuComponent) ;
-								if (response.wind_gust) li.innerHTML +=  ' g' + (-qfuGustComponent) ;
+								if (metar_response.wind_gust) li.innerHTML +=  ' g' + (-qfuGustComponent) ;
 								li.innerHTML +=  ' kt, ' ;
 							}
 							if (crossComponent >= 0) {
 								li.innerHTML += 'left crosswind = ' + crossComponent  ;
-								if (response.wind_gust) li.innerHTML +=  ' g' + crossGustComponent ;
+								if (metar_response.wind_gust) li.innerHTML +=  ' g' + crossGustComponent ;
 								li.innerHTML +=  ' kt' ;
 							} else {
 								li.innerHTML += 'right crosswind = ' + (-crossComponent) ;
-								if (response.wind_gust) li.innerHTML +=  ' g' + (-crossGustComponent) ;
+								if (metar_response.wind_gust) li.innerHTML +=  ' g' + (-crossGustComponent) ;
 								li.innerHTML +=  ' kt' ;
 							}
-							if (response.wind_gust && Math.abs(crossGustComponent) > 15)
+							if (metar_response.wind_gust && Math.abs(crossGustComponent) > 15)
 								li.innerHTML += ' <b>!Caution!</b>' ;
 							else if (Math.abs(crossComponent) > 15)
 								li.innerHTML += ' <b>!Caution!</b>' ;
 						}
 					}
-					if (isToday()) setTimeout(displayMETAR, 1000 * 60 * 5) ; // Refresh every 5 minutes
+					if (isToday()) 
+						setTimeout(displayMETAR, 1000 * 60 * 5) ; // Refresh every 5 minutes
 					metarTime = timeNow ;
 					metarHTML = elem.innerHTML ;
 					metarBackgroundColor = elem.style.backgroundColor ;
 				}
 			} // status == 200
-			hideWaiting() ;
+//			hideWaiting() ;
 		} // readyState == 4
 	} // function
 	var requestUrl = 'metar/' + defaultMetarStation ;
-	XHR.open("GET", requestUrl, false) ; // We need to be have a synchronous request else METAR competes with detailed booking information :-(
+	XHR.open("GET", requestUrl, true) ;
+	metarTime = -1 ; // Used as a flag to signal a request is pending
+//	XHR.open("GET", requestUrl, false) ; // We need to be have a synchronous request else METAR competes with detailed booking information :-(
 	// TODO try/catch to handle exceptions
 	XHR.send(null) ;
+	console.log("End of displayMETAR()") ;
 }
 
 function airportChanged(elem) {
@@ -1474,11 +1488,15 @@ function newBookingDetails(event) {
 	}
 	// Enable the right set of buttons
 	buttonDisplayIf('addMaintenanceButton', ressourceType == 0 && (userIsMechanic || userIsInstructor || userIsAdmin)) ;
-	buttonDisplayIf('addBookingButton', (userIsPilot && allPlanes[i].actif == 1) || userIsInstructor || userIsAdmin) ;
+	// Temporary for COVID-19
+	//buttonDisplayIf('addBookingButton', (userIsPilot && allPlanes[i].actif == 1) || userIsInstructor || userIsAdmin) ;
+	buttonDisplayIf('addBookingButton', userIsInstructor || userIsMechanic) ;
 	if (ressourceType == 0) { // Only plane needs additional flight duration value
-		document.getElementById('addBookingButton').disabled = true ;
+		if (document.getElementById('addBookingButton') !== null)
+			document.getElementById('addBookingButton').disabled = true ;
 	} else {
-		document.getElementById('addBookingButton').disabled = false ;
+		if (document.getElementById('addBookingButton') !== null)
+			document.getElementById('addBookingButton').disabled = false ;
 	}
 	buttonHide('modifyBookingButton') ;
 	buttonHide('cancelBookingButton') ;
@@ -1917,7 +1935,8 @@ function refreshPlanningTable() {
 	}
 	document.getElementById('planningDayOfWeek').innerHTML = (planningDayOfWeek == -1) ? '' : weekdays[planningDayOfWeek] + ': ' ; 
 	document.getElementById('planningDate').value = planningDay + '/' + planningMonth + '/' + planningYear ;
-	clearBookingDetails() ; // Repeated to unsure accurate (? but this is asynchronous) dayMessagesHTML display...
+// TODO June 2020, do we really need it repeated ? It is heavy with displayMETAR() notably...
+//	clearBookingDetails() ; // Repeated to unsure accurate (? but this is asynchronous) dayMessagesHTML display...
 	myLog("end refreshPlanningTable()") ;
 }
 
@@ -1943,13 +1962,13 @@ function presentationByDay(event) {
 	planningYear = year ;
 	var workDate = new Date(year, month - 1 , day, 0, 0, 0, 0) ;
 	planningDayOfWeek = workDate.getDay() ;
-	displayMETAR() ; // As the date has changed
 	refreshEphemerides() ; // As the date has changed
 	planningByPlane = false ; 
         document.getElementById('roadBookButton').disabled = true ;
         document.getElementById('roadBookButton').style.display = 'none' ;
 	initPlanningTable() ;
 	refreshPlanningTable() ;
+	displayMETAR() ; // As the date has changed, last action to be taken as it is the least important
 }
 
 function init() {
@@ -1974,7 +1993,6 @@ function init() {
 	displayClock() ;
 	refreshWebcam() ;
 	setTimeout(refreshTimestamp, 1000 * 60) ; // Refresh every 60 seconds
-	displayMETAR() ;
 	refreshEphemerides() ;
 	if (planes.length == 0 || pilots.length == 0 || instructors.length <= 1) {
 		console.log("Planes.js or pilots.js or instructors.js has a length of 0") ;
@@ -2036,5 +2054,6 @@ function init() {
 	datepickr('#calendarIcon', { altInput: document.getElementById('planningDate'), dateFormat: 'd/m/Y'});
 	myLog('in init(): calling refreshPlanningTable()') ;
 	refreshPlanningTable() ;
+	myLog('end of refreshPlanningTable()') ;
 	myLog('end init()') ;
 }
