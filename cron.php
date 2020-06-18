@@ -145,6 +145,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
+	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
 	if ($test_mode)
 		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 	else
@@ -220,6 +221,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
+	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
 	if ($test_mode)
 		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 	else
