@@ -515,6 +515,7 @@ $result = mysqli_query($mysqli_link, "select group_id from $table_user_usergroup
 while ($row = mysqli_fetch_array($result)) 
 	$joomla_groups[$row['group_id']] = true ;
 $groupes = array() ;
+if (array_key_exists($joomla_member_group, $joomla_groups)) $groupes[] = "Membre" ;
 if (array_key_exists($joomla_pilot_group, $joomla_groups)) $groupes[] = "Pilote" ;
 if (array_key_exists($joomla_student_group, $joomla_groups)) $groupes[] = "&Eacute;l&egrave;ve" ;
 if (array_key_exists($joomla_mechanic_group, $joomla_groups)) $groupes[] = "M&eacute;cano" ;
