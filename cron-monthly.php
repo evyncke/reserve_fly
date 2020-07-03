@@ -21,6 +21,7 @@
 // TODO: every month, statistics on WE ?
 
 require_once 'dbi.php' ;
+ob_start() ; // To allow the ob_flush()
 
 // SMTP email debuging & optimization
 $smtp_info['debug'] = True;
@@ -81,6 +82,7 @@ function print_plane_table($title, $sql, $columns) {
 	mysqli_free_result($result) ;
 	$email_body .= "</table>\n$n ligne(s).<br/>\n" ;
 	print(date('Y-m-d H:i:s') . ": ($title) $n lines\n") ;
+	ob_flush() ;
 }
 
 if (strpos($actions, 'b') !== FALSE) {
@@ -143,6 +145,7 @@ if ($test_mode) {
 	smtp_mail("evyncke@cisco.com", "Statistiques utilisations des avions (test)", $email_body) ;
 } else
 	@smtp_mail($email_recipients, "Statistiques sur l'utilisation des avions", $email_body, $email_header) ;
+ob_flush() ;
 
 if (strpos($actions, 'p') !== FALSE) {
 
@@ -157,7 +160,7 @@ $sql = "select *,u.name as full_name
 	from $table_users u left join $table_person p on u.id = p.jom_id
 	where block = 0 and exists (select * from $table_user_usergroup_map m
 		where u.id = m.user_id and m.group_id in ($joomla_admin_group, $joomla_pilot_group, $joomla_student_group, $joomla_instructor_group))" ; 
-print(date('Y-m-d H:i:s') . ": executing: $sql\n") ;
+print(date('Y-m-d H:i:s') . ": executing: $sql\n") ; ob_flush() ;
 $result = mysqli_query($mysqli_link, $sql) or die(date('Y-m-d H:i:s') . ": Erreur systeme lors de la lecture des profils: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
         $profile_count = 0 ;
@@ -180,7 +183,7 @@ while ($row = mysqli_fetch_array($result)) {
 		if ($profile_count < $max_profile_count/2) 
 			journalise($row['jom_id'], 'W', db2web("Incomplete profile for $row[name]/$row[username]/$row[full_name]: profile items count $profile_count ($missing_items_string)")) ;
 		if ($row['email'] == '') {
-			print(date('Y-m-d H:i:s').": no email address... skipping !!!!!\n") ;
+			print(date('Y-m-d H:i:s').": no email address... skipping !!!!!\n") ; ob_flush() ;
 			continue ;
 	}
 	// Need to warn the user...
@@ -215,12 +218,12 @@ while ($row = mysqli_fetch_array($result)) {
 		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 }
 mysqli_free_result($result) ;
-
+print(date('Y-m-d H:i:s').": End of profile checks.\n") ; ob_flush() ;
 }
 
 if (strpos($actions, 'e') !== FALSE) {
 
-print(date('Y-m-d H:i:s').": preparing lists of pilots/students/members.\n") ;
+print(date('Y-m-d H:i:s').": preparing lists of pilots/students/members.\n") ; ob_flush() ;
 
 $email_body = "<p>Voici la liste mensuelle des divers utilisateurs du site RAPCS.</p>" ;
 
@@ -228,7 +231,7 @@ function print_table($title, $sql) {
 	global $email_body, $mysqli_link, $convertToUtf8 ;
 
 	$email_body .= "<h2>$title</h2>\n<table border='1'><tr><th>Username</th><th>Nom</th><th>Email</th></tr>\n" ;
-	print(date('Y-m-d H:i:s') . ": ($title) executing: $sql\n") ;
+	print(date('Y-m-d H:i:s') . ": ($title) executing: $sql\n") ; ob_flush() ;
 	$result = mysqli_query($mysqli_link, $sql) or die(date('Y-m-d H:i:s') . ": Erreur systeme lors de la lecture des profils: " . mysqli_error($mysqli_link)) ;
 	$n = 0 ;
 	while ($row = mysqli_fetch_array($result)) {
@@ -239,7 +242,7 @@ function print_table($title, $sql) {
 	}
 	mysqli_free_result($result) ;
 	$email_body .= "</table>\n$n ligne(s).<br/>\n" ;
-	print(date('Y-m-d H:i:s') . ": ($title) $n lines\n") ;
+	print(date('Y-m-d H:i:s') . ": ($title) $n lines\n") ; ob_flush() ;
 }
 
 $sql = "select *,u.name as full_name
@@ -300,6 +303,6 @@ if ($test_mode) {
 	smtp_mail($email_recipients, "Listes diverses", $email_body, $email_header) ;
 }
 
-print(date('Y-m-d H:i:s').": end of job.\n") ;
+print(date('Y-m-d H:i:s').": end of job.\n") ; ob_flush() ;
 journalise(0, "I", "End of monthly cron job (actions=$actions)") ;
 ?>
