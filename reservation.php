@@ -431,9 +431,9 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 		</td>
 <?php
 $result_news = mysqli_query($mysqli_link, "SELECT * FROM $table_news
-	WHERE n_stop > SYSDATE() and n_start <= SYSDATE()
+	WHERE n_stop >= SYSDATE() and n_start <= SYSDATE()
 	ORDER BY n_id desc
-	LIMIT 0,3") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
+	LIMIT 0,5") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
 
 if (mysqli_num_rows($result_news) or $userIsAdmin) {
 	print('<td class="hidden-phone" style="width: 25%;"><div id="newsDiv"><ul>') ;
