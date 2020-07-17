@@ -429,7 +429,8 @@ if (! $read_only) {
 <?php
 if ($me['avatar'] != '') {
 	print("<div class=\"row\">
-		<img src=\"$avatar_root_uri/$me[avatar]\" XXXclass=\"col-xs-12 col-sm-6 col-md-2\">
+		<img src=\"$avatar_root_uri/$me[avatar]\" class=\"col-xs-12 col-sm-6 col-md-2\">
+		<img src=\"https://www.gravatar.com/avatar/" . md5(strtolower(trim($me['email']))) . "?s=200&d=blank&r=pg\" class=\"col-xs-12 col-sm-6 col-md-2\">
 		</div> <!-- row -->\n") ;
 }
 if (! $read_only) {
