@@ -453,9 +453,12 @@ function showPilotDetails(id) {
 		document.getElementById("pilotDetailsImage").style.visibility = 'inherited' ;
 		document.getElementById("pilotDetailsImage").style.display = 'inline' ;
 	} else {
-		document.getElementById("pilotDetailsImage").src = '' ;
-		document.getElementById("pilotDetailsImage").style.visibility = 'none' ;
-		document.getElementById("pilotDetailsImage").style.display = 'none' ;
+		document.getElementById("pilotDetailsImage").src = 'https://www.gravatar.com/avatar/' + booking.gravatar + '?s=80&d=blank&r=pg' ;
+		document.getElementById("pilotDetailsImage").style.visibility = 'inherited' ;
+		document.getElementById("pilotDetailsImage").style.display = 'inline' ;
+//		document.getElementById("pilotDetailsImage").src = '' ;
+//		document.getElementById("pilotDetailsImage").style.visibility = 'none' ;
+//		document.getElementById("pilotDetailsImage").style.display = 'none' ;
 	}
 	if (booking.instructorId > 0) {
 		span.innerHTML += '<hr><b>' + booking.instructorName + "</b>" ;

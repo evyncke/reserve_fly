@@ -117,6 +117,7 @@ if ($error_message != '') {
 			$booking['bookedDate'] = str_replace('-', '/', $row['r_date']) ;  // Safari javascript does not like - in dates !!!
 			if ($userId > 0) {
 				$booking['email'] = $row['email'] ;
+				$booking['gravatar'] = md5(strtolower(trim($row['email']))) ; // Hash for gravatar
 				$booking['home_phone'] = $row['home_phone'] ;
 				$booking['work_phone'] = $row['work_phone'] ;
 				$booking['cell_phone'] = $row['cell_phone'] ;
