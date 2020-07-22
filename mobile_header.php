@@ -38,6 +38,8 @@ if ($userId <= 0 and isset($_SESSION['jom_id']) and is_numeric($_SESSION['jom_id
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<!-- Allow the swipe events on phones & tablets -->
+<script src="pure-swipe.js"></script>
 <script>
 var
 		runwaysQFU = [ <?php print(implode(', ', $runways_qfu)) ; ?> ],
