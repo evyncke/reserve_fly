@@ -186,9 +186,18 @@ if ($booking['instructor_name'] != '') {
 <?php
 if ($previous_id != '') {
 	print("<li class=\"previous\"><a href=\"$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth\">Ma r&eacute;servation pr&eacute;c&eacute;dente</a></li>\n") ;
+	print("<script>
+		// Swipe to change to previous booking
+		document.addEventListener('swiped-right', function(e) {location.href='$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth' ; }) ;
+		</script>\n") ;
+
 }
 if ($next_id != '') {
 	print("<li class=\"next\"><a href=\"$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth\">Ma r&eacute;servation suivante</a></li>\n") ;
+	print("<script>
+		// Swipe to change to next booking
+		document.addEventListener('swiped-left', function(e) {location.href='$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth' ; }) ;
+		</script>\n") ;
 } 
 ?>
 </ul>

@@ -149,6 +149,11 @@ ob_flush() ;
 
 if (strpos($actions, 'p') !== FALSE) {
 
+mysqli_close($mysqli_link) ; // Sometimes OVH times out ...
+$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
+if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
+if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
+
 // Reminder of incomplete profile
 //$joomla_admin_group = 7 ;
 //$joomla_pilot_group = 13 ;
@@ -222,6 +227,11 @@ print(date('Y-m-d H:i:s').": End of profile checks.\n") ; ob_flush() ;
 }
 
 if (strpos($actions, 'e') !== FALSE) {
+
+mysqli_close($mysqli_link) ; // Sometimes OVH times out ...
+$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
+if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
+if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
 
 print(date('Y-m-d H:i:s').": preparing lists of pilots/students/members.\n") ; ob_flush() ;
 

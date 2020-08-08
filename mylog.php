@@ -115,7 +115,7 @@ function ShowEntryCell($line, $action, $dom_id, $col_name, $default_value, $inpu
 	else {
 		print("<td><select class=\"logCellEntry\" id=\"$dom_id" . ucfirst($action). "\">\n") ;
 		print("<option value=\"0\"" . (($default_value == '0') ? ' selected' : '') . ">SELF</option>\n") ;
-		$result = mysqli_query($mysqli_link, "select jom_id, last_name from $table_person join $table_user_usergroup_map on jom_id = user_id
+		$result = mysqli_query($mysqli_link, "select jom_id, last_name from $table_person join jom_user_usergroup_map on jom_id = user_id
 			where group_id = $joomla_instructor_group
 			order by name") or print(mysqli_error($mysqli_link)) ;
 		while ($row = mysqli_fetch_array($result)) {

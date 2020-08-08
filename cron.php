@@ -102,9 +102,11 @@ while ($row = mysqli_fetch_array($result)) {
 	}
 	if ($row['r_pilot'] == $row['r_who'])
 		$email_subject = iconv_mime_encode('Subject',
+//			"Aéroport fermé, veuillez annuler la réservation de $row[r_plane] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
 			"Rappel de la réservation de $row[r_plane] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
 	else
 		$email_subject = iconv_mime_encode('Subject',
+//			"Aéroport fermé, veuillez annuler la réservation de $row[r_plane] par $booker[name] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
 			"Rappel de la réservation de $row[r_plane] par $booker[name] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
 	if ($email_subject === FALSE)
 		$email_subject = "Cannot iconv(pilot/$row[name])" ;
