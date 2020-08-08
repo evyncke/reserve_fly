@@ -74,7 +74,7 @@ $sql_date = date('Y-m-d', $displayTimestamp) ;
 
 <!-- Display previous / next -->
 <?php
-if ($userId > 0) { // Only members can see all booking
+if ($userId > 0) { // Only members can see all bookings
 ?>
 <div class="row">
 <ul class="pager col-xs-12">
@@ -82,6 +82,10 @@ if ($userId > 0) { // Only members can see all booking
 <li class="next"><a href="<?=$_SERVER[PHP_SELF] . '?time=' . ($displayTimestamp + 24 * 3600)?>">Jour suivant</a></li>
 </ul>
 </div> <!-- row -->
+<script>
+document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER[PHP_SELF] . '?time=' . ($displayTimestamp + 24 * 3600)?>' }) ;
+document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER[PHP_SELF] . '?time=' . ($displayTimestamp - 24 * 3600)?>' }) ;
+</script>
 <?php
 } // $userId > 0
 ?>

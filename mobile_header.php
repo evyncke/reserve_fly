@@ -39,7 +39,7 @@ if ($userId <= 0 and isset($_SESSION['jom_id']) and is_numeric($_SESSION['jom_id
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 <!-- Allow the swipe events on phones & tablets -->
-<script src="pure-swipe.js"></script>
+<script src="swiped-events.js"></script>
 <script>
 var
 		runwaysQFU = [ <?php print(implode(', ', $runways_qfu)) ; ?> ],
@@ -84,9 +84,15 @@ var
           <ul class="dropdown-menu">
             <!--li><a href="mobile.php">Ma prochaine</a></li-->
 <?php
-if ($userId > 0) {
+// Temporary COVID-19
+//if ($userId > 0) {
+if (($userId > 0) and ($userIsInstructor or $userIsMechanic)) {
 ?>
             <li><a href="mobile_book.php">Nouvelle réservation</a></li>
+<?php
+}
+if ($userId > 0) {
+?>
             <li><a href="mobile.php">Mes réservations</a></li>
 <?php
 }

@@ -170,11 +170,11 @@ if ($delete_pax) {
 
 if (isset($flight_id) and $flight_id != 0) {
 	$result = mysqli_query($mysqli_link, "SELECT * 
-			FROM $table_flight JOIN $table_pax_role ON pr_flight = f_id LEFT JOIN $table_pax ON pr_pax = p_id JOIN $table_person ON f_who_created = jom_id
+			FROM $table_flight JOIN $table_pax_role ON pr_flight = f_id LEFT JOIN $table_pax ON pr_pax = p_id LEFT JOIN $table_person ON f_who_created = jom_id
 			WHERE f_id = $flight_id and pr_role='C'")
 		or die("Cannot retrieve flight $flight_id: " . mysqli_error($mysqli_link)) ;
 	$row_flight = mysqli_fetch_array($result) ;
-	if (!$row_flight) die("Vol #$flight_id inconnu:") ;
+	if (!$row_flight) die("Vol #$flight_id inconnu!") ;
 //	print_r($row_flight) ;
 	mysqli_free_result($result) ;
 }
@@ -396,6 +396,7 @@ else
 <div id="menuAudit" class="tab-pane fade">
 
 <div class="row">
+<?php if (! isset($row_flight['first_name']) or $row_flight['first_name'] == '') $row_flight['first_name'] = 'client via la page web' ; ?>
 Ce vol a été créé le <?=$row_flight['f_date_created']?> par <?=db2web("$row_flight[first_name] $row_flight[last_name]")?>.<br/>
 <?php
 if ($row_flight['f_date_cancelled']) print("Puis a été annulé le $row_flight[f_date_cancelled].<br/>") ;

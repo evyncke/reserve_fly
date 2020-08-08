@@ -203,7 +203,7 @@ console.log('cancel_booking:' + XHR.responseText) ;
 			}
 		}
 	}
-	var requestUrl = "cancel_booking.php?id=" + id + "&auth=" + auth ;
+	var requestUrl = "cancel_booking.php?id=" + id + "&auth=" + auth + "&reason=mobile" ;
 console.log(requestUrl) ;
 	XHR.open("GET", requestUrl, false) ;
 	XHR.send(null) ;

@@ -24,6 +24,8 @@ require_once 'facebook.php' ;
 $cam = (isset($_REQUEST['cam'])) ? $_REQUEST['cam'] : '' ;
 if (! is_numeric($cam)) die("Invalid camera ID") ;
 if ($cam >= count($webcam_uris)) die("Invalid camera ID") ;
+$previous_cam = ($cam-1 < 0) ? count($webcam_uris) - 1 : $cam - 1 ;
+$next_cam = ($cam+1 >= count($webcam_uris)) ? 0 : $cam + 1 ;
 
 require_once 'mobile_header.php' ;
 
@@ -36,10 +38,13 @@ require_once 'mobile_header.php' ;
 <script>
 function refreshWebcam() {
 	document.getElementById('webcamImg').src = "<?=$webcam_uris[$cam]?>" + "?random=" + new Date().getTime() ;
-	console.log(document.getElementById('webcamImg').src) ;
 }
 refreshWebcam() ;
 setInterval(refreshWebcam, 1000 * 30) ; // Refresh every 30 seconds
+// Swipe to change to next webcam
+document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER[PHP_SELF] . '?cam=' . $previous_cam?>' }) ;
+document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER[PHP_SELF] . '?cam=' . $next_cam?>' }) ;
+
 </script>
 
 </div> <!-- container-->
