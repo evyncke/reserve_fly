@@ -22,8 +22,8 @@ require_once "dbi.php" ;
 require_once 'facebook.php' ;
 require_once 'fpdf.php';
 
-if (! ($userIsAdmin or $userIsInstructor))
-	die("Vous devez être instructeur ou administrateur pour utiliser cette page") ;
+if (! ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager))
+	die("Vous devez être pilote ou gestionnaire des vols découvertes ou instructeur ou administrateur pour utiliser cette page.") ;
 
 class PDF extends FPDF {
 // Column widths

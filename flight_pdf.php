@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ require_once 'facebook.php' ;
 require_once 'fpdf.php';
 //require_once 'mem_image.php' ;
 
-if (! ($userIsAdmin or $userIsInstructor))
-	die("Vous devez être instructeur ou administrateur pour utiliser cette page") ;
-
+if (! ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager))
+	die("Vous devez être pilote ou gestionnaire des vols découvertes ou instructeur ou administrateur pour utiliser cette page.") ;
+	
 $flight_id = (isset($_REQUEST['flight_id'])) ? trim($_REQUEST['flight_id']) : 0 ;
 if (!is_numeric($flight_id) or $flight_id <= 0) die("Invalid ID: $flight_id") ;
 
@@ -67,7 +67,7 @@ function NouveauChapitre($libelle) {
     // Couleur de fond
     $this->SetFillColor(200,220,255);
     // Titre
-    $this->CellUtf8(0,6,"$libelle",0,1,'C',true);
+    $this->MultiCellUtf8(0,6,"$libelle",0,1,'C',true);
     // Saut de ligne
     $this->Ln(4);
     $this->SetFont('Arial','',12);
@@ -164,10 +164,14 @@ function RecentBooking($plane, $userId, $delai_reservation) {
 	$row = mysqli_fetch_array($result) ;
 	if (! $row) {
 		mysqli_free_result($result) ;
-		return FALSE ;
+		$return_value->result = FALSE ;
+		$return_value->explanation = 'No booking found' ;
+		return $return_value ;
 	} else {
 		mysqli_free_result($result) ;
-		return "$plane $row[l_end] ($row[temps_dernier]<=$delai_reservation)" ;
+		$return_value->explanation = "$plane $row[l_end] $row[temps_dernier] days ago" ;
+		$return_value->result = ($row['temps_dernier'] <= $delai_reservation) ;
+		return $return_value ;
 	}
 }
 
@@ -193,6 +197,11 @@ mysqli_free_result($result) ;
 $scheduled_date = (isset($row_flight['f_date_scheduled']) and $row_flight['f_date_scheduled']) ? " $row_flight[f_date_scheduled]" : '' ;
 $flight_type = ($row_flight['f_type'] == 'D') ? 'découverte' : "d'initiation" ;
 
+// Get the circuit names
+$circuits = json_decode(file_get_contents("../voldecouverte/script/circuits.js"), true);
+$circuit_name = (isset($circuits[$row_flight['f_circuit']])) ? $circuits[$row_flight['f_circuit']] : "Circuit #$row_flight[f_circuit] inconnu" ;
+
+
 // Get information about booked plane
 if ($row_flight['r_plane']) {
 	$result_plane = mysqli_query($mysqli_link, "SELECT * FROM $table_planes WHERE id = '$row_flight[r_plane]' and ressource = 0")
@@ -206,20 +215,23 @@ if ($row_flight['r_plane']) {
 //
 $pdf->NouveauChapitre("Dossier sécurité pour le vol $flight_type $flight_id ($row_flight[p_lname]$scheduled_date)") ;
 
+$pdf->CellUtf8(0, 5, "Circuit: $circuit_name") ;
+$pdf->Ln() ;
+
 if ($row_flight['first_name'])
-	$pdf->CellUtf8(0, 5, "Pilote: " . db2web("$row_flight[first_name] $row_flight[last_name]")) ;
+	$pdf->CellUtf8(0, 5, "Pilote: " . db2web("$row_flight[first_name] $row_flight[last_name] ($row_flight[cell_phone] $row_flight[email])")) ;
 else
 	$pdf->CellUtf8(0, 5, "Pilote:") ;
 $pdf->Ln() ;
 
 if ($row_flight['r_plane'])
-	$pdf->CellUtf8(0, 5, "Avion: " . db2web("$row_flight[r_plane]")) ;
+	$pdf->CellUtf8(0, 5, "Avion: $row_flight[r_plane]") ;
 else
 	$pdf->CellUtf8(0, 5, "Avion: ") ;
 $pdf->Ln() ;
 
-if ($row_flight['f_date_scheduled'])
-	$pdf->CellUtf8(0, 5, "Début du vol (heure locale): " . db2web("$row_flight[f_date_scheduled]")) ;
+if ($row_flight['r_start'])
+	$pdf->CellUtf8(0, 5, "Début du vol (heure locale): $row_flight[r_start]") ;
 else
 	$pdf->CellUtf8(0, 5, "Ce vol n'est pas encore planifié.") ;
 $pdf->Ln(20) ;
@@ -227,11 +239,21 @@ $pdf->Ln(20) ;
 //
 // Check-list
 //
-$pdf->SetColumnsWidth(array(80, 80, 25)) ;
-$pdf->ImprovedTableHeader(array("Actions", "Information", "Checked")) ; 
+// o ET avoir effectué au moins 100 heures de vol en tant que PIC sur un avion de classe SEP, dont
+// 10 heures au cours des 12 derniers mois
+// o ET avoir effectué au moins 10 heures sur un aéronef du même type que celui utilisé pour le vol
+// découverte. Dans ce cadre, on distingue 4 types : C150-152 / C172 / C182 / PA18
+// o ET avoir effectué au moins 3 vols complets (atterrissages et décollages) en tant que PIC sur un
+// aéronef du même type au cours des 90 derniers jours.
+// o ET avoir la certification ELP.
+
+// Voire page 14 de https://drive.google.com/file/d/1XYZWORUndRYdqAqUmnbHWXKOB7IotbO4/view
+
+$pdf->SetColumnsWidth(array(60, 100, 15, 10)) ;
+$pdf->ImprovedTableHeader(array("Actions", "Information", "Chck", "Sig")) ; 
 if ($row_flight['f_pilot']) {
 	$licence_info = pilotLicence($row_flight['f_pilot']) ;
-	$pdf->ImprovedTableRow(array("Licence" , "$licence_info[name] (*)", (!$licence_info['checked']) ? '' : ($licence_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI' )) ;
+	$pdf->ImprovedTableRow(array("Licence" , "$licence_info[name] (*)", (!$licence_info['checked']) ? '' : ($licence_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
 	if ($row_flight['r_plane']) {
 		$result_booking = mysqli_query($mysqli_link, "select upper(id) as id, classe, delai_reservation
 			from $table_planes where ressource = 0
@@ -242,19 +264,19 @@ if ($row_flight['f_pilot']) {
 				$check_club = RecentBooking($row_flight['r_plane'], $row_flight['f_pilot'], $row_booking['delai_reservation']) ; // Only if recent flight !!!
 		}
 		mysqli_free_result($result_booking) ;
-		$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , $check_club,($check_club) ? 'OUI' : '')) ;
+		$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , $check_club->explanation,($check_club->result) ? 'OUI' : 'NON', '')) ;
 	} else // $row_flight['r_plane']
-		$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , "", "")) ;
+		$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , "", "", "")) ;
 	$flight_time_info = pilotFlightTimeInfo($row_flight['f_pilot']) ;
-	$pdf->ImprovedTableRow(array("Heures de vol sur l'année (PPL)" , $flight_time_info['hours'], ($flight_time_info['hours'] >= 10.0) ? "OUI" : "NON")) ;
+	$pdf->ImprovedTableRow(array("Heures de vol sur l'année (PPL)" , $flight_time_info['hours'], ($flight_time_info['hours'] >= 10.0) ? "OUI" : "NON", '')) ;
 } else {
-	$pdf->ImprovedTableRow(array("Licence" , '', '')) ;
-	$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , "", "")) ;
-	$pdf->ImprovedTableRow(array("Heures de vol sur l'année (PPL)" , '', '')) ;
+	$pdf->ImprovedTableRow(array("Licence" , '', '', '')) ;
+	$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , "", "", '')) ;
+	$pdf->ImprovedTableRow(array("Heures de vol sur l'année (PPL)" , '', '', '')) ;
 }
-$pdf->ImprovedTableRow(array("Repos observé" , "", "")) ;
-$pdf->ImprovedTableRow(array("Briefing passagers" , "", "")) ;
-$pdf->ImprovedTableRow(array("Masse et centrage" , (($row_flight['r_plane'])) ? "Voir page suivante" : "Avion non spécifié", "")) ;
+$pdf->ImprovedTableRow(array("Repos observé" , "", "", '')) ;
+$pdf->ImprovedTableRow(array("Briefing passagers" , "", "", '')) ;
+$pdf->ImprovedTableRow(array("Masse et centrage" , (($row_flight['r_plane'])) ? "Voir page suivante" : "Avion non spécifié", "", '')) ;
 if ($licence_info['checked']) {
 	$pdf->MultiCellUtf8(0, 8, "(*) $licence_info[name]: $licence_info[ident] jusqu'au $licence_info[expiration].") ;
 }
@@ -326,7 +348,8 @@ while ($row = mysqli_fetch_array($result)) {
 	switch ($row['item']) {
 		case 'Pilot':
 			$result_pilot = mysqli_query($mysqli_link, "SELECT * 
-				FROM $table_person JOIN $table_flights_pilots ON jom_id = p_id")
+				FROM $table_person JOIN $table_flights_pilots ON jom_id = p_id
+				WHERE $row_flight[f_pilot] = p_id")
 				or die("Cannot get pilot details: " . mysqli_error($mysqli_link)) ;
 			$row_pilot = mysqli_fetch_array($result_pilot) ;
 			$item_weight = round($row_pilot['p_weight'] * 2.20462, 2) ; // kg to lbs
@@ -379,6 +402,61 @@ $pdf->Image("https://www.spa-aviation.be/TippingPoint/scatter.php?tailnumber=1&t
 //
 $pdf->NouveauChapitre("Description du vol $flight_type $flight_id ($row_flight[p_lname]$scheduled)") ;
 $pdf->MulticellUtf8(0, 5, "La personne de contact pour ce vol est: $row_flight[p_fname] $row_flight[p_lname], numéro de téléphone: $row_flight[p_tel], email: $row_flight[p_email].") ;
+
+//
+// Responsability waivers
+//
+
+foreach($all_pax as $pax_row) {
+	if ($pax_row['p_age'] == 'A') { // For an adump
+		$pdf->NouveauChapitre("Décharge de " . db2web($pax_row['p_fname']) . " " . db2web($pax_row['p_lname']) . " pour le vol $flight_type $flight_id ($row_flight[p_lname]$scheduled)") ;
+		$pdf->CellUtf8(0, 30, "Je, soussigné:") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(30, 10 ) ;
+		$pdf->CellUtf8(0, 10, "nom: " . db2web($pax_row['p_lname'])) ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(30, 10 ) ;
+		$pdf->CellUtf8(0, 10, "prénom: " . db2web($pax_row['p_fname'])) ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(30, 10 ) ;
+		$pdf->CellUtf8(0, 10, "carte d'identité: ...............................................,") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(0, 10, "décharge le pilote et le club RAPCS ASBL de toute responsabilité en cas d’accident.") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(0, 30, "Fait à Spa, le _ _ / _ _ / 2 0 _ _") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(0, 60, "(signature)", 0, 1, 'C') ;
+	} else { // For a minor or children
+		$pdf->NouveauChapitre("Autorisation et décharge de " . db2web($pax_row['p_fname']) . " " . db2web($pax_row['p_lname']) . " pour le vol $flight_type $flight_id ($row_flight[p_lname]$scheduled)") ;
+		$pdf->CellUtf8(0, 30, "Je, soussigné:") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(30, 10 ) ;
+		$pdf->CellUtf8(0, 10, "nom: ..................................................................................................................................") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(30, 10 ) ;
+		$pdf->CellUtf8(0, 10, "prénom: ...............................................................................................................................") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(30, 10 ) ;
+		$pdf->CellUtf8(0, 10, "adresse: ..............................................................................................................................") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(30, 10 ) ;
+		$pdf->CellUtf8(0, 10, "........................................................................................................................................") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(0, 10, "Pour un(e) mineur d'âge (biffer les mentions inutiles);") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(30, 10 ) ;
+		$pdf->CellUtf8(0, 10, "* exerçant l'autorité parentale en tant que : PÈRE – MÈRE – TUTEUR – TUTRICE") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(30, 10 ) ;
+		$pdf->CellUtf8(0, 10, "* autorise MON FILS - MA FILLE (". db2web($pax_row['p_lname']) . " " . db2web($pax_row['p_fname']) .") à participer à ce vol") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(0, 10, "et je décharge le pilote et le club RAPCS ASBL de toute responsabilité en cas d’accident.") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(0, 30, "Fait à Spa, le _ _ / _ _ / 2 0 _ _") ;
+		$pdf->Ln() ;
+		$pdf->CellUtf8(0, 60, "(signature)", 0, 1, 'C') ;
+	}
+}
 
 $pdf->Output();
 

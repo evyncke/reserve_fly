@@ -16,6 +16,14 @@
 
 */
 require_once 'flight_header.php' ;
+if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'delete' and isset($_REQUEST['flight_id']) and is_numeric($_REQUEST['flight_id'])) {
+	$flight_id = trim($_REQUEST['flight_id']) ;
+	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
+	$result = mysqli_query($mysqli_link, "UPDATE $table_flight SET f_date_cancelled = SYSDATE() WHERE f_id = $flight_id")
+		or die("Cannot cancel flight $flight_id: " . mysqli_error($mysqli_link)) ;
+	journalise($userId, "W", "Flight $flight_id cancelled") ;
+
+}
 ?>
 
 <div class="page-header hidden-xs">
@@ -28,10 +36,11 @@ require_once 'flight_header.php' ;
 
 <table class="table table-striped table-responsive">
 <thead>
-<tr><th>Créé le</th><th>Type</th><th>Contact</th><th>Description</th></tr>
+<tr><th>Créé le</th><th>Type</th><th>Circuit</th><th>Dates</th><th>Heures</th><th>Contact</th><th>Description</th></tr>
 </thead>
 <tbody>
 <?php
+$circuits = json_decode(file_get_contents("../voldecouverte/script/circuits.js"), true);
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flight JOIN $table_pax_role ON f_id = pr_flight JOIN $table_pax ON pr_pax = p_id 
 	WHERE pr_role = 'C' and f_date_cancelled IS NULL and f_pilot IS NULL ORDER BY f_id ASC") 
 	or die("Impossible de lister les vols: " . mysqli_error($mysqli_link));
@@ -40,9 +49,14 @@ while ($row = mysqli_fetch_array($result)) {
 	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : "" ; 
 	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-pencil\"></span></a> " ;
 	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-print\"></span></a> " ;
+	$cancel =  " <a href=\"flight_home.php?action=delete&flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-trash\"></span></a> " ;
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
+	if ($row['f_type'] == 'D')
+		$circuit_name = (isset($circuits[$row['f_circuit']])) ? $circuits[$row['f_circuit']] : "Circuit #$row[f_circuit] inconnu" ;
+	else
+		$circuit_name = '' ;
 	$description = db2web($row['f_description']) ;
-	print("<tr><td>$edit$print$row[f_date_created]</td><td>$type</td><td>$row[p_fname] <b>$row[p_lname]$email$telephone</b></td><td>$description</td></tr>\n") ;
+	print("<tr><td>$edit$print$cancel$row[f_date_created]</td><td>$type</td><td>$circuit_name</td><td>$row[f_date_1]<br/>$row[f_date_2]</td><td>$row[f_schedule]</td><td>$row[p_fname] <b>$row[p_lname]$email$telephone</b></td><td>$description</td></tr>\n") ;
 }
 ?>
 </tbody>
@@ -61,7 +75,7 @@ while ($row = mysqli_fetch_array($result)) {
 $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today 
 	FROM $table_flight JOIN $table_pax_role ON f_id = pr_flight JOIN $table_pax ON pr_pax = p_id
 	JOIN $table_bookings AS b ON f_booking = b.r_id JOIN $table_person on f_pilot = jom_id
-	WHERE pr_role = 'C' AND f_pilot = $userId AND DATE(b.r_start) = CURDATE()
+	WHERE pr_role = 'C' AND DATE(b.r_start) = CURDATE()
 	ORDER BY f_id DESC") 
 	or die("Impossible de lister les vols: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
