@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
-if (! ($userIsAdmin or $userIsInstructor))
-	die("Vous devez être instructeur ou administrateur pour utiliser cette page") ;
+if (! ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager))
+	die("Vous devez être pilote ou gestionnaire des vols découvertes ou instructeur ou administrateur pour utiliser cette page.") ;
 ?>
 <html>
 <head>
@@ -66,7 +66,7 @@ var
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>                        
       </button>
-      <a class="navbar-brand" href="#">Vols découvertes/initiations</a>
+      <a class="navbar-brand" href="flight_home.php">Vols découvertes/initiations <span style="color:red; font-weight: bold; font-style: italic;">EN TEST !!!</span></a>
     </div><!-- navbar-header -->
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">

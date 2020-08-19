@@ -55,6 +55,9 @@ include 'Mail.php';
 	$joomla_instructor_group = 14 ;
 	$joomla_instructor_group2 = 15 ;
 	$joomla_mechanic_group = 17 ;
+	$joomla_flight_group = 21 ;
+	$joomla_flight_pilot_group = 19 ;
+	$joomla_flight_manager_group = 20 ;
 
 	// Get information from Joomla
 	define( '_JEXEC', 1 );
@@ -74,10 +77,11 @@ include 'Mail.php';
 
 
 function CheckJoomlaUser($joomla_user) {
-	global $userIsPilot, $userIsAdmin, $userIsInstructor, $userIsMechanic,$userIsStudent ;
+	global $userIsPilot, $userIsAdmin, $userIsInstructor, $userIsMechanic,$userIsStudent, $userIsFlightPilot, $userIsFlightManager ;
 	global $userName, $userFullName, $userId ;
 	global $joomla_member_group, $joomla_admin_group, $joomla_sysadmin_group, $joomla_superuser_group ;
 	global $joomla_pilot_group, $joomla_student_group, $joomla_instructor_group, $joomla_instructor_group2, $joomla_mechanic_group ;
+	global $joomla_flight_group, $joomla_flight_pilot_group, $joomla_flight_manager_group ;
 
 	// And now use this information
 	if ($joomla_user->guest) {
@@ -89,6 +93,7 @@ function CheckJoomlaUser($joomla_user) {
 		$userFullName = $joomla_user->name ;
 		$userName = $joomla_user->username ;
 		$joomla_user->setLastVisit() ;
+//		if ($userId == 62) { $userId = 66 ; print("Forcing userId = $userId") ; }
 
 	}
 	
@@ -101,6 +106,8 @@ function CheckJoomlaUser($joomla_user) {
 	$userIsInstructor = array_key_exists($joomla_instructor_group, $joomla_groups) ;
 	$userIsMechanic = array_key_exists($joomla_mechanic_group, $joomla_groups) ;
 	$userIsStudent = array_key_exists($joomla_student_group, $joomla_groups) ;
+	$userIsFlightPilot = array_key_exists($joomla_flight_pilot_group, $joomla_groups) ;
+	$userIsFlightManager = array_key_exists($joomla_flight_manager_group, $joomla_groups) ;
 	// Session
 }
 
