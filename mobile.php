@@ -112,6 +112,18 @@ if (isset($result) and $result) {
 <div class="container">
 
 <?php
+if ($userId <= 0 and isset($_REQUEST['logout'])) {
+?>
+<br/><br/><br/><br/><br/>
+<div class="row text-center">
+	<div class="col-xs-12 col-md-6 jumbotron vertical-center" style="background-color: lightblue;">
+		Vous êtes maintenant déconnecté(e).<br/>Utilisez le bouton "Se connecter" en haut à droite.
+	</div>
+</div>
+<?php
+exit ;
+} # if ($userId <= 0 and logout)
+
 if ($userId <= 0) {
 ?>
 <br/><br/><br/><br/><br/>
