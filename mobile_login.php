@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013 Eric Vyncke
+   Copyright 2013-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@
 // $_SERVER[SERVER_NAME] www.spa-aviation.be ou resa.spa-aviation.be
 // $_SERVER[PHP_SELF] /resa/mobile_login.php ou /mobile_login.php
 
-ob_start("ob_gzhandler");
+// Start the session
+session_start(['cookie_lifetime' => 86400, 'cookie_httponly' => TRUE]) ;
 
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
@@ -44,7 +45,6 @@ if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
 		die("Cannot login, wrong username/password combination") ;
 	$_SESSION['jom_id'] = $row['id'] ;
 	header("Location: https://resa.spa-aviation.be/mobile.php?news") ;
-//	header("Location: https://www.spa-aviation.be/resa/mobile.php?news") ;
 	journalise($row['id'], 'I', "$username is connected on the mobile web.") ;
 	exit() ;
 }
