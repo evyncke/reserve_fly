@@ -98,6 +98,10 @@ if ($userId > 0) {
 }
 ?>
             <li><a href="mobile_today.php">Réservations de ce jour</a></li>
+<?php
+	if ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager)
+		print("<li><a href=\"flight_home.php\">Vols découvertes (!!! TEST !!!)</a></li>\n") ;
+?>
           </ul>
         </li>
         <li class="dropdown">
