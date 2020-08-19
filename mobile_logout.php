@@ -16,8 +16,6 @@
 
 */
 
-ob_start("ob_gzhandler");
-
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
@@ -25,9 +23,11 @@ require_once 'facebook.php' ;
 session_start() ;
 unset($_SESSION['fb_access_token']);
 unset($_SESSION['jom_id']);
+session_unset();
+session_destroy();
 
-header("Location: https://www.spa-aviation.be/resa/mobile.php") ;
-journalise($userId, 'I', "$userFullName is disconnected from the mobile web") ;
+	header("Location: https://resa.spa-aviation.be/mobile.php?logout") ;
+journalise($userId, 'I', "$username is disconnected from the mobile web") ;
 
 exit() ;
 
