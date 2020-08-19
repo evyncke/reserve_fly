@@ -518,7 +518,7 @@ if (mysqli_num_rows($result_customer)) {
 	print("Client: <select id=\"customerSelect\">
 		<option value=\"-1\"> - aucun - </option>\n") ;
 	while ($row_customer = mysqli_fetch_array($result_customer)) {
-			print("<option value=\"$row_customer[f_id]\">" . db2web("$row_customer[p_fname] $row_customer[p_lname]") . "</option>\n") ;
+			print("<option value=\"$row_customer[f_id]\">" . db2web("$row_customer[p_fname] $row_customer[p_lname] (IF)") . "</option>\n") ;
 	}
 	mysqli_free_result($result_customer) ;
 	print("</select><br/>\n") ;
