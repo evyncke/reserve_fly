@@ -200,7 +200,7 @@ if (isset($flight_id) and $flight_id != 0) {
 </div><!-- page header -->
 
 <ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#menuContact">Contact</a></li>
+  <li class="active"><a data-toggle="tab" href="#menuContact">Résumé</a></li>
   <li><a data-toggle="tab" href="#menuPassenger">Passagers</a></li>
   <li><a data-toggle="tab" href="#menuPilot">Pilote</a></li>
   <li><a data-toggle="tab" href="#menuPlane">Avion</a></li>
