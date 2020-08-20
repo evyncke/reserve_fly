@@ -18,6 +18,8 @@
 
 //ob_start("ob_gzhandler");
 
+session_start(['cookie_lifetime' => 86400, 'cookie_httponly' => TRUE]) ;
+
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
