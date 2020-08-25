@@ -66,8 +66,8 @@ if ($create or $modify) {
 	$circuit = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['selectedCircuit'])) ;
 	if (!is_numeric($circuit)) die("Invalid circuit: $circuit") ;
 	$schedule = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['selectedSchedule'])) ;
-	$date1 = date('Y-m-d', strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date1'])))) ;
-	$date2 = date('Y-m-d', strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date2'])))) ;
+	$date1 = (trim($_REQUEST['date1']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date1'])))) : 'NULL';
+	$date2 = (trim($_REQUEST['date2']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date2'])))) : 'NULL';
 	$birthdate = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['birthdate'])) ;
 	$comment = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['comment'])) ;
 }
@@ -78,7 +78,7 @@ if ($create) {
 		or die("Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
 	$pax_id = mysqli_insert_id($mysqli_link) ; 
 	mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_pilot) 
-		VALUES(SYSDATE(), $userId, '$flight_type', $pax_cnt, $circuit, '$schedule', '$date1', '$date2', '" . web2db($comment) . "', NULL)")
+		VALUES(SYSDATE(), $userId, '$flight_type', $pax_cnt, $circuit, '$schedule', $date1, $date2, '" . web2db($comment) . "', NULL)")
 		or die("Cannot add flight, system error: " . mysqli_error($mysqli_link)) ;
 	$flight_id = mysqli_insert_id($mysqli_link) ; 
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax_role(pr_flight, pr_pax, pr_role)
@@ -104,7 +104,7 @@ if ($modify) {
 			WHERE p_id = $pax_id")
 		or die("Cannot modify contact, system error: " . mysqli_error($mysqli_link)) ;
 	mysqli_query($mysqli_link, "UPDATE $table_flight 
-		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = '$date1', f_date_2 = '$date2', f_schedule = '$schedule', f_description='" . web2db($comment) . "'
+		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "'
 		WHERE f_id = $flight_id")
 		or die("Cannot modify flight, system error: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "W", "Flight $flight_id modified") ;
