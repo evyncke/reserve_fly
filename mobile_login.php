@@ -25,6 +25,8 @@
 // $_SERVER[PHP_SELF] /resa/mobile_login.php ou /mobile_login.php
 
 // Start the session
+
+session_name('RAPCSSID') ;
 session_start(['cookie_lifetime' => 86400, 'cookie_httponly' => TRUE]) ;
 
 require_once "dbi.php" ;

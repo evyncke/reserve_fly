@@ -15,7 +15,7 @@
    limitations under the License.
 
 */
-
+session_name('RAPCSSID') ;
 session_start(['cookie_lifetime' => 86400, 'cookie_httponly' => TRUE]) ;
 
 if ($userId <= 0 and isset($_SESSION['jom_id']) and is_numeric($_SESSION['jom_id'])) {
