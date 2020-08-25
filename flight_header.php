@@ -18,6 +18,7 @@
 
 //ob_start("ob_gzhandler");
 
+session_name('RAPCSSID') ;
 session_start(['cookie_lifetime' => 86400, 'cookie_httponly' => TRUE]) ;
 
 require_once "dbi.php" ;
@@ -60,7 +61,7 @@ var
 </head>
 <body>
 
-<nav class="navbar navbar-inverse">
+<nav class="navbar navbar-inverse bg-light navbar-light">
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">

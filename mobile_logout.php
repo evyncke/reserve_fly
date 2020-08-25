@@ -19,7 +19,7 @@
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
-
+session_name('RAPCSSID') ;
 session_start() ;
 unset($_SESSION['fb_access_token']);
 unset($_SESSION['jom_id']);
