@@ -23,8 +23,9 @@ $assign_pilot = (isset($_REQUEST['assign_pilot']) and $_REQUEST['assign_pilot'] 
 $add_pax = (isset($_REQUEST['add_pax']) and $_REQUEST['add_pax'] != '') ? TRUE : FALSE ;
 $delete_pax = (isset($_REQUEST['delete_pax']) and $_REQUEST['delete_pax'] != '') ? TRUE : FALSE ;
 $modify_pax = (isset($_REQUEST['modify_pax']) and $_REQUEST['modify_pax'] != '') ? TRUE : FALSE ;
+$link_to = (isset($_REQUEST['link_to']) and $_REQUEST['link_to'] != '') ? $_REQUEST['link_to'] : FALSE ;
 $flight_id = (isset($_REQUEST['flight_id'])) ? trim($_REQUEST['flight_id']) : 0 ;
-if (!is_numeric($flight_id)) die("Invalid ID: $flight_id") ;
+if (!is_numeric($flight_id) and $flight_id != '') die("Invalid ID: $flight_id") ;
 $title = ($flight_id) ? "Modification d'une réservation de vol" : "Création d'une réservation de vol" ;
 // TODO be ready to pre-load when asking for modification/cancellation
 // and of course add 'modify' 'cancel' button
@@ -183,6 +184,14 @@ if ($delete_pax) {
 		mysqli_query($mysqli_link, "DELETE FROM $table_pax WHERE p_id = $pax_id")
 			or die("Cannot delete passenger detail: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "I", "Passenger $pax_id deleted from flight $flight_id") ;
+}
+
+if ($link_to) {
+	if (! is_numeric($link_to))
+		die("Numéro de réservation invalide $link_to") ;
+	mysqli_query($mysqli_link, "UPDATE $table_flight SET f_booking=$link_to WHERE f_id=$flight_id")
+		or die("Impossible de mettre à jour le vol: " . mysqli_error($mysqli_link)) ;
+	journalise($userId, "I", "Flight $flight_id is linked to booking $link_to") ;
 }
 
 if (isset($flight_id) and $flight_id != 0) {
@@ -470,7 +479,7 @@ function show_reservation($date, $header) {
 		</div><!-- row -->\n" ) ;
 	print("<div class=\"row\">
 		<table class=\"col-sm-12 table table-responsive table-striped\">
-		<tr><th>De</th><th>A</th><th>Avion</th><th>Pilote</th><th>Commentaire</th></tr>\n") ;
+		<tr><th>De</th><th>A</th><th>Avion</th><th>Pilote</th><th>Commentaire</th><th>Action</th></tr>\n") ;
 	$sql_date = date('Y-m-d') ;
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.cell_phone as icell_phone, i.jom_id as iid,
 		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.cell_phone as pcell_phone, pi.jom_id as pid
@@ -493,7 +502,8 @@ function show_reservation($date, $header) {
 		if (strpos($row['r_stop'], $date) === 0) 
 			$row['r_stop'] = substr($row['r_stop'], 11) ;
 		print("<tr$class><td>$row[r_start]</td><td>$row[r_stop]</td><td>$row[r_plane]</td><td><span class=\"hidden-xs\">" . db2web($row['pfirst_name']) . " </span><b>" . 
-			db2web($row['plast_name']) . "</b>$ptelephone$instructor</td><td>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
+			db2web($row['plast_name']) . "</b>$ptelephone$instructor</td><td>". nl2br(db2web($row['r_comment'])) . "</td>
+			<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&link_to=$row[r_id]\"><span class=\"glyphicon glyphicon-link\"></span></a></td></tr>\n") ;
 	}
 	print("</table>
 	</div><!-- row -->\n" ) ;
