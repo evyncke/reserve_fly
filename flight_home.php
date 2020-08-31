@@ -31,7 +31,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'delete' and isset($_R
 </div><!-- page header -->
 
 <div class="page-header hidden-xs">
-<h4>Vols à assigner</h4>
+<h4>Vols futurs à assigner</h4>
 </div><!-- page header -->
 
 <table class="table table-striped table-responsive">
@@ -42,7 +42,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'delete' and isset($_R
 <?php
 $circuits = json_decode(file_get_contents("../voldecouverte/script/circuits.js"), true);
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flight JOIN $table_pax_role ON f_id = pr_flight JOIN $table_pax ON pr_pax = p_id 
-	WHERE pr_role = 'C' and f_date_cancelled IS NULL and f_pilot IS NULL ORDER BY f_id ASC") 
+	WHERE pr_role = 'C' AND f_date_cancelled IS NULL AND f_pilot IS NULL AND (f_date_1 >= CURRENT_DATE() or f_date_2 >= CURRENT_DATE())
+	ORDER BY f_id ASC") 
 	or die("Impossible de lister les vols: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
 	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"glyphicon glyphicon-envelope\"></span></a>" : "" ; 
