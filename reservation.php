@@ -197,7 +197,7 @@ while ($row = mysqli_fetch_array($result)) {
 		" \"classe\": \"$row[classe]\", \"sous_controle\": " . (($row['sous_controle'] == 0) ? 'false' : 'true') . "}") ;
 }
 ob_flush() ;
-// Now process ther ressources (rooms, ...)
+// Now process the ressources (rooms, ...)
 $result = mysqli_query($mysqli_link, "SELECT id, sous_controle, commentaire, actif, photo, ressource
 	FROM $table_planes
 	WHERE ressource <> 0
