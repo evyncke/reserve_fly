@@ -119,7 +119,7 @@ $sql = "select r_plane, count(l_id), min(l_start_hour), max(l_end_hour), max(l_e
 	where p.actif != 0 and p.ressource = 0 and r_cancel_date is null and r_start > date_sub(sysdate(), interval 1 month) and r_type != " . BOOKING_MAINTENANCE . "
 	group by r_plane" ;
 
-print_plane_table("Entr&eacute;es dans les carnets de route du dernier mois", $sql, ['Avion', 'Nbr de vols', 'D&eacute;but', 'Fin', 'Minutes moteur']) ;
+print_plane_table("Entr&eacute;es dans les carnets de route informatiques du dernier mois", $sql, ['Avion', 'Nbr de vols', 'D&eacute;but', 'Fin', 'Minutes moteur']) ;
 }
 
 if (strpos($actions, 'm') !== FALSE) {
@@ -146,6 +146,7 @@ if ($test_mode) {
 } else
 	@smtp_mail($email_recipients, "Statistiques sur l'utilisation des avions", $email_body, $email_header) ;
 ob_flush() ;
+journalise(0, 'I', "Cron-monthly: statistics email sent") ;
 
 if (strpos($actions, 'p') !== FALSE) {
 
@@ -224,6 +225,7 @@ while ($row = mysqli_fetch_array($result)) {
 }
 mysqli_free_result($result) ;
 print(date('Y-m-d H:i:s').": End of profile checks.\n") ; ob_flush() ;
+journalise(0, 'I', "Cron-monthly: email reminders for missing profiles sent") ;
 }
 
 if (strpos($actions, 'e') !== FALSE) {
@@ -245,9 +247,9 @@ function print_table($title, $sql) {
 	$result = mysqli_query($mysqli_link, $sql) or die(date('Y-m-d H:i:s') . ": Erreur systeme lors de la lecture des profils: " . mysqli_error($mysqli_link)) ;
 	$n = 0 ;
 	while ($row = mysqli_fetch_array($result)) {
-		$row['name'] = db2web($row['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+		$row['full_name'] = db2web($row['full_name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		$row['username'] = db2web($row['username']) ; // SQL DB is latin1 and the rest is in UTF-8
-		$email_body .= "<tr><td>$row[username]</td><td>$row[name]</td><td>$row[email]</td></tr>\n" ;
+		$email_body .= "<tr><td>$row[username]</td><td>$row[full_name]</td><td>$row[email]</td></tr>\n" ;
 		$n ++ ;
 	}
 	mysqli_free_result($result) ;
@@ -261,6 +263,23 @@ $sql = "select *,u.name as full_name
 		where u.id = m.user_id and m.group_id in ($joomla_admin_group, $joomla_pilot_group, $joomla_student_group, $joomla_instructor_group))
 	order by name" ; 
 print_table("Utilisateurs qui ne sont ni pilotes ni &eacute;l&egrave;ves", $sql) ;
+
+
+$sql = "select *,concat(u.name, ' - ', count(*), ' vol(s)') as full_name
+	from $table_users u join $table_bookings b on b.r_pilot = u.id
+	where u.block = 0 and b.r_start > date_sub(sysdate(), interval 1 month) and b.r_stop < sysdate() and b.r_cancel_date is null
+		and not exists (select * from $table_logbook l
+				where l.l_booking = b.r_id)
+	group by username
+	order by full_name" ; 
+print_table("Pilotes/&eacute;l&egrave;ves sans aucune entr&eacute;e dans les carnets de routes des avions ce dernier mois", $sql) ;
+
+$sql = "select *,u.name as full_name
+	from $table_users u join $table_person p on u.id = p.jom_id
+	where u.block = 0 and (p.cell_phone is null or p.cell_phone = '') and exists (select * from $table_user_usergroup_map m
+		where u.id = m.user_id and m.group_id in ($joomla_admin_group, $joomla_pilot_group, $joomla_student_group, $joomla_instructor_group)) 
+	order by full_name" ; 
+print_table("Utilisateurs sans num&eacute;ro de mobile", $sql) ;
 
 $sql = "select *,u.name as full_name
 	from $table_users u 
@@ -298,6 +317,21 @@ $sql = "select *,u.name as full_name
 	order by name" ; 
 print_table("Administrateurs syst&egrave;me du site (webmaster@spa-aviation.be)", $sql) ;
 
+$sql = "select *,u.name as full_name
+	from $table_users u 
+	where block = 0 and exists (select * from $table_user_usergroup_map m
+		where u.id = m.user_id and m.group_id in ($joomla_flight_pilot_group)) 
+	order by name" ; 
+print_table("Pilotes pour les vols d&eacute;couverte", $sql) ;
+
+
+$sql = "select *,u.name as full_name
+	from $table_users u 
+	where block = 0 and exists (select * from $table_user_usergroup_map m
+		where u.id = m.user_id and m.group_id in ($joomla_flight_manager_group)) 
+	order by name" ; 
+print_table("Gestionnaires des vols d&eacute;couverte", $sql) ;
+
 $email_header = "From: $managerName <$smtp_from>\r\n" ;
 $email_header .= "To: info@spa-aviation.be, ca@spa-aviation.be\r\n" ;
 $email_header .= "Cc: fis@spa-aviation.be, webmaster@spa-aviation.be\r\n" ;
@@ -311,6 +345,7 @@ if ($test_mode) {
 	smtp_mail("eric.vyncke@ulg.ac.be", "Listes diverses (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 } else
 	smtp_mail($email_recipients, "Listes diverses", $email_body, $email_header) ;
+journalise(0, "I", "Cron-monthly: misc lists sent") ;
 }
 
 print(date('Y-m-d H:i:s').": end of job.\n") ; ob_flush() ;
