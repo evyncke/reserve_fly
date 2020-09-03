@@ -49,17 +49,17 @@ td {text-align: center; border-left: 1px solid gray ; border-bottom: 1px dotted 
 <h1>Echéances des avions</h1>
 <table border="1" class="logTable">
 <thead>
-<tr><th>Plane</th> <th>Last</th> <th colspan="3">Inspections</th>        <th colspan="2">Time limit</th> <th colspan="3">Circ. Equip 4 ed5</th>    <th>&lt; 30 days</th>            <th>Mag.</th> <th>Pesage</th></tr>
-<tr><th></th>      <th></th>     <th>50h</th><th>100h</th><th>200h</th>  <th>Eng</th><th>Prop</th>       <th>ATC</th><th>Enc.</th><th>Alti</th>    <th>CN</th>                      <th>500h</th> <th>10 y </th></tr>
+<tr><th>Plane</th> <th>Last mechanics /</th> <th colspan="3">Inspections</th>        <th colspan="2">Time limit</th> <th colspan="3">Circ. Equip 4 ed5</th>    <th>&lt; 30 days</th>            <th>Mag.</th> <th>Pesage</th></tr>
+<tr><th>     </th> <th>pilots          </th> <th>50h</th><th>100h</th><th>200h</th>  <th>Eng</th><th>Prop</th>       <th>ATC</th><th>Enc.</th><th>Alti</th>    <th>CN</th>                      <th>500h</th> <th>10 y </th></tr>
 </thead>
 <tbody>
 <?php
 function GenCell($value) {
-	global $current_value ;
+	global $current_value, $current_value_pilot ;
 	
-	if ($value - 5 < $current_value)
+	if ($value - 5 < $current_value or $value - 5 < $current_value_pilot)
 		return "<td class=\"red\">$value</td>" ;
-	if ($value - 10 < $current_value)
+	if ($value - 10 < $current_value or $value - 10 < $current_value_pilot)
 		return "<td class=\"orange\">$value</td>" ;
 	return "<td>$value</td>" ;
 }
@@ -68,7 +68,15 @@ $result = mysqli_query($mysqli_link, "SELECT * from $table_planes WHERE ressourc
 	or die("Cannot read $tables_planes: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
 	$current_value = $row['compteur'] ;
-	print("<tr><td>" . strtoupper($row['id']) . "</td><td>$row[compteur]</td>") ;
+	$index_column = ($row['compteur_vol'] == 0) ? 'l_end_hour' : 'l_flight_end_hour' ;
+	$result2 = mysqli_query($mysqli_link, "select $index_column as compteur_pilote, l_end as compteur_pilote_date, concat(first_name, ' ', last_name) as compteur_pilote_nom 
+		from $table_logbook  l join $table_bookings r on l_booking = r_id join $table_person p on jom_id = if(l_audit_who <= 0, if(l_instructor is null, l_pilot, l_instructor), l_audit_who)
+		where l_plane = '$row[id]' and l_booking is not null and l_end_hour > 0
+		order by compteur_pilote_date desc limit 0,1")
+		or die("Cannot get pilote engine time:" . mysqli_error($mysqli_link)) ;
+	$row2 = mysqli_fetch_array($result2) ;
+	$current_value_pilot = $row2['compteur_pilote'] ;
+	print("<tr><td><a href=\"plane_chart.php?id=$row[id]\">" . strtoupper($row['id']) . "</a></td><td>$current_value / <br/>$current_value_pilot</td>") ;
 	// Type_entretien... human encoding :-( 50h, 50h->200h, 100h
 	if (stripos($row['type_entretien'], '50h') === 0)
 		print("". GenCell($row['entretien']) . "<td></td><td></td>") ;
