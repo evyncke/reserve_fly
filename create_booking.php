@@ -146,19 +146,22 @@ $message .= "</ul>\n" ;
 	}
 }
 
-$message="<p>De manière expérimentale, chaque réservation est vérifiée quant aux règles du re-check RAPCS.<p>
-	<p><i>Pour l'instant, le pilote ne voit pas cet email: c'est un test. Corrections et améliorations à eric@vyncke.org ;-)</i></p>
-	<p>Vérification de $plane (de type $plane_row[classe]) pour $userFullName ($userId), commentaire de la réservation: <i>$comment</i>.</p>\n" ;
-
 // TODO
 // Check validity...
 
-// More checks on user
-if ($plane_row['ressource'] == 0 and ! ($userIsMechanic or $userIsInstructor or $instructor_id != "NULL")) {
+// More checks on user when booking a plane and flying solo even when booked by an instructor COVID-19
+// More checks on user when booking a plane and booked by an non-instructor/mechanic
+journalise($userId, "D", "Check club: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot_id") ;
+
+if ($plane_row['ressource'] == 0 and ! ($userIsMechanic /* or $userIsInstructor */ or $instructor_id != "NULL")) {
 //if (false) {
+	$message = "<p>De manière expérimentale, chaque réservation est vérifiée quant aux règles du re-check RAPCS.<p>
+		<p><i>Pour l'instant, le pilote ne voit pas cet email: c'est un test. Corrections et améliorations à eric@vyncke.org ;-)</i></p>
+		<p>Vérification de $plane (de type $plane_row[classe]) pour $userFullName ($userId), commentaire de la réservation: <i>$comment</i>.</p>\n" ;
+
 	// Check all validity ratings
 	$result = mysqli_query($mysqli_link, "select *,datediff(sysdate(), expire_date) as delta
-		from $table_validity_type t left join $table_validity v on validity_type_id = t.id and jom_id = $userId")
+		from $table_validity_type t left join $table_validity v on validity_type_id = t.id and jom_id = $pilot_id")
 		or die("Erreur systeme lors de la lecture de vos validites: " . mysqli_error($mysqli_link)) ;
 	$userValidities = array() ;
 	while ($row = mysqli_fetch_array($result)) {
@@ -166,7 +169,7 @@ if ($plane_row['ressource'] == 0 and ! ($userIsMechanic or $userIsInstructor or 
 	}
 	mysqli_free_result($result) ;
 	// Not too distant reservation?
-	$reservation_permise = RecentBooking($plane, $userId, $plane_row['delai_reservation']) ;
+	$reservation_permise = RecentBooking($plane, /*$userId*/ $pilot_id, $plane_row['delai_reservation']) ;
 	mysqli_free_result($result) ;
 	if (!$reservation_permise) {
 $message .= "<p><span style='color: blue;'>Aucune entrée récente dans le logbook pour $plane, regardons l'historique...</span></p>\n" ;
@@ -185,13 +188,17 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 		mysqli_free_result($result) ;
 	}
 	$message .= '</p>' ;
-	$email_header = "From: $managerName <$smtp_from>\r\n" ;
 	if (!$reservation_permise) {
+		journalise($pilot_id, "W", "Check club: Cette réservation pour $plane devrait être refusée...") ;
 		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
+		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		$email_header .= "To: $fleetName <$fleetEmail>\r\n" ;
 		@smtp_mail($fleetEmail, substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $userFullName"), 9), $message, $email_header) ;
-	}
-} // End of checks for normal pilot
+	} else
+		journalise($pilot_id, "W", "Check club: Cette réservation pour $plane est autoriséeÒ") ;
+
+} else // End of checks for normal pilot 
+	journalise($pilot_id, "D", "Check club is not required") ;
  
 // Check whether this period overlaps with other ones
 // TODO should give more information about other reservations => do not count(*) but mysqli_num_rows()
