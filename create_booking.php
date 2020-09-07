@@ -71,12 +71,17 @@ if ($end_date <= $start_date) $response['error'] .= "La fin doit &ecirc;tre apr&
 // Check on user ids
 if ($userId == 0) $response['error'] .= "Vous devez &ecirc;tre connect&eacute; pour faire une r&eacute;servation.<br/>" ;
 if ($booking_type == BOOKING_MAINTENANCE) {
-	if (! ($userIsMechanic or $userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit de mettre en maintenance.<br/>" ;
+	if (! ($userIsMechanic or $userIsInstructor or $userIsAdmin)) 
+		$response['error'] .= "Vous n'avez pas le droit de mettre en maintenance.<br/>" ;
 } else {
 	if ($pilot_id != $userId) {
-		if (! ($userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation pour un autre pilote.<br/>" ;
+		// Temporary COVID-19
+		//if (! ($userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation pour un autre pilote.<br/>" ;
+		if (! ($userIsInstructor)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation pour un autre pilote.<br/>" ;
 	} else {
-		if (! ($userIsPilot or $userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation.<br/>" ;
+		// Temporary COVID-19
+		// if (! ($userIsPilot or $userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation.<br/>" ;
+		if (! ($userIsInstructor)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation.<br/>" ;
 	}
 }
 
@@ -104,14 +109,36 @@ elseif ($plane_row['ressource'] != 0 and !($userIsAdmin || $userIsInstructor))
 	$response['error'] .= "Cette ressource ($plane) n'est disponible que pour les instructeurs, r&eacute;servation non effectu&eacute;e...<br/>" ;
 mysqli_free_result($result) ;
 
-function RecentBooking($plane, $userId, $delai_reservation) {
+// Get information about pilot
+$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $pilot_id") ;
+$pilot = mysqli_fetch_array($result) ;
+$pilot['name'] = db2web($pilot['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+// If instructor is on board, then get information about instructor
+if ($instructor_id != 'NULL') {
+	$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $instructor_id") ;
+	$instructor = mysqli_fetch_array($result) ;
+	$instructor['name'] = db2web($instructor['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+}
+// Get information about booker
+$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $userId") ;
+$booker = mysqli_fetch_array($result) ;
+$booker_quality = 'pilote' ;
+if ($useIsInstructeur)
+	$booker_quality = 'instructeur' ;
+elseif ($useIsMechanic)
+	$booker_quality = 'm&eacute;cano' ;
+elseif ($useIsAdmin)
+	$booker_quality = 'administrateur web' ;
+$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+
+function RecentBooking($plane, $pilotId, $delai_reservation) {
 	global $mysqli_link, $table_logbook, $table_bookings ;
 	global $message ;
 
 $message .= "<ul>\n" ;
 	// First: only look entries with a relevant 'carnet de route' (linked to a booking)
 	$result = mysqli_query($mysqli_link, "select l_end, datediff(sysdate(), l_end) as temps_dernier from $table_logbook l join $table_bookings r on l_booking = r_id
-		where r_plane = '$plane' and (r_pilot = $userId or (r_instructor is not null and r_instructor = $userId)) and l_booking is not null
+		where r_plane = '$plane' and (r_pilot = $pilotId or (r_instructor is not null and r_instructor = $pilotId)) and l_booking is not null
 		order by l_end desc") or die("Cannot get last reservation: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
 	if (! $row) {
@@ -130,7 +157,7 @@ $message .= "</ul>\n" ;
 	$plane_alt = str_replace('-', '', $plane) ; // alternate form of plane ID with the '-'
 	$result = mysqli_query($mysqli_link, "select l_end, datediff(sysdate(), l_end) as temps_dernier 
 		from $table_logbook l
-		where (l_plane = '$plane' or l_plane = '$plane_alt') and (l_pilot = $userId or (l_instructor is not null and l_instructor = $userId))
+		where (l_plane = '$plane' or l_plane = '$plane_alt') and (l_pilot = $pilotId or (l_instructor is not null and l_instructor = $pilotId))
 		order by l_end desc") or die("Cannot get last reservation in pilot logbook: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
 	if (! $row) {
@@ -151,7 +178,7 @@ $message .= "</ul>\n" ;
 
 // More checks on user when booking a plane and flying solo even when booked by an instructor COVID-19
 // More checks on user when booking a plane and booked by an non-instructor/mechanic
-journalise($userId, "D", "Check club: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot_id") ;
+journalise($userId, "D", "Check club: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot[name]/$pilot_id") ;
 
 if ($plane_row['ressource'] == 0 and ! ($userIsMechanic /* or $userIsInstructor */ or $instructor_id != "NULL")) {
 //if (false) {
@@ -181,7 +208,7 @@ $message .= "<p><span style='color: blue;'>Aucune entrée récente dans le logbo
 			if ($row['id'] == $plane_row['id']) continue ;
 $message .= "Vérification de $row[id] (type $row[classe]): \n" ;
 			if (planeClassIsMember($plane_row['classe'], $row['classe']))
-				$reservation_permise = RecentBooking($row['id'], $userId, $plane_row['delai_reservation']) ; // Only if recent flight !!!
+				$reservation_permise = RecentBooking($row['id'], /*$userId*/ $pilot_id, $plane_row['delai_reservation']) ; // Only if recent flight !!!
 			else
 $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour le type $plane_row[classe].</i><br/>\n" ;
 		}
@@ -189,14 +216,18 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 	}
 	$message .= '</p>' ;
 	if (!$reservation_permise) {
-		journalise($pilot_id, "W", "Check club: Cette réservation pour $plane devrait être refusée...") ;
+		journalise($pilot_id, "W", "Check club: Cette réservation pour $plane  devrait être refusée...") ;
 		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		$email_header .= "To: $fleetName <$fleetEmail>\r\n" ;
-		@smtp_mail($fleetEmail, substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $userFullName"), 9), $message, $email_header) ;
-	} else
-		journalise($pilot_id, "W", "Check club: Cette réservation pour $plane est autoriséeÒ") ;
-
+//		@smtp_mail($fleetEmail, substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
+		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
+	} else {
+		journalise($pilot_id, "W", "Check club: Cette réservation pour $plane est autorisée") ;
+		$email_header = "From: $managerName <$smtp_from>\r\n" ;
+		$email_header .= "To: <evyncke@cisco.com>\r\n" ;
+		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane autorisée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
+	}
 } else // End of checks for normal pilot 
 	journalise($pilot_id, "D", "Check club is not required") ;
  
@@ -236,27 +267,6 @@ if ($response['error'] == '') {
 			mysqli_query($mysqli_link, "UPDATE $table_flights SET f_booking = $booking_id, f_date_scheduled = SYSDATE() WHERE f_id = $customer_id")
 				or die("Cannot update flight: " . mysqli_error($mysqli_link)) ;
 		}
-		// Get information abour pilot
-		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $pilot_id") ;
-		$pilot = mysqli_fetch_array($result) ;
-		$pilot['name'] = db2web($pilot['name']) ; // SQL DB is latin1 and the rest is in UTF-8
-		// If instructor is on board, then get information about instructor
-		if ($instructor_id != 'NULL') {
-			$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $instructor_id") ;
-			$instructor = mysqli_fetch_array($result) ;
-			$instructor['name'] = db2web($instructor['name']) ; // SQL DB is latin1 and the rest is in UTF-8
-		}
-		// Get information about booker
-		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $userId") ;
-		$booker = mysqli_fetch_array($result) ;
-		$booker_quality = 'pilote' ;
-		if ($useIsInstructeur)
-			$booker_quality = 'instructeur' ;
-		elseif ($useIsMechanic)
-			$booker_quality = 'm&eacute;cano' ;
-		elseif ($useIsAdmin)
-			$booker_quality = 'administrateur web' ;
-		$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		if ($booking_type == BOOKING_MAINTENANCE) {
 			$response['message'] = "La maintenance de $plane du $start au $end: est confirm&eacute;e" ;
 			$email_subject = "Subject: Confirmation de la mise en maintenance de $plane par $booker[name] [#$booking_id]" ;
