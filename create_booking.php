@@ -178,13 +178,13 @@ $message .= "</ul>\n" ;
 
 // More checks on user when booking a plane and flying solo even when booked by an instructor COVID-19
 // More checks on user when booking a plane and booked by an non-instructor/mechanic
-journalise($userId, "D", "Check club: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot[name]/$pilot_id") ;
+//journalise($userId, "D", "Check club: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot[name]/$pilot_id") ;
 
 if ($plane_row['ressource'] == 0 and ! ($userIsMechanic /* or $userIsInstructor */ or $instructor_id != "NULL")) {
 //if (false) {
 	$message = "<p>De manière expérimentale, chaque réservation est vérifiée quant aux règles du re-check RAPCS.<p>
 		<p><i>Pour l'instant, le pilote ne voit pas cet email: c'est un test. Corrections et améliorations à eric@vyncke.org ;-)</i></p>
-		<p>Vérification de $plane (de type $plane_row[classe]) pour $userFullName ($userId), commentaire de la réservation: <i>$comment</i>.</p>\n" ;
+		<p>Vérification de $plane (de type $plane_row[classe]) par $userFullName/$userId pour $pilot[name]/$pilot_id, commentaire de la réservation: <i>$comment</i>.</p>\n" ;
 
 	// Check all validity ratings
 	$result = mysqli_query($mysqli_link, "select *,datediff(sysdate(), expire_date) as delta
@@ -216,14 +216,14 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 	}
 	$message .= '</p>' ;
 	if (!$reservation_permise) {
-		journalise($pilot_id, "W", "Check club: Cette réservation pour $plane  devrait être refusée...") ;
+		journalise($pilot_id, "E", "Check club: Cette réservation pour $plane devrait être refusée...") ;
 		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		$email_header .= "To: $fleetName <$fleetEmail>\r\n" ;
-//		@smtp_mail($fleetEmail, substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
-		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
+		@smtp_mail($fleetEmail, substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
+//		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
 	} else {
-		journalise($pilot_id, "W", "Check club: Cette réservation pour $plane est autorisée") ;
+		journalise($pilot_id, "I", "Check club: Cette réservation pour $plane est autorisée") ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		$email_header .= "To: <evyncke@cisco.com>\r\n" ;
 		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane autorisée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
