@@ -39,15 +39,17 @@ $date = "$year-$month-$day" ;
 if ($error_message != '') {
 	$bookings['errorMessage'] = $error_message ;
 } else {
-	$result = mysqli_query($mysqli_link, "select r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
-		convert(r_comment using utf8) as r_comment, r_from, r_via1, r_via2, r_to, r_duration, r_crew_wanted, r_pax_wanted,
-		p.username as username, p.name as name, w.username as username2, w.name as name2,
-		p.email as email, home_phone, work_phone, cell_phone, avatar, ressource, r.id as plane_id
-		from $table_bookings join $table_planes as r on r_plane = r.id join $table_users as p on r_pilot = p.id join jom_kunena_users k on k.userid = r_pilot,
-		$table_users as w, $table_person
-		where r_plane = '$plane' and date(r_start) <= '$date' and '$date' <= date(r_stop) and
-		r_who = w.id and jom_id = p.id and r_cancel_date is null
-		order by r_plane, r_start") ;
+	$result = mysqli_query($mysqli_link, "SELECT r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
+		CONVERT(r_comment USING UTF8) AS r_comment, r_from, r_via1, r_via2, r_to, r_duration, r_crew_wanted, r_pax_wanted,
+		p.username as username, p.name as name, w.username AS username2, w.name AS name2,
+		p.email as email, home_phone, work_phone, cell_phone, avatar, ressource, r.id AS plane_id,
+		l_start as log_start, l_end as log_end
+		FROM $table_bookings JOIN $table_planes AS r ON r_plane = r.id JOIN $table_users AS p ON r_pilot = p.id JOIN jom_kunena_users k ON k.userid = r_pilot
+		LEFT JOIN $table_logbook AS l ON l.l_booking = r_id,
+		$table_users AS w, $table_person
+		WHERE r_plane = '$plane' AND DATE(r_start) <= '$date' AND '$date' <= DATE(r_stop) AND
+		r_who = w.id AND jom_id = p.id AND r_cancel_date IS NULL
+		ORDER BY r_plane, r_start") ;
 	if ($result)  {
 		while ($row = mysqli_fetch_array($result)) {
 			$booking = array() ;
@@ -56,7 +58,7 @@ if ($error_message != '') {
 			if ($row['ressource'] == 0) // Normal plane
 				$booking['plane'] = $row['r_plane'] ; // This one is in upper-case matching the javascript case
 			else
-				$booking['plane'] = $row['plane_id'] ; // This one is capitzalized
+				$booking['plane'] = $row['plane_id'] ; // This one is capitalized
 			$booking['start'] = str_replace('-', '/', $row['r_start']) ; // Safari javascript does not like - in dates !!!
 			$booking['end'] = str_replace('-', '/', $row['r_stop']) ; // Safari javascript does not like - in dates !!!
 			$booking['user'] = $row['r_pilot'] ;
@@ -126,6 +128,9 @@ if ($error_message != '') {
 				elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
 					$booking['avatar'] = $avatar_root_uri . '/' . $row['avatar'] ;
 			}
+			// Now the logbook entries (often empty...) TODO multiple log entries per booking :(
+			$booking['log_start'] = str_replace('-', '/', $row['log_start']) ;  // Safari javascript does not like - in dates !!!
+			$booking['log_end'] = str_replace('-', '/', $row['log_end']) ;  // Safari javascript does not like - in dates !!!
 			// To allow asynchronous AJAX calls, we need to pass back an argument...
 			if ($_REQUEST['arg'] != '') $booking['arg'] = $_REQUEST['arg'] ;
 			// Be paranoid and prevent XSS
