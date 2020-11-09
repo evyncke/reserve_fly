@@ -734,8 +734,12 @@ function displayBookingDetails(id) {
 	span.innerHTML += '<br/>' ;
 	if (booking.instructorId != -1)
 		span.innerHTML += 'Instructeur vol: ' + booking.instructorName + '<br/>' ;
-	span.innerHTML += 'Du: ' + booking.start + ", " ;
+	span.innerHTML += 'R&eacute;servation du: ' + booking.start + ", " ;
 	span.innerHTML += '&agrave;: ' + booking.end + " <i>(" + booking.duration + " heure(s) de vol)</i><br/>" ;
+	if (booking.log_start != '') {
+		span.innerHTML += 'Carnet de route: ' + booking.log_start + ", " ;
+		span.innerHTML += '&agrave;: ' + booking.log_end + '<br/>'  ;
+	}
 	if (booking.type == bookingTypeMaintenance) 
 		span.innerHTML += '<span style="color: red;">Maintenance</span><br/>' ;
 	else if (booking.from != '' || booking.to != '') {
@@ -1540,8 +1544,13 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 	var workDate, startDate, endDate, nameDisplayed = false, firstColumn, widthInColumn ;
 	var thisCell ;
 
-	startDate = new Date(booking.start) ;
-	endDate = new Date(booking.end) ;
+	if (booking.log_end) { // Let's use the actual / logged time
+		startDate = new Date(booking.log_start) ;
+		endDate = new Date(booking.log_end) ;
+	} else { // If not logged, then use the booking time
+		startDate = new Date(booking.start) ;
+		endDate = new Date(booking.end) ;
+	}
 	for (var i = 1, hour = planningStartHour, minute = 0 ; i < columnCount ; i ++, minute += 15) {
 		if (minute >= 60) {
 			minute = 0 ;
@@ -1558,9 +1567,11 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 					thisCell.className = 'customer' ;
 				else if (booking.type == bookingTypeOnHold)
 					thisCell.className = 'onhold' ;
-				else
-					thisCell.className = (booking.user == userId || booking.instructorId == userId) ? 'booked2_by_me' :
-						(booking.instructorId > 0) ? 'booked2_dc' : 'booked2' ;
+				else if ((booking.ressource == 0) && (!booking.log_end) && isInThePast(displayYear, displayMonth, displayDay, hour))
+							thisCell.className = 'nolog' ;
+						else
+							thisCell.className = (booking.user == userId || booking.instructorId == userId) ? 'booked2_by_me' :
+								(booking.instructorId > 0) ? 'booked2_dc' :'booked2' ;
 			} else { // Name not yet displayed, need to display some more information
 				nameDisplayed = true ;
 				firstColumn = i ;
@@ -1575,9 +1586,11 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 					thisCell.innerHTML = booking.name ;
 					if (booking.type == bookingTypeOnHold)
 						thisCell.className = 'onhold' 
-					else
-						thisCell.className = (booking.user == userId || booking.instructorId == userId) ? 'booked_by_me' :
-							(booking.instructorId > 0) ? 'booked_dc' :'booked' ;
+					else if ((booking.ressource == 0) && (!booking.log_end) && isInThePast(displayYear, displayMonth, displayDay, hour))
+							thisCell.className = 'nolog' ;
+						else
+							thisCell.className = (booking.user == userId || booking.instructorId == userId) ? 'booked_by_me' :
+								(booking.instructorId > 0) ? 'booked_dc' :'booked' ;
 				}
 			}
 			thisCell.onmouseenter = function () { displayBookingDetails(booking.id) ; } ;
