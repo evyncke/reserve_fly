@@ -600,6 +600,7 @@ if ($userIsInstructor) {
 <button id="cancelPilotHealthButton" onclick="javascript:document.getElementById('reasonTextArea').value='Santé pilote';cancelBooking(true);">Santé pilote</button>
 <button id="cancelWeatherButton" onclick="javascript:document.getElementById('reasonTextArea').value='Météo';cancelBooking(true);">Conditions météo</button>
 <button id="cancelADClosedButton" onclick="javascript:document.getElementById('reasonTextArea').value='Aéroport fermé';cancelBooking(true);">Aéroport fermé</button><br/>
+<button id="cancelCOVIDButton" onclick="javascript:document.getElementById('reasonTextArea').value='Mesures COVID-19';cancelBooking(true);">Mesures COVID-19</button><br/>
 <button id="confirmCancelBookingButton" onclick="javascript:cancelBooking(true);">Confirmer l'annulation</button>
 <button onclick="javascript:hideCancelBookingDetails();">Fermer la fen&ecirc;tre</button>
 </center>
