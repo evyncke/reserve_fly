@@ -220,7 +220,8 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		$email_header .= "To: $fleetName <$fleetEmail>\r\n" ;
-		@smtp_mail($fleetEmail, substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
+		$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>\r\n" ;
+		@smtp_mail($fleetEmail, substr(iconv_mime_encode('Subject',"Réservation $plane devrait être refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
 //		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
 	} else {
 		journalise($pilot_id, "I", "Check club: Cette réservation pour $plane est autorisée") ;
