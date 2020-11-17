@@ -296,16 +296,16 @@ function displayMETAR() {
 	var elem = document.getElementById('reservationDetails') ;
 	
 	timeNow = new Date().getTime() ; // in msec
-	console.log("Start of displayMETAR(), timeNow=" + timeNow + ", metarTime=" + metarTime) ;
-	console.trace() ;
+//	console.log("Start of displayMETAR(), timeNow=" + timeNow + ", metarTime=" + metarTime) ;
+//	console.trace() ;
 	if (metarTime < 0) { // Another request is pending
-		console.log("End of displayMETAR() aborting as another request is pending") ;
+//		console.log("End of displayMETAR() aborting as another request is pending") ;
 		return ;
 	}
 	if (timeNow < metarTime + 1000 * 60) { // Allow the caching for 1 minute
 		elem.innerHTML = metarHTML ;
 		elem.style.backgroundColor = metarBackgroundColor ;
-		console.log("End of displayMETAR() re-using cache") ;
+//		console.log("End of displayMETAR() re-using cache") ;
 		return ;
 	}
 // TODO as this is asynchronous...
@@ -405,7 +405,7 @@ function displayMETAR() {
 //	XHR.open("GET", requestUrl, false) ; // We need to be have a synchronous request else METAR competes with detailed booking information :-(
 	// TODO try/catch to handle exceptions
 	XHR.send(null) ;
-	console.log("End of displayMETAR()") ;
+//	console.log("End of displayMETAR()") ;
 }
 
 function airportChanged(elem) {
@@ -1551,6 +1551,7 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 		startDate = new Date(booking.start) ;
 		endDate = new Date(booking.end) ;
 	}
+	now = new Date() ;
 	for (var i = 1, hour = planningStartHour, minute = 0 ; i < columnCount ; i ++, minute += 15) {
 		if (minute >= 60) {
 			minute = 0 ;
@@ -1567,12 +1568,28 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 					thisCell.className = 'customer' ;
 				else if (booking.type == bookingTypeOnHold)
 					thisCell.className = 'onhold' ;
-				else if ((booking.ressource == 0) && (!booking.log_end) && isInThePast(displayYear, displayMonth, displayDay, hour))
+// !!! compare to REAL time and not simply workDate (the running cursor...)
+//				else if ((booking.ressource == 0) && (!booking.log_end) && (+booking.end < +now))
+//				else if ((booking.ressource == 0) && (!booking.log_end) && (booking.end <= workDate))
+//				else if ((booking.ressource == 0) && (!booking.log_end) && isInThePast(displayYear, displayMonth, displayDay, hour))
+//				else if ((booking.ressource == 0) && (!booking.log_end) && isInThePast(displayYear, displayMonth, displayDay, hour) && (booking.end <= workDate))
+				else if ((booking.ressource == 0) && (!booking.log_end) && (endDate <= now))
+{
 							thisCell.className = 'nolog' ;
-						else
+console.log('Nolog at workDate: ' + workDate + ', booking.end: '  + new Date(booking.end) + ', isInThePast: ' + isInThePast(displayYear, displayMonth, displayDay, hour) + ',  (endDate <= now): ' +  (endDate <= now) + ', Now: ' + now) ;
+}						else
+{
 							thisCell.className = (booking.user == userId || booking.instructorId == userId) ? 'booked2_by_me' :
 								(booking.instructorId > 0) ? 'booked2_dc' :'booked2' ;
+console.log('Booked at workDate: ' + workDate + ', booking.end: '  + new Date(booking.end) + ', isInThePast: ' + isInThePast(displayYear, displayMonth, displayDay, hour) + ',  (endDate <= now): ' +  (endDate <= now) + ', Now: ' + now) ;
+}
 			} else { // Name not yet displayed, need to display some more information
+console.log('booking.log_end=' + booking.log_end + ', booking.end=' + booking.end + ', endDate=' + endDate) ;
+console.log('now=' + now) ;
+if (endDate <= now)
+console.log("   endDate <= now ") ;
+else
+console.log("   endDate > now ") ;
 				nameDisplayed = true ;
 				firstColumn = i ;
 				widthInColumn = 1 ;
@@ -1586,7 +1603,7 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 					thisCell.innerHTML = booking.name ;
 					if (booking.type == bookingTypeOnHold)
 						thisCell.className = 'onhold' 
-					else if ((booking.ressource == 0) && (!booking.log_end) && isInThePast(displayYear, displayMonth, displayDay, hour))
+					else if ((booking.ressource == 0) && (!booking.log_end) && (endDate <= now))
 							thisCell.className = 'nolog' ;
 						else
 							thisCell.className = (booking.user == userId || booking.instructorId == userId) ? 'booked_by_me' :
