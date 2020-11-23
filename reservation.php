@@ -563,16 +563,21 @@ règles d'emport de passagers et les autres règles du club définies dans
 </span><!-- flightInfo2Span -->
 <center>
 <?php
-if ($userIsMechanic || $userIsInstructor || $userIsAdmin) {
+if ($userIsMechanic || $userIsInstructor) {
 	print('<button id="addMaintenanceButton" onclick="javascript:confirmBooking(false);">Immobiliser pour maintenance</button><br/>' . "\n") ;
 	print('<button id="cancelMaintenanceButton" onclick="javascript:cancelBooking(false);">Annuler la maintenance</button><br/>' . "\n") ;
 }
-if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin) {
+// Temporary for COVID-19
+//if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin) {
+if ($userIsMechanic || $userIsInstructor) {
 	print('<button id="addBookingButton" onclick="javascript:confirmBooking(true);">Je respecte les conditions et r&eacute;serve</button>' . "\n") ;
-	print('<button id="cancelBookingButton" onclick="javascript:confirmCancelBooking();">Annuler la r&eacute;servation</button>' . "\n") ;
+//	print('<button id="cancelBookingButton" onclick="javascript:confirmCancelBooking();">Annuler la r&eacute;servation</button>' . "\n") ;
 	print('<button id="modifyBookingButton" onclick="javascript:modifyBooking(true);">Modifier la r&eacute;servation</button>' . "\n") ;
 	print('<button id="engineHoursButton" onclick="javascript:engineHoursClicked();">Enregistrer les heures moteur</button>' . "\n") ;
 }
+// COVID-19, moved outside of the previous if
+if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin)
+	print('<button id="cancelBookingButton" onclick="javascript:confirmCancelBooking();">Annuler la r&eacute;servation</button>' . "\n") ;
 ?>
 <button onclick="javascript:hideEditBookingDetails();">Fermer la fen&ecirc;tre</button>
 </center>

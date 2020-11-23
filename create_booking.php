@@ -145,7 +145,7 @@ $message .= "<ul>\n" ;
 $message .= "<li>Aucune entr&eacute;e dans le carnet de routes de l'avion $plane pour ce pilote.</li>\n" ;
 		mysqli_free_result($result) ;
 	} else {
-$message .= "<li>Entrée dans le carnet de routes de l'avion $plane pour ce pilote, la dernière réservation date de $row[temps_dernier] jours et la limite club réservation: $delai_reservation jours.</li>\n" ;
+$message .= "<li>Entrée dans le carnet de routes de l'avion $plane pour ce pilote, le dernier vol date de $row[temps_dernier] jours et la limite club réservation: $delai_reservation jours.</li>\n" ;
 		mysqli_free_result($result) ;
 		if ($delai_reservation >= $row['temps_dernier']) {
 $message .= "</ul>\n" ;
@@ -166,7 +166,7 @@ $message .= "<li>Aucune entr&eacute;e dans le logbook du pilote pour $plane.</li
 $message .= "</ul>\n" ;
 		return FALSE ;
 	} else {
-$message .= "<li>Entrée dans le logbook du pilote pour $plane, la dernière réservation date de $row[temps_dernier] jours et la limite club réservation: $delai_reservation jours.</li>\n" ;
+$message .= "<li>Entrée dans le logbook du pilote pour $plane, le dernier vol date de $row[temps_dernier] jours et la limite club réservation: $delai_reservation jours.</li>\n" ;
 		mysqli_free_result($result) ;
 $message .= "</ul>\n" ;
 		return $delai_reservation >= $row['temps_dernier'] ;
@@ -180,11 +180,13 @@ $message .= "</ul>\n" ;
 // More checks on user when booking a plane and booked by an non-instructor/mechanic
 //journalise($userId, "D", "Check club: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot[name]/$pilot_id") ;
 
-if ($plane_row['ressource'] == 0 and ! ($userIsMechanic /* or $userIsInstructor */ or $instructor_id != "NULL")) {
+if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BOOKING_MAINTENANCE) /* or $userIsInstructor */ or $instructor_id != "NULL")) {
 //if (false) {
-	$message = "<p>De manière expérimentale, chaque réservation est vérifiée quant aux règles du re-check RAPCS.<p>
-		<p><i>Pour l'instant, le pilote ne voit pas cet email: c'est un test. Corrections et améliorations à eric@vyncke.org ;-)</i></p>
-		<p>Vérification de $plane (de type $plane_row[classe]) par $userFullName/$userId pour $pilot[name]/$pilot_id, commentaire de la réservation: <i>$comment</i>.</p>\n" ;
+	$message = "<p>De manière expérimentale, chaque réservation est vérifiée quant au ROI à propos du re-check RAPCS.<p>
+		<p><i>Ce message est envoyé au pilote, aux instructeurs et aux gestionnaires de la flotte. Corrections et améliorations à eric@vyncke.org ;-)</i></p>
+		<p>Vérification de la réservation de $plane (de type $plane_row[classe]) effectuée par $userFullName/$userId pour $pilot[name]/$pilot_id." ;
+	if ($comment != '')
+		$message .= " Commentaire de la réservation: <i>$comment</i>.</p>\n" ;
 
 	// Check all validity ratings
 	$result = mysqli_query($mysqli_link, "select *,datediff(sysdate(), expire_date) as delta
