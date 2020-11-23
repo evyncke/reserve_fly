@@ -157,7 +157,7 @@ while ($row = mysqli_fetch_array($result)) {
 }
 
 // Reminder after start to enter engine time
-print(date('Y-m-d H:i:s').": start of log book reminder(s).\n") ;
+print(date('Y-m-d H:i:s').": start of log book reminder before the flight(s).\n") ;
 
 $engine_reminders = 0 ;
 $sql ="select *,u.name as full_name
@@ -200,7 +200,7 @@ while ($row = mysqli_fetch_array($result)) {
 		"<a href=\"https://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> " .
 		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu " .
 		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle " .
-		"r&eacute;servation du pass&eacute; afin de mettre &agrave; le carnet de route et vos heures. " .
+		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures. " .
 		"<br/><br/>Si le temps vous manque, ou si vous n'avez pas acc&egrave;s &agrave; un PC, pri&egrave;re d'adresser un SMS au <a href=\"tel:+32496547748\">+32.496.54.77.48</a> avec le temps moteur " .
 		" et l'immatriculation de l'avion <i>Ex: $row[r_plane] 3999.45</i>" .
 		"<hr>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!\n" ;
@@ -229,10 +229,97 @@ while ($row = mysqli_fetch_array($result)) {
 	else
 		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 	$engine_reminders ++ ;
-	print(date('Y-m-d H:i:s').": engine reminder sent by email to $email_recipients.\n") ;
+	print(date('Y-m-d H:i:s').": before flight engine reminder sent by email to $email_recipients.\n") ;
 }
-print(date('Y-m-d H:i:s').": total of $engine_reminder engine reminders sent.\n") ;
+print(date('Y-m-d H:i:s').": total of $engine_reminders engine reminders sent.\n") ;
 
+if (date('G') == 6) { // Send reminders _AFTER_ the flight, once a day in early morning
+// Reminder after start to enter engine time
+print(date('Y-m-d H:i:s').": start of log book reminder(s) after 7 days after the flight(s).\n") ;
+
+$engine_reminders = 0 ;
+$sql ="SELECT *,u.name AS full_name
+FROM $table_bookings b JOIN $table_users u ON b.r_pilot = u.id JOIN $table_planes a ON r_plane = a.id
+LEFT JOIN $table_logbook AS l ON l.l_booking = r_id, $table_person p
+WHERE a.actif = 1 AND a.ressource = 0 AND p.jom_id = u.id AND DATE_SUB(SYSDATE(), INTERVAL 7 DAY) <= r_start
+AND r_start <= DATE_SUB(SYSDATE(), INTERVAL 1 DAY) AND r_cancel_date IS NULL AND l.l_start IS NULL" ;
+print(date('Y-m-d H:i:s').": running $sql.\n") ;
+$result = mysqli_query($mysqli_link, $sql)
+	or die(date('Y-m-d H:i:s').": cannot find current bookings without any logs, " . mysqli_error($mysqli_link)) ;
+$today = date('Y-m-d') ;
+while ($row = mysqli_fetch_array($result)) {
+	$booking_id = $row['r_id'] ;
+	if ($debug) print(date('Y-m-d H:i:s').": processing booking $booking_id from $row[r_start] on $row[r_plane] for $row[full_name].\n") ;
+	if ($row['r_type'] == BOOKING_MAINTENANCE) {
+		if ($debug) print(date('Y-m-d H:i:s').": ignoring booking $booking_id as it is a maintenance.\n") ;
+		continue ;
+	}
+	$auth = md5($booking_id . $shared_secret) ;
+	$row['full_name'] = db2web($row['full_name']) ; // SQL DB is latin1 and the rest is in UTF-8
+	$row['first_name'] = db2web($row['first_name']) ; // SQL DB is latin1 and the rest is in UTF-8
+	if ($row['first_name'] == '') $row['first_name'] = '<i>[Votre profil est incomplet et votre pr&eacute;nom est inconnu]</i>' ;
+	$row['r_comment'] = db2web($row['r_comment']) ; // SQL DB is latin1 and the rest is in UTF-8
+	$result_booker = mysqli_query($mysqli_link, "select name, email from $table_users where id = $row[r_who]") 
+		or journalise($row['r_who'], 'E', "Cannot find user $row[r_rwho] in $table_users: " . mysqli_error($mysqli_link)) ;
+	$booker = mysqli_fetch_array($result_booker) ;
+	$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+	$email_subject = iconv_mime_encode('Subject',
+		"Rappel: entrer les heures moteur de votre vol sur $row[r_plane] du $row[r_start] [#$booking_id]", $mime_preferences) ;
+	if ($email_subject === FALSE)
+		$email_subject = "Cannot iconv(pilot/$row[name])" ;
+	$email_message = "<p>$row[first_name],</p>" ;
+	$email_message .= "<p>Il est important que tous les pilotes et &eacute;l&egrave;ves respectent le r&egrave;glement d'ordre int&eacute;rieur du RAPCS.</p>" .
+		"<p>Afin de garder une trace des compteurs moteur des avions et de planifier les maintenances, et de v&eacute;rifier si les pilotes respectent " .
+		"les conditions <i>check club</i> avant de prendre un avion, le RAPCS demande\n" .
+		"&agrave; tous les pilotes et &eacute;l&egrave;ves d'entrer les heures moteur (et en option les heures de vol ainsi que les a&eacute;roports de d&eacute;part et de destination).\n" .
+		" <b>Nous comptons tous sur vous</b>.</p>" .
+		"<p>Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] " .
+		"avec $row[full_name] en tant que pilote.</p>\n" ;
+	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
+	$email_message .= "<p>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation via ce lien "  .
+		"<a href=\"https://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> " .
+		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu " .
+		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle " .
+		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures voire d'annuler a posteriori une r&eacute;servation.</p>" .
+		"<hr>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!\n" ;
+	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
+	$email_header = "From: $managerName <$smtp_from>\r\n" ;
+	if (! $test_mode or TRUE) {
+		$email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
+		$email_recipients = $row['email'] ;
+		if ($row['r_pilot'] != $row['r_who']) {
+			$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
+			$email_recipients .= ", $booker[email]" ;
+		}
+		if ($bccTo != '') {
+			$email_header .= "Bcc: $bccTo\r\n" ;
+			$email_recipients .= ", $bccTo" ;
+		}
+	}
+	$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
+	$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
+	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
+	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
+	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
+	if ($test_mode)
+		smtp_mail("eric.vyncke@uliege.be", substr($email_subject, 9), $email_message, $email_header) ;
+	else
+		@smtp_mail($email_recipients . ",eric@vyncke.org", substr($email_subject, 9), $email_message, $email_header) ;
+	$engine_reminders ++ ;
+	print(date('Y-m-d H:i:s').": after flight engine reminder(s) (after flight) sent by email to $email_recipients.\n") ;
+	if (! is_resource($mysqli_link)) { // Naive ? attempt to reconnect in case of lost connection...
+		$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
+		if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
+		if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
+	}
+}
+print(date('Y-m-d H:i:s').": total of $engine_remindesr engine reminders (after flight) sent.\n") ;
+}
+
+if (! is_resource($mysqli_link)) { // Naive ? attempt to reconnect in case of lost connection...
+		$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
+		if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
+		if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;}
 // Vérifier si tous les pilotes/élèves/membres ont bel et bien une entrée dans la table $rapcs_person (ex OpenFlyers)
 // Ajouter/enlever si nécessaire
 print(date('Y-m-d H:i:s').": checking entries in $table_person.\n") ;
