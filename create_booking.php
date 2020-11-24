@@ -188,14 +188,6 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 	if ($comment != '')
 		$message .= " Commentaire de la réservation: <i>$comment</i>.</p>\n" ;
 
-	// Check all validity ratings
-	$result = mysqli_query($mysqli_link, "select *,datediff(sysdate(), expire_date) as delta
-		from $table_validity_type t left join $table_validity v on validity_type_id = t.id and jom_id = $pilot_id")
-		or die("Erreur systeme lors de la lecture de vos validites: " . mysqli_error($mysqli_link)) ;
-	$userValidities = array() ;
-	while ($row = mysqli_fetch_array($result)) {
-		$userValidities[$row['validity_type_id']] = true ;
-	}
 	mysqli_free_result($result) ;
 	// Not too distant reservation?
 	$reservation_permise = RecentBooking($plane, /*$userId*/ $pilot_id, $plane_row['delai_reservation']) ;
@@ -203,9 +195,10 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 	if (!$reservation_permise) {
 $message .= "<p><span style='color: blue;'>Aucune entrée récente dans le logbook pour $plane, regardons l'historique...</span></p>\n" ;
 		// If pilot did not book this exact plane, let's try to find whether he/she flew a plane from a 'larger' group...
-		$result = mysqli_query($mysqli_link, "select upper(id) as id, classe, delai_reservation
-			from $table_planes where id <> '$plane' and ressource = 0
-			order by id") or die("Cannot get all active planes:".mysqli_error($mysqli_link)) ;
+		$result = mysqli_query($mysqli_link, "SELECT upper(id) AS id, classe, delai_reservation
+			FROM $table_planes 
+			WHERE id <> '$plane' AND ressource = 0 AND actif > 0
+			ORDER BY id") or die("Cannot get all active planes:".mysqli_error($mysqli_link)) ;
 		while ($row = mysqli_fetch_array($result) and !$reservation_permise) {
 			if ($row['id'] == $plane_row['id']) continue ;
 $message .= "Vérification de $row[id] (type $row[classe]): \n" ;
@@ -217,19 +210,51 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 		mysqli_free_result($result) ;
 	}
 	$message .= '</p>' ;
+// Next checks on validity ratings
+	$validity_msg = '' ;
+	$userRatingValid = true ;
+	$userValidities = array() ;
+	$result = mysqli_query($mysqli_link, "SELECT *,DATEDIFF(SYSDATE(), expire_date) AS delta
+		FROM $table_validity_type t LEFT JOIN $table_validity v ON validity_type_id = t.id AND jom_id = $pilot_id")
+		or journalise($pilot_id, "E", "Erreur systeme lors de la lecture de des validites: " . mysqli_error($mysqli_link)) ;
+	while ($row = mysqli_fetch_array($result)) {
+		$userValidities[$row['validity_type_id']] = true ;
+		$row['name'] = db2web($row['name']) ;
+		if ($row['delta'] == '') { // This validity was not filled in
+			if ($row['mandatory'] != 0) {
+				$userRatingValid = false ;
+				$validity_msg .= "<span style=\"color: red;\">Le profil du pilote ne contient pas $row[name]. Le ROI interdit en ce cas de r&eacute;server un avion. Le pilote doit modifier son profil d'abord.</span><br/>" ;
+			}
+		} elseif ($row['delta'] > 0) {
+			if ($row['mandatory'] != 0) {
+				$userRatingValid = false ;
+				$validity_msg .= "<span style=\"color: red;\">Le $row[name] du pilote n'est plus valable depuis le $row[expire_date]. Le ROI interdit en ce cas de r&eacute;server un avion.</span><br/>" ;
+			} else {
+				$validity_msg .= "<span style=\"color: blue;\">Le $row[name] du pilote n'est plus valable depuis le $row[expire_date].</span><br/>" ;
+			}
+		} elseif ($row['delta'] > - $validity_warning) 
+			$validity_msg .= "<span style=\"color: blue;\">Le $row[name] du pilote sera plus valable le $row[expire_date]; il sera alors impossible de r&eacute;server un avion pour ce pilote.</span><br/>" ;
+	}
+	mysqli_free_result($result) ;
+	if ($validity_msg == '') 
+		$validity_msg = "<p>Toutes les validités du pilotes sont valables.</p>" ;
+	else
+		$validity_msg = "<h2>Certificats et ratings</h2><p>$validity_msg</p>" ;
+//	if (!$userRatingValid) $reservation_permise = false ;
 	if (!$reservation_permise) {
 		journalise($pilot_id, "E", "Check club: Cette réservation pour $plane devrait être refusée...") ;
 		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
-		$email_header .= "To: $fleetName <$fleetEmail>\r\n" ;
+		$email_header .= "To: $fleetName <$fleetEmail>, $pilot[name] <$pilot[email]>\r\n" ;
 		$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>\r\n" ;
-		@smtp_mail($fleetEmail, substr(iconv_mime_encode('Subject',"Réservation $plane devrait être refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
+		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
+		@smtp_mail("$fleetEmail,fis@spa-aviation.be,$pilot[email],eric@vyncke.org", substr(iconv_mime_encode('Subject',"La réservation de $plane devrait être refusée pour $pilot[name]/$userFullName"), 9), $message  . $validity_msg, $email_header) ;
 //		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
 	} else {
 		journalise($pilot_id, "I", "Check club: Cette réservation pour $plane est autorisée") ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		$email_header .= "To: <evyncke@cisco.com>\r\n" ;
-		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane autorisée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
+		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane autorisée pour $pilot[name]/$userFullName"), 9), $message . $validity_msg, $email_header) ;
 	}
 } else // End of checks for normal pilot 
 	journalise($pilot_id, "D", "Check club is not required") ;
