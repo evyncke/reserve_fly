@@ -133,6 +133,7 @@ print_plane_table("Avions en maintenance", $sql, ['Avion', 'D&eacute;but', 'Fin'
 
 $email_recipients = "info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be" ;
 $email_header = "From: $managerName <$smtp_from>\r\n" ;
+$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 $email_header .= "To: info@spa-aviation.be, ca@spa-aviation.be\r\n" ;
 $email_header .= "Cc: fis@spa-aviation.be\r\n" ;
 if ($bccTo != '') {
@@ -211,6 +212,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_message .= "<hr>Ceci est un message automatique envoy&eacute; tous les mois tant que votre profil n'est pas complet." ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 	$email_header = "From: $managerName <$smtp_from>\r\n" ;
+	$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 	$email_header .= "To: $full_name <$row[email]>\r\n" ;
 	$email_recipients = $row['email'] ;
 	if ($bccTo != '') {
@@ -333,6 +335,7 @@ $sql = "select *,u.name as full_name
 print_table("Gestionnaires des vols d&eacute;couverte", $sql) ;
 
 $email_header = "From: $managerName <$smtp_from>\r\n" ;
+$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 $email_header .= "To: info@spa-aviation.be, ca@spa-aviation.be\r\n" ;
 $email_header .= "Cc: fis@spa-aviation.be, webmaster@spa-aviation.be\r\n" ;
 $email_recipients = "info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be, webmaster@spa-aviation.be" ;

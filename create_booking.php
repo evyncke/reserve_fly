@@ -327,6 +327,7 @@ if ($response['error'] == '') {
 		$email_header .= "Message-ID: <booking-$booking_id@$smtp_localhost>\r\n" ;
 		$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
 //		$smtp_info['debug'] = True;
+		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 		if ($test_mode)
 			@smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 		else
