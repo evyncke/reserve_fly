@@ -148,6 +148,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
 	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
+	$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 	if ($test_mode)
 		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 	else
@@ -224,6 +225,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
 	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
+	$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 	if ($test_mode)
 		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 	else
@@ -301,6 +303,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
 	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
+	$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 	if ($test_mode)
 		smtp_mail("eric.vyncke@uliege.be", substr($email_subject, 9), $email_message, $email_header) ;
 	else
@@ -313,7 +316,7 @@ while ($row = mysqli_fetch_array($result)) {
 		if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
 	}
 }
-print(date('Y-m-d H:i:s').": total of $engine_remindesr engine reminders (after flight) sent.\n") ;
+print(date('Y-m-d H:i:s').": total of $engine_reminders engine reminders (after flight) sent.\n") ;
 }
 
 if (! is_resource($mysqli_link)) { // Naive ? attempt to reconnect in case of lost connection...
@@ -356,6 +359,7 @@ while ($row = mysqli_fetch_array($result)) {
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 		$email_header = "From: Webmaster RAPCS <webmaster@spa-aviation.be>\r\n" ;
 		$email_header .= "To: $row[name] <$row[email]>\r\n" ;
+		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 		if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
 		$email_header .= "X-Comment: joomla user is $row[jom_id]\r\n" ;
 		if ($test_mode)
