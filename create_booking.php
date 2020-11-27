@@ -182,13 +182,12 @@ $message .= "</ul>\n" ;
 
 if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BOOKING_MAINTENANCE) /* or $userIsInstructor */ or $instructor_id != "NULL")) {
 //if (false) {
-	$message = "<p>De manière expérimentale, chaque réservation est vérifiée quant au ROI à propos du re-check RAPCS.<p>
-		<p><i>Ce message est envoyé au pilote, aux instructeurs et aux gestionnaires de la flotte. Corrections et améliorations à eric@vyncke.org ;-)</i></p>
-		<p>Vérification de la réservation de $plane (de type $plane_row[classe]) effectuée par $userFullName/$userId pour $pilot[name]/$pilot_id." ;
+	$intro = "<p>De manière expérimentale, chaque réservation est vérifiée quant au Règlement d'Ordre Intérieur (ROI) à propos du re-check RAPCS.<p>
+		<p><i>Ce message est envoyé au pilote, aux instructeurs et aux gestionnaires de la flotte.</i></p>" ;
 	if ($comment != '')
-		$message .= " Commentaire de la réservation: <i>$comment</i>.</p>\n" ;
-
+		$intro .= "<p>Commentaire de la réservation: <i>$comment</i>.</p>\n" ;
 	mysqli_free_result($result) ;
+	$message = "<p>Vérification de la réservation de $plane (de type $plane_row[classe]) effectuée par $userFullName/$userId pour $pilot[name]/$pilot_id." ;
 	// Not too distant reservation?
 	$reservation_permise = RecentBooking($plane, /*$userId*/ $pilot_id, $plane_row['delai_reservation']) ;
 	mysqli_free_result($result) ;
@@ -237,7 +236,7 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 	}
 	mysqli_free_result($result) ;
 	if ($validity_msg == '') 
-		$validity_msg = "<p>Toutes les validités du pilotes sont valables.</p>" ;
+		$validity_msg = "<p style=\"color: blue;\">Toutes les validités du pilotes sont valables.</p>" ;
 	else
 		$validity_msg = "<h2>Certificats et ratings</h2><p>$validity_msg</p>" ;
 //	if (!$userRatingValid) $reservation_permise = false ;
@@ -248,13 +247,13 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 		$email_header .= "To: $fleetName <$fleetEmail>, $pilot[name] <$pilot[email]>\r\n" ;
 		$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>\r\n" ;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
-		@smtp_mail("$fleetEmail,fis@spa-aviation.be,$pilot[email],eric@vyncke.org", substr(iconv_mime_encode('Subject',"La réservation de $plane devrait être refusée pour $pilot[name]/$userFullName"), 9), $message  . $validity_msg, $email_header) ;
+		@smtp_mail("$fleetEmail,fis@spa-aviation.be,$pilot[email],eric@vyncke.org", substr(iconv_mime_encode('Subject',"La réservation de $plane devrait être refusée pour $pilot[name]/$userFullName"), 9), $intro  . $validity_msg . $message, $email_header) ;
 //		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
 	} else {
 		journalise($pilot_id, "I", "Check club: Cette réservation pour $plane est autorisée") ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		$email_header .= "To: <evyncke@cisco.com>\r\n" ;
-		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane autorisée pour $pilot[name]/$userFullName"), 9), $message . $validity_msg, $email_header) ;
+		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane autorisée pour $pilot[name]/$userFullName"), 9), $intro . $validity_msg . $message, $email_header) ;
 	}
 } else // End of checks for normal pilot 
 	journalise($pilot_id, "D", "Check club is not required") ;
