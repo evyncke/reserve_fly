@@ -367,8 +367,11 @@ if ($userIsPilot) print(" pilote ") ;
 if ($userIsMechanic) print(" mecano ") ;
 if ($userIsInstructor) print(" instructor ") ;
 if ($userIsAdmin) print(" administrateur ") ;
-if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
-	print("<br/><font color=red>Vous devez &ecirc;tre au moins pilote pour r&eacute;server un avion.</font>") ;
+// Temporary COVID-19
+//if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
+//	print("<br/><font color=red>Vous devez &ecirc;tre au moins pilote pour r&eacute;server un avion.</font>") ;
+if (! ($userIsInstructor || $userIsMechanic))
+	print("<br/><font color=red>Seuls les instructeurs et mécanos peuvent r&eacute;server un avion (mesure COVID-19).</font>") ;
 if ($userId == 0) {
 	print("<br/><font color=red>Vous devez &ecirc;tre connect&eacute;(e) pour r&eacute;server un avion.</font> ") ;
 } else {
