@@ -43,9 +43,9 @@ if ($error_message != '') {
 		CONVERT(r_comment USING UTF8) AS r_comment, r_from, r_via1, r_via2, r_to, r_duration, r_crew_wanted, r_pax_wanted,
 		p.username as username, p.name as name, w.username AS username2, w.name AS name2,
 		p.email as email, home_phone, work_phone, cell_phone, avatar, ressource, r.id AS plane_id,
-		l_start as log_start, l_end as log_end
+		l_start as log_start, l_end as log_end, l_from as log_from, l_to as log_to
 		FROM $table_bookings JOIN $table_planes AS r ON r_plane = r.id JOIN $table_users AS p ON r_pilot = p.id JOIN jom_kunena_users k ON k.userid = r_pilot
-		LEFT JOIN $table_logbook AS l ON l.l_booking = r_id,
+		LEFT JOIN $table_logbook AS l ON l.l_booking = r_id AND l_plane = r_plane,
 		$table_users AS w, $table_person
 		WHERE r_plane = '$plane' AND DATE(r_start) <= '$date' AND '$date' <= DATE(r_stop) AND
 		r_who = w.id AND jom_id = p.id AND r_cancel_date IS NULL
@@ -82,13 +82,17 @@ if ($error_message != '') {
 					$type_vol = ($customer_row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 					$booking['comment'] = "Vol $type_vol pour $customer_row[p_fname] $customer_row[p_lname]" ;
 			}
-			if ($row['r_from'])
+			if ($row['log_from'])
+				$booking['from'] = $row['log_from'] ;
+			else if ($row['r_from'])
 				$booking['from'] = $row['r_from'] ;
 			if ($row['r_via1'])
 				$booking['via1'] = $row['r_via1'] ;
 			if ($row['r_via2'])
 				$booking['via2'] = $row['r_via2'] ;
-			if ($row['r_to'])
+			if ($row['log_to'])
+				$booking['to'] = $row['log_to'] ;
+			else if ($row['r_to'])
 				$booking['to'] = $row['r_to'] ;
 			$booking['duration'] = $row['r_duration'] ;
 			if ($row['r_instructor']) {
