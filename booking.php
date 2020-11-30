@@ -307,7 +307,10 @@ if ($booking['can_log']) { // Should also be also checked when not already logge
 <div class="row">
 	<br/>
 	<div class="col-xs-12 text-center ">
-		<button id="logbookButton" class="btn btn-success" onclick="logbookClick();">Carnet de route</button>
+		Pour entrer les heures moteurs pour le club et compléter votre carnet de vols, cliquez ci-dessous.
+	</div><!-- col-->
+	<div class="col-xs-12 text-center ">
+		<button id="logbookButton" class="btn btn-success" onclick="logbookClick();">Carnet de routes</button>
 	</div><!-- col-->
 </div> <!-- row -->
 <?php
