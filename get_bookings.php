@@ -43,7 +43,7 @@ if ($error_message != '') {
 		CONVERT(r_comment USING UTF8) AS r_comment, r_from, r_via1, r_via2, r_to, r_duration, r_crew_wanted, r_pax_wanted,
 		p.username as username, p.name as name, w.username AS username2, w.name AS name2,
 		p.email as email, home_phone, work_phone, cell_phone, avatar, ressource, r.id AS plane_id,
-		l_start as log_start, l_end as log_end, l_from as log_from, l_to as log_to
+		l_start as log_start, l_end as log_end, l_from as log_from, l_to as log_to, l_id as log_id
 		FROM $table_bookings JOIN $table_planes AS r ON r_plane = r.id JOIN $table_users AS p ON r_pilot = p.id JOIN jom_kunena_users k ON k.userid = r_pilot
 		LEFT JOIN $table_logbook AS l ON l.l_booking = r_id AND l_plane = r_plane,
 		$table_users AS w, $table_person
@@ -133,8 +133,11 @@ if ($error_message != '') {
 					$booking['avatar'] = $avatar_root_uri . '/' . $row['avatar'] ;
 			}
 			// Now the logbook entries (often empty...) TODO multiple log entries per booking :(
-			$booking['log_start'] = str_replace('-', '/', $row['log_start']) ;  // Safari javascript does not like - in dates !!!
-			$booking['log_end'] = str_replace('-', '/', $row['log_end']) ;  // Safari javascript does not like - in dates !!!
+			if ($row['log_id']) {
+				$booking['log_start'] = str_replace('-', '/', $row['log_start']) ;  // Safari javascript does not like - in dates !!!
+				$booking['log_end'] = str_replace('-', '/', $row['log_end']) ;  // Safari javascript does not like - in dates !!!
+				$booking['log_id'] = $row['log_id'] ;
+			}
 			// To allow asynchronous AJAX calls, we need to pass back an argument...
 			if ($_REQUEST['arg'] != '') $booking['arg'] = $_REQUEST['arg'] ;
 			// Be paranoid and prevent XSS
