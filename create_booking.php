@@ -240,14 +240,18 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 	else
 		$validity_msg = "<h2>Certificats et ratings</h2><p>$validity_msg</p>" ;
 //	if (!$userRatingValid) $reservation_permise = false ;
-	if (!$reservation_permise) {
+	if (!$reservation_permise or !$userRatingValid) {
 		journalise($pilot_id, "E", "Check club: Cette réservation pour $plane devrait être refusée...") ;
 		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		$email_header .= "To: $fleetName <$fleetEmail>, $pilot[name] <$pilot[email]>\r\n" ;
 		$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>\r\n" ;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
-		@smtp_mail("$fleetEmail,fis@spa-aviation.be,$pilot[email],eric@vyncke.org", substr(iconv_mime_encode('Subject',"La réservation de $plane devrait être refusée pour $pilot[name]/$userFullName"), 9), $intro  . $validity_msg . $message, $email_header) ;
+		if ($userRatingValid)
+			$subject = "La réservation de $plane devrait être refusée pour $pilot[name]/$userFullName" ;
+		else
+			$suject =  "Validité(s) expirée(s) pour $pilot[name]... pour la réservation de $plane" ;
+		@smtp_mail("$fleetEmail,fis@spa-aviation.be,$pilot[email],eric@vyncke.org", substr(iconv_mime_encode('Subject', $subject), 9), $intro  . $validity_msg . $message, $email_header) ;
 //		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
 	} else {
 		journalise($pilot_id, "I", "Check club: Cette réservation pour $plane est autorisée") ;
