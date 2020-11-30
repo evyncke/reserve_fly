@@ -250,7 +250,7 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 		if ($userRatingValid)
 			$subject = "La réservation de $plane devrait être refusée pour $pilot[name]/$userFullName" ;
 		else
-			$suject =  "Validité(s) expirée(s) pour $pilot[name]... pour la réservation de $plane" ;
+			$subject =  "Validité(s) expirée(s) pour $pilot[name]... pour la réservation de $plane" ;
 		@smtp_mail("$fleetEmail,fis@spa-aviation.be,$pilot[email],eric@vyncke.org", substr(iconv_mime_encode('Subject', $subject), 9), $intro  . $validity_msg . $message, $email_header) ;
 //		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
 	} else {
