@@ -65,6 +65,23 @@ var
 </script>
 <script src="mobile.js"></script>
 <script src="planes.js"></script>
+<!-- Matomo -->
+<script type="text/javascript">
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+  _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//analytics.vyncke.org/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '5']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
 </head>
 <body onload="init();<?=($_SERVER['PHP_SELF'] == '/resa/mobile_logbook.php' or $_SERVER['PHP_SELF'] == '/mobile_logbook.php') ? 'initLogbook();' : ''?><?=($_SERVER['PHP_SELF'] == '/resa/mobile_book.php'or $_SERVER['PHP_SELF'] == '/mobile_book.php') ? 'initBook();' : ''?>">
 

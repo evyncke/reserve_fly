@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -234,8 +234,24 @@ var
 	durationHour = Number(<?=$durationHour?>), durationMinute = Number(<?=$durationMinute?>),
 	takeoffDate = new Date('<?=str_replace('-', '/', $booking['r_takeoff'])?>') ,
 	landingDate ;
-
 </script>
+<!-- Matomo -->
+<script type="text/javascript">
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+  _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//analytics.vyncke.org/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '5']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
 </head>
 <body onload="initLogbook();">
 <div class="container-fluid">
@@ -326,30 +342,30 @@ if ($this_segment_id > 1) {
 <form action="<?=$_SERVER['PHP_SELF']?>" method="POST">
 
 <div class="row">
-<div class="col-xs-12 col-md-4">
+<div class="col-xs-12 col-md-6">
 
 <table class="logbookTable">
 	<tr><td class="logbookSeparator" colspan="2">Temps/index <?=$engine_flight_label?></td><tr>
 	<tr><td class="logbookLabel">D&eacute;but:</td>
 	<td class="logbookValue">
-		<input type="number" size="6" name="engineStartHour" max="<?=$engineStartHour+50?>" value="<?=$engineStartHour?>" onchange="engineTimeChanged(false);"> H
+		<input type="number" size="7" name="engineStartHour" max="<?=$engineStartHour+50?>" Xvalue="<?=$engineStartHour?>" onchange="engineTimeChanged(false);"> H
 <?php
 if ($booking['compteur_type'] == 1) 
-		print("<input type=\"number\" size=\"4\" maxlength=\"2\" min=\"0\" max=\"59\" name=\"engineStartMinute\" value=\"$engineStartMinute\" onchange=\"engineTimeChanged(false);\"> min.\n") ;
+		print("<input type=\"number\" size=\"5\" maxlength=\"2\" min=\"0\" max=\"59\" name=\"engineStartMinute\" Xvalue=\"$engineStartMinute\" onchange=\"engineTimeChanged(false);\"> min.\n") ;
 elseif ($booking['compteur_type'] == 6)
-		print("<input type=\"number\" size=\"3\" maxlength=\"1\" min=\"0\" max=\"9\" name=\"engineStartMinute\" value=\"" . round($engineStartMinute/6) . "\" onchange=\"engineTimeChanged(false);\"> dixi&egrave;mes\n") ;
+		print("<input type=\"number\" size=\"4\" maxlength=\"1\" min=\"0\" max=\"9\" name=\"engineStartMinute\" Xvalue=\"" . round($engineStartMinute/6) . "\" onchange=\"engineTimeChanged(false);\"> dixi&egrave;mes\n") ;
 else
 		print("Type de compteur moteur inconnu...") ;
 ?>
 		</td></tr>
 	<tr><td class="logbookLabel">Fin:</td>
 	<td class="logbookValue">
-		<input type="number" size="5" name="engineEndHour" max="<?=$engineStartHour+50?>" value="<?=$engineEndHour?>" onchange="engineTimeChanged(false);"> H
+		<input type="number" size="7" name="engineEndHour" max="<?=$engineStartHour+50?>" Xvalue="<?=$engineEndHour?>" onchange="engineTimeChanged(false);"> H
 <?php
 if ($booking['compteur_type'] == 1) 
-		print("<input type=\"number\" size=\"4\" maxlength=\"2\" min=\"0\" max=\"59\" name=\"engineEndMinute\" value=\"$engineEndMinute\" onchange=\"engineTimeChanged(false);\"> min.\n") ;
+		print("<input type=\"number\" size=\"5\" maxlength=\"2\" min=\"0\" max=\"59\" name=\"engineEndMinute\" value=\"$engineEndMinute\" onchange=\"engineTimeChanged(false);\"> min.\n") ;
 elseif ($booking['compteur_type'] == 6)
-		print("<input type=\"number\" size=\"3\" maxlength=\"1\" min=\"0\" max=\"9\" name=\"engineEndMinute\" value=\"" . round($engineEndMinute/6) . "\" onchange=\"engineTimeChanged(false);\"> dixi&egrave;mes\n") ;
+		print("<input type=\"number\" size=\"4\" maxlength=\"1\" min=\"0\" max=\"9\" name=\"engineEndMinute\" Xvalue=\"" . round($engineEndMinute/6) . "\" onchange=\"engineTimeChanged(false);\"> dixi&egrave;mes\n") ;
 else
 		print("Type de compteur moteur inconnu...") ;
 ?>
@@ -378,19 +394,19 @@ if ($booking['compteur_vol'] != 0) {
 ?> 
 </div> <!-- col -->
 
-<div class="col-xs-12 col-md-4">
+<div class="col-xs-12 col-md-6">
 <table class="logbookTable" id="flightSchedule" style="opacity: 0.5">
 	<tr><td class="logbookSeparator" colspan="2">Horaire du vol</td><tr>
 	<tr><td class="logbookLabel">D&eacute;but (heure locale):</td><td class="logbookValue">
-		<input type="number" min="0" max="23" name="startHours" size="3" maxlength="2" onchange="takeoffTimeChanged();" disabled> :
-		<input type="number" min="0" max="59" name="startMinutes" size="3" maxlength="2" onchange="takeoffTimeChanged();" disabled>
+		<input type="number" min="0" max="23" name="startHours" size="4" maxlength="2" onchange="takeoffTimeChanged();" disabled> :
+		<input type="number" min="0" max="59" name="startMinutes" size="4" maxlength="2" onchange="takeoffTimeChanged();" disabled>
 	</td><tr>
 	<tr><td class="logbookLabel">D&eacute;but (heure universelle):</td><td class="logbookValue">
 		<input type="text" name="startHoursUTC" size="3" maxlength="2" disabled> : <input type="text" name="startMinutesUTC" size="2" maxlength="2" disabled>
 	</td><tr>
 	<tr><td class="logbookLabel">Fin (heure locale):</td><td class="logbookValue">
-		<input type="number" min="0" max="23" name="endHours" size="3" maxlength="2" onchange="landingTimeChanged();" disabled> :
-		<input type="number" min="0" max="59" name="endMinutes" size="3" maxlength="2" onchange="landingTimeChanged();" disabled>
+		<input type="number" min="0" max="23" name="endHours" size="4" maxlength="2" onchange="landingTimeChanged();" disabled> :
+		<input type="number" min="0" max="59" name="endMinutes" size="4" maxlength="2" onchange="landingTimeChanged();" disabled>
 	</td><tr>
 	<tr><td class="logbookLabel">Fin (heure universelle):</td><td class="logbookValue">
 		<input type="text" name="endHoursUTC" size="2" maxlength="2" disabled>:<input type="text" name="endMinutesUTC" size="3" maxlength="2" disabled>
