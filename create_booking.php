@@ -137,9 +137,11 @@ function RecentBooking($plane, $pilotId, $delai_reservation) {
 
 $message .= "<ul>\n" ;
 	// First: only look entries with a relevant 'carnet de route' (linked to a booking)
-	$result = mysqli_query($mysqli_link, "select l_end, datediff(sysdate(), l_end) as temps_dernier from $table_logbook l join $table_bookings r on l_booking = r_id
-		where r_plane = '$plane' and (r_pilot = $pilotId or (r_instructor is not null and r_instructor = $pilotId)) and l_booking is not null
-		order by l_end desc") or die("Cannot get last reservation: " . mysqli_error($mysqli_link)) ;
+	$result = mysqli_query($mysqli_link, "SELECT l_end, DATEDIFF('$start', l_end) AS temps_dernier
+		FROM $table_logbook l JOIN $table_bookings r ON l_booking = r_id
+		where r_plane = '$plane' AND (r_pilot = $pilotId OR (r_instructor IS NOT NULL ANS r_instructor = $pilotId)) AND l_booking IS NOT NULL
+		ORDER BY l_end DESC
+		LIMIT 1") or die("Cannot get last reservation: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
 	if (! $row) {
 $message .= "<li>Aucune entr&eacute;e dans le carnet de routes de l'avion $plane pour ce pilote.</li>\n" ;
@@ -213,7 +215,7 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 	$validity_msg = '' ;
 	$userRatingValid = true ;
 	$userValidities = array() ;
-	$result = mysqli_query($mysqli_link, "SELECT *,DATEDIFF(SYSDATE(), expire_date) AS delta
+	$result = mysqli_query($mysqli_link, "SELECT *,DATEDIFF('$end', expire_date) AS delta
 		FROM $table_validity_type t LEFT JOIN $table_validity v ON validity_type_id = t.id AND jom_id = $pilot_id")
 		or journalise($pilot_id, "E", "Erreur systeme lors de la lecture de des validites: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
@@ -232,7 +234,7 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 				$validity_msg .= "<span style=\"color: blue;\">Le $row[name] du pilote n'est plus valable depuis le $row[expire_date].</span><br/>" ;
 			}
 		} elseif ($row['delta'] > - $validity_warning) 
-			$validity_msg .= "<span style=\"color: blue;\">Le $row[name] du pilote sera plus valable le $row[expire_date]; il sera alors impossible de r&eacute;server un avion pour ce pilote.</span><br/>" ;
+			$validity_msg .= "<span style=\"color: blue;\">Le $row[name] du pilote ne sera plus valable le $row[expire_date]; il sera alors impossible de r&eacute;server un avion pour ce pilote.</span><br/>" ;
 	}
 	mysqli_free_result($result) ;
 	if ($validity_msg == '') 
@@ -354,6 +356,9 @@ if ($response['error'] == '') {
 		}
 		$email_header .= "Message-ID: <booking-$booking_id@$smtp_localhost>\r\n" ;
 		$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
+		// TODO: create an ICS file and send it as well
+		// Cfr https://www.phpfacile.com/apprendre_le_php/envoyer_un_mail_en_php/2 
+		//
 //		$smtp_info['debug'] = True;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 		if ($test_mode)
