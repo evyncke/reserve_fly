@@ -198,17 +198,17 @@ while ($row = mysqli_fetch_array($result)) {
 		"Votre profil sur www.spa-aviation.be est incomplet", $mime_preferences) ;
 	$email_message = '' ;
 	if ($first_name != '')
-		$email_message .= "<p>Bonjour $first_name,<br/>" ;
+		$email_message .= "<p>Bonjour $first_name,</p>" ;
 	else
-		$email_message .= "<p>Bonjour,<br/>" ;
-	$email_message .= "&Agrave; titre informatif, votre profil sur le site de notre club est incomplet: seulement $profile_count informations sur $max_profile_count...<br/>
+		$email_message .= "<p>Bonjour,</p>" ;
+	$email_message .= "<p>&Agrave; titre informatif, votre profil sur le site de notre club est incomplet: seulement $profile_count informations sur $max_profile_count...<br/>
 		Ces informations ne sont visibles que pour les autres membres RAPCS (+ le SPW et notre atelier).
 		<b>Seules certaines donn&eacute;es sont obligatoires pour effectuer une r&eacute;servation: nom, pr&eacute;nom, email et num&eacute;ro
 		de t&eacute;l&eacute;phone mobile</b> (ceci afin de vous contacter si n&eacute;cessaire); les autres informations sont simplement
-		pour permettre de nous conna&icirc;tre au sein de notre club.
-		<br/>Veuillez visiter le lien ci-dessous et compl&eacute;ter les donn&eacute;es manquantes ($missing_items_string):\n" ;
+		pour permettre de nous conna&icirc;tre au sein de notre club.</p>
+		<p>Veuillez visiter le lien ci-dessous et compl&eacute;ter les donn&eacute;es manquantes ($missing_items_string):\n" ;
 	$email_message .= "<a href=https://www.spa-aviation.be/resa/profile.php>profil r&eacute;servation</a>.</p>\n" ;
-	$email_message .= "<p>Pour rappel, votre identifiant est <b>$row[username]</b>.</p>\r\n" ;
+	$email_message .= "<p>Pour rappel, votre identifiant est <b>$row[username]</b> et vous devez &ecirc;tre connect&eacute;(e) pour changer votre profil.</p>\r\n" ;
 	$email_message .= "<hr>Ceci est un message automatique envoy&eacute; tous les mois tant que votre profil n'est pas complet." ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 	$email_header = "From: $managerName <$smtp_from>\r\n" ;
@@ -259,14 +259,6 @@ function print_table($title, $sql) {
 	print(date('Y-m-d H:i:s') . ": ($title) $n lines\n") ; ob_flush() ;
 }
 
-$sql = "select *,u.name as full_name
-	from $table_users u 
-	where block = 0 and not exists (select * from $table_user_usergroup_map m
-		where u.id = m.user_id and m.group_id in ($joomla_admin_group, $joomla_pilot_group, $joomla_student_group, $joomla_instructor_group))
-	order by name" ; 
-print_table("Utilisateurs qui ne sont ni pilotes ni &eacute;l&egrave;ves", $sql) ;
-
-
 $sql = "select *,concat(u.name, ' - ', count(*), ' vol(s)') as full_name
 	from $table_users u join $table_bookings b on b.r_pilot = u.id
 	where u.block = 0 and b.r_start > date_sub(sysdate(), interval 1 month) and b.r_stop < sysdate() and b.r_cancel_date is null
@@ -274,14 +266,21 @@ $sql = "select *,concat(u.name, ' - ', count(*), ' vol(s)') as full_name
 				where l.l_booking = b.r_id)
 	group by username
 	order by full_name" ; 
-print_table("Pilotes/&eacute;l&egrave;ves sans aucune entr&eacute;e dans les carnets de routes des avions ce dernier mois", $sql) ;
+print_table("<span style=\"color: red;\">Pilotes/&eacute;l&egrave;ves sans aucune entr&eacute;e dans les carnets de routes des avions pour des r&eacute;servations de ce dernier mois</span>", $sql) ;
 
 $sql = "select *,u.name as full_name
 	from $table_users u join $table_person p on u.id = p.jom_id
 	where u.block = 0 and (p.cell_phone is null or p.cell_phone = '') and exists (select * from $table_user_usergroup_map m
 		where u.id = m.user_id and m.group_id in ($joomla_admin_group, $joomla_pilot_group, $joomla_student_group, $joomla_instructor_group)) 
 	order by full_name" ; 
-print_table("Utilisateurs sans num&eacute;ro de mobile", $sql) ;
+print_table("<span style=\"color: red;\">Utilisateurs sans num&eacute;ro de mobile</span>", $sql) ;
+
+$sql = "select *,u.name as full_name
+	from $table_users u 
+	where block = 0 and not exists (select * from $table_user_usergroup_map m
+		where u.id = m.user_id and m.group_id in ($joomla_admin_group, $joomla_pilot_group, $joomla_student_group, $joomla_instructor_group))
+	order by name" ; 
+print_table("Utilisateurs qui ne sont ni pilotes ni &eacute;l&egrave;ves", $sql) ;
 
 $sql = "select *,u.name as full_name
 	from $table_users u 
@@ -348,7 +347,11 @@ if ($test_mode) {
 	smtp_mail("eric.vyncke@ulg.ac.be", "Listes diverses (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 } else
 	smtp_mail($email_recipients, "Listes diverses", $email_body, $email_header) ;
-journalise(0, "I", "Cron-monthly: misc lists sent") ;
+	mysqli_close($mysqli_link) ; // Sometimes OVH times out ...
+	$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
+	if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
+	if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
+	journalise(0, "I", "Cron-monthly: misc lists sent") ;
 }
 
 print(date('Y-m-d H:i:s').": end of job.\n") ; ob_flush() ;
