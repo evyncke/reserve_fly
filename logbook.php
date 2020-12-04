@@ -46,6 +46,7 @@ $engine_flight_label = ($booking['r_plane'] == 'PH-AML') ? 'vol' : 'moteur' ;
 if ($auth == '') {
 	if (! ($userId == $booking['r_pilot'] or $userId == $booking['r_who'] or $userId == $booking['r_instructor']))
 		die("Logbook: you ($userId) are not authorized") ;
+	$auth = md5($id . $shared_secret) ; // It may be used later
 } else if ($auth != md5($id . $shared_secret)) die("logbook: wrong key for booking#$id: $auth ") ;
 
 $booking['r_takeoff'] = str_replace('-', '/', $booking['r_takeoff']) ;
