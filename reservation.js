@@ -736,7 +736,7 @@ function displayBookingDetails(id) {
 		span.innerHTML += 'Instructeur vol: ' + booking.instructorName + '<br/>' ;
 	span.innerHTML += 'R&eacute;servation du: ' + booking.start + ", " ;
 	span.innerHTML += '&agrave;: ' + booking.end + " <i>(" + booking.duration + " heure(s) de vol)</i><br/>" ;
-	if (booking.log_start != '') {
+	if (booking.log_start) {
 		span.innerHTML += 'Carnet de route: ' + booking.log_start + ", " ;
 		span.innerHTML += '&agrave;: ' + booking.log_end + '<br/>'  ;
 	}

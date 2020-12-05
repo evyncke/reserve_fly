@@ -133,15 +133,15 @@ $booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is 
 
 function RecentBooking($plane, $pilotId, $delai_reservation) {
 	global $mysqli_link, $table_logbook, $table_bookings ;
-	global $message ;
+	global $message, $start, $userId ;
 
 $message .= "<ul>\n" ;
 	// First: only look entries with a relevant 'carnet de route' (linked to a booking)
 	$result = mysqli_query($mysqli_link, "SELECT l_end, DATEDIFF('$start', l_end) AS temps_dernier
 		FROM $table_logbook l JOIN $table_bookings r ON l_booking = r_id
-		where r_plane = '$plane' AND (r_pilot = $pilotId OR (r_instructor IS NOT NULL ANS r_instructor = $pilotId)) AND l_booking IS NOT NULL
+		where r_plane = '$plane' AND (r_pilot = $pilotId OR (r_instructor IS NOT NULL AND r_instructor = $pilotId)) AND l_booking IS NOT NULL
 		ORDER BY l_end DESC
-		LIMIT 1") or die("Cannot get last reservation: " . mysqli_error($mysqli_link)) ;
+		LIMIT 1") or journalise($userId, "E", "Cannot get last reservation: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
 	if (! $row) {
 $message .= "<li>Aucune entr&eacute;e dans le carnet de routes de l'avion $plane pour ce pilote.</li>\n" ;
@@ -157,10 +157,10 @@ $message .= "</ul>\n" ;
 
 	// Then, look also at all entries in the pilot log book even without any link to carnet de route
 	$plane_alt = str_replace('-', '', $plane) ; // alternate form of plane ID with the '-'
-	$result = mysqli_query($mysqli_link, "select l_end, datediff(sysdate(), l_end) as temps_dernier 
-		from $table_logbook l
-		where (l_plane = '$plane' or l_plane = '$plane_alt') and (l_pilot = $pilotId or (l_instructor is not null and l_instructor = $pilotId))
-		order by l_end desc") or die("Cannot get last reservation in pilot logbook: " . mysqli_error($mysqli_link)) ;
+	$result = mysqli_query($mysqli_link, "SELECT l_end, DATEDIFF('$start', l_end) AS temps_dernier 
+		FROM $table_logbook l
+		WHERE (l_plane = '$plane' OR l_plane = '$plane_alt') AND (l_pilot = $pilotId OR (l_instructor IS NOT NULL AND l_instructor = $pilotId))
+		ORDER BY l_end DESC") or journalise($userId, "E", "Cannot get last reservation in pilot logbook: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
 	if (! $row) {
 $message .= "<li>Aucune entr&eacute;e dans le logbook du pilote pour $plane.</li>\n" ;
@@ -175,14 +175,11 @@ $message .= "</ul>\n" ;
 	}
 }
 
-// TODO
-// Check validity...
-
 // More checks on user when booking a plane and flying solo even when booked by an instructor COVID-19
 // More checks on user when booking a plane and booked by an non-instructor/mechanic
-//journalise($userId, "D", "Check club: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot[name]/$pilot_id") ;
 
 if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BOOKING_MAINTENANCE) /* or $userIsInstructor */ or $instructor_id != "NULL")) {
+	journalise($userId, "D", "Check club is required: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot[name]/$pilot_id") ;
 //if (false) {
 	$intro = "<p>De manière expérimentale, chaque réservation est vérifiée quant au Règlement d'Ordre Intérieur (ROI) à propos du re-check RAPCS.<p>
 		<p><i>Ce message est envoyé au pilote, aux instructeurs et aux gestionnaires de la flotte.</i></p>" ;
@@ -192,14 +189,13 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 	$message = "<p>Vérification de la réservation de $plane (de type $plane_row[classe]) effectuée par $userFullName/$userId pour $pilot[name]/$pilot_id." ;
 	// Not too distant reservation?
 	$reservation_permise = RecentBooking($plane, /*$userId*/ $pilot_id, $plane_row['delai_reservation']) ;
-	mysqli_free_result($result) ;
 	if (!$reservation_permise) {
 $message .= "<p><span style='color: blue;'>Aucune entrée récente dans le logbook pour $plane, regardons l'historique...</span></p>\n" ;
 		// If pilot did not book this exact plane, let's try to find whether he/she flew a plane from a 'larger' group...
 		$result = mysqli_query($mysqli_link, "SELECT upper(id) AS id, classe, delai_reservation
 			FROM $table_planes 
 			WHERE id <> '$plane' AND ressource = 0 AND actif > 0
-			ORDER BY id") or die("Cannot get all active planes:".mysqli_error($mysqli_link)) ;
+			ORDER BY id") or journalise($userId, "E", "Cannot get all active planes:".mysqli_error($mysqli_link)) ;
 		while ($row = mysqli_fetch_array($result) and !$reservation_permise) {
 			if ($row['id'] == $plane_row['id']) continue ;
 $message .= "Vérification de $row[id] (type $row[classe]): \n" ;
@@ -303,7 +299,7 @@ if ($response['error'] == '') {
 		if ($booking_type == BOOKING_MAINTENANCE) {
 			$response['message'] = "La maintenance de $plane du $start au $end: est confirm&eacute;e" ;
 			$email_subject = "Subject: Confirmation de la mise en maintenance de $plane par $booker[name] [#$booking_id]" ;
-			$email_message = "La maintenance du $start au $end sur le $plane avec comme commentaires: <i>$comment</i> " ;
+			$email_message = "<p>La maintenance du $start au $end sur le $plane avec comme commentaires: <i>$comment</i> " ;
 			$email_message .= "est confirm&eacute;e.<br/>" ;
 		} else {
 			$response['message'] = "La r&eacute;servation de $plane du $start au $end: est confirm&eacute;e" ;
@@ -317,19 +313,22 @@ if ($response['error'] == '') {
 						$mime_preferences) ;
 			if ($email_subject === FALSE)
 				$email_subject = "Subject: Cannot iconv(pilot/$pilot[name])" ;
-			$email_message = "La r&eacute;servation du $start au $end sur le <b>$plane</b> " ;
+			$email_message = "<p>La r&eacute;servation du $start au $end sur le <b>$plane</b> " ;
 			$email_message .= "avec $pilot[name] en pilote est confirm&eacute;e.<br/>\n" ;
 			if ($comment) $email_message .= "Commentaires: <i>$comment</i>.<br/>\n" ;
 			if ($instructor_id != 'NULL') $email_message .= "Instructeur vol: $instructor[name] (<a href=\"mailto:$instructor[email]\">$instructor[email]</a>).<br/>\n" ;
 		}
 		if ($pilot_id != $userId)
 			$email_message .= "Cette op&eacute;ration a &eacute;t&eacute; effectu&eacute;e par $booker[name] ($booker_quality)." ;
+		$email_message .= '</p>' ;
 		$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
 		$request_scheme = ($_SERVER['REQUEST_SCHEME'] != '') ? $_SERVER['REQUEST_SCHEME'] : 'http' ; // TODO pourquoi cela ne fonctionne pas???
-		$request_scheme = 'http' ;
+		$request_scheme = 'https' ;
 		$directory_prefix = '/resa' ;
-		$email_message .= "<br/>Vous pouvez g&eacute;rer cette r&eacute;servation via le site ou via ce lien "  .
-			"<a href=\"$request_scheme://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> (&agrave; conserver si souhait&eacute;)." ;
+		$email_message .= "Vous pouvez lier votre calendrier &agrave; cette r&eacute;servation via <a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">ce calendrier (iCal)</a>.</p>" .
+			"<p>Vous pouvez g&eacute;rer (modifier ou annuler) cette r&eacute;servation via le site ou via ce lien "  .
+			"<a href=\"$request_scheme://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> (&agrave; conserver si souhait&eacute;).</p>" ;
+
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 //		$email_header = '' ; // Let's use the default From -- currently defined as no-reply
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
