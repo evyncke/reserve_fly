@@ -179,7 +179,7 @@ $message .= "</ul>\n" ;
 // More checks on user when booking a plane and booked by an non-instructor/mechanic
 
 if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BOOKING_MAINTENANCE) /* or $userIsInstructor */ or $instructor_id != "NULL")) {
-	journalise($userId, "D", "Check club is required: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot[name]/$pilot_id") ;
+//	journalise($userId, "D", "Check club is required: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot[name]/$pilot_id") ;
 //if (false) {
 	$intro = "<p>De manière expérimentale, chaque réservation est vérifiée quant au Règlement d'Ordre Intérieur (ROI) à propos du re-check RAPCS.<p>
 		<p><i>Ce message est envoyé au pilote, aux instructeurs et aux gestionnaires de la flotte.</i></p>" ;
