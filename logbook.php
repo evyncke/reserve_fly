@@ -128,8 +128,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 
 // Do we need to cancel the booking?
 if (isset($_REQUEST['cancel']) and $_REQUEST['cancel'] != '') {
-	$result = mysqli_query($mysqli_link, "update $table_bookings set r_cancel_date = sysdate(), r_cancel_who = $userId, r_cancel_address = '" . 
-		getClientAddress() . "' where r_id = $id") ;
+	$result = mysqli_query($mysqli_link, "UPDATE $table_bookings SET r_cancel_date = SYSDATE(), r_cancel_who = $userId, r_cancel_address = '" . 
+		getClientAddress() . "' WHERE r_id = $id") ;
 	if ($result && mysqli_affected_rows($mysqli_link) == 1) {
 		journalise($userId, 'W', "Deleting an old booking ($id): $booking[r_plane] $booking[r_start] $booking[r_end]") ;
 	}
@@ -138,7 +138,7 @@ if (isset($_REQUEST['cancel']) and $_REQUEST['cancel'] != '') {
 // Do we need to delete an entry?
 if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 	$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
-	mysqli_query($mysqli_link, "delete from $table_logbook where l_booking=$id and l_audit_time='$audit_time'") or die("Cannot delete: " . mysql_error()) ;
+	mysqli_query($mysqli_link, "DELETE FROM $table_logbook WHERE l_booking=$id AND l_audit_time='$audit_time'") or die("Cannot delete: " . mysql_error()) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
 		$insert_message = "Carnet de route mis &agrave; jour" ;
 		journalise($userId, 'I', "Logbook entry deleted for booking $id (done at $audit_time).") ;
@@ -149,7 +149,7 @@ if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 }
 
 // Refresh the data from the DB
-$result = mysqli_query($mysqli_link, "select * from $table_logbook 
+$result = mysqli_query($mysqli_link, "SELECT * FROM $table_logbook 
 		where l_plane = '$booking[r_plane]' and l_start_hour is not null and l_start_hour > 0
 		order by l_end desc limit 0,1")
 	or die("Cannot access the plan journey log: " . mysqli_error($mysqli_link)) ;
