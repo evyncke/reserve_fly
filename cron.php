@@ -189,22 +189,22 @@ while ($row = mysqli_fetch_array($result)) {
 		"Ne pas oublier d'entrer les heures moteur du $row[r_plane] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
 	if ($email_subject === FALSE)
 		$email_subject = "Cannot iconv(pilot/$row[name])" ;
-	$email_message = "$row[first_name],<br/><br/>" ;
-	$email_message .= "Afin de garder une trace des compteurs moteur des avions et de planifier les maintenances, le RAPCS demande\n" .
-		"&agrave; tous les pilotes et &eacute;l&egrave;ves d'entrer les heures moteur (et en option les heures de vol ainsi que les a&eacute;roports de d&eacute;part et de destination).\n" .
-		" Cela aide TOUS les pilotes d'avoir ces compteurs &agrave; jour. <b>Nous comptons tous sur vous</b>. La proc&eacute;dure\n" .
+	$email_message = "<p>$row[first_name],</p>" ;
+	$email_message .= "<p>Afin de garder une trace des compteurs moteur des avions et de planifier les maintenances, le RoI RAPCS exige\n" .
+		"que tous les pilotes et &eacute;l&egrave;ves entrent les heures moteur (et en option les heures de vol ainsi que les a&eacute;roports de d&eacute;part et de destination).<br/>" .
+		"Cela aide TOUS les pilotes d'avoir ces compteurs &agrave; jour. <b>Nous comptons tous sur vous</b>. La proc&eacute;dure\n" .
 		"est simple et peut &ecirc;tre effectu&eacute;e sur un smartphone ou une tablette depuis l'a&eacute;rodrome (3G ou WiFi du club).<br/><br/>" .
 		"Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] " .
-		"avec $row[full_name] en tant que pilote.<br/>\n" ;
+		"avec $row[full_name] en tant que pilote.</p>\n" ;
 	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
-	$email_message .= "<br/>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation via ce lien "  .
+	$email_message .= "<p>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation ou l'annuler a posteriori via ce lien "  .
 		"<a href=\"https://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> " .
 		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu " .
 		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle " .
-		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures. " .
-		"<br/><br/>Si le temps vous manque, ou si vous n'avez pas acc&egrave;s &agrave; un PC, pri&egrave;re d'adresser un SMS au <a href=\"tel:+32496547748\">+32.496.54.77.48</a> avec le temps moteur " .
-		" et l'immatriculation de l'avion <i>Ex: $row[r_plane] 3999.45</i>" .
-		"<hr>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!\n" ;
+		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures.</p>" .
+		"<p>Si le temps vous manque, ou si vous n'avez pas acc&egrave;s &agrave; un PC, pri&egrave;re d'adresser un SMS au <a href=\"tel:+32496547748\">+32.496.54.77.48</a> avec le temps moteur " .
+		" et l'immatriculation de l'avion <i>Ex: $row[r_plane] 3999.45</i>.</p>" .
+		"<hr><p>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!</p>" ;
 	$email_message .= allBookings($row['r_plane'], $today, $row['r_pilot']) ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 	$email_header = "From: $managerName <$smtp_from>\r\n" ;
