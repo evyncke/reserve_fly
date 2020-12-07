@@ -43,7 +43,10 @@ header('Pragma: no-cache') ;
 header('Expires: Mon, 01 Jan 1990 00:00:00 GMT') ; // force automatic expiration ;-)
 
 $content = '' ;
-emit_header() ;
+emit_header("X-PUBLISHED-TTL:PT15M" . $eol .
+		"REFRESH-INTERVAL;VALUE=DURATION:P15M" . $eol .
+		"SOURCE;VALUE=URI:https://$_SERVER[SERVER_NAME]:$_SERVER[SERVER_PORT]/" . $eol . 
+			"\tics.php?user=$user_id&auth=$auth" . $eol ) ;
 
 // Start with the specific user bookings
 $result = mysqli_query($mysqli_link, "SELECT *,u.name AS full_name, DATE_SUB(r_start, INTERVAL 1 HOUR) AS alert

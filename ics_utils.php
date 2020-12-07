@@ -61,15 +61,15 @@ function emit_header($headers) {
 	// If this iCalendar is being automatically published to a remote location at regular intervals,
 	// this property SHOULD<33> be set to that interval with a minimum granularity of minutes.
 	// X-PUBLISHED-TTL::PT15M for a 15- minute refresh
-		"X-PUBLISHED-TTL:PT15M" . $eol .
-		"REFRESH-INTERVAL;VALUE=DURATION:P15M" . $eol .
-		"SOURCE;VALUE=URI:https://$_SERVER[SERVER_NAME]:$_SERVER[SERVER_PORT]/" . $eol . 
-			"\t$_SERVER[PHP_SELF]?user=$user_id&auth=$auth" . $eol ) ;
+		$headers) ;
 }
 
 function emit_booking($booking) {
-	global $eol, $default_timezone, $shared_secret, $mysqli_link, $ical_name, $ical_organizer, $table_users ;
+	global $eol, $default_timezone, $shared_secret, $mysqli_link, $ical_name, $ical_organizer, $table_users, $userId ;
+	global $default_airport, $apt_latitude, $apt_longitude ;
 
+	if (!$booking)
+		journalise($userId, 'W', 'emit_booking has received an empty booking') ;
 	$date_flight_start = gmdate('Ymd\THis\Z', strtotime("$booking[r_start] $default_timezone")) ;
 	$date_flight_end =   gmdate('Ymd\THis\Z', strtotime("$booking[r_stop] $default_timezone")) ;
 	$date_time_booking = gmdate('Ymd\THis\Z', strtotime("$booking[r_date] $default_timezone")) ;
