@@ -58,8 +58,8 @@ function allBookings($plane, $day, $me) {
 		and r_cancel_date is null
 		order by r_start") or die("allBookings($plane, $day, $me) : " . mysqli_error($mysqli_link)) ;
 	if (mysqli_num_rows($result) == 0)
-		return "<p><i>Pour votre information, vous &ecirc;tes le/la seul(e) &agrave; avoir r&eacute;serv&eacute; cet avion ce jour-l&agrave;.</i>\n" ;
-	$msg = "<p><i>Pour votre information, d'autres pilotes ont r&eacute;serv&eacute; cet avion le m&ecirc;me jour (utile en cas de retard par exemple):
+		return "\n<p><i>Pour votre information, vous &ecirc;tes le/la seul(e) &agrave; avoir r&eacute;serv&eacute; cet avion ce jour-l&agrave;.</i>\n" ;
+	$msg = "\n<p><i>Pour votre information, d'autres pilotes ont r&eacute;serv&eacute; cet avion le m&ecirc;me jour (utile en cas de retard par exemple):
 <table border=\"1\">
 <tr><td><b>De</b></td><td><b>Fin</b></td><td><b>Nom</b></td><td><b>Mobile</b></td><td><b>E-mail</b></td><td><b>Commentaire</b></td></tr>\n" ;
 	while ($row = mysqli_fetch_array($result)) {
@@ -122,7 +122,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
 	$email_message .= "<p>Vous pouvez g&eacute;rer voire annuler cette r&eacute;servation et remplir le carnet de routes via le site ou via ce lien "  .
 		"<a href=\"http://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> " .
-		"(&agrave; conserver si souhait&eacute; et pr&eacute;vu pour smartphones et tablettes)." ;
+		"(&agrave; conserver si souhait&eacute; et pr&eacute;vu pour smartphones et tablettes).</p>\n" ;
 	$email_message .= allBookings($row['r_plane'], $tomorrow, $row['r_pilot']) ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 	$email_header = "From: $managerName <$smtp_from>\r\n" ;
@@ -139,7 +139,6 @@ while ($row = mysqli_fetch_array($result)) {
 			$email_recipients .= ", $booker[email]" ;
 		}
 		if ($bccTo != '') {
-			$email_header .= "Bcc: $bccTo\r\n" ;
 			$email_recipients .= ", $bccTo" ;
 		}
 	}

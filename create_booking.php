@@ -286,7 +286,8 @@ if ($response['error'] == '') {
 	$result = mysqli_query($mysqli_link, "INSERT INTO $table_bookings(r_plane, r_start, r_stop, r_duration, r_pilot, r_instructor, r_comment, r_crew_wanted, r_pax_wanted,
 			r_from, r_via1, r_via2, r_to, r_type, r_date, r_address, r_who, r_sequence)
 		VALUES('$plane', '$start', '$end', $duration, $pilot_id, $instructor_id, '$comment_db', $crew_wanted, $pax_wanted,
-			'$from_apt', '$via1_apt', '$via2_apt', '$to_apt', $booking_type, sysdate(), '" . getClientAddress() . "', $userId, 0)") or die(mysqli_error($mysqli_link));
+			'$from_apt', '$via1_apt', '$via2_apt', '$to_apt', $booking_type, sysdate(), '" . getClientAddress() . "', $userId, 0)") 
+			or journalise($userId, 'E', 'Cannot insert into DB: ' . mysqli_error($mysqli_link));
 
 	if (mysqli_affected_rows($mysqli_link) == 1) {
 		$booking_id = mysqli_insert_id($mysqli_link) ;
@@ -294,7 +295,7 @@ if ($response['error'] == '') {
 		// If for a customer flight, then let's modify the flight
 		if ($customer_id > 0) {
 			mysqli_query($mysqli_link, "UPDATE $table_flights SET f_booking = $booking_id, f_date_scheduled = SYSDATE() WHERE f_id = $customer_id")
-				or die("Cannot update flight: " . mysqli_error($mysqli_link)) ;
+				or journalise($userId, 'E', "Cannot update flight: " . mysqli_error($mysqli_link)) ;
 		}
 		if ($booking_type == BOOKING_MAINTENANCE) {
 			$response['message'] = "La maintenance de $plane du $start au $end: est confirm&eacute;e" ;
@@ -330,7 +331,6 @@ if ($response['error'] == '') {
 			"<a href=\"$request_scheme://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> (&agrave; conserver si souhait&eacute;).</p>" ;
 
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
-//		$email_header = '' ; // Let's use the default From -- currently defined as no-reply
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		if ($test_mode) {
 			$email_header .= "To: eric-test <eric@vyncke.org>\r\n" ;
@@ -350,6 +350,7 @@ if ($response['error'] == '') {
 				$email_recipients .= ", $fleetEmail" ;
 			}
 			if ($bccTo != '') {
+					$email_header .= "Bcc: $bccTo\r\n" ;
 					$email_recipients .= ", $bccTo" ;
 			}
 		}
