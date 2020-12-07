@@ -326,9 +326,10 @@ if ($response['error'] == '') {
 		$request_scheme = ($_SERVER['REQUEST_SCHEME'] != '') ? $_SERVER['REQUEST_SCHEME'] : 'http' ; // TODO pourquoi cela ne fonctionne pas???
 		$request_scheme = 'https' ;
 		$directory_prefix = '/resa' ;
-		$email_message .= "Vous pouvez lier votre calendrier &agrave; cette r&eacute;servation via <a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">ce calendrier (iCal)</a>.</p>" .
+		$email_message .= "Vous pouvez lier votre calendrier &agrave; cette r&eacute;servation via <a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">ce calendrier (iCal)</a>.</p>\n" .
 			"<p>Vous pouvez g&eacute;rer (modifier ou annuler) cette r&eacute;servation via le site ou via ce lien "  .
-			"<a href=\"$request_scheme://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> (&agrave; conserver si souhait&eacute;).</p>" ;
+			"<a href=\"$request_scheme://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> (&agrave; conserver si souhait&eacute;).\n" .
+			"Une invitation iCalendar est aussi jointe afin de l'importer dans votre calendrier.</p>" ;
 
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
@@ -361,12 +362,43 @@ if ($response['error'] == '') {
 		//
 //		$smtp_info['debug'] = True;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
+		// Multiple part body to be able to attach .ICS and other files/images
+		$headers['MIME-Version'] = '1.0' ;
+		$delimiteur = "Part-".md5(uniqid(rand())) ;
+		$email_header .= "Content-Type: multipart/mixed; boundary=\"$delimiteur\"\r\n" ;
+		$email_message = "Ce texte est envoye en format MIME et HTML donc peut ne pas etre lisible sur cette plateforme.\r\n\r\n" .
+			"--$delimiteur\r\n" .
+			"Content-Type: text/html; charset=UTF-8\r\n" .
+			"Content-Disposition: inline\r\n" .
+			"\r\n<html><body>" . 
+			$email_message  .
+			"</body></htlm>\r\n\r\n" ;
+		// Prepare an ICS file to be attached
+		require_once('ics_utils.php') ;
+		$content = '' ;
+		emit_header('') ;
+		// Should actually send the booking ! by reconstructing first a pseudo $booking_row from inputs
+		$this_result = mysqli_query($mysqli_link, "SELECT *,u.name AS full_name, DATE_SUB(r_start, INTERVAL 1 HOUR) AS alert
+			FROM $table_bookings b JOIN $table_users u ON b.r_pilot = u.id, $table_person p
+			WHERE r_id = $booking_id") or journalise($userId, "E", "Impossible de lire les reservations: " . mysqli_error($mysqli_link));	
+		emit_booking(mysqli_fetch_array($this_result)) ; // Should be there as it is just created	
+		emit_trailer() ;
+		$email_message .= "--$delimiteur\r\n" .
+			"Content-Type: text/calendar; charset=UTF-8; name=\"booking-$booking_id.ics\"\r\n" .
+			"Content-Disposition: attachment; filename=\"booking-$booking_id.ics\"\r\n" .
+			"Content-ID: <booking-$booking_id-ics@" . $smtp_info['localhost'] . ">\r\n" . 
+			"Content-Transfer-Encoding: base64\r\n" .
+			"\r\n" .
+			chunk_split(base64_encode($content)) .
+			"\r\n\r\n" .
+			"--$delimiteur--\r\n"; // last delimiter must be followed by --
+		// Now let's send it !
 		if ($test_mode)
 			@smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
 		else
 			@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 		if ($booking_type == BOOKING_MAINTENANCE)
-			journalise($userId, 'W', "$plane is out for maintenance #$booking_ido by $booker[name] ($comment). $start => $end") ;
+			journalise($userId, 'W', "$plane is out for maintenance #$booking_id by $booker[name] ($comment). $start => $end") ;
 		else {
 			journalise($userId, 'I', "Booking #$booking_id of $plane done for $pilot[name] by $booker[name] ($comment). $start => $end") ;
 			// Check for long booking...
