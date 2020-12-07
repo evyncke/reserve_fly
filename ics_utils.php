@@ -103,6 +103,7 @@ function emit_booking($booking) {
 		"URL:" . ((isset($_SERVER['HTTPS'])) ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]/resa/booking.php?" . $eol . "\tid=$booking[r_id]&auth=$auth" . $eol .
 		"SUMMARY:Vol sur $booking[r_plane]" . $eol ) ; // SUMMARY is the main visible thing in the calendar
 	emit('TRANSP:OPAQUE' . $eol .
+		'CLASS:PRIVATE' . $eol .
 		'X-MICROSOFT-CDO-ALLDAYEVENT:FALSE' . $eol .
 		'X-MICROSOFT-CDO-IMPORTANCE:1' . $eol .
 		'X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY' . $eol .
