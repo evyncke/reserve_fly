@@ -146,7 +146,16 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
-	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
+	$delimiteur = "-----=".md5(uniqid(rand())) ;
+	$email_header .= "Content-Type: multipart/related; boundary=\"$delimiteur\"\r\n" ;
+	$email_message = "Ce texte est envoye en format MIME et HTML donc peut-etre pas lisible sur cette plateforme.\r\n" .
+		"--$delimiteur\r\n" .
+		"Content-Type: text/html; charset=UTF-8\r\n" .
+		"\r\n" . 
+		$email_message .
+		"\r\n\r\n" .
+		"--$delimiteur--\r\n" ;
+//	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
 	$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 	if ($test_mode)
 		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
