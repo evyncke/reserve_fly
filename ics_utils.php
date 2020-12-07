@@ -44,8 +44,8 @@ function emit_long($line) {
 	$content .= wordwrap($line, 75, $eol . "\t", true) ;
 }
 
-function emit_header() {
-	global $eol, $test_mode, $user_id, $auth, $favicon, $ical_name, $ical_organizer ;
+function emit_header($headers) {
+	global $eol, $test_mode, $favicon, $ical_name, $ical_organizer ;
 
 	emit("BEGIN:VCALENDAR" . $eol .
 		"PRODID:-//$_SERVER[HTTP_HOST]//Fly-Reserve//FR" . $eol .
@@ -88,20 +88,30 @@ function emit_booking($booking) {
 		"UID:booking-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		// DESCRIPTION: the details in the description
 		"DESCRIPTION:Réservation du $booking[r_plane] du " . $eol .
-			"\t$booking[r_start] au $booking[r_stop]." . $eol . 
-			"\tPilote: " . db2web($booking['full_name']) . '. ' . $eol ) ;
+			"\t$booking[r_start] au $booking[r_stop].\\n" . $eol . 
+			"\tPilote: " . db2web($booking['full_name']) . '.\n' . $eol ) ;
 	if ($booking['r_instructor'] > 0) {
-		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $booking[r_instructor]") ;
+		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $booking[r_instructor]") 
+			or journalise($userId, 'E', 'emit_booking: cannot fetch instructor: ' . mysqli_error($mysqli_link)) ;
 		$instructor = mysqli_fetch_array($result) ;
-		emit("\tInstructeur: " . db2web($instructor['name']) . '. ' . $eol) ;
+		emit("\tInstructeur: " . db2web($instructor['name']) . '.\n' . $eol) ;
 	}
 	if ($booking['r_comment'] != '')
-		emit("\tCommentaire: " . db2web($booking['r_comment']) . $eol) ;
+		emit("\tCommentaire: " . db2web($booking['r_comment']) . '.\n' . $eol) ;
 
 	emit("SEQUENCE:$booking[r_sequence]" . $eol .
 		"URL:" . ((isset($_SERVER['HTTPS'])) ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]/resa/booking.php?" . $eol . "\tid=$booking[r_id]&auth=$auth" . $eol .
 		"SUMMARY:Vol sur $booking[r_plane]" . $eol ) ; // SUMMARY is the main visible thing in the calendar
-	emit('TRANSP:OPAQUE' . $eol) ;
+	emit('TRANSP:OPAQUE' . $eol .
+		'X-MICROSOFT-CDO-ALLDAYEVENT:FALSE' . $eol .
+		'X-MICROSOFT-CDO-IMPORTANCE:1' . $eol .
+		'X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY' . $eol .
+		'X-MICROSOFT-DONOTFORWARDMEETING:FALSE' . $eol .
+		'X-MICROSOFT-LOCATIONDISPLAYNAME:' . $default_airport . ' airport' . $eol .
+		'X-MICROSOFT-LOCATIONCITY:Spa' . $eol .
+		'X-MICROSOFT-LOCATIONCOUNTRY:Belgium' . $eol . 
+		'X-MICROSOFT-LATITUDE:' . $apt_latitude . $eol .
+		'X-MICROSOFT-LONGITUDE:' . $apt_longitude . $eol ) ;
 // generate also an alarm one hour before, per RFC 5545 it MUST be included in the VEVENT
 // it MUST also include ACTION & TRIGGER
 	emit("BEGIN:VALARM" . $eol) ;

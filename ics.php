@@ -84,5 +84,5 @@ $content
 ---
 ", 'Content-Type: text/plain; charset="UTF-8"') ;
 
-journalise($user_id, "I", "ICS download: $_SERVER[HTTP_USER_AGENT]") ;
+//journalise($user_id, "I", "ICS download: $_SERVER[HTTP_USER_AGENT]") ;
 ?>
