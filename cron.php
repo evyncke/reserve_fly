@@ -376,9 +376,21 @@ while ($row = mysqli_fetch_array($result)) {
 	}
 }
 
+// Vérifier si tous les pilotes/élèves (club) existent en $table_users (Joomla)
+// enlever si nécessaire
+print(date('Y-m-d H:i:s').": checking whether entries $table_person exist in $table_users.\n") ;
+$result = mysqli_query($mysqli_link, "SELECT *
+	FROM $table_person p
+	WHERE NOT EXISTS ( SELECT * FROM $table_users u WHERE u.id = p.jom_id)")
+	or die(date('Y-m-d H:i:s').": cannot read $table_users and $table_person, " . mysqli_error($mysqli_link)) ;
+while (FALSE and $row = mysqli_fetch_array($result)) {
+	print(date('Y-m-d H:i:s').": $row[name]/$row[email]/$row[id] does not exist in Joomla (previously known as $row[jom_id]") ;
+	journalise($row['jom_id'], 'W', "Member $row[name]/$row[email]/$row[id] does not exist in Joomla (previously known as $row[jom_id]).") ;
+}
+
 // Vérifier si tous les pilotes/élèves ont des informations équivalentes en $table_users and $rapcs_person (ex OpenFlyers)
 // Ajouter/enlever si nécessaire
-print(date('Y-m-d H:i:s').": checking entries in $table_users and $table_person.\n") ;
+print(date('Y-m-d H:i:s').": checking email/name entries in $table_users and $table_person.\n") ;
 // $result = mysqli_query($mysqli_link, "select *, u.id as j_id, u.email as j_email, p.email as p_email, u.name as j_name, p.user_name as p_name
 $result = mysqli_query($mysqli_link, "select *, u.id as j_id, u.email as j_email, p.email as p_email
 	from $table_users u join $table_user_usergroup_map g on u.id = g.user_id and g.group_id in ($joomla_student_group, $joomla_pilot_group, $joomla_instructor_group, $joomla_admin_group, $joomla_member_group)
