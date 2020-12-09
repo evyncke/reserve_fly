@@ -50,15 +50,15 @@ $mime_preferences = array(
 
 
 function allBookings($plane, $day, $me) {
-	global $table_bookings, $table_person, $table_users, $mysqli_link ;
+	global $table_bookings, $table_person, $table_users, $mysqli_link, $userId ;
 
 	$result = mysqli_query($mysqli_link, "select *, time(r_start) as start, time(r_stop) as stop, u.name as full_name
 		from $table_bookings b join $table_users u on b.r_pilot = u.id, $table_person p
 		where p.jom_id = u.id and date(r_start) = '$day' and r_plane = '$plane' and r_pilot != $me and r_type != " . BOOKING_MAINTENANCE . "
 		and r_cancel_date is null
-		order by r_start") or die("allBookings($plane, $day, $me) : " . mysqli_error($mysqli_link)) ;
+		order by r_start") or journalise($userId, 'E', "allBookings($plane, $day, $me) : " . mysqli_error($mysqli_link)) ;
 	if (mysqli_num_rows($result) == 0)
-		return "\n<p><i>Pour votre information, vous &ecirc;tes le/la seul(e) &agrave; avoir r&eacute;serv&eacute; cet avion ce jour-l&agrave;.</i>\n" ;
+		return "\n<p><i>Pour votre information, vous &ecirc;tes le/la seul(e) &agrave; avoir r&eacute;serv&eacute; cet avion ce jour-l&agrave;.</i></p>\n" ;
 	$msg = "\n<p><i>Pour votre information, d'autres pilotes ont r&eacute;serv&eacute; cet avion le m&ecirc;me jour (utile en cas de retard par exemple):
 <table border=\"1\">
 <tr><td><b>De</b></td><td><b>Fin</b></td><td><b>Nom</b></td><td><b>Mobile</b></td><td><b>E-mail</b></td><td><b>Commentaire</b></td></tr>\n" ;
@@ -145,13 +145,13 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
-	$delimiteur = "-----=".md5(uniqid(rand())) ;
-	$email_header .= "Content-Type: multipart/related; boundary=\"$delimiteur\"\r\n" ;
+	$delimiteur = "Part=".md5(uniqid(rand())) ;
+	$email_header .= "Content-Type: multipart/mixed; boundary=\"$delimiteur\"\r\n" ;
 	$email_message = "Ce texte est envoye en format MIME et HTML donc peut-etre pas lisible sur cette plateforme.\r\n" .
 		"--$delimiteur\r\n" .
 		"Content-Type: text/html; charset=UTF-8\r\n" .
 		"\r\n" . 
-		$email_message .
+		"<html><body>$email_message</body></html>" .
 		"\r\n\r\n" .
 		"--$delimiteur--\r\n" ;
 //	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
@@ -198,22 +198,22 @@ while ($row = mysqli_fetch_array($result)) {
 		$email_subject = "Cannot iconv(pilot/$row[name])" ;
 	$email_message = "<p>$row[first_name],</p>" ;
 	$email_message .= "<p>Afin de garder une trace des compteurs moteur des avions et de planifier les maintenances, le RoI RAPCS exige\n" .
-		"que tous les pilotes et &eacute;l&egrave;ves entrent les heures moteur (et en option les heures de vol ainsi que les a&eacute;roports de d&eacute;part et de destination).<br/>" .
+		"que tous les pilotes et &eacute;l&egrave;ves entrent les heures moteur (et en option les heures de vol ainsi que les a&eacute;roports de d&eacute;part et de destination).<br/>\n" .
 		"Cela aide TOUS les pilotes d'avoir ces compteurs &agrave; jour. <b>Nous comptons tous sur vous</b>. La proc&eacute;dure\n" .
-		"est simple et peut &ecirc;tre effectu&eacute;e sur un smartphone ou une tablette depuis l'a&eacute;rodrome (3G ou WiFi du club).<br/><br/>" .
-		"Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] " .
+		"est simple et peut &ecirc;tre effectu&eacute;e sur un smartphone ou une tablette depuis l'a&eacute;rodrome (3G ou WiFi du club).<br/><br/>\n" .
+		"Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] \n" .
 		"avec $row[full_name] en tant que pilote.</p>\n" ;
 	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
-	$email_message .= "<p>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation ou l'annuler a posteriori via ce lien "  .
-		"<a href=\"https://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> " .
-		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu " .
-		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle " .
-		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures.</p>" .
+	$email_message .= "<p>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation ou l'annuler a posteriori via ce lien \n"  .
+		"<a href=\"https://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> \n" .
+		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu \n" .
+		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle \n" .
+		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures.</p>\n" .
 		"<p>Si le temps vous manque, ou si vous n'avez pas acc&egrave;s &agrave; un PC, pri&egrave;re d'adresser un SMS au <a href=\"tel:+32496547748\">+32.496.54.77.48</a> avec le temps moteur " .
-		" et l'immatriculation de l'avion <i>Ex: $row[r_plane] 3999.45</i>.</p>" .
-		"<hr><p>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!</p>" ;
+		" et l'immatriculation de l'avion <i>Ex: $row[r_plane] 3999.45</i>.</p>\n" .
+		"<hr><p>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!</p>\n" ;
 	$email_message .= allBookings($row['r_plane'], $today, $row['r_pilot']) ;
-	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
+	if ($test_mode) $email_message .= "<hr><p><font color=red><B>Ceci est une version de test</b></font>.</p>" ;
 	$email_header = "From: $managerName <$smtp_from>\r\n" ;
 	if (! $test_mode) {
 		$email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
@@ -399,8 +399,8 @@ $result = mysqli_query($mysqli_link, "select *, u.id as j_id, u.email as j_email
 while ($row = mysqli_fetch_array($result)) {
 	if ($row['p_email'] != $row['j_email']) {
 		print(date('Y-m-d H:i:s').": $row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
-		journalise($row['id'], 'W', "$row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
-		$status = mysqli_query($mysqli_link, "update $table_person set email = '$row[j_email]' where jom_id = $row[j_id]");
+		journalise($row['j_id'], 'W', "$row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
+		$status = mysqli_query($mysqli_link, "UPDATE $table_person SET email = '$row[j_email]' WHERE jom_id = $row[j_id]");
 		if (!$status) {
 			journalise($row['j_id'], 'E', mysqli_error($mysqli_link) . " for row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
 		}
