@@ -84,7 +84,8 @@ function emit_booking($booking) {
 		"DTSTAMP:$date_time_booking" . $eol .
 	    "DTSTART:$date_flight_start" . $eol .
 		"DTEND:$date_flight_end" . $eol .
-		"ORGANIZER:$ical_organizer" . $eol .
+		// TODO should use the booker ?
+		"ORGANIZER;CN=$ical_organizer:mailto:bounce@spa-aviation.be" . $eol .
 		"UID:booking-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		// DESCRIPTION: the details in the description
 		"DESCRIPTION:Réservation du $booking[r_plane] du " . $eol .
@@ -104,6 +105,7 @@ function emit_booking($booking) {
 		"SUMMARY:Vol sur $booking[r_plane]" . $eol ) ; // SUMMARY is the main visible thing in the calendar
 	emit('TRANSP:OPAQUE' . $eol .
 		'CLASS:PRIVATE' . $eol .
+		'LOCATION:' . $default_airport . ' airport' . $eol .
 		'X-MICROSOFT-CDO-ALLDAYEVENT:FALSE' . $eol .
 		'X-MICROSOFT-CDO-IMPORTANCE:1' . $eol .
 		'X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY' . $eol .
@@ -117,12 +119,12 @@ function emit_booking($booking) {
 // it MUST also include ACTION & TRIGGER
 	emit("BEGIN:VALARM" . $eol) ;
 	emit("ACTION:DISPLAY" . $eol) ; // ACTION is mandatory... ACTION:DISPLAY MUST include a DESCRIPTION
-	emit("DESCRIPTION:Vol sur $booking[r_plane]" . $eol) ;
+	emit("DESCRIPTION:REMINDER Vol sur $booking[r_plane]" . $eol) ;
 	emit(
-//		"TRIGGER;RELATED=start:-PT1H" . $eol .
+		"TRIGGER;RELATED=START:-PT1H" . $eol .
 		"X-WR-ALARMUID:alert-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		"UID:alert-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
-		"TRIGGER:$date_alert" . $eol .
+//		"TRIGGER:$date_alert" . $eol .
 		"X-APPLE-DEFAULT-ALARM:TRUE" . $eol .
 		"END:VALARM" . $eol);
 // End of event

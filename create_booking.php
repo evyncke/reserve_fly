@@ -326,7 +326,7 @@ if ($response['error'] == '') {
 		$request_scheme = ($_SERVER['REQUEST_SCHEME'] != '') ? $_SERVER['REQUEST_SCHEME'] : 'http' ; // TODO pourquoi cela ne fonctionne pas???
 		$request_scheme = 'https' ;
 		$directory_prefix = '/resa' ;
-		$email_message .= "Vous pouvez lier votre calendrier &agrave; cette r&eacute;servation via <a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">ce calendrier (iCal)</a>.</p>\n" .
+		$email_message .= "<p>Vous pouvez lier votre calendrier &agrave; cette r&eacute;servation via <a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">ce calendrier (iCal)</a>.</p>\n" .
 			"<p>Vous pouvez g&eacute;rer (modifier ou annuler) cette r&eacute;servation via le site ou via ce lien "  .
 			"<a href=\"$request_scheme://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> (&agrave; conserver si souhait&eacute;).\n" .
 			"Une invitation iCalendar est aussi jointe afin de l'importer dans votre calendrier.</p>" ;
