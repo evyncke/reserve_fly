@@ -67,7 +67,7 @@ function allBookings($plane, $day, $me) {
 		$row['r_comment'] = db2web($row['r_comment']) ; // SQL DB is latin1 and the rest is in UTF-8
 		$msg .= "<tr><td>$row[start]</td><td>$row[stop]</td><td>$row[full_name]</td><td><a href=\"tel:$row[cell_phone]\">$row[cell_phone]</a></td><td><a href=\"mailto:$row[email]\">$row[email]</a></td><td>$row[r_comment]</tr>\n" ;
 	}
-	$msg .= "\n</table>\n" ;
+	$msg .= "\n</table>\n</p>\n" ;
 	return $msg ;
 }
 
@@ -110,8 +110,8 @@ while ($row = mysqli_fetch_array($result)) {
 			"Rappel de la réservation de $row[r_plane] par $booker[name] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
 	if ($email_subject === FALSE)
 		$email_subject = "Cannot iconv(pilot/$row[name])" ;
-	$email_message = "$row[first_name],<br/><br/>" ;
-	$email_message .= "&agrave; titre informatif, voici un rappel de la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] " ;
+	$email_message = "<p>$row[first_name],</p>" ;
+	$email_message .= "<p>&agrave; titre informatif, voici un rappel de la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] " ;
 	if ($row['comment'] != '')
 		$email_message .= "avec comme commentaire: <i>$row[r_comment]</i> " ;
 	$email_message .= "avec $row[full_name] en pilote.<br/>" ;
@@ -120,13 +120,12 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['r_pilot'] != $row['r_who'])
 		$email_message .= "Cette op&eacute;ration a &eacute;t&eacute; effectu&eacute;e par $booker[name]." ;
 	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
-	$email_message .= "<p>Vous pouvez g&eacute;rer voire annuler cette r&eacute;servation et remplir le carnet de routes via le site ou via ce lien "  .
-		"<a href=\"http://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> " .
+	$email_message .= "</p>\n<p>Vous pouvez g&eacute;rer voire annuler cette r&eacute;servation et remplir le carnet de routes via le site ou via ce lien \n"  .
+		"<a href=\"http://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> \n" .
 		"(&agrave; conserver si souhait&eacute; et pr&eacute;vu pour smartphones et tablettes).</p>\n" ;
 	$email_message .= allBookings($row['r_plane'], $tomorrow, $row['r_pilot']) ;
-	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
+	if ($test_mode) $email_message .= "<hr><p><font color=red><B>Ceci est une version de test</b></font></p>" ;
 	$email_header = "From: $managerName <$smtp_from>\r\n" ;
-//	$email_header = '' ; // let's use the Reply-To
 	if (!$test_mode) {
 		$email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
 		$email_recipients = $row['email'] ;
@@ -277,20 +276,20 @@ while ($row = mysqli_fetch_array($result)) {
 		"Rappel: entrer les heures moteur de votre vol sur $row[r_plane] du $row[r_start] [#$booking_id]", $mime_preferences) ;
 	if ($email_subject === FALSE)
 		$email_subject = "Cannot iconv(pilot/$row[name])" ;
-	$email_message = "<p>$row[first_name],</p>" ;
-	$email_message .= "<p>Il est important que tous les pilotes et &eacute;l&egrave;ves respectent le r&egrave;glement d'ordre int&eacute;rieur du RAPCS.</p>" .
-		"<p>Afin de garder une trace des compteurs moteur des avions et de planifier les maintenances, et de v&eacute;rifier si les pilotes respectent " .
+	$email_message = "<p>$row[first_name],</p>\n" ;
+	$email_message .= "<p>Il est important que tous les pilotes et &eacute;l&egrave;ves respectent le r&egrave;glement d'ordre int&eacute;rieur du RAPCS.</p>\n" .
+		"<p>Afin de garder une trace des compteurs moteur des avions et de planifier les maintenances, et de v&eacute;rifier si les pilotes respectent \n" .
 		"les conditions <i>check club</i> avant de prendre un avion, le RAPCS demande\n" .
 		"&agrave; tous les pilotes et &eacute;l&egrave;ves d'entrer les heures moteur (et en option les heures de vol ainsi que les a&eacute;roports de d&eacute;part et de destination).\n" .
-		" <b>Nous comptons tous sur vous</b>.</p>" .
-		"<p>Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] " .
+		" <b>Nous comptons tous sur vous</b>.</p>\n" .
+		"<p>Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] \n" .
 		"avec $row[full_name] en tant que pilote.</p>\n" ;
 	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
-	$email_message .= "<p>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation via ce lien "  .
-		"<a href=\"https://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> " .
-		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu " .
-		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle " .
-		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures voire d'annuler a posteriori une r&eacute;servation.</p>" .
+	$email_message .= "<p>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation via ce lien \n"  .
+		"<a href=\"https://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> \n" .
+		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu \n" .
+		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle \n" .
+		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures voire d'annuler a posteriori une r&eacute;servation.</p>\n" .
 		"<hr>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!\n" ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 	$email_header = "From: $managerName <$smtp_from>\r\n" ;

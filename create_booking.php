@@ -372,7 +372,7 @@ if ($response['error'] == '') {
 			"Content-Disposition: inline\r\n" .
 			"\r\n<html><body>" . 
 			$email_message  .
-			"</body></htlm>\r\n\r\n" ;
+			"</body></html>\r\n\r\n" ;
 		// Prepare an ICS file to be attached
 		require_once('ics_utils.php') ;
 		$content = '' ;
@@ -384,7 +384,7 @@ if ($response['error'] == '') {
 		emit_booking(mysqli_fetch_array($this_result)) ; // Should be there as it is just created	
 		emit_trailer() ;
 		$email_message .= "--$delimiteur\r\n" .
-			"Content-Type: text/calendar; charset=UTF-8; name=\"booking-$booking_id.ics\"\r\n" .
+			"Content-Type: text/calendar; charset=\"utf-8\"; method=REQUEST; name=\"booking-$booking_id.ics\"\r\n" .
 			"Content-Disposition: attachment; filename=\"booking-$booking_id.ics\"\r\n" .
 			"Content-ID: <booking-$booking_id-ics@" . $smtp_info['localhost'] . ">\r\n" . 
 			"Content-Transfer-Encoding: base64\r\n" .
