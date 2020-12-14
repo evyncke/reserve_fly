@@ -117,11 +117,10 @@ function emit_booking($booking) {
 		'X-MICROSOFT-LONGITUDE:' . $apt_longitude . $eol ) ;
 // generate also an alarm one hour before, per RFC 5545 it MUST be included in the VEVENT
 // it MUST also include ACTION & TRIGGER
-	emit("BEGIN:VALARM" . $eol) ;
-	emit("ACTION:DISPLAY" . $eol) ; // ACTION is mandatory... ACTION:DISPLAY MUST include a DESCRIPTION
-	emit("DESCRIPTION:REMINDER Vol sur $booking[r_plane]" . $eol) ;
-	emit(
-		"TRIGGER;RELATED=START:-PT1H" . $eol .
+	emit("BEGIN:VALARM" . $eol .
+		"ACTION:DISPLAY" . $eol . // ACTION is mandatory... ACTION:DISPLAY MUST include a DESCRIPTION
+		"DESCRIPTION:REMINDER Vol sur $booking[r_plane]" . $eol .
+		"TRIGGER;RELATED=START:-PT01H00M00S" . $eol .
 		"X-WR-ALARMUID:alert-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		"UID:alert-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 //		"TRIGGER:$date_alert" . $eol .
