@@ -243,19 +243,26 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		$email_header .= "To: $fleetName <$fleetEmail>, $pilot[name] <$pilot[email]>\r\n" ;
-		$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>\r\n" ;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
-		if ($userRatingValid)
+		$email_recipients = "$fleetEmail,fis@spa-aviation.be,$pilot[email]" ;
+		if ($userRatingValid) {
+			$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>\r\n" ;
 			$subject = "La réservation de $plane devrait être refusée pour $pilot[name]/$userFullName" ;
-		else
-			$subject =  "Validité(s) expirée(s) pour $pilot[name]... pour la réservation de $plane" ;
-		@smtp_mail("$fleetEmail,fis@spa-aviation.be,$pilot[email],eric@vyncke.org", substr(iconv_mime_encode('Subject', $subject), 9), $intro  . $validity_msg . $message, $email_header) ;
+		} else {
+			$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>, $managerName <$managerEmail>\r\n" ;
+			$email_recipients .= ",$managerEmail" ;
+			$subject =  "Validité expirée pour $pilot[name]/$userFullName... pour la réservation de $plane" ;
+		}
+		if ($bccTo)
+			$email_recipients .= ",$bccTo" ;
+		@smtp_mail($email_recipients, substr(iconv_mime_encode('Subject', $subject), 9), $intro  . $validity_msg . $message, $email_header) ;
+		journalise($pilot_id, "D", "Email sent with $subject") ;
 //		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
-	} else {
+	} else if ($bccTo) {
 		journalise($pilot_id, "I", "Check club: Cette réservation pour $plane est autorisée") ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
-		$email_header .= "To: <evyncke@cisco.com>\r\n" ;
-		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane autorisée pour $pilot[name]/$userFullName"), 9), $intro . $validity_msg . $message, $email_header) ;
+		$email_header .= "To: $bccTo\r\n" ;
+		@smtp_mail($bccTo, substr(iconv_mime_encode('Subject',"Réservation $plane autorisée pour $pilot[name]/$userFullName"), 9), $intro . $validity_msg . $message, $email_header) ;
 	}
 } else // End of checks for normal pilot 
 	journalise($pilot_id, "D", "Check club is not required") ;
