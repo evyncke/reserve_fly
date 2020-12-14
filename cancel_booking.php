@@ -94,7 +94,7 @@ if ($response['error'] == '') {
 			$email_subject =  iconv_mime_encode('Subject',
 				"Annulation de la mise en maintenance de $plane par $booker[name] [#$id]",
 					$mime_preferences) ;
-			$email_message = "La maintenance du $booking_start au $booking_end sur le $plane " ;
+			$email_message = "<p>La maintenance du $booking_start au $booking_end sur le $plane " ;
 			$email_message .= "est annul&eacute;e.<br/>" ;
 		} else {
 			$response['message'] = "La r&eacute;servation de $plane du $booking_start au $booking_end: est annul&eacute;e" ;
@@ -103,12 +103,13 @@ if ($response['error'] == '') {
 					$mime_preferences) ;
 			if ($email_subject === FALSE)
 				$email_subject = "Cannot iconv(pilot/$pilot[name])" ;
-			$email_message = "La r&eacute;servation du $booking_start au $booking_end sur le $plane " ;
-			$email_message .= "avec $pilot[name] en pilote est annul&eacute;e.<br/>" ;
+			$email_message = "<p>La r&eacute;servation du $booking_start au $booking_end sur le $plane " ;
+			$email_message .= "avec $pilot[name] en pilote est annul&eacute;e.<br/>\n" ;
 		}
-		$email_message .= "Cette op&eacute;ration a &eacute;t&eacute; effectu&eacute;e par $booker[name]. " ;
-		if ($reason) $email_message .= "La raison donn&eacute;e est: <i>" . trim($_REQUEST['reason']) . "</i>." ;
-		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
+		$email_message .= "Cette op&eacute;ration a &eacute;t&eacute; effectu&eacute;e par $booker[name]. \n" ;
+		if ($reason) $email_message .= "La raison donn&eacute;e est: <i>" . trim($_REQUEST['reason']) . "</i>.\n" ;
+		$email_message .= "</p>\n" ;
+		if ($test_mode) $email_message .= "<hr><p><font color=red><B>Ceci est une version de test</b></font></p>\n" ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		if (!$test_mode) {
 			$email_header .= "To: $pilot[name] <$pilot[email]>\r\n" ;
