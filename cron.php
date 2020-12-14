@@ -290,7 +290,7 @@ while ($row = mysqli_fetch_array($result)) {
 		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu \n" .
 		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle \n" .
 		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures voire d'annuler a posteriori une r&eacute;servation.</p>\n" .
-		"<hr>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!\n" ;
+		"<hr><p>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!</p>\n" ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
 	$email_header = "From: $managerName <$smtp_from>\r\n" ;
 	if (! $test_mode or TRUE) {
@@ -314,7 +314,7 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($test_mode)
 		smtp_mail("eric.vyncke@uliege.be", substr($email_subject, 9), $email_message, $email_header) ;
 	else
-		@smtp_mail($email_recipients . ",eric@vyncke.org", substr($email_subject, 9), $email_message, $email_header) ;
+		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
 	$engine_reminders ++ ;
 	print(date('Y-m-d H:i:s').": after flight engine reminder(s) (after flight) sent by email to $email_recipients.\n") ;
 	if (! is_resource($mysqli_link)) { // Naive ? attempt to reconnect in case of lost connection...
@@ -372,7 +372,7 @@ while ($row = mysqli_fetch_array($result)) {
 		if ($test_mode)
 			smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 		else
-			@smtp_mail("$row[email],eric@vyncke.org", substr($email_subject, 9), $email_message, $email_header) ;
+			@smtp_mail("$row[email]", substr($email_subject, 9), $email_message, $email_header) ;
 	}
 }
 
@@ -383,9 +383,11 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	FROM $table_person p
 	WHERE NOT EXISTS ( SELECT * FROM $table_users u WHERE u.id = p.jom_id)")
 	or die(date('Y-m-d H:i:s').": cannot read $table_users and $table_person, " . mysqli_error($mysqli_link)) ;
-while (FALSE and $row = mysqli_fetch_array($result)) {
+while ($row = mysqli_fetch_array($result)) {
 	print(date('Y-m-d H:i:s').": $row[name]/$row[email]/$row[id] does not exist in Joomla (previously known as $row[jom_id]") ;
-	journalise($row['jom_id'], 'W', "Member $row[name]/$row[email]/$row[id] does not exist in Joomla (previously known as $row[jom_id]).") ;
+	journalise($row['jom_id'], 'W', "Member $row[name]/$row[email]/$row[id] does not exist in Joomla (previously known as $row[jom_id]), setting it to NULL.") ;
+	mysqli_query($mysqli_link, "UPDATE $table_person SET jom_id = NULL WHERE id = $row[id]")
+		or journalise($row['jom_id'], "E", "Cannot nullify joomla ID : " . mysqli_error($mysqli_link)) ;
 }
 
 // Vérifier si tous les pilotes/élèves ont des informations équivalentes en $table_users and $rapcs_person (ex OpenFlyers)
