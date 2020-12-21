@@ -136,8 +136,6 @@ function displayClock() {
 function refreshPlanningTableHeader() {
 	var rowHeader, i, hour, minute ;
 
-	console.log('refreshPlanningTableTopRow(), nowMinute = ' + nowMinute) ;
-
 	// Build the top row with cells per 15 minutes
         rowHeader = planePlanningTable.rows[0];
         for (i = 1, hour = planningStartHour, minute = 0 ; hour < planningStopHour; i++, minute += 15) {
@@ -639,9 +637,6 @@ function refreshEphemerides() {
 				// response.timezone_offset is the UTC offset in seconds (positive is EAST, e.g. Spa CEST = 7200
 				// Date().getTimezoneOffset() is the UTC offset in minute (positive is WEST, e.g. PST = 420)
 				offsetBrowserAirfield = (0 + parseInt(response.timezone_offset) + 60 * (new Date().getTimezoneOffset())) * 1000 ;
-				console.log("response.timezone_offset = ", parseInt(response.timezone_offset)) ;
-				console.log("getTimezoneOffset = ", new Date().getTimezoneOffset()) ;
-				console.log("offsetBrowserAirfield = ", offsetBrowserAirfield) ;
 				ephemerides.aero_sunrise = new Date(response.aero_sunrise * 1000 + offsetBrowserAirfield) ;
 				ephemerides.sunrise = new Date(response.sunrise * 1000 + offsetBrowserAirfield) ;
 				ephemerides.airport_open = new Date(response.airport_open * 1000 + offsetBrowserAirfield) ;
@@ -1010,7 +1005,6 @@ function modifyBooking(id) {
 		'&comment=' + comment + '&crewWanted=' + crewWanted + '&paxWanted=' + paxWanted + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
 		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
 		'&duration=' + flightDuration ;
-console.log(requestUrl) ;
 	XHR.open("GET", requestUrl, false) ;
 	XHR.send(null) ;
 	// Now, let's refresh the screen to display the new booking
@@ -1042,7 +1036,6 @@ function modifyAgendaItem(id) {
 			hideWaiting() ;
 			if(XHR.status  == 200) {
 				try {
-console.log('modify_agenda_item response:' + XHR.responseText) ;
 					var response = eval('(' + XHR.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
@@ -1574,22 +1567,11 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 //				else if ((booking.ressource == 0) && (!booking.log_end) && isInThePast(displayYear, displayMonth, displayDay, hour))
 //				else if ((booking.ressource == 0) && (!booking.log_end) && isInThePast(displayYear, displayMonth, displayDay, hour) && (booking.end <= workDate))
 				else if ((booking.ressource == 0) && (!booking.log_end) && (endDate <= now))
-{
 							thisCell.className = 'nolog' ;
-console.log('Nolog at workDate: ' + workDate + ', booking.end: '  + new Date(booking.end) + ', isInThePast: ' + isInThePast(displayYear, displayMonth, displayDay, hour) + ',  (endDate <= now): ' +  (endDate <= now) + ', Now: ' + now) ;
-}						else
-{
+						else
 							thisCell.className = (booking.user == userId || booking.instructorId == userId) ? 'booked2_by_me' :
 								(booking.instructorId > 0) ? 'booked2_dc' :'booked2' ;
-console.log('Booked at workDate: ' + workDate + ', booking.end: '  + new Date(booking.end) + ', isInThePast: ' + isInThePast(displayYear, displayMonth, displayDay, hour) + ',  (endDate <= now): ' +  (endDate <= now) + ', Now: ' + now) ;
-}
 			} else { // Name not yet displayed, need to display some more information
-console.log('booking.log_end=' + booking.log_end + ', booking.end=' + booking.end + ', endDate=' + endDate) ;
-console.log('now=' + now) ;
-if (endDate <= now)
-console.log("   endDate <= now ") ;
-else
-console.log("   endDate > now ") ;
 				nameDisplayed = true ;
 				firstColumn = i ;
 				widthInColumn = 1 ;
