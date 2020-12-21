@@ -91,14 +91,14 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$fromAirport = mysqli_real_escape_string($mysqli_link, strtoupper(trim($_REQUEST['fromAirport']))) ;
 	$toAirport = mysqli_real_escape_string($mysqli_link, strtoupper(trim($_REQUEST['toAirport']))) ;
 	$flightType = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['flightType'])) ;
-	$startHours = trim($_REQUEST['startHours']) ; if (!is_numeric($startHours)) die("$startHours is not numeric") ;
-	$startMinutes = trim($_REQUEST['startMinutes']) ; if (!is_numeric($startMinutes)) die("$startMinutes is not numeric") ;
+	$startHours = trim($_REQUEST['startHours']) ; if (!is_numeric($startHours)) die("startHours $startHours is not numeric") ;
+	$startMinutes = trim($_REQUEST['startMinutes']) ; if (!is_numeric($startMinutes)) die("startMinutes $startMinutes is not numeric") ;
 	$startDayTime = "$booking[r_day] " . substr("0" . $startHours, -2) . ":" . substr("0" . $startMinutes, -2) ;
-	$endHours = trim($_REQUEST['endHours']) ; if (!is_numeric($endHours)) die("$endHours is not numeric") ;
-	$endMinutes = trim($_REQUEST['endMinutes']) ; if (!is_numeric($endMinutes)) die("$endMinutes is not numeric") ;
+	$endHours = trim($_REQUEST['endHours']) ; if (!is_numeric($endHours)) die("endHours $endHours is not numeric") ;
+	$endMinutes = trim($_REQUEST['endMinutes']) ; if (!is_numeric($endMinutes)) die("endMinutes $endMinutes is not numeric") ;
 	$endDayTime = "$booking[r_day] " . substr("0" . $endHours, -2) . ":" . substr("0" . $endMinutes, -2) ;
-	$pilotId = trim($_REQUEST['pilot']) ; if (!is_numeric($pilotId)) die("$pilotId is not numeric") ;
-	$instructorId = trim($_REQUEST['instructor']) ; if (!is_numeric($instructorId)) die("$instructorId is not numeric") ;
+	$pilotId = trim($_REQUEST['pilot']) ; if (!is_numeric($pilotId)) die("pilotId $pilotId is not numeric") ;
+	$instructorId = trim($_REQUEST['instructor']) ; if (!is_numeric($instructorId)) die("instructorId $instructorId is not numeric") ;
 	if ($instructorId <= 0) $instructorId = "NULL" ;
 	$dayLandings = trim($_REQUEST['dayLandings']) ; if (!is_numeric($dayLandings) or $dayLandings < 0) die("$dayLandings is not numeric or is not valid") ;
 	$nightLandings = trim($_REQUEST['nightLandings']) ; if (!is_numeric($nightLandings) or $nightLandings < 0) die("$nightLandings is not numeric or is not valid") ;
@@ -387,19 +387,19 @@ if ($booking['compteur_vol'] != 0) {
 <div class="col-xs-12 col-md-4">
 <table class="logbookTable" id="flightSchedule" style="opacity: 0.5">
 	<tr><td class="logbookSeparator" colspan="2">Horaire du vol</td><tr>
-	<tr><td class="logbookLabel">D&eacute;but (heure locale):</td><td class="logbookValue">
-		<input type="number" min="0" max="23" name="startHours" size="3" maxlength="2" onchange="takeoffTimeChanged();" disabled> :
-		<input type="number" min="0" max="59" name="startMinutes" size="3" maxlength="2" onchange="takeoffTimeChanged();" disabled>
-	</td><tr>
 	<tr><td class="logbookLabel">D&eacute;but (heure universelle):</td><td class="logbookValue">
-		<input type="text" name="startHoursUTC" size="3" maxlength="2" disabled> : <input type="text" name="startMinutesUTC" size="2" maxlength="2" disabled>
+		<input type="number" min="0" max="23" name="startHoursUTC" size="4" maxlength="2" onchange="takeoffTimeChanged();" disabled> :
+		<input type="number" min="0" max="59" name="startMinutesUTC" size="4" maxlength="2" onchange="takeoffTimeChanged();" disabled>
 	</td><tr>
-	<tr><td class="logbookLabel">Fin (heure locale):</td><td class="logbookValue">
-		<input type="number" min="0" max="23" name="endHours" size="3" maxlength="2" onchange="landingTimeChanged();" disabled> :
-		<input type="number" min="0" max="59" name="endMinutes" size="3" maxlength="2" onchange="landingTimeChanged();" disabled>
+	<tr><td class="logbookLabel"><i>D&eacute;but (heure locale)</i>:</td><td class="logbookValue">
+		<input type="text" name="startHours" size="3" maxlength="2" readonly> : <input type="text" name="startMinutes" size="2" maxlength="2" readonly>
 	</td><tr>
 	<tr><td class="logbookLabel">Fin (heure universelle):</td><td class="logbookValue">
-		<input type="text" name="endHoursUTC" size="2" maxlength="2" disabled>:<input type="text" name="endMinutesUTC" size="2" maxlength="2" disabled>
+		<input type="number" min="0" max="23" name="endHoursUTC" size="3" maxlength="2" onchange="landingTimeChanged();" disabled> :
+		<input type="number" min="0" max="59" name="endMinutesUTC" size="3" maxlength="2" onchange="landingTimeChanged();" disabled>
+	</td><tr>
+	<tr><td class="logbookLabel">Fin (<i>heure locale</i>):</td><td class="logbookValue">
+		<input type="text" name="endHours" size="2" maxlength="2" readonly>:<input type="text" name="endMinutes" size="2" maxlength="2" readonly>
 	</td><tr>
 </table>
 </div> <!-- col -->
