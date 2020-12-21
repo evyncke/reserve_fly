@@ -111,7 +111,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 			$pilotId, $instructorId, $dayLandings, $nightLandings,
 			$userId, '" . getClientAddress() . "', sysdate())") or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
-			$insert_message = "Carnet de route mis &agrave; jour" ;
+			$insert_message = "Carnet de routes mis &agrave; jour" ;
 			if ($test_mode) $insert_message .= " " . mysqli_error($mysqli_link) ;
 			journalise($booking['r_pilot'], 'I', "Logbook entry added for $planeId/$planeModel, engine from $engineStartHour:$engineStartMinute to $engineEndHour:$engineEndMinute, flight $startDayTime@$fromAirport to $endDayTime@$toAirport") ;
 			// Now, if this was for a customer flight, also update this
@@ -120,7 +120,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 					or journalise($userId, "E", "Unable to update $table_flights upon logbook entry: " . mysqli_error($mysqli_link)) ;
 			}
 		} else {
-			$insert_message = "Impossible de mettre &agrave; jour le carnet de route" ;
+			$insert_message = "Impossible de mettre &agrave; jour le carnet de routes" ;
 			journalise($userId, 'W', "Cannot add entry in logbook for $planeId, engine from $engineStartHour:$engineStartMinute to $engineEndHour:$engineEndMinute, flight $startDayTime@$fromAirport to $endDayTime@$toAirport") ;
 		}
 	}	
@@ -140,10 +140,10 @@ if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 	$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
 	mysqli_query($mysqli_link, "DELETE FROM $table_logbook WHERE l_booking=$id AND l_audit_time='$audit_time'") or die("Cannot delete: " . mysql_error()) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
-		$insert_message = "Carnet de route mis &agrave; jour" ;
+		$insert_message = "Carnet de routes mis &agrave; jour" ;
 		journalise($userId, 'I', "Logbook entry deleted for booking $id (done at $audit_time).") ;
 	} else {
-		$insert_message = "Impossible d'effacer la ligne dans le carnet de route" ;
+		$insert_message = "Impossible d'effacer la ligne dans le carnet de routes" ;
 		journalise($userId, 'E', "Error (" . mysqli_error($mysqli_link). ") while deleting logbook entry for booking $id (done at $audit_time).") ;
 	}
 }
@@ -205,7 +205,7 @@ if ($logbook['l_booking'] == $id) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<title>Carnet de route pour <?=$booking['r_plane']?></title>
+<title>Carnet de routes pour <?=$booking['r_plane']?></title>
 <!-- http://www.w3schools.com/bootstrap/ -->
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
@@ -266,10 +266,10 @@ if (isset($_REQUEST['cancel']) and $_REQUEST['cancel'] != '') {
 	exit ;
 }
 ?>
-	<div class="col-sm-12 text-center"><h2>Carnet de route pour <?=$booking['r_plane']?></h2>
-		Vol du <?=$booking['r_start']?>.<div class="hidden-xs"><mark><b>Cette page <!-- est optionelle (mais aide &agrave; la maintenance de l'avion et
+	<div class="col-sm-12 text-center"><h2>Carnet de routes pour <?=$booking['r_plane']?></h2>
+		R&eacute;servation pour le <?=$booking['r_start']?>.<div class="hidden-xs"><mark><b>Cette page <!-- est optionelle (mais aide &agrave; la maintenance de l'avion et
 		aux pr&eacute;visions de vols des autres pilotes), elle --> ne remplace pas l'entr&eacute;e &eacute;crite qui doit
-		&ecirc;tre dans le carnet de route de l'avion.</b></mark><br/> Veuillez commencer par entrer les heures moteurs, puis l'horaire
+		&ecirc;tre dans le carnet de routes de l'avion.</b></mark><br/> Veuillez commencer par entrer les heures moteurs, puis l'horaire
 		de votre vol et en option le nom du pilote, le nombre d'atterrissages, ...</div><!-- hidden -->
 	<br/>
 	</div><!-- col -->
@@ -299,8 +299,11 @@ $this_segment_id = mysqli_num_rows($result) + 1 ;
 if ($this_segment_id > 1) {
 	print('<div class="row">
 		<div class="col-xs-12 text-center table-responsive">
-		<br/>Ligne(s) du carnet de route relative(s) &agrave; cette r&eacute;servation (heure universelle)
-		<table class="previousLogTable table table-striped table-condensed">') ;
+		<br/>Ligne(s) du carnet de routes relative(s) &agrave; cette r&eacute;servation (heure universelle)
+		<table class="previousLogTable table table-striped table-condensed">
+		<thead class="hidden-xs">
+		<tr><th>Avion</th><th>Pilote</th><th>De</th><th>D&eacute;part (UTC)</th><th>A</th><th>Arriv&eacute;e (UTC)</th><th>Type vol</th><th>Action</th></tr>
+		</thead>') ;
 	while ($row = mysqli_fetch_array($result)) {
 		// As the OVH MySQL server does not have the timezone support, needs to be done in PHP
 		$start_UTC = gmdate('H:i', strtotime("$row[l_start] $default_timezone")) ;
@@ -333,7 +336,7 @@ if ($this_segment_id > 1) {
 	$this_segment_id = 1 ;
 	print('<div class="row">
 		<div class="col-xs-12">
-			Le carnet de route est toujours vide pour cette r&eacute;servation. Veuillez ajouter au moins une ligne remplissant les tables ci-dessous et en cliquant sur le bouton vert "Enregistrer" tout en bas (qui appara&icirc;tra d&egrave;s que les heures moteur seront remplies).
+			Le carnet de routes est toujours vide pour cette r&eacute;servation. Veuillez ajouter au moins une ligne remplissant les tables ci-dessous et en cliquant sur le bouton vert "Enregistrer" tout en bas (qui appara&icirc;tra d&egrave;s que les heures moteur seront remplies).
 		</div> <!-- col -->
 		</div> <!-- row -->
 ') ;
@@ -349,24 +352,24 @@ if ($this_segment_id > 1) {
 	<tr><td class="logbookSeparator" colspan="2">Temps/index <?=$engine_flight_label?></td><tr>
 	<tr><td class="logbookLabel">D&eacute;but:</td>
 	<td class="logbookValue">
-		<input type="number" size="7" name="engineStartHour" max="<?=$engineStartHour+50?>" Xvalue="<?=$engineStartHour?>" onchange="engineTimeChanged(false);"> H
+		<input type="number" size="7" name="engineStartHour" max="<?=$engineStartHour+50?>" value="<?=$engineStartHour?>" onchange="engineTimeChanged(false);"> H
 <?php
 if ($booking['compteur_type'] == 1) 
-		print("<input type=\"number\" size=\"5\" maxlength=\"2\" min=\"0\" max=\"59\" name=\"engineStartMinute\" Xvalue=\"$engineStartMinute\" onchange=\"engineTimeChanged(false);\"> min.\n") ;
+		print("<input type=\"number\" size=\"5\" maxlength=\"2\" min=\"0\" max=\"59\" name=\"engineStartMinute\" value=\"$engineStartMinute\" onchange=\"engineTimeChanged(false);\"> min.\n") ;
 elseif ($booking['compteur_type'] == 6)
-		print("<input type=\"number\" size=\"4\" maxlength=\"1\" min=\"0\" max=\"9\" name=\"engineStartMinute\" Xvalue=\"" . round($engineStartMinute/6) . "\" onchange=\"engineTimeChanged(false);\"> dixi&egrave;mes\n") ;
+		print("<input type=\"number\" size=\"4\" maxlength=\"1\" min=\"0\" max=\"9\" name=\"engineStartMinute\" value=\"" . round($engineStartMinute/6) . "\" onchange=\"engineTimeChanged(false);\"> dixi&egrave;mes\n") ;
 else
 		print("Type de compteur moteur inconnu...") ;
 ?>
 		</td></tr>
 	<tr><td class="logbookLabel">Fin:</td>
 	<td class="logbookValue">
-		<input type="number" size="7" name="engineEndHour" max="<?=$engineStartHour+50?>" Xvalue="<?=$engineEndHour?>" onchange="engineTimeChanged(false);"> H
+		<input type="number" size="7" name="engineEndHour" max="<?=$engineStartHour+50?>" value="<?=$engineEndHour?>" onchange="engineTimeChanged(false);"> H
 <?php
 if ($booking['compteur_type'] == 1) 
 		print("<input type=\"number\" size=\"5\" maxlength=\"2\" min=\"0\" max=\"59\" name=\"engineEndMinute\" value=\"$engineEndMinute\" onchange=\"engineTimeChanged(false);\"> min.\n") ;
 elseif ($booking['compteur_type'] == 6)
-		print("<input type=\"number\" size=\"4\" maxlength=\"1\" min=\"0\" max=\"9\" name=\"engineEndMinute\" Xvalue=\"" . round($engineEndMinute/6) . "\" onchange=\"engineTimeChanged(false);\"> dixi&egrave;mes\n") ;
+		print("<input type=\"number\" size=\"4\" maxlength=\"1\" min=\"0\" max=\"9\" name=\"engineEndMinute\" value=\"" . round($engineEndMinute/6) . "\" onchange=\"engineTimeChanged(false);\"> dixi&egrave;mes\n") ;
 else
 		print("Type de compteur moteur inconnu...") ;
 ?>
@@ -430,6 +433,7 @@ if ($booking['compteur_vol'] != 0) {
 <div id="alertPlaceHolder" class="text-center"></div>
 </div><!-- row -->
 
+<hr>
 
 <div class="row">
 <div class="col-xs-12 text-center">
@@ -485,6 +489,8 @@ if ($booking['compteur_vol'] != 0) {
 
 </div> <!-- row -->
 
+<hr>
+
 <!-- the CANCEL, SAVE and BACK buttons -->
 <div class="row">
 	<div class="col-xs-6 col-sm-4 text-center">
@@ -493,12 +499,12 @@ if ($booking['compteur_vol'] != 0) {
 <?php
 	if ($this_segment_id == 1) {
 ?>
-	<input type="submit" id="logbookCancelButton" class="col-xs-12 col-sm-6 btn btn-danger center collapse in"
+	<input type="submit" id="logbookCancelButton" class="btn btn-danger center collapse in"
 		value="Annuler la r&eacute;servation" name="cancel" style="margin-left: auto; margin-right: auto;">
 <?php
 }
 ?>
-	<input type="submit" id="logbookButton" class="col-xs-12 col-sm-6 btn btn-success center collapse"
+	<input type="submit" id="logbookButton" class="btn btn-success center collapse"
 		value="Enregistrer le segment #<?=$this_segment_id?>" name="action" disabled style="margin-left: auto; margin-right: auto;">
 	</div> <!-- col-->
 </form>
@@ -510,12 +516,20 @@ if ($auth != '') {
 		<form action="booking.php">
 		<input type="hidden" name="id" value="<?=$id?>">
 		<input type="hidden" name="auth" value="<?=$auth?>">
-		<input type="submit" class="col-xs-12 col-sm-6 btn btn-success center" value="Retour &agrave; la r&eacute;servation" style="margin-left: auto; margin-right: auto;">
+		<input type="submit" class="btn btn-secondary center" value="Retour &agrave; la r&eacute;servation" style="margin-left: auto; margin-right: auto;">
 		</form>
 	</div> <!-- col-->
 <?php
 }
 ?>
+<div class="col-xs-6 col-sm-4 text-center">
+	<form action="mylog.php">
+	<input type="hidden" name="id" value="<?=$id?>">
+	<input type="hidden" name="auth" value="<?=$auth?>">
+	<input type="submit" class="btn btn-info center" value="Mon carnet de vols" style="margin-left: auto; margin-right: auto;">
+	</form>
+</div> <!-- col-->
+
 </div> <!-- row -->
 
 <div class="row hidden-xs">
