@@ -94,6 +94,17 @@ function myDateGetHoursMinutes(d) {
 	return leadingZero(d.getHours()) + ':' + leadingZero(d.getMinutes()) ;
 }
 
+// Functions to split an booking composite ID into booking number and logging number
+function bookingFromID(id) {
+	var elems = id.split('-') ;
+	return elems[0] ;
+}
+
+function loggingFromID(id) {
+	var elems = id.split('-') ;
+	return elems[1] ;
+}
+
 function buttonHide(id) {
 	if (document.getElementById(id) === null) return ; // Some buttons are not enabled for some classes of users
         document.getElementById(id).disabled = true ;
@@ -434,7 +445,7 @@ function showPilotDetails(id) {
 	document.getElementById("pilotDetailsDiv").style.top = 300 ;
 	document.getElementById("pilotDetailsDiv").style.left = 300 ;
 	var span = document.getElementById("pilotDetailsSpan") ;
-	var booking = allBookings[id] ;
+	var booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
 	span.innerHTML = '<b>' + booking.name + "</b>" ;
 	if (booking.user)
 		span.innerHTML += '<a href="vcard.php?id=' + booking.user + '"><i class="material-icons" style="font-size:18px;color:blue;">cloud_download</i></a>' ;
@@ -707,7 +718,7 @@ function displayPlaneDetails(planeIndex) {
 
 // Called when mouse is over an existing reservation
 function displayBookingDetails(id) {
-	var span, booking = allBookings[id] ;
+	var span, booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
 
 	span = document.getElementById('reservationDetails') ;
 	span.style.backgroundColor = 'lightGray' ; // METAR displayed in the same span can change the color
@@ -935,7 +946,7 @@ function cancelAgendaItem() {
 
 function modifyBooking(id) {
 	displayWaiting() ;
-	if (allBookings[currentlyDisplayedBooking].ressource == 0) {
+	if (allBookings[bookingFromID(currentlyDisplayedBooking)][loggingFromID(currentlyDisplayedBooking)].ressource == 0) {
 		var plane = document.getElementById("planeSelect").value ;
 		var pilotId = document.getElementById("pilotSelect").value ;
 		var instructorId = document.getElementById("instructorSelect").value ;
@@ -1287,7 +1298,7 @@ function redirectLogBook(event) {
 	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
 	var id = Number(event.target.id) ;
 	if (id == 0) return ; // When clicking on pilot details, this event is also triggered :-(
-	var booking = allBookings[id] ;
+	var booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
 	window.location.href = 'logbook.php?id=' + booking.id ;
 }
 
@@ -1302,7 +1313,7 @@ function editBookingDetails(event) {
 	var id = Number(event.target.id) ;
 	if (id == 0) return ; // When clicking on pilot details, this event is also triggered :-(
 	currentlyDisplayedBooking = id ;
-	var booking = allBookings[id] ;
+	var booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
 	document.getElementById('bookingTitle').innerHTML = "Annuler/modifier une r&eacute;servation" ; 
 	// Replace webcam by plane photo, add any plane comment
 	document.getElementById('planeComment').innerHTML = "" ;
@@ -1592,16 +1603,16 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 								(booking.instructorId > 0) ? 'booked_dc' :'booked' ;
 				}
 			}
-			thisCell.onmouseenter = function () { displayBookingDetails(booking.id) ; } ;
+			thisCell.onmouseenter = function () { displayBookingDetails(booking.id + '-' + booking.log_id) ; } ;
 			thisCell.onmouseleave = function () { clearBookingDetails() ; } ;
 			if (!isInThePast(displayYear, displayMonth, displayDay, hour) &&
 					(userIsAdmin || userIsMechanic || userIsInstructor || userId == booking.user || userId == booking.bookedById)) {
-				thisCell.id = booking.id ;
+				thisCell.id = booking.id + '-' + booking.log_id ;
 				thisCell.removeEventListener('click', newBookingDetails) ;
 				thisCell.addEventListener('click', editBookingDetails) ;
 			} else if (isInThePast(displayYear, displayMonth, displayDay, hour) &&
 					(userId == booking.user || userId == booking.instructorId || userId == booking.bookedById)) {
-				thisCell.id = booking.id ;
+				thisCell.id = booking.id + '-' + booking.log_id ;
 				thisCell.removeEventListener('click', newBookingDetails) ;
 				thisCell.addEventListener('click', redirectLogBook) ;
 			}
@@ -1660,19 +1671,20 @@ function displayAgenda(row, item, displayDay, displayMonth, displayYear) {
 			thisCell.className = 'maintenance' ; // A default class, just in case...
 			// Simple case: FI is not available because he is flying ;-)
 			if (item.booking) { // A little tricky because the allBookings[] is built asynchronously... so we need to handle this case
-				if (allBookings[item.booking] !== undefined && item.fi == allBookings[item.booking].instructorId) 
+				var booking = allBookings[bookingFromID(item.booking)][loggingFromID(item.booking)] ;
+				if (booking !== undefined && item.fi == booking.instructorId) 
 					thisCell.className = 'booked_dc' ;
 				else
 					thisCell.className = 'booked' ;
 				if (nameDisplayed) {
 					widthInColumn++ ;
-					thisCell.className = (allBookings[item.booking] !== undefined && item.fi == allBookings[item.booking].instructorId) ? 'booked2_dc' : 'booked2' ; 
+					thisCell.className = (booking !== undefined && item.fi == booking.instructorId) ? 'booked2_dc' : 'booked2' ; 
 				} else { // Name not yet displayed, need to display some more information
 					nameDisplayed = true ;
 					firstColumn = i ;
 					widthInColumn = 1 ;
-					thisCell.innerHTML = (allBookings[item.booking] !== undefined) ? allBookings[item.booking].name : 'loading...' ;
-					thisCell.className = (allBookings[item.booking] !== undefined && item.fi == allBookings[item.booking].instructorId) ? 'booked_dc' : 'booked' ; 
+					thisCell.innerHTML = (booking !== undefined) ? booking.name : 'loading...' ;
+					thisCell.className = (booking !== undefined && item.fi == booking.instructorId) ? 'booked_dc' : 'booked' ; 
 				}
 				// As it is linked to a plane booking, neither adding nor modifying on this cell
 				thisCell.removeEventListener('click', newAgendaItemDetails) ;
@@ -1786,7 +1798,11 @@ function refreshPlanePlanningRow(rowIndex, plane, displayDay, displayMonth, disp
 						if (typeof bookings[i].via1 == 'undefined') bookings[i].via1 = '' ;
 						if (typeof bookings[i].via2 == 'undefined') bookings[i].via2 = '' ;
 						if (typeof bookings[i].to == 'undefined') bookings[i].to = '' ;
-						allBookings[bookings[i].id] = bookings[i] ;
+						if (typeof bookings[i].log_id == 'undefined') bookings[i].log_id = 0 ;
+						// should do it only when row does not exist yet... such as when there are multiple logging entries for the same booking						
+						if (typeof allBookings[bookings[i].id] == 'undefined')
+							allBookings[bookings[i].id] = new Array() ;
+						allBookings[bookings[i].id][bookings[i].log_id] = bookings[i] ;
 						displayBooking(Number(bookings[i].arg), bookings[i], displayDay, displayMonth, displayYear) ;
 						if (bookings[i].crew_wanted != 0)
 							dayMessagesHTML += 'Pilote(s) bienvenu(s) pour la réservation du ' + bookings[i].plane + ' par ' + bookings[i].name + '.<br/>' ;
@@ -1876,7 +1892,7 @@ function refreshPlanningTable() {
 	var hour, minute, compteur ;
 
 	clearBookingDetails() ;
-	allBookings = new Array() ;
+	allBookings = new Array(new Array()) ;
 	allFIAgendas = new Array() ;
 	dayMessagesHTML = '' ;
 	if (planningByPlane) { // TODO probably need to refresh column 0 with all the new dates
