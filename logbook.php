@@ -398,19 +398,19 @@ if ($booking['compteur_vol'] != 0) {
 <div class="col-xs-12 col-md-6">
 <table class="logbookTable" id="flightSchedule" style="opacity: 0.5">
 	<tr><td class="logbookSeparator" colspan="2">Horaire du vol</td><tr>
-	<tr><td class="logbookLabel">D&eacute;but (heure locale):</td><td class="logbookValue">
-		<input type="number" min="0" max="23" name="startHours" size="4" maxlength="2" onchange="takeoffTimeChanged();" disabled> :
-		<input type="number" min="0" max="59" name="startMinutes" size="4" maxlength="2" onchange="takeoffTimeChanged();" disabled>
-	</td><tr>
 	<tr><td class="logbookLabel">D&eacute;but (heure universelle):</td><td class="logbookValue">
-		<input type="text" name="startHoursUTC" size="3" maxlength="2" disabled> : <input type="text" name="startMinutesUTC" size="2" maxlength="2" disabled>
+		<input type="number" min="0" max="23" name="startHoursUTC" size="4" maxlength="2" onchange="takeoffTimeChanged();" disabled> :
+		<input type="number" min="0" max="59" name="startMinutesUTC" size="4" maxlength="2" onchange="takeoffTimeChanged();" disabled>
 	</td><tr>
-	<tr><td class="logbookLabel">Fin (heure locale):</td><td class="logbookValue">
-		<input type="number" min="0" max="23" name="endHours" size="4" maxlength="2" onchange="landingTimeChanged();" disabled> :
-		<input type="number" min="0" max="59" name="endMinutes" size="4" maxlength="2" onchange="landingTimeChanged();" disabled>
+	<tr><td class="logbookLabel">D&eacute;but (<i>heure locale</i>):</td><td class="logbookValue">
+		<input type="text" name="startHours" size="4" maxlength="2" readonly> : <input type="text" name="startMinutes" size="4" maxlength="2" readonly>
 	</td><tr>
 	<tr><td class="logbookLabel">Fin (heure universelle):</td><td class="logbookValue">
-		<input type="text" name="endHoursUTC" size="2" maxlength="2" disabled>:<input type="text" name="endMinutesUTC" size="3" maxlength="2" disabled>
+		<input type="number" min="0" max="23" name="endHoursUTC" size="4" maxlength="2" onchange="landingTimeChanged();" disabled> :
+		<input type="number" min="0" max="59" name="endMinutesUTC" size="4" maxlength="2" onchange="landingTimeChanged();" disabled>
+	</td><tr>
+	<tr><td class="logbookLabel">Fin (<i>heure locale</i>):</td><td class="logbookValue">
+		<input type="text" name="endHours" size="4" maxlength="2" readonly>:<input type="text" name="endMinutes" size="4" maxlength="2" readonly>
 	</td><tr>
 </table>
 </div> <!-- col -->
