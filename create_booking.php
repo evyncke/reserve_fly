@@ -168,7 +168,7 @@ $message .= "<li>Aucune entr&eacute;e dans le logbook du pilote pour $plane.</li
 $message .= "</ul>\n" ;
 		return FALSE ;
 	} else {
-$message .= "<li>Entrée dans le logbook du pilote pour $plane, le dernier vol date de $row[temps_dernier] jours et la limite club réservation: $delai_reservation jours.</li>\n" ;
+$message .= "<li>Entr&eacute;e dans le logbook du pilote pour $plane, le dernier vol date de $row[temps_dernier] jours et la limite club r&eacute;servation: $delai_reservation jours.</li>\n" ;
 		mysqli_free_result($result) ;
 $message .= "</ul>\n" ;
 		return $delai_reservation >= $row['temps_dernier'] ;
@@ -181,16 +181,16 @@ $message .= "</ul>\n" ;
 if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BOOKING_MAINTENANCE) /* or $userIsInstructor */ or $instructor_id != "NULL")) {
 //	journalise($userId, "D", "Check club is required: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot[name]/$pilot_id") ;
 //if (false) {
-	$intro = "<p>De manière expérimentale, chaque réservation est vérifiée quant au Règlement d'Ordre Intérieur (ROI) à propos du re-check RAPCS.<p>
-		<p><i>Ce message est envoyé au pilote, aux instructeurs et aux gestionnaires de la flotte.</i></p>" ;
+	$intro = "<p>De mani&egrave;re exp&eacute;rimentale, chaque r&eacute;servation est v&eacute;rifi&eacute;e quant au R&egrave;glement d'Ordre Intérieur (ROI) &agrave; propos du re-check RAPCS.<p>
+		<p><i>Ce message est envoy&eacute; au pilote, aux instructeurs et aux gestionnaires de la flotte.</i></p>" ;
 	if ($comment != '')
-		$intro .= "<p>Commentaire de la réservation: <i>$comment</i>.</p>\n" ;
+		$intro .= "<p>Commentaire de la r&eacute;servation: <i>$comment</i>.</p>\n" ;
 	mysqli_free_result($result) ;
-	$message = "<p>Vérification de la réservation de $plane (de type $plane_row[classe]) effectuée par $userFullName/$userId pour $pilot[name]/$pilot_id." ;
+	$message = "<p>V&eacute;rification de la r&eacute;servation de $plane (de type $plane_row[classe]) effectu&eacute;e par $userFullName/$userId pour $pilot[name]/$pilot_id." ;
 	// Not too distant reservation?
 	$reservation_permise = RecentBooking($plane, /*$userId*/ $pilot_id, $plane_row['delai_reservation']) ;
 	if (!$reservation_permise) {
-$message .= "<p><span style='color: blue;'>Aucune entrée récente dans le logbook pour $plane, regardons l'historique...</span></p>\n" ;
+$message .= "<p><span style='color: blue;'>Aucune entr&eacute;e r&eacute;cente dans le logbook pour $plane, regardons l'historique...</span></p>\n" ;
 		// If pilot did not book this exact plane, let's try to find whether he/she flew a plane from a 'larger' group...
 		$result = mysqli_query($mysqli_link, "SELECT upper(id) AS id, classe, delai_reservation
 			FROM $table_planes 
@@ -198,7 +198,7 @@ $message .= "<p><span style='color: blue;'>Aucune entrée récente dans le logbo
 			ORDER BY id") or journalise($userId, "E", "Cannot get all active planes:".mysqli_error($mysqli_link)) ;
 		while ($row = mysqli_fetch_array($result) and !$reservation_permise) {
 			if ($row['id'] == $plane_row['id']) continue ;
-$message .= "Vérification de $row[id] (type $row[classe]): \n" ;
+$message .= "V&eacute;rification de $row[id] (type $row[classe]): \n" ;
 			if (planeClassIsMember($plane_row['classe'], $row['classe']))
 				$reservation_permise = RecentBooking($row['id'], /*$userId*/ $pilot_id, $plane_row['delai_reservation']) ; // Only if recent flight !!!
 			else
@@ -234,7 +234,7 @@ $message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour 
 	}
 	mysqli_free_result($result) ;
 	if ($validity_msg == '') 
-		$validity_msg = "<p style=\"color: blue;\">Toutes les validités du pilotes sont valables.</p>" ;
+		$validity_msg = "<p style=\"color: blue;\">Toutes les validit&eacute;s du pilotes sont valables.</p>" ;
 	else
 		$validity_msg = "<h2>Certificats et ratings</h2><p>$validity_msg</p>" ;
 //	if (!$userRatingValid) $reservation_permise = false ;
