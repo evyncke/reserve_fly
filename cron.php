@@ -557,7 +557,6 @@ else {
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
-	fwrite($f, "eric@vyncke.org\n") ;
 	fclose($f) ;
 }
 
@@ -588,7 +587,6 @@ else {
 			fwrite($f, "$row[email]\n") ;
 		}
 	}
-	fwrite($f, "eric@vyncke.org\n") ;
 	fclose($f) ;
 }
 
@@ -634,7 +632,7 @@ else {
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
-	fwrite($f, "eric.vyncke@ulg.ac.be\n") ;
+	fwrite($f, "eric.vyncke@uliege.be\n") ;
 	fclose($f) ;
 }
 
