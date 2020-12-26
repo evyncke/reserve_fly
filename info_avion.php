@@ -1,9 +1,9 @@
 <?php
 // This PHP script is fully integrated as a component of Joomla
-// Developped by Joseph La Chine in 2013, Eric Vyncke 2014/2018
+// Developped by Joseph La Chine in 2013, Eric Vyncke 2014/2020
 /*
    Copyright Joseph La China 2013-2014
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2020 Eric Vyncke
    Copyright 2020 Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -261,7 +261,7 @@ if ($canview) {
        // Access the DB to get the official CT values
 	$db = &JFactory::getDBO();
 	$query = $db->getQuery(true);
-	$query->select("*,date_format(compteur_date,'%e-%c-%Y') as date, date_format(wb_date,'%e-%c-%Y') as wb_date2");
+	$query->select("*, date_format(compteur_date,'%e-%c-%Y') as date, date_format(wb_date,'%e-%c-%Y') as wb_date2");
 	$query->from('rapcs_planes');
 	$query->where("id like '$avion'");
 	$db->setQuery($query);
@@ -277,7 +277,7 @@ if ($canview) {
 	$query->select("*,date_format(l_audit_time,'%e-%c-%Y') as date");
 	$query->from('rapcs_logbook');
 	$query->join('left', 'jom_users as u on l_pilot = u.id');
-	$query->where("l_plane like '$avion'");
+	$query->where("l_plane like '$avion' and l_end_hour is not null and l_end_hour != ''");
         // $query->order("l_end_hour desc, l_end_minute desc") ;
         $query->order("l_audit_time desc") ;
         $query->setLimit('1') ; // Only the first row is meaningful
@@ -294,8 +294,8 @@ if ($canview) {
 		<FORM METHOD="post">
 		<TABLE CELLSPACING=0 CELLPADDING=0 BORDER=0>
 		<TR><TD><B>Prix/Minute:</B></TD><TD><INPUT type="text" name="cout" value="<?=$info[0]->cout?>"> &euro;/min (<i>Mettre un '.' d&eacute;cimal dans le prix</i>)</TD></TR>
-		<TR><TD><B>Dernier relev&eacute; moteur CT / vol (admin):</B></TD><TD><INPUT type="number" name="compteur" value="<?=$info[0]->compteur?>"> </TD></TR>
-		<!--TR><TD><B>Dernier relev&eacute; vol (admin):</B></TD><TD><INPUT type="number" name="compteur_vol_valeur" value="<?=$info[0]->compteur_vol_valeur?>"> </TD></TR-->
+		<TR><TD><B>Dernier relev&eacute; moteur CT (admin):</B></TD><TD><INPUT type="number" name="compteur" value="<?=$info[0]->compteur?>"> </TD></TR>
+		<TR><TD><B>Dernier relev&eacute; vol (admin):</B></TD><TD><INPUT type="number" name="compteur_vol_valeur" value="<?=$info[0]->compteur_vol_valeur?>"> </TD></TR>
 		<TR><TD><B>Prochaine immobilisation:</B></TD><TD><INPUT type="number" name="entretien" value="<?=$info[0]->entretien?>"> pour
 		      <INPUT type="text" name="type_entretien" value="<?=db2web($info[0]->type_entretien)?>"></TD></TR>
 		<TR><TD><B>Consommation:</B></TD><TD><INPUT type="number" step="0.1" name="consommation" value="<?=$info[0]->consommation?>"> litres/heure </TD></TR>
@@ -332,7 +332,7 @@ if ($canview) {
 		<TABLE  BORDER="1">
 	        <tr style="background-color: lightblue;"><td style="">Avion</td>
 	        	<td>Co&ucirc;t</td>
-	        	<td>Dernier CT moteur/vol</td><!--td>Dernier index vol</td--><td>Prochaine immobilisation</td><td>Type<br/>entretien</td>
+	        	<td>Dernier CT moteur</td><td>Dernier index vol</td><td>Prochaine immobilisation</td><td>Type<br/>entretien</td>
 	        	<td>Consommation</td><td>Fabrication</td><td>CN</td><td>Limite moteur<br/>12 ans</td><td>Limite moteur<br/>heure</td><td>Limite<br/>h&eacute;lice</td><td>Pesage</td>
 	        	<td>Poids &agrave; vide<br/>(pounds)</td><td>Bras<br/>(inches)</td><td>Date<br/>(JJ-MM-AAAA)</td>
 	        	</tr>
@@ -343,7 +343,7 @@ if ($canview) {
 	                	"</b><input type=hidden name=\"plane[$i]\" value=\"$plane->id\"></td>
 	                	<td><input type=text name=\"cout[$i]\" value=\"$plane->cout\" size=5 maxlength=5></td>
 		                <td><input type=number name=\"compteur[$i]\" value=\"$plane->compteur\" size=5 maxlength=5></td>
-		                <!--td><input type=number name=\"compteur_vol_valeur[$i]\" value=\"$plane->compteur_vol_valeur\" size=5 maxlength=5></td-->
+		                <td><input type=number name=\"compteur_vol_valeur[$i]\" value=\"$plane->compteur_vol_valeur\" size=5 maxlength=5></td>
 		                <td><input type=number name=\"entretien[$i]\" value=\"$plane->entretien\" size=5 maxlength=5></td>
 		                <td><input type=text name=\"type_entretien[$i]\" value=\"" . db2web($plane->type_entretien) . "\"></td>
 		                <td><input type=number step=\"0.1\" name=\"consommation[$i]\" value=\"$plane->consommation\" size=3></td>
@@ -376,12 +376,14 @@ if ($canview) {
 		}
 		?>
 		<UL>
-		  <LI><B>Prix/Minute (Euro):</B> <? echo $info[0]->cout . " &euro;/min (" . $info[0]->cout*60 ." &euro;/heure)"; ?></LI>
+		  <LI><B>Prix/Minute (Euro):</B> <?= $info[0]->cout . " &euro;/min (" . $info[0]->cout*60 ." &euro;/heure)"?></LI>
 		  <?php if ($info[0]->sous_controle) { ?>
 			<LI><B>Dernier relev&eacute; index moteur (admin):</B> <?= $info[0]->compteur?>h <i> mis &agrave; jour le <?=$info[0]->date?> par <?=$info[0]->compteur_qui?></i></LI>
 			<LI><B>Dernier relev&eacute; index moteur (pilote):</B> <?= $info_logbook[0]->l_end_hour . "h" .$info_logbook[0]->l_end_minute ?>m <i> mis &agrave; jour le <?=$info_logbook[0]->date?> par <?=$info_logbook[0]->name?></i></LI>
-			<!--LI><B>Dernier relev&eacute; index vol (admin):</B> <?= $info[0]->compteur_vol_valeur?>h <i> mis &agrave; jour le <?=$info[0]->date?> par <?=$info[0]->compteur_qui?></i></LI>
-			<LI><B>Dernier relev&eacute; index vol (pilote):</B> <?= $info_logbook[0]->l_flight_end_hour . "h" .$info_logbook[0]->l_flight_end_minute ?>m <i> mis &agrave; jour le <?=$info_logbook[0]->date?> par <?=$info_logbook[0]->name?></i></LI-->
+			<?php if ($info[0]->compteur_vol) { ?>
+			<LI><B>Dernier relev&eacute; index vol (admin):</B> <?= $info[0]->compteur_vol_valeur?>h <i> mis &agrave; jour le <?=$info[0]->date?> par <?=$info[0]->compteur_qui?></i></LI>
+			<LI><B>Dernier relev&eacute; index vol (pilote):</B> <?= $info_logbook[0]->l_flight_end_hour . "h" .$info_logbook[0]->l_flight_end_minute ?>m <i> mis &agrave; jour le <?=$info_logbook[0]->date?> par <?=$info_logbook[0]->name?></i></LI>
+			<?php } ?>
 			<LI><a style="text-decoration: underline;color: blue;" href="/resa/plane_chart.php?id=<?=$avion?>">Graphe</A> de l'&eacute;volution des compteurs</LI>
 			<LI><B>Prochaine immobilisation:</B> <?=db2web($info[0]->entretien)?>h pour <?=db2web($info[0]->type_entretien)?>
 				<span style="color: red; font-weight: bold;">Interdiction de d&eacute;passer l'&eacute;ch&eacute;ance (sauf autorisation de l'atelier).</span></LI>
@@ -390,9 +392,9 @@ if ($canview) {
 		  		pas d&eacute;passer les heures.</span></li>
 		  <?php } ?>
 			<LI><B>Consommation:</B> <?=$info[0]->consommation?> litres/heure</LI>
-			<LI><B>Certificat de navigabilit&eacute;: </B><?=$info[0]->cn?></LI>
-			<LI><B>Ann&eacute;e de fabrication: </B><?=$info[0]->fabrication?></LI>
-			<LI><B>Limite moteur 12 ans:</B><?=$info[0]->limite_moteur_12ans?></LI>
+			<LI><B>Certificat de navigabilit&eacute;:</B> <?=$info[0]->cn?></LI>
+			<LI><B>Ann&eacute;e de fabrication:</B> <?=$info[0]->fabrication?></LI>
+			<LI><B>Limite moteur 12 ans:</B> <?=$info[0]->limite_moteur_12ans?></LI>
 			<LI><B>Limite moteur:</B> <?=$info[0]->limite_moteur_heure?></LI>
 			<LI><B>Limite h&eacute;lice:</B> <?=$info[0]->limite_helice?></LI>
 			<LI><B>Limite magn&eacute;tos:</B> <?=$info[0]->limite_magnetos?></LI>

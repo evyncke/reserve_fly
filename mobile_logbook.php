@@ -170,7 +170,10 @@ if ($logbook['l_end']  && ($logbook['l_end'] > $booking['compteur_date'])) { // 
 } else { // Use data from maintenance logs
 	$engineStartHour = $booking['compteur'] ;
 	$engineStartMinute = 0 ;
-	$flightStartHour = ($booking['compteur_vol']) ? $booking['compteur_vol_valeur'] : 0 ;
+	$flightStartHour = 0 ;
+	if ($booking['compteur_vol'])
+		if ($booking['compteur_vol_valeur'] and $booking['compteur_vol_valeur'] > 0)
+			$flightStartHour = $booking['compteur_vol_valeur'] ;
 	$flightStartMinute = 0 ;
 }
 
@@ -221,7 +224,7 @@ require_once 'mobile_header.php' ;
 <script>
 var
 // $booking['compteur_type'] = <?=$booking['compteur_type']?> $logbook['l_end_minute'] = <?=$logbook['l_end_minute']?> $engineStartMinute = <?=$engineStartMinute?> 
-// $flightStartMinute = <?=$flightStartMinute?> 
+// $flightStartHour = <?=$flightStartHour?>  $flightStartMinute = <?=$flightStartMinute?> 
 	planeId = '<?=$booking['r_plane']?>',
 	pilotId = <?=$booking['r_pilot']?>,
 	instructorId = <?= ($booking['r_instructor'])? $booking['r_instructor'] : -1 ?>,
@@ -326,6 +329,7 @@ if ($this_segment_id > 1) {
 ') ;
 }
 ?>
+<hr>
 
 <form action="<?=$_SERVER['PHP_SELF']?>" method="POST">
 
@@ -349,7 +353,7 @@ else
 		</td></tr>
 	<tr><td class="logbookLabel">Fin:</td>
 	<td class="logbookValue">
-		<input type="number" size="6" max="<?=$engineStartHour+50?>" name="engineEndHour" value="<?=$engineEndHour?>" onchange="engineTimeChanged(false);"> H
+		<input type="number" size="6" maxlength="6" max="<?=$engineStartHour+50?>" name="engineEndHour" value="<?=$engineEndHour?>" onchange="engineTimeChanged(false);"> H
 <?php
 if ($booking['compteur_type'] == 1) 
 		print("<input type=\"number\" size=\"4\" maxlength=\"2\" min=\"0\" max=\"59\" name=\"engineEndMinute\" value=\"$engineEndMinute\" onchange=\"engineTimeChanged(false);\"> min.\n") ;
@@ -359,8 +363,8 @@ else
 		print("Type de compteur moteur inconnu...") ;
 ?>
 		</td></tr>
-	<tr><td class="logbookLabel">Dur&eacute;e:</td><td class="logbookValue"><input type="text" size="5" maxlength="5" name="engineDurationHour" value="<?=$durationHour?>" readonly> H
-		<input type="text" size="2" maxlength="2" name="engineDurationMinute" value="<?=$durationMinute?>" readonly> min.</td><tr>
+	<tr><td class="logbookLabel">Dur&eacute;e:</td><td class="logbookValue"><span id="engineDurationHour"><?=$durationHour?></span> H
+		<span id="engineDurationMinute"><?=$durationMinute?></span> min moteur.</td><tr>
   </tbody>
 </table> <!-- logbookTable -->
 
@@ -376,8 +380,8 @@ if ($booking['compteur_vol'] != 0) {
 		<input type="number" size="6" maxlength="6" max="<?=$flightStartHour+50?>" name="flightEndHour" value="<?=$flightEndHour?>" onchange="flightTimeChanged(false);"> H
 		<input type="number" size="4" maxlength="2" min="0" max="59" name="flightEndMinute" value="<?=$flightEndMinute?>" onchange="flightTimeChanged(false);"> min
 	</td></tr>
-	<tr><td class="logbookLabel">Dur&eacute;e:</td><td class="logbookValue"><input type="text" size="6" maxlength="5" name="flightDurationHour" value="<?=$durationHour?>" readonly> H
-		<input type="text" size="3" maxlength="2" name="flightDurationMinute" value="<?=$durationMinute?>" readonly> min.</td><tr>
+	<tr><td class="logbookLabel">Dur&eacute;e:</td><td class="logbookValue"><span id="flightDurationHour"><?=$durationHour?></span> H
+		<span id="flightDurationMinute"><?=$durationMinute?></span> min vol.</td><tr>
 </table> <!-- logbookTable -->
 <?php
 } // End of if ($booking['compteur_vol'] != 0)

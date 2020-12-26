@@ -173,7 +173,10 @@ if ($logbook['l_end']  && ($logbook['l_end'] > $booking['compteur_date'])) { // 
 // print("Doing 2<br/>") ;
 	$engineStartHour = $booking['compteur'] ;
 	$engineStartMinute = 0 ;
-	$flightStartHour = ($booking['compteur_vol'] and $booking['compteur_vol_valeur'] != '') ? $booking['compteur_vol_valeur'] : 0 ;
+	$flightStartHour = 0 ;
+	if ($booking['compteur_vol'])
+		if ($booking['compteur_vol_valeur'] and $booking['compteur_vol_valeur'] > 0)
+			$flightStartHour = $booking['compteur_vol_valeur'] ;
 	$flightStartMinute = 0 ;
 }
 
