@@ -98,7 +98,7 @@ function update_aircraft($avion, $cout, $compteur, $compteur_vol_valeur, $entret
 			// Et gardons l'historique à toutes fins utiles
 			$query->clear();
 			$columns = array('plane', 'compteur', 'compteur_date', 'compteur_qui') ;
-			$values = array("'$avion'", $compteur, "'" . date('Y-m-d') . "'", "'$user->name'");
+			$values = array("'$avion'", (! isset($compteur_vol_valeur) or $compteur_vol_valeur == '' or $compteur_vol_valeur == 0) ? $compteur : $compteur_vol_valeur, "'" . date('Y-m-d') . "'", "'$user->name'");
 			$query->insert($db->quoteName('rapcs_planes_history'))->columns($db->quoteName($columns))->values(implode(',', $values));
 			$db->setQuery($query);
 			$result = $db->query();
