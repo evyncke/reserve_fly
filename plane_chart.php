@@ -26,24 +26,32 @@ function drawChart() {
 	data.addColumn('number', '<?=$plane['type_entretien']?>') ;
 	data.addRows([
 <?php
-// Engine hours from pilots logbooks
-$result = mysqli_query($mysqli_link, "select l_end_hour as data, date(l_audit_time) as date from $table_logbook where l_plane = '$id' and l_end_hour is not null and l_end_hour > 0 order by date asc")
-	or die("Cannot access logbook for $id: " . mysqli_error($mysqli_link)) ;
-while ($line = mysqli_fetch_array($result)) {
-	$this_date = $line['date'] ;
-        $this_data = $line['data'] ;
-        $dates[$this_date] = true ;
-        $data[0][$this_date] = $this_data ;
-}
 
 // Engine hours from mechanics logbooks
-$result = mysqli_query($mysqli_link, "select compteur as data, compteur_date as date from $table_planes_history where plane = '$id' order by date asc")
-	or die("Cannot access engine clock history for $id: " . mysqli_error($mysqli_link)) ;
+$result = mysqli_query($mysqli_link, "SELECT compteur AS data, compteur_date AS date
+		FROM $table_planes_history 
+		WHERE plane = '$id' 
+		ORDER BY date ASC")
+	or journalise($userId, "E", "Cannot access engine clock history for $id: " . mysqli_error($mysqli_link)) ;
 while ($line = mysqli_fetch_array($result)) {
 	$this_date = $line['date'] ;
-        $this_data = $line['data'] ;
-        $dates[$this_date] = true ;
-        $data[1][$this_date] = $this_data ;
+    $this_data = $line['data'] ;
+    $dates[$this_date] = true ;
+    $data[1][$this_date] = $this_data ;
+}
+
+// Engine hours from pilots logbooks
+$data_field = ($plane['compteur_vol']) ? 'l_flight_end_hour' : 'l_end_hour' ;
+$result = mysqli_query($mysqli_link, "SELECT $data_field AS data, DATE(l_audit_time) AS date
+		FROM $table_logbook
+		WHERE l_plane = '$id' AND $data_field IS NOT NULL AND $data_field > 0 
+		ORDER BY date ASC")
+	or journalise($userId, "E", "Cannot access logbook for $id: " . mysqli_error($mysqli_link)) ;
+while ($line = mysqli_fetch_array($result)) {
+	$this_date = $line['date'] ;
+    $this_data = $line['data'] ;
+    $dates[$this_date] = true ;
+    $data[0][$this_date] = $this_data ;
 }
 
 $first = true ;
@@ -62,8 +70,10 @@ foreach ($dates as $this_date=>$foo) {
         }
 	// Always add the next maintenance as an horizontal line
 	print(", $plane[entretien]") ;
-        print("]") ;
+    print("]") ;
 }
+
+// TODO add 100 hour to plane[entretien] as the max and 1 year default time width
 
 ?>
 
@@ -71,15 +81,16 @@ foreach ($dates as $this_date=>$foo) {
 
 //	data.addColumn('number', '<?=$plane['type_entretien']?>') ;
         var options = {
-          title: 'Engine clock',
-	  numberFormats: '##,##0',
-	  displayRangeSelector: false,
-	  interpolateNulls: true,
-          chart: {
-		interpolateNulls: true
-	  },
-	  scaleType: 'allmaximized'
-        };
+      	title: 'Engine clock',
+	  	numberFormats: '####0',
+	  	XnumberFormats: '##,##0',
+	  	displayRangeSelector: false,
+	  	interpolateNulls: true,
+      	chart: {
+			interpolateNulls: true
+	  	},
+	  	scaleType: 'allmaximized'
+      };
 
 //        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('curve_chart'));
         var chart = new google.visualization.AnnotationChart(document.getElementById('curve_chart'));
@@ -87,10 +98,10 @@ foreach ($dates as $this_date=>$foo) {
         chart.draw(data, options);
       }
 </script>
-<title>Engine clocks for <?=$id?></title>
+<title><?=($plane['compteur_vol']) ? 'Flight' : 'Engine'?> indexes for <?=$id?></title>
 </head>
 <body>
-<h2>Engine clocks for <?=$id?></h2>
-    <div id="curve_chart" style="width: 1000px; height: 600px"></div>
+<h2><?=($plane['compteur_vol']) ? 'Flight' : 'Engine'?> indexes for <?=$id?></h2>
+    <div id="curve_chart" style="width: 80%; height: 80%"></div>
 </body>
 </html>
