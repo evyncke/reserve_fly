@@ -67,7 +67,7 @@ function GenCell($value) {
 $result = mysqli_query($mysqli_link, "SELECT * from $table_planes WHERE ressource = 0 AND actif != 0 ORDER BY id")
 	or die("Cannot read $tables_planes: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
-	$current_value = $row['compteur'] ;
+	$current_value = ($row['compteur_vol'] == 0) ? $row['compteur'] : $row['compteur_vol_valeur'] ;
 	$index_column = ($row['compteur_vol'] == 0) ? 'l_end_hour' : 'l_flight_end_hour' ;
 	$result2 = mysqli_query($mysqli_link, "select $index_column as compteur_pilote, l_end as compteur_pilote_date, concat(first_name, ' ', last_name) as compteur_pilote_nom 
 		from $table_logbook  l join $table_bookings r on l_booking = r_id join $table_person p on jom_id = if(l_audit_who <= 0, if(l_instructor is null, l_pilot, l_instructor), l_audit_who)
