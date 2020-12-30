@@ -57,6 +57,8 @@ td {text-align: center; border-left: 1px solid gray ; border-bottom: 1px dotted 
 function GenCell($value) {
 	global $current_value, $current_value_pilot ;
 	
+	if ($value < 0)
+		return "<td>N/A</td>" ;
 	if ($value - 5 < $current_value or $value - 5 < $current_value_pilot)
 		return "<td class=\"red\">$value</td>" ;
 	if ($value - 10 < $current_value or $value - 10 < $current_value_pilot)
