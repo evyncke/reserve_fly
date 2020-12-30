@@ -66,10 +66,10 @@ if ($error_message != '') {
 	} else
 		$agenda['errorMessage'] =  "Cannot read FI_agenda: " . mysqli_error($mysqli_link);
 	// All plane booking where the instructor is instructor or pilot is ovbviously also an item in the agenda ;-)
-	$result = mysqli_query($mysqli_link, "select r_id, r_plane, r_start, r_stop, r_comment, r_pilot, r_instructor, timestampdiff(minute, r_start, r_stop) as duration
-		from $table_bookings 
-		where date(r_start) <= '$date' and '$date' <= date(r_stop) and ($fi = r_pilot or $fi = r_instructor) and r_type != " . BOOKING_MAINTENANCE . 
-		" order by r_start") ;
+	$result = mysqli_query($mysqli_link, "SELECT r_id, r_plane, r_start, r_stop, r_comment, r_pilot, r_instructor, timestampdiff(minute, r_start, r_stop) AS duration
+		FROM $table_bookings 
+		WHERE date(r_start) <= '$date' AND '$date' <= date(r_stop) AND ($fi = r_pilot OR $fi = r_instructor) AND r_cancel_date IS NULL AND r_type != " . BOOKING_MAINTENANCE . 
+		" ORDER BY r_start") ;
 	if ($result)  {
 		while ($row = mysqli_fetch_array($result)) {
 			$item = array() ;
