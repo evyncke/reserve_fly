@@ -1433,7 +1433,6 @@ function newBookingDetails(event) {
 	document.getElementById('bookingTitle').innerHTML = "Nouvelle r&eacute;servation" ; 
 	// Pre-set the form fields based on the clicked cell, format: plane-tail-number/row/year/month/day/hour/minute
 	cellDetails = event.target.id.split('/') ;
-	console.log(cellDetails) ;
 	// Replace webcam by plane photo and in the same loop, add any plane/ressource comment as well remember which kind of ressource
 	cellDetails[0] = decodeURI(cellDetails[0]) ;
 	document.getElementById('planeComment').innerHTML = "" ;
@@ -1572,11 +1571,6 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 					thisCell.className = 'customer' ;
 				else if (booking.type == bookingTypeOnHold)
 					thisCell.className = 'onhold' ;
-// !!! compare to REAL time and not simply workDate (the running cursor...)
-//				else if ((booking.ressource == 0) && (!booking.log_end) && (+booking.end < +now))
-//				else if ((booking.ressource == 0) && (!booking.log_end) && (booking.end <= workDate))
-//				else if ((booking.ressource == 0) && (!booking.log_end) && isInThePast(displayYear, displayMonth, displayDay, hour))
-//				else if ((booking.ressource == 0) && (!booking.log_end) && isInThePast(displayYear, displayMonth, displayDay, hour) && (booking.end <= workDate))
 				else if ((booking.ressource == 0) && (!booking.log_end) && (endDate <= now))
 							thisCell.className = 'nolog' ;
 						else
@@ -1649,7 +1643,7 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 			thisCell.innerHTML += '<br/><b><i>' + pInitials + '</i></b>' ;
 		}
 		// Add a clickable icons to display details
-		thisCell.innerHTML += '<br/><a href="javascript:showPilotDetails(' + booking.id + ');"><img src="usl_search_icon.png" alt="?" title="D&eacute;tails"></a>' ;
+		thisCell.innerHTML += '<br/><a href="javascript:showPilotDetails(\'' + booking.id + '-' + booking.log_id + '\');"><img src="usl_search_icon.png" alt="?" title="D&eacute;tails"></a>' ;
 	}
 }
 
@@ -1671,11 +1665,18 @@ function displayAgenda(row, item, displayDay, displayMonth, displayYear) {
 			thisCell.className = 'maintenance' ; // A default class, just in case...
 			// Simple case: FI is not available because he is flying ;-)
 			if (item.booking) { // A little tricky because the allBookings[] is built asynchronously... so we need to handle this case
-				var booking = allBookings[bookingFromID(item.booking)][loggingFromID(item.booking)] ;
-				if (booking !== undefined && item.fi == booking.instructorId) 
-					thisCell.className = 'booked_dc' ;
-				else
-					thisCell.className = 'booked' ;
+				// TODO CHECK WITH LOGGING part
+				var booking ;
+				if (allBookings[item.booking] === undefined) {
+					thisCell.className = 'booked' ;	
+					booking = undefined ;				
+				} else {
+					booking = allBookings[item.booking][0] ;
+					if (booking !== undefined && item.fi == booking.instructorId) 
+						thisCell.className = 'booked_dc' ;
+					else
+						thisCell.className = 'booked' ;
+				}
 				if (nameDisplayed) {
 					widthInColumn++ ;
 					thisCell.className = (booking !== undefined && item.fi == booking.instructorId) ? 'booked2_dc' : 'booked2' ; 
