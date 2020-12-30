@@ -127,7 +127,7 @@ ob_flush() ; // Attempt to push as much as HTML to the browser
 $result = mysqli_query($mysqli_link, "SELECT upper(id) as id, classe, compteur, compteur_vol, compteur_vol_valeur, compteur_date, entretien, photo, sous_controle, delai_reservation, commentaire, actif, compteur_vol
 	FROM $table_planes
 	WHERE actif > 0 AND ressource = 0
-	ORDER BY id") or die("Cannot get all active planes:".mysqli_error($mysqli_link)) ;
+	ORDER BY model ASC, id ASC") or die("Cannot get all active planes:".mysqli_error($mysqli_link)) ;
 $first = true ;
 while ($row = mysqli_fetch_array($result)) {
 	if ($first)
