@@ -141,10 +141,10 @@ if ($bccTo != '') {
 	$email_recipients .= ", $bccTo" ;
 }
 
-if ($test_mode) {
+ if ($test_mode) {
 	$smtp_info['debug'] = True ;
 	smtp_mail("evyncke@cisco.com", "Statistiques utilisations des avions (test)", $email_body) ;
-} else
+ } else
 	@smtp_mail($email_recipients, "Statistiques sur l'utilisation des avions", $email_body, $email_header) ;
 ob_flush() ;
 journalise(0, 'I', "Cron-monthly: statistics email sent") ;
@@ -262,7 +262,7 @@ function print_table($title, $sql) {
 
 $sql = "select *,concat(u.name, ' - ', count(*), ' vol(s)') as full_name
 	from $table_users u join $table_bookings b on b.r_pilot = u.id
-	where u.block = 0 and b.r_start > date_sub(sysdate(), interval 1 month) and b.r_stop < sysdate() and b.r_cancel_date is null
+	where u.block = 0 and b.r_start > date_sub(sysdate(), interval 1 month) and b.r_stop < sysdate() and b.r_cancel_date is null and b.r_type != " . BOOKING_MAINTENANCE . "
 		and not exists (select * from $table_logbook l
 				where l.l_booking = b.r_id)
 	group by username
