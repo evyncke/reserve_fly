@@ -1309,10 +1309,9 @@ function engineHoursClicked() {
 function editBookingDetails(event) {
 	var ressource ; // Whether it is a plane (0) or another ressource (1)
 	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
-	if (isNaN(event.target.id)) return ; // TODO Looks like the event is not always removed when a booking is cancelled :-(
-	var id = Number(event.target.id) ;
+	var id = event.target.id ;
 	if (id == 0) return ; // When clicking on pilot details, this event is also triggered :-(
-	currentlyDisplayedBooking = id ;
+	currentlyDisplayedBooking = bookingFromID(id)  ;
 	var booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
 	document.getElementById('bookingTitle').innerHTML = "Annuler/modifier une r&eacute;servation" ; 
 	// Replace webcam by plane photo, add any plane comment
