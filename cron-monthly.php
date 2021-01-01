@@ -24,7 +24,7 @@ require_once 'dbi.php' ;
 ob_start() ; // To allow the ob_flush()
 
 // SMTP email debuging & optimization
-$smtp_info['debug'] = True;
+//$smtp_info['debug'] = True;
 $smtp_info['persist'] = True;
 $managerEmail = $smtp_from ; // Allow more debugging
 
@@ -169,7 +169,8 @@ $sql = "select *,u.name as full_name
 		where u.id = m.user_id and m.group_id in ($joomla_admin_group, $joomla_pilot_group, $joomla_student_group, $joomla_instructor_group))" ; 
 print(date('Y-m-d H:i:s') . ": executing: $sql\n") ; ob_flush() ;
 $result = mysqli_query($mysqli_link, $sql) or die(date('Y-m-d H:i:s') . ": Erreur systeme lors de la lecture des profils: " . mysqli_error($mysqli_link)) ;
-while ($row = mysqli_fetch_array($result)) {
+$all_rows = mysqli_fetch_all($result, MYSQLI_ASSOC) ;
+foreach ($all_rows as $row) {
         $profile_count = 0 ;
 		$missing_items = array() ;
 		$full_name = db2web($row['full_name']) ; // SQL DB is latin1 and the rest is in UTF-8
