@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2020 Eric Vyncke
+   Copyright 2013-2021 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,13 +15,26 @@
    limitations under the License.
 
 */
-session_name('RAPCSSID') ;
-session_start(['cookie_lifetime' => 86400, 'cookie_httponly' => TRUE]) ;
+$session_name = session_name('RAPCS') ;
+session_start(['cookie_lifetime' => 3600 * 24 * 7, 'cookie_httponly' => '1', 'cookie_domain' => '.spa-aviation.be', 'cookie_path' => '/resa', 'use_cookies' => '1']) 
+	or journalise(0, "E", "Cannot start session in mobile header") ;
+
+
+if (!session_id()) {
+	journalise(0, 'W', "session_id() does not return any value") ; 
+} else {
+		journalise(0, 'D', "session_id() = " . session_id() . ", session_name() = " . session_name());
+		journalise(0, 'D', "_SESSION['jom_id'] = $_SESSION[jom_id], _SESSION['truc'] = $_SESSION[truc] ");
+}
 
 if ($userId <= 0 and isset($_SESSION['jom_id']) and is_numeric($_SESSION['jom_id'])) {
 	$joomla_user = JFactory::getUser($_SESSION['jom_id']) ;
 	CheckJoomlaUser($joomla_user) ;
-}	
+} else
+	$_SESSION['jom_id'] = $userId ;
+$_SESSION['truc'] = 'muche' ;
+session_commit() ;
+	
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
