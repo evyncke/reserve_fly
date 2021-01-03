@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2020 Eric Vyncke
+   Copyright 2013-2021 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@
 // Start the session
 
 session_name('RAPCSSID') ;
-session_start(['cookie_lifetime' => 86400, 'cookie_httponly' => TRUE]) ;
+session_start(['cookie_lifetime' => 3600 * 24 * 7, 'cookie_httponly' => TRUE, 'cookie_domain' => '.spa-aviation.be', 'cookie_path' => '/']) 
+	or journalise(0, 'E', 'Cannot start session in mobile_login');
 
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
