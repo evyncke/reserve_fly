@@ -140,8 +140,8 @@ exit ;
 
 if (isset($_REQUEST['news'])) {
 	$result_news = mysqli_query($mysqli_link, "SELECT * FROM $table_news
-		WHERE n_stop > SYSDATE() and n_start <= SYSDATE()
-		ORDER BY n_id desc
+		WHERE n_stop >= CURRENT_DATE() and n_start <= CURRENT_DATE()
+		ORDER BY n_id DESC
 		LIMIT 0,3") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
 	
 	if (mysqli_num_rows($result_news)) {

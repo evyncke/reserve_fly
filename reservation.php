@@ -451,7 +451,7 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 		</td>
 <?php
 $result_news = mysqli_query($mysqli_link, "SELECT * FROM $table_news
-	WHERE n_stop >= SYSDATE() and n_start <= SYSDATE()
+	WHERE n_stop >= CURRENT_DATE() and n_start <= CURRENT_DATE()
 	ORDER BY n_id desc
 	LIMIT 0,5") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
 
