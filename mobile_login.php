@@ -26,7 +26,7 @@
 
 // Start the session
 
-session_name('RAPCSSID') ;
+session_name('RAPCS') ;
 session_start(['cookie_lifetime' => 3600 * 24 * 7, 'cookie_httponly' => TRUE, 'cookie_domain' => '.spa-aviation.be', 'cookie_path' => '/']) 
 	or journalise(0, 'E', 'Cannot start session in mobile_login');
 
