@@ -391,7 +391,7 @@ if ($userId == 0) {
 	if ($row['country'] != '') $profile_count ++ ;
 	if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ;
 	if ($row['birthdate'] != '') $profile_count ++ ;
-	if ($profile_count != 10) print("<font color=\"red\"><br/>Votre profil est compl&eacute;t&eacute; &agrave; " . round(100 * $profile_count / 10) . "% seulement, veuillez cliquer ici: </font>") ;
+	if ($profile_count != 10) print("<div class=\"validityBox\">Votre profil est compl&eacute;t&eacute; &agrave; " . round(100 * $profile_count / 10) . "% seulement, veuillez cliquer sur le bouton 'Mon Profil'.</div>") ;
 	print('<input type="button" value="Mon profil" onclick="javascript:document.location.href=\'profile.php\';"> ') ;
 	print('<input type="button" value="Mon carnet de vol" onclick="javascript:document.location.href=\'mylog.php\';"> ') ;
 	print('<input type="button" value="Carte de mes vols" onclick="javascript:document.location.href=\'mymap.php\';"> ') ;
@@ -399,7 +399,6 @@ if ($userId == 0) {
 	if ($userIsAdmin) print('<input type="button" value="Journal des opérations" onclick="javascript:document.location.href=\'journal.php\';"> ') ;
 	if ($userIsAdmin || $userIsMechanic) print('<input type="button" value="Echéances des maintenances" onclick="javascript:document.location.href=\'plane_planning.php\';"> ') ;
 	print('<input type="button" value="No log" style="background-color: yellow; visibility: hidden;" id="logButton" onclick="javascript:toggleLogDisplay();"> ') ;
-	// TODO check whether webcall works with Clouflare
 	print("<a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">lier &agrave; mon calendrier (iCal)</a>") ;
 	// Display any validity message from above
 	if ($validity_msg != '') print('<div class="validityBox">' . $validity_msg . '</div>') ;
@@ -412,18 +411,20 @@ if ($userId == 0) {
 			r_start > date_sub(curdate(), interval 1 month) and
 			r_start < now() and
 			r_cancel_date is null and
-			r_type in (" . BOOKING_PILOT . ") and
+			r_type in (" . BOOKING_PILOT . ", " . BOOKING_INSTRUCTOR . ") and
 			not exists (select * from $table_logbook l where l.l_booking = b.r_id)
 		order by b.r_start desc limit 5") or die("Cannot select unlogged flights: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_num_rows($result) > 0) {
-		print("<p style=\"color: red;\">Vous avez une ou plusieurs r&eacute;servations sans entr&eacute;es dans les carnets de route des avions, pour la bonne
+		$missing_entries = mysqli_num_rows($result) ;
+		print("<p style=\"color: red;\">Vous avez une ou plusieurs r&eacute;servations sans entr&eacute;es dans les carnets de routes des avions, pour la bonne
 			gestion de notre flotte, veuillez compl&eacute;ter les carnets:<ul>\n") ;
 		while ($row = mysqli_fetch_array($result)) {
-			print("<li>$row[r_start]: <a href=\"logbook.php?id=$row[r_id]\">remplir le carnet de route de $row[r_plane]</a>;") ;
+			print("<li>$row[r_start]: <a href=\"logbook.php?id=$row[r_id]\">remplir le carnet de routes de $row[r_plane] ou annuler la r&eacute;servation</a>;") ;
 			if ($userIsInstructor) print(" <img src=\"gtk-delete.png\" onclick=\"javascript:document.getElementById('reasonTextArea').value='Old booking';cancelOldBooking($row[r_id]);\">" ) ;
 			print("</li>\n") ;
 		}
 		print("</ul></p>\n") ;
+		journalise($userId, "I", "$missing_entries unlogged booking displayed") ;
 	}
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 } // ($userId == 0)
