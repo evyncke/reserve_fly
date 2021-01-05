@@ -17,19 +17,19 @@
 */
 $session_name = session_name('RAPCS') ;
 session_start(['cookie_lifetime' => 3600 * 24 * 7, 'cookie_httponly' => '1', 'cookie_domain' => '.spa-aviation.be', 'cookie_path' => '/resa', 'use_cookies' => '1']) 
-	or journalise(0, "E", "Cannot start session in mobile header") ;
+	or journalise($userId, "E", "Cannot start session in mobile header") ;
 
 
 if (!session_id()) {
-	journalise(0, 'W', "session_id() does not return any value") ; 
+	journalise($userId, 'W', "session_id() does not return any value") ; 
 } else {
-		journalise(0, 'D', "session_id() = " . session_id() . ", session_name() = " . session_name());
-		journalise(0, 'D', "_SESSION['jom_id'] = $_SESSION[jom_id], _SESSION['truc'] = $_SESSION[truc] ");
+	journalise($userId, 'D', "session_id()=" . session_id() . ", session_name()=" . session_name() . ", _SESSION['jom_id']=$_SESSION[jom_id], _SESSION['truc']=$_SESSION[truc] ");
 }
 
-if ($userId <= 0 and isset($_SESSION['jom_id']) and is_numeric($_SESSION['jom_id'])) {
+if ($userId <= 0 and isset($_SESSION['jom_id']) and is_numeric($_SESSION['jom_id']) and $_SESSION['jom_id'] > 0) {
 	$joomla_user = JFactory::getUser($_SESSION['jom_id']) ;
 	CheckJoomlaUser($joomla_user) ;
+	journalise($userId, 'I', "Using _SESSION['jom_id']=$_SESSION[jom_id] for authentication") ;
 } else
 	$_SESSION['jom_id'] = $userId ;
 $_SESSION['truc'] = 'muche' ;
