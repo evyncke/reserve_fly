@@ -81,9 +81,19 @@ var
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
+<?php
+// If user is logged-in then call 'setUserId'
+// $userId variable must be set by the server when the user has successfully authenticated to your app.
+	if (isset($userId) and $userId > 0) {
+     print("_paq.push(['setUserId', '$userName']);\n");
+}
+?>
   /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
   _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
   _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
+  _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
+  _paq.push(['enableHeartBeatTimer']);
+  _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
   _paq.push(['trackPageView']);
   _paq.push(['enableLinkTracking']);
   (function() {
