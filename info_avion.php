@@ -319,7 +319,7 @@ if ($canview) {
         	$query = $db->getQuery(true) ;
 	        $query->select("*, upper(id) as id, date_format(wb_date,'%e-%c-%Y') as wb_date2") ;
 	        $query->from('rapcs_planes') ;
-            $query->where('actif != 0') ;
+            $query->where('actif != 0 AND ressource = 0') ;
             $query->order('id') ;
 	        $db->setQuery($query);
 	        if($db->getErrorNum()) {
@@ -333,8 +333,8 @@ if ($canview) {
 	        <tr style="background-color: lightblue;"><td style="">Avion</td>
 	        	<td>Co&ucirc;t</td>
 	        	<td>Dernier CT moteur</td><td>Dernier index vol</td><td>Prochaine immobilisation</td><td>Type<br/>entretien</td>
-	        	<td>Consommation</td><td>Fabrication</td><td>CN</td><td>Limite moteur<br/>12 ans</td><td>Limite moteur<br/>heure</td><td>Limite<br/>h&eacute;lice</td><td>Pesage</td>
-	        	<td>Poids &agrave; vide<br/>(pounds)</td><td>Bras<br/>(inches)</td><td>Date<br/>(JJ-MM-AAAA)</td>
+	        	<td>Consommation</td><td>Fabrication</td><td>CN</td><td>Limite moteur<br/>12 ans</td><td>Limite moteur<br/>heure</td><td>Limite<br/>h&eacute;lice</td><td>Limite<br/>magn&eacute;tos</td>
+	        	<td>Pesage</td><td>Poids &agrave; vide<br/>(pounds)</td><td>Bras<br/>(inches)</td><td>Date W&B<br/>(JJ-MM-AAAA)</td>
 	        	</tr>
 	        <?php
 	            foreach($all_planes as $i=>$plane) {
