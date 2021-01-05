@@ -1294,16 +1294,15 @@ function hideEditAgendaItemDetails() {
 	currentlyDisplayedAgendaItem = null ;
 }
 
-function redirectLogBook(event) {
-	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
-	var id = Number(event.target.id) ;
-	if (id == 0) return ; // When clicking on pilot details, this event is also triggered :-(
-	var booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
-	window.location.href = 'logbook.php?id=' + booking.id ;
-}
-
 function engineHoursClicked() {
 	console.log("Not implemented yet") ;
+}
+
+function redirectLogBook(event) {
+	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
+	var id = event.target.id ;
+	if (id == 0) return ; // When clicking on pilot details, this event is also triggered :-(
+	window.location.href = 'logbook.php?id=' + bookingFromID(id) ;
 }
 
 function editBookingDetails(event) {
