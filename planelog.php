@@ -58,6 +58,7 @@ function init() {
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
+   _paq.push(['setUserId', '<?=$userName?>']);
   /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
   _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
   _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
