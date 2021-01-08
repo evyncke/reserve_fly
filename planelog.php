@@ -58,9 +58,11 @@ function init() {
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
-   _paq.push(['setUserId', '<?=$userName?>']);
-  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(['setUserId', '<?=$userName?>']);
   _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+  _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
+  _paq.push(['enableHeartBeatTimer']);
+  _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
   _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
   _paq.push(['trackPageView']);
   _paq.push(['enableLinkTracking']);
