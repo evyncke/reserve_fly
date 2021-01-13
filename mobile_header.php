@@ -26,10 +26,7 @@ setcookie(session_name(),session_id(),time() + $cookie_lifetime, '/resa', '.spa-
 
 if (!session_id()) {
 	journalise($userId, 'W', "session_id() does not return any value") ; 
-} else {
-	journalise($userId, 'D', "session_id()=" . session_id() . ", session_name()=" . session_name() . ", _SESSION['jom_id']=$_SESSION[jom_id], _SESSION['truc']=$_SESSION[truc] ");
-}
-
+} 
 if ($userId <= 0 and isset($_SESSION['jom_id']) and is_numeric($_SESSION['jom_id']) and $_SESSION['jom_id'] > 0) {
 	$joomla_user = JFactory::getUser($_SESSION['jom_id']) ;
 	CheckJoomlaUser($joomla_user) ;
