@@ -27,8 +27,8 @@ if (! $userIsAdmin)
 $id = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['id'])) ;
 if (! is_numeric($id)) die("Invalid value for id ($id)") ;
 
-mysqli_query($mysqli_link, "UPDATE $table_news SET n_stop = sysdate() where n_id = $id")
-		or die("Cannot delet news: " . mysqli_error($mysqli_link)) ;
+mysqli_query($mysqli_link, "UPDATE $table_news SET n_stop = DATE_SUB(sysdate(), INTERVAL 1 DAY) WHERE n_id = $id")
+		or journalise($userId, "E", "Cannot delete news $id: " . mysqli_error($mysqli_link)) ;
 	// So far so good, redirect to the reservation page
 journalise($userId, 'W', "News $id deleted") ;
 header('Location: ' . 'https://www.spa-aviation.be/resa/') ;
