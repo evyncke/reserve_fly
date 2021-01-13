@@ -585,7 +585,13 @@ while ($row = mysqli_fetch_array($result)) {
 			$delete = " <a href=\"$_SERVER[PHP_SELF]?displayed_id=$displayed_id&validity_id=$row[id]&action=delete_rating\"><span class=\"glyphicon glyphicon-trash text-danger\"></span></a>" ;
 		else
 			$delete = '' ;
-		print("<tr><td class=\"validityNameCell\">" . db2web($row['name']) . "$delete</td>\n") ;
+		if ($row['mandatory_access_control'] == 0)
+			$private_validity = '' ;
+		else if ($userId == $displayed_id or $userIsInstructor)
+			$private_validity = ' (seuls le pilote et les instructeurs voient cette ligne) ' ;
+		else
+			continue ;
+		print("<tr><td class=\"validityNameCell\">" . db2web($row['name']) . "$private_validity$delete</td>\n") ;
 		if ($row['ident_value_enable'])
 			print("<td class=\"validityCell\"><input type=\"text\" name=\"ident_value[$row[id]]\" value=\"" . db2web($row['ident_value']) . "\"></td>\n") ;
 		else	
