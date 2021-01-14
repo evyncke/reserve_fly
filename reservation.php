@@ -304,13 +304,12 @@ function checkLoginState() {
 
 // This is called with the results from from FB.getLoginStatus().
 function statusChangeCallback(response) {
-        console.log('statusChangeCallback');
+        console.log('Facebook statusChangeCallback() with response being:');
         console.log(response);
         if (response.status === 'connected') {
         	// authResponse: {accessToken: "EAAPNZCUXiyGMBAMJmcWO372uoGw9ZBWVHD53CD7TZAkEW7E50…XSpxYhYplRSH3BhLIQxLOYjIR28WZCNKwzZCSlgBbTfWgZDZD", userID: "10154716346282833", expiresIn: 5720, signedRequest: "qApsBkagFg2S4StwnDNIs13uGyzfDoraOQ0Bhz9QOc4.eyJhbG…yMzA2ODAsInVzZXJfaWQiOiIxMDE1NDcxNjM0NjI4MjgzMyJ9"}, status: "connected"
                 console.log('Everything is fine: connected to our app') ;
                 FBaccessToken = response.authResponse.accessToken ;
-//                document.getElementById("submitButton").disabled = false;
                 FB.api("/me", function (response) {
                         if (response && !response.error) {
                         	// Only two items id (=fbuid) and name 'Eric Vyncke'
@@ -318,22 +317,24 @@ function statusChangeCallback(response) {
                                 document.getElementById("helloFBUser").style.display = 'block' ;
                         }
                 }) ;
-		var allFbuis = document.getElementsByClassName("fbuid") ;
-		// It seems that we need to do it in reverse order...
-		for (var i = allFbuis.length - 1; i >= 0; i--) {
-			var fbuid = allFbuis[i].getAttribute("fbuid") ;
-			(function (allFbuis, i, fbuid) { // Wrapper to keep allFbuis & i
-				FB.api("/" + fbuid, function (response) {
-					if (response && !response.error) {  // Again this dummy closure thing where i has disappeared but allFbuis is still there !!!
-						// One way would be to parse again all tag with class fbuid and change them...
-						allFbuis[i].innerHTML = response.name;
-					}
-				}) ;
-			}) (allFbuis, i, fbuid) ;
-		}
-	}
+			var allFbuis = document.getElementsByClassName("fbuid") ;
+			// It seems that we need to do it in reverse order...
+			for (var i = allFbuis.length - 1; i >= 0; i--) {
+				var fbuid = allFbuis[i].getAttribute("fbuid") ;
+				(function (allFbuis, i, fbuid) { // Wrapper to keep allFbuis & i
+					FB.api("/" + fbuid, function (response) {
+						if (response && !response.error) {  // Again this dummy closure thing where i has disappeared but allFbuis is still there !!!
+							// One way would be to parse again all tag with class fbuid and change them...
+							allFbuis[i].innerHTML = response.name;
+						}
+					}) ;
+				}) (allFbuis, i, fbuid) ;
+			}
+		} // if (response.status === 'connected') E.g. status = "unknown" and authResponse = NULL
+		console.log('end of Facebook statusChangeCallback') ;
+		console.log('fb_log: ' + '<?=nl2br($fb_log)?>') ;
 }
-console.log('fb_log: ' + '<?=nl2br($fb_log)?>') ;
+
 </script>
 
 <h2>R&eacute;servation des avions</font></h2>
