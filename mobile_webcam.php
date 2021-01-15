@@ -19,7 +19,7 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
+//require_once 'facebook.php' ;
 
 $cam = (isset($_REQUEST['cam'])) ? $_REQUEST['cam'] : '' ;
 if (! is_numeric($cam)) die("Invalid camera ID") ;

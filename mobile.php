@@ -19,7 +19,7 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
+//require_once 'facebook.php' ;
 
 require_once 'mobile_header.php' ;
 
