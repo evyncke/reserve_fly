@@ -31,19 +31,17 @@ if ($id and ! is_numeric($id)) die("Logbook: wrong booking id: $id") ;
 
 // Retrieve the booking
 if ($id) {
-	$result = mysqli_query($mysqli_link, "select r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
+	$result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
 		r_from, r_to, compteur_type, compteur_vol, model, compteur, compteur_date, 
 		r_duration,date_add(r_start, interval 15 minute) as r_takeoff, date(r_start) as r_day
-		from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a,
-		$table_users as w
+		from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a
 		where r_id = $id and a.id = r_plane") or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 } else { // Retrieve the nearest one
 	if ($userId <= 0) die("Vous devez être connecté") ;
-	$result = mysqli_query($mysqli_link, "select r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
+	$result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
 		r_from, r_to, compteur_type, compteur_vol, model, compteur, compteur_date, 
 		r_duration,date_add(r_start, interval 15 minute) as r_takeoff, date(r_start) as r_day
-		from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a,
-		$table_users as w
+		from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a
 		where r_pilot = $userId and r_start < sysdate() and r_cancel_date is null and a.ressource = 0
 		order by r_start desc
 		limit 0,1") or die("Cannot access closest booking in the past: " . mysqli_error($mysqli_link)) ;
@@ -59,7 +57,15 @@ $id = $booking['r_id'] ;
 if ($auth == '') {
 	if (! ($userId == $booking['r_pilot'] or $userId == $booking['r_who'] or $userId == $booking['r_instructor']))
 		die("Logbook: you ($userId) are not authorized") ;
-} else if ($auth != md5($id . $shared_secret)) die("logbook: wrong key for booking#$id: $auth ") ;
+	$auth = md5($id . $shared_secret) ; // It may be used later
+} else 
+	if ($auth != md5($id . $shared_secret)) {
+		journalise(0, 'E', "logbook: wrong key for booking#$id: $auth") ;
+		die("logbook: wrong key for booking#$id: $auth") ;
+	} else {
+		$userId = $booking['r_pilot'] ; // Assumption
+		$userName = $booking['username'] ;
+	}
 
 $booking['r_takeoff'] = str_replace('-', '/', $booking['r_takeoff']) ;
 if (($booking['r_from'] == '') && ($booking['r_to'] == '')) {
