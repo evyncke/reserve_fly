@@ -54,12 +54,12 @@ $start = mysqli_real_escape_string($mysqli_link, $_REQUEST['start']) ;
 $end = mysqli_real_escape_string($mysqli_link, $_REQUEST['end']) ;
 $comment = mysqli_real_escape_string($mysqli_link, $_REQUEST['comment']) ;
 $comment_db = mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['comment'])) ;
-$crew_wanted = mysqli_real_escape_string($mysqli_link, $_REQUEST['crewWanted']) ;
-$pax_wanted = mysqli_real_escape_string($mysqli_link, $_REQUEST['paxWanted']) ;
-$from_apt = mysqli_real_escape_string($mysqli_link, $_REQUEST['fromApt']) ;
-$via1_apt = mysqli_real_escape_string($mysqli_link, $_REQUEST['via1Apt']) ;
-$via2_apt = mysqli_real_escape_string($mysqli_link, $_REQUEST['via2Apt']) ;
-$to_apt = mysqli_real_escape_string($mysqli_link, $_REQUEST['toApt']) ;
+$crew_wanted = (isset($_REQUEST['crewWanted'])) ? mysqli_real_escape_string($mysqli_link, $_REQUEST['crewWanted']) : 0 ;
+$pax_wanted = (isset($_REQUEST['paxWanted'])) ? mysqli_real_escape_string($mysqli_link, $_REQUEST['paxWanted']) : 0 ;
+$from_apt = (isset($_REQUEST['fromApt'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['fromApt'])) : $default_airport;
+$via1_apt = (isset($_REQUEST['via1Apt'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['via1Apt'])) : '';
+$via2_apt = (isset($_REQUEST['via2Apt'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['via2Apt'])) : '';
+$to_apt = (isset($_REQUEST['toApt'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['toApt'])) : $default_airport;
 
 // Basic checks on dates
 $start_date = new DateTime($start) ;
@@ -293,10 +293,12 @@ if ($response['error'] == '') {
 	$result = mysqli_query($mysqli_link, "INSERT INTO $table_bookings(r_plane, r_start, r_stop, r_duration, r_pilot, r_instructor, r_comment, r_crew_wanted, r_pax_wanted,
 			r_from, r_via1, r_via2, r_to, r_type, r_date, r_address, r_who, r_sequence)
 		VALUES('$plane', '$start', '$end', $duration, $pilot_id, $instructor_id, '$comment_db', $crew_wanted, $pax_wanted,
-			'$from_apt', '$via1_apt', '$via2_apt', '$to_apt', $booking_type, sysdate(), '" . getClientAddress() . "', $userId, 0)") 
-			or journalise($userId, 'E', 'Cannot insert into DB: ' . mysqli_error($mysqli_link));
-
-	if (mysqli_affected_rows($mysqli_link) == 1) {
+			'$from_apt', '$via1_apt', '$via2_apt', '$to_apt', $booking_type, sysdate(), '" . getClientAddress() . "', $userId, 0)") ;
+	if (!$result) { // Failed insertion
+		journalise($userId, 'E', 'Cannot insert into DB: ' . mysqli_error($mysqli_link)) ;
+		$response['error'] = "Erreur systeme dans la base de donnees, reservation non effectuee" ;
+	}
+	if ($result and mysqli_affected_rows($mysqli_link) == 1) {
 		$booking_id = mysqli_insert_id($mysqli_link) ;
 		$auth = md5($booking_id . $shared_secret) ;
 		// If for a customer flight, then let's modify the flight
