@@ -143,8 +143,8 @@ function engineTimeChanged(onInit) {
 	var minutes = (engineEndHour - engineStartHour) * 60 + (engineEndMinute - engineStartMinute) ;
 	durationMinute = minutes % 60 ;
 	durationHour = (minutes - durationMinute) / 60 ;
-	document.getElementById('engineDurationHour').innerHTML = durationHour ;
-	document.getElementById('engineDurationMinute').innerHTML = durationMinute ;
+	document.getElementsByName('engineDurationHour')[0].innerHTML = durationHour ;
+	document.getElementsByName('engineDurationMinute')[0].innerHTML = durationMinute ;
 	// Update the landing time based on new flight duration
 	landingDate = new Date(takeoffDate.valueOf() + 1000 * 60 * (durationMinute + 60 * durationHour)) ;
 	document.getElementsByName("endHoursUTC")[0].value = landingDate.getUTCHours() ;
@@ -157,8 +157,8 @@ function engineTimeChanged(onInit) {
 		document.getElementsByName('startMinutesUTC')[0].disabled = true ;
 		document.getElementsByName('endHoursUTC')[0].disabled = true ;
 		document.getElementsByName('endMinutesUTC')[0].disabled = true ;
-		document.getElementById('engineDurationHour').style.backgroundColor = 'red' ;
-		document.getElementById('engineDurationMinute').style.backgroundColor = 'red' ;
+		document.getElementsByName('engineDurationHour')[0].style.backgroundColor = 'red' ;
+		document.getElementsByName('engineDurationMinute')[0].style.backgroundColor = 'red' ;
 	} else if (!onInit) {
 		toggleButtons(true) ;
 		document.getElementById('flightSchedule').style.opacity = 1.0 ;
@@ -166,8 +166,8 @@ function engineTimeChanged(onInit) {
 		document.getElementsByName('startMinutesUTC')[0].disabled = false ;
 		document.getElementsByName('endHoursUTC')[0].disabled = false ;
 		document.getElementsByName('endMinutesUTC')[0].disabled = false ;
-		document.getElementById('engineDurationHour').style.backgroundColor = 'lightgray' ;
-		document.getElementById('engineDurationMinute').style.backgroundColor = 'lightgray' ;
+		document.getElementsByName('engineDurationHour')[0].style.backgroundColor = 'lightgray' ;
+		document.getElementsByName('engineDurationMinute')[0].style.backgroundColor = 'lightgray' ;
 	}
 }
 
