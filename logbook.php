@@ -85,17 +85,29 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$fromAirport = mysqli_real_escape_string($mysqli_link, strtoupper(trim($_REQUEST['fromAirport']))) ;
 	$toAirport = mysqli_real_escape_string($mysqli_link, strtoupper(trim($_REQUEST['toAirport']))) ;
 	$flightType = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['flightType'])) ;
-	$startHours = trim($_REQUEST['startHours']) ; if (!is_numeric($startHours)) die("$startHours is not numeric") ;
-	$startMinutes = trim($_REQUEST['startMinutes']) ; if (!is_numeric($startMinutes)) die("$startMinutes is not numeric") ;
+	//PRE
+	//Before
+	//$startHours = trim($_REQUEST['startHours']) ; if (!is_numeric($startHours)) die("startHours $startHours is not numeric") ;
+	//$startMinutes = trim($_REQUEST['startMinutes']) ; if (!is_numeric($startMinutes)) die("startMinutes $startMinutes is not numeric") ;
+	//After
+	$startHours = trim($_REQUEST['startHoursUTC']) ; if (!is_numeric($startHours)) die("startHours $startHours is not numeric") ;
+	$startMinutes = trim($_REQUEST['startMinutesUTC']) ; if (!is_numeric($startMinutes)) die("startMinutes $startMinutes is not numeric") ;
+	//PRE
 	$startDayTime = "$booking[r_day] " . substr("0" . $startHours, -2) . ":" . substr("0" . $startMinutes, -2) ;
-	$endHours = trim($_REQUEST['endHours']) ; if (!is_numeric($endHours)) die("$endHours is not numeric") ;
-	$endMinutes = trim($_REQUEST['endMinutes']) ; if (!is_numeric($endMinutes)) die("$endMinutes is not numeric") ;
+	//PRE
+	//Before
+	//$endHours = trim($_REQUEST['endHours']) ; if (!is_numeric($endHours)) die("endHours $endHours is not numeric") ;
+	//$endMinutes = trim($_REQUEST['endMinutes']) ; if (!is_numeric($endMinutes)) die("endMinutes $endMinutes is not numeric") ;
+	//After
+	$endHours = trim($_REQUEST['endHoursUTC']) ; if (!is_numeric($endHours)) die("endHours $endHours is not numeric") ;
+	$endMinutes = trim($_REQUEST['endMinutesUTC']) ; if (!is_numeric($endMinutes)) die("endMinutes $endMinutes is not numeric") ;
+	//PRE
 	$endDayTime = "$booking[r_day] " . substr("0" . $endHours, -2) . ":" . substr("0" . $endMinutes, -2) ;
-	$pilotId = trim($_REQUEST['pilot']) ; if (!is_numeric($pilotId)) die("$pilotId is not numeric") ;
-	$instructorId = trim($_REQUEST['instructor']) ; if (!is_numeric($instructorId)) die("$instructorId is not numeric") ;
+	$pilotId = trim($_REQUEST['pilot']) ; if (!is_numeric($pilotId)) die("pilotId $pilotId is not numeric") ;
+	$instructorId = trim($_REQUEST['instructor']) ; if (!is_numeric($instructorId)) die("instructorId $instructorId is not numeric") ;
 	if ($instructorId <= 0) $instructorId = "NULL" ;
-	$dayLandings = trim($_REQUEST['dayLandings']) ; if (!is_numeric($dayLandings) or $dayLandings < 0) die("$dayLandings is not numeric or is not valid") ;
-	$nightLandings = trim($_REQUEST['nightLandings']) ; if (!is_numeric($nightLandings) or $nightLandings < 0) die("$nightLandings is not numeric or is not valid") ;
+	$dayLandings = trim($_REQUEST['dayLandings']) ; if (!is_numeric($dayLandings) or $dayLandings < 0) die("dayLandings $dayLandings is not numeric or is not valid") ;
+	$nightLandings = trim($_REQUEST['nightLandings']) ; if (!is_numeric($nightLandings) or $nightLandings < 0) die("nightLandings $nightLandings is not numeric or is not valid") ;
 	// Do some checks
 	if ($endDayTime <= $startDayTime)  
 		$insert_message = "Le temps d'arriv&eacute;e=$endDayTime doit &ecirc;tre plus grand que le temps de d&eacute;part= $startDayTime" ;

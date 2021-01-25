@@ -143,8 +143,14 @@ function engineTimeChanged(onInit) {
 	var minutes = (engineEndHour - engineStartHour) * 60 + (engineEndMinute - engineStartMinute) ;
 	durationMinute = minutes % 60 ;
 	durationHour = (minutes - durationMinute) / 60 ;
-	document.getElementsByName('engineDurationHour')[0].innerHTML = durationHour ;
-	document.getElementsByName('engineDurationMinute')[0].innerHTML = durationMinute ;
+	//PRE
+	//Before
+	//document.getElementsByName('engineDurationHour')[0].innerHTML = durationHour ;
+	//document.getElementsByName('engineDurationMinute')[0].innerHTML = durationMinute ;
+	//After
+	document.getElementsByName('engineDurationHour')[0].value = durationHour ;
+	document.getElementsByName('engineDurationMinute')[0].value = durationMinute ;
+	//PRE
 	// Update the landing time based on new flight duration
 	landingDate = new Date(takeoffDate.valueOf() + 1000 * 60 * (durationMinute + 60 * durationHour)) ;
 	document.getElementsByName("endHoursUTC")[0].value = landingDate.getUTCHours() ;
@@ -169,6 +175,12 @@ function engineTimeChanged(onInit) {
 		document.getElementsByName('engineDurationHour')[0].style.backgroundColor = 'lightgray' ;
 		document.getElementsByName('engineDurationMinute')[0].style.backgroundColor = 'lightgray' ;
 	}
+	//PRE
+	else {
+		document.getElementsByName('engineDurationHour')[0].style.backgroundColor = 'lightgray' ;
+		document.getElementsByName('engineDurationMinute')[0].style.backgroundColor = 'lightgray' ;		
+	}
+	//PRE
 }
 
 
