@@ -84,7 +84,6 @@ function emit_booking($booking) {
 		"DTSTAMP:$date_time_booking" . $eol .
 	    "DTSTART:$date_flight_start" . $eol .
 		"DTEND:$date_flight_end" . $eol .
-		// TODO should use the booker ?
 		"ORGANIZER;CN=$ical_organizer:mailto:bounce@spa-aviation.be" . $eol .
 		"UID:booking-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		// DESCRIPTION: the details in the description
