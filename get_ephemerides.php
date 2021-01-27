@@ -18,7 +18,7 @@
 
 ob_start("ob_gzhandler");
 
-require_once 'db.php' ;
+require_once 'dbi.php' ;
 
 // returns different times as Unix timestamp in UTC time zone
 
