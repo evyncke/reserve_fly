@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2021 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 Charset is UTF-8
 https://icalendar.org/validator.html
 TODO
+Should the organizer be the booker ?
 The "charset" Content-Type parameter MUST be used in MIME transports
    to specify the charset being used. */
 
@@ -53,7 +54,7 @@ function emit_header($headers) {
 		"CALSCALE:GREGORIAN" . $eol .
 		"METHOD:PUBLISH" . $eol .
 		"X-WR-CALNAME:$ical_name" . (($test_mode) ? ' test' : '') . $eol . 
-		"ORGANIZER:$ical_organizer" . $eol .
+		"ORGANIZER:$ical_organizer:mailto:bounce@spa-aviation.be" . $eol .
 		"DESCRIPTION:$ical_name" . $eol .
 		"X-WR-CALDESC:$ical_name" . $eol .
 		"IMAGE;VALUE=URI;DISPLAY=BADGE:$favicon" . $eol .
@@ -82,14 +83,14 @@ function emit_booking($booking) {
 		"STATUS:CONFIRMED" . $eol .
 		"X-MICROSOFT-CDO-BUSYSTATUS:BUSY" . $eol .
 		"DTSTAMP:$date_time_booking" . $eol .
-	    "DTSTART:$date_flight_start" . $eol .
+	    	"DTSTART:$date_flight_start" . $eol .
 		"DTEND:$date_flight_end" . $eol .
 		"ORGANIZER;CN=$ical_organizer:mailto:bounce@spa-aviation.be" . $eol .
 		"UID:booking-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		// DESCRIPTION: the details in the description
 		"DESCRIPTION:Réservation du $booking[r_plane] du " . $eol .
-			"\t$booking[r_start] au $booking[r_stop].\\n" . $eol . 
-			"\tPilote: " . db2web($booking['full_name']) . '.\n' . $eol ) ;
+		"\t$booking[r_start] au $booking[r_stop].\\n" . $eol . 
+		"\tPilote: " . db2web($booking['full_name']) . '.\n' . $eol ) ;
 	if ($booking['r_instructor'] > 0) {
 		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $booking[r_instructor]") 
 			or journalise($userId, 'E', 'emit_booking: cannot fetch instructor: ' . mysqli_error($mysqli_link)) ;
@@ -133,15 +134,15 @@ function emit_agenda($event) {
 	global $eol, $default_timezone, $mysqli_link, $ical_name, $ical_organizer ;
 
 	$date_event_start = gmdate('Ymd\THis\Z', strtotime("$event[ag_start] $default_timezone")) ;
-	$date_event_end =   gmdate('Ymd\THis\Z', strtotime("$event[ag_end] $default_timezone")) ;
+	$date_event_end = gmdate('Ymd\THis\Z', strtotime("$event[ag_end] $default_timezone")) ;
 	$date_event_created = gmdate('Ymd\THis\Z', strtotime("$event[ag_date] $default_timezone")) ;
-	$date_alert =        gmdate('Ymd\THis\Z', strtotime("$event[alert] $default_timezone")) ;
+	$date_alert = gmdate('Ymd\THis\Z', strtotime("$event[alert] $default_timezone")) ;
 	emit("BEGIN:VEVENT" . $eol) ;
 	emit("METHOD:PUBLISH" . $eol .
 		"STATUS:TENTATIVE" . $eol .
 		"X-MICROSOFT-CDO-BUSYSTATUS:TENTATIVE" . $eol .
 		"DTSTAMP:$date_event_created" . $eol .
-	    "DTSTART:$date_event_start" . $eol .
+		"DTSTART:$date_event_start" . $eol .
 		"DTEND:$date_event_end" . $eol .
 		"ORGANIZER:$ical_organizer" . $eol .
 		"UID:event-$event[ag_id]@$_SERVER[HTTP_HOST]" . $eol) ;
