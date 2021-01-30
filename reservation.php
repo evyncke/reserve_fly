@@ -1,7 +1,7 @@
 <?php
 // Some icons (fast forward & co) by Snowish Icon Pack by Alexander Moore 
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2021 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -671,7 +671,8 @@ $version_css = date ("Y-m-d H:i:s.", filemtime('reservation.css')) ;
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 ?>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, d&eacute;cembre 2014, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, d&eacute;cembre 2014-2021 et Patrick Reginster 2020-2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
+Open Source code: <a href="https://github.com/evyncke/reserve_fly">on github</a><br/>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, ex&eacute;cut&eacute en <?=$execution_time?> sec</div>
 <br/>
 <center>
