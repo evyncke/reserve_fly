@@ -374,7 +374,7 @@ if ($this_segment_id > 1) {
 <div class="col-xs-12 col-md-6">
 <?php 
 // Avion avec compteur Moteur
-if ($booking['compteur_vol'] == 0) {
+//if ($booking['compteur_vol'] == 0) {
 ?>
 <table class="logbookTable">
 	<tr><td class="logbookSeparator" colspan="2">Temps/index moteur</td></tr>
@@ -407,7 +407,7 @@ else
 </table>
 <?php 
 // FIN Avion avec compteur Moteur
-}
+//}
 ?>
 
 <?php 
