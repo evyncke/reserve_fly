@@ -96,26 +96,46 @@ function toggleButtons(hideCancel) {
 function takeoffTimeChanged() {
 	takeoffDate.setUTCHours(document.getElementsByName("startHoursUTC")[0].value) ;
 	takeoffDate.setUTCMinutes(document.getElementsByName("startMinutesUTC")[0].value) ;
-	// Update the landing time based on new flight duration
-	landingDate = new Date(takeoffDate.valueOf() + 1000 * 60 * (durationMinute + 60 * durationHour)) ;
-	document.getElementsByName("endHoursUTC")[0].value = landingDate.getUTCHours() ;
-	document.getElementsByName("endMinutesUTC")[0].value = landingDate.getUTCMinutes() ;
-	// Make the Save button appear and the Cancel button disappear
-	toggleButtons(true) ;
+	//PRE
+	// Update the landing time based on new flight duration if compteurVol=0 (engineCompteur)
+	if(compteurVol==0) {
+		landingDate = new Date(takeoffDate.valueOf() + 1000 * 60 * (durationMinute + 60 * durationHour)) ;
+		document.getElementsByName("endHoursUTC")[0].value = landingDate.getUTCHours() ;
+		document.getElementsByName("endMinutesUTC")[0].value = landingDate.getUTCMinutes() ;
+		document.getElementsByName("UTCDurationHour")[0].value = durationHour ;
+		document.getElementsByName("UTCDurationMinute")[0].value = durationMinute ;
+		// Make the Save button appear and the Cancel button disappear
+		toggleButtons(true) ;
+	}
+	UTCTimeChanged(false);
+	//PRE
 }
 
 function landingTimeChanged() {
 	landingDate.setUTCHours(document.getElementsByName("endHoursUTC")[0].value) ;
 	landingDate.setUTCMinutes(document.getElementsByName("endMinutesUTC")[0].value) ;
-	// Update the landing time based on new flight duration
-	takeoffDate = new Date(landingDate.valueOf() - 1000 * 60 * (durationMinute + 60 * durationHour)) ;
-	document.getElementsByName("startHoursUTC")[0].value = takeoffDate.getUTCHours() ;
-	document.getElementsByName("startMinutesUTC")[0].value = takeoffDate.getUTCMinutes() ;
-	// Make the Save button appear and the Cancel button disappear
+	//PRE
+	// Update the landing time based on new flight duration if compteurVol=0 (engineCompteur)
+	if(compteurVol==0) {
+		takeoffDate = new Date(landingDate.valueOf() - 1000 * 60 * (durationMinute + 60 * durationHour)) ;
+		document.getElementsByName("startHoursUTC")[0].value = takeoffDate.getUTCHours() ;
+		document.getElementsByName("startMinutesUTC")[0].value = takeoffDate.getUTCMinutes() ;
+		document.getElementsByName("UTCDurationHour")[0].value = durationHour ;
+		document.getElementsByName("UTCDurationMinute")[0].value = durationMinute ;
+		// Make the Save button appear and the Cancel button disappear
+	}
+	UTCTimeChanged(false);
+	//PRE
 	toggleButtons(true) ;
 }
 
 function engineTimeChanged(onInit) {
+	//PRE
+	if(compteurVol==1) {
+		landingDate = new Date(takeoffDate.valueOf()) ;
+		return;
+	}
+	//PRE
 	var inputEngineStartHour = parseInt(document.getElementsByName('engineStartHour')[0].value) ;
 	var inputEngineEndHour = parseInt(document.getElementsByName('engineEndHour')[0].value) ;
 	
@@ -192,8 +212,12 @@ function flightTimeChanged(onInit) {
 	var minutes = (flightEndHour - flightStartHour) * 60 + (flightEndMinute - flightStartMinute) ;
 	flightDurationMinute = minutes % 60 ;
 	flightDurationHour = (minutes - flightDurationMinute) / 60 ;
-	document.getElementById('flightDurationHour').innerHTML = flightDurationHour ;
-	document.getElementById('flightDurationMinute').innerHTML = flightDurationMinute ;
+	//PRE
+	//document.getElementById('flightDurationHour').innerHTML = flightDurationHour ;
+	//document.getElementById('flightDurationMinute').innerHTML = flightDurationMinute ;
+	document.getElementsByName('flightDurationHour')[0].value = flightDurationHour ;
+	document.getElementsByName('flightDurationMinute')[0].value = flightDurationMinute ;	
+	//PRE
 	if (minutes <= 0) {
 		toggleButtons(false) ;
 		document.getElementById('flightSchedule').style.opacity = 0.7 ;
@@ -201,8 +225,12 @@ function flightTimeChanged(onInit) {
 		document.getElementsByName('startMinutesUTC')[0].disabled = true ;
 		document.getElementsByName('endHoursUTC')[0].disabled = true ;
 		document.getElementsByName('endMinutesUTC')[0].disabled = true ;
-		document.getElementById('flightDurationHour').style.backgroundColor = 'red' ;
-		document.getElementById('flightDurationMinute').style.backgroundColor = 'red' ;
+		//PRE
+		//document.getElementById('flightDurationHour').style.backgroundColor = 'red' ;
+		//document.getElementById('flightDurationMinute').style.backgroundColor = 'red' ;
+		document.getElementsByName('flightDurationHour')[0].style.backgroundColor = 'red' ;
+		document.getElementsByName('flightDurationMinute')[0].style.backgroundColor = 'red' ;
+		//PRE
 	} else if (!onInit) {
 		toggleButtons(true) ;
 		document.getElementById('flightSchedule').style.opacity = 1.0 ;
@@ -210,10 +238,48 @@ function flightTimeChanged(onInit) {
 		document.getElementsByName('startMinutesUTC')[0].disabled = false ;
 		document.getElementsByName('endHoursUTC')[0].disabled = false ;
 		document.getElementsByName('endMinutesUTC')[0].disabled = false ;
-		document.getElementById('flightDurationHour').style.backgroundColor = 'lightgray' ;
-		document.getElementById('flightDurationMinute').style.backgroundColor = 'lightgray' ;
+		//PRE
+		//document.getElementById('flightDurationHour').style.backgroundColor = 'lightgray' ;
+		//document.getElementById('flightDurationMinute').style.backgroundColor = 'lightgray' ;
+		document.getElementsByName('flightDurationHour')[0].style.backgroundColor = 'lightgray' ;
+		document.getElementsByName('flightDurationMinute')[0].style.backgroundColor = 'lightgray' ;
+		//PRE
 	}
 }
+
+//PRE
+function UTCTimeChanged(onInit) {
+	var inputUTCStartHour = parseInt(document.getElementsByName('startHoursUTC')[0].value) ;
+	var inputUTCEndHour = parseInt(document.getElementsByName('endHoursUTC')[0].value) ;
+	var inputUTCStartMinute = parseInt(document.getElementsByName('startMinutesUTC')[0].value) ;
+	var inputUTCEndMinute = parseInt(document.getElementsByName('endMinutesUTC')[0].value) ;
+	var minutes = (inputUTCEndHour - inputUTCStartHour) * 60 + (inputUTCEndMinute - inputUTCStartMinute) ;
+	durationUTCMinute = minutes % 60 ;
+	durationUTCHour = (minutes - durationUTCMinute) / 60 ;
+	document.getElementsByName('UTCDurationHour')[0].value = durationUTCHour ;
+	document.getElementsByName('UTCDurationMinute')[0].value = durationUTCMinute ;
+	if (minutes <= 0) {
+		bsAlert('Temps UTC fin doit être plus grand que le temps UTC début') ;
+		toggleButtons(false) ;
+		document.getElementsByName('UTCDurationHour')[0].style.backgroundColor = 'red' ;
+		document.getElementsByName('UTCDurationMinute')[0].style.backgroundColor = 'red' ;
+	} else if (!onInit) {
+		toggleButtons(true) ;
+		document.getElementsByName('startHoursUTC')[0].disabled = false ;
+		document.getElementsByName('startMinutesUTC')[0].disabled = false ;
+		document.getElementsByName('endHoursUTC')[0].disabled = false ;
+		document.getElementsByName('endMinutesUTC')[0].disabled = false ;
+		document.getElementsByName('UTCDurationHour')[0].style.backgroundColor = 'lightgray' ;
+		document.getElementsByName('UTCDurationMinute')[0].style.backgroundColor = 'lightgray' ;
+	}
+	else {
+		document.getElementsByName('UTCDurationHour')[0].disabled = true ;
+		document.getElementsByName('UTCDurationMinute')[0].disabled = true ;
+		document.getElementsByName('UTCDurationHour')[0].style.backgroundColor = 'lightgray' ;
+		document.getElementsByName('UTCDurationMinute')[0].style.backgroundColor = 'lightgray' ;
+	}
+}
+//PRE
 
 function prefillDropdownMenus(selectName, valuesArray, selectedValue) {
 	var select = document.getElementsByName(selectName)[0] ;
@@ -236,14 +302,27 @@ function initLogbook() {
 //	document.getElementById('logDiv').innerHTML += (isMobile) ? 'Using a mobile device<br/>' : 'Using a desktop<br/>' ;
 // Should also prepare the CSS for logDiv
 // which was #logDiv { color: gray; font-size: 8; border-top-style: solid ; border-width: 1px; position: relative;}
+	//PRE
+	compteurVol=0;
+	if(document.getElementsByName('engineStartHour').length==0) {
+		console.log('initLogbook, No engine UI BOX') ;
+		compteurVol=1;
+	}
+	//PRE
 
 	// As too many pilots do not fill the engine time, let's focus on the start time...
 //	document.getElementsByName("engineEndHour")[0].focus();
-	document.getElementsByName("engineStartHour")[0].focus();
+	//PRE
+	//document.getElementsByName("engineStartHour")[0].focus();
+	document.getElementsByName("startHoursUTC")[0].focus();
 	document.getElementsByName("startHoursUTC")[0].value = takeoffDate.getUTCHours() ;
 	document.getElementsByName("startMinutesUTC")[0].value = takeoffDate.getUTCMinutes() ;
+	document.getElementsByName("endHoursUTC")[0].value = takeoffDate.getUTCHours() +1;
+	document.getElementsByName("endMinutesUTC")[0].value = takeoffDate.getUTCMinutes() ;
+	//PRE
 	// Compute the landing time based on estimated flight duration...
 	engineTimeChanged(true) ;
+	UTCTimeChanged(true);
 	// Prefill the select drop-down
 	prefillDropdownMenus('plane', planes, planeId) ;
 	prefillDropdownMenus('pilot', pilots, pilotId) ;

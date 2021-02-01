@@ -372,7 +372,10 @@ if ($this_segment_id > 1) {
 
 <div class="row">
 <div class="col-xs-12 col-md-6">
-
+<?php 
+// Avion avec compteur Moteur
+if ($booking['compteur_vol'] == 0) {
+?>
 <table class="logbookTable">
 	<tr><td class="logbookSeparator" colspan="2">Temps/index moteur</td></tr>
 	<tr><td class="logbookLabel">D&eacute;but:</td>
@@ -399,11 +402,16 @@ else
 		print("Type de compteur moteur inconnu...") ;
 ?>
 		</td></tr>
-	<tr><td class="logbookLabel">Dur&eacute;e:</td><td class="logbookValue"><input type="text" size="5" maxlength="5" name="engineDurationHour" value="<?=$durationHour?>" readonly> H
+	<tr><td class="logbookLabel">Dur&eacute;e Moteur:</td><td class="logbookValue"><input type="text" size="5" maxlength="5" name="engineDurationHour" value="<?=$durationHour?>" readonly> H
 		<input type="text" size="3" maxlength="2" name="engineDurationMinute" value="<?=$durationMinute?>" readonly> min.</td></tr>
 </table>
+<?php 
+// FIN Avion avec compteur Moteur
+}
+?>
 
 <?php 
+// Avion avec compteur VOL (C182)
 if ($booking['compteur_vol'] != 0) {
 ?>
 <table class="logbookTable">
@@ -415,7 +423,7 @@ if ($booking['compteur_vol'] != 0) {
 		<input type="number" size="6" name="flightEndHour" max="<?=$flightStartHour+50?>" value="<?=$flightEndHour?>" onchange="flightTimeChanged(false);"> H
 		<input type="number" size="4" maxlength="2" min="0" max="59" name="flightEndMinute" value="<?=$flightEndMinute?>" onchange="flightTimeChanged(false);"> min
 	</td></tr>
-	<tr><td class="logbookLabel">Dur&eacute;e:</td><td class="logbookValue"><input type="text" size="5" maxlength="5" name="flightDurationHour" value="<?=$durationHour?>" readonly> H
+	<tr><td class="logbookLabel">Dur&eacute;e vol:</td><td class="logbookValue"><input type="text" size="5" maxlength="5" name="flightDurationHour" value="<?=$durationHour?>" readonly> H
 		<input type="text" size="3" maxlength="2" name="flightDurationMinute" value="<?=$durationMinute?>" readonly> min.</td></tr>
 </table>
 <?php
@@ -437,6 +445,11 @@ if ($booking['compteur_vol'] != 0) {
 		<input type="number" min="0" max="23" name="endHoursUTC" size="4" maxlength="2" onchange="landingTimeChanged();" disabled> :
 		<input type="number" min="0" max="59" name="endMinutesUTC" size="4" maxlength="2" onchange="landingTimeChanged();" disabled>
 	</td></tr>
+	<!-- PRE -->
+	<tr><td class="logbookLabel">Dur&eacute;e Moteur:</td><td class="logbookValue"><input type="text" size="5" maxlength="5" name="UTCDurationHour" value="<?=$durationHour?>" readonly> H
+		<input type="text" size="3" maxlength="2" name="UTCDurationMinute" value="<?=$durationMinute?>" readonly> min.</td></tr>
+	<!-- PRE -->
+	
 	<!--tr><td class="logbookLabel">Fin (<i>heure locale</i>):</td><td class="logbookValue">
 		<input type="text" name="endHours" size="4" maxlength="2" readonly>:<input type="text" name="endMinutes" size="4" maxlength="2" readonly>
 	</td></tr-->
