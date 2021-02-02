@@ -416,12 +416,12 @@ if ($booking['compteur_vol'] != 0) {
 ?>
 <table class="logbookTable">
 	<tr><td class="logbookSeparator" colspan="2">Temps/index vol</td></tr>
-	<tr><td class="logbookLabel">D&eacute;but:</td><td class="logbookValue"><input type="number" size="5" name="flightStartHour" XXXmin="<?=$flightStartHour-10?>" XXXmax="<?=$flightStartHour+30?>" value="<?=$flightStartHour?>" onchange="flightTimeChanged(false);"> H
-		<input type="number" size="4" maxlength="2" min="0" max="59" name="flightStartMinute" value="<?=$flightStartMinute?>" onchange="flightTimeChanged(false);"> min
+	<tr><td class="logbookLabel">D&eacute;but:</td><td class="logbookValue"><input type="number" size="6" maxlength="6" name="flightStartHour" min="<?=$flightStartHour-10?>" max="<?=$flightStartHour+30?>" value="<?=$flightStartHour?>" onchange="flightTimeChanged(false);"> H
+		<input type="number" size="4" maxlength="4" min="0" max="59" name="flightStartMinute" value="<?=$flightStartMinute?>" onchange="flightTimeChanged(false);"> min
 	</td></tr>
 	<tr><td class="logbookLabel">Fin:</td><td class="logbookValue">
-		<input type="number" size="6" name="flightEndHour" max="<?=$flightStartHour+50?>" value="<?=$flightEndHour?>" onchange="flightTimeChanged(false);"> H
-		<input type="number" size="4" maxlength="2" min="0" max="59" name="flightEndMinute" value="<?=$flightEndMinute?>" onchange="flightTimeChanged(false);"> min
+		<input type="number" size="6" maxlength="5" name="flightEndHour" max="<?=$flightStartHour+50?>" value="<?=$flightEndHour?>" onchange="flightTimeChanged(false);"> H
+		<input type="number" size="6" maxlength="2" min="0" max="59" name="flightEndMinute" value="<?=$flightEndMinute?>" onchange="flightTimeChanged(false);"> min
 	</td></tr>
 	<tr><td class="logbookLabel">Dur&eacute;e vol:</td><td class="logbookValue"><input type="text" size="5" maxlength="5" name="flightDurationHour" value="<?=$durationHour?>" readonly> H
 		<input type="text" size="3" maxlength="2" name="flightDurationMinute" value="<?=$durationMinute?>" readonly> min.</td></tr>
