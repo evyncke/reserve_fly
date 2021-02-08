@@ -425,7 +425,6 @@ if ($userId == 0) {
 			print("</li>\n") ;
 		}
 		print("</ul></p>\n") ;
-		journalise($userId, "I", "$missing_entries unlogged booking displayed") ;
 	}
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 } // ($userId == 0)
