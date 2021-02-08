@@ -381,13 +381,13 @@ while ($row = mysqli_fetch_array($result)) {
 print(date('Y-m-d H:i:s').": checking whether entries $table_person exist in $table_users.\n") ;
 $result = mysqli_query($mysqli_link, "SELECT *
 	FROM $table_person p
-	WHERE NOT EXISTS ( SELECT * FROM $table_users u WHERE u.id = p.jom_id)")
+	WHERE p.jom_id IS NOT NULL AND NOT EXISTS ( SELECT * FROM $table_users u WHERE u.id = p.jom_id)")
 	or die(date('Y-m-d H:i:s').": cannot read $table_users and $table_person, " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
 	print(date('Y-m-d H:i:s').": $row[name]/$row[email]/$row[id] does not exist in Joomla (previously known as $row[jom_id]") ;
 	journalise($row['jom_id'], 'W', "Member $row[name]/$row[email]/$row[id] does not exist in Joomla (previously known as $row[jom_id]), setting it to NULL.") ;
 	mysqli_query($mysqli_link, "UPDATE $table_person SET jom_id = NULL WHERE id = $row[id]")
-		or journalise($row['jom_id'], "E", "Cannot nullify joomla ID : " . mysqli_error($mysqli_link)) ;
+		or journalise(0, "E", "Cannot nullify joomla ID($row[jom_id]/$row[id]: " . mysqli_error($mysqli_link)) ;
 }
 
 // Vérifier si tous les pilotes/élèves ont des informations équivalentes en $table_users and $rapcs_person (ex OpenFlyers)
