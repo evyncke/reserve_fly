@@ -101,8 +101,13 @@ function bookingFromID(id) {
 }
 
 function loggingFromID(id) {
-	var elems = id.split('-') ;
-	return elems[1] ;
+	if (id.includes('-')) {
+		var elems = id.split('-') ;
+		return elems[1] ;
+	} else {
+		console.log('loggingFromID(' + id + ') has no hyphen') ;
+		return 0 ;
+	}
 }
 
 function buttonHide(id) {
@@ -946,6 +951,9 @@ function cancelAgendaItem() {
 
 function modifyBooking(id) {
 	displayWaiting() ;
+	console.log('modifyBooking(' + id + ') currentlyDisplayedBooking=' + currentlyDisplayedBooking + ', bookingFromID()=' + bookingFromID(currentlyDisplayedBooking) + ', loggingFromID()=' + loggingFromID(currentlyDisplayedBooking)) ;
+	console.log('allBookings:') ;
+	console.log(allBookings) ;
 	if (allBookings[bookingFromID(currentlyDisplayedBooking)][loggingFromID(currentlyDisplayedBooking)].ressource == 0) {
 		var plane = document.getElementById("planeSelect").value ;
 		var pilotId = document.getElementById("pilotSelect").value ;
