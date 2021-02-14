@@ -289,6 +289,31 @@ function UTCTimeChanged(onInit) {
 	}
 }
 
+function planeChanged() {
+	console.log('Start of plane change') ;
+	// Let's clear the engine index
+	document.getElementsByName('engineStartHour')[0].value = null ;
+	document.getElementsByName('engineStartHour')[0].min = null ;
+	document.getElementsByName('engineStartHour')[0].max = null ;
+	document.getElementsByName('engineStartMinute')[0].value = null ;
+	document.getElementsByName('engineEndHour')[0].value = null ;
+	document.getElementsByName('engineEndHour')[0].min = null ;
+	document.getElementsByName('engineEndHour')[0].max = null ;
+	document.getElementsByName('engineEndMinute')[0].value = null ;
+	document.getElementsByName('engineDurationHour')[0].value = 0 ;
+	document.getElementsByName('engineDurationMinute')[0].value = 0 ;
+	// Let's clear the flight time index (... issue is of course it is not always set... so not applicable to PH-AML @ RAPCS...
+	
+	// Let's clear the end of block time
+	document.getElementsByName('startHoursUTC')[0].value = null ;
+	document.getElementsByName('startMinutesUTC')[0].value = null ;
+	document.getElementsByName('endHoursUTC')[0].value = null ;
+	document.getElementsByName('endMinutesUTC')[0].value = null ;
+	document.getElementsByName('UTCDurationHour')[0].value = 0 ;
+	document.getElementsByName('UTCDurationMinute')[0].value = 0 ;
+	console.log('End of plane change') ;
+}
+
 function prefillDropdownMenus(selectName, valuesArray, selectedValue) {
 	var select = document.getElementsByName(selectName)[0] ;
 

@@ -519,7 +519,7 @@ if ($booking['compteur_vol'] != 0) {
 <tr><td class="logbookSeparator" colspan="2">Avion</td><tr>
 <tr><td class="logbookLabel">Avion:</td>
 <td class="logbookValue">
-	<select name="plane">
+	<select name="plane" onchange="planeChanged();">
 	</select>
 </td></tr>
 </table>
