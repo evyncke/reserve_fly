@@ -16,6 +16,7 @@
 */
 
 var
+	checkEngineCounter = true,
 	userAgentMobile = navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/),
 	isMobile = (userAgentMobile && userAgentMobile.length > 0),
 	hideOptionalFields,
@@ -168,7 +169,7 @@ function engineTimeChanged(onInit) {
 	} else if (!onInit) {
 		var engineStartHourMax= engineStartHourInit+50;
 		var engineStartHourMin= engineStartHourInit-50;
-		if(engineStartHour > engineStartHourMax || engineStartHour < engineStartHourMin) {
+		if(checkEngineCounter && (engineStartHour > engineStartHourMax || engineStartHour < engineStartHourMin)) {
 			bsAlert('Compteur Moteur trop different du compteur introduit par le pilote précédent. Vérifiez la valeur.') ;
 			toggleButtons(false) ;
 			document.getElementsByName('engineStartHour')[0].style.backgroundColor = 'pink';			
@@ -183,11 +184,10 @@ function engineTimeChanged(onInit) {
 			document.getElementsByName('engineDurationHour')[0].style.backgroundColor = 'lightgray' ;
 			document.getElementsByName('engineDurationMinute')[0].style.backgroundColor = 'lightgray' ;
 			document.getElementsByName('engineStartHour')[0].style.backgroundColor = 'white';			
-			
 			UTCTimeChanged(false);
 		}
 	}
-	else {
+	else { // onInit
 		engineStartHourInit=engineStartHour;
 		document.getElementsByName('engineDurationHour')[0].style.backgroundColor = 'lightgray' ;
 		document.getElementsByName('engineDurationMinute')[0].style.backgroundColor = 'lightgray' ;		
@@ -311,6 +311,8 @@ function planeChanged() {
 	document.getElementsByName('endMinutesUTC')[0].value = null ;
 	document.getElementsByName('UTCDurationHour')[0].value = 0 ;
 	document.getElementsByName('UTCDurationMinute')[0].value = 0 ;
+	// No more engine checks
+	checkEngineCounter = false ;
 	console.log('End of plane change') ;
 }
 
