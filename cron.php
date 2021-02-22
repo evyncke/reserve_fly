@@ -133,10 +133,11 @@ while ($row = mysqli_fetch_array($result)) {
 			$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
 			$email_recipients .= ", $instructor[email]" ;
 		}
-		if ($row['r_pilot'] != $row['r_who']) {
-			$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
-			$email_recipients .= ", $booker[email]" ;
-		}
+// Instructors (the only COVID-19 bookers) are complaining to have too many emails...
+//		if ($row['r_pilot'] != $row['r_who']) {
+//			$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
+//			$email_recipients .= ", $booker[email]" ;
+//		}
 		if ($bccTo != '') {
 			$email_recipients .= ", $bccTo" ;
 		}
@@ -218,10 +219,11 @@ while ($row = mysqli_fetch_array($result)) {
 	if (! $test_mode) {
 		$email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
 		$email_recipients = $row['email'] ;
-		if ($row['r_pilot'] != $row['r_who']) {
-			$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
-			$email_recipients .= ", $booker[email]" ;
-		}
+// Instructors (the only COVID-19 bookers) are complaining to have too many emails...
+//		if ($row['r_pilot'] != $row['r_who']) {
+//			$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
+//			$email_recipients .= ", $booker[email]" ;
+//		}
 		if ($bccTo != '') {
 			$email_header .= "Bcc: $bccTo\r\n" ;
 			$email_recipients .= ", $bccTo" ;
