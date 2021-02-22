@@ -34,8 +34,8 @@ if ($info['http_code'] != 200) {
 		foreach ($result->states as $state) {
 			$squawk = (isset($state[14]) and $state[14] != 'null' and $state[14] != '') ? "'$state[14]'" : 'NULL' ;
 			$velocity = (isset($state[9]) and $state[9] != 'null' and $state[9] != '') ? $state[9] : 'NULL' ;
-			mysqli_query($mysqli_link, "INSERT INTO rapcs_tracks (t_icao24, t_time, t_longitude, t_latitude, t_altitude, t_velocity, t_squawk, t_source)
-				VALUES('$state[0]', FROM_UNIXTIME($state[4]), $state[5], $state[6], $state[7], $velocity, $squawk, $state[16])")
+			mysqli_query($mysqli_link, "INSERT INTO rapcs_tracks (t_icao24, t_time, t_longitude, t_latitude, t_altitude, t_velocity, t_squawk, t_sensor, t_source)
+				VALUES('$state[0]', FROM_UNIXTIME($state[4]), $state[5], $state[6], $state[7], $velocity, '$squawk', $state[16], 'OpenSky')")
 				or journalise(0, 'E', "Cannot insert track for $state[0]: " . mysqli_error($mysqli_link)) ; 
 		}
 	}
