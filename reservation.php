@@ -406,6 +406,7 @@ if ($userId == 0) {
 
 
 // Verify non-logged flights in the last week
+	if (! $userIsInstructor) {
 	$result = mysqli_query($mysqli_link, "select * from $table_bookings b join $table_planes p on r_plane = p.id  
 		where p.actif = 1 and 
 			(b.r_pilot = $userId or b.r_who = $userId or b.r_instructor = $userId) and
@@ -426,6 +427,7 @@ if ($userId == 0) {
 		}
 		print("</ul></p>\n") ;
 	}
+	} // Not $isInstructor
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 } // ($userId == 0)
 // Facebook log-in
@@ -508,6 +510,7 @@ Indications pour un avion que nous n'&ecirc;tes probablement pas en droit de r&e
 base de l'entr&eacute;e des heures de vol dans votre carnet de vol).<br/>
 <img src="forbidden-icon.png" width="12" height="12" alt="X"  onStalled="imgStalled();">: vous n'avez pas les qualifications requises (sur base des validit&eacute;s de votre profil).<br/>
 V&eacute;rifiez les r&egrave;gles de r&eacute;servation et si vous les respectez: r&eacute;servez :-)<br/>
+<img src="fa.ico" border="0" width="12" height="12">: ouvre Flight Aware avec le dernier vol de cet avion.<br/>
 </span>
 <center><input type="button" id="roadBookButton" value="Carnet de route" onclick="roadBookClick();" disabled="true" style="display: none;"></center>
 <p>
