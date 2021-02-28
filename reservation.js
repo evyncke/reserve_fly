@@ -1201,7 +1201,6 @@ function confirmBooking(bookingIsForFlying) {
 		'&type=' + bookingType + '&comment=' + comment + '&crewWanted=' + crewWanted + '&paxWanted=' + paxWanted + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
 		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
 		'&duration=' + flightDuration ;
-myLog(requestUrl) ;
 	XHR.open("GET", requestUrl, false) ;
 	XHR.send(null) ;
 	// Now, let's refresh the screen to display the new booking
@@ -1210,7 +1209,6 @@ myLog(requestUrl) ;
 
 function confirmAgendaItem() {
 	displayWaiting() ;
-myLog("AgendaItem is for: " + document.getElementById("agendaItemInstructorSelect").value) ;
 	var itemStart = document.getElementById("agendaItemDateStart").value ;
 	itemStart += ' ' + document.getElementById("agendaItemStartHourSelect").value ;
 	itemStart += ':' + document.getElementById("agendaItemStartMinuteSelect").value + ":00";
@@ -1235,7 +1233,6 @@ myLog("AgendaItem is for: " + document.getElementById("agendaItemInstructorSelec
 			hideWaiting() ;
 			if(XHR.status  == 200) {
 				try {
-myLog('create_fi_agenda:' + XHR.responseText) ;
 					var response = eval('(' + XHR.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
@@ -1256,7 +1253,6 @@ myLog('create_fi_agenda:' + XHR.responseText) ;
 	}
 	var requestUrl = "create_fi_agenda.php?fi=" + instructorId + '&start=' + itemStart + '&end=' + itemEnd +
 		'&callType=' + itemCallType + '&studentOnly=' + itemStudentOnly + '&comment=' + comment ;
-myLog(requestUrl) ;
 	XHR.open("GET", requestUrl, false) ;
 	XHR.send(null) ;
 	// Now, let's refresh the screen to display the new booking
@@ -1408,7 +1404,6 @@ function editAgendaItemDetails(event) {
 	document.getElementById('agendaItemTitle').innerHTML = "Annuler/modifier une disponibilit&eacute;" ; 
 	document.getElementById("agendaItemInstructorSelect").value = item.fi ;
 	// Time
-console.log(item) ;
 	document.getElementById("agendaItemDateStart").value = item.start.substr(0,10).replace(/\//g, '-') ;
 	document.getElementById("agendaItemStartHourSelect").value = Number(item.start.substr(11,2)) ; // easy way to remove leading zero
 	document.getElementById("agendaItemStartMinuteSelect").value = Number(item.start.substr(14,2)) ; // easy way to remove leading zero
@@ -1454,7 +1449,6 @@ function newBookingDetails(event) {
 			break ;
 		}
 	}
-	console.log('plane= ' + i + ', ressource: ' + ressourceType) ;
 	// Pre-set plane, pilot
 	if (ressourceType == 0) {
 		document.getElementById("planeSelectSpan").style.display = 'inline' ;
@@ -1945,6 +1939,9 @@ function refreshPlanningTable() {
 			}
 			// add for engine hours using the most recent data but not for ressources
 			if (allPlanes[plane].ressource == 0) {
+				// Add FlightAware link only for members
+				if (userId > 0)
+					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="https://flightaware.com/live/flight/' + allPlanes[plane].id.toUpperCase() + '" target="_blank"><img src="fa.ico" border="0" width="12" height="12"></a>' ;
 				if (allPlanes[plane].compteur_pilote_date > allPlanes[plane].compteur_date)
 					compteur = allPlanes[plane].compteur_pilote ;
 				else
