@@ -31,7 +31,7 @@ if ($velocity == 'none') $velocity = "NULL" ;
 $squawk = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['squawk'])) ;
 $sensor = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['sensor'])) ;
 $source = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['source'])) ;
-$rc = mysqli_query($mysqli_link, "INSERT INTO rapcs_tracks (t_icao24, t_time, t_longitude, t_latitude, t_altitude, t_velocity, t_squawk, t_sensor, t_source)
+$rc = mysqli_query($mysqli_link, "INSERT INTO $table_tracks (t_icao24, t_time, t_longitude, t_latitude, t_altitude, t_velocity, t_squawk, t_sensor, t_source)
 		VALUES('$icao24', '$daytime', $longitude, $latitude, $altitude, $velocity, '$squawk', $sensor, '$source')") ;
 if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
 	journalise(0, 'E', "Cannot insert track for $icao24 (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
