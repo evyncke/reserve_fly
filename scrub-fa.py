@@ -53,8 +53,8 @@ for plane, icao24 in planes.items():
 	reply = urllib.request.urlopen(request)
 	# Let's skip until past the preamble and before the postamble, using '?' to avoid being greedy
 	match = re.search(preamble + '(.+?)' + postamble, str(reply.read()))
-	json_string = match.group(1)
-	json_dict = json.loads(json_string) 
+	json_string = match.group(1).replace("\\'", "'")
+	json_dict = json.loads(json_string)
 	if not 'flights' in json_dict:
 		print('No flights element found')
 		continue
