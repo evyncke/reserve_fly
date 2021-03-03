@@ -33,33 +33,59 @@ var trackColors = [ '#33C9EB', // blue,
 '#a1dab4',
 ] ;
 
-function insertTrackPoints () {
-	var plane = 0, currentId = '' ;
+function insertTrackPoints (flights) {
+	var planeCount = 0 , currentId = '' ;
 	var currentFeature ;
 
+	console.log("Start of insertTrackPoints") ;
 	flightFeatureCollection = [] ;
-	for (var pointIndex = 0; pointIndex < flightPoints.length; pointIndex++) {
+	for (var flight in flights) {
+		console.log('Top level of the loop for ' + flight) ;
+		thisFlight = flights[flight] ;
 		// TODO add time of the first point in the comment
-		// TODO separate in two flights if the timestamp difference is > 30 minutes or if booking-id is different
-		if (currentId != flightPoints[pointIndex][0]) {
-			if (typeof currentFeature != 'undefined') // Let's add the previous place to the list of features
-				flightFeatureCollection.push(currentFeature) ;
-			currentFeature = {type : 'Feature',
-				properties : {title : '',comment : '', color: ''},
-				geometry : {type : 'LineString', coordinates : [] } } ;
-			currentFeature.type = 'Feature' ;
-			currentFeature.properties.title = flightPoints[pointIndex][0] ;
-			currentFeature.properties.comment = flightPoints[pointIndex][0] ;
-			currentFeature.properties.color = trackColors[plane] ;
-			currentFeature.geometry.type = 'LineString' ;
-			currentFeature.geometry.coordinates = [] ;
-			currentId = flightPoints[pointIndex][0] ;
-			plane = plane + 1 ;
+		currentFeature = {type : 'Feature',
+			properties : {title : '',comment : '', color: ''},
+			geometry : {type : 'LineString', coordinates : [] } } ;
+		currentFeature.properties.title = flight ;
+		currentFeature.properties.comment = "Plane: " + thisFlight.plane + '</br>First seen: ' + thisFlight.first + ' UTC</br>Last seen: ' + thisFlight.last + ' UTC';
+		currentFeature.properties.color = trackColors[planeCount++] ;
+		currentFeature.geometry.type = 'LineString' ;
+		currentFeature.geometry.coordinates = [] ;
+
+		thisTrack = thisFlight.track ;
+		for (trackPosition in thisTrack) {
+			currentFeature.geometry.coordinates.push([thisTrack[trackPosition][0], thisTrack[trackPosition][1]]) ;
 		}
-		currentFeature.geometry.coordinates.push([flightPoints[pointIndex][1], flightPoints[pointIndex][2]]) ;
-	}
-	if (typeof currentFeature != 'undefined') // Let's add the previous place to the list of features
+		// Add this flight to the collection
+		console.log('end of top level of the loop for ' + flight) ;
 		flightFeatureCollection.push(currentFeature) ;
+	}
+		
+	// Add the flights layers
+	map.on('load', mapAddLayers) ;
+	console.log("flightFeatureCollection is ") ;
+	console.log(flightFeatureCollection) ;
+}
+
+function getTrackPoints(ajaxURL) {
+	var XHR = new XMLHttpRequest();
+	XHR.onreadystatechange = function() {
+		if(XHR.readyState  == 4) {
+			if(XHR.status  == 200) {
+				console.log("getTrackPoints() call-back") ;
+				try {
+					var response = eval('(' + XHR.responseText.trim() + ')') ;
+				} catch(err) {
+					console.log("Cannot eval: " + XHR.responseText.trim()) ;
+					return ;
+				}
+				insertTrackPoints(response) ;
+				console.log("end of getTrackPoints() call-back") ;
+			} // == 200
+		} // == 4
+	} // onreadystatechange
+	XHR.open("GET", ajaxURL, true) ; // Send asynchronous request
+	XHR.send(null) ;
 }
 
 function mapAddLayers() {
@@ -68,7 +94,7 @@ function mapAddLayers() {
 	map.addLayer(flightLayer) ;
 	// Change the cursor to a pointer when the it enters a feature in the 'airports' layer.
 	map.on('mouseenter', 'flights', function (e) {
-//		map.getCanvas().style.cursor = 'pointer';
+		map.getCanvas().style.cursor = 'pointer';
 		console.log(document.getElementById('flightInfo')) ;
 		document.getElementById('flightInfo').innerHTML = e.features[0].properties.comment ;
 		// e.originalEvent.Client[XY] e.originalEvent.offset[XY](== e.point.[xy])
@@ -80,12 +106,12 @@ function mapAddLayers() {
 	});
 	// Change it back to a pointer when it leaves.
 	map.on('mouseleave', 'flights', function (e) {
-//		map.getCanvas().style.cursor = '';
+		map.getCanvas().style.cursor = '';
 		document.getElementById('flightInfo').style.display = 'none' ;
 	});
 }
 
-function init(longitude, latitude, mapBoxToken) {
+function init(longitude, latitude, mapBoxToken, ajaxURL) {
 	mapboxgl.accessToken = mapBoxToken;
 	map = new mapboxgl.Map({
 	    container: 'map', // container id
@@ -98,7 +124,5 @@ function init(longitude, latitude, mapBoxToken) {
 	map.addControl(new mapboxgl.NavigationControl());
 
 	// Build the track points
-	insertTrackPoints() ;
-	// Add the flights layers
-	map.on('load', mapAddLayers) ;
+	getTrackPoints(ajaxURL) ;
 }

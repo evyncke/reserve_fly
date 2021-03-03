@@ -108,7 +108,7 @@ while ($row = mysqli_fetch_array($result)) {
 </script>
 <!-- End Matomo Code -->
 </head>
-<body onload="init(<?=$default_longitude?>, <?=$default_latitude?>, '<?=$mapbox_token?>');">
+<body onload="init(<?=$default_longitude?>, <?=$default_latitude?>, '<?=$mapbox_token?>', 'get_tracks.php?');">
 <center><h2>Vols de la flotte ces dernières 24 heures</h2></center>
 
 <div id='map' style='width: 100%; height: 90%;'></div>
