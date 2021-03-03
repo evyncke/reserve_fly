@@ -89,8 +89,9 @@ function generateMaintenanceClass($entretien, $compteur) {
 	print("<tr$class><td>Dernier compteur pilote<span class=\"hidden-xs\"> ($row2[compteur_pilote_date])</span></td><td>$row2[compteur_pilote]</td></tr>\n") ;
 	if ($plane_row['poh'])
 		print("<tr><td>POH </td><td><a href=\"$plane_row[poh]\"><span class=\"glyphicon glyphicon-download-alt\"></span></a></td></tr>\n") ;
-	if ($plane_row['poh'])
+	if ($plane_row['checklist'])
 		print("<tr><td>Checklist</td><td><a href=\"$plane_row[checklist]\"><span class=\"glyphicon glyphicon-download-alt\"></span></a></td></tr>\n") ;
+	print("<tr><td>Dernier vol sur FlightAware  <span class=\"glyphicon glyphicon-new-window\"></span></td><td><a href=\"https://flightaware.com/live/flight/" . strtoupper($plane_row['id']) . "\" target=\"_blank\"><img src=\"fa.ico\" border=\"0\" width=\"24\" height=\"24\"></a></td></tr>\n") ;
 ?>
 </table>
 </div><!-- col-->
