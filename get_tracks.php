@@ -35,7 +35,7 @@ else
 	$sql_filters[] = "t_time >= DATE_SUB(SYSDATE(), INTERVAL 24 HOUR)";
 
 // TODO check whether user could select the source of data ? AND t_source = 'FA-evyncke' or 'FlightAware' ?
-$sql = "SELECT *
+$sql = "SELECT *, UNIX_TIMESTAMP(t_time) AS ts
 	FROM $table_planes JOIN $table_tracks ON t_icao24 = icao24
 	WHERE " . implode(' AND ', $sql_filters) . "
 	ORDER BY id, t_time
@@ -45,21 +45,35 @@ $sql = "SELECT *
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access aux traces: " . mysqli_error($mysqli_link)) ;
 $current_plane = '' ;
 $current_track = array() ;
+$current_ts = -1 ;
 while ($row = mysqli_fetch_array($result)) {
 	$plane = strtoupper($row['id']) ;
-	if ($plane == $current_plane)
-		$current_track[] = [$row['t_longitude'], $row['t_latitude']] ;
-	else {
+	// Should the previous flight be emitted ?
+	if ($plane != $current_plane or $row['ts'] > $current_ts + 60 * 15) {
 		if ($current_plane != '') {
-			$tracks[$current_plane] = $current_track ;
+			$flight = array() ;
+			$flight['plane'] = $current_plane ;
+			$flight['track'] = $current_track ;
+			$flight['first'] = $first_seen ;
+			$flight['last'] = $last_seen ;
+			$tracks["$current_plane/$first_seen"] = $flight ;
 		} 
 		$current_plane = $plane ;
 		$current_track = array() ;
+		$first_seen = $row['t_time'] ;
 	}
+	$current_track[] = [$row['t_longitude'], $row['t_latitude']] ;
+	$last_seen = $row['t_time'] ;
+	$current_ts = $row['ts'] ;
 }
 
 if ($current_plane != '') {
-	$tracks[$current_plane] = $current_track ;
+		$flight = array() ;
+		$flight['plane'] = $current_plane ;
+		$flight['track'] = $current_track ;
+		$flight['first'] = $first_seen ;
+		$flight['last'] = $last_seen ;
+		$tracks["$current_plane/$first_seen"] = $flight ;
 }
 
 // Let's send the data back
