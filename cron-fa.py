@@ -17,7 +17,7 @@ my_fa_site_port = 8080
 request = urllib.request.urlopen("http://" + my_fa_site_fqdn + ":" + str(my_fa_site_port) + '/data/aircraft.json')
 
 response = json.loads(request.read())
-now = datetime.datetime.fromtimestamp(response['now']).strftime('%Y-%m-%d %H:%M:%S')
+now = datetime.datetime.fromtimestamp(response['now'], tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S') # It is now in local time while it should be in UTC
 aircrafts = response['aircraft']
 for aircraft in aircrafts:
 	aircraft['hex'] = aircraft['hex'].lower()  # just in case...

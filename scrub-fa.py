@@ -65,7 +65,7 @@ for plane, icao24 in planes.items():
 			continue
 		for p in json_dict['flights'][flight]['track']:
 			if p['timestamp'] <= one_hour_back:
-				print('Skipping old entry...')
+#				print('Skipping old entry...')
 				continue
 			if 'alt' in p:
 				alt = p['alt'] * 100
@@ -79,6 +79,6 @@ for plane, icao24 in planes.items():
 			else:
 				lon = p['coord'][0]
 				lat = p['coord'][1]
-			timestamp = datetime.datetime.fromtimestamp(p['timestamp']).strftime('%Y-%m-%d %H:%M:%S')
+			timestamp = datetime.datetime.fromtimestamp(p['timestamp'], tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S') # It is then in local time :-(
 			print("https://www.spa-aviation.be/resa/add_to_tracks.php?icao24=" + icao24 + '&daytime=' + urllib.parse.quote(timestamp) + '&longitude=' + str(lon) + '&latitude=' + str(lat) + '&altitude=' + str(alt) + '&velocity=' + str(p['gs']) + '&squawk=----&sensor=0&source=FlightAware')
 			response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?icao24=" + icao24 + '&daytime=' + urllib.parse.quote(timestamp) + '&longitude=' + str(lon) + '&latitude=' + str(lat) + '&altitude=' + str(alt) + '&velocity=' + str(p['gs']) + '&squawk=----&sensor=0&source=FlightAware')
