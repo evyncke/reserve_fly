@@ -29,7 +29,7 @@ if (isset($_REQUEST['auth']))
 	if ($_REQUEST['auth'] != md5($_REQUEST['pilot'] . $_REQUEST['period'] . $shared_secret))
 		die("Vous n'&ecric;tes pas autoris&eacute;.") ;
 
-journalise($userId, 'I', "Fleet map displayed") ;
+if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
 
 /* Let's retrieve the default airport coordinates */
 $result = mysqli_query($mysqli_link, "select * from $table_airports where a_code = '$default_airport'") or die("Erreur systeme a propos de l'accès à l'aéroport: " . mysqli_error($mysqli_link)) ;
@@ -51,8 +51,7 @@ if ($row) {
 <script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
 <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
 <title>Vols de la flotte ces dernières 24 heures</title>
-<script src="arc.js"></script> <!-- GreatCircles for geodesic lines -->
-<script>
+<script type="text/javascript">
 var
 	// preset Javascript constant fill with the right data from db.php PHP variables
 	userFullName = '<?=$userFullName?>',
@@ -61,28 +60,7 @@ var
 	userIsPilot = <?=($userIsPilot)? 'true' : 'false'?>,
 	userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?>,
 	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?>,
-	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ;
-
-// Some global variables for the mapBox
-var map ;
-var flightLayer = {
-	id : 'flights',
-	type : 'line', 
-	paint : {
-		// 'line-color' : '#F88',
-		// Use a get expression (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-get)
-		// to set the line-color to a feature property value.
-		'line-color': ['get', 'color'],
-		'line-width' : 2
-	},
-	source : {
-		type : 'geojson',
-		data : {
-			type : 'FeatureCollection',
-			features : {}
-		}
-	}
-} ;
+	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?>;
 
 // The flights coordinates
 var flightPoints = [
@@ -106,87 +84,8 @@ while ($row = mysqli_fetch_array($result)) {
 }
 ?>
 ] ;
-
-var flightFeatureCollection = [] ;
-
-var trackColors = [ '#33C9EB', // blue, 
-	'#F7455D', // red
-'#2c7fb8',
-'#253494',
-'#fed976',
-'#feb24c',
-'#ffffcc',
-'#a1dab4',
-] ;
-
-function insertTrackPoints () {
-	var plane = 0, currentId = '' ;
-	var currentFeature ;
-
-	flightFeatureCollection = [] ;
-	for (var pointIndex = 0; pointIndex < flightPoints.length; pointIndex++) {
-		if (currentId != flightPoints[pointIndex][0]) {
-			if (typeof currentFeature != 'undefined') // Let's add the previous place to the list of features
-				flightFeatureCollection.push(currentFeature) ;
-			currentFeature = {type : 'Feature',
-				properties : {title : '',comment : '', color: ''},
-				geometry : {type : 'LineString', coordinates : [] } } ;
-			currentFeature.type = 'Feature' ;
-			currentFeature.properties.title = flightPoints[pointIndex][0] ;
-			currentFeature.properties.comment = flightPoints[pointIndex][0] ;
-			currentFeature.properties.color = trackColors[plane] ;
-			currentFeature.geometry.type = 'LineString' ;
-			currentFeature.geometry.coordinates = [] ;
-			currentId = flightPoints[pointIndex][0] ;
-			plane = plane + 1 ;
-		}
-		currentFeature.geometry.coordinates.push([flightPoints[pointIndex][1], flightPoints[pointIndex][2]]) ;
-	}
-	if (typeof currentFeature != 'undefined') // Let's add the previous place to the list of features
-		flightFeatureCollection.push(currentFeature) ;
-}
-
-function mapAddLayers() {
-	// Display the flights
-	flightLayer.source.data.features = flightFeatureCollection ;
-	map.addLayer(flightLayer) ;
-	// Change the cursor to a pointer when the it enters a feature in the 'airports' layer.
-	map.on('mouseenter', 'flights', function (e) {
-//		map.getCanvas().style.cursor = 'pointer';
-		console.log(document.getElementById('flightInfo')) ;
-		document.getElementById('flightInfo').innerHTML = e.features[0].properties.comment ;
-		// e.originalEvent.Client[XY] e.originalEvent.offset[XY](== e.point.[xy])
-		// top & left are absolute within browser window
-		document.getElementById('flightInfo').style.left = ' ' + (20 + e.originalEvent.clientX) + 'px'  ;
-		document.getElementById('flightInfo').style.top = ' ' + e.originalEvent.clientY + 'px'  ;
-		document.getElementById('flightInfo').style.display = 'block' ;
-		document.getElementById('flightInfo').style.zIndex = '10' ;
-	});
-	// Change it back to a pointer when it leaves.
-	map.on('mouseleave', 'flights', function (e) {
-//		map.getCanvas().style.cursor = '';
-		document.getElementById('flightInfo').style.display = 'none' ;
-	});
-}
-
-function init(longitude, latitude) {
-	mapboxgl.accessToken = '<?=$mapbox_token?>';
-	map = new mapboxgl.Map({
-	    container: 'map', // container id
-	    style: 'mapbox://styles/mapbox/outdoors-v10', // stylesheet location
-	    center: [longitude, latitude], // starting position [lng, lat]
-	    zoom: 7 // starting zoom
-	});
-
-	// Add zoom and rotation controls to the map.
-	map.addControl(new mapboxgl.NavigationControl());
-
-	// Build the track points
-	insertTrackPoints() ;
-	// Add the flights layers
-	map.on('load', mapAddLayers) ;
-}
 </script>
+<script type="text/javascript" src="fleet_map.js">
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
@@ -209,7 +108,7 @@ function init(longitude, latitude) {
 </script>
 <!-- End Matomo Code -->
 </head>
-<body onload="init(<?=$default_longitude?>, <?=$default_latitude?>);">
+<body onload="init(<?=$default_longitude?>, <?=$default_latitude?>, '<?=$mapbox_token?>');">
 <center><h2>Vols de la flotte ces dernières 24 heures</h2></center>
 
 <div id='map' style='width: 100%; height: 90%;'></div>
@@ -220,10 +119,12 @@ function init(longitude, latitude) {
 <br/>
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('fleet_map.php')) ;
+$version_js = date ("Y-m-d H:i:s.", filemtime('fleet_map.js')) ;
 ?>
 <?php if (isset($_REQUEST['auth'])) print('</div>') ; ?>
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
-Versions: PHP=<?=$version_php?></div>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
+Données via Flight Aware (avec maximum une heure de délai) et via quelques récepteurs ADS-B / MLAT.</br>
+Versions: PHP=<?=$version_php?>, JS=<?=$version_js?></div>
 </body>
 </html>
