@@ -154,6 +154,7 @@ if ($userId > 0) {
 if ($userId > 0) {
 ?>
             <li><a href="mobile_logbook.php">Mon carnet de routes</a></li>
+            <li><a href="https://resa.spa-aviation.be/fleet_map.php" target="_blank">Ces dernières 24 heures <span class="glyphicon glyphicon-new-window"></span></a></li>
 <?php
 }
 ?>
