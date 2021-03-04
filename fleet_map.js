@@ -111,7 +111,7 @@ function mapAddLayers() {
 	});
 }
 
-function init(longitude, latitude, mapBoxToken, ajaxURL) {
+function initFleet(longitude, latitude, mapBoxToken, ajaxURL) {
 	mapboxgl.accessToken = mapBoxToken;
 	map = new mapboxgl.Map({
 	    container: 'map', // container id

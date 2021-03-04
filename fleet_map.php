@@ -61,29 +61,6 @@ var
 	userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?>,
 	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?>,
 	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?>;
-
-// The flights coordinates
-var flightPoints = [
-<?php
-// TODO check whether user could select the source of data ? AND t_source = 'FA-evyncke' or 'FlightAware' ?
-$sql = "SELECT *
-	FROM $table_planes JOIN $table_tracks ON t_icao24 = icao24
-	WHERE t_time >= DATE_SUB(SYSDATE(), INTERVAL 24 HOUR) 
-	ORDER BY id, t_time
-	" ;
-
-$result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access aux traces: " . mysqli_error($mysqli_link)) ;
-$first = TRUE ;
-while ($row = mysqli_fetch_array($result)) {
-	if ($first)
-		$first = FALSE ;
-	else
-		print(",\n") ;
-	$plane = strtoupper($row['id']) ;
-	print("['$plane', $row[t_longitude], $row[t_latitude]]") ;
-}
-?>
-] ;
 </script>
 <script type="text/javascript" src="fleet_map.js">
 <!-- Matomo -->
@@ -108,23 +85,20 @@ while ($row = mysqli_fetch_array($result)) {
 </script>
 <!-- End Matomo Code -->
 </head>
-<body onload="init(<?=$default_longitude?>, <?=$default_latitude?>, '<?=$mapbox_token?>', 'get_tracks.php?');">
+<body onload="initFleet(<?=$default_longitude?>, <?=$default_latitude?>, '<?=$mapbox_token?>', 'get_tracks.php?');">
 <center><h2>Vols de la flotte ces dernières 24 heures</h2></center>
 
 <div id='map' style='width: 100%; height: 90%;'></div>
 <div id='flightInfo' style='display: none; position: absolute; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.7;'></div>
 
-<?php if (isset($_REQUEST['auth'])) print('<div style="visibility: hidden;">') ; ?>
-
-<br/>
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('fleet_map.php')) ;
 $version_js = date ("Y-m-d H:i:s.", filemtime('fleet_map.js')) ;
+$version_ajax = date ("Y-m-d H:i:s.", filemtime('get_tracks.php')) ;
 ?>
-<?php if (isset($_REQUEST['auth'])) print('</div>') ; ?>
 <hr>
 <div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
-Données via Flight Aware (avec maximum une heure de délai) et via quelques récepteurs ADS-B / MLAT.</br>
-Versions: PHP=<?=$version_php?>, JS=<?=$version_js?></div>
+Données via Flight Aware (avec maximum une heure de délai) et via quelques récepteurs ADS-B / MLAT (avec maximum 1 minute de délai).</br>
+Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, AJAX=<?=$version_ajax?></div>
 </body>
 </html>
