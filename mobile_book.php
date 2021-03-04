@@ -64,6 +64,7 @@ if ($id and is_numeric($id)) {
 // Or should it be done in AJAX?
 // Modify & Add in AJAX but let's prefill via PHP
 
+$body_attributes = 'onload="init();initBook();"' ;
 
 require_once 'mobile_header.php' ;
 
