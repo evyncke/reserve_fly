@@ -106,8 +106,14 @@ var
   })();
 </script>
 <!-- End Matomo Code -->
+<?php  // Output any page specific header
+if (isset($header_postamble))
+	print($header_postamble) ;
+	
+$body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init();"' ; 
+?>
 </head>
-<body onload="init();<?=($_SERVER['PHP_SELF'] == '/resa/mobile_logbook.php' or $_SERVER['PHP_SELF'] == '/mobile_logbook.php') ? 'initLogbook();' : ''?><?=($_SERVER['PHP_SELF'] == '/resa/mobile_book.php'or $_SERVER['PHP_SELF'] == '/mobile_book.php') ? 'initBook();' : ''?>">
+<body <?=$body_attributes?>>
 
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
@@ -154,7 +160,7 @@ if ($userId > 0) {
 if ($userId > 0) {
 ?>
             <li><a href="mobile_logbook.php">Mon carnet de routes</a></li>
-            <li><a href="https://resa.spa-aviation.be/fleet_map.php" target="_blank">Ces dernières 24 heures <span class="glyphicon glyphicon-new-window"></span></a></li>
+            <li><a href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
 <?php
 }
 ?>

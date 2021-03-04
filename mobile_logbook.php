@@ -221,6 +221,8 @@ $row = mysqli_fetch_array($result) ;
 $next_id = $row['r_id'] ;
 $next_auth = md5($next_id . $shared_secret) ;
 
+$body_attributes = 'onload="init();initLogbook();"' ;
+
 require_once 'mobile_header.php' ;
 
 ?>
