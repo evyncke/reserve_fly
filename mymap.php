@@ -209,9 +209,7 @@ foreach ($featured_airports as $code => $airport) {
 
 function computeGeodesicLine(coordinates) {
 	var generator = new arc.GreatCircle({x: coordinates[0][0], y : coordinates[0][1]}, {x: coordinates[1][0], y : coordinates[1][1]}) ;
-	console.log(generator) ;
 	var line = generator.Arc(10) ;
-	console.log(line) ;
 //	return coordinates ;
 	return line.geometries[0].coords ;
 }
@@ -233,7 +231,6 @@ function mapAddLayers() {
 	// Change the cursor to a pointer when the it enters a feature in the 'airports' layer.
 	map.on('mouseenter', 'airports', function (e) {
 //		map.getCanvas().style.cursor = 'pointer';
-		console.log(document.getElementById('airportInfo')) ;
 		document.getElementById('airportInfo').innerHTML = e.features[0].properties.comment + ' (' + e.features[0].properties.title + ')<br/>' +
 			e.features[0].properties.landing + ' landing(s)<br/>' + e.features[0].properties.takeoff + ' take-off(s)';
 		// e.originalEvent.Client[XY] e.originalEvent.offset[XY](== e.point.[xy])
@@ -242,7 +239,6 @@ function mapAddLayers() {
 		document.getElementById('airportInfo').style.top = ' ' + e.originalEvent.clientY + 'px'  ;
 		document.getElementById('airportInfo').style.display = 'block' ;
 		document.getElementById('airportInfo').style.zIndex = '10' ;
-		console.log(document.getElementById('airportInfo')) ;
 	});
 	// Change it back to a pointer when it leaves.
 	map.on('mouseleave', 'airports', function (e) {
