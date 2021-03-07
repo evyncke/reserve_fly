@@ -8,10 +8,11 @@ var flightLayer = {
 		// Use a get expression (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-get)
 		// to set the line-color to a feature property value.
 		'line-color': ['get', 'color'],
-		'line-width' : 2
+		'line-width' : 4,
 	},
 	source : {
 		type : 'geojson',
+//		attribution: 'FlightAware',
 		data : {
 			type : 'FeatureCollection',
 			features : {}
@@ -19,9 +20,36 @@ var flightLayer = {
 	}
 } ;
 
-
+var locationLayer = {
+	id : 'locations',
+	type: 'symbol',
+//	type : 'circle', 
+//	paint : {  // For line & circle
+		// Use a get expression (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-get)
+		// to set the line-color to a feature property value.
+//		'circle-radius' : 20,
+//		'circle-color': '#B42222',
+//		visibility: 'visible',
+		// 'circle-color': ['get', 'color']
+//	},
+	source : {
+		type : 'geojson',
+		data : {
+			type : 'FeatureCollection',
+			features : {}
+		}
+	},
+//	layout: { // Only applicable to type: symbol
+//		"icon-image": "{icon}-15", // used when type: symbol
+//		"text-field": "{title}",
+//		"text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+//		"text-offset": [0, 0.6],
+//		"text-anchor": "top"
+//	}
+} ;
 
 var flightFeatureCollection = [] ;
+var locationFeatureCollection = [] ;
 
 var trackColors = [ '#33C9EB', // blue, 
 '#F7455D', // red
@@ -37,10 +65,14 @@ function insertTrackPoints (flights) {
 	var planeCount = 0 , currentId = '' ;
 	var currentFeature ;
 
-	console.log("Start of insertTrackPoints") ;
 	flightFeatureCollection = [] ;
 	for (var flight in flights) {
 		console.log('Top level of the loop for ' + flight) ;
+		if (flight == 'sql') continue ;
+		if (flight == 'error') {
+			console.log(flights[error]) ;
+			continue ;
+		}
 		thisFlight = flights[flight] ;
 		// TODO add time of the first point in the comment
 		currentFeature = {type : 'Feature',
@@ -49,22 +81,28 @@ function insertTrackPoints (flights) {
 		currentFeature.properties.title = flight ;
 		currentFeature.properties.comment = "Plane: " + thisFlight.plane + '</br>First seen: ' + thisFlight.first + ' UTC</br>Last seen: ' + thisFlight.last + ' UTC';
 		currentFeature.properties.color = trackColors[planeCount++] ;
-		currentFeature.geometry.type = 'LineString' ;
-		currentFeature.geometry.coordinates = [] ;
+			currentFeature.geometry.coordinates = [] ;
 
 		thisTrack = thisFlight.track ;
 		for (trackPosition in thisTrack) {
-			currentFeature.geometry.coordinates.push([thisTrack[trackPosition][0], thisTrack[trackPosition][1]]) ;
+			currentFeature.geometry.coordinates.push([parseFloat(thisTrack[trackPosition][0]), parseFloat(thisTrack[trackPosition][1])]) ;
 		}
-		// Add this flight to the collection
-		console.log('end of top level of the loop for ' + flight) ;
-		flightFeatureCollection.push(currentFeature) ;
+		// If there is only one point, change type to a marker
+		if (currentFeature.geometry.coordinates.length == 1) {
+			console.log("Only one coordinate, changing to marker") ;
+			currentFeature.geometry.type = 'Point' ;
+			currentFeature.properties.icon = 'airfield' ;
+			currentFeature.properties['marker-symbol'] = 'airfield' ;
+			currentFeature.properties['marker-size'] = 'large' ;
+			locationFeatureCollection.push(currentFeature) ;
+		} else {
+			// Add this flight to the collection
+			flightFeatureCollection.push(currentFeature) ;
+		}
 	}
 		
 	// Add the flights layers
 	map.on('load', mapAddLayers) ;
-	console.log("flightFeatureCollection is ") ;
-	console.log(flightFeatureCollection) ;
 }
 
 function getTrackPoints(ajaxURL) {
@@ -72,7 +110,6 @@ function getTrackPoints(ajaxURL) {
 	XHR.onreadystatechange = function() {
 		if(XHR.readyState  == 4) {
 			if(XHR.status  == 200) {
-				console.log("getTrackPoints() call-back") ;
 				try {
 					var response = eval('(' + XHR.responseText.trim() + ')') ;
 				} catch(err) {
@@ -80,7 +117,6 @@ function getTrackPoints(ajaxURL) {
 					return ;
 				}
 				insertTrackPoints(response) ;
-				console.log("end of getTrackPoints() call-back") ;
 			} // == 200
 		} // == 4
 	} // onreadystatechange
@@ -89,8 +125,16 @@ function getTrackPoints(ajaxURL) {
 }
 
 function mapAddLayers() {
+	// Display the locations
+	locationLayer.source.data.features = locationFeatureCollection ;
+	console.log("locationLayer is ") ;
+	console.log(locationLayer) ;
+	map.addLayer(locationLayer) ;
+	
 	// Display the flights
 	flightLayer.source.data.features = flightFeatureCollection ;
+	console.log("flightLayer is ") ;
+	console.log(flightLayer) ;
 	map.addLayer(flightLayer) ;
 	// Change the cursor to a pointer when the it enters a feature in the 'airports' layer.
 	map.on('mouseenter', 'flights', function (e) {
@@ -109,6 +153,7 @@ function mapAddLayers() {
 		map.getCanvas().style.cursor = '';
 		document.getElementById('flightInfo').style.display = 'none' ;
 	});
+
 }
 
 function initFleet(longitude, latitude, mapBoxToken, ajaxURL) {
@@ -122,7 +167,14 @@ function initFleet(longitude, latitude, mapBoxToken, ajaxURL) {
 
 	// Add zoom and rotation controls to the map.
 	map.addControl(new mapboxgl.NavigationControl());
-
+	
 	// Build the track points
 	getTrackPoints(ajaxURL) ;
+	
+	// When run in bootstrap per https://stackoverflow.com/questions/54681826/mapbox-gl-js-canvas-not-displaying-properly-in-bootstrap-modal
+	// TODO to be done only in bootstrap mode ?
+	// TODO seems that $ does not work at all
+//	$('#map').on('shown.bs.modal', function() {
+//    	map.resize();
+//	});
 }
