@@ -39,13 +39,13 @@ var locationLayer = {
 			features : {}
 		}
 	},
-//	layout: { // Only applicable to type: symbol
-//		"icon-image": "{icon}-15", // used when type: symbol
-//		"text-field": "{title}",
-//		"text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-//		"text-offset": [0, 0.6],
-//		"text-anchor": "top"
-//	}
+	layout: { // Only applicable to type: symbol
+		"icon-image": "{icon}-15", // used when type: symbol
+		"text-field": "{title}",
+		"text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+		"text-offset": [0, 0.6],
+		"text-anchor": "top"
+	}
 } ;
 
 var flightFeatureCollection = [] ;
@@ -81,7 +81,7 @@ function insertTrackPoints (flights) {
 		currentFeature.properties.title = flight ;
 		currentFeature.properties.comment = "Plane: " + thisFlight.plane + '</br>First seen: ' + thisFlight.first + ' UTC</br>Last seen: ' + thisFlight.last + ' UTC';
 		currentFeature.properties.color = trackColors[planeCount++] ;
-			currentFeature.geometry.coordinates = [] ;
+		currentFeature.geometry.coordinates = [] ;
 
 		thisTrack = thisFlight.track ;
 		for (trackPosition in thisTrack) {
@@ -90,6 +90,8 @@ function insertTrackPoints (flights) {
 		// If there is only one point, change type to a marker
 		if (currentFeature.geometry.coordinates.length == 1) {
 			console.log("Only one coordinate, changing to marker") ;
+			currentFeature.geometry.coordinates = currentFeature.geometry.coordinates[0] ; // a Point feature has only one coordinate and not an array of coordinates
+			currentFeature.properties.title = thisFlight.plane  + '\n' + thisFlight.last + ' UTC' ;
 			currentFeature.geometry.type = 'Point' ;
 			currentFeature.properties.icon = 'airfield' ;
 			currentFeature.properties['marker-symbol'] = 'airfield' ;
