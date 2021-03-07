@@ -25,24 +25,38 @@ $tracks = array() ;
 // Parameter sanitization
 $plane = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['plane']))) ;
 $since = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['since']))) ;
+$latest = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['latest']))) ;
 
-// SQL filters
-$sql_filter  = array() ;
-if ($plane) $sql_filters[] = "id = '$plane'" ;
-if ($since)
-	$sql_filters[] = "t_time >= '$since'" ;
-else
-	$sql_filters[] = "t_time >= DATE_SUB(SYSDATE(), INTERVAL 24 HOUR)";
+// Handle the specific case where only the latest flight location is requested
+if ($latest) {
+	$sql = "SELECT *, UNIX_TIMESTAMP(t_time) AS ts
+		FROM $table_planes JOIN $table_tracks t ON t_icao24 = icao24
+		WHERE t_time = (SELECT MAX(t_time) FROM $table_tracks t2 WHERE t2.t_icao24 = t.t_icao24)" ;
+} else {// SQL filters
+	$sql_filter  = array() ;
+	if ($plane) $sql_filters[] = "id = '$plane'" ;
+	if ($since)
+		$sql_filters[] = "t_time >= '$since'" ;
+	else
+		$sql_filters[] = "t_time >= DATE_SUB(SYSDATE(), INTERVAL 24 HOUR)";
+	$sql_filters = ($sql_filters) ? "WHERE " . implode(' AND ', $sql_filters) : '' ;
 
-// TODO check whether user could select the source of data ? AND t_source = 'FA-evyncke' or 'FlightAware' ?
-$sql = "SELECT *, UNIX_TIMESTAMP(t_time) AS ts
-	FROM $table_planes JOIN $table_tracks ON t_icao24 = icao24
-	WHERE " . implode(' AND ', $sql_filters) . "
-	ORDER BY id, t_time
+	// TODO check whether user could select the source of data ? AND t_source = 'FA-evyncke' or 'FlightAware' ?
+	$sql = "SELECT *, UNIX_TIMESTAMP(t_time) AS ts
+		FROM $table_planes JOIN $table_tracks ON t_icao24 = icao24
+		$sql_filters
+		ORDER BY id, t_time
 	" ;
-// $tracks['sql'] = $sql ;
+}
 
-$result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access aux traces: " . mysqli_error($mysqli_link)) ;
+$tracks['sql'] = $sql ;
+
+$result = mysqli_query($mysqli_link, $sql) ;
+if (! $result) {
+	journalise($userId, "E", "Erreur systeme a propos de l'access aux traces: " . mysqli_error($mysqli_link) . " $sql") ;
+	$tracks['error'] = mysqli_error($mysqli_link) ;
+}
+
 $current_plane = '' ;
 $current_track = array() ;
 $current_ts = -1 ;
