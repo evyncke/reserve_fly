@@ -48,14 +48,14 @@ require_once 'mobile_header.php' ;
 ?> 
 
 
-<div class="container">
+<div class="container" style="height: 100%; width: 100%">
 
 <div class="page-header">
 <h3>Vols de nos avions ces dernières 24 heures</h3>
 </div> <!-- row -->
 
 <div class="row">
-<div id='map' style='width: 100%; height: 90%;'></div>
+<div id='map' style='width: 100%; height: 400px;' class='col-sm-12'></div>
 <div id='flightInfo' style='display: none; position: absolute; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.7;'></div>
 
 </div><!-- row -->
