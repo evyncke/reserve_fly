@@ -3,6 +3,8 @@ import urllib.request
 import urllib
 import json
 import datetime
+import errno
+import socket
 
 # https://github.com/flightaware/dump1090/blob/master/README-json.md
 
@@ -21,16 +23,31 @@ now = datetime.datetime.fromtimestamp(response['now'], tz=datetime.timezone.utc)
 aircrafts = response['aircraft']
 for aircraft in aircrafts:
 	aircraft['hex'] = aircraft['hex'].lower()  # just in case...
+	if not 'alt_baro' in aircraft: aircraft['alt_baro'] = -1
+	if not 'gs' in aircraft: aircraft['gs'] = -1
+	if not 'squawk' in aircraft: aircraft['squawk'] = '----'
+	if not 'flight' in aircraft: aircraft['flight'] = '-'
 	if aircraft['hex'] in my_icao:
 		print('Found my aircraft at ' + now)
 		print(aircraft)
 		if 'lon' in aircraft:
-			if not 'alt_baro' in aircraft:
-				aircraft['alt_baro'] = -1
-			if not 'gs' in aircraft:
-				aircraft['gs'] = -1
-			if not 'squawk' in aircraft:
-				aircraft['squawk'] = '----'
-			response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?icao24=" + aircraft['hex'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&squawk=' + urllib.parse.quote(aircraft['squawk']) + '&sensor=0&source=FA-evyncke')
+			try:
+				response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?icao24=" + aircraft['hex'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&squawk=' + urllib.parse.quote(aircraft['squawk']) + '&sensor=0&source=FA-evyncke')
+			except urllib.error.URLError as e:
+				print('Error when connecting to RAPCS: ' + str(e))
+			except SocketError as e:
+				print('Error in connecting to RPACS web service: ' + str(e))
+		else:
+			print('Alas no location...')
+	elif (aircraft['alt_baro'] > 0 and aircraft['alt_baro'] <= 5000): # Not my aircraft but it is a local flight it seems
+		print('Found a nearby aircraft at ' + now)
+		print(aircraft)
+		if 'lon' in aircraft:
+			try:
+				response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?local=yes&icao24=" + aircraft['hex'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&tail_number=' + urllib.parse.quote(aircraft['flight']) + '&source=FA-evyncke')
+			except urllib.error.URLError as e:
+				print('Error when connecting to RAPCS: ' + str(e))
+			except SocketError as e:
+				print('Error in connecting to RPACS web service: ' + str(e))
 		else:
 			print('Alas no location...')
