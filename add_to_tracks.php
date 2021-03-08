@@ -31,8 +31,28 @@ if ($velocity == 'None') $velocity = "NULL" ;
 $squawk = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['squawk'])) ;
 $sensor = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['sensor'])) ;
 $source = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['source'])) ;
-$rc = mysqli_query($mysqli_link, "INSERT INTO $table_tracks (t_icao24, t_time, t_longitude, t_latitude, t_altitude, t_velocity, t_squawk, t_sensor, t_source)
-		VALUES('$icao24', '$daytime', $longitude, $latitude, $altitude, $velocity, '$squawk', $sensor, '$source')") ;
-if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
-	journalise(0, 'E', "Cannot insert track for $icao24 (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
+
+if (! isset($_REQUEST['local']) or $_REQUEST['local'] != 'yes') {
+	$rc = mysqli_query($mysqli_link, "INSERT INTO $table_tracks (t_icao24, t_time, t_longitude, t_latitude, t_altitude, t_velocity, t_squawk, t_sensor, t_source)
+			VALUES('$icao24', '$daytime', $longitude, $latitude, $altitude, $velocity, '$squawk', $sensor, '$source')") ;
+	if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
+		journalise(0, 'E', "Cannot insert track for $icao24 (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
+}
+
+// If flight is near the default airport, then add the track to $table_local_tracks
+
+if (abs($longitude - $apt_longitude) <= $local_longitude_bound and abs($latitude - $apt_latitude) <= $local_latitude_bound and $altitude <= $local_altimeter_bound) {
+	if ($icao24 == 'None') $icao24 = "" ;
+	if (isset($_REQUEST['tail_number']))
+		$tail_number = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['tail_number'])) ;
+	else
+		$tail_number = "" ;
+	$rc = mysqli_query($mysqli_link, "INSERT INTO $table_local_tracks (lt_timestamp, lt_longitude, lt_latitude, lt_altitude, lt_velocity, lt_icao24, lt_tail_number, lt_source)
+		VALUES('$daytime', $longitude, $latitude, $altitude, $velocity, '$icao24', '$tail_number', '$source')") ;
+	if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
+		journalise(0, 'E', "Cannot insert local track track for $icao24/$tail_number (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
+	if ($source == 'OGN') journalise(0, "I", "Added from OpenGliderNet") ;
+}
+
+
 ?>

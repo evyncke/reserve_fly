@@ -24,15 +24,15 @@ var locationLayer = {
 	id : 'locations',
 	type: 'symbol',
 //	type : 'circle', 
-	paint : {  // For line & circle
-		"icon-color": ['get', 'color'],
+//	paint : {  // For line & circle
+//		"icon-color": ['get', 'color'],
 		// Use a get expression (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-get)
 		// to set the line-color to a feature property value.
 //		'circle-radius' : 20,
 //		'circle-color': '#B42222',
 //		visibility: 'visible',
 		// 'circle-color': ['get', 'color']
-	},
+//	},
 	source : {
 		type : 'geojson',
 		data : {
