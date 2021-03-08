@@ -22,6 +22,8 @@ import json
 import re
 import datetime
 import time
+import errno
+import socket
 
 
 planes = {	# Dictionnary for all the planes with their icao 24-bit identifier
@@ -49,7 +51,10 @@ one_hour_back = time.time() - 3600
 
 for plane, icao24 in planes.items():
 	print('plane: ' + plane + ', icao24: ' + icao24)
-	request = urllib.request.Request("https://flightaware.com/live/flight/" + plane, data = None, headers = headers, method = 'GET')
+	try:
+		request = urllib.request.Request("https://flightaware.com/live/flight/" + plane, data = None, headers = headers, method = 'GET')
+	except urllib.error.URLError as e:
+		print('Error when connecting to RAPCS: ' + str(e))
 	reply = urllib.request.urlopen(request)
 	# Let's skip until past the preamble and before the postamble, using '?' to avoid being greedy
 	match = re.search(preamble + '(.+?)' + postamble, str(reply.read()))
@@ -65,7 +70,7 @@ for plane, icao24 in planes.items():
 			continue
 		for p in json_dict['flights'][flight]['track']:
 			if p['timestamp'] <= one_hour_back:
-#				print('Skipping old entry...')
+				print('Skipping old entry...')
 				continue
 			if 'alt' in p:
 				alt = p['alt'] * 100
@@ -81,4 +86,9 @@ for plane, icao24 in planes.items():
 				lat = p['coord'][1]
 			timestamp = datetime.datetime.fromtimestamp(p['timestamp'], tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S') # It is then in local time :-(
 			print("https://www.spa-aviation.be/resa/add_to_tracks.php?icao24=" + icao24 + '&daytime=' + urllib.parse.quote(timestamp) + '&longitude=' + str(lon) + '&latitude=' + str(lat) + '&altitude=' + str(alt) + '&velocity=' + str(p['gs']) + '&squawk=----&sensor=0&source=FlightAware')
-			response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?icao24=" + icao24 + '&daytime=' + urllib.parse.quote(timestamp) + '&longitude=' + str(lon) + '&latitude=' + str(lat) + '&altitude=' + str(alt) + '&velocity=' + str(p['gs']) + '&squawk=----&sensor=0&source=FlightAware')
+			try:
+				response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?icao24=" + icao24 + '&daytime=' + urllib.parse.quote(timestamp) + '&longitude=' + str(lon) + '&latitude=' + str(lat) + '&altitude=' + str(alt) + '&velocity=' + str(p['gs']) + '&squawk=----&sensor=0&source=FlightAware')
+			except ConnectionResetError as e:
+				print('Error when connecting to RAPCS: ' + str(e))
+			except urllib.error.URLError as e:
+				print('Error when connecting to RAPCS: ' + str(e))
