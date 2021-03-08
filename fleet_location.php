@@ -91,6 +91,7 @@ var
 <div id='map' style='width: 100%; height: 90%;'></div>
 <div id='flightInfo' style='display: none; position: absolute; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.7;'></div>
 
+
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('fleet_map.php')) ;
 $version_js = date ("Y-m-d H:i:s.", filemtime('fleet_map.js')) ;
