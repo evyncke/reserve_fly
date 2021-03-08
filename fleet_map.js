@@ -8,7 +8,7 @@ var flightLayer = {
 		// Use a get expression (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-get)
 		// to set the line-color to a feature property value.
 		'line-color': ['get', 'color'],
-		'line-width' : 4,
+		'line-width' : 2,
 	},
 	source : {
 		type : 'geojson',
@@ -24,14 +24,15 @@ var locationLayer = {
 	id : 'locations',
 	type: 'symbol',
 //	type : 'circle', 
-//	paint : {  // For line & circle
+	paint : {  // For line & circle
+		"icon-color": ['get', 'color'],
 		// Use a get expression (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-get)
 		// to set the line-color to a feature property value.
 //		'circle-radius' : 20,
 //		'circle-color': '#B42222',
 //		visibility: 'visible',
 		// 'circle-color': ['get', 'color']
-//	},
+	},
 	source : {
 		type : 'geojson',
 		data : {
@@ -44,7 +45,7 @@ var locationLayer = {
 		"text-field": "{title}",
 		"text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
 		"text-offset": [0, 0.6],
-		"text-anchor": "top"
+		"text-anchor": "top",
 	}
 } ;
 
@@ -52,20 +53,31 @@ var flightFeatureCollection = [] ;
 var locationFeatureCollection = [] ;
 
 var trackColors = [ '#33C9EB', // blue, 
-'#F7455D', // red
-'#2c7fb8',
-'#253494',
-'#fed976',
-'#feb24c',
-'#ffffcc',
-'#a1dab4',
+'MediumBlue', // red
+'cyan',
+'darkblue',
+'crimson',
+'black',
+'orange',
+'brown',
+'chartreuse',
+'DeepPink',
+'LawnGreen',
+'LightCoral',
+'Magenta',
 ] ;
 
 function insertTrackPoints (flights) {
 	var planeCount = 0 , currentId = '' ;
 	var currentFeature ;
+	var legendDiv = document.getElementById('flightLegend') ;
 
 	flightFeatureCollection = [] ;
+//	if (typeof legendDiv != 'undefined') {
+	if (legendDiv) {
+		legendDiv.innerHTML = '' ;
+		// TODO position the div
+	}
 	for (var flight in flights) {
 		console.log('Top level of the loop for ' + flight) ;
 		if (flight == 'sql') continue ;
@@ -74,6 +86,10 @@ function insertTrackPoints (flights) {
 			continue ;
 		}
 		thisFlight = flights[flight] ;
+//		if (typeof legendDiv != 'undefined') {
+		if (legendDiv) {
+			legendDiv.innerHTML += '<span class="glyphicon glyphicon-plane" style="color:' + trackColors[planeCount] + '"></span> ' + flight + '<br/>' ;
+		}
 		// TODO add time of the first point in the comment
 		currentFeature = {type : 'Feature',
 			properties : {title : '',comment : '', color: ''},
@@ -96,6 +112,7 @@ function insertTrackPoints (flights) {
 			currentFeature.properties.icon = 'airfield' ;
 			currentFeature.properties['marker-symbol'] = 'airfield' ;
 			currentFeature.properties['marker-size'] = 'large' ;
+			currentFeature.properties['marker-color'] = currentFeature.properties.color ;
 			locationFeatureCollection.push(currentFeature) ;
 		} else {
 			// Add this flight to the collection
@@ -129,19 +146,16 @@ function getTrackPoints(ajaxURL) {
 function mapAddLayers() {
 	// Display the locations
 	locationLayer.source.data.features = locationFeatureCollection ;
-	console.log("locationLayer is ") ;
-	console.log(locationLayer) ;
 	map.addLayer(locationLayer) ;
+	console.log(locationFeatureCollection) ;
+	console.log(locationLayer) ;
 	
 	// Display the flights
 	flightLayer.source.data.features = flightFeatureCollection ;
-	console.log("flightLayer is ") ;
-	console.log(flightLayer) ;
 	map.addLayer(flightLayer) ;
 	// Change the cursor to a pointer when the it enters a feature in the 'airports' layer.
 	map.on('mouseenter', 'flights', function (e) {
 		map.getCanvas().style.cursor = 'pointer';
-		console.log(document.getElementById('flightInfo')) ;
 		document.getElementById('flightInfo').innerHTML = e.features[0].properties.comment ;
 		// e.originalEvent.Client[XY] e.originalEvent.offset[XY](== e.point.[xy])
 		// top & left are absolute within browser window

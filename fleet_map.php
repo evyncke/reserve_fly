@@ -50,6 +50,9 @@ if ($row) {
 <!-- Load the MAP BOX scripts & CSS -->
 <script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
 <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
+<!-- Reusing bootstrap icons -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
 <title>Vols de la flotte ces dernières 24 heures</title>
 <script type="text/javascript">
 var
@@ -88,9 +91,12 @@ var
 <body onload="initFleet(<?=$default_longitude?>, <?=$default_latitude?>, '<?=$mapbox_token?>', 'get_tracks.php?');">
 <center><h2>Vols de la flotte ces dernières 24 heures</h2></center>
 
-<div id='map' style='width: 100%; height: 90%;'></div>
-<div id='flightInfo' style='display: none; position: absolute; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.7;'></div>
+<div id='container' style='position: relative;'>
+	<div id='map' style='width: 100%; height: 90%;'></div>
+	<div id='flightLegend' style='display: block; position: absolute; bottom: 30px; right: 5px; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.8;'></div>
+</div> <!-- container -->
 
+<div id='flightInfo' style='display: none; position: absolute; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.7;'></div>
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('fleet_map.php')) ;
 $version_js = date ("Y-m-d H:i:s.", filemtime('fleet_map.js')) ;
