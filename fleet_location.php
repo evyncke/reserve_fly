@@ -29,18 +29,8 @@ if (isset($_REQUEST['auth']))
 	if ($_REQUEST['auth'] != md5($_REQUEST['pilot'] . $_REQUEST['period'] . $shared_secret))
 		die("Vous n'&ecric;tes pas autoris&eacute;.") ;
 
-if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
+if ($userId != 62) journalise($userId, 'I', "Fleet location displayed") ;
 
-/* Let's retrieve the default airport coordinates */
-$result = mysqli_query($mysqli_link, "select * from $table_airports where a_code = '$default_airport'") or die("Erreur systeme a propos de l'accès à l'aéroport: " . mysqli_error($mysqli_link)) ;
-$row = mysqli_fetch_array($result) ;
-if ($row) {
-	$default_longitude = $row['a_longitude'] ;
-	$default_latitude = $row['a_latitude'] ;
-} else {
-	$default_longitude = 5 ;
-	$default_latitude = 50.5 ;
-}
 ?>
 <html>
 <head>
@@ -85,7 +75,7 @@ var
 </script>
 <!-- End Matomo Code -->
 </head>
-<body onload="initFleet(<?=$default_longitude?>, <?=$default_latitude?>, '<?=$mapbox_token?>', 'get_tracks.php?latest=y');">
+<body onload="initFleet(<?=$apt_longitude?>, <?=$apt_latitude?>, '<?=$mapbox_token?>', 'get_tracks.php?latest=y');">
 <center><h2>Dernières positions de notre flotte</h2></center>
 
 <div id='map' style='width: 100%; height: 90%;'></div>
