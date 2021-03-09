@@ -23,7 +23,10 @@ now = datetime.datetime.fromtimestamp(response['now'], tz=datetime.timezone.utc)
 aircrafts = response['aircraft']
 for aircraft in aircrafts:
 	aircraft['hex'] = aircraft['hex'].lower()  # just in case...
-	if not 'alt_baro' in aircraft: aircraft['alt_baro'] = -1
+	if not 'alt_baro' in aircraft: 
+		aircraft['alt_baro'] = -1
+	else:
+		aircraft['alt_baro'] = int(aircraft['alt_baro'])
 	if not 'gs' in aircraft: aircraft['gs'] = -1
 	if not 'squawk' in aircraft: aircraft['squawk'] = '----'
 	if not 'flight' in aircraft: aircraft['flight'] = '-'

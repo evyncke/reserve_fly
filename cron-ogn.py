@@ -11,7 +11,7 @@ import socket
 #  https://github.com/glidernet/ogn-live
 
 try:
-	request = urllib.request.urlopen("http://live.glidernet.org/lxml.php?a=1&b=51.0&c=50.0&d=6.5&e=5.5&y=15")
+	request = urllib.request.urlopen("http://live.glidernet.org/lxml.php?a=1&b=51.5&c=49.5&d=6.5&e=3.0&y=15")
 	replyString = request.read()
 	xmlDoc = minidom.parseString(replyString)
 except urllib.error.HTTPError as err:
@@ -36,7 +36,7 @@ for marker in xmlDoc.getElementsByTagName('m'):
 	latitude = m.group(1)
 	longitude = m.group(2)
 	tailNumber = m.group(4).replace('-', '')
-	altitude = float(m.group(5)) * 3.28084
+	altitude = round(float(m.group(5)) * 3.28084)
 	timeUTC = m.group(6)
 	timeSinceMeasure = int(m.group(7))
 	velocity = -1
