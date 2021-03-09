@@ -646,7 +646,7 @@ mysqli_query($mysqli_link, "DELETE FROM $table_journal WHERE j_datetime < DATE_S
 mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_journal")
 	or journalise(0, "E", "Cannot optimize $table_journal: " . mysqli_error($mysqli_link)) ;
 
-mysqli_query($mysqli_link, "DELETE FROM $table_local_tracks WHERE lt_timestamp < DATE_SUB(NOW(), INTERVAL 15 MINUTE)")
+mysqli_query($mysqli_link, "DELETE FROM $table_local_tracks WHERE lt_timestamp < DATE_SUB(CONVERT_TZ(NOW(), 'Europe/Paris', 'UTC'), INTERVAL 15 MINUTE)")
 	or journalise(0, "E", "Cannot purge old entries in $table_local_tracks: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_local_tracks")
 	or journalise(0, "E", "Cannot optimize $table_local_tracks: " . mysqli_error($mysqli_link)) ;
