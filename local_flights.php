@@ -88,7 +88,7 @@ var
 </script>
 <!-- End Matomo Code -->
 </head>
-<body onload="initLocalFlights(<?=$default_longitude?>, <?=$local_longitude_bound?>, <?=$default_latitude?>, <?=$local_latitude_bound?>, '<?=$mapbox_token?>', 'get_local_tracks.php?');">
+<body onload="initLocalFlights(<?=$default_longitude?>, <?=$local_longitude_bound?>, <?=$default_latitude?>, <?=$local_latitude_bound?>, <?=$local_altimeter_bound?>, '<?=$mapbox_token?>', 'get_local_tracks.php?');">
 <center><h2>Vols à proximité de l'aéroport ces 15 dernières minutes</h2></center>
 
 <div id='container' style='position: relative;'>

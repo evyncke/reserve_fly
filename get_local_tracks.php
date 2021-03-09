@@ -24,7 +24,7 @@ $tracks = array() ;
 
 $sql = "SELECT *, UNIX_TIMESTAMP(lt_timestamp) AS ts
 		FROM $table_local_tracks 
-		WHERE lt_timestamp >= DATE_SUB(SYSDATE(), INTERVAL 1500 MINUTE)
+		WHERE lt_timestamp >= DATE_SUB(CONVERT_TZ(NOW(), 'Europe/Paris', 'UTC'), INTERVAL 15 MINUTE)
 		ORDER BY lt_icao24, lt_timestamp" ;
 
 $tracks['sql'] = $sql ;
@@ -49,6 +49,9 @@ while ($row = mysqli_fetch_array($result)) {
 			$flight['track'] = $current_track ;
 			$flight['first'] = $first_seen ;
 			$flight['last'] = $last_seen ;
+			$flight['last_altitude'] = $last_altitude ;
+			$flight['last_velocity'] = $last_velocity ;
+			$flight['last_track'] = $last_track ;
 			$tracks["$current_plane-$current_tail_number"] = $flight ;
 		} 
 		$current_plane = $plane ;
@@ -56,8 +59,11 @@ while ($row = mysqli_fetch_array($result)) {
 		$current_track = array() ;
 		$first_seen = $row['lt_timestamp'] ;
 	}
-	$current_track[] = [$row['lt_longitude'], $row['lt_latitude'], $row['lt_altitude']] ;
+	$current_track[] = [$row['lt_longitude'], $row['lt_latitude']] ;
 	$last_seen = $row['lt_timestamp'] ;
+	$last_altitude = $row['lt_altitude'] ;
+	$last_velocity = $row['lt_velocity'] ;
+	$last_track = $row['lt_track'] ;
 	$current_ts = $row['ts'] ;
 	if ($current_tail_number == '-') $current_tail_number = $row['lt_tail_number'] ;
 }
@@ -69,6 +75,9 @@ if ($current_plane != '') {
 		$flight['track'] = $current_track ;
 		$flight['first'] = $first_seen ;
 		$flight['last'] = $last_seen ;
+		$flight['last_altitude'] = $last_altitude ;
+		$flight['last_velocity'] = $last_velocity ;
+		$flight['last_track'] = $last_track ;
 		$tracks["$current_plane-$current_tail_number"] = $flight ;
 }
 
