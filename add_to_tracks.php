@@ -51,7 +51,6 @@ if (abs($longitude - $apt_longitude) <= $local_longitude_bound and abs($latitude
 		VALUES('$daytime', $longitude, $latitude, $altitude, $velocity, '$icao24', '$tail_number', '$source')") ;
 	if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
 		journalise(0, 'E', "Cannot insert local track track for $icao24/$tail_number (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
-	if ($source == 'OGN') journalise(0, "I", "Added from OpenGliderNet") ;
 }
 
 
