@@ -28,6 +28,8 @@ $altitude = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['altitude']))
 if ($altitude == 'None') $altitude = "NULL" ;
 $velocity = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['velocity'])) ;
 if ($velocity == 'None') $velocity = "NULL" ;
+$track = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['track'])) ;
+if ($track == '' or $track == 'None') $track = "NULL" ;
 $squawk = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['squawk'])) ;
 $sensor = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['sensor'])) ;
 $source = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['source'])) ;
@@ -47,8 +49,8 @@ if (abs($longitude - $apt_longitude) <= $local_longitude_bound and abs($latitude
 		$tail_number = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['tail_number'])) ;
 	else
 		$tail_number = "" ;
-	$rc = mysqli_query($mysqli_link, "INSERT INTO $table_local_tracks (lt_timestamp, lt_longitude, lt_latitude, lt_altitude, lt_velocity, lt_icao24, lt_tail_number, lt_source)
-		VALUES('$daytime', $longitude, $latitude, $altitude, $velocity, '$icao24', '$tail_number', '$source')") ;
+	$rc = mysqli_query($mysqli_link, "INSERT INTO $table_local_tracks (lt_timestamp, lt_longitude, lt_latitude, lt_altitude, lt_velocity, lt_track, lt_icao24, lt_tail_number, lt_source)
+		VALUES('$daytime', $longitude, $latitude, $altitude, $velocity, $track, '$icao24', '$tail_number', '$source')") ;
 	if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
 		journalise(0, 'E', "Cannot insert local track track for $icao24/$tail_number (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
 }

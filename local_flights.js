@@ -95,7 +95,6 @@ function insertTrackPoints (flights) {
 	var planeCount = 0 , currentId = '' ;
 	var currentFeature ;
 	var legendDiv = document.getElementById('flightLegend') ;
-	var currentAltitude ;
 
 	flightFeatureCollection = [] ;
 //	if (typeof legendDiv != 'undefined') {
@@ -127,7 +126,6 @@ function insertTrackPoints (flights) {
 		thisTrack = thisFlight.track ;
 		for (trackPosition in thisTrack) {
 			currentFeature.geometry.coordinates.push([parseFloat(thisTrack[trackPosition][0]), parseFloat(thisTrack[trackPosition][1])]) ;
-			currentAltitude = thisTrack[trackPosition][2] ;
 		}
 		// Add this flight to the collection
 		flightFeatureCollection.push(currentFeature) ;		// If there is only one point, change type to a marker
@@ -135,7 +133,7 @@ function insertTrackPoints (flights) {
 			properties : {title : '',comment : '', color: ''},
 			geometry : {type : 'LineString', coordinates : [] } } ;
 		locationFeature.geometry.coordinates = currentFeature.geometry.coordinates[currentFeature.geometry.coordinates.length - 1] ; // a Point feature has only one coordinate and not an array of coordinates
-		locationFeature.properties.title = thisFlight.tail_number  + '\n' + currentAltitude + ' ft' ;
+		locationFeature.properties.title = thisFlight.tail_number  + '\n' + thisFlight.last_altitude + ' ft' ;
 		locationFeature.geometry.type = 'Point' ;
 		locationFeature.properties.icon = 'airfield' ;
 		locationFeature.properties['marker-symbol'] = 'airfield' ;
@@ -193,10 +191,25 @@ function mapAddLayers() {
 		document.getElementById('flightInfo').style.display = 'none' ;
 	});
 
+	// Display the box layer
 	map.addLayer(boxLayer) ;
+	// Change the cursor to a pointer when the it enters a feature in the 'airports' layer.
+	map.on('mouseenter', 'box', function (e) {
+		map.getCanvas().style.cursor = 'pointer';
+		document.getElementById('flightInfo').innerHTML = e.features[0].properties.comment ;
+		document.getElementById('flightInfo').style.left = ' ' + (20 + e.originalEvent.clientX) + 'px'  ;
+		document.getElementById('flightInfo').style.top = ' ' + e.originalEvent.clientY + 'px'  ;
+		document.getElementById('flightInfo').style.display = 'block' ;
+		document.getElementById('flightInfo').style.zIndex = '10' ;
+	});
+	// Change it back to a pointer when it leaves.
+	map.on('mouseleave', 'box', function (e) {
+		map.getCanvas().style.cursor = '';
+		document.getElementById('flightInfo').style.display = 'none' ;
+	});
 }
 
-function initLocalFlights(longitude, longitudeDelta, latitude, latitudeDelta, mapBoxToken, ajaxURL) {
+function initLocalFlights(longitude, longitudeDelta, latitude, latitudeDelta, maxAltitude, mapBoxToken, ajaxURL) {
 	mapboxgl.accessToken = mapBoxToken;
 	map = new mapboxgl.Map({
 	    container: 'map', // container id
@@ -218,6 +231,7 @@ function initLocalFlights(longitude, longitudeDelta, latitude, latitudeDelta, ma
 	boxLayer.source.data.features[0].geometry.coordinates.push([longitude-longitudeDelta, latitude-latitudeDelta]) ;
 	boxLayer.source.data.features[0].geometry.coordinates.push([longitude-longitudeDelta, latitude+latitudeDelta]) ;
 	boxLayer.source.data.features[0].geometry.coordinates.push([longitude+longitudeDelta, latitude+latitudeDelta]) ;
+	boxLayer.source.data.features[0].properties.comment = 'Box around the airport<br/>Lat: ' + (latitude-latitudeDelta) + '-' + (latitude+latitudeDelta) + '<br/>Lon: ' + (longitude-longitudeDelta) + '-' + (longitude+longitudeDelta) + '<br/>Alt: max ' + maxAltitude + ' ft';
 	console.log(boxLayer) ;
 
 
