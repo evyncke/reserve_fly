@@ -7,6 +7,7 @@ var boxLayer = {
 	paint : {
 		'line-color': 'black',
 		'line-width' : 3,
+		'line-dasharray': [ 10, 2],
 	},
 	source : {
 		type : 'geojson',
@@ -69,7 +70,8 @@ var locationLayer = {
 		"text-field": "{title}",
 		"text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
 		"text-offset": [0, 0.6],
-		"text-anchor": "top",
+		"text-anchor": "top-left",
+		"text-ignore-placement": true,
 	}
 } ;
 
