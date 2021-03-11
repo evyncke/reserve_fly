@@ -25,6 +25,8 @@ for aircraft in aircrafts:
 	aircraft['hex'] = aircraft['hex'].lower()  # just in case...
 	if not 'alt_baro' in aircraft: 
 		aircraft['alt_baro'] = -1
+	elif aircraft['alt_baro'] == 'ground':
+		aircraft['alt_baro'] = 0
 	else:
 		aircraft['alt_baro'] = int(aircraft['alt_baro'])
 	if not 'gs' in aircraft: aircraft['gs'] = -1

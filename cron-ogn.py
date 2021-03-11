@@ -16,10 +16,10 @@ try:
 	xmlDoc = minidom.parseString(replyString)
 except (urllib.error.HTTPError, urllib.error.URLError) as err:
 	print("Cannot GET HTTP, error: ", err)
-	sys.exit("Cannot GET HTTP, error: ", err)
+	sys.exit("Cannot GET HTTP, error: " + str(err))
 except:
 	print('Not found or invalid XML')
-	sys.exit("Cannot get or parse XML, error: ", sys.exc_info()[0])
+	sys.exit("Cannot get or parse XML, error: " + sys.exc_info()[0])
 
 # <markers>
 #<m a="50.818668,6.230770,EB,D-KEEB,713,13:14:56,7140,261,76,-4.6,1,AIRS89035,3E66E9,aebcb1ba"/>
@@ -43,7 +43,7 @@ except:
 #	Bleu: Autres aéronefs
 #	Gris: Tout aéronef inactif (pas de donnée reçue depuis plus de 10 minutes)
 
-prog = re.compile(r'(.+),(.+),(.+),(.+),(.+),(..:..:..),(.+?),(.+?),(.+?),(.+),.*')
+prog = re.compile(r'(.+?),(.+?),(.*),(.*),(.+),(..:..:..),(.+?),(.+?),(.+?),(.+),.*')
 today =  datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d')
 
 for marker in xmlDoc.getElementsByTagName('m'):
@@ -53,11 +53,11 @@ for marker in xmlDoc.getElementsByTagName('m'):
 	latitude = m.group(1)
 	longitude = m.group(2)
 	tailNumber = m.group(4).replace('-', '')
-	altitude = round(float(m.group(5)) * 3.28084)
+	altitude = round(float(m.group(5)) * 3.28084) # meter to feet conversion
 	timeUTC = m.group(6)
 	timeSinceMeasure = int(m.group(7))
 	track = int(m.group(8))
-	velocity = round(float(m.group(9)) * 0.539957)
+	velocity = round(float(m.group(9)) * 0.539957) # km/h to knots conversion
 
 	print('lat/lon', latitude, longitude)
 	print('ID', tailNumber)
