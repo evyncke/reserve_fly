@@ -25,6 +25,8 @@ $tracks = array() ;
 $sql = "SELECT *, UNIX_TIMESTAMP(lt_timestamp) AS ts
 		FROM $table_local_tracks 
 		WHERE lt_timestamp >= DATE_SUB(CONVERT_TZ(NOW(), 'Europe/Paris', 'UTC'), INTERVAL 15 MINUTE)
+			AND ABS(lt_latitude - $apt_latitude) <= $local_latitude_bound
+			AND ABS(lt_longitude - $apt_longitude) <= $local_longitude_bound
 		ORDER BY lt_icao24, lt_timestamp" ;
 
 $tracks['sql'] = $sql ;
