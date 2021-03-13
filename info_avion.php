@@ -295,7 +295,12 @@ if ($canview) {
 		<TABLE CELLSPACING=0 CELLPADDING=0 BORDER=0>
 		<TR><TD><B>Prix/Minute:</B></TD><TD><INPUT type="text" name="cout" value="<?=$info[0]->cout?>"> &euro;/min (<i>Mettre un '.' d&eacute;cimal dans le prix</i>)</TD></TR>
 		<TR><TD><B>Dernier relev&eacute; moteur CT (admin):</B></TD><TD><INPUT type="number" name="compteur" value="<?=$info[0]->compteur?>"> </TD></TR>
+<!--- PRE -->
+		<?php if ($info[0]->compteur_vol) { ?>
 		<TR><TD><B>Dernier relev&eacute; vol (admin):</B></TD><TD><INPUT type="number" name="compteur_vol_valeur" value="<?=$info[0]->compteur_vol_valeur?>"> </TD></TR>
+		<?php } ?>
+<!--- PRE -->
+	
 		<TR><TD><B>Prochaine immobilisation:</B></TD><TD><INPUT type="number" name="entretien" value="<?=$info[0]->entretien?>"> pour
 		      <INPUT type="text" name="type_entretien" value="<?=db2web($info[0]->type_entretien)?>"></TD></TR>
 		<TR><TD><B>Consommation:</B></TD><TD><INPUT type="number" step="0.1" name="consommation" value="<?=$info[0]->consommation?>"> litres/heure </TD></TR>
