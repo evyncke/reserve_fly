@@ -31,16 +31,6 @@ if (isset($_REQUEST['auth']))
 
 if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
 
-/* Let's retrieve the default airport coordinates */
-$result = mysqli_query($mysqli_link, "select * from $table_airports where a_code = '$default_airport'") or die("Erreur systeme a propos de l'accès à l'aéroport: " . mysqli_error($mysqli_link)) ;
-$row = mysqli_fetch_array($result) ;
-if ($row) {
-	$default_longitude = $row['a_longitude'] ;
-	$default_latitude = $row['a_latitude'] ;
-} else {
-	$default_longitude = 5 ;
-	$default_latitude = 50.5 ;
-}
 ?>
 <html>
 <head>
@@ -88,7 +78,7 @@ var
 </script>
 <!-- End Matomo Code -->
 </head>
-<body onload="initLocalFlights(<?=$default_longitude?>, <?=$local_longitude_bound?>, <?=$default_latitude?>, <?=$local_latitude_bound?>, <?=$local_altimeter_bound?>, '<?=$mapbox_token?>', 'get_local_tracks.php?');">
+<body onload="initLocalFlights(<?=$apt_longitude?>, <?=$local_longitude_bound?>, <?=$apt_latitude?>, <?=$local_latitude_bound?>, <?=$local_altimeter_bound?>, '<?=$mapbox_token?>', 'get_local_tracks.php?');">
 <center><h2>Vols à proximité de l'aéroport ces 15 dernières minutes</h2></center>
 
 <div id='container' style='position: relative;'>
