@@ -43,7 +43,7 @@ if (! isset($_REQUEST['local']) or $_REQUEST['local'] != 'yes') {
 
 // If flight is near the default airport, then add the track to $table_local_tracks
 
-if (abs($longitude - $apt_longitude) <= $local_longitude_bound and abs($latitude - $apt_latitude) <= $local_latitude_bound and $altitude <= $local_altimeter_bound) {
+if (abs($longitude - $apt_longitude) <= $local_longitude_bound*2.0 and abs($latitude - $apt_latitude) <= $local_latitude_bound*2.0 and $altitude <= $local_altimeter_bound) {
 	if ($icao24 == 'None') $icao24 = "" ;
 	if (isset($_REQUEST['tail_number']))
 		$tail_number = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['tail_number'])) ;
