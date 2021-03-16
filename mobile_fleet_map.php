@@ -26,23 +26,12 @@ if ($userId <= 0)
 	
 if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
 
-/* Let's retrieve the default airport coordinates */
-$result = mysqli_query($mysqli_link, "select * from $table_airports where a_code = '$default_airport'") or die("Erreur systeme a propos de l'accès à l'aéroport: " . mysqli_error($mysqli_link)) ;
-$row = mysqli_fetch_array($result) ;
-if ($row) {
-	$default_longitude = $row['a_longitude'] ;
-	$default_latitude = $row['a_latitude'] ;
-} else {
-	$default_longitude = 5 ;
-	$default_latitude = 50.5 ;
-}
-
 $header_postamble = "<!-- Load the MAP BOX scripts & CSS -->
 <script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
 <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
 <script type='text/javascript' src='fleet_map.js'></script>
 " ;
-$body_attributes = "onload=\"init();initFleet($default_longitude, $default_latitude, '$mapbox_token', 'get_tracks.php?');\"" ;
+$body_attributes = "onload=\"init();initFleet($apt_longitude, $apt_latitude, '$mapbox_token', 'get_tracks.php?');\"" ;
 
 require_once 'mobile_header.php' ;
 ?> 
