@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2021 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ include_once 'dbi.php' ;
 
 $icao24 = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['icao24'])) ;
 $daytime = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['daytime'])) ;
-$longitude = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['longitude'])) ;
-$latitude = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['latitude'])) ;
+$longitude = floatval(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['longitude']))) ;
+$latitude = floatval(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['latitude']))) ;
 $altitude = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['altitude'])) ;
 if ($altitude == 'None') $altitude = "NULL" ;
 $velocity = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['velocity'])) ;

@@ -26,6 +26,26 @@ var boxLayer = {
 	}
 } ;
 
+var airportLayer = {
+	id : 'airports',
+	type: 'symbol',
+	source : {
+		type : 'geojson',
+		data : {
+			type : 'FeatureCollection',
+			features : {}
+		}
+	},
+	layout: { // Only applicable to type: symbol
+		"icon-image": "{icon}-11", // used when type: symbol
+		"text-field": "{title}",
+		"text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+		"text-offset": [0, 0.6],
+		"text-anchor": "top-left",
+		"text-ignore-placement": true,
+	}
+} ;
+
 var flightLayer = {
 	id : 'flights',
 	type : 'line', 
@@ -75,6 +95,7 @@ var locationLayer = {
 	}
 } ;
 
+var airportFeatureCollection = [] ;
 var flightFeatureCollection = [] ;
 var locationFeatureCollection = [] ;
 
@@ -130,7 +151,8 @@ function insertTrackPoints (flights) {
 			currentFeature.geometry.coordinates.push([parseFloat(thisTrack[trackPosition][0]), parseFloat(thisTrack[trackPosition][1])]) ;
 		}
 		// Add this flight to the collection
-		flightFeatureCollection.push(currentFeature) ;		// If there is only one point, change type to a marker
+		flightFeatureCollection.push(currentFeature) ;		
+		// and the last track point as a marker
 		locationFeature = {type : 'Feature',
 			properties : {title : '',comment : '', color: ''},
 			geometry : {type : 'LineString', coordinates : [] } } ;
@@ -168,6 +190,59 @@ function getTrackPoints(ajaxURL) {
 	XHR.send(null) ;
 }
 
+function insertAirports(airports) {
+	console.log('insertAirports') ;
+	console.log(airports) ;
+	
+	airportFeatureCollection = [] ;
+	for (var airport in airports) {
+		console.log('Top level of the loop for ' + airport) ;
+		if (airport == 'sql') continue ;
+		if (airport == 'status') continue ;
+		if (airport == 'error') {
+			console.log(airports[error]) ;
+			continue ;
+		}
+		thisAirport = airports[airport] ;
+		console.log(thisAirport) ;
+		airportFeature = {type : 'Feature',
+			properties : {title : '', comment : ''},
+			geometry : {type : 'LineString', coordinates : [] } } ; // Is this really LineString ????? TODO
+		airportFeature.geometry.coordinates = [parseFloat(thisAirport.longitude), parseFloat(thisAirport.latitude)] ; // a Point feature has only one coordinate and not an array of coordinates
+		airportFeature.properties.title = thisAirport.code ;
+		airportFeature.properties.comment = thisAirport.name ;
+		airportFeature.geometry.type = 'Point' ;
+		airportFeature.properties.icon = 'circle' ;
+		airportFeature.properties['marker-symbol'] = 'circle' ;
+		airportFeature.properties['marker-size'] = 'small' ;
+		// Add this icon to the collection
+		airportFeatureCollection.push(airportFeature) ;
+	}
+	
+	// Display the airports
+	airportLayer.source.data.features = airportFeatureCollection ;
+	map.addLayer(airportLayer) ;
+}
+
+function getAirports(ajaxURL) {
+	var XHR = new XMLHttpRequest();
+	XHR.onreadystatechange = function() {
+		if(XHR.readyState  == 4) {
+			if(XHR.status  == 200) {
+				try {
+					var response = eval('(' + XHR.responseText.trim() + ')') ;
+				} catch(err) {
+					console.log("Cannot eval: " + XHR.responseText.trim()) ;
+					return ;
+				}
+				insertAirports(response) ;
+			} // == 200
+		} // == 4
+	} // onreadystatechange
+	XHR.open("GET", ajaxURL, true) ; // Send asynchronous request
+	XHR.send(null) ;
+}
+
 function mapAddLayers() {
 	// Display a rectangle of 'local zone'
 	
@@ -178,6 +253,8 @@ function mapAddLayers() {
 	// Display the flights
 	flightLayer.source.data.features = flightFeatureCollection ;
 	map.addLayer(flightLayer) ;
+	
+	
 	// Change the cursor to a pointer when the it enters a feature in the 'airports' layer.
 	map.on('mouseenter', 'flights', function (e) {
 		map.getCanvas().style.cursor = 'pointer';
@@ -217,7 +294,7 @@ function initLocalFlights(longitude, longitudeDelta, latitude, latitudeDelta, ma
 	    container: 'map', // container id
 	    style: 'mapbox://styles/mapbox/outdoors-v10', // stylesheet location
 	    center: [longitude, latitude], // starting position [lng, lat]
-	    zoom: 8 // starting zoom
+	    zoom: 9 // starting zoom was 8
 	});
 
 	// Add zoom and rotation controls to the map.
@@ -226,6 +303,9 @@ function initLocalFlights(longitude, longitudeDelta, latitude, latitudeDelta, ma
 	// Build the track points
 	getTrackPoints(ajaxURL) ;
 		
+	// Mark the airports
+	getAirports('https://nav.vyncke.org/airports_ws.php?lat1=' + (latitude-latitudeDelta) + '&lat2=' + (latitude+latitudeDelta) + '&lng1=' + (longitude-longitudeDelta) + '&lng2=' + (longitude+longitudeDelta)) ;
+	
 	// Build the box around the local zone
 	boxLayer.source.data.features[0].geometry.coordinates = [] ;
 	boxLayer.source.data.features[0].geometry.coordinates.push([longitude+longitudeDelta, latitude+latitudeDelta]) ;
