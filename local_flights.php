@@ -29,6 +29,11 @@ if (isset($_REQUEST['auth']))
 	if ($_REQUEST['auth'] != md5($_REQUEST['pilot'] . $_REQUEST['period'] . $shared_secret))
 		die("Vous n'&ecric;tes pas autoris&eacute;.") ;
 
+if (isset($_REQUEST['large'])) {
+	$local_longitude_bound *= 2.0 ;
+	$local_latitude_bound *= 2.0 ;
+}	
+
 if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
 
 ?>
@@ -82,7 +87,7 @@ var
 <center><h2>Vols à proximité de l'aéroport ces 15 dernières minutes</h2></center>
 
 <div id='container' style='position: relative;'>
-	<div id='map' style='width: 100%; height: 90%;'></div>
+	<div id='map' style='width: 100%; height: 80%;'></div>
 	<div id='flightLegend' style='display: block; position: absolute; bottom: 30px; right: 5px; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.8;'></div>
 </div> <!-- container -->
 
@@ -94,7 +99,8 @@ $version_ajax = date ("Y-m-d H:i:s.", filemtime('get_tracks.php')) ;
 ?>
 <hr>
 <div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
-Données via Flight Aware (avec maximum une heure de délai) et via quelques récepteurs ADS-B / MLAT (avec maximum 1 minute de délai).</br>
+Ne pas utiliser comme outil en vol<br/>
+Données via Flight Aware (avec maximum 30 minutes de délai), via quelques récepteurs ADS-B / MLAT (avec maximum 1 minute de délai) et glidernet.org (planeurs FLARM).</br>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, AJAX=<?=$version_ajax?></div>
 </body>
 </html>
