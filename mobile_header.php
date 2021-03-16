@@ -174,6 +174,7 @@ if ($userId > 0) {
 if ($userId > 0) {
 ?> 
             <li><a href="mobile_team.php">Equipe SPW</a></li>
+            <li><a href="mobile_local_flights.php">Vols proches</a></li>
 <?php
 }
 ?>
