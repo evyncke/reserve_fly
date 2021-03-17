@@ -120,10 +120,8 @@ function insertTrackPoints (flights) {
 	var legendDiv = document.getElementById('flightLegend') ;
 
 	flightFeatureCollection = [] ;
-//	if (typeof legendDiv != 'undefined') {
 	if (legendDiv) {
 		legendDiv.innerHTML = '' ;
-		// TODO position the div
 	}
 	for (var flight in flights) {
 		console.log('Top level of the loop for ' + flight) ;
@@ -133,7 +131,7 @@ function insertTrackPoints (flights) {
 			continue ;
 		}
 		thisFlight = flights[flight] ;
-//		if (typeof legendDiv != 'undefined') {
+		var tailNumber = ((thisFlight.tail_number == '-') ? thisFlight.icao24 : thisFlight.tail_number) ;
 		if (legendDiv) {
 			legendDiv.innerHTML += '<span class="glyphicon glyphicon-plane" style="color:' + trackColors[planeCount] + '"></span> ' + thisFlight.tail_number + '<br/>' ;
 		}
@@ -196,7 +194,6 @@ function insertAirports(airports) {
 	
 	airportFeatureCollection = [] ;
 	for (var airport in airports) {
-		console.log('Top level of the loop for ' + airport) ;
 		if (airport == 'sql') continue ;
 		if (airport == 'status') continue ;
 		if (airport == 'error') {
@@ -204,7 +201,6 @@ function insertAirports(airports) {
 			continue ;
 		}
 		thisAirport = airports[airport] ;
-		console.log(thisAirport) ;
 		airportFeature = {type : 'Feature',
 			properties : {title : '', comment : ''},
 			geometry : {type : 'LineString', coordinates : [] } } ; // Is this really LineString ????? TODO
@@ -288,13 +284,13 @@ function mapAddLayers() {
 	});
 }
 
-function initLocalFlights(longitude, longitudeDelta, latitude, latitudeDelta, maxAltitude, mapBoxToken, ajaxURL) {
+function initLocalFlights(longitude, longitudeDelta, latitude, latitudeDelta, maxAltitude, mapBoxToken, zoomLevel, ajaxURL) {
 	mapboxgl.accessToken = mapBoxToken;
 	map = new mapboxgl.Map({
 	    container: 'map', // container id
 	    style: 'mapbox://styles/mapbox/outdoors-v10', // stylesheet location
 	    center: [longitude, latitude], // starting position [lng, lat]
-	    zoom: 9 // starting zoom was 8
+	    zoom: zoomLevel // starting zoom was 8 then 9
 	});
 
 	// Add zoom and rotation controls to the map.

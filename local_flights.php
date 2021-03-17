@@ -32,7 +32,12 @@ if (isset($_REQUEST['auth']))
 if (isset($_REQUEST['large'])) {
 	$local_longitude_bound *= 2.0 ;
 	$local_latitude_bound *= 2.0 ;
-}	
+	$mult = 2.0 ;
+	$zoom_level = 9 ;
+} else {
+	$mult = 1.0 ;
+	$zoom_level = 10 ;
+}
 
 if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
 
@@ -83,7 +88,7 @@ var
 </script>
 <!-- End Matomo Code -->
 </head>
-<body onload="initLocalFlights(<?=$apt_longitude?>, <?=$local_longitude_bound?>, <?=$apt_latitude?>, <?=$local_latitude_bound?>, <?=$local_altimeter_bound?>, '<?=$mapbox_token?>', 'get_local_tracks.php?');">
+<body onload="initLocalFlights(<?=$apt_longitude?>, <?=$local_longitude_bound?>, <?=$apt_latitude?>, <?=$local_latitude_bound?>, <?=$local_altimeter_bound?>, '<?=$mapbox_token?>', <?=$zoom_level?>, 'get_local_tracks.php?mult=<?=$mult?>');">
 <center><h2>Vols à proximité de l'aéroport ces 15 dernières minutes</h2></center>
 
 <div id='container' style='position: relative;'>
@@ -98,8 +103,7 @@ $version_js = date ("Y-m-d H:i:s.", filemtime('fleet_map.js')) ;
 $version_ajax = date ("Y-m-d H:i:s.", filemtime('get_tracks.php')) ;
 ?>
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
-Ne pas utiliser comme outil en vol<br/>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL. <b>Ne pas utiliser comme outil en vol</b><br/>
 Données via Flight Aware (avec maximum 30 minutes de délai), via quelques récepteurs ADS-B / MLAT (avec maximum 1 minute de délai) et glidernet.org (planeurs FLARM).</br>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, AJAX=<?=$version_ajax?></div>
 </body>
