@@ -53,7 +53,7 @@ if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
 <!-- Reusing bootstrap icons -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
 
-<title>Vols à proximité de l'aéroport ces 15 dernières minutes</title>
+<title>Vols à proximité de l'aéroport ces <?=$local_delay?> dernières minutes</title>
 <script type="text/javascript">
 var
 	// preset Javascript constant fill with the right data from db.php PHP variables
@@ -89,7 +89,7 @@ var
 <!-- End Matomo Code -->
 </head>
 <body onload="initLocalFlights(<?=$apt_longitude?>, <?=$local_longitude_bound?>, <?=$apt_latitude?>, <?=$local_latitude_bound?>, <?=$local_altimeter_bound?>, '<?=$mapbox_token?>', <?=$zoom_level?>, 'get_local_tracks.php?mult=<?=$mult?>');">
-<center><h2>Vols à proximité de l'aéroport ces 15 dernières minutes</h2></center>
+<center><h2>Vols à proximité de l'aéroport ces <?=$local_delay?> dernières minutes</h2></center>
 
 <div id='container' style='position: relative;'>
 	<div id='map' style='width: 100%; height: 80%;'></div>

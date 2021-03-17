@@ -33,7 +33,7 @@ var airportLayer = {
 		type : 'geojson',
 		data : {
 			type : 'FeatureCollection',
-			features : {}
+			features : []
 		}
 	},
 	layout: { // Only applicable to type: symbol
@@ -60,7 +60,7 @@ var flightLayer = {
 		type : 'geojson',
 		data : {
 			type : 'FeatureCollection',
-			features : {}
+			features : []
 		}
 	}
 } ;
@@ -82,7 +82,7 @@ var locationLayer = {
 		type : 'geojson',
 		data : {
 			type : 'FeatureCollection',
-			features : {}
+			features : []
 		}
 	},
 	layout: { // Only applicable to type: symbol
@@ -99,6 +99,8 @@ var airportFeatureCollection = [] ;
 var flightFeatureCollection = [] ;
 var locationFeatureCollection = [] ;
 
+var longitude, longitudeDelta, latitude, latitudeDelta, maxAltitude, ajaxURL ;
+
 var trackColors = [ '#33C9EB', // blue, 
 'MediumBlue', // red
 'cyan',
@@ -114,12 +116,22 @@ var trackColors = [ '#33C9EB', // blue,
 'Magenta',
 ] ;
 
-function insertTrackPoints (flights) {
-	var planeCount = 0 , currentId = '' ;
+function tailNumber2Color(str) {
+    var hash = 0, i = 0, len = str.length;
+    while ( i < len ) {
+        hash  = ((hash << 5) - hash + str.charCodeAt(i++)) << 0;
+    }
+    console.log('Hash for ' + str + " = " + hash) ;
+    return trackColors[hash % trackColors.length] ;
+}
+
+function insertTrackPoints(flights) {
+	var currentId = '' ;
 	var currentFeature ;
 	var legendDiv = document.getElementById('flightLegend') ;
 
 	flightFeatureCollection = [] ;
+	locationFeatureCollection = [] ;
 	if (legendDiv) {
 		legendDiv.innerHTML = '' ;
 	}
@@ -133,15 +145,15 @@ function insertTrackPoints (flights) {
 		thisFlight = flights[flight] ;
 		var tailNumber = ((thisFlight.tail_number == '-') ? thisFlight.icao24 : thisFlight.tail_number) ;
 		if (legendDiv) {
-			legendDiv.innerHTML += '<span class="glyphicon glyphicon-plane" style="color:' + trackColors[planeCount] + '"></span> ' + thisFlight.tail_number + '<br/>' ;
+			legendDiv.innerHTML += '<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(thisFlight.tail_number) + '"></span> ' + thisFlight.tail_number + '<br/>' ;
 		}
 		// TODO add time of the first point in the comment
 		currentFeature = {type : 'Feature',
 			properties : {title : '',comment : '', color: ''},
 			geometry : {type : 'LineString', coordinates : [] } } ;
 		currentFeature.properties.title = flight ;
-		currentFeature.properties.comment = "Plane: " + thisFlight.tail_number + '</br>First seen: ' + thisFlight.first + ' UTC</br>Last seen: ' + thisFlight.last + ' UTC';
-		currentFeature.properties.color = trackColors[planeCount++] ;
+		currentFeature.properties.comment = "Plane: " + thisFlight.tail_number + '</br>Last seen: ' + thisFlight.last + ' UTC';
+		currentFeature.properties.color = tailNumber2Color(thisFlight.tail_number) ;
 		currentFeature.geometry.coordinates = [] ;
 
 		thisTrack = thisFlight.track ;
@@ -164,12 +176,23 @@ function insertTrackPoints (flights) {
 		// Add this icon to the collection
 		locationFeatureCollection.push(locationFeature) ;
 	}
-		
-	// Add the flights layers
-	map.on('load', mapAddLayers) ;
+
+	// Now add this new part to the layer
+	console.log("in insertTrackPoints: map.getSource('flights')") ;
+	console.log(map.getSource('flights')) ;
+	map.getSource('flights').setData({
+			type : 'FeatureCollection',
+			features : flightFeatureCollection
+		}) ;		
+	console.log(map.getSource('locations')) ;
+	map.getSource('locations').setData({
+			type : 'FeatureCollection',
+			features : locationFeatureCollection
+		}) ;	
+	setTimeout(getTrackPoints, 15000) ;	
 }
 
-function getTrackPoints(ajaxURL) {
+function getTrackPoints() {
 	var XHR = new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
 		if(XHR.readyState  == 4) {
@@ -246,9 +269,8 @@ function mapAddLayers() {
 	locationLayer.source.data.features = locationFeatureCollection ;
 	map.addLayer(locationLayer) ;
 	
-	// Display the flights
-	flightLayer.source.data.features = flightFeatureCollection ;
-	map.addLayer(flightLayer) ;
+	// Draw the local flight zone
+	drawBox(longitude, longitudeDelta, latitude, latitudeDelta, maxAltitude)
 	
 	
 	// Change the cursor to a pointer when the it enters a feature in the 'airports' layer.
@@ -265,6 +287,24 @@ function mapAddLayers() {
 		map.getCanvas().style.cursor = '';
 		document.getElementById('flightInfo').style.display = 'none' ;
 	});
+
+	// Try to do it asynchronously
+	console.log("in mapAddLayers(): map.addLayer(flightLayer)") ;
+	map.addLayer(flightLayer) ;
+	// Build the track points
+	getTrackPoints(ajaxURL) ;
+}
+
+function drawBox() {
+	// Build the box around the local zone
+	boxLayer.source.data.features[0].geometry.coordinates = [] ;
+	boxLayer.source.data.features[0].geometry.coordinates.push([longitude+longitudeDelta, latitude+latitudeDelta]) ;
+	boxLayer.source.data.features[0].geometry.coordinates.push([longitude+longitudeDelta, latitude-latitudeDelta]) ;
+	boxLayer.source.data.features[0].geometry.coordinates.push([longitude-longitudeDelta, latitude-latitudeDelta]) ;
+	boxLayer.source.data.features[0].geometry.coordinates.push([longitude-longitudeDelta, latitude+latitudeDelta]) ;
+	boxLayer.source.data.features[0].geometry.coordinates.push([longitude+longitudeDelta, latitude+latitudeDelta]) ;
+	boxLayer.source.data.features[0].properties.comment = 'Box around the airport<br/>Lat: ' + (latitude-latitudeDelta) + '-' + (latitude+latitudeDelta) + '<br/>Lon: ' + (longitude-longitudeDelta) + '-' + (longitude+longitudeDelta) + '<br/>Alt: max ' + maxAltitude + ' ft';
+	console.log(boxLayer) ;
 
 	// Display the box layer
 	map.addLayer(boxLayer) ;
@@ -284,7 +324,17 @@ function mapAddLayers() {
 	});
 }
 
-function initLocalFlights(longitude, longitudeDelta, latitude, latitudeDelta, maxAltitude, mapBoxToken, zoomLevel, ajaxURL) {
+function initLocalFlights(longitudeArg, longitudeDeltaArg, latitudeArg, latitudeDeltaArg, maxAltitudeArg, mapBoxToken, zoomLevel, ajaxURLArg) {
+	
+	// Save all parameters for later use
+	longitude = longitudeArg ;
+	longitudeDelta = longitudeDeltaArg ;
+	latitude = latitudeArg ; 
+	latitudeDelta = latitudeDeltaArg ; 
+	maxAltitude = maxAltitudeArg ;
+	ajaxURL = ajaxURLArg ;
+	
+	
 	mapboxgl.accessToken = mapBoxToken;
 	map = new mapboxgl.Map({
 	    container: 'map', // container id
@@ -295,23 +345,12 @@ function initLocalFlights(longitude, longitudeDelta, latitude, latitudeDelta, ma
 
 	// Add zoom and rotation controls to the map.
 	map.addControl(new mapboxgl.NavigationControl());
+	map.on('load', mapAddLayers) ;
 
-	// Build the track points
-	getTrackPoints(ajaxURL) ;
 		
 	// Mark the airports
 	getAirports('https://nav.vyncke.org/airports_ws.php?lat1=' + (latitude-latitudeDelta) + '&lat2=' + (latitude+latitudeDelta) + '&lng1=' + (longitude-longitudeDelta) + '&lng2=' + (longitude+longitudeDelta)) ;
 	
-	// Build the box around the local zone
-	boxLayer.source.data.features[0].geometry.coordinates = [] ;
-	boxLayer.source.data.features[0].geometry.coordinates.push([longitude+longitudeDelta, latitude+latitudeDelta]) ;
-	boxLayer.source.data.features[0].geometry.coordinates.push([longitude+longitudeDelta, latitude-latitudeDelta]) ;
-	boxLayer.source.data.features[0].geometry.coordinates.push([longitude-longitudeDelta, latitude-latitudeDelta]) ;
-	boxLayer.source.data.features[0].geometry.coordinates.push([longitude-longitudeDelta, latitude+latitudeDelta]) ;
-	boxLayer.source.data.features[0].geometry.coordinates.push([longitude+longitudeDelta, latitude+latitudeDelta]) ;
-	boxLayer.source.data.features[0].properties.comment = 'Box around the airport<br/>Lat: ' + (latitude-latitudeDelta) + '-' + (latitude+latitudeDelta) + '<br/>Lon: ' + (longitude-longitudeDelta) + '-' + (longitude+longitudeDelta) + '<br/>Alt: max ' + maxAltitude + ' ft';
-	console.log(boxLayer) ;
-
 
 	
 	// When run in bootstrap per https://stackoverflow.com/questions/54681826/mapbox-gl-js-canvas-not-displaying-properly-in-bootstrap-modal
