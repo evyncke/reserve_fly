@@ -19,14 +19,19 @@ ob_start("ob_gzhandler");
 
 require_once 'dbi.php' ;
 
+if (isset($_REQUEST['mult'])) {
+	$mult = floatval(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['mult']))) ;
+} else
+	$mult = 1.0 ;
+	
 $error_message = '' ;
 $tracks = array() ;
 
 $sql = "SELECT *, UNIX_TIMESTAMP(lt_timestamp) AS ts
 		FROM $table_local_tracks 
 		WHERE lt_timestamp >= DATE_SUB(CONVERT_TZ(NOW(), 'Europe/Paris', 'UTC'), INTERVAL 15 MINUTE)
-			AND ABS(lt_latitude - $apt_latitude) <= $local_latitude_bound
-			AND ABS(lt_longitude - $apt_longitude) <= $local_longitude_bound
+			AND ABS(lt_latitude - $apt_latitude) <= $local_latitude_bound * $mult
+			AND ABS(lt_longitude - $apt_longitude) <= $local_longitude_bound * $mult
 		ORDER BY lt_icao24, lt_timestamp" ;
 
 $tracks['sql'] = $sql ;

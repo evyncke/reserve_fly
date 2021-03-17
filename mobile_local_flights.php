@@ -26,12 +26,14 @@ if ($userId <= 0)
 	
 if ($userId != 62) journalise($userId, 'I', "Mobile local flights map displayed") ;
 
+$zoom_level = 10 ;
+
 $header_postamble = "<!-- Load the MAP BOX scripts & CSS -->
 <script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
 <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
 <script type='text/javascript' src='local_flights.js'></script>
 " ;
-$body_attributes = "onload=\"init();initLocalFlights($apt_longitude, $local_longitude_bound, $apt_latitude, $local_latitude_bound, $local_altimeter_bound, '$mapbox_token', 'get_local_tracks.php?');\"" ;
+$body_attributes = "onload=\"init();initLocalFlights($apt_longitude, $local_longitude_bound, $apt_latitude, $local_latitude_bound, $local_altimeter_bound, '$mapbox_token', $zoom_level, 'get_local_tracks.php?');\"" ;
 
 require_once 'mobile_header.php' ;
 ?> 
