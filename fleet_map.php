@@ -81,7 +81,7 @@ var
 <center><h2>Vols de la flotte ces dernières 24 heures</h2></center>
 
 <div id='container' style='position: relative;'>
-	<div id='map' style='width: 100%; height: 90%;'></div>
+	<div id='map' style='width: 100%; height: 85%;'></div>
 	<div id='flightLegend' style='display: block; position: absolute; bottom: 30px; right: 5px; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.8;'></div>
 </div> <!-- container -->
 
@@ -93,7 +93,7 @@ $version_ajax = date ("Y-m-d H:i:s.", filemtime('get_tracks.php')) ;
 ?>
 <hr>
 <div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
-Données via Flight Aware (avec maximum 30 minutes de délai) et via quelques récepteurs ADS-B / MLAT (avec maximum 1 minute de délai).</br>
+Données via Flight Aware (avec maximum 30 minutes de délai) et via quelques récepteurs ADS-B / MLAT (avec maximum 15 secondes de délai).</br>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, AJAX=<?=$version_ajax?></div>
 </body>
 </html>

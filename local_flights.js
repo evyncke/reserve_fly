@@ -121,7 +121,6 @@ function tailNumber2Color(str) {
     while ( i < len ) {
         hash  = ((hash << 5) - hash + str.charCodeAt(i++)) << 0;
     }
-    console.log('Hash for ' + str + " = " + hash) ;
     return trackColors[hash % trackColors.length] ;
 }
 
@@ -178,18 +177,15 @@ function insertTrackPoints(flights) {
 	}
 
 	// Now add this new part to the layer
-	console.log("in insertTrackPoints: map.getSource('flights')") ;
-	console.log(map.getSource('flights')) ;
 	map.getSource('flights').setData({
 			type : 'FeatureCollection',
 			features : flightFeatureCollection
 		}) ;		
-	console.log(map.getSource('locations')) ;
 	map.getSource('locations').setData({
 			type : 'FeatureCollection',
 			features : locationFeatureCollection
 		}) ;	
-	setTimeout(getTrackPoints, 15000) ;	
+
 }
 
 function getTrackPoints() {
@@ -263,7 +259,6 @@ function getAirports(ajaxURL) {
 }
 
 function mapAddLayers() {
-	// Display a rectangle of 'local zone'
 	
 	// Display the last known locations
 	locationLayer.source.data.features = locationFeatureCollection ;
@@ -289,10 +284,10 @@ function mapAddLayers() {
 	});
 
 	// Try to do it asynchronously
-	console.log("in mapAddLayers(): map.addLayer(flightLayer)") ;
 	map.addLayer(flightLayer) ;
 	// Build the track points
-	getTrackPoints(ajaxURL) ;
+	getTrackPoints() ;
+	setInterval(getTrackPoints, 10000) ;	
 }
 
 function drawBox() {
@@ -304,7 +299,6 @@ function drawBox() {
 	boxLayer.source.data.features[0].geometry.coordinates.push([longitude-longitudeDelta, latitude+latitudeDelta]) ;
 	boxLayer.source.data.features[0].geometry.coordinates.push([longitude+longitudeDelta, latitude+latitudeDelta]) ;
 	boxLayer.source.data.features[0].properties.comment = 'Box around the airport<br/>Lat: ' + (latitude-latitudeDelta) + '-' + (latitude+latitudeDelta) + '<br/>Lon: ' + (longitude-longitudeDelta) + '-' + (longitude+longitudeDelta) + '<br/>Alt: max ' + maxAltitude + ' ft';
-	console.log(boxLayer) ;
 
 	// Display the box layer
 	map.addLayer(boxLayer) ;

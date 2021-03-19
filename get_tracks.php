@@ -87,7 +87,7 @@ if ($current_plane != '') {
 		$flight['track'] = $current_track ;
 		$flight['first'] = $first_seen ;
 		$flight['last'] = $last_seen ;
-		$tracks["$current_plane/$first_seen"] = $flight ;
+		$tracks["$current_plane/$last_seen"] = $flight ;
 }
 
 // Let's send the data back

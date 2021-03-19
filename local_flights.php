@@ -104,7 +104,7 @@ $version_ajax = date ("Y-m-d H:i:s.", filemtime('get_tracks.php')) ;
 ?>
 <hr>
 <div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL. <b>Ne pas utiliser comme outil en vol</b><br/>
-Données via Flight Aware (avec maximum 30 minutes de délai), via quelques récepteurs ADS-B / MLAT (avec maximum 1 minute de délai) et glidernet.org (planeurs FLARM).</br>
+Données via Flight Aware (avec maximum 30 minutes de délai), via quelques récepteurs ADS-B / MLAT (avec maximum 1 minute de délai), via Open Sky, et via glidernet.org (planeurs FLARM).</br>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, AJAX=<?=$version_ajax?></div>
 </body>
 </html>
