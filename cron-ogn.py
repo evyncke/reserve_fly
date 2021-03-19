@@ -11,7 +11,7 @@ import socket
 #  https://github.com/glidernet/ogn-live
 
 try:
-	request = urllib.request.urlopen("http://live.glidernet.org/lxml.php?a=1&b=51.5&c=49.5&d=6.5&e=3.0&y=15")
+	request = urllib.request.urlopen("http://live.glidernet.org/lxml.php?a=1&b=51.5&c=49.5&d=7.0&e=5.0&y=15")
 	replyString = request.read()
 	xmlDoc = minidom.parseString(replyString)
 except (urllib.error.HTTPError, urllib.error.URLError) as err:
