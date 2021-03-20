@@ -72,7 +72,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$last_velocity = $row['lt_velocity'] ;
 	$last_track = $row['lt_track'] ;
 	$current_ts = $row['ts'] ;
-	if ($current_tail_number == '-') $current_tail_number = $row['lt_tail_number'] ;
+	if ($current_tail_number == '-' or $current_tail_number == '') $current_tail_number = $row['lt_tail_number'] ;
 	if ((strlen($current_tail_number) == 6) and ctype_xdigit($current_tail_number)) $current_tail_number = $row['lt_tail_number'] ; // Sometimes the ICAO identifier finishes here...
 }
 
