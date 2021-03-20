@@ -45,19 +45,46 @@ var locationFeatureCollection = [] ;
 
 var longitude, latitude, maxAltitude, ajaxURL ;
 
-var trackColors = [ '#33C9EB', // blue, 
-'MediumBlue', // red
-'cyan',
-'darkblue',
-'crimson',
+var trackColors = [ 'Crimson',
+'MediumBlue',
+'Aquamarine', 
+'Chocolate',
+'Cyan',
+'DarkBlue',
+'Crimson',
 'black',
-'orange',
-'brown',
-'chartreuse',
+'Orange',
+'DarkMagenta',
+'DarkOrchid',
+'DarkOrange', 
+'DarkGreen',
+'DarkOliveGreen',
+'DarkRed',
+'DodgerBlue',
+'ForestGreen',
+'Fuchsia',
+'Gold',
+'Green',
+'GreenYellow',
+'Brown',
+'Chartreuse',
+'Indigo',
+'Maroon',
+'MediumOrchid',
+'MidnightBlue',
+'Navy',
+'Olive',
 'DeepPink',
 'LawnGreen',
 'LightCoral',
 'Magenta',
+'Plum',
+'Sienna',
+'SlateBlue',
+'SaddleBrown',
+'Red',
+'Yellow',
+'YellowGreen'
 ] ;
 
 function tailNumber2Color(str) {
@@ -65,8 +92,7 @@ function tailNumber2Color(str) {
     while ( i < len ) {
         hash  = ((hash << 5) - hash + str.charCodeAt(i++)) << 0;
     }
-    console.log('Hash for ' + str + " = " + hash) ;
-    return trackColors[hash % trackColors.length] ;
+    return trackColors[Math.abs(hash) % trackColors.length] ;
 }
 
 function insertTrackPoints (flights) {
@@ -77,7 +103,7 @@ function insertTrackPoints (flights) {
 	flightFeatureCollection = [] ;
 	flightFeatureCollection = [] ;
 	if (legendDiv) {
-		legendDiv.innerHTML = '' ;
+		legendDiv.innerHTML = 'Plane/Last seen<br/>' ;
 		// TODO position the div
 	}
 	for (var flight in flights) {
@@ -102,7 +128,7 @@ function insertTrackPoints (flights) {
 		thisTrack = thisFlight.track ;
 		var lastLongitude, lastLatitude ;
 		for (trackPosition in thisTrack) {
-			if (trackPosition == 0 || (Math.abs(lastLongitude-thisTrack[trackPosition][0]) <= 0.1 && Math.abs(lastLatitude-thisTrack[trackPosition][1]) <= 0.1)) {
+			if (trackPosition == 0 || (Math.abs(lastLongitude-thisTrack[trackPosition][0]) <= 0.05 && Math.abs(lastLatitude-thisTrack[trackPosition][1]) <= 0.05)) {
 				currentFeature.geometry.coordinates.push([parseFloat(thisTrack[trackPosition][0]), parseFloat(thisTrack[trackPosition][1])]) ;
 				lastLongitude = thisTrack[trackPosition][0] ;
 				lastLatitude = thisTrack[trackPosition][1] ;
