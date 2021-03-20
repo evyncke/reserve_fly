@@ -47,7 +47,7 @@ headers = {
 
 # TODO handle cookies with https://docs.python.org/3/library/http.cookiejar.html
 
-one_hour_back = time.time() - 3600
+one_hour_back = time.time() - 1800 # Cron is executed twice an hour now...
 
 for plane, icao24 in planes.items():
 	print('plane: ' + plane + ', icao24: ' + icao24)
