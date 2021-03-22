@@ -42,7 +42,13 @@ class mapping:
 	def applicable(self, n):
 		return (self.start <= n and n <= self.end)
 
-# Should try to find the mapping 484871 to PHOTK and PH-AML 484b0c
+# Should try to find the mapping
+# 484871 PHOTK 
+# 484b0c PHAML 
+# 485613 PHDEC
+
+# Netherlands       0100 1000 0 ... .. ..........   480000 - 487FFF   22000000 - 22077777
+#
 # A = 0
 # M = 12
 # L = 11
@@ -58,7 +64,7 @@ mappings.append(mapping(0x3D4950, 26*26, 26, prefix="DF"))
 mappings.append(mapping(0x3D8DF8, 26*26, 26, prefix="DG"))
 mappings.append(mapping(0x3DD2A0, 26*26, 26, prefix="DH"))
 mappings.append(mapping(0x3E1748, 26*26, 26, prefix="DI"))
-mappings.append(mapping(0x448421, 1024,  32, prefix="OO"))
+mappings.append(mapping(0x448421, 1024,  32, prefix="OO"))  # 32768 codes as in 0 1 0 0 : 0 1 0 0 : 1 - - - - - - - - - - - - - - -
 mappings.append(mapping(0x458421, 1024,  32, prefix="OY"))
 mappings.append(mapping(0x460000, 26*26, 26, prefix="OH"))
 mappings.append(mapping(0x468421, 1024,  32, prefix="SX"))
@@ -74,7 +80,7 @@ mappings.append(mapping(0xC044A9, 26*26, 26, prefix="CG"))
 mappings.append(mapping(0xE01041, 4096,  64, prefix="LV"))
 
 #mappings.append(mapping(0x484981, 1024,  32, prefix="PH"))
-mappings.append(mapping(0x4849C9, 26*26,  26, prefix="PH"))
+#mappings.append(mapping(0x4849C9, 26*26,  26, prefix="PH"))
 
 limitedAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ" # 24 chars; no I, O
 
@@ -145,19 +151,20 @@ for aircraft in aircrafts:
 		print(aircraft)
 		if 'lon' in aircraft:
 			try:
-				response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?icao24=" + aircraft['hex'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&squawk=' + urllib.parse.quote(aircraft['squawk']) + '&track=' + str(aircraft['track']) + '&sensor=0&source=FA-evyncke')
+				response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?icao24=" + aircraft['hex'] + '&tail_number=' + aircraft['flight'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&squawk=' + urllib.parse.quote(aircraft['squawk']) + '&track=' + str(aircraft['track']) + '&sensor=0&source=FA-evyncke')
 			except urllib.error.URLError as e:
 				print('Error when connecting to RAPCS: ' + str(e))
 			except SocketError as e:
 				print('Error in connecting to RAPCS web service: ' + str(e))
 		else:
 			print('Alas no location...')
-	elif (aircraft['alt_baro'] > 0 and aircraft['alt_baro'] <= 5000): # Not my aircraft but it is a local flight it seems
+	if (aircraft['alt_baro'] > 0 and aircraft['alt_baro'] <= 5000): # it is a local flight it seems
 		print('Found a nearby aircraft at ' + now)
 		print(aircraft)
 		if 'lon' in aircraft:
 			try:
 				response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?local=yes&icao24=" + aircraft['hex'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&tail_number=' + urllib.parse.quote(aircraft['flight']) + '&track=' + str(aircraft['track']) + '&source=FA-evyncke')
+				print("https://www.spa-aviation.be/resa/add_to_tracks.php?local=yes&icao24=" + aircraft['hex'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&tail_number=' + urllib.parse.quote(aircraft['flight']) + '&track=' + str(aircraft['track']) + '&source=FA-evyncke')
 			except urllib.error.URLError as e:
 				print('Error when connecting to RAPCS: ' + str(e))
 			except SocketError as e:
