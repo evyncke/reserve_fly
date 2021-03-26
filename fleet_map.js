@@ -89,7 +89,7 @@ var trackColors = [ 'Crimson',
 
 function tailNumber2Color(str) {
     var hash = 0, i = 0, len = str.length;
-    while ( i < len ) {
+    while ( i < 20 ) { // Limit to 20 to avoid changing color for flights in the air
         hash  = ((hash << 5) - hash + str.charCodeAt(i++)) << 0;
     }
     return trackColors[Math.abs(hash) % trackColors.length] ;
@@ -99,13 +99,10 @@ function insertTrackPoints (flights) {
 	var currentId = '' ;
 	var currentFeature ;
 	var legendDiv = document.getElementById('flightLegend') ;
+	var legendItems = [] ;
 
 	flightFeatureCollection = [] ;
 	flightFeatureCollection = [] ;
-	if (legendDiv) {
-		legendDiv.innerHTML = 'Plane/Last seen<br/>' ;
-		// TODO position the div
-	}
 	for (var flight in flights) {
 		if (flight == 'sql') continue ;
 		if (flight == 'error') {
@@ -114,7 +111,7 @@ function insertTrackPoints (flights) {
 		}
 		thisFlight = flights[flight] ;
 		if (legendDiv) {
-			legendDiv.innerHTML += '<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(flight) + '"></span> ' + flight + ' UTC<br/>' ;
+			legendItems.push('<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(flight) + ';"></span> ' + flight + ' UTC<br/>') ;
 		}
 		// TODO add time of the first point in the comment
 		currentFeature = {type : 'Feature',
@@ -149,6 +146,15 @@ function insertTrackPoints (flights) {
 			// Add this flight to the collection
 			flightFeatureCollection.push(currentFeature) ;
 		}
+	}
+
+	if (legendDiv) {
+		legendDiv.innerHTML = 'Plane/Last seen<br/>' ;
+		legendItems.sort(function (a,b) {
+				return (a.substr(a.length-28, 19) > b.substr(b.length-28, 19)) ? +1 : -1 ;
+			})
+		legendDiv.innerHTML += legendItems.join('') ;
+		// TODO position the div
 	}
 		
 	map.getSource('flights').setData({

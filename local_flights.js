@@ -155,12 +155,10 @@ function insertTrackPoints(flights) {
 	var currentId = '' ;
 	var currentFeature ;
 	var legendDiv = document.getElementById('flightLegend') ;
+	var legendItems = [] ;
 
 	flightFeatureCollection = [] ;
 	locationFeatureCollection = [] ;
-	if (legendDiv) {
-		legendDiv.innerHTML = '' ;
-	}
 	for (var flight in flights) {
 		if (flight == 'sql') continue ;
 		if (flight == 'error') {
@@ -170,7 +168,8 @@ function insertTrackPoints(flights) {
 		thisFlight = flights[flight] ;
 		var tailNumber = ((thisFlight.tail_number == '-') ? thisFlight.icao24 : thisFlight.tail_number) ;
 		if (legendDiv) {
-			legendDiv.innerHTML += '<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(thisFlight.tail_number) + '"></span> ' + thisFlight.tail_number + '<br/>' ;
+//			legendDiv.innerHTML += '<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(thisFlight.tail_number) + '"></span> ' + thisFlight.tail_number + '<br/>' ;
+			legendItems.push('<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(thisFlight.tail_number) + ';"></span> ' + thisFlight.tail_number + '<br/>') ;
 		}
 		// TODO add time of the first point in the comment
 		currentFeature = {type : 'Feature',
@@ -202,6 +201,14 @@ function insertTrackPoints(flights) {
 		locationFeatureCollection.push(locationFeature) ;
 	}
 
+	if (legendDiv) {
+//		legendItems.sort(function (a,b) {
+//				return (a.substr(a.length-28, 19) > b.substr(b.length-28, 19)) ? +1 : -1 ;
+//			})
+		legendDiv.innerHTML = legendItems.sort().join('') ;
+		// TODO position the div
+	}
+	
 	// Now add this new part to the layer
 	map.getSource('flights').setData({
 			type : 'FeatureCollection',
@@ -234,8 +241,6 @@ function getTrackPoints() {
 }
 
 function insertAirports(airports) {
-	console.log('insertAirports') ;
-	console.log(airports) ;
 	
 	airportFeatureCollection = [] ;
 	for (var airport in airports) {
