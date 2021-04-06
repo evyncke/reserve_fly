@@ -656,7 +656,7 @@ $load = sys_getloadavg();
 
 // Clean-up Joomla session table (growing for ever...)
 $hour = intval(date('H')) ;
-if ($hour == 3) { // Only run it at 3 AM, TODO use from_unixtime(time) to only delete 'old anonymous'
+//if ($hour == 3) { // Only run it at 3 AM, TODO use from_unixtime(time) to only delete 'old anonymous'
 	print(date('Y-m-d H:i:s').": purging old anonymous sessions.\n") ;
 	mysqli_query($mysqli_link, "DELETE FROM $table_session WHERE userid = 0")
 		or journalise(0, "E", "Cannot purge anonymous entries in $table_session: " . mysqli_error($mysqli_link)) ;
@@ -674,7 +674,7 @@ if ($hour == 3) { // Only run it at 3 AM, TODO use from_unixtime(time) to only d
 		or journalise(0, "E", "Cannot purge old revisions in jom_ucm_history: " . mysqli_error($mysqli_link)) ;
 	mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_ucm_history")
 		or journalise(0, "E", "Cannot optimize jom_ucm_history: " . mysqli_error($mysqli_link)) ;
-}
+//}
 
 // Historique des METAR (move to the end as vyncke.org tends to be too slow and cause a mySql disconnect
 print(date('Y-m-d H:i:s').": building METAR history.\n") ;
