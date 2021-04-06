@@ -10,9 +10,12 @@ import math
 # https://github.com/flightaware/dump1090/blob/master/README-json.md
 
 my_icao = [ '448585', '4499b8', '44aa42', '448584', '484b0c', '44ce10']
-my_icao.append('44ce01') # OO-SPA
-my_icao.append('44ccb8') # OO-SEX
+my_icao.append('3d6745') # D-FLIZ SkyDive
 my_icao.append('449a89') # OO-FTI
+my_icao.append('44b1a9') # OO-LMI SkyDive helicopter ?
+my_icao.append('44ccb8') # OO-SEX SkyDive
+my_icao.append('44ce01') # OO-SPA SkyDive
+my_icao.append('44d1f0') # OO-TOP SkyDive ?
 my_fa_site_fqdn = 'raspeberry.local'
 my_fa_site_fqdn = 'localhost' 
 my_fa_site_port = 8080 
@@ -108,6 +111,9 @@ def lookup(icao24):
 		i2 = math.floor(offset / mapping.s2)
 		offset = offset % mapping.s2
 		i3 = offset
+		if i1 >= len(mapping.alphabet) or i2 >= len(mapping.alphabet) or i3 >= len(mapping.alphabet):
+			print("!!!!! invalid mapping found !!!!")
+			return icao24
 		print("--- mapping striving found")
 		return mapping.prefix + mapping.alphabet[i1] + mapping.alphabet[i2] + mapping.alphabet[i3]
 
@@ -124,8 +130,11 @@ def lookup(icao24):
 	print(">>> no mapping found for " + icao24)
 	return icao24
 
-print("PH-AML => " + lookup('484b0c'))
-print("PH-OTK => " + lookup('484871'))
+#print("PH-AML => " + lookup('484b0c'))
+#print("PH-OTK => " + lookup('484871'))
+#print("OO-TOP => " + lookup('44d1f0'))
+#import sys
+#sys.exit("Early")
 
 request = urllib.request.urlopen("http://" + my_fa_site_fqdn + ":" + str(my_fa_site_port) + '/data/aircraft.json')
 
