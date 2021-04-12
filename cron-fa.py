@@ -42,8 +42,11 @@ class mapping:
 		else:
 			self.end = self.start - self.offset + s1 * (len(self.alphabet)-1) + s2 * (len(self.alphabet)-1) + len(self.alphabet) - 1
 
-	def applicable(self, n):
+	def hex_applicable(self, n):
 		return (self.start <= n and n <= self.end)
+
+	def registration_applicable(self, s):
+		return s.startswith(self.prefix)
 
 # Should try to find the mapping
 # 484871 PHOTK 
@@ -97,13 +100,13 @@ def n_letters(rem):
 		return ''
 	return limitedAlphabet[math.floor(rem/25)] + n_letter(rem % 25)
 
-def lookup(icao24):
+def decode(icao24):
 	try:
 		hex = int('0x' + icao24, base=16)
 	except:
 		return icao24
 	for mapping in mappings:
-		if not mapping.applicable(hex):
+		if not mapping.hex_applicable(hex):
 			continue
 		offset = hex - mapping.start + mapping.offset
 		i1 = math.floor(offset / mapping.s1)
@@ -130,11 +133,21 @@ def lookup(icao24):
 	print(">>> no mapping found for " + icao24)
 	return icao24
 
-#print("PH-AML => " + lookup('484b0c'))
-#print("PH-OTK => " + lookup('484871'))
-#print("OO-TOP => " + lookup('44d1f0'))
-#import sys
-#sys.exit("Early")
+def encode(registration):
+	registration = registration.replace('-', '').upper()
+	for mapping in mappings:
+		if not mapping.registration_applicable(registration):
+			continue
+		registration = registration[2:]
+		i1 = mapping.alphabet.index(registration[0])
+		i2 = mapping.alphabet.index(registration[1])
+		i3 = mapping.alphabet.index(registration[2])
+		code = mapping.start + i3 + mapping.s2 * i2 + mapping.s1 * i1
+		return hex(code)
+	return 0xffffff
+
+print("OO-TOP => ", encode('oo-tOp'), ' correct is 44d1f0')
+print("--------")
 
 request = urllib.request.urlopen("http://" + my_fa_site_fqdn + ":" + str(my_fa_site_port) + '/data/aircraft.json')
 
@@ -152,8 +165,8 @@ for aircraft in aircrafts:
 	if not 'gs' in aircraft: aircraft['gs'] = -1
 	if not 'track' in aircraft: aircraft['track'] = -1
 	if not 'squawk' in aircraft: aircraft['squawk'] = '----'
-	if not 'flight' in aircraft: aircraft['flight'] = lookup(aircraft['hex'])
-	if aircraft['flight'] == '-': aircraft['flight'] = lookup(aircraft['hex'])
+	if not 'flight' in aircraft: aircraft['flight'] = decode(aircraft['hex'])
+	if aircraft['flight'] == '-': aircraft['flight'] = decode(aircraft['hex'])
 	aircraft['flight'] = aircraft['flight'].strip()
 	if aircraft['hex'] in my_icao:
 		print('Found my aircraft at ' + now)
