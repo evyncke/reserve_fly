@@ -1,5 +1,26 @@
 // Some global variables for the mapBox
 var map ;
+
+var airportLayer = {
+	id : 'airports',
+	type: 'symbol',
+	source : {
+		type : 'geojson',
+		data : {
+			type : 'FeatureCollection',
+			features : []
+		}
+	},
+	layout: { // Only applicable to type: symbol
+		"icon-image": "{icon}-11", // used when type: symbol
+		"text-field": "{title}",
+		"text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+		"text-offset": [0, 0.6],
+		"text-anchor": "top-left",
+		"text-ignore-placement": true,
+	}
+} ;
+
 var flightLayer = {
 	id : 'flights',
 	type : 'line', 
@@ -12,13 +33,13 @@ var flightLayer = {
 	},
 	source : {
 		type : 'geojson',
-//		attribution: 'FlightAware',
 		data : {
 			type : 'FeatureCollection',
 			features : []
 		}
 	}
 } ;
+
 
 var locationLayer = {
 	id : 'locations',
@@ -111,7 +132,7 @@ function insertTrackPoints (flights) {
 		}
 		thisFlight = flights[flight] ;
 		if (legendDiv) {
-			legendItems.push('<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(flight) + ';"></span> ' + flight + ' UTC<br/>') ;
+			legendItems.push('<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(flight) + ';"></span> ' + flight + ' / ' + thisFlight.first + ' UTC / ' + thisFlight.pilot + '<br/>') ;
 		}
 		// TODO add time of the first point in the comment
 		currentFeature = {type : 'Feature',
@@ -125,7 +146,8 @@ function insertTrackPoints (flights) {
 		thisTrack = thisFlight.track ;
 		var lastLongitude, lastLatitude ;
 		for (trackPosition in thisTrack) {
-			if (trackPosition < 10 || (Math.abs(lastLongitude-thisTrack[trackPosition][0]) <= 0.1 && Math.abs(lastLatitude-thisTrack[trackPosition][1]) <= 0.1)) {
+//			if (trackPosition < 10 || (Math.abs(lastLongitude-thisTrack[trackPosition][0]) <= 0.1 && Math.abs(lastLatitude-thisTrack[trackPosition][1]) <= 0.1)) {
+			if (trackPosition < 2 || (Math.abs(lastLongitude-thisTrack[trackPosition][0]) <= 0.1 && Math.abs(lastLatitude-thisTrack[trackPosition][1]) <= 0.1)) {
 				currentFeature.geometry.coordinates.push([parseFloat(thisTrack[trackPosition][0]), parseFloat(thisTrack[trackPosition][1])]) ;
 				lastLongitude = thisTrack[trackPosition][0] ;
 				lastLatitude = thisTrack[trackPosition][1] ;
@@ -149,11 +171,22 @@ function insertTrackPoints (flights) {
 	}
 
 	if (legendDiv) {
-		legendDiv.innerHTML = 'Plane/Last seen<br/>' ;
-		legendItems.sort(function (a,b) {
-				return (a.substr(a.length-28, 19) > b.substr(b.length-28, 19)) ? +1 : -1 ;
+		legendDiv.innerHTML = 'Plane/Last seen / First seen / Pilot/student<br/>' ;
+		var x = legendItems.sort(function (a,b) {
+				var firstA = a.match(/.*\/(.+)\/.*\/.*/)[1] ;
+				var firstB = b.match(/.*\/(.+)\/.*\/.*/)[1] ;
+				console.log(firstA) ;
+				console.log(b.match(/.*\/(.+)\/.*\/.*/)[1]) ;
+				if (firstA > firstB) {
+						console.log(firstA + ' > ' + firstB) ;
+						return +1 ;
+				} else {
+						console.log(firstA + ' < ' + firstB) ;
+						return -1 ;
+				}
 			})
-		legendDiv.innerHTML += legendItems.join('') ;
+		console.log(x) ;
+		legendDiv.innerHTML += x.join('') ;
 		// TODO position the div
 	}
 		
@@ -187,10 +220,64 @@ function getTrackPoints() {
 	XHR.send(null) ;
 }
 
+function insertAirports(airports) {
+	
+	airportFeatureCollection = [] ;
+	for (var airport in airports) {
+		if (airport == 'sql') continue ;
+		if (airport == 'status') continue ;
+		if (airport == 'error') {
+			console.log(airports[error]) ;
+			continue ;
+		}
+		thisAirport = airports[airport] ;
+		airportFeature = {type : 'Feature',
+			properties : {title : '', comment : ''},
+			geometry : {type : 'LineString', coordinates : [] } } ; // Is this really LineString ????? TODO
+		airportFeature.geometry.coordinates = [parseFloat(thisAirport.longitude), parseFloat(thisAirport.latitude)] ; // a Point feature has only one coordinate and not an array of coordinates
+		airportFeature.properties.title = thisAirport.code ;
+		airportFeature.properties.comment = thisAirport.name ;
+		airportFeature.geometry.type = 'Point' ;
+		airportFeature.properties.icon = 'circle' ;
+		airportFeature.properties['marker-symbol'] = 'circle' ;
+		airportFeature.properties['marker-size'] = 'small' ;
+		// Add this icon to the collection
+		airportFeatureCollection.push(airportFeature) ;
+	}
+	
+	map.getSource('airports').setData({
+		type : 'FeatureCollection',
+		features : airportFeatureCollection
+	}) ;	
+}
+
+function getAirports(ajaxURL) {
+	var XHR = new XMLHttpRequest();
+	XHR.onreadystatechange = function() {
+		if(XHR.readyState  == 4) {
+			if(XHR.status  == 200) {
+				try {
+					var response = eval('(' + XHR.responseText.trim() + ')') ;
+				} catch(err) {
+					console.log("Cannot eval: " + XHR.responseText.trim()) ;
+					return ;
+				}
+				insertAirports(response) ;
+			} // == 200
+		} // == 4
+	} // onreadystatechange
+	XHR.open("GET", ajaxURL, true) ; // Send asynchronous request
+	XHR.send(null) ;
+}
+
 function mapAddLayers() {
 	// Display the last known locations
 	locationLayer.source.data.features = locationFeatureCollection ;
 	map.addLayer(locationLayer) ;
+
+	// Display the airports (currently empty as we need the map to move)
+	airportLayer.source.data.features = [] ;
+	map.addLayer(airportLayer) ;
 
 	// Change the cursor to a pointer when the it enters a feature in the 'flights' layer.
 	map.on('mouseenter', 'flights', function (e) {
