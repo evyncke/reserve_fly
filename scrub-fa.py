@@ -30,7 +30,9 @@ planes = {	# Dictionnary for all the planes with their icao 24-bit identifier
 	'OOALD': '448584',
 	'OOALE': '448585',
 	'OOFMX': '4499b8',
+	'OOFUN': '449aae',
 	'OOJRB': '44aa42',
+	'OOTOP': '44d1f0',
 	'PHAML': '484b0c'}
 
 preamble = '<script>var trackpollBootstrap = '
@@ -57,9 +59,13 @@ for plane, icao24 in planes.items():
 		print('Error when connecting to RAPCS: ' + str(e))
 	reply = urllib.request.urlopen(request)
 	# Let's skip until past the preamble and before the postamble, using '?' to avoid being greedy
-	match = re.search(preamble + '(.+?)' + postamble, str(reply.read()))
+	match = re.search(preamble + '(.+?)' + postamble, str(reply.read().decode()))
 	json_string = match.group(1).replace("\\'", "'")
-	json_dict = json.loads(json_string)
+	try:
+		json_dict = json.loads(json_string)
+	except Exception as e:
+		print("Cannot decode json file: " + str(e)) 
+		print(json_string)
 	if not 'flights' in json_dict:
 		print('No flights element found')
 		continue
