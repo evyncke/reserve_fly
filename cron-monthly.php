@@ -51,6 +51,7 @@ $actions = (isset($_REQUEST['actions']) and $_REQUEST['actions'] != '') ? trim(s
 if (strpos($actions, 't') !== FALSE) $test_mode = true ;
 
 print(date('Y-m-d H:i:s').": starting for actions = {$actions}.\n") ;
+journalise(0, 'I', "Cron-monthly: starting for actions = {$actions}") ;
 
  
 print(date('Y-m-d H:i:s').": preparing lists of plane bookings & logbook entries.\n") ;
@@ -147,14 +148,16 @@ if ($bccTo != '') {
  } else
 	@smtp_mail($email_recipients, "Statistiques sur l'utilisation des avions", $email_body, $email_header) ;
 ob_flush() ;
-journalise(0, 'I', "Cron-monthly: statistics email sent") ;
-
-if (strpos($actions, 'p') !== FALSE) {
 
 mysqli_close($mysqli_link) ; // Sometimes OVH times out ...
 $mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
 if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
 if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
+
+journalise(0, 'I', "Cron-monthly: statistics email sent") ;
+
+if (strpos($actions, 'p') !== FALSE) {
+	journalise(0, 'I', "Cron-monthly: starting checks on users' profiles") ;
 
 // Reminder of incomplete profile
 //$joomla_admin_group = 7 ;
@@ -228,11 +231,14 @@ foreach ($all_rows as $row) {
 }
 mysqli_free_result($result) ;
 print(date('Y-m-d H:i:s').": End of profile checks.\n") ; ob_flush() ;
+mysqli_close($mysqli_link) ; // Sometimes OVH times out ...
+$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
+if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
+if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
 journalise(0, 'I', "Cron-monthly: email reminders for missing profiles sent") ;
 }
 
 if (strpos($actions, 'e') !== FALSE) {
-
 mysqli_close($mysqli_link) ; // Sometimes OVH times out ...
 $mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
 if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
