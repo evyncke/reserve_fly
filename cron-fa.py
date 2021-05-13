@@ -12,6 +12,7 @@ import math
 my_icao = [ '448585', '4499b8', '44aa42', '448584', '484b0c', '44ce10']
 my_icao.append('3d6745') # D-FLIZ SkyDive
 my_icao.append('449a89') # OO-FTI
+my_icao.append('449aae') # OO-FUN SkyDive
 my_icao.append('44b1a9') # OO-LMI SkyDive helicopter ?
 my_icao.append('44ccb8') # OO-SEX SkyDive
 my_icao.append('44ce01') # OO-SPA SkyDive
