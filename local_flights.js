@@ -68,16 +68,6 @@ var flightLayer = {
 var locationLayer = {
 	id : 'locations',
 	type: 'symbol',
-//	type : 'circle', 
-//	paint : {  // For line & circle
-//		"icon-color": ['get', 'color'],
-		// Use a get expression (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-get)
-		// to set the line-color to a feature property value.
-//		'circle-radius' : 20,
-//		'circle-color': '#B42222',
-//		visibility: 'visible',
-		// 'circle-color': ['get', 'color']
-//	},
 	source : {
 		type : 'geojson',
 		data : {
@@ -202,9 +192,6 @@ function insertTrackPoints(flights) {
 	}
 
 	if (legendDiv) {
-//		legendItems.sort(function (a,b) {
-//				return (a.substr(a.length-28, 19) > b.substr(b.length-28, 19)) ? +1 : -1 ;
-//			})
 		legendDiv.innerHTML = legendItems.sort().join('') ;
 		// TODO position the div
 	}
@@ -218,7 +205,6 @@ function insertTrackPoints(flights) {
 			type : 'FeatureCollection',
 			features : locationFeatureCollection
 		}) ;	
-
 }
 
 function getTrackPoints() {
@@ -318,7 +304,7 @@ function mapAddLayers() {
 	map.addLayer(flightLayer) ;
 	// Build the track points
 	getTrackPoints() ;
-	setInterval(getTrackPoints, 10000) ;	
+	setInterval(getTrackPoints, 5000) ;	
 }
 
 function drawBox() {
