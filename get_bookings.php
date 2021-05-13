@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2021 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -43,7 +43,8 @@ if ($error_message != '') {
 		CONVERT(r_comment USING UTF8) AS r_comment, r_from, r_via1, r_via2, r_to, r_duration, r_crew_wanted, r_pax_wanted,
 		p.username as username, p.name as name, w.username AS username2, w.name AS name2,
 		p.email as email, home_phone, work_phone, cell_phone, avatar, ressource, r.id AS plane_id,
-		l_start as log_start, l_end as log_end, l_from as log_from, l_to as log_to, l_id as log_id
+		CONVERT_TZ(l_start, 'UTC', 'Europe/Brussels') as log_start, CONVERT_TZ(l_end, 'UTC', 'Europe/Brussels') as log_end, 
+		l_from as log_from, l_to as log_to, l_id as log_id
 		FROM $table_bookings JOIN $table_planes AS r ON r_plane = r.id JOIN $table_users AS p ON r_pilot = p.id JOIN jom_kunena_users k ON k.userid = r_pilot
 		LEFT JOIN $table_logbook AS l ON l.l_booking = r_id AND l_plane = r_plane,
 		$table_users AS w, $table_person
@@ -132,7 +133,8 @@ if ($error_message != '') {
 				elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
 					$booking['avatar'] = $avatar_root_uri . '/' . $row['avatar'] ;
 			}
-			// Now the logbook entries (often empty...) TODO multiple log entries per booking :(
+			// Now the logbook entries (often empty...)
+			// Need to convert date time to local timezone...
 			if ($row['log_id']) {
 				$booking['log_start'] = str_replace('-', '/', $row['log_start']) ;  // Safari javascript does not like - in dates !!!
 				$booking['log_end'] = str_replace('-', '/', $row['log_end']) ;  // Safari javascript does not like - in dates !!!
