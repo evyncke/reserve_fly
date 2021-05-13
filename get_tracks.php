@@ -27,6 +27,27 @@ $plane = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['plane
 $since = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['since']))) ;
 $latest = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['latest']))) ;
 
+function pilot($plane, $start, $end) {
+	global $mysqli_link, $table_bookings, $table_users, $userId ;
+	
+	$result = mysqli_query($mysqli_link, "SELECT * 
+			FROM $table_bookings JOIN $table_users AS p ON r_pilot = p.id 
+			WHERE r_plane = '$plane' 
+				AND r_start <= CONVERT_TZ('$start', 'UTC', 'Europe/Brussels')
+				AND r_stop >= CONVERT_TZ('$end', 'UTC', 'Europe/Brussels')
+			") ;
+	if ($result) {
+		$row = mysqli_fetch_array($result) ;
+		if ($row) 
+			return "$row[name]"  ;
+		else
+			return '' ;
+	} else {
+		journalise($userId, 'E', 'Cannot find the pilot for a track: ' . mysqli_error($mysqli_link)) ;
+		return '' ;
+	}
+}
+
 // Handle the specific case where only the latest flight location is requested
 if ($latest) {
 	$sql = "SELECT *, UNIX_TIMESTAMP(t_time) AS ts
@@ -38,12 +59,12 @@ if ($latest) {
 	if ($since)
 		$sql_filters[] = "t_time >= '$since'" ;
 	else
-		$sql_filters[] = "t_time >= DATE_SUB(SYSDATE(), INTERVAL 24 HOUR)";
+		$sql_filters[] = "t_time >= DATE_SUB(CONVERT_TZ(SYSDATE(), 'Europe/Brussels', 'UTC'), INTERVAL 24 HOUR)";
 	$sql_filters = ($sql_filters) ? "WHERE " . implode(' AND ', $sql_filters) : '' ;
 
 	// TODO check whether user could select the source of data ? AND t_source = 'FA-evyncke' or 'FlightAware' ?
 	$sql = "SELECT *, UNIX_TIMESTAMP(t_time) AS ts
-		FROM $table_planes JOIN $table_tracks ON t_icao24 = icao24
+		FROM $table_planes AS p JOIN $table_tracks ON t_icao24 = p.icao24
 		$sql_filters
 		ORDER BY id, t_time
 	" ;
@@ -70,7 +91,8 @@ while ($row = mysqli_fetch_array($result)) {
 			$flight['track'] = $current_track ;
 			$flight['first'] = $first_seen ;
 			$flight['last'] = $last_seen ;
-			$tracks["$current_plane/$first_seen"] = $flight ;
+			$flight['pilot'] = pilot($current_plane, $first_seen, $last_seen) ;
+			$tracks["$current_plane/$last_seen"] = $flight ;
 		} 
 		$current_plane = $plane ;
 		$current_track = array() ;
@@ -87,6 +109,7 @@ if ($current_plane != '') {
 		$flight['track'] = $current_track ;
 		$flight['first'] = $first_seen ;
 		$flight['last'] = $last_seen ;
+		$flight['pilot'] = pilot($current_plane, $first_seen, $last_seen) ;
 		$tracks["$current_plane/$last_seen"] = $flight ;
 }
 
