@@ -89,9 +89,9 @@ function ShowTableHeader() {
 <th class="logLastHeader"></th>
 <th class="logLastHeader">(dd/mm/yy)</th>
 <th class="logLastHeader">Place</th>
-<th class="logLastHeader">Time</th>
+<th class="logLastHeader">Time UTC</th>
 <th class="logLastHeader">Place</th>
-<th class="logLastHeader">Time</th>
+<th class="logLastHeader">Time UTC</th>
 <th class="logLastHeader">Model</th>
 <th class="logLastHeader">Registration</th>
 <th class="logLastHeader" colspan="2">of flight</th>
@@ -132,8 +132,12 @@ function ShowEntryRow($action, $line, $id) {
 
 	if ($line) {
 		// DB contains local daytime while display is in UTC
-		$l_start = gmdate('H:i', strtotime("$line[l_start] $default_timezone")) ;
-		$l_end = gmdate('H:i', strtotime("$line[l_end] $default_timezone")) ;
+//		$l_start = gmdate('H:i', strtotime("$line[l_start] $default_timezone")) ;
+//		$l_end = gmdate('H:i', strtotime("$line[l_end] $default_timezone")) ;
+		// DB contains UTC daytime
+		$l_start = gmdate('H:i', strtotime("$line[l_start] +0000")) ;
+		$l_end = gmdate('H:i', strtotime("$line[l_end] +0000")) ;
+		print("<hr>l_start=$l_start   line[l_start] $line[l_start]<br/>") ;
 		if ($line['l_pilot'] == $line['r_who']) // Solo, no instructor
 			$pic = 0 ;
 		else
@@ -293,9 +297,12 @@ switch ($_REQUEST['action']) {
 		if (isset($_REQUEST['id']) and !is_numeric($_REQUEST['id'])) die("Invalid parameter for id") ;
 		$tokens = preg_split(',[/-],', $_REQUEST['date']) ;
 		// Time in DB is local time while time on screen is UTC...
-		$l_start = date("Y-m-d H:i:s", strtotime("$tokens[0]-$tokens[1]-$tokens[2] $_REQUEST[startTime] UTC")) ;
+		// $l_start = date("Y-m-d H:i:s", strtotime("$tokens[0]-$tokens[1]-$tokens[2] $_REQUEST[startTime] UTC")) ;
+		// $l_end = date("Y-m-d H:i:s", strtotime("$tokens[0]-$tokens[1]-$tokens[2] $_REQUEST[endTime] UTC")) ;
+		// Time in DB is in UTC and display is also UTC
+		$l_start = date("Y-m-d H:i:s", strtotime("$tokens[0]-$tokens[1]-$tokens[2] $_REQUEST[startTime]")) ;
+		$l_end = date("Y-m-d H:i:s", strtotime("$tokens[0]-$tokens[1]-$tokens[2] $_REQUEST[endTime]")) ;
 		$l_from = mysqli_real_escape_string($mysqli_link, $_REQUEST['from']) ;
-		$l_end = date("Y-m-d H:i:s", strtotime("$tokens[0]-$tokens[1]-$tokens[2] $_REQUEST[endTime] UTC")) ;
 		$l_to = mysqli_real_escape_string($mysqli_link, $_REQUEST['to']) ;
 		$l_model = mysqli_real_escape_string($mysqli_link, $_REQUEST['model']) ;
 		$l_plane = mysqli_real_escape_string($mysqli_link, $_REQUEST['plane']) ;
@@ -408,8 +415,11 @@ while (($row = mysqli_fetch_array($result)) && ($line_count < $items)) {
 	$night_landing_total += $row['l_night_landing'] ;
 	// DB contains local daytime while display is in UTC
 	// As the OVH MySQL server does not have the timezone support, needs to be done in PHP
-	$l_start = gmdate('H:i', strtotime("$row[l_start] $default_timezone")) ;
-	$l_end = gmdate('H:i', strtotime("$row[l_end] $default_timezone")) ;
+//	$l_start = gmdate('H:i', strtotime("$row[l_start] $default_timezone")) ;
+//	$l_end = gmdate('H:i', strtotime("$row[l_end] $default_timezone")) ;
+	// DB contains UTC time
+	$l_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
+	$l_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
 	if ($row['l_instructor'] < 0) $row['instructor_name'] = 'Autre FI' ;
 // print("<br/>l_start is now $l_start raw $row[l_start] and UTC $row[l_start_utc]<br/>") ;
 	print("<tr>
