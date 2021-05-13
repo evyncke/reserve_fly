@@ -93,9 +93,15 @@ limitedAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ" # 24 chars; no I, O
 def n_letter(rem):
 	if rem == 0:
 		return ''
+	if rem >= 24:
+		print("n_letter(", rem, ") probably illegal")
+		return '***ERROR***'
 	return limitedAlphabet[rem]
 
 def n_letters(rem):
+	if rem >= 25 * 24:
+		print("n_letters(", rem, ") probably illegal")
+		return '***ERROR***'
 	if rem == 0:
 		return ''
 	return limitedAlphabet[math.floor(rem/25)] + n_letter(rem % 25)
@@ -115,22 +121,57 @@ def decode(icao24):
 		offset = offset % mapping.s2
 		i3 = offset
 		if i1 >= len(mapping.alphabet) or i2 >= len(mapping.alphabet) or i3 >= len(mapping.alphabet):
-			print("!!!!! invalid mapping found !!!!")
+			print("!!!!! invalid mapping found !!!!", icao24)
 			return icao24
-		print("--- mapping striving found")
+#		print("--- mapping striving found")
 		return mapping.prefix + mapping.alphabet[i1] + mapping.alphabet[i2] + mapping.alphabet[i3]
 
 	# Let's try to US N--- registration
+# --- mapping US found  a27f09 => N260AP
+# Flight N260AM    decode hex N260AP
+
+# --- mapping#3 US found  adab8d => N980EG
+# Flight N980EE    decode hex N980EG => wrong decode
+
+# --- mapping#3 US found  a0aed0 => N143LC
+# Flight N143LA    decode hex N143LC
+
 	offset = hex - 0xA00001
 	if 0 <= offset and offset <= 915399:
 		i1 = math.floor(offset / 101711) + 1
 		reg = 'N' + str(i1)
 		offset = offset % 101711
 		if offset <= 600:
+			print("--- mapping#1 US found ", icao24, '=>', reg + n_letters(offset))
 			return reg + n_letters(offset)
-		print("--- mapping US found " + reg)
+		offset -= 601
+		i2 = math.floor(offset / 10111)
+		reg += str(i2)
+		offset = offset % 10111
+		print("offset " , offset, ' reg ', reg)
+		if offset <= 600:
+			print("--- mapping#2 US found ", icao24, '=>', reg + n_letters(offset))
+			return reg + n_letters(offset)
+		offset -= 601
+		i3 = math.floor(offset / 951)
+		reg += str(i3)
+		offset = offset % 951
+		print("offset " , offset, ' reg ', reg)
+		if offset <= 600:
+			print("--- mapping#3 US found ", icao24, '=>', reg + n_letters(offset))
+			return reg + n_letters(offset)
+		offset -= 601
+		i4 = math.floor(offset / 35)
+		reg += str(i4)
+		offset = offset % 35
+		if offset <= 24:
+			print("--- mapping#4 US found ", icao24, '=>', reg + n_letter(offset))
+			return reg + n_letter(offset)
+		offset -= 25
+		reg = reg + str(offset)
+		print("--- mapping#5 US found ", icao24, '=>', reg)
 		return reg
-	print(">>> no mapping found for " + icao24)
+#	print(">>> no mapping found for " + icao24)
 	return icao24
 
 def encode(registration):
@@ -146,12 +187,15 @@ def encode(registration):
 		return hex(code)
 	return 0xffffff
 
-print("OO-TOP => ", encode('oo-tOp'), ' correct is 44d1f0')
+print("OO-TOP => ", encode('oo-top'), ' correct is 44d1f0')
+print("OO-FUN => ", encode('oo-fun'), ' correct is 44d1f0')
+print("US decode icao24=0xADAB8D for N980EE, decode= ", decode('ADAB8D'))
+print("US decode icao24=0xa0aed0 for N143LA, decode= ", decode('a0aed0'))
 print("--------")
 
 request = urllib.request.urlopen("http://" + my_fa_site_fqdn + ":" + str(my_fa_site_port) + '/data/aircraft.json')
 
-response = json.loads(request.read())
+response = json.loads(request.read().decode())
 now = datetime.datetime.fromtimestamp(response['now'], tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S') # It is now in local time while it should be in UTC
 aircrafts = response['aircraft']
 for aircraft in aircrafts:
@@ -166,10 +210,12 @@ for aircraft in aircrafts:
 	if not 'track' in aircraft: aircraft['track'] = -1
 	if not 'squawk' in aircraft: aircraft['squawk'] = '----'
 	if not 'flight' in aircraft: aircraft['flight'] = decode(aircraft['hex'])
+	if aircraft['flight'].startswith('N'):
+		print("Flight=", aircraft['flight'], ', hex=', aircraft['hex'], ', decode hex=', decode(aircraft['hex']))
 	if aircraft['flight'] == '-': aircraft['flight'] = decode(aircraft['hex'])
 	aircraft['flight'] = aircraft['flight'].strip()
 	if aircraft['hex'] in my_icao:
-		print('Found my aircraft at ' + now)
+		print('>>>> Found my aircraft at ' + now + ' *********************************************')
 		print(aircraft)
 		if 'lon' in aircraft:
 			try:
@@ -193,5 +239,5 @@ for aircraft in aircrafts:
 				print('Error in connecting to RAPCS web service: ' + str(e))
 		else:
 			print('Alas no location...')
-	else:
-		print('Not a useful aircraft ' + aircraft['flight'])
+#	else:
+#		print('Not a useful aircraft ' + aircraft['flight'])
