@@ -29,6 +29,9 @@ import socket
 planes = {	# Dictionnary for all the planes with their icao 24-bit identifier
 	'OOALD': '448584',
 	'OOALE': '448585',
+	'OOAPV': '448616',
+	'OOBEN': '4488ae',
+	'OODAJ': '44902a',
 	'OOFMX': '4499b8',
 	'OOFUN': '449aae',
 	'OOJRB': '44aa42',

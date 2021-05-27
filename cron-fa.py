@@ -9,14 +9,16 @@ import math
 
 # https://github.com/flightaware/dump1090/blob/master/README-json.md
 
-my_icao = [ '448585', '4499b8', '44aa42', '448584', '484b0c', '44ce10']
+my_icao = [ '448585', '4499b8', '44aa42', '448584', '484b0c', '44ce10', '448616']
 my_icao.append('3d6745') # D-FLIZ SkyDive
+my_icao.append('4488ae') # OO-BEN SkyDive balloon
+my_icao.append('44902a') # OO-DAJ SkyDive school Mooney
 my_icao.append('449a89') # OO-FTI
-my_icao.append('449aae') # OO-FUN SkyDive
+my_icao.append('449aae') # OO-FUN SkyDive school C150
 my_icao.append('44b1a9') # OO-LMI SkyDive helicopter ?
 my_icao.append('44ccb8') # OO-SEX SkyDive
 my_icao.append('44ce01') # OO-SPA SkyDive
-my_icao.append('44d1f0') # OO-TOP SkyDive ?
+my_icao.append('44d1f0') # OO-TOP SkyDive school Piper
 my_fa_site_fqdn = 'raspeberry.local'
 my_fa_site_fqdn = 'localhost' 
 my_fa_site_port = 8080 
@@ -189,7 +191,8 @@ def encode(registration):
 	return 0xffffff
 
 print("OO-TOP => ", encode('oo-top'), ' correct is 44d1f0')
-print("OO-FUN => ", encode('oo-fun'), ' correct is 44d1f0')
+print("OO-BEN => ", encode('oo-ben'))
+print("OO-apv => ", encode('oo-apv'))
 print("US decode icao24=0xADAB8D for N980EE, decode= ", decode('ADAB8D'))
 print("US decode icao24=0xa0aed0 for N143LA, decode= ", decode('a0aed0'))
 print("--------")
