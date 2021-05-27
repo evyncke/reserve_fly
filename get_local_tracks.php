@@ -59,12 +59,14 @@ while ($row = mysqli_fetch_array($result)) {
 			$flight['last_altitude'] = $last_altitude ;
 			$flight['last_velocity'] = $last_velocity ;
 			$flight['last_track'] = $last_track ;
+			$flight['source'] = $source ;
 			$tracks["$current_plane-$current_tail_number"] = $flight ;
 		} 
 		$current_plane = $plane ;
 		$current_tail_number = $row['lt_tail_number'] ;
 		$current_track = array() ;
 		$first_seen = $row['lt_timestamp'] ;
+		$source = $row['lt_source'] ;
 	}
 	$current_track[] = [$row['lt_longitude'], $row['lt_latitude']] ;
 	$last_seen = $row['lt_timestamp'] ;
@@ -86,6 +88,7 @@ if ($current_plane != '') {
 		$flight['last_altitude'] = $last_altitude ;
 		$flight['last_velocity'] = $last_velocity ;
 		$flight['last_track'] = $last_track ;
+		$flight['source'] = $source ;
 		$tracks["$current_plane-$current_tail_number"] = $flight ;
 }
 
