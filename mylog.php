@@ -46,14 +46,14 @@ if (isset($_REQUEST['period'])) {
 if (isset($_REQUEST['items'])) {
 	$items = $_REQUEST['items'] ;
 	switch ($items) {
-		case '10': $items = 10 ; break ;
-		case '20': $items = 20 ; break ;
+		case '12': $items = 12 ; break ;
+		case '24': $items = 24 ; break ;
 		case '50': $items = 50 ; break ;
 		case '100': $items = 100 ; break ;
-		default: $items = 20 ;
+		default: $items = 12 ;
 	}
 } else {
-	$items = 20 ;
+	$items = 12 ;
 }
 
 if (isset($_REQUEST['page']) and is_numeric($_REQUEST['page'])) {
@@ -353,8 +353,8 @@ print("P&eacute;riode: <select id=\"periodSelect\" onchange=\"selectChanged();\"
 	<option value=\"1m\">1 mois</option>
 </select>,
 <select id=\"itemsSelect\" onchange=\"selectChanged();\">
-	<option value=\"10\">10</option>
-	<option value=\"20\">20</option>
+	<option value=\"12\">12</option>
+	<option value=\"24\">24</option>
 	<option value=\"50\">50</option>
 	<option value=\"100\">100</option>
 </select> lignes/page.
