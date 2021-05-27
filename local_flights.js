@@ -159,7 +159,7 @@ function insertTrackPoints(flights) {
 		var tailNumber = ((thisFlight.tail_number == '-') ? thisFlight.icao24 : thisFlight.tail_number) ;
 		if (legendDiv) {
 //			legendDiv.innerHTML += '<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(thisFlight.tail_number) + '"></span> ' + thisFlight.tail_number + '<br/>' ;
-			legendItems.push('<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(thisFlight.tail_number) + ';"></span> ' + thisFlight.tail_number + '<br/>') ;
+			legendItems.push('<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(thisFlight.tail_number) + ';"></span> ' + thisFlight.tail_number + ' (' + thisFlight.source + ')<br/>') ;
 		}
 		// TODO add time of the first point in the comment
 		currentFeature = {type : 'Feature',
