@@ -30,16 +30,18 @@ $latest = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['late
 function pilot($plane, $start, $end) {
 	global $mysqli_link, $table_bookings, $table_users, $userId ;
 	
-	$result = mysqli_query($mysqli_link, "SELECT * 
+	$result_pilot = mysqli_query($mysqli_link, "SELECT * 
 			FROM $table_bookings JOIN $table_users AS p ON r_pilot = p.id 
 			WHERE r_plane = '$plane' 
 				AND r_start <= CONVERT_TZ('$start', 'UTC', 'Europe/Brussels')
 				AND r_stop >= CONVERT_TZ('$end', 'UTC', 'Europe/Brussels')
+				AND r_cancel_who IS NULL
 			") ;
-	if ($result) {
-		$row = mysqli_fetch_array($result) ;
-		if ($row) 
-			return "$row[name]"  ;
+	if ($result_pilot) {
+		$row_pilot = mysqli_fetch_array($result_pilot) ;
+		mysqli_free_result($result_pilot) ;
+		if ($row_pilot) 
+			return "$row_pilot[name]"  ;
 		else
 			return '' ;
 	} else {
