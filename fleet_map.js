@@ -123,7 +123,7 @@ function insertTrackPoints (flights) {
 	var legendItems = [] ;
 
 	flightFeatureCollection = [] ;
-	flightFeatureCollection = [] ;
+	locationFeatureCollection = [] ;
 	for (var flight in flights) {
 		if (flight == 'sql') continue ;
 		if (flight == 'error') {
@@ -134,7 +134,6 @@ function insertTrackPoints (flights) {
 		if (legendDiv) {
 			legendItems.push('<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(flight) + ';"></span> ' + flight + ' / ' + thisFlight.first + ' UTC / ' + thisFlight.pilot + '<br/>') ;
 		}
-		// TODO add time of the first point in the comment
 		currentFeature = {type : 'Feature',
 			properties : {title : '',comment : '', color: ''},
 			geometry : {type : 'LineString', coordinates : [] } } ;
@@ -175,13 +174,9 @@ function insertTrackPoints (flights) {
 		var x = legendItems.sort(function (a,b) {
 				var firstA = a.match(/.*\/(.+)\/.*\/.*/)[1] ;
 				var firstB = b.match(/.*\/(.+)\/.*\/.*/)[1] ;
-				console.log(firstA) ;
-				console.log(b.match(/.*\/(.+)\/.*\/.*/)[1]) ;
 				if (firstA > firstB) {
-						console.log(firstA + ' > ' + firstB) ;
 						return +1 ;
 				} else {
-						console.log(firstA + ' < ' + firstB) ;
 						return -1 ;
 				}
 			})
