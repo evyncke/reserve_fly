@@ -174,10 +174,11 @@ if ($userId > 0) {
 if ($userId > 0) {
 ?> 
             <li><a href="mobile_team.php">Equipe SPW</a></li>
-            <li><a href="mobile_local_flights.php">Vols proches</a></li>
+
 <?php
 }
 ?>
+            <li><a href="mobile_local_flights.php">Vols proches</a></li>
             <li><a href="mobile_metar.php">METAR</a></li>
             <li><a href="mobile_webcam.php?cam=0">Webcam Apron</a></li>
             <li><a href="mobile_webcam.php?cam=1">Webcam Fuel</a></li>

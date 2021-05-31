@@ -21,9 +21,9 @@ ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
-if ($userId <= 0)
+if (false and $userId <= 0)
 	die("Vous devez &ecirc;tre connect&eacute; pour visualiser les vols de la journée.") ;
-	
+
 if ($userId != 62) journalise($userId, 'I', "Mobile local flights map displayed") ;
 
 $zoom_level = 10 ;
