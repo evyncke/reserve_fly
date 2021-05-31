@@ -10,6 +10,8 @@ import socket
 
 #  https://github.com/glidernet/ogn-live
 
+# b5120703 is probably OO-SPA
+
 try:
 # https://github.com/glidernet/ogn-live#backend
 # a= show offline gliders	1 - true, 0 -false
@@ -92,8 +94,9 @@ for marker in xmlDoc.getElementsByTagName('m'):
 	receiver_name = m.group(11)
 	if receiver_name == 'SafeSky':
 		source = 'SafeSky-OGN'
+		continue	# As there is another cron using the SafeSky API
 	else:
-		source = 'OGN-evyncke'
+		source = 'OGN'
 
 #	print('Receiver name', receiver_name, ' source', source)
 #	print('lat/lon', latitude, longitude)

@@ -59,7 +59,7 @@ for plane, icao24 in planes.items():
 	try:
 		request = urllib.request.Request("https://flightaware.com/live/flight/" + plane, data = None, headers = headers, method = 'GET')
 	except urllib.error.URLError as e:
-		print('Error when connecting to RAPCS: ' + str(e))
+		print('Error when connecting to FlightAware: ' + str(e))
 	reply = urllib.request.urlopen(request)
 	# Let's skip until past the preamble and before the postamble, using '?' to avoid being greedy
 	match = re.search(preamble + '(.+?)' + postamble, str(reply.read().decode()))
