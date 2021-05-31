@@ -218,25 +218,32 @@ for aircraft in aircrafts:
 		print("Flight=", aircraft['flight'], ', hex=', aircraft['hex'], ', decode hex=', decode(aircraft['hex']))
 	if aircraft['flight'] == '-': aircraft['flight'] = decode(aircraft['hex'])
 	aircraft['flight'] = aircraft['flight'].strip()
+	if 'mlat' in aircraft:
+		if 'lat' in aircraft['mlat']:
+			source = 'FA-mlat-evyncke'
+		else:
+			source = 'FA-evyncke'
+	else:
+		source = 'FA-evyncke'
 	if aircraft['hex'] in my_icao:
 		print('>>>> Found my aircraft at ' + now + ' *********************************************')
 		print(aircraft)
 		if 'lon' in aircraft:
 			try:
-				response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?icao24=" + aircraft['hex'] + '&tail_number=' + aircraft['flight'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&squawk=' + urllib.parse.quote(aircraft['squawk']) + '&track=' + str(aircraft['track']) + '&sensor=0&source=FA-evyncke')
+				response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?icao24=" + aircraft['hex'] + '&tail_number=' + aircraft['flight'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&squawk=' + urllib.parse.quote(aircraft['squawk']) + '&track=' + str(aircraft['track']) + '&sensor=0&source=' + source)
 			except urllib.error.URLError as e:
 				print('Error when connecting to RAPCS: ' + str(e))
 			except SocketError as e:
 				print('Error in connecting to RAPCS web service: ' + str(e))
 		else:
 			print('Alas no location...')
-	if (aircraft['alt_baro'] > 0 and aircraft['alt_baro'] <= 5000): # it is a local flight it seems
+	if (aircraft['alt_baro'] > 0 and aircraft['alt_baro'] <= 10000): # it is a local flight it seems
 		print('Found a nearby aircraft at ' + now)
 		print(aircraft)
 		if 'lon' in aircraft:
 			try:
-				response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?local=yes&icao24=" + aircraft['hex'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&tail_number=' + urllib.parse.quote(aircraft['flight']) + '&track=' + str(aircraft['track']) + '&source=FA-evyncke')
-				print("https://www.spa-aviation.be/resa/add_to_tracks.php?local=yes&icao24=" + aircraft['hex'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&tail_number=' + urllib.parse.quote(aircraft['flight']) + '&track=' + str(aircraft['track']) + '&source=FA-evyncke')
+				response = urllib.request.urlopen("https://www.spa-aviation.be/resa/add_to_tracks.php?local=yes&icao24=" + aircraft['hex'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&tail_number=' + urllib.parse.quote(aircraft['flight']) + '&track=' + str(aircraft['track']) + '&source=' + source)
+				print("https://www.spa-aviation.be/resa/add_to_tracks.php?local=yes&icao24=" + aircraft['hex'] + '&daytime=' + urllib.parse.quote(now) + '&longitude=' + str(aircraft['lon']) + '&latitude=' + str(aircraft['lat']) + '&altitude=' + str(aircraft['alt_baro']) + '&velocity=' + str(aircraft['gs']) + '&tail_number=' + urllib.parse.quote(aircraft['flight']) + '&track=' + str(aircraft['track']) + '&source=' + source)
 			except urllib.error.URLError as e:
 				print('Error when connecting to RAPCS: ' + str(e))
 			except SocketError as e:
