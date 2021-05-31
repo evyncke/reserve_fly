@@ -48,7 +48,7 @@ if (abs($longitude - $apt_longitude) <= $local_longitude_bound*2.0 and abs($lati
 	if (isset($_REQUEST['tail_number']))
 		$tail_number = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['tail_number'])) ;
 	else
-		$tail_number = "" ;
+		$tail_number = $icao24 ;
 	$rc = mysqli_query($mysqli_link, "INSERT INTO $table_local_tracks (lt_timestamp, lt_longitude, lt_latitude, lt_altitude, lt_velocity, lt_track, lt_icao24, lt_tail_number, lt_source)
 		VALUES('$daytime', $longitude, $latitude, $altitude, $velocity, $track, '$icao24', '$tail_number', '$source')") ;
 	if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
