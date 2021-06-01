@@ -142,19 +142,23 @@ if ($bccTo != '') {
 	$email_recipients .= ", $bccTo" ;
 }
 
- if ($test_mode) {
-	$smtp_info['debug'] = True ;
-	smtp_mail("evyncke@cisco.com", "Statistiques utilisations des avions (test)", $email_body) ;
- } else
-	@smtp_mail($email_recipients, "Statistiques sur l'utilisation des avions", $email_body, $email_header) ;
-ob_flush() ;
+// Only send if actions b l m are selected
+if (strpos($actions, 'b') !== FALSE or strpos($actions, 'l') !== FALSE or strpos($actions, 'p') !== FALSE) {
+	 if ($test_mode) {
+		$smtp_info['debug'] = True ;
+		smtp_mail("evyncke@cisco.com", "Statistiques utilisations des avions (test)", $email_body) ;
+ 	} else
+		@smtp_mail($email_recipients, "Statistiques sur l'utilisation des avions", $email_body, $email_header) ;
 
-mysqli_close($mysqli_link) ; // Sometimes OVH times out ...
-$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
-if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
-if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
+	ob_flush() ;
 
-journalise(0, 'I', "Cron-monthly: statistics email sent") ;
+	mysqli_close($mysqli_link) ; // Sometimes OVH times out ...
+	$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
+	if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
+	if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
+
+	journalise(0, 'I', "Cron-monthly: statistics email sent") ;
+}
 
 if (strpos($actions, 'p') !== FALSE) {
 	journalise(0, 'I', "Cron-monthly: starting checks on users' profiles") ;
