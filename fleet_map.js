@@ -146,12 +146,12 @@ function insertTrackPoints (flights) {
 		var lastLongitude, lastLatitude ;
 		for (trackPosition in thisTrack) {
 //			if (trackPosition < 10 || (Math.abs(lastLongitude-thisTrack[trackPosition][0]) <= 0.1 && Math.abs(lastLatitude-thisTrack[trackPosition][1]) <= 0.1)) {
-			if (trackPosition < 2 || (Math.abs(lastLongitude-thisTrack[trackPosition][0]) <= 0.1 && Math.abs(lastLatitude-thisTrack[trackPosition][1]) <= 0.1)) {
+			if (trackPosition < 2 || (Math.abs(lastLongitude-thisTrack[trackPosition][0]) <= 0.3 && Math.abs(lastLatitude-thisTrack[trackPosition][1]) <= 0.3)) {
 				currentFeature.geometry.coordinates.push([parseFloat(thisTrack[trackPosition][0]), parseFloat(thisTrack[trackPosition][1])]) ;
 				lastLongitude = thisTrack[trackPosition][0] ;
 				lastLatitude = thisTrack[trackPosition][1] ;
 			} else
-				console.log("Skipping position #" + trackPosition + ' <' + thisTrack[trackPosition][0] + ', ' + thisTrack[trackPosition][1] + '>') ;
+				console.log("Skipping position #" + trackPosition + '=<' + thisTrack[trackPosition][0] + ', ' + thisTrack[trackPosition][1] + '>, delta=<' + Math.abs(lastLongitude-thisTrack[trackPosition][0]) + ', ' + Math.abs(lastLatitude-thisTrack[trackPosition][1])) ;
 		}
 		// If there is only one point, change type to a marker
 		if (currentFeature.geometry.coordinates.length == 1) {
