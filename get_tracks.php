@@ -52,9 +52,8 @@ function pilot($plane, $start, $end) {
 
 // Handle the specific case where only the latest flight location is requested
 if ($latest) {
-	$sql = "SELECT *, UNIX_TIMESTAMP(t_time) AS ts
-		FROM $table_planes JOIN $table_tracks t ON t_icao24 = icao24
-		WHERE t_time = (SELECT MAX(t_time) FROM $table_tracks t2 WHERE t2.t_icao24 = t.t_icao24)" ;
+	$sql = "SELECT *, last_seen as t_time, last_longitude as t_longitude, last_latitude as t_latitude
+		FROM $table_planes" ;
 } else {// SQL filters
 	$sql_filter  = array() ;
 	if ($plane) $sql_filters[] = "id = '$plane'" ;
