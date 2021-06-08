@@ -651,6 +651,11 @@ mysqli_query($mysqli_link, "DELETE FROM $table_local_tracks WHERE lt_timestamp <
 mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_local_tracks")
 	or journalise(0, "E", "Cannot optimize $table_local_tracks: " . mysqli_error($mysqli_link)) ;
 		
+mysqli_query($mysqli_link, "DELETE FROM $table_tracks WHERE t_time < DATE_SUB(NOW(), INTERVAL 1 MONTH)")
+	or journalise(0, "E", "Cannot purge old entries in $table_tracks: " . mysqli_error($mysqli_link)) ;
+mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_tracks")
+	or journalise(0, "E", "Cannot optimize $table_tracks: " . mysqli_error($mysqli_link)) ;
+		
 $load = sys_getloadavg(); 
 // TODO also use http://php.net/manual/fr/function.getrusage.php
 
