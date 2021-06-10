@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2021 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -75,13 +75,9 @@ if ($booking_type == BOOKING_MAINTENANCE) {
 		$response['error'] .= "Vous n'avez pas le droit de mettre en maintenance.<br/>" ;
 } else {
 	if ($pilot_id != $userId) {
-		// Temporary COVID-19
-		//if (! ($userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation pour un autre pilote.<br/>" ;
-		if (! ($userIsInstructor)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation pour un autre pilote.<br/>" ;
+		if (! ($userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit de faire une r&eacute;servation pour un autre pilote.<br/>" ;
 	} else {
-		// Temporary COVID-19
-		// if (! ($userIsPilot or $userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation.<br/>" ;
-		if (! ($userIsInstructor)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation.<br/>" ;
+		if (! ($userIsPilot or $userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation.<br/>" ;
 	}
 }
 
@@ -175,10 +171,9 @@ $message .= "</ul>\n" ;
 	}
 }
 
-// More checks on user when booking a plane and flying solo even when booked by an instructor COVID-19
 // More checks on user when booking a plane and booked by an non-instructor/mechanic
 
-if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BOOKING_MAINTENANCE) /* or $userIsInstructor */ or $instructor_id != "NULL")) {
+if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BOOKING_MAINTENANCE) or $userIsInstructor or $instructor_id != "NULL")) {
 //	journalise($userId, "D", "Check club is required: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot[name]/$pilot_id") ;
 //if (false) {
 	$intro = "<p>De mani&egrave;re exp&eacute;rimentale, chaque r&eacute;servation est v&eacute;rifi&eacute;e quant au R&egrave;glement d'Ordre Intérieur (ROI) &agrave; propos du re-check RAPCS.<p>
@@ -308,21 +303,16 @@ if ($response['error'] == '') {
 		}
 		if ($booking_type == BOOKING_MAINTENANCE) {
 			$response['message'] = "La maintenance de $plane du $start au $end: est confirm&eacute;e" ;
-			$email_subject = "Subject: Confirmation de la mise en maintenance de $plane par $booker[name] [#$booking_id]" ;
+			$email_subject = "🛠 Confirmation de la mise en maintenance de $plane par $booker[name] [#$booking_id]" ;
 			$email_message = "<p>La maintenance du $start au $end sur le $plane avec comme commentaires: <i>$comment</i> " ;
 			$email_message .= "est confirm&eacute;e.<br/>" ;
 		} else {
 			$response['message'] = "La r&eacute;servation de $plane du $start au $end: est confirm&eacute;e" ;
 			if ($pilot_id == $userId)
-				$email_subject = iconv_mime_encode('Subject',
-					"Confirmation d'une nouvelle réservation de $plane pour $pilot[name] [#$booking_id]",
-						$mime_preferences) ;
+				$email_subject = "✈ Confirmation d'une nouvelle réservation de $plane pour $pilot[name] [#$booking_id]" ;
 			else
-				$email_subject = iconv_mime_encode('Subject',
-					"Confirmation d'une nouvelle réservation de $plane par $booker[name] pour $pilot[name]  [#$booking_id]",
-						$mime_preferences) ;
-			if ($email_subject === FALSE)
-				$email_subject = "Subject: Cannot iconv(pilot/$pilot[name])" ;
+				$email_subject =  "✈ Confirmation d'une nouvelle réservation de $plane par $booker[name] pour $pilot[name]  [#$booking_id]" ;
+
 			$email_message = "<p>La r&eacute;servation du $start au $end sur le <b>$plane</b> " ;
 			$email_message .= "avec $pilot[name] en pilote est confirm&eacute;e.<br/>\n" ;
 			if ($comment) $email_message .= "Commentaires: <i>$comment</i>.<br/>\n" ;
@@ -403,9 +393,9 @@ if ($response['error'] == '') {
 			"--$delimiteur--\r\n"; // last delimiter must be followed by --
 		// Now let's send it !
 		if ($test_mode)
-			@smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
+			@smtp_mail("eric.vyncke@ulg.ac.be", $email_subject, $email_message, $email_header) ;
 		else
-			@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
+			@smtp_mail($email_recipients, $email_subject, $email_message, $email_header) ;
 		if ($booking_type == BOOKING_MAINTENANCE)
 			journalise($userId, 'W', "$plane is out for maintenance #$booking_id by $booker[name] ($comment). $start => $end") ;
 		else {
@@ -418,7 +408,7 @@ if ($response['error'] == '') {
 				$email_header .= "To: $fleetEmail, $managerName <$managerEmail>\r\n" ;
 				$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
 				$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
-				@smtp_mail("$managerEmail, $fleetEmail", "!!! Longue reservation ($start / $end): " . substr($email_subject, 9), $email_message, "To: $managerName <$managerEmail>, $fleetName <$fleetEmail>\r\n" . $email_header) ;
+				@smtp_mail("$managerEmail, $fleetEmail", "!!! Longue reservation ($start / $end): " . $email_subject, $email_message, "To: $managerName <$managerEmail>, $fleetName <$fleetEmail>\r\n" . $email_header) ;
 			}
 		}
 	} else {
