@@ -101,13 +101,9 @@ while ($row = mysqli_fetch_array($result)) {
 		$instructor['name'] = db2web($instructor['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 	}
 	if ($row['r_pilot'] == $row['r_who'])
-		$email_subject = iconv_mime_encode('Subject',
-//			"Aéroport fermé, veuillez annuler la réservation de $row[r_plane] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
-			"Rappel de la réservation de $row[r_plane] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
+		$email_subject = "Rappel ⏰ de la réservation de $row[r_plane] pour $row[full_name] [#$booking_id]" ;
 	else
-		$email_subject = iconv_mime_encode('Subject',
-//			"Aéroport fermé, veuillez annuler la réservation de $row[r_plane] par $booker[name] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
-			"Rappel de la réservation de $row[r_plane] par $booker[name] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
+		$email_subject = "Rappel ⏰ de la réservation de $row[r_plane] par $booker[name] pour $row[full_name] [#$booking_id]" ;
 	if ($email_subject === FALSE)
 		$email_subject = "Cannot iconv(pilot/$row[name])" ;
 	$email_message = "<p>$row[first_name],</p>" ;
@@ -158,9 +154,9 @@ while ($row = mysqli_fetch_array($result)) {
 //	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
 	$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 	if ($test_mode)
-		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
+		smtp_mail("eric.vyncke@ulg.ac.be", $email_subject, $email_message, $email_header) ;
 	else
-		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
+		@smtp_mail($email_recipients, $email_subject, $email_message, $email_header) ;
 	$flight_reminders ++ ;
 	print(date('Y-m-d H:i:s').": $flight_reminders flight reminder(s) sent.\n") ;
 }
@@ -193,10 +189,7 @@ while ($row = mysqli_fetch_array($result)) {
 		or journalise($row['r_who'], 'E', "Cannot find user $row[r_rwho] in $table_users: " . mysqli_error($mysqli_link)) ;
 	$booker = mysqli_fetch_array($result_booker) ;
 	$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
-	$email_subject = iconv_mime_encode('Subject',
-		"Ne pas oublier d'entrer les heures moteur du $row[r_plane] pour $row[full_name] [#$booking_id]", $mime_preferences) ;
-	if ($email_subject === FALSE)
-		$email_subject = "Cannot iconv(pilot/$row[name])" ;
+	$email_subject = "Ne pas oublier d'entrer les heures ⏱ moteur du $row[r_plane] pour $row[full_name] [#$booking_id]" ;
 	$email_message = "<p>$row[first_name],</p>" ;
 	$email_message .= "<p>Afin de garder une trace des compteurs moteur des avions et de planifier les maintenances, le RoI RAPCS exige\n" .
 		"que tous les pilotes et &eacute;l&egrave;ves entrent les heures moteur (et en option les heures de vol ainsi que les a&eacute;roports de d&eacute;part et de destination).<br/>\n" .
@@ -236,9 +229,9 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
 	$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 	if ($test_mode)
-		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
+		smtp_mail("eric.vyncke@ulg.ac.be", $email_subject, $email_message, $email_header) ;
 	else
-		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
+		@smtp_mail($email_recipients, $email_subject, $email_message, $email_header) ;
 	$engine_reminders ++ ;
 	print(date('Y-m-d H:i:s').": before flight engine reminder sent by email to $email_recipients.\n") ;
 }
@@ -274,10 +267,7 @@ while ($row = mysqli_fetch_array($result)) {
 		or journalise($row['r_who'], 'E', "Cannot find user $row[r_rwho] in $table_users: " . mysqli_error($mysqli_link)) ;
 	$booker = mysqli_fetch_array($result_booker) ;
 	$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
-	$email_subject = iconv_mime_encode('Subject',
-		"Rappel: entrer les heures moteur de votre vol sur $row[r_plane] du $row[r_start] [#$booking_id]", $mime_preferences) ;
-	if ($email_subject === FALSE)
-		$email_subject = "Cannot iconv(pilot/$row[name])" ;
+	$email_subject = "Rappel: entrer les heures ⏱ moteur de votre vol sur $row[r_plane] du $row[r_start] [#$booking_id]" ;
 	$email_message = "<p>$row[first_name],</p>\n" ;
 	$email_message .= "<p>Il est important que tous les pilotes et &eacute;l&egrave;ves respectent le r&egrave;glement d'ordre int&eacute;rieur du RAPCS.</p>\n" .
 		"<p>Afin de garder une trace des compteurs moteur des avions et de planifier les maintenances, et de v&eacute;rifier si les pilotes respectent \n" .
@@ -315,9 +305,9 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
 	$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 	if ($test_mode)
-		smtp_mail("eric.vyncke@uliege.be", substr($email_subject, 9), $email_message, $email_header) ;
+		smtp_mail("eric.vyncke@uliege.be", $email_subject, $email_message, $email_header) ;
 	else
-		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
+		@smtp_mail($email_recipients, $email_subject, $email_message, $email_header) ;
 	$engine_reminders ++ ;
 	print(date('Y-m-d H:i:s').": after flight engine reminder(s) (after flight) sent by email to $email_recipients.\n") ;
 	if (! is_resource($mysqli_link)) { // Naive ? attempt to reconnect in case of lost connection...
@@ -355,7 +345,7 @@ while ($row = mysqli_fetch_array($result)) {
 			print(date('Y-m-d H:i:s').": cannot insert into $table_person($row[id], $row[name], $row[email]): " . mysqli_error($mysqli_link) . "\n") ;
 			journalise($row['id'], 'E', " cannot insert into $table_person($row[id], $row[name], $row[email]): " . mysqli_error($mysqli_link)) ;
 	} else {
-		$email_subject = iconv_mime_encode('Subject', "Bienvenue sur le site des réservations du RAPCS", $mime_preferences) ;
+		$email_subject = "Bienvenue sur le site des réservations du RAPCS" ;
         $email_message = "<p>Bonjour,</p><p>Vous avez d&eacute;j&agrave; re&ccedil;u un email avec votre identifiant et votre mot de passe pour le site du RAPCS:\n" ;
 		$email_message .= "<a href=https://www.spa-aviation.be>www.spa-aviation.be</a>. Mais, ce m&ecirc;me identifiant vous permet aussi de visualiser toutes les r&eacute;servations des avions\n" ;
 		$email_message .= "(en tant qu'&eacute;l&egrave;ve ou membre non navigant vous ne pouvez pas en r&eacute;server un)" ;
@@ -373,9 +363,9 @@ while ($row = mysqli_fetch_array($result)) {
 		if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
 		$email_header .= "X-Comment: joomla user is $row[jom_id]\r\n" ;
 		if ($test_mode)
-			smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
+			smtp_mail("eric.vyncke@ulg.ac.be", $email_subject, $email_message, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 		else
-			@smtp_mail("$row[email]", substr($email_subject, 9), $email_message, $email_header) ;
+			@smtp_mail("$row[email]", $email_subject, $email_message, $email_header) ;
 	}
 }
 
