@@ -133,9 +133,7 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
           <ul class="dropdown-menu">
             <!--li><a href="mobile.php">Ma prochaine</a></li-->
 <?php
-// Temporary COVID-19
-//if ($userId > 0) {
-if (($userId > 0) and ($userIsInstructor or $userIsMechanic)) {
+if ($userId > 0) {
 ?>
             <li><a href="mobile_book.php">Nouvelle réservation</a></li>
 <?php

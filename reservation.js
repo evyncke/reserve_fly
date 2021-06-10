@@ -1,4 +1,4 @@
-//   Copyright 2014-2020 Eric Vyncke
+//   Copyright 2014-2021 Eric Vyncke
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -1498,9 +1498,7 @@ function newBookingDetails(event) {
 	}
 	// Enable the right set of buttons
 	buttonDisplayIf('addMaintenanceButton', ressourceType == 0 && (userIsMechanic || userIsInstructor || userIsAdmin)) ;
-	// Temporary for COVID-19
-	//buttonDisplayIf('addBookingButton', (userIsPilot && allPlanes[i].actif == 1) || userIsInstructor || userIsAdmin) ;
-	buttonDisplayIf('addBookingButton', userIsInstructor || userIsMechanic) ;
+	buttonDisplayIf('addBookingButton', (userIsPilot && allPlanes[i].actif == 1) || userIsInstructor || userIsAdmin) ;
 	if (ressourceType == 0) { // Only plane needs additional flight duration value
 		if (document.getElementById('addBookingButton') !== null)
 			document.getElementById('addBookingButton').disabled = true ;
