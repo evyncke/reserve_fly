@@ -372,11 +372,8 @@ if ($userIsPilot) print(" pilote ") ;
 if ($userIsMechanic) print(" mecano ") ;
 if ($userIsInstructor) print(" instructor ") ;
 if ($userIsAdmin) print(" administrateur ") ;
-// Temporary COVID-19
-//if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
-//	print("<br/><font color=red>Vous devez &ecirc;tre au moins pilote pour r&eacute;server un avion.</font>") ;
-if (! ($userIsInstructor || $userIsMechanic))
-	print("<br/><font color=red>Seuls les instructeurs et mécanos peuvent r&eacute;server un avion (mesure COVID-19).</font>") ;
+if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
+	print("<br/><font color=red>Vous devez &ecirc;tre au moins pilote pour r&eacute;server un avion.</font>") ;
 if ($userId == 0) {
 	print("<br/><font color=red>Vous devez &ecirc;tre connect&eacute;(e) pour r&eacute;server un avion.</font> ") ;
 } else {
@@ -628,7 +625,6 @@ if ($userIsInstructor) {
 <button id="cancelPilotHealthButton" onclick="javascript:document.getElementById('reasonTextArea').value='Santé pilote';cancelBooking(true);">Santé pilote</button>
 <button id="cancelWeatherButton" onclick="javascript:document.getElementById('reasonTextArea').value='Météo';cancelBooking(true);">Conditions météo</button>
 <button id="cancelADClosedButton" onclick="javascript:document.getElementById('reasonTextArea').value='Aéroport fermé';cancelBooking(true);">Aéroport fermé</button><br/>
-<!-- button id="cancelCOVIDButton" onclick="javascript:document.getElementById('reasonTextArea').value='Mesures COVID-19';cancelBooking(true);">Mesures COVID-19</button><br/-->
 <button id="confirmCancelBookingButton" onclick="javascript:cancelBooking(true);">Confirmer l'annulation</button>
 <button onclick="javascript:hideCancelBookingDetails();">Fermer la fen&ecirc;tre</button>
 </center>
