@@ -331,8 +331,11 @@ if ($this_segment_id > 1) {
 		</thead>') ;
 	while ($row = mysqli_fetch_array($result)) {
 		// As the OVH MySQL server does not have the timezone support, needs to be done in PHP
-		$start_UTC = gmdate('H:i', strtotime("$row[l_start] $default_timezone")) ;
-		$end_UTC = gmdate('H:i', strtotime("$row[l_end] $default_timezone")) ;
+//		$start_UTC = gmdate('H:i', strtotime("$row[l_start] $default_timezone")) ;
+//		$end_UTC = gmdate('H:i', strtotime("$row[l_end] $default_timezone")) ;
+		// datetime is coming back as UTC from early 2021, TODO use only hours and not date + hour ?
+		$start_UTC = $row['l_start'] ;
+		$end_UTC = $row['l_end'] ;
 		if ($row['instructorName'] == '')
 			$crew = $row['pilotName'] ;
 		else
