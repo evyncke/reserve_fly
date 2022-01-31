@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2021 Eric Vyncke
+   Copyright 2013-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -35,6 +35,9 @@ if ($userId <= 0 and isset($_SESSION['jom_id']) and is_numeric($_SESSION['jom_id
 	$_SESSION['jom_id'] = $userId ;
 $_SESSION['truc'] = 'muche' ;
 session_commit() ;
+
+# HTTP/2 push of CSS via header()
+header('Link: </resa/mobile.css>;rel=preload;as=style, </resa/swiped-events.js>;rel=preload;as=script,</resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
 	
 ?><!DOCTYPE html>
 <html lang="fr">
@@ -186,7 +189,7 @@ if ($userId > 0) {
       <ul class="nav navbar-nav navbar-right">
         <!--li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li-->
         <li id="userNameElem" class="hidden-sm"><span id="userNameSpan" class="navbar-text"></span></li>
-        <li id="FBloginElem"><a href="<?= htmlspecialchars($fb_loginUrl)?>"><img src="facebook.jpg"/> Lier à Facebook</a></li>
+        <li id="FBloginElem"><a href="<?= htmlspecialchars($fb_loginUrl)?>"><img src="facebook_blue_100.png" width="25" height="25"/> Lier à Facebook</a></li>
         <li id="loginElem"><a href="https://resa.spa-aviation.be/mobile_login.php"><span class="glyphicon glyphicon-log-in"></span> Se connecter</a></li>
         <li id="logoutElem"><a href="mobile_logout.php"><span class="glyphicon glyphicon-log-out"></span> Se déconnecter</a></li>
       </ul><!-- nabvar-right -->

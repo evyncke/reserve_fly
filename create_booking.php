@@ -171,6 +171,7 @@ $message .= "</ul>\n" ;
 	}
 }
 
+// More checks on user when booking a plane and flying solo even when booked by an instructor COVID-19
 // More checks on user when booking a plane and booked by an non-instructor/mechanic
 
 if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BOOKING_MAINTENANCE) or $userIsInstructor or $instructor_id != "NULL")) {

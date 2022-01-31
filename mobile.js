@@ -252,7 +252,7 @@ if (false) {
 		for (var i = 0; i < allPlanes.length; i++)
 			if (allPlanes[i].id == plane) {
 				if (!allPlanes[i].qualifications_requises)
-					if (!confirm("Au vu de votre carnet de vol, vous n'avez pas la possibilité de réserver cet avion.\nVoulez-vous malgré tout réserver?\n\n" +
+					if (!confirm("Au vu de votre carnet de vol et de vos validités/annotations club, vous n'avez pas la possibilité de réserver cet avion.\nVoulez-vous malgré tout réserver?\n\n" +
 						"OK pour continuer (les instructeurs seront prévenus), Cancel pour ne pas réserver")) {
 						hideEditBookingDetails() ;
 						return ; 

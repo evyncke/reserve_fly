@@ -138,7 +138,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'validity' and !$read_
 		$sql_statement = "replace into $table_validity(jom_id, validity_type_id, ident_value, grant_date, expire_date)
 			values($displayed_id, $type, '$ident_value', '$grant_date', '$expire_date')"; 
 		mysqli_query($mysqli_link, $sql_statement)
-			or die("Impossible de mettre à jour les validités: " . mysqli_error($mysqli_link)) ;
+			or die("Impossible de mettre à jour les validités/annotations: " . mysqli_error($mysqli_link)) ;
 		$affected_rows += mysqli_affected_rows($mysqli_link) ;
 		$log .= "$row[name] ($ident_value): $grant_date -> $expire_date; \n" ;
 	}
@@ -153,7 +153,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'validity' and !$read_
 		$new_expire_date = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['new_expire_date'])) ;
 		mysqli_query($mysqli_link, "INSERT INTO $table_validity(jom_id, validity_type_id, ident_value, grant_date, expire_date)
 			values($displayed_id, $newValidityId, '$new_ident_value', '$new_grant_date', '$new_expire_date')")
-			or die("Impossible d'ajouter la validité: " . mysqli_error($mysqli_link)) ;
+			or die("Impossible d'ajouter la validité/annotation: " . mysqli_error($mysqli_link)) ;
 		$affected_rows++ ;
 		$log .= "new $newValidityId ($new_ident_value): $new_grant_date -> $new_expire_date; \n" ;
 	}
@@ -316,7 +316,7 @@ $read_only_attribute = ($read_only) ? 'readonly' : '' ;
 <br/>
 <ul class="nav nav-tabs nav-justified">
         <li class="active"><a data-toggle="tab" href="#main">Contact</a></li>
-        <li><a data-toggle="tab" href="#validity">Validit&eacute;s</a></li>
+        <li><a data-toggle="tab" href="#validity">Validit&eacute;s / annotations club</a></li>
         <li><a data-toggle="tab" href="#photo">Photo</a></li>
         <li><a data-toggle="tab" href="#social_network">R&eacute;seaux sociaux</a></li>
         <li><a data-toggle="tab" href="#groups">Groupes</a></li>
@@ -480,7 +480,7 @@ if (! $read_only) {
 <?php
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'social' and !$read_only) {
 }
-$facebook_img = ($me['facebook'] != '') ? "<a href=\"https://www.facebook.com/$me[facebook]\" target=\"_blank\"><img src=\"facebook.jpg\"></a>\n" : '' ;
+$facebook_img = ($me['facebook'] != '') ? "<a href=\"https://www.facebook.com/$me[facebook]\" target=\"_blank\"><img src=\"facebook_blue_100.png\" width=\”15\" height=\"15\"></a>\n" : '' ;
 $linkedin_img = ($me['linkedin'] != '') ? "<a href=\"https://www.linkedin.com/in/$me[linkedin]\" target=\"_blank\"><img src=\"linkedin.jpg\"></a>\n" : "" ;
 $skype_img = ($me['skype'] != '') ? "<a href=\"skype:$me[skype]\"><img src=\"skype.png\"></a>\n" : "" ;
 $twitter_img = ($me['twitter'] != '') ? "<a href=\"https://www.twitter.com/$me[twitter]\" target=\"_blank\"><img src=\"twitter.jpg\"></a>\n" : '' ;
@@ -578,7 +578,7 @@ if (! $read_only) {
 $result = mysqli_query($mysqli_link, "select *
 	from $table_validity_type t left join $table_validity v on validity_type_id = t.id and jom_id = $displayed_id
 	order by t.name") or die("Erreur systeme a propos de l'access a validity: " . mysqli_error($mysqli_link)) ;
-$options = '<option value="-1" disabled selected> -- validité à ajouter et remplir les cases sur cette ligne--</option>' ;
+$options = '<option value="-1" disabled selected> -- validité/annotation à ajouter et remplir les cases sur cette ligne--</option>' ;
 while ($row = mysqli_fetch_array($result)) {
 	if ($row['grant_date']) {
 		if ($userId == $displayed_id)
@@ -608,7 +608,7 @@ while ($row = mysqli_fetch_array($result)) {
 if ($userId == $displayed_id) {
 	print("
 	<tr>
-	<td class=\"validityCell\">Nouvelle validit&eacute;: <select name=\"newValidityId\" class=\"form-control\">$options</select></td>
+	<td class=\"validityCell\">Nouvelle validit&eacute; ou annotation club: <select name=\"newValidityId\" class=\"form-control\">$options</select></td>
 	<td class=\"validityCell\"><input type=\"text\" name=\"new_ident_value\"/></td>
 	<td class=\"validityCell\"><input type=\"date\" name=\"new_grant_date\"/></td>
 	<td class=\"validityCell\"><input type=\"date\" name=\"new_expire_date\"/></td>

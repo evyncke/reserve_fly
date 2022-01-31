@@ -21,6 +21,11 @@ include_once 'dbi.php' ;
 // TODO add some authentication...
 
 $icao24 = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['icao24'])) ;
+if ($icao24 == 'None') $icao24 = "" ;
+if (isset($_REQUEST['tail_number']))
+	$tail_number = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['tail_number'])) ;
+else
+	$tail_number = $icao24 ;
 $daytime = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['daytime'])) ;
 $longitude = floatval(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['longitude']))) ;
 $latitude = floatval(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['latitude']))) ;
@@ -52,16 +57,14 @@ if (! isset($_REQUEST['local']) or $_REQUEST['local'] != 'yes') {
 // If flight is near the default airport, then add the track to $table_local_tracks
 
 if (abs($longitude - $apt_longitude) <= $local_longitude_bound*2.0 and abs($latitude - $apt_latitude) <= $local_latitude_bound*2.0 and $altitude <= $local_altimeter_bound) {
-	if ($icao24 == 'None') $icao24 = "" ;
-	if (isset($_REQUEST['tail_number']))
-		$tail_number = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['tail_number'])) ;
-	else
-		$tail_number = $icao24 ;
 	$rc = mysqli_query($mysqli_link, "INSERT INTO $table_local_tracks (lt_timestamp, lt_longitude, lt_latitude, lt_altitude, lt_velocity, lt_track, lt_icao24, lt_tail_number, lt_source)
 		VALUES('$daytime', $longitude, $latitude, $altitude, $velocity, $track, '$icao24', '$tail_number', '$source')") ;
 	if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
-		journalise(0, 'E', "Cannot insert local track track for $icao24/$tail_number (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
+		journalise(0, 'E', "Cannot insert local track for $icao24/$tail_number (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
+} else if (in_array($tail_number, $tracked_planes)) { // Mainly for rallye Air Spa
+	$rc = mysqli_query($mysqli_link, "INSERT INTO $table_local_tracks (lt_timestamp, lt_longitude, lt_latitude, lt_altitude, lt_velocity, lt_track, lt_icao24, lt_tail_number, lt_source)
+		VALUES('$daytime', $longitude, $latitude, $altitude, $velocity, $track, '$icao24', '$tail_number', '$source')") ;
+	if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
+		journalise(0, 'E', "Cannot insert local track for tracked $icao24/$tail_number (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
 }
-
-
 ?>
