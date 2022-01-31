@@ -156,7 +156,7 @@ if (isset($_REQUEST['cancel']) and $_REQUEST['cancel'] != '') {
 // Do we need to delete an entry?
 if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 	$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
-	mysqli_query($mysqli_link, "DELETE FROM $table_logbook WHERE l_booking=$id AND l_audit_time='$audit_time'") or die("Cannot delete: " . mysql_error()) ;
+	mysqli_query($mysqli_link, "DELETE FROM $table_logbook WHERE l_booking=$id AND l_audit_time='$audit_time'") or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
 		$insert_message = "Carnet de routes mis &agrave; jour" ;
 		journalise($userId, 'I', "Logbook entry deleted for booking $id (done at $audit_time).") ;
