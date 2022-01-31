@@ -20,6 +20,7 @@ ob_start("ob_gzhandler");
 require_once 'dbi.php' ;
 
 $error_message = '' ;
+$log = '' ;
 $tracks = array() ;
 
 // Parameter sanitization
@@ -41,7 +42,7 @@ function pilot($plane, $start, $end) {
 		$row_pilot = mysqli_fetch_array($result_pilot) ;
 		mysqli_free_result($result_pilot) ;
 		if ($row_pilot) 
-			return "$row_pilot[name]"  ;
+			return db2web($row_pilot['name'])  ;
 		else
 			return '' ;
 	} else {
@@ -64,11 +65,11 @@ if ($latest) {
 	$sql_filters = ($sql_filters) ? "WHERE " . implode(' AND ', $sql_filters) : '' ;
 
 	// TODO check whether user could select the source of data ? AND t_source = 'FA-evyncke' or 'FlightAware' ?
-	$sql = "SELECT *, UNIX_TIMESTAMP(t_time) AS ts
-		FROM $table_planes AS p JOIN $table_tracks ON t_icao24 = p.icao24
-		$sql_filters
-		ORDER BY id, t_time
-	" ;
+
+		$sql = "SELECT *, UNIX_TIMESTAMP(t_time) AS ts
+			FROM $table_planes AS p JOIN $table_tracks ON t_icao24 = p.icao24
+			$sql_filters
+			ORDER BY id, t_time" ;
 }
 
 $tracks['sql'] = $sql ;
@@ -82,8 +83,9 @@ if (! $result) {
 $current_plane = '' ;
 $current_track = array() ;
 $current_ts = -1 ;
+$log .= "starting, " ;
 while ($row = mysqli_fetch_array($result)) {
-	$plane = strtoupper($row['id']) ;
+	$plane = db2web(strtoupper($row['id'])) ;
 	// Should the previous flight be emitted ?
 	if ($plane != $current_plane or $row['ts'] > $current_ts + 60 * 15) {
 		if ($current_plane != '') {
@@ -94,6 +96,7 @@ while ($row = mysqli_fetch_array($result)) {
 			$flight['last'] = $last_seen ;
 			$flight['pilot'] = pilot($current_plane, $first_seen, $last_seen) ;
 			$tracks["$current_plane/$last_seen"] = $flight ;
+			$log .= "$current_plane/$last_seen/$pilot " ;
 		} 
 		$current_plane = $plane ;
 		$current_track = array() ;
@@ -104,6 +107,8 @@ while ($row = mysqli_fetch_array($result)) {
 	$current_ts = $row['ts'] ;
 }
 
+$log .= 'end of loop, ' ;
+
 if ($current_plane != '') {
 		$flight = array() ;
 		$flight['plane'] = $current_plane ;
@@ -112,6 +117,7 @@ if ($current_plane != '') {
 		$flight['last'] = $last_seen ;
 		$flight['pilot'] = pilot($current_plane, $first_seen, $last_seen) ;
 		$tracks["$current_plane/$last_seen"] = $flight ;
+		$log .= "$current_plane/$last_seen/$pilot" ;
 }
 
 // Let's send the data back
@@ -120,7 +126,7 @@ if ($current_plane != '') {
 $json_encoded = json_encode($tracks) ;
 if ($json_encoded === FALSE) {
 	journalise($userId, 'E', "Cannot JSON_ENCODE(), error code: " . json_last_error_msg()) ;
-	print("{'errorMessage' : 'cannot json_encode(): " . json_last_error_msg() . "'}") ;
+	print("{'errorMessage' : 'cannot json_encode(): " . json_last_error_msg() . "', 'log' : '$log'}") ;
 } else
 	print($json_encoded) ;
 ?>

@@ -21,6 +21,9 @@
 
 ob_start("ob_gzhandler");
 
+# HTTP/2 push of CSS via header()
+header('Link: </resa/reservation.css>;rel=preload;as=style, </resa/datepickr.css>;rel=preload;as=style,</resa/reservation.js>;rel=preload;as=script,</resa/datepickr.js>;rel=preload;as=script') ;
+
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
@@ -41,7 +44,6 @@ for ($i = 0, $all_minute_options = '' ; $i <= 45  ; $i+=15)
 $validity_msg = '' ;
 $userRatingValid = true ;
 $userValidities = array() ;
-print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 $result = mysqli_query($mysqli_link, "select *,datediff(sysdate(), expire_date) as delta
 	from $table_validity_type t left join $table_validity v on validity_type_id = t.id and jom_id = $userId")
 	or die("Erreur systeme lors de la lecture de vos validites: " . mysqli_error($mysqli_link)) ;
@@ -137,7 +139,7 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['compteur_vol']) $row['compteur'] = ($row['compteur_vol_valeur'] != '') ? $row['compteur_vol_valeur'] : 'null' ;
 	// Get the engine time from the last entry in the pilot log book
 	$index_column = ($row['compteur_vol'] == 0) ? 'l_end_hour' : 'l_flight_end_hour' ;
-	$result2 = mysqli_query($mysqli_link, "select $index_column as compteur_pilote, l_end as compteur_pilote_date, concat(first_name, ' ', last_name) as compteur_pilote_nom 
+	$result2 = mysqli_query($mysqli_link, "select $index_column as compteur_pilote, l_end as compteur_pilote_date, concat(first_name, ' ', last_name) as compteur_pilote_nom, email, name 
 		from $table_logbook  l join $table_bookings r on l_booking = r_id join $table_person p on jom_id = if(l_audit_who <= 0, if(l_instructor is null, l_pilot, l_instructor), l_audit_who)
 		where l_plane = '$row[id]' and l_booking is not null and l_end_hour > 0
 		order by compteur_pilote_date desc limit 0,1")
@@ -148,7 +150,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$row2['compteur_pilote_date'] = 'null' ;
 		$row2['compteur_pilote_nom'] = 'null' ;
 	} else {
-		$row2['compteur_pilote_nom'] = db2web($row2['compteur_pilote_nom']) ;
+		$row2['compteur_pilote_nom'] = db2web(($row2['compteur_pilote_nom'] == '') ? $row2['name']  : $row2['compteur_pilote_nom']) ;
 	}
 	// Not too distant reservation?
 // Old code: only looking in the actual 'carnet de route' entries
@@ -185,8 +187,9 @@ while ($row = mysqli_fetch_array($result)) {
 		}
 	}
 	// Prevent XSS from comments field and a few others
-	$row['entretien'] = htmlspecialchars($row['entretien'], ENT_QUOTES) ;
-	$row['commentaire'] = htmlspecialchars(($convertToUtf8) ? iconv("ISO-8859-1", "UTF-8", $row['commentaire']) : $row['commentaire'], ENT_QUOTES) ;
+	$row['entretien'] = htmlspecialchars(db2web($row['entretien']), ENT_QUOTES) ;
+	$row['commentaire'] = htmlspecialchars(db2web($row['commentaire']), ENT_QUOTES) ;
+	$row['id'] = htmlspecialchars(db2web($row['id']), ENT_QUOTES) ;
 	print("{ \"id\": \"$row[id]\", \"compteur\": $row[compteur], \"compteur_date\": new Date(\"" . str_replace('-', '/', $row['compteur_date']) . "\"), " .
 		" \"compteur_pilote\": $row2[compteur_pilote], \"compteur_pilote_date\": new Date(\"" . str_replace('-', '/', $row2['compteur_pilote_date']) . "\"), " .
 		" \"compteur_pilote_nom\": \"$row2[compteur_pilote_nom]\", " .
@@ -208,6 +211,8 @@ while ($row = mysqli_fetch_array($result)) {
 	else
 		print(",\n") ;
 	$reservation_permise = ($userIsAdmin or $userIsInstructor) ;
+	$row['commentaire'] = htmlspecialchars(db2web($row['commentaire']), ENT_QUOTES) ;
+	$row['id'] = htmlspecialchars(db2web($row['id']), ENT_QUOTES) ;
 	print("{ \"id\": \"$row[id]\", \"photo\": \"$row[photo]\", \"commentaire\": \"" . str_replace(array("\r\n", "\r", "\n"), '<br />', $row['commentaire']) . "\", " .
 		" \"reservation_permise\": " . (($reservation_permise) ? 'true' : 'false') . ", \"qualifications_requises\": true, " .
 		" \"actif\": $row[actif], \"ressource\": $row[ressource], " .  
@@ -664,7 +669,7 @@ $version_css = date ("Y-m-d H:i:s.", filemtime('reservation.css')) ;
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 ?>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, d&eacute;cembre 2014-2021 et Patrick Reginster 2020-2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, d&eacute;cembre 2014-2022 et Patrick Reginster 2020-2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
 Open Source code: <a href="https://github.com/evyncke/reserve_fly">on github</a><br/>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, ex&eacute;cut&eacute en <?=$execution_time?> sec</div>
 <br/>

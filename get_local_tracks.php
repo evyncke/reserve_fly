@@ -23,11 +23,20 @@ if (isset($_REQUEST['mult'])) {
 	$mult = floatval(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['mult']))) ;
 } else
 	$mult = 1.0 ;
+$rallye = (isset($_REQUEST['rallye']) and $_REQUEST['rallye'] != '') ;
 	
 $error_message = '' ;
 $tracks = array() ;
 
-$sql = "SELECT *, UNIX_TIMESTAMP(lt_timestamp) AS ts
+if ($rallye) {
+	$sql_filter = " AND lt_tail_number IN (" . "'" . implode("', '", $tracked_planes) . "') " ;
+//	$sql_filter = "" ; // for debugging
+	$sql = "SELECT *, UNIX_TIMESTAMP(lt_timestamp) AS ts
+				FROM $table_local_tracks
+				WHERE lt_timestamp >= DATE_SUB(CONVERT_TZ(NOW(), 'Europe/Paris', 'UTC'), INTERVAL 1 HOUR) $sql_filter
+			ORDER BY lt_tail_number, ts" ;
+} else
+	$sql = "SELECT *, UNIX_TIMESTAMP(lt_timestamp) AS ts
 		FROM $table_local_tracks 
 		WHERE lt_timestamp >= DATE_SUB(CONVERT_TZ(NOW(), 'Europe/Paris', 'UTC'), INTERVAL $local_delay MINUTE)
 			AND ABS(lt_latitude - $apt_latitude) <= $local_latitude_bound * $mult
@@ -53,6 +62,7 @@ while ($row = mysqli_fetch_array($result)) {
 			$flight = array() ;
 			$flight['icao24'] = $current_plane ;
 			$flight['tail_number'] = $current_tail_number ;
+			$flight['plane'] = $current_tail_number ;
 			$flight['track'] = $current_track ;
 			$flight['first'] = $first_seen ;
 			$flight['last'] = $last_seen ;
@@ -60,7 +70,11 @@ while ($row = mysqli_fetch_array($result)) {
 			$flight['last_velocity'] = $last_velocity ;
 			$flight['last_track'] = $last_track ;
 			$flight['source'] = $source ;
-			$tracks["$current_plane-$current_tail_number"] = $flight ;
+			$flight['pilot'] = '' ; // Unable to find the pilot for local tracks
+			if ($rallye)
+				$tracks["$current_tail_number"] = $flight ;
+			else
+				$tracks["$current_plane-$current_tail_number"] = $flight ;
 		} 
 		$current_plane = $plane ;
 		$current_tail_number = $row['lt_tail_number'] ;
@@ -82,6 +96,7 @@ if ($current_plane != '') {
 		$flight = array() ;
 		$flight['icao24'] = $current_plane ;
 		$flight['tail_number'] = $current_tail_number ;
+		$flight['plane'] = $current_tail_number ;
 		$flight['track'] = $current_track ;
 		$flight['first'] = $first_seen ;
 		$flight['last'] = $last_seen ;
@@ -89,7 +104,11 @@ if ($current_plane != '') {
 		$flight['last_velocity'] = $last_velocity ;
 		$flight['last_track'] = $last_track ;
 		$flight['source'] = $source ;
-		$tracks["$current_plane-$current_tail_number"] = $flight ;
+		$flight['pilot'] = '' ; // Unable to find the pilot for local tracks
+		if ($rallye)
+			$tracks["$current_tail_number"] = $flight ;
+		else
+			$tracks["$current_plane-$current_tail_number"] = $flight ;
 }
 
 // Let's send the data back

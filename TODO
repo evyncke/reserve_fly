@@ -7,3 +7,28 @@ TODO list
 - lien vers carnet de route / réservation sur page avion
 - en cas de cancel, prévenir les pilotes avant/après pour extension possible
 - booking.php, truc spécial pour les FI?
+
+Style genre départs
+       body {
+            background-color: black;
+            background-size:     cover;                      /* <------ */
+            background-repeat:   no-repeat;
+            background-position: -100px center;
+            background-attachment: fixed;
+            margin:0px;
+            padding: 0px;
+        }
+
+        #bheader {
+            display:none;
+
+        }
+
+        #loader {
+            color:white;
+
+        }
+        .bline {
+            display:block !important;
+
+        }

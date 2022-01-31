@@ -143,7 +143,7 @@ if ($bccTo != '') {
 }
 
 // Only send if actions b l m are selected
-if (strpos($actions, 'b') !== FALSE or strpos($actions, 'l') !== FALSE or strpos($actions, 'p') !== FALSE) {
+if (strpos($actions, 'b') !== FALSE or strpos($actions, 'l') !== FALSE or strpos($actions, 'm') !== FALSE) {
 	 if ($test_mode) {
 		$smtp_info['debug'] = True ;
 		smtp_mail("evyncke@cisco.com", "Statistiques utilisations des avions (test)", $email_body) ;

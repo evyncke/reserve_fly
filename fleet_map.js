@@ -110,7 +110,7 @@ var trackColors = [ 'Crimson',
 
 function tailNumber2Color(str) {
     var hash = 0, i = 0, len = str.length;
-    while ( i < 20 ) { // Limit to 20 to avoid changing color for flights in the air
+    while ( i < 20 && i < len) { // Limit to 20 to avoid changing color for flights in the air
         hash  = ((hash << 5) - hash + str.charCodeAt(i++)) << 0;
     }
     return trackColors[Math.abs(hash) % trackColors.length] ;
@@ -127,19 +127,20 @@ function insertTrackPoints (flights) {
 	for (var flight in flights) {
 		if (flight == 'sql') continue ;
 		if (flight == 'error') {
-			console.log(flights[error]) ;
+			console.log(flights['error']) ;
 			continue ;
 		}
 		thisFlight = flights[flight] ;
+		planeColor = tailNumber2Color(flight) ;
 		if (legendDiv) {
-			legendItems.push('<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(flight) + ';"></span> ' + flight + ' / ' + thisFlight.first + ' UTC / ' + thisFlight.pilot + '<br/>') ;
+			legendItems.push('<span class="glyphicon glyphicon-plane" style="color:' + planeColor + ';"></span> ' + flight + ' / ' + thisFlight.first + ' UTC / ' + thisFlight.pilot + '<br/>') ;
 		}
 		currentFeature = {type : 'Feature',
 			properties : {title : '',comment : '', color: ''},
 			geometry : {type : 'LineString', coordinates : [] } } ;
 		currentFeature.properties.title = flight ;
 		currentFeature.properties.comment = "Plane: " + thisFlight.plane + '</br>First seen: ' + thisFlight.first + ' UTC</br>Last seen: ' + thisFlight.last + ' UTC';
-		currentFeature.properties.color = tailNumber2Color(flight) ;
+		currentFeature.properties.color = planeColor ;
 		currentFeature.geometry.coordinates = [] ;
 
 		thisTrack = thisFlight.track ;
@@ -180,7 +181,6 @@ function insertTrackPoints (flights) {
 						return -1 ;
 				}
 			})
-		console.log(x) ;
 		legendDiv.innerHTML += x.join('') ;
 		// TODO position the div
 	}
@@ -290,7 +290,6 @@ function mapAddLayers() {
 	});
 
 	// Try to do it asynchronously
-	console.log("in mapAddLayers(): map.addLayer(flightLayer)") ;
 	map.addLayer(flightLayer) ;
 	// Build the track points
 	getTrackPoints(ajaxURL) ;

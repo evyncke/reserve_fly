@@ -21,14 +21,16 @@ ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
+$map_rallye = (isset($_REQUEST['rallye']) and $_REQUEST['rallye'] != '') ;
 
-if ($userId <= 0 && (!isset($_REQUEST['auth'])))
-	die("Vous devez &ecirc;tre connect&eacute; pour visualiser les vols de la journée.") ;
+if (! $map_rallye) { 
+	if ($userId <= 0 && (!isset($_REQUEST['auth'])))
+		die("Vous devez &ecirc;tre connect&eacute; pour visualiser les vols de la journée.") ;
 	
-if (isset($_REQUEST['auth']))
-	if ($_REQUEST['auth'] != md5($_REQUEST['pilot'] . $_REQUEST['period'] . $shared_secret))
-		die("Vous n'&ecric;tes pas autoris&eacute;.") ;
-
+	if (isset($_REQUEST['auth']))
+		if ($_REQUEST['auth'] != md5($_REQUEST['pilot'] . $_REQUEST['period'] . $shared_secret))
+			die("Vous n'&ecric;tes pas autoris&eacute;.") ;
+}
 if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
 ?>
 <html>
@@ -42,7 +44,12 @@ if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
 <!-- Reusing bootstrap icons -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
 
-<title>Vols de la flotte ces dernières 24 heures</title>
+<?php
+if ($map_rallye)
+	print("<title>Equipages du rallye Air Spa</title>") ;
+else 
+	print("<title>Vols de la flotte ces dernières 24 heures</title>") ;
+?>
 <script type="text/javascript">
 var
 	// preset Javascript constant fill with the right data from db.php PHP variables
@@ -77,8 +84,8 @@ var
 </script>
 <!-- End Matomo Code -->
 </head>
-<body onload="initFleet(<?=$apt_longitude?>, <?=$apt_latitude?>, '<?=$mapbox_token?>', 'get_tracks.php?');">
-<center><h2>Vols de la flotte ces dernières 24 heures</h2></center>
+<body onload="initFleet(<?=$apt_longitude?>, <?=$apt_latitude?>, '<?=$mapbox_token?>', <?=($map_rallye) ? "'get_local_tracks.php?rallye=y'" : "'get_tracks.php?'" ?>);">
+<center><h2><?=($map_rallye) ? "Participants au rallye cette dernière heure" : "Vols de la flotte ces dernières 24 heures"?></h2></center>
 
 <div id='container' style='position: relative;'>
 	<div id='map' style='width: 100%; height: 85%;'></div>
@@ -92,8 +99,8 @@ $version_js = date ("Y-m-d H:i:s.", filemtime('fleet_map.js')) ;
 $version_ajax = date ("Y-m-d H:i:s.", filemtime('get_tracks.php')) ;
 ?>
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
-Données via Flight Aware (avec maximum 30 minutes de délai) et via quelques récepteurs ADS-B / MLAT (avec maximum 15 secondes de délai).</br>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021 - août 2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
+Données via Flight Aware (avec maximum 15 minutes de délai), via quelques récepteurs ADS-B / MLAT (avec maximum 10 secondes de délai), via Open Sky, et via glidernet.org (planeurs FLARM et intégration SafeSky et un délai d'une minute).</br>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, AJAX=<?=$version_ajax?></div>
 </body>
 </html>
