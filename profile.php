@@ -447,12 +447,12 @@ if (! $read_only) {
 
 <div id="photo" class="tab-pane fade">
 <?php
+print("<div class=\"row\">") ;
 if ($me['avatar'] != '') {
-	print("<div class=\"row\">
-		<img src=\"$avatar_root_uri/$me[avatar]\" class=\"col-xs-12 col-sm-6 col-md-2\">
-		<img src=\"https://www.gravatar.com/avatar/" . md5(strtolower(trim($me['email']))) . "?s=200&d=blank&r=pg\" class=\"col-xs-12 col-sm-6 col-md-2\">
-		</div> <!-- row -->\n") ;
+		print("<img src=\"$avatar_root_uri/$me[avatar]\" class=\"col-xs-12 col-sm-6 col-md-2\">") ;
 }
+print("<img src=\"https://www.gravatar.com/avatar/" . md5(strtolower(trim($me['email']))) . "?s=200&d=blank&r=pg\" class=\"col-xs-12 col-sm-6 col-md-2\">
+	</div> <!-- row -->\n") ;
 if (! $read_only) {
 	print('<div class="row">
 		<form action="' . $_SERVER['PHP_SELF'] . '" method="post" enctype="multipart/form-data" role="form" class="form-inline">
@@ -466,6 +466,7 @@ if (! $read_only) {
 			<button type="submit" class="form-control col-sm-4 col-md-2 btn btn-primary">Mettre &agrave; jour la photo</button>
 		</div> <!-- form-group -->
 	</form>
+	<p>Vous pouvez aussi utiliser le site gratuit <a href="https://gravatar.com/">Gravatar</a> pour y mettre votre photo et la lier ainsi à votre adresse email ' . $me['email'] . '.</p>
 	</div> <!-- row -->') ;
 }
 ?>
