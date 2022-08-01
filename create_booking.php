@@ -308,14 +308,20 @@ if ($response['error'] == '') {
 			$email_message = "<p>La maintenance du $start au $end sur le $plane avec comme commentaires: <i>$comment</i> " ;
 			$email_message .= "est confirm&eacute;e.<br/>" ;
 		} else {
-			$response['message'] = "La r&eacute;servation de $plane du $start au $end: est confirm&eacute;e" ;
+			$response['message'] = "La r&eacute;servation de $plane du $start au $end: est confirm&eacute;e.<br/>" .
+				"<b>Note</b>: apr&egrave;s votre vol, n'oubliez pas d'encoder les index du compteur d&eacute;part et arriv&eacute;e " .
+				"et les autres informations demand&eacute;es. " .
+				"Sans cela, votre prochaine r&eacute;servation sera impossible. " .
+				"Merci de votre coop&eacute;ration." ;
 			if ($pilot_id == $userId)
 				$email_subject = "✈ Confirmation d'une nouvelle réservation de $plane pour $pilot[name] [#$booking_id]" ;
 			else
-				$email_subject =  "✈ Confirmation d'une nouvelle réservation de $plane par $booker[name] pour $pilot[name]  [#$booking_id]" ;
+				$email_subject = "✈ Confirmation d'une nouvelle réservation de $plane par $booker[name] pour $pilot[name]  [#$booking_id]" ;
 
 			$email_message = "<p>La r&eacute;servation du $start au $end sur le <b>$plane</b> " ;
 			$email_message .= "avec $pilot[name] en pilote est confirm&eacute;e.<br/>\n" ;
+			$email_message .= "<em><b>Note</b>: n'oubliez pas d'encoder les index
+                                du compteur d&eacute;part et arriv&eacute;e car toutes les r&eacute;servations futures seront bloqu&eacute;es (y compris pour les &eacute;l&egrave;ves).</em>" ;
 			if ($comment) $email_message .= "Commentaires: <i>$comment</i>.<br/>\n" ;
 			if ($instructor_id != 'NULL') $email_message .= "Instructeur vol: $instructor[name] (<a href=\"mailto:$instructor[email]\">$instructor[email]</a>).<br/>\n" ;
 		}
