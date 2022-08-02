@@ -103,6 +103,7 @@ var // was 'const' but IE does not support it !
 	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ,
 	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ,
 	userIsStudent = <?=($userIsStudent)? 'true' : 'false'?> ,
+	userIsNoFlight = <?=($userIsNoFlight)? 'true' : 'false'?> ,
 	bookingTypePilot = <?= BOOKING_PILOT?> ,
 	bookingTypeInstructor = <?= BOOKING_INSTRUCTOR?> ,
 	bookingTypeAdmin = <?= BOOKING_ADMIN?> ,
@@ -377,8 +378,11 @@ if ($userIsPilot) print(" pilote ") ;
 if ($userIsMechanic) print(" mecano ") ;
 if ($userIsInstructor) print(" instructor ") ;
 if ($userIsAdmin) print(" administrateur ") ;
+if ($userIsNoFlight) print(" <span style=\"color: red:\">interdit de vol</span> ") ;
 if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
 	print("<br/><font color=red>Vous devez &ecirc;tre au moins pilote pour r&eacute;server un avion.</font>") ;
+if ($userNoFligh)
+	print("<br/><font color=red>Vous &ecirc;tes interdit(e) de vol, contactez <a href=\"info@spa-aviation.be\">l'a&eacute;roclub.</font>") ;
 if ($userId == 0) {
 	print("<br/><font color=red>Vous devez &ecirc;tre connect&eacute;(e) pour r&eacute;server un avion.</font> ") ;
 } else {
@@ -395,6 +399,10 @@ if ($userId == 0) {
 	if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ;
 	if ($row['birthdate'] != '') $profile_count ++ ;
 	if ($profile_count != 10) print("<div class=\"validityBox\">Votre profil est compl&eacute;t&eacute; &agrave; " . round(100 * $profile_count / 10) . "% seulement, veuillez cliquer sur le bouton 'Mon Profil'.</div>") ;
+	if ($row['cell_phone'] == '') {
+		print("<div class=\"validityBox\">Il manque votre num&eacute;ro de GSM/mobile, impossible de r&eacute;server. Veuillez cliquer sur le bouton 'Mon Profil'.</div>") ;
+		$userNoFlight = true ;
+	}
 	print('<input type="button" value="Mon profil" onclick="javascript:document.location.href=\'profile.php\';"> ') ;
 	print('<input type="button" value="Mon carnet de vol" onclick="javascript:document.location.href=\'mylog.php\';"> ') ;
 	print('<input type="button" value="Carte de mes vols" onclick="javascript:document.location.href=\'mymap.php\';"> ') ;
@@ -597,7 +605,7 @@ if ($userIsMechanic || $userIsInstructor) {
 	print('<button id="addMaintenanceButton" onclick="javascript:confirmBooking(false);">Immobiliser pour maintenance</button><br/>' . "\n") ;
 	print('<button id="cancelMaintenanceButton" onclick="javascript:cancelBooking(false);">Annuler la maintenance</button><br/>' . "\n") ;
 }
-if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin) {
+if (! $userNoFlight && ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin)) {
 	print('<button id="addBookingButton" onclick="javascript:confirmBooking(true);">Je respecte les conditions et r&eacute;serve</button>' . "\n") ;
 	print('<button id="cancelBookingButton" onclick="javascript:confirmCancelBooking();">Annuler la r&eacute;servation</button>' . "\n") ;
 	print('<button id="modifyBookingButton" onclick="javascript:modifyBooking(true);">Modifier la r&eacute;servation</button>' . "\n") ;

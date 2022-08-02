@@ -80,6 +80,8 @@ if ($booking_type == BOOKING_MAINTENANCE) {
 		if (! ($userIsPilot or $userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation.<br/>" ;
 	}
 }
+// Is the user on the no flight list ?
+if ($userNoFlight) $response['error'] .= "Vous &ecirc;tes interdit(e) de vol. Contactez l'a&eacute;roclub." ;
 
 // Check whether userId is the assigned pilot !
 if ($customer_id > 0) {
@@ -119,11 +121,11 @@ if ($instructor_id != 'NULL') {
 $result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $userId") ;
 $booker = mysqli_fetch_array($result) ;
 $booker_quality = 'pilote' ;
-if ($useIsInstructeur)
+if ($useirIsInstructor)
 	$booker_quality = 'instructeur' ;
-elseif ($useIsMechanic)
+elseif ($userIsMechanic)
 	$booker_quality = 'm&eacute;cano' ;
-elseif ($useIsAdmin)
+elseif ($userIsAdmin)
 	$booker_quality = 'administrateur web' ;
 $booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 
@@ -140,13 +142,13 @@ $message .= "<ul>\n" ;
 		LIMIT 1") or journalise($userId, "E", "Cannot get last reservation: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
 	if (! $row) {
-$message .= "<li>Aucune entr&eacute;e dans le carnet de routes de l'avion $plane pour ce pilote.</li>\n" ;
+		$message .= "<li>Aucune entr&eacute;e dans le carnet de routes de l'avion $plane pour ce pilote.</li>\n" ;
 		mysqli_free_result($result) ;
 	} else {
-$message .= "<li>Entrée dans le carnet de routes de l'avion $plane pour ce pilote, le dernier vol date de $row[temps_dernier] jours et la limite club réservation: $delai_reservation jours.</li>\n" ;
+		$message .= "<li>Entrée dans le carnet de routes de l'avion $plane pour ce pilote, le dernier vol date de $row[temps_dernier] jours et la limite club réservation: $delai_reservation jours.</li>\n" ;
 		mysqli_free_result($result) ;
 		if ($delai_reservation >= $row['temps_dernier']) {
-$message .= "</ul>\n" ;
+			$message .= "</ul>\n" ;
 			return TRUE ;
 		}
 	}
@@ -159,19 +161,18 @@ $message .= "</ul>\n" ;
 		ORDER BY l_end DESC") or journalise($userId, "E", "Cannot get last reservation in pilot logbook: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
 	if (! $row) {
-$message .= "<li>Aucune entr&eacute;e dans le logbook du pilote pour $plane.</li>\n" ;
+		$message .= "<li>Aucune entr&eacute;e dans le logbook du pilote pour $plane.</li>\n" ;
 		mysqli_free_result($result) ;
-$message .= "</ul>\n" ;
+		$message .= "</ul>\n" ;
 		return FALSE ;
 	} else {
-$message .= "<li>Entr&eacute;e dans le logbook du pilote pour $plane, le dernier vol date de $row[temps_dernier] jours et la limite club r&eacute;servation: $delai_reservation jours.</li>\n" ;
+		$message .= "<li>Entr&eacute;e dans le logbook du pilote pour $plane, le dernier vol date de $row[temps_dernier] jours et la limite club r&eacute;servation: $delai_reservation jours.</li>\n" ;
 		mysqli_free_result($result) ;
-$message .= "</ul>\n" ;
+		$message .= "</ul>\n" ;
 		return $delai_reservation >= $row['temps_dernier'] ;
 	}
 }
 
-// More checks on user when booking a plane and flying solo even when booked by an instructor COVID-19
 // More checks on user when booking a plane and booked by an non-instructor/mechanic
 
 if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BOOKING_MAINTENANCE) or $userIsInstructor or $instructor_id != "NULL")) {
@@ -186,7 +187,7 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 	// Not too distant reservation?
 	$reservation_permise = RecentBooking($plane, /*$userId*/ $pilot_id, $plane_row['delai_reservation']) ;
 	if (!$reservation_permise) {
-$message .= "<p><span style='color: blue;'>Aucune entr&eacute;e r&eacute;cente dans le logbook pour $plane, regardons l'historique...</span></p>\n" ;
+		$message .= "<p><span style='color: blue;'>Aucune entr&eacute;e r&eacute;cente dans le logbook pour $plane, regardons l'historique...</span></p>\n" ;
 		// If pilot did not book this exact plane, let's try to find whether he/she flew a plane from a 'larger' group...
 		$result = mysqli_query($mysqli_link, "SELECT upper(id) AS id, classe, delai_reservation
 			FROM $table_planes 
@@ -194,11 +195,11 @@ $message .= "<p><span style='color: blue;'>Aucune entr&eacute;e r&eacute;cente d
 			ORDER BY id") or journalise($userId, "E", "Cannot get all active planes:".mysqli_error($mysqli_link)) ;
 		while ($row = mysqli_fetch_array($result) and !$reservation_permise) {
 			if ($row['id'] == $plane_row['id']) continue ;
-$message .= "V&eacute;rification de $row[id] (type $row[classe]): \n" ;
+			$message .= "V&eacute;rification de $row[id] (type $row[classe]): \n" ;
 			if (planeClassIsMember($plane_row['classe'], $row['classe']))
 				$reservation_permise = RecentBooking($row['id'], /*$userId*/ $pilot_id, $plane_row['delai_reservation']) ; // Only if recent flight !!!
 			else
-$message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour le type $plane_row[classe].</i><br/>\n" ;
+				$message .= "&nbsp;&nbsp;<i>Cet avion ($row[classe]) n'entre pas en compte pour le type $plane_row[classe].</i><br/>\n" ;
 		}
 		mysqli_free_result($result) ;
 	}
