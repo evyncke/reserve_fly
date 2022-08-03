@@ -381,8 +381,8 @@ if ($userIsAdmin) print(" administrateur ") ;
 if ($userIsNoFlight) print(" <span style=\"color: red:\">interdit de vol</span> ") ;
 if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
 	print("<br/><font color=red>Vous devez &ecirc;tre au moins pilote pour r&eacute;server un avion.</font>") ;
-if ($userNoFligh)
-	print("<br/><font color=red>Vous &ecirc;tes interdit(e) de vol, contactez <a href=\"info@spa-aviation.be\">l'a&eacute;roclub.</font>") ;
+if ($userNoFlight)
+	print("<div class=\"validityBox\">Vous &ecirc;tes interdit(e) de vol (par exemple: factures non pay&eacute;es, contactez <a href=\"mailto:info@spa-aviation.be\">l'a&eacute;roclub.</div>") ;
 if ($userId == 0) {
 	print("<br/><font color=red>Vous devez &ecirc;tre connect&eacute;(e) pour r&eacute;server un avion.</font> ") ;
 } else {
@@ -607,8 +607,10 @@ if ($userIsMechanic || $userIsInstructor) {
 }
 if (! $userNoFlight && ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin)) {
 	print('<button id="addBookingButton" onclick="javascript:confirmBooking(true);">Je respecte les conditions et r&eacute;serve</button>' . "\n") ;
-	print('<button id="cancelBookingButton" onclick="javascript:confirmCancelBooking();">Annuler la r&eacute;servation</button>' . "\n") ;
 	print('<button id="modifyBookingButton" onclick="javascript:modifyBooking(true);">Modifier la r&eacute;servation</button>' . "\n") ;
+}
+if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin) {
+	print('<button id="cancelBookingButton" onclick="javascript:confirmCancelBooking();">Annuler la r&eacute;servation</button>' . "\n") ;
 	print('<button id="engineHoursButton" onclick="javascript:engineHoursClicked();">Enregistrer les heures moteur</button>' . "\n") ;
 }
 ?>
