@@ -108,6 +108,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	if ($instructorId <= 0) $instructorId = "NULL" ;
 	$dayLandings = trim($_REQUEST['dayLandings']) ; if (!is_numeric($dayLandings) or $dayLandings < 0) die("dayLandings $dayLandings is not numeric or is not valid") ;
 	$nightLandings = trim($_REQUEST['nightLandings']) ; if (!is_numeric($nightLandings) or $nightLandings < 0) die("nightLandings $nightLandings is not numeric or is not valid") ;
+	$remark = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['remark'])) ;
 	// Do some checks
 	if ($endDayTime <= $startDayTime)  
 		$insert_message = "Le temps d'arriv&eacute;e=$endDayTime doit &ecirc;tre plus grand que le temps de d&eacute;part= $startDayTime" ;
@@ -119,13 +120,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		mysqli_query($mysqli_link, "insert into $table_logbook(l_plane, l_model, l_booking, l_from, l_to,
 			l_start_hour, l_start_minute, l_end_hour, l_end_minute,
 			l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
-			l_start, l_end, l_flight_type,
+			l_start, l_end, l_flight_type, l_remark,
 			l_pilot, l_instructor, l_day_landing, l_night_landing,
 			l_audit_who, l_audit_ip, l_audit_time) values
 			('$planeId', '$planeModel', $id, '$fromAirport', '$toAirport',
 			$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute,
 			$flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
-			'$startDayTime', '$endDayTime', '$flightType',
+			'$startDayTime', '$endDayTime', '$flightType', '$remark',
 			$pilotId, $instructorId, $dayLandings, $nightLandings,
 			$userId, '" . getClientAddress() . "', sysdate())") or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
@@ -459,11 +460,17 @@ if ($booking['compteur_vol'] != 0) {
 </table>
 </div> <!-- col -->
 
-
 <div class="col-xs-12 col-md-2">
 <table class="logbookTable">
 	<tr><td class="logbookSeparator" colspan="2">Type de vol (local, nav, ...)</td><tr>
 	<tr><td class="logbookLabel">Type de vol:</td><td class="logbookValue"><input type="text" size="16" maxlength="32" name="flightType" value=""></td><tr>
+</table>
+</div> <!-- col-->
+
+<div class="col-xs-12 col-md-2">
+<table class="logbookTable">
+	<tr><td class="logbookSeparator" colspan="2">Remarque (CP, check, IF, ..)</td><tr>
+	<tr><td class="logbookLabel">Remarque:</td><td class="logbookValue"><input type="text" size="32" maxlength="64" name="remark" value=""></td><tr>
 </table>
 </div> <!-- col-->
 
