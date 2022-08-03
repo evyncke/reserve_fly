@@ -129,6 +129,7 @@ if ($page < $page_count)
 if ($plane_details['compteur_vol'] != 0)
 	print("<th class=\"logHeader\">Flight index</th>\n") ;
 ?>
+<th class="logHeader">Remark</th>
 </tr>
 <tr>
 <th class="logLastHeader">(dd/mm/yy)</th>
@@ -144,6 +145,7 @@ if ($plane_details['compteur_vol'] != 0)
 if ($plane_details['compteur_vol'] != 0)
 	print("<th class=\"logLastHeader\">(end)</th>\n") ;
 ?>
+<th class="logHeader">(CP, ...)</th>
 </tr>
 </thead>
 <tbody>
@@ -152,7 +154,7 @@ if ($plane_details['compteur_vol'] != 0)
 $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, 
 	timediff(l_end, l_start) as duration,
 	l_flight_end_hour, l_flight_end_minute,
-	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name
+	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark
 	from $table_logbook l 
 	join $table_users p on l_pilot=p.id
 	left join $table_users i on l_instructor = i.id
@@ -197,6 +199,7 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"logCell\">$row[l_end_hour]:$row[l_end_minute]</td>\n") ;
 	if ($plane_details['compteur_vol'] != 0)
 		print("<td class=\"logCell\">$row[l_flight_end_hour]:$row[l_flight_end_minute]</td>\n") ;
+	print("<td class=\"logCell\">$row[l_remark]</td>") ;
 	print("</tr>\n") ;
 }
 $duration_total_hour += floor($duration_total_minute / 60) ;
