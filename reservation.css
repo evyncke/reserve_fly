@@ -1,5 +1,5 @@
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -80,8 +80,10 @@ td.unavailable2 { background-color: lightblue; width: 15px; height: 40px; border
 
 .userPrivileges {color: gray; }
 .copyright {color: gray; font-size: smaller; font-style: oblique; text-align: center; border-top: 1px gray ;}
+.noFlyBox {background-color: white; margin-left: auto; margin-right: auto;  border-width: 4px; border-style: double; border-color: red;
+	padding: 10px; font-weight: bold; font-size: x-large;}
 .validityBox {background-color: white; margin-left: auto; margin-right: auto;  border-width: 4px; border-style: dashed; border-color: red; border-radius: 10px; 
-	padding: 10px; Xfont-size: larger;}
+	padding: 10px; font-size: larger;}
 .validityWarning {color: orange; }
 .validityExpired {color: red; }
 
