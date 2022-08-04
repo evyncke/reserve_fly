@@ -123,6 +123,7 @@ if ($page < $page_count)
 <th class="logHeader" colspan="2">Airports</th>
 <th class="logHeader" colspan="2">Time</th>
 <th class="logHeader">Total time</th>
+<th class="logHeader">Passengers</th>
 <th class="logHeader">Type of</th>
 <th class="logHeader">Engine index</th>
 <?php 
@@ -139,22 +140,23 @@ if ($plane_details['compteur_vol'] != 0)
 <th class="logLastHeader">Takeoff</th>
 <th class="logLastHeader">Landing</th>
 <th class="logLastHeader">hh:mm</th>
+<th class="logLastHeader">Count</th>
 <th class="logLastHeader">flight</th>
 <th class="logLastHeader">(end)</th>
 <?php 
 if ($plane_details['compteur_vol'] != 0)
 	print("<th class=\"logLastHeader\">(end)</th>\n") ;
 ?>
-<th class="logHeader">(CP, ...)</th>
+<th class="logLastHeader">(CP, ...)</th>
 </tr>
 </thead>
 <tbody>
 <?php
 // Display up to $rows_per_page rows from $first_row
-$sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, 
+$sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, l_start_hour, l_end_minute,
 	timediff(l_end, l_start) as duration,
 	l_flight_end_hour, l_flight_end_minute,
-	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark
+	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark, l_pax_count
 	from $table_logbook l 
 	join $table_users p on l_pilot=p.id
 	left join $table_users i on l_instructor = i.id
@@ -171,7 +173,14 @@ $dual_total_minute =  0;
 $fi_total_hour = 0 ;
 $fi_total_minute =  0;
 $line_count = 0 ;
+$previous_end_hour = false ;
+$previous_end_minute = false ;
 while ($row = mysqli_fetch_array($result)) {
+	// Emit a red line for missing entries...
+	if ($previous_end_hour and $previous_end_hour != $row['l_start_hour'] and $previous_end_minute != $row['l_start_minute'])
+		print("<tr><td class=\"logCell\" colspan=11 style=\"color: red;\">Missing entries...</td></tr>\n") ;
+	$previous_end_hour = $row['l_end_hour'] ;
+	$previous_end_minute = $row['l_end_minute'] ;
 	$line_count ++ ;
 	// Need to change duration from HH:MM:SS into HH:MM
 	$duration = explode(':', $row['duration']) ;
@@ -195,6 +204,7 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"logCell\">$l_start</td>
 		<td class=\"logCell\">$l_end</td>
 		<td class=\"logCell\">$duration</td>
+		<td class=\"logCell\">$row[l_pax_count]</td>
 		<td class=\"logCell\">$row[l_flight_type]</td>
 		<td class=\"logCell\">$row[l_end_hour]:$row[l_end_minute]</td>\n") ;
 	if ($plane_details['compteur_vol'] != 0)
