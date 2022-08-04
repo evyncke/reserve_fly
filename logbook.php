@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ $result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r
 	where r_id = $id and a.id = r_plane and a.ressource = 0") or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 $booking = mysqli_fetch_array($result) ;
 if (! $booking) die("D&eacute;sol&eacute; cette r&eacute;servation n'existe pas") ;
+
+// TODO check planes[compteur_vol]
 $engine_flight_label = ($booking['r_plane'] == 'PH-AML') ? 'vol' : 'moteur' ;
 
 // Check authorization
@@ -64,6 +66,8 @@ if (($booking['r_from'] == '') && ($booking['r_to'] == '')) {
 // Do we need to save into the logbook?
 if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$planeId = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['plane'])) ;
+	$day = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['day'])) ;
+print("<hr>$day</hr>") ;
 	$planeModel = $booking['model'] ;
 	$engineStartHour = trim($_REQUEST['engineStartHour']) ; if (!is_numeric($engineStartHour)) die("engineStartHour $engineStartHour is not numeric") ;
 	$engineStartMinute = trim($_REQUEST['engineStartMinute']) ; if (!is_numeric($engineStartMinute)) die("engineStartMinute $engineStartMinute is not numeric") ;
@@ -93,7 +97,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$startHours = trim($_REQUEST['startHoursUTC']) ; if (!is_numeric($startHours)) die("startHours $startHours is not numeric") ;
 	$startMinutes = trim($_REQUEST['startMinutesUTC']) ; if (!is_numeric($startMinutes)) die("startMinutes $startMinutes is not numeric") ;
 	//PRE
-	$startDayTime = "$booking[r_day] " . substr("0" . $startHours, -2) . ":" . substr("0" . $startMinutes, -2) ;
+	$startDayTime = "$day " . substr("0" . $startHours, -2) . ":" . substr("0" . $startMinutes, -2) ;
 	//PRE
 	//Before
 	//$endHours = trim($_REQUEST['endHours']) ; if (!is_numeric($endHours)) die("endHours $endHours is not numeric") ;
@@ -102,7 +106,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$endHours = trim($_REQUEST['endHoursUTC']) ; if (!is_numeric($endHours)) die("endHours $endHours is not numeric") ;
 	$endMinutes = trim($_REQUEST['endMinutesUTC']) ; if (!is_numeric($endMinutes)) die("endMinutes $endMinutes is not numeric") ;
 	//PRE
-	$endDayTime = "$booking[r_day] " . substr("0" . $endHours, -2) . ":" . substr("0" . $endMinutes, -2) ;
+	$endDayTime = "$day " . substr("0" . $endHours, -2) . ":" . substr("0" . $endMinutes, -2) ;
 	$pilotId = trim($_REQUEST['pilot']) ; if (!is_numeric($pilotId)) die("pilotId $pilotId is not numeric") ;
 	$instructorId = trim($_REQUEST['instructor']) ; if (!is_numeric($instructorId)) die("instructorId $instructorId is not numeric") ;
 	if ($instructorId <= 0) $instructorId = "NULL" ;
@@ -379,6 +383,15 @@ if ($this_segment_id > 1) {
 <form action="<?=$_SERVER['PHP_SELF']?>" method="POST">
 
 <div class="row">
+
+<div class="col-xs-6 col-sm-6 col-md-1">
+<table class="logbookTable">
+	<tr><td class="logbookSeparator" colspan="2">Date</td><tr>
+	<tr><td class="logbookLabel">Date:</td><td class="logbookValue"><input type="date" name="day" value="<?=$booking['r_day']?>"></td><tr>
+</table>
+</div> <!-- col-->
+
+
 <div class="col-xs-12 col-md-6">
 <?php 
 // Avion avec compteur Moteur
