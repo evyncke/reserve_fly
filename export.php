@@ -29,7 +29,7 @@ function AddDates($last_day) {
 }
 
 // Get all planes (active and non active)
-$result = mysqli_query($mysqli_link, "select upper(id) as id from $table_planes order by id") or
+$result = mysqli_query($mysqli_link, "select upper(id) as id from $table_planes where ressource = 0 order by id") or
 	die("Cannot read $table_planes: " . mysqli_error($mysqli_link)) ;
 $planes = array() ;
 while ($row = mysqli_fetch_array($result)) {
