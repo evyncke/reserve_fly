@@ -67,7 +67,6 @@ if (($booking['r_from'] == '') && ($booking['r_to'] == '')) {
 if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$planeId = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['plane'])) ;
 	$day = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['day'])) ;
-print("<hr>$day</hr>") ;
 	$planeModel = $booking['model'] ;
 	$engineStartHour = trim($_REQUEST['engineStartHour']) ; if (!is_numeric($engineStartHour)) die("engineStartHour $engineStartHour is not numeric") ;
 	$engineStartMinute = trim($_REQUEST['engineStartMinute']) ; if (!is_numeric($engineStartMinute)) die("engineStartMinute $engineStartMinute is not numeric") ;
