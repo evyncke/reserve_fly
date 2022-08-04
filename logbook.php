@@ -108,6 +108,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	if ($instructorId <= 0) $instructorId = "NULL" ;
 	$dayLandings = trim($_REQUEST['dayLandings']) ; if (!is_numeric($dayLandings) or $dayLandings < 0) die("dayLandings $dayLandings is not numeric or is not valid") ;
 	$nightLandings = trim($_REQUEST['nightLandings']) ; if (!is_numeric($nightLandings) or $nightLandings < 0) die("nightLandings $nightLandings is not numeric or is not valid") ;
+	$paxCount = trim($_REQUEST['pax_count']) ; if (!is_numeric($paxCount) or $paxCount < 0 or $paxCount > 3) die("paxCount $paxCount is not numeric or is not valid") ;
 	$remark = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['remark'])) ;
 	// Do some checks
 	if ($endDayTime <= $startDayTime)  
@@ -120,13 +121,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		mysqli_query($mysqli_link, "insert into $table_logbook(l_plane, l_model, l_booking, l_from, l_to,
 			l_start_hour, l_start_minute, l_end_hour, l_end_minute,
 			l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
-			l_start, l_end, l_flight_type, l_remark,
+			l_start, l_end, l_flight_type, l_remark, l_pax_count,
 			l_pilot, l_instructor, l_day_landing, l_night_landing,
 			l_audit_who, l_audit_ip, l_audit_time) values
 			('$planeId', '$planeModel', $id, '$fromAirport', '$toAirport',
 			$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute,
 			$flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
-			'$startDayTime', '$endDayTime', '$flightType', '$remark',
+			'$startDayTime', '$endDayTime', '$flightType', '$remark', $paxCount,
 			$pilotId, $instructorId, $dayLandings, $nightLandings,
 			$userId, '" . getClientAddress() . "', sysdate())") or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
@@ -317,7 +318,8 @@ if (isset($insert_message) and $insert_message != '') {
 
 <?php
 // Now, display any previous entries related to this booking
-$result = mysqli_query($mysqli_link, "select l_start, l_end, l_plane, l_from, l_to, l_flight_type, l_audit_time, p.last_name as pilotName, i.last_name as instructorName
+$result = mysqli_query($mysqli_link, "select l_start, l_end, l_plane, l_from, l_to, l_flight_type, l_audit_time, p.last_name as pilotName, i.last_name as instructorName,
+			l_pax_count, l_remark
 		from $table_logbook l join $table_person p on l.l_pilot = p.jom_id left join $table_person i on l.l_instructor = i.jom_id
 		where l_booking = $id order by l_start")
 	or die("Impossible de lire les entrees pour reservation $id: " . mysqli_error($mysqli_link)) ;
@@ -328,7 +330,7 @@ if ($this_segment_id > 1) {
 		<br/>Ligne(s) du carnet de routes relative(s) &agrave; cette r&eacute;servation (UTC)
 		<table class="previousLogTable table table-striped table-condensed">
 		<thead class="hidden-xs">
-		<tr><th>Avion</th><th>Pilote</th><th>De</th><th>D&eacute;part (UTC)</th><th>A</th><th>Arriv&eacute;e (UTC)</th><th>Type vol</th><th>Action</th></tr>
+		<tr><th>Avion</th><th>Pilote</th><th>De</th><th>D&eacute;part (UTC)</th><th>A</th><th>Arriv&eacute;e (UTC)</th><th>Passagers</th><th>Type vol</th><th>Remarque</th><th>Action</th></tr>
 		</thead>') ;
 	while ($row = mysqli_fetch_array($result)) {
 		// As the OVH MySQL server does not have the timezone support, needs to be done in PHP
@@ -348,7 +350,9 @@ if ($this_segment_id > 1) {
 			<td class=\"previousLogEntry\">$start_UTC</td>
 			<td class=\"previousLogEntry\">$row[l_to]</td>
 			<td class=\"previousLogEntry\">$end_UTC</td>
+			<td class=\"previousLogEntry\">$row[l_pax_count]</td>
 			<td class=\"previousLogEntry\">$row[l_flight_type]</td>
+			<td class=\"previousLogEntry\">$row[l_remark]</td>
 			<td class=\"previousLogEntry\">&nbsp;<button type=\"button\" class=\"btn btn-danger btn-xs\" onclick=\"redirectDelete($id, '$auth', '$row[l_audit_time]');\">EFFACER</button>&nbsp;</td></tr>\n") ;
 	}
 	print('</table>
@@ -463,14 +467,18 @@ if ($booking['compteur_vol'] != 0) {
 <div class="col-xs-12 col-md-2">
 <table class="logbookTable">
 	<tr><td class="logbookSeparator" colspan="2">Type de vol (local, nav, ...)</td><tr>
-	<tr><td class="logbookLabel">Type de vol:</td><td class="logbookValue"><input type="text" size="16" maxlength="32" name="flightType" value=""></td><tr>
+	<tr><td class="logbookLabel">Type de vol:</td><td class="logbookValue">
+		<select name="flightType">
+			<option value="local">local</option>
+			<option value="nav">nav</option>
+		</select>
 </table>
 </div> <!-- col-->
 
 <div class="col-xs-12 col-md-2">
 <table class="logbookTable">
-	<tr><td class="logbookSeparator" colspan="2">Remarque (CP, check, IF, ..)</td><tr>
-	<tr><td class="logbookLabel">Remarque:</td><td class="logbookValue"><input type="text" size="32" maxlength="64" name="remark" value=""></td><tr>
+	<tr><td class="logbookSeparator" colspan="2">Nombre de passager(s)</td><tr>
+	<tr><td class="logbookLabel">Passagers:</td><td class="logbookValue"><input type="number" size="4" maxlength="2" name="pax_count" value="0"></td><tr>
 </table>
 </div> <!-- col-->
 
@@ -532,6 +540,13 @@ if ($booking['compteur_vol'] != 0) {
 	<select name="plane" onchange="planeChanged();">
 	</select>
 </td></tr>
+</table>
+</div> <!-- col-->
+
+<div class="col-xs-12 col-md-2">
+<table class="logbookTable">
+	<tr><td class="logbookSeparator" colspan="2">Remarque (CP, check, IF, ..)</td><tr>
+	<tr><td class="logbookLabel">Remarque:</td><td class="logbookValue"><input type="text" size="32" maxlength="64" name="remark" value=""></td><tr>
 </table>
 </div> <!-- col-->
 
