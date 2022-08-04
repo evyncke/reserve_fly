@@ -378,11 +378,11 @@ if ($userIsPilot) print(" pilote ") ;
 if ($userIsMechanic) print(" mecano ") ;
 if ($userIsInstructor) print(" instructor ") ;
 if ($userIsAdmin) print(" administrateur ") ;
-if ($userIsNoFlight) print(" <span style=\"color: red:\">interdit de vol</span> ") ;
+if ($userNoFlight) print(" <span style=\"color: red;\">interdit de vol</span> ") ;
 if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
 	print("<br/><font color=red>Vous devez &ecirc;tre au moins pilote pour r&eacute;server un avion.</font>") ;
 if ($userNoFlight)
-	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol (par exemple: factures non pay&eacute;es, contactez <a href=\"mailto:info@spa-aviation.be\">l'a&eacute;roclub.</div>") ;
+	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol (par exemple: factures non pay&eacute;es, contactez <a href=\"mailto:info@spa-aviation.be\">l'a&eacute;roclub).</div>") ;
 if ($userId == 0) {
 	print("<br/><font color=red>Vous devez &ecirc;tre connect&eacute;(e) pour r&eacute;server un avion.</font> ") ;
 } else {
