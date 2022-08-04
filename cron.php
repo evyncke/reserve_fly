@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -125,15 +125,16 @@ while ($row = mysqli_fetch_array($result)) {
 	if (!$test_mode) {
 		$email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
 		$email_recipients = $row['email'] ;
-		if ($row['r_instructor'] != '') {
-			$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
-			$email_recipients .= ", $instructor[email]" ;
-		}
-// Instructors (the only COVID-19 bookers) are complaining to have too many emails...
-//		if ($row['r_pilot'] != $row['r_who']) {
-//			$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
-//			$email_recipients .= ", $booker[email]" ;
+		// FIs complains to have too many emails...
+//		if ($row['r_instructor'] != '') {
+//			$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
+//			$email_recipients .= ", $instructor[email]" ;
 //		}
+// Instructors are complaining to have too many emails... so do not copy them when they booked a DC flight
+		if ($row['r_pilot'] != $row['r_who'] and $row['r_instructor'] != $row['r_who']) {
+			$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
+			$email_recipients .= ", $booker[email]" ;
+		}
 		if ($bccTo != '') {
 			$email_recipients .= ", $bccTo" ;
 		}
@@ -191,10 +192,12 @@ while ($row = mysqli_fetch_array($result)) {
 	$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 	$email_subject = "Ne pas oublier d'entrer les heures ⏱ moteur du $row[r_plane] pour $row[full_name] [#$booking_id]" ;
 	$email_message = "<p>$row[first_name],</p>" ;
-	$email_message .= "<p>Afin de garder une trace des compteurs moteur des avions et de planifier les maintenances, le RoI RAPCS exige\n" .
-		"que tous les pilotes et &eacute;l&egrave;ves entrent les heures moteur (et en option les heures de vol ainsi que les a&eacute;roports de d&eacute;part et de destination).<br/>\n" .
-		"Cela aide TOUS les pilotes d'avoir ces compteurs &agrave; jour. <b>Nous comptons tous sur vous</b>. La proc&eacute;dure\n" .
-		"est simple et peut &ecirc;tre effectu&eacute;e sur un smartphone ou une tablette depuis l'a&eacute;rodrome (3G ou WiFi du club).<br/><br/>\n" .
+	$email_message .= "<p>L'encodage des heures moteur, des heures de vol, des a&eacute;roports de d&eacute;part et de destination ainsi que du nombre de passagers est " .
+		"devenu <b>OBLIGATOIRE</b> apr&egrave;s chaque vol. Cette d&eacute;marcge est indispensable pour une gestion efficace de la flotte (planification de la maintenance " .
+		"des avions, aide &agrave; la facturation des heures de vol, ...).<p>" .
+		"<p>Merci d'effectuer cette d&eacute;marche au plus vite. Dans le cas contraire, le syst&egrave;me vous bloquera et il ne vous <b>sera plus possible " .
+		"d'effectuer votre prochaine r&eacute;servation</b>.<p>" .
+		"<p>La proc&eacute; dure est simple et peut &ecirc;tre effectu&eacute;e sur un smartphone ou une tablette depuis l'a&eacute;rodrome (3G ou WiFi du club).<br/><br/>\n" .
 		"Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] \n" .
 		"avec $row[full_name] en tant que pilote.</p>\n" ;
 	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
@@ -203,8 +206,7 @@ while ($row = mysqli_fetch_array($result)) {
 		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu \n" .
 		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle \n" .
 		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures.</p>\n" .
-		"<p>Si le temps vous manque, ou si vous n'avez pas acc&egrave;s &agrave; un PC, pri&egrave;re d'adresser un SMS au <a href=\"tel:+32496547748\">+32.496.54.77.48</a> avec le temps moteur " .
-		" et l'immatriculation de l'avion <i>Ex: $row[r_plane] 3999.45</i>.</p>\n" .
+		"<p>Merci pour votre compr&eacute;hension et votre collaboration.</p>" .
 		"<hr><p>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!</p>\n" ;
 	$email_message .= allBookings($row['r_plane'], $today, $row['r_pilot']) ;
 	if ($test_mode) $email_message .= "<hr><p><font color=red><B>Ceci est une version de test</b></font>.</p>" ;
@@ -212,11 +214,11 @@ while ($row = mysqli_fetch_array($result)) {
 	if (! $test_mode) {
 		$email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
 		$email_recipients = $row['email'] ;
-// Instructors (the only COVID-19 bookers) are complaining to have too many emails...
-//		if ($row['r_pilot'] != $row['r_who']) {
-//			$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
-//			$email_recipients .= ", $booker[email]" ;
-//		}
+// Instructors are complaining to have too many emails...
+		if ($row['r_pilot'] != $row['r_who'] and $row['r_who'] != $row['r_instructor']) {
+			$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
+			$email_recipients .= ", $booker[email]" ;
+		}
 		if ($bccTo != '') {
 			$email_header .= "Bcc: $bccTo\r\n" ;
 			$email_recipients .= ", $bccTo" ;
