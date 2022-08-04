@@ -108,9 +108,15 @@ elseif ($plane_row['ressource'] != 0 and !($userIsAdmin || $userIsInstructor))
 mysqli_free_result($result) ;
 
 // Get information about pilot
-$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $pilot_id") ;
+$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $pilot_id")
+	or journalise($userId, "E", "Cannot get info about pilot: " . mysqli_error($mysqli_link));
 $pilot = mysqli_fetch_array($result) ;
 $pilot['name'] = db2web($pilot['name']) ; // SQL DB is latin1 and the rest is in UTF-8
+// Check whether the pilot is on the no fly list
+$result = mysqli_query($mysqli_link, "SELECT * FROM jom_user_usergroup_map WHERE user_id = $pilot_id and group_id = $joomla_no_flight") 
+	or journalise($userId, "E", "Cannot get info about pilot's group: " . mysqli_error($mysqli_link));
+if (mysqli_num_rows($result) > 0) $response['error'] .= "Le pilote est interdit de vol (violation des r&egrave;gles du club (par exemple, non paiement))" ;
+
 // If instructor is on board, then get information about instructor
 if ($instructor_id != 'NULL') {
 	$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $instructor_id") ;
