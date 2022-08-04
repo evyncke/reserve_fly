@@ -74,6 +74,10 @@ function redirectDelete(id, auth, auditTime) {
 	window.location.href = 'logbook.php?id=' + id + '&auth=' + auth + '&audit_time=' + auditTime;
 }
 
+function redirectMobileDelete(id, auth, auditTime) {
+	window.location.href = 'mobile_logbook.php?id=' + id + '&auth=' + auth + '&audit_time=' + auditTime;
+}
+
 function toggleButtons(hideCancel) {
 	if (hideCancel) {
 		// Make the Save button appear and the Cancel button disappear
