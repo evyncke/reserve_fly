@@ -114,11 +114,11 @@ if ($response['error'] == '') {
 		if (!$test_mode) {
 			$email_header .= "To: $pilot[name] <$pilot[email]>\r\n" ;
 			$email_recipients = $pilot['email'] ;
-			if ($pilot_id != $userId and $booker['email'] != '') {
+			if ($pilot_id != $userId and $booker['email'] != '' and !$userIsInstructor) { // Don't send warning to FI
 				$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
 				$email_recipients .= ", $booker[email]" ;
 			}
-			if ($booking['r_instructor']) {
+			if (!$userIsInstructor and $booking['r_instructor']) { // Only warns FI when cancelled by the student
 				$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
 				$email_recipients .= ", $instructor[email]" ;
 			}

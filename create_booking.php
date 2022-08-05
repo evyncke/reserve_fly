@@ -351,11 +351,12 @@ if ($response['error'] == '') {
 		} else {
 			$email_header .= "To: $pilot[name] <$pilot[email]>\r\n" ;
 			$email_recipients = $pilot['email'] ;
-			if ($pilot_id != $userId and $booker['email'] != '') { // If booked by somebody else
+			if ($pilot_id != $userId and $booker['email'] != '' and ! $userIsInstructor) { // If booked by somebody else who is not a FI (to avoid too many email)
 				$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
 				$email_recipients .= ", $booker[email]" ;
 			}
-			if ($instructor_id != 'NULL') {
+			// Copy FI only when booking is not done by the FI
+			if ($instructor_id != 'NULL' and $instructor_id != $userId) {
 				$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
 				$email_recipients .= ", $instructor[email]" ;
 			}
@@ -370,8 +371,6 @@ if ($response['error'] == '') {
 		}
 		$email_header .= "Message-ID: <booking-$booking_id@$smtp_localhost>\r\n" ;
 		$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
-		// TODO: create an ICS file and send it as well
-		// Cfr https://www.phpfacile.com/apprendre_le_php/envoyer_un_mail_en_php/2 
 		//
 //		$smtp_info['debug'] = True;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
