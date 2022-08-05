@@ -1603,7 +1603,7 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 				thisCell.removeEventListener('click', newBookingDetails) ;
 				thisCell.addEventListener('click', editBookingDetails) ;
 			} else if (isInThePast(displayYear, displayMonth, displayDay, hour) &&
-					(userId == booking.user || userId == booking.instructorId || userId == booking.bookedById)) {
+					(userIsAdmin || userId == booking.user || userId == booking.instructorId || userId == booking.bookedById)) {
 				thisCell.id = booking.id + '-' + booking.log_id ;
 				thisCell.removeEventListener('click', newBookingDetails) ;
 				thisCell.addEventListener('click', redirectLogBook) ;

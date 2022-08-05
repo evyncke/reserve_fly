@@ -429,7 +429,7 @@ if ($userId == 0) {
 	if (mysqli_num_rows($result) > 0) {
 		$missing_entries = mysqli_num_rows($result) ;
 		print("<p style=\"color: red;\">Vous avez une ou plusieurs r&eacute;servations sans entr&eacute;es dans les carnets de routes des avions, pour la bonne
-			gestion de notre flotte, veuillez compl&eacute;ter les carnets:<ul>\n") ;
+			gestion de notre flotte, veuillez compl&eacute;ter les carnets <b>(cela sera bient&ocirc;t obligatoire pour effectuer une future r&eacute;servation)</b>.:<ul>\n") ;
 		while ($row = mysqli_fetch_array($result)) {
 			print("<li>$row[r_start]: <a href=\"logbook.php?id=$row[r_id]\">remplir le carnet de routes de $row[r_plane] ou annuler la r&eacute;servation</a>;") ;
 			if ($userIsInstructor) print(" <img src=\"gtk-delete.png\" onclick=\"javascript:document.getElementById('reasonTextArea').value='Old booking';cancelOldBooking($row[r_id]);\">" ) ;
@@ -587,11 +587,11 @@ Commentaire: <textarea id="commentTextArea" rows=4 cols=40></textarea>
 </span>
 <br/>
 <span id="flightInfo2Span">
-Lieu de d&eacute;part: <input type=text id="departingAirport" size="4" maxlength="4" onKeyUp="airportChanged(this);" value="EBSP">
-d'arriv&eacute;e: <input type=text id="destinationAirport" size="4" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
+Lieu de d&eacute;part: <input type=text id="departingAirport" size="6" maxlength="4" onKeyUp="airportChanged(this);" value="EBSP">
+d'arriv&eacute;e: <input type=text id="destinationAirport" size="6" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
 <br/>
-Via: <input type=text id="via1Airport" size="4" maxlength="4" onKeyUp="airportChanged(this);">
-et: <input type=text id="via2Airport" size="4" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
+Via: <input type=text id="via1Airport" size="6" maxlength="4" onKeyUp="airportChanged(this);">
+et: <input type=text id="via2Airport" size="6" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
 <br/>
 <hr>
 <span style="color: blue;">N'oubliez pas de vérifier la validité de votre qualification SEP, certificat médical, de votre ELP, des

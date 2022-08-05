@@ -45,7 +45,7 @@ $engine_flight_label = ($booking['r_plane'] == 'PH-AML') ? 'vol' : 'moteur' ;
 
 // Check authorization
 if ($auth == '') {
-	if (! ($userId == $booking['r_pilot'] or $userId == $booking['r_who'] or $userId == $booking['r_instructor']))
+	if (! ($userId == $booking['r_pilot'] or $userId == $booking['r_who'] or $userId == $booking['r_instructor'] or $userIsAdmin))
 		die("Logbook: you ($userId) are not authorized") ;
 	$auth = md5($id . $shared_secret) ; // It may be used later
 } else 
