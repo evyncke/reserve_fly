@@ -267,8 +267,8 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 		$email_header .= "To: $bccTo\r\n" ;
 		@smtp_mail($bccTo, substr(iconv_mime_encode('Subject',"Réservation $plane autorisée pour $pilot[name]/$userFullName"), 9), $intro . $validity_msg . $message, $email_header) ;
 	}
-} else // End of checks for normal pilot 
-	journalise($pilot_id, "D", "Check club is not required") ;
+} ; // else // End of checks for normal pilot 
+//	journalise($pilot_id, "D", "Check club is not required") ;
  
 // Check whether this period overlaps with other ones
 // TODO should give more information about other reservations => do not count(*) but mysqli_num_rows()
