@@ -24,9 +24,9 @@ if ($userId <= 0) die("Vous devez être connecté ($userIsAdmin/$userId)") ;
 
 $plane = strtoupper(mysqli_real_escape_string($mysqli_link, $_REQUEST['plane'])) ;
 if ($plane == '') die("Missing parameter plane") ;
-$page = mysqli_real_escape_string($mysqli_link, $_REQUEST['page']) ;
-if (!is_numeric($page) and $page != '') die("Invalid page number") ;
-$rows_per_page = 20 ;
+$since = mysqli_real_escape_string($mysqli_link, $_REQUEST['since']) ;
+if ($since == '')
+	$since = date('Y-m-01') ;
 
 
 ?><html>
@@ -90,29 +90,18 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['id'] == $plane)
 		$plane_details = $row ;
 }
-print("</select> Page: ") ;
-// Find how many rows in the whole logbook, it must be IDENTICAL to the real display SQL SELECT further down as some pilots are no more members...
-$result = mysqli_query($mysqli_link, "select count(*)
-	from $table_logbook l
-        join $table_users p on l_pilot=p.id
-	left join $table_users i on l_instructor = i.id
-	where l_plane = '$plane' and l_booking is not null") ;
-$row = mysqli_fetch_array($result) ;
-$row_count = $row[0] ;
-$page_count = ceil($row_count / $rows_per_page) ;
-if ($page == '') $page = $page_count ; // Without page indication, the last page is displayed
-$first_row = ($page - 1) * $rows_per_page ;
-// Try to draw base page navigation...
-if ($page > 1) 
-	print("<a href=$_SERVER[PHP_SELF]?plane=$plane&page=1>&lt;&lt;</a> ") ;
-if ($page > 2) 
-	print("<a href=$_SERVER[PHP_SELF]?plane=$plane&page=" . ($page - 1) . ">&lt;</a> ") ;
-print("$page ") ;
-if ($page < $page_count) 
-	print("<a href=$_SERVER[PHP_SELF]?plane=$plane&page=" . ($page + 1) . ">&gt;</a> ") ;
-if ($page < $page_count) 
-	print("<a href=$_SERVER[PHP_SELF]?plane=$plane&page=$page_count>&gt;&gt></a> ") ;
+print("</select> ") ;
 
+$sinceDate = new DateTime($since) ;
+$monthAfter = new DateTime($since) ;
+$monthBefore = new DateTime($since) ;
+$monthInterval = new DateInterval('P1M') ; // One month
+$monthBefore = $monthBefore->sub($monthInterval) ;
+$monthBeforeString = $monthBefore->format('Y-m-d') ;
+$monthAfter = $monthAfter->add($monthInterval) ;
+$monthAfterString = $monthAfter->format('Y-m-d') ;
+
+print("Mois: <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString>&lt;</a> $since <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthAfterString>&gt;</a>\n") ;
 ?>
 <br/>
 <table class="logTable">
@@ -152,7 +141,6 @@ if ($plane_details['compteur_vol'] != 0)
 </thead>
 <tbody>
 <?php
-// Display up to $rows_per_page rows from $first_row
 $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, l_start_hour, l_end_minute,
 	timediff(l_end, l_start) as duration,
 	l_flight_end_hour, l_flight_end_minute,
@@ -161,8 +149,8 @@ $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_h
 	join $table_users p on l_pilot=p.id
 	left join $table_users i on l_instructor = i.id
 	where l_plane = '$plane' and l_booking is not null
-	order by l_start asc
-	limit $first_row, $rows_per_page" ;
+		and '$since' <= l_start and l_start < '$monthAfterString'
+	order by l_start asc" ;
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur système à propos de l'accès au carnet de route: " . mysqli_error($mysqli_link)) ;
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
