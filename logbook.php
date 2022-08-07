@@ -136,7 +136,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		if (mysqli_affected_rows($mysqli_link) > 0) {
 			$insert_message = "Carnet de routes mis &agrave; jour" ;
 			if ($test_mode) $insert_message .= " " . mysqli_error($mysqli_link) ;
-			journalise($booking['r_pilot'], 'I', "Logbook entry added for $planeId/$planeModel, engine from $engineStartHour:$engineStartMinute to $engineEndHour:$engineEndMinute, flight $startDayTime@$fromAirport to $endDayTime@$toAirport") ;
+			journalise($booking['r_pilot'], 'I', "Logbook entry added for $planeId/$planeModel, engine from $engineStartHour:$engineStartMinute to $engineEndHour:$engineEndMinute, flight $startDayTime@$fromAirport to $endDayTime@$toAirport, $remark, $paxCount pax") ;
 			// Now, if this was for a customer flight, also update this
 			if ($booking['r_type'] == BOOKING_CUSTOMER) {
 				mysqli_query($mysqli_link, "UPDATE $table_flights SET f_date_flown='$startDayTime' WHERE f_booking=$id")
