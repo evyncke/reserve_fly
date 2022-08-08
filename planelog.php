@@ -110,14 +110,14 @@ print("Mois: <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString>&l
 <th class="logHeader">Date</th>
 <th class="logHeader">Pilot(s)</th>
 <th class="logHeader" colspan="2">Airports</th>
-<th class="logHeader" colspan="2">Time</th>
+<th class="logHeader" colspan="2">Time (UTC)</th>
 <th class="logHeader">Total time</th>
 <th class="logHeader">Passengers</th>
 <th class="logHeader">Type of</th>
-<th class="logHeader">Engine index</th>
+<th class="logHeader" colspan="2">Engine index</th>
 <?php 
 if ($plane_details['compteur_vol'] != 0)
-	print("<th class=\"logHeader\">Flight index</th>\n") ;
+	print("<th class=\"logHeader\" colspan=\"2\">Flight index</th>\n") ;
 ?>
 <th class="logHeader">Remark</th>
 </tr>
@@ -131,20 +131,23 @@ if ($plane_details['compteur_vol'] != 0)
 <th class="logLastHeader">hh:mm</th>
 <th class="logLastHeader">Count</th>
 <th class="logLastHeader">flight</th>
-<th class="logLastHeader">(end)</th>
+<th class="logLastHeader">Begin</th>
+<th class="logLastHeader">End</th>
 <?php 
 if ($plane_details['compteur_vol'] != 0)
-	print("<th class=\"logLastHeader\">(end)</th>\n") ;
+	print("<th class=\"logLastHeader\">Begin</th>\n
+		<th class=\"logLastHeader\">End</th>\n") ;
 ?>
 <th class="logLastHeader">(CP, ...)</th>
 </tr>
 </thead>
 <tbody>
 <?php
-$sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, l_start_hour, l_end_minute,
+$sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, l_start_hour, l_start_minute,
 	timediff(l_end, l_start) as duration,
-	l_flight_end_hour, l_flight_end_minute,
-	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark, l_pax_count
+	l_flight_end_hour, l_flight_end_minute, l_flight_start_hour, l_flight_start_minute,
+	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark, l_pax_count,
+	l_booking
 	from $table_logbook l 
 	join $table_users p on l_pilot=p.id
 	left join $table_users i on l_instructor = i.id
@@ -165,23 +168,56 @@ $previous_end_hour = false ;
 $previous_end_minute = false ;
 while ($row = mysqli_fetch_array($result)) {
 	// Emit a red line for missing entries...
-	if ($previous_end_hour and $previous_end_hour != $row['l_start_hour'] and $previous_end_minute != $row['l_start_minute'])
-		print("<tr><td class=\"logCell\" colspan=11 style=\"color: red;\">Missing entries...</td></tr>\n") ;
+	if ($previous_end_hour) {
+		$gap = 60 * ($row['l_start_hour'] - $previous_end_hour) + $row['l_start_minute'] - $previous_end_minute ;
+		if ($gap > 0) {
+			$missingPilots = array() ;
+			// A little tricky as the data in $table_logbook is in UTC and in $table_bookings in local time :-O
+			// Moreover, the MySQL server at OVH does not support timezone... I.e., everything must be done in PHP
+			// I.e., the logging data must be converted into local time
+			$previous_end_lt = new DateTime($previous_end, new DateTimeZone('UTC')) ;
+			$previous_end_lt->setTimezone(new DateTimeZone($default_timezone)) ;
+			$this_start_lt = new DateTime($row['l_start'], new DateTimeZone('UTC')) ;
+			$this_start_lt->setTimezone(new DateTimeZone($default_timezone)) ;
+			$result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type
+				FROM $table_bookings JOIN $table_person ON r_pilot = jom_id
+				WHERE r_plane = '$plane' AND r_cancel_date IS NULL
+					AND r_id != $row[l_booking]
+					AND '" . $previous_end_lt->format('Y-m-d H:i') . "' <= r_start
+					AND r_stop < '" . $this_start_lt->format('Y-m-d H:i') . "' 
+				ORDER by r_start ASC") or die("Erreur système à propos de l'accès aux réservations manquantes: " . mysqli_error($mysqli_link));
+			while ($row2 = mysqli_fetch_array($result2)) {
+				if ($row2['r_type'] == BOOKING_MAINTENANCE)
+					$missingPilots[] = 'Maintenance (' . substr($row2['r_start'], 0, 10) . ')' ;
+				else
+					$missingPilots[] = db2web($row2['last_name']) . ' (' . substr($row2['r_start'], 0, 10) . ')' ;
+			}
+			print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Missing entries for $gap minutes..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
+		} else if ($gap < 0)
+			print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Overlapping / duplicate entries for $gap minutes...</td></tr>\n") ;
+	}
 	$previous_end_hour = $row['l_end_hour'] ;
 	$previous_end_minute = $row['l_end_minute'] ;
+	$previous_end = $row['l_end'] ;
 	$line_count ++ ;
 	// Need to change duration from HH:MM:SS into HH:MM
 	$duration = explode(':', $row['duration']) ;
 	$duration = "$duration[0]:$duration[1]" ;
 	// Handling character sets...
-	$pilot_name = ($convertToUtf8) ? iconv("ISO-8859-1", "UTF-8", $row['pilot_name']) : $row['pilot_name'] ; 
-	$instructor_name = ($convertToUtf8) ? iconv("ISO-8859-1", "UTF-8", $row['instructor_name']) : $row['instructor_name'] ; 
-	// As the OVH MySQL server does not have the timezone support, needs to be done in PHP
-	$l_start = gmdate('H:i', strtotime("$row[l_start] $default_timezone")) ;
-	$l_end = gmdate('H:i', strtotime("$row[l_end] $default_timezone")) ;
+	$pilot_name = db2web($row['pilot_name']) ;
+	$instructor_name = db2web($row['instructor_name']) ;
+	// Time in $table_logbook is already in UTC
+	// $l_start = gmdate('H:i', strtotime("$row[l_start] $default_timezone")) ;
+	// $l_end = gmdate('H:i', strtotime("$row[l_end] $default_timezone")) ;
+	$l_start = substr($row['l_start'], 11, 5) ;
+	$l_end = substr($row['l_end'], 11, 5) ;
 	$instructor = ($instructor_name != '') ? " /<br/>$instructor_name" : '' ;
+	if ($row['l_start_minute'] < 10)
+			$row['l_start_minute'] = "0$row[l_start_minute]" ;
 	if ($row['l_end_minute'] < 10)
 			$row['l_end_minute'] = "0$row[l_end_minute]" ;
+	if ($row['l_flight_start_minute'] < 10)
+			$row['l_flight_start_minute'] = "0$row[l_flight_start_minute]" ;
 	if ($row['l_flight_end_minute'] < 10)
 			$row['l_flight_end_minute'] = "0$row[l_flight_end_minute]" ;
 	print("<tr>
@@ -194,6 +230,7 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"logCell\">$duration</td>
 		<td class=\"logCell\">$row[l_pax_count]</td>
 		<td class=\"logCell\">$row[l_flight_type]</td>
+		<td class=\"logCell\">$row[l_start_hour]:$row[l_start_minute]</td>
 		<td class=\"logCell\">$row[l_end_hour]:$row[l_end_minute]</td>\n") ;
 	if ($plane_details['compteur_vol'] != 0)
 		print("<td class=\"logCell\">$row[l_flight_end_hour]:$row[l_flight_end_minute]</td>\n") ;
@@ -234,3 +271,4 @@ $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
 </body>
 </html>
+
