@@ -166,6 +166,8 @@ $fi_total_minute =  0;
 $line_count = 0 ;
 $previous_end_hour = false ;
 $previous_end_minute = false ;
+$previous_end_utc = false ;
+$previous_end_lt = false ;
 while ($row = mysqli_fetch_array($result)) {
 	// Emit a red line for missing entries...
 	if ($previous_end_hour) {
@@ -175,7 +177,7 @@ while ($row = mysqli_fetch_array($result)) {
 			// A little tricky as the data in $table_logbook is in UTC and in $table_bookings in local time :-O
 			// Moreover, the MySQL server at OVH does not support timezone... I.e., everything must be done in PHP
 			// I.e., the logging data must be converted into local time
-			$previous_end_lt = new DateTime($previous_end, new DateTimeZone('UTC')) ;
+			$previous_end_lt = new DateTime($previous_end_utc, new DateTimeZone('UTC')) ;
 			$previous_end_lt->setTimezone(new DateTimeZone($default_timezone)) ;
 			$this_start_lt = new DateTime($row['l_start'], new DateTimeZone('UTC')) ;
 			$this_start_lt->setTimezone(new DateTimeZone($default_timezone)) ;
@@ -198,7 +200,9 @@ while ($row = mysqli_fetch_array($result)) {
 	}
 	$previous_end_hour = $row['l_end_hour'] ;
 	$previous_end_minute = $row['l_end_minute'] ;
-	$previous_end = $row['l_end'] ;
+	$previous_end_utc = $row['l_end'] ;
+	$previous_end_lt = new DateTime($previous_end_utc, new DateTimeZone('UTC')) ;
+	$previous_end_lt->setTimezone(new DateTimeZone($default_timezone)) ;
 	$line_count ++ ;
 	// Need to change duration from HH:MM:SS into HH:MM
 	$duration = explode(':', $row['duration']) ;
@@ -232,31 +236,36 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"logCell\">$row[l_flight_type]</td>
 		<td class=\"logCell\">$row[l_start_hour]:$row[l_start_minute]</td>
 		<td class=\"logCell\">$row[l_end_hour]:$row[l_end_minute]</td>\n") ;
-	if ($plane_details['compteur_vol'] != 0)
+	if ($plane_details['compteur_vol'] != 0) {
+		print("<td class=\"logCell\">$row[l_flight_start_hour]:$row[l_flight_start_minute]</td>\n") ;
 		print("<td class=\"logCell\">$row[l_flight_end_hour]:$row[l_flight_end_minute]</td>\n") ;
+	}
 	print("<td class=\"logCell\">$row[l_remark]</td>") ;
 	print("</tr>\n") ;
 }
-$duration_total_hour += floor($duration_total_minute / 60) ;
-$duration_total_minute = $duration_total_minute % 60 ;
-$pic_total_hour += floor($pic_total_minute / 60) ;
-$pic_total_minute = $pic_total_minute % 60 ;
-$dual_total_hour += floor($dual_total_minute / 60) ;
-$dual_total_minute = $dual_total_minute % 60 ;
-$fi_total_hour += floor($fi_total_minute / 60) ;
-$fi_total_minute = $fi_total_minute % 60 ;
+
+// Missing logbook entries until now
+$missingPilots = array() ;
+// A little tricky as the data in $table_logbook is in UTC and in $table_bookings in local time :-O
+// Moreover, the MySQL server at OVH does not support timezone... I.e., everything must be done in PHP
+// I.e., the logging data must be converted into local time
+print("Before: " . $previous_end_lt->format('Y-m-d H:i')) ;
+$result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type
+	FROM $table_bookings JOIN $table_person ON r_pilot = jom_id
+	WHERE r_plane = '$plane' AND r_cancel_date IS NULL
+		AND '" . $previous_end_lt->format('Y-m-d H:i') . "' <= r_start
+		AND r_stop < SYSDATE()
+	ORDER by r_start ASC") or die("Erreur système à propos de l'accès aux réservations manquantes après: " . mysqli_error($mysqli_link));
+while ($row2 = mysqli_fetch_array($result2)) {
+	if ($row2['r_type'] == BOOKING_MAINTENANCE)
+		$missingPilots[] = 'Maintenance (' . substr($row2['r_start'], 0, 10) . ')' ;
+	else
+		$missingPilots[] = db2web($row2['last_name']) . ' (' . substr($row2['r_start'], 0, 10) . ')' ;
+}
+if (count($missingPilots) > 0)
+	print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Missing entries..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
+
 ?>
-<!-- tr><td colspan="7" class="logTotal">Total</td>
-<td class="logTotal"><?=$duration_total_hour?></td>
-<td class="logTotal"><?=$duration_total_minute?></td>
-<td class="logTotal"></td>
-<td class="logTotal"><?=$pic_total_hour?></td>
-<td class="logTotal"><?=$pic_total_minute?></td>
-<td class="logTotal"><?=$dual_total_hour?></td>
-<td class="logTotal"><?=$dual_total_minute?></td>
-<td class="logTotal"><?=$fi_total_hour?></td>
-<td class="logTotal"><?=$fi_total_minute?></td>
-</tr -->
 </tbody>
 </table>
 <br>
