@@ -450,29 +450,36 @@ function showPilotDetails(id) {
 	document.getElementById("pilotDetailsDiv").style.top = 300 ;
 	document.getElementById("pilotDetailsDiv").style.left = 300 ;
 	var span = document.getElementById("pilotDetailsSpan") ;
+	// Reset the picture in the div
+	document.getElementById("pilotDetailsImage").src = '' ;
+	document.getElementById("pilotDetailsImage").style.display = 'none' ;
+
 	var booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
-	span.innerHTML = '<b>' + booking.name + "</b>" ;
-	if (booking.user)
-		span.innerHTML += '<a href="vcard.php?id=' + booking.user + '"><i class="material-icons" style="font-size:18px;color:blue;">cloud_download</i></a>' ;
-	if (booking.cell_phone)
-		span.innerHTML += '<br/>Mobile: <a href="tel:' + booking.cell_phone + '">' + booking.cell_phone + '</a>';
-	if (booking.home_phone)
-		span.innerHTML += '<br/>Priv&eacute;: <a href="tel:' + booking.home_phone + '">' + booking.home_phone + '</a>';
-	if (booking.work_phone)
-		span.innerHTML += '<br/>Prof.: <a href="tel:' + booking.work_phone + '">' + booking.work_phone + '</a>';
-	if (booking.email)
-		span.innerHTML += '<br/>Email: <a href="mailto:' + booking.email + '">' + booking.email + '</a>' ;
-	if (booking.avatar) {
-		document.getElementById("pilotDetailsImage").src = booking.avatar ;
-		document.getElementById("pilotDetailsImage").style.visibility = 'inherited' ;
-		document.getElementById("pilotDetailsImage").style.display = 'inline' ;
-	} else {
-		document.getElementById("pilotDetailsImage").src = 'https://www.gravatar.com/avatar/' + booking.gravatar + '?s=80&d=blank&r=pg' ;
-		document.getElementById("pilotDetailsImage").style.visibility = 'inherited' ;
-		document.getElementById("pilotDetailsImage").style.display = 'inline' ;
-//		document.getElementById("pilotDetailsImage").src = '' ;
-//		document.getElementById("pilotDetailsImage").style.visibility = 'none' ;
-//		document.getElementById("pilotDetailsImage").style.display = 'none' ;
+	if (booking.log_pilot == 'undefined' || booking.log_pilot != booking.user) { // The booked pilot is not the same as in logbook
+		span.innerHTML = '<b>' + booking.log_pilotName + "</b>" ;
+		span.innerHTML += '<a href="vcard.php?id=' + booking.log_pilot + '"><i class="material-icons" style="font-size:18px;color:blue;">cloud_download</i></a>' ;
+		span.innerHTML += '<br>Vol réserve par: ' + booking.name ;
+	} else { // No logbook information (possibly future reservation
+		span.innerHTML = '<b>' + booking.name + "</b>" ;
+		if (booking.user)
+			span.innerHTML += '<a href="vcard.php?id=' + booking.user + '"><i class="material-icons" style="font-size:18px;color:blue;">cloud_download</i></a>' ;
+		if (booking.cell_phone)
+			span.innerHTML += '<br/>Mobile: <a href="tel:' + booking.cell_phone + '">' + booking.cell_phone + '</a>';
+		if (booking.home_phone)
+			span.innerHTML += '<br/>Priv&eacute;: <a href="tel:' + booking.home_phone + '">' + booking.home_phone + '</a>';
+		if (booking.work_phone)
+			span.innerHTML += '<br/>Prof.: <a href="tel:' + booking.work_phone + '">' + booking.work_phone + '</a>';
+		if (booking.email)
+			span.innerHTML += '<br/>Email: <a href="mailto:' + booking.email + '">' + booking.email + '</a>' ;
+		if (booking.avatar) {
+			document.getElementById("pilotDetailsImage").src = booking.avatar ;
+			document.getElementById("pilotDetailsImage").style.visibility = 'inherited' ;
+			document.getElementById("pilotDetailsImage").style.display = 'inline' ;
+		} else {
+			document.getElementById("pilotDetailsImage").src = 'https://www.gravatar.com/avatar/' + booking.gravatar + '?s=80&d=blank&r=pg' ;
+			document.getElementById("pilotDetailsImage").style.visibility = 'inherited' ;
+			document.getElementById("pilotDetailsImage").style.display = 'inline' ;
+		}
 	}
 	if (booking.instructorId > 0) {
 		span.innerHTML += '<hr><b>' + booking.instructorName + "</b>" ;
@@ -749,7 +756,7 @@ function displayBookingDetails(id) {
 	span.innerHTML += '&agrave;: ' + booking.end + " <i>(" + booking.duration + " heure(s) de vol)</i><br/>" ;
 	if (booking.log_start) {
 		span.innerHTML += 'Carnet de route: ' + booking.log_start + ", " ;
-		span.innerHTML += '&agrave;: ' + booking.log_end + '<br/>'  ;
+		span.innerHTML += '&agrave;: ' + booking.log_end + ' (' + booking.log_pilotName + ')<br/>'  ;
 	}
 	if (booking.type == bookingTypeMaintenance) 
 		span.innerHTML += '<span style="color: red;">Maintenance</span><br/>' ;
@@ -1585,7 +1592,10 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 					thisCell.innerHTML = booking.customerName ;
 					thisCell.className = 'customer' ;
 				} else {
-					thisCell.innerHTML = booking.name ;
+					if (booking.log_pilot == 0)
+						thisCell.innerHTML = booking.name ;
+					else
+						thisCell.innerHTML = booking.log_pilotName ;
 					if (booking.type == bookingTypeOnHold)
 						thisCell.className = 'onhold' 
 					else if ((booking.ressource == 0) && (!booking.log_end) && (endDate <= now))
@@ -1797,7 +1807,19 @@ function refreshPlanePlanningRow(rowIndex, plane, displayDay, displayMonth, disp
 						if (typeof bookings[i].via1 == 'undefined') bookings[i].via1 = '' ;
 						if (typeof bookings[i].via2 == 'undefined') bookings[i].via2 = '' ;
 						if (typeof bookings[i].to == 'undefined') bookings[i].to = '' ;
-						if (typeof bookings[i].log_id == 'undefined') bookings[i].log_id = 0 ;
+						if (typeof bookings[i].log_id == 'undefined') {
+							bookings[i].log_id = 0 ;
+							bookings[i].log_pilot = 0 ;
+							bookings[i].log_pilotName = '' ;
+						} else {
+							bookings[i].log_pilotName = 'inconnu' ;
+							for (var j = 0; j < pilots.length ; j++) {
+								if (pilots[j].id == bookings[i].log_pilot) {
+									bookings[i].log_pilotName = pilots[j].name ;
+									break ;
+								}
+							}	
+						}	
 						// should do it only when row does not exist yet... such as when there are multiple logging entries for the same booking						
 						if (typeof allBookings[bookings[i].id] == 'undefined')
 							allBookings[bookings[i].id] = new Array() ;
