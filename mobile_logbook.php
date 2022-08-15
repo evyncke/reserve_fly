@@ -449,7 +449,8 @@ if ($booking['compteur_vol'] != 0) {
 	<tr><td class="logbookLabel">Type de vol:</td><td class="logbookValue">
 		<select name="flightType">
 			<option value="local">local</option>
-			<option value="nav">nav</option>
+			<option value="navigation">navigation</option>
+			<option value="initiation">initiation</option>
 		</select>
 	</td><tr>
 </table>
