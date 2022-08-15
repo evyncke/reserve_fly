@@ -249,7 +249,6 @@ $missingPilots = array() ;
 // A little tricky as the data in $table_logbook is in UTC and in $table_bookings in local time :-O
 // Moreover, the MySQL server at OVH does not support timezone... I.e., everything must be done in PHP
 // I.e., the logging data must be converted into local time
-print("Before: " . $previous_end_lt->format('Y-m-d H:i')) ;
 $result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type
 	FROM $table_bookings JOIN $table_person ON r_pilot = jom_id
 	WHERE r_plane = '$plane' AND r_cancel_date IS NULL
