@@ -165,7 +165,8 @@ if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 }
 
 // Refresh the data from the DB
-$result = mysqli_query($mysqli_link, "select * from $table_logbook where l_plane = '$booking[r_plane]' and l_start_hour is not null and l_start_hour > 0
+$result = mysqli_query($mysqli_link, "select * from $table_logbook where l_plane = '$booking[r_plane]'
+		and l_start_hour is not null and l_start_hour > 0
 		order by l_end desc limit 0,1")
 	or die("Cannot access the plan journey log: " . mysqli_error($mysqli_link)) ;
 $logbook = mysqli_fetch_array($result) ;
