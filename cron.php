@@ -59,16 +59,18 @@ function allBookings($plane, $day, $me) {
 		order by r_start") or journalise($userId, 'E', "allBookings($plane, $day, $me) : " . mysqli_error($mysqli_link)) ;
 	if (mysqli_num_rows($result) == 0)
 		return "\n<p><i>Pour votre information, vous &ecirc;tes le/la seul(e) &agrave; avoir r&eacute;serv&eacute; cet avion ce jour-l&agrave;.</i></p>\n" ;
-	$msg = "\n<p><i>Pour votre information, d'autres pilotes ont r&eacute;serv&eacute; cet avion le m&ecirc;me jour (utile en cas de retard par exemple):
+	else {
+		$msg = "\n<p><i>Pour votre information, d'autres pilotes ont r&eacute;serv&eacute; cet avion le m&ecirc;me jour (utile en cas de retard par exemple):
 <table border=\"1\">
 <tr><td><b>De</b></td><td><b>Fin</b></td><td><b>Nom</b></td><td><b>Mobile</b></td><td><b>E-mail</b></td><td><b>Commentaire</b></td></tr>\n" ;
-	while ($row = mysqli_fetch_array($result)) {
-		$row['full_name'] = db2web($row['full_name']) ; // SQL DB is latin1 and the rest is in UTF-8
-		$row['r_comment'] = db2web($row['r_comment']) ; // SQL DB is latin1 and the rest is in UTF-8
-		$msg .= "<tr><td>$row[start]</td><td>$row[stop]</td><td>$row[full_name]</td><td><a href=\"tel:$row[cell_phone]\">$row[cell_phone]</a></td><td><a href=\"mailto:$row[email]\">$row[email]</a></td><td>$row[r_comment]</tr>\n" ;
+		while ($row = mysqli_fetch_array($result)) {
+			$row['full_name'] = db2web($row['full_name']) ; // SQL DB is latin1 and the rest is in UTF-8
+			$row['r_comment'] = db2web($row['r_comment']) ; // SQL DB is latin1 and the rest is in UTF-8
+			$msg .= "<tr><td>$row[start]</td><td>$row[stop]</td><td>$row[full_name]</td><td><a href=\"tel:$row[cell_phone]\">$row[cell_phone]</a></td><td><a href=\"mailto:$row[email]\">$row[email]</a></td><td>$row[r_comment]</tr>\n" ;
+		}
+		$msg .= "\n</table>\n</p>\n" ;
+		return $msg ;
 	}
-	$msg .= "\n</table>\n</p>\n" ;
-	return $msg ;
 }
 
 // Reminder 24 hours before the flight
