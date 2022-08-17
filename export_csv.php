@@ -48,14 +48,14 @@ exportSQL("SELECT l_id, l_plane, l_start, l_end, l_start_hour,
 			l_start_minute, l_end_hour, l_end_minute,
 			l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
 			l_flight_type, l_booking, l_from, l_to, l_pilot, l_instructor,
-			l_pax_count, l_remark, l_cp1, l_cp2
+			l_pax_count, l_remark, l_share_type, l_share_member
 		FROM $table_logbook
 		WHERE l_start >= '$startDate'",
 	array('l_id', 'l_plane', 'l_start', 'l_end', 'l_start_hour',
                         'l_start_minute', 'l_end_hour', 'l_end_minute',
                         'l_flight_start_hour', 'l_flight_start_minute', 'l_flight_end_hour', 'l_flight_end_minute',
 			'l_flight_type', 'l_booking', 'l_from', 'l_to', 'l_pilot', 'l_instructor',
-			'l_pax_count', 'l_remark', 'l_cp1', 'l_cp2'),
+			'l_pax_count', 'l_remark', 'l_share_type', 'l_share_member'),
 	"data/$table_logbook.csv") ;
 
 exportSQL("SELECT r_id, r_plane, r_start, r_stop, r_pilot, r_instructor, r_comment, r_who, r_from, r_to, r_cancel_date, r_cancel_who, r_cancel_reason
