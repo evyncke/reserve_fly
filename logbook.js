@@ -1,5 +1,5 @@
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ left, or landscape mode with the screen turned to the right. */
 }
 
 function showTab(anchor) {
-	console.log("showTab(" + anchor + ")") ;
 	$('.nav-tabs a[href="' + anchor + '"]').tab('show');
 }
 
@@ -130,10 +129,6 @@ function engineTimeChanged(onInit) {
 	var inputEngineStartHour = parseInt(document.getElementsByName('engineStartHour')[0].value) ;
 	var inputEngineEndHour = parseInt(document.getElementsByName('engineEndHour')[0].value) ;
 	
-	console.log('engineTimeChanged, inputEngineStartHour=' + inputEngineStartHour) ;
-	console.log('engineStartHour=' + engineStartHour) ;
-	console.log('engineTimeChanged, inputEngineEndHour=' + inputEngineEndHour) ;
-	console.log('engineEndtHour=' + engineEndHour) ;
 	if (engineStartHour > 10) { // Need to have a sensible value
 //		if (inputEngineStartHour + 10 < engineStartHour) {
 //			bsAlert('Temps moteur début doit être supérieur à ' + engineStartHour ) ;
@@ -294,7 +289,6 @@ function UTCTimeChanged(onInit) {
 }
 
 function planeChanged() {
-	console.log('Start of plane change') ;
 	// Let's clear the engine index
 	document.getElementsByName('engineStartHour')[0].value = null ;
 	document.getElementsByName('engineStartHour')[0].min = null ;
@@ -317,7 +311,6 @@ function planeChanged() {
 	document.getElementsByName('UTCDurationMinute')[0].value = 0 ;
 	// No more engine checks
 	checkEngineCounter = false ;
-	console.log('End of plane change') ;
 }
 
 function prefillDropdownMenus(selectName, valuesArray, selectedValue) {
@@ -365,6 +358,10 @@ function initLogbook() {
 	prefillDropdownMenus('plane', planes, planeId) ;
 	prefillDropdownMenus('pilot', pilots, pilotId) ;
 	prefillDropdownMenus('instructor', instructors, instructorId) ;
+	prefillDropdownMenus('cp1', shareCodes, 0) ;
+	prefillDropdownMenus('cp1', members, 0) ;
+	prefillDropdownMenus('cp2', [{id: 0, name: "Aucun partage"}], 0) ;
+	prefillDropdownMenus('cp2', members, 0) ;
 	// Hide optional fields on mobile devices
 //	hideOptionalFields = !isMobile ;
 //	toggleOptionalFields() ;

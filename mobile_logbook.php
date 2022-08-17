@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -110,6 +110,15 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$dayLandings = trim($_REQUEST['dayLandings']) ; if (!is_numeric($dayLandings) or $dayLandings < 0) die("dayLandings $dayLandings is not numeric or is not valid") ;
 	$nightLandings = trim($_REQUEST['nightLandings']) ; if (!is_numeric($nightLandings) or $nightLandings < 0) die("nightLandings $nightLandings is not numeric or is not valid") ;
 	$paxCount = trim($_REQUEST['pax_count']) ; if (!is_numeric($paxCount) or $paxCount < 0 or $paxCount > 3) die("paxCount $paxCount is not numeric or is not valid") ;
+        $cp1 = trim($_REQUEST['cp1']) ; 
+        if ($cp1 == '' or $cp1 == '0') // 0 is hard coded as not shared
+                $cp1 = 'NULL' ;
+        else if (!is_numeric($cp1)) die("cp1 $cp1 is not numeric") ;
+        $cp2 = trim($_REQUEST['cp2']) ; 
+        if ($cp2 == '' or $cp2 == '0') // 0 is hard coded as not shared
+                $cp2 = 'NULL' ;
+        else if (!is_numeric($cp2)) die("cp2 $cp2 is not numeric") ;
+        if ($cp2 != 'NULL' and $cp1 == 'NULL') die("Cannot share with CP2 with empty CP1") ;
 	$remark = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['remark'])) ;
 	// Do some checks
 	if ($endDayTime <= $startDayTime)  
@@ -122,13 +131,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		mysqli_query($mysqli_link, "insert into $table_logbook(l_plane, l_model, l_booking, l_from, l_to,
 			l_start_hour, l_start_minute, l_end_hour, l_end_minute,
 			l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
-			l_start, l_end, l_flight_type, l_remark, l_pax_count,
+			l_start, l_end, l_flight_type, l_remark, l_pax_count, l_cp1, l_cp2,
 			l_pilot, l_instructor, l_day_landing, l_night_landing,
 			l_audit_who, l_audit_ip, l_audit_time) values
 			('$planeId', '$planeModel', $id, '$fromAirport', '$toAirport',
 			$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute,
 			$flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
-			'$startDayTime', '$endDayTime', '$flightType', '$remark', $paxCount,
+			'$startDayTime', '$endDayTime', '$flightType', '$remark', $paxCount, $cp1, $cp2,
 			$pilotId, $instructorId, $dayLandings, $nightLandings,
 			$userId, '" . getClientAddress() . "', sysdate())") or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
@@ -232,6 +241,8 @@ require_once 'mobile_header.php' ;
 ?>
 <script src="pilots.js"></script>
 <script src="instructors.js"></script>
+<script src="members.js"></script>
+<script src="shareCodes.js"></script>
 <script src="logbook.js"></script>
 <script>
 var
@@ -263,8 +274,8 @@ if (isset($_REQUEST['cancel']) and $_REQUEST['cancel'] != '') {
 	<div class="col-sm-12 text-center"><h3 class=" hidden-xs">Carnet de routes pour <?=$booking['r_plane']?></h3>
 		R&eacute;servation du <?=$booking['r_start']?>. <div class="hidden-xs"><mark><b>Cette page <!-- est optionelle (mais aide &agrave; la maintenance de l'avion et
 		aux pr&eacute;visions de vols des autres pilotes), elle --> ne remplace pas l'entr&eacute;e &eacute;crite qui doit
-		&ecirc;tre dans le carnet de routes de l'avion.</b></mark><br/> Veuillez commencer par entrer les heures moteurs, puis l'horaire
-		de votre vol et en option le nom du pilote, le nombre d'atterrissages, ...</div><!-- hidden -->
+		&ecirc;tre dans le carnet de routes de l'avion.</b></mark><br/> Veuillez commencer par entrer la date, les heures moteurs, puis l'horaire
+		de votre vol, le nom du pilote, le nombre d'atterrissages, ...</div><!-- hidden -->
 	<br/>
 	</div><!-- col -->
 </div> <!-- row -->
@@ -285,7 +296,7 @@ if (isset($insert_message) and $insert_message != '') {
 
 <?php
 // Now, display any previous entries related to this booking
-$result = mysqli_query($mysqli_link, "select l_start, l_end, l_plane, l_from, l_to, l_flight_type, l_audit_time, p.last_name as pilotName, i.last_name as instructorName, l_pax_count, l_remark
+$result = mysqli_query($mysqli_link, "select l_start, l_end, l_plane, l_from, l_to, l_flight_type, l_audit_time, p.last_name as pilotName, i.last_name as instructorName, l_pax_count, l_remark, l_cp1, l_cp2
 		from $table_logbook l join $table_person p on l.l_pilot = p.jom_id left join $table_person i on l.l_instructor = i.jom_id
 		where l_booking = $id order by l_start")
 	or die("Impossible de lire les entrees pour reservation $id: " . mysqli_error($mysqli_link)) ;
@@ -300,15 +311,17 @@ if ($this_segment_id > 1) {
 		</thead>
 		<tbody>') ;
 	while ($row = mysqli_fetch_array($result)) {
-		// As the OVH MySQL server does not have the timezone support, needs to be done in PHP
-//		$start_UTC = gmdate('H:i', strtotime("$row[l_start] $default_timezone")) ;
-//		$end_UTC = gmdate('H:i', strtotime("$row[l_end] $default_timezone")) ;
 		$start_UTC = $row['l_start'] ;
 		$end_UTC = $row['l_end'] ;
 		if ($row['instructorName'] == '')
 			$crew = $row['pilotName'] ;
 		else
 			$crew = $row['pilotName'] . '/' . $row['instructorName'] ;
+                if ($row['l_cp1'] != '')
+                        if ($row['l_cp2'] != '')
+                                $row['l_remark'] = "<b>CP2</b> " . $row['l_remark'] ;
+                        else
+                                $row['l_remark'] = "<b>CP1</b> " . $row['l_remark'] ;
 		print("<tr>
 			<td>$row[l_plane]</td>
 			<td>$crew</td>
@@ -463,6 +476,20 @@ if ($booking['compteur_vol'] != 0) {
 </table>
 </div> <!-- col-->
 
+<div class="col-xs-12 col-md-4">
+<table class="logbookTable">
+       <tr><td class="logbookSeparator" colspan="2">Partage des coûts (en test)</td><tr>
+       <tr><td class="logbookLabel">CP1:</td><td class="logbookValue">
+               <select name="cp1">
+               </select>
+       </td><tr>
+       <tr><td class="logbookLabel">CP2:</td><td class="logbookValue">
+               <select name="cp2">
+               </select>
+       </td><tr>
+</table>
+</div> <!-- col-->
+
 <div class="col-xs-12 col-md-3">
 <table class="logbookTable">
 	<tr><td class="logbookSeparator" colspan="2">Remarque (CP, IF, ...)</td><tr>
@@ -478,12 +505,6 @@ if ($booking['compteur_vol'] != 0) {
 </div><!-- row -->
 
 <hr>
-
-<div class="row">
-<div class="col-xs-12 text-center">
-<h3>Donn&eacute;es facultatives</h3>
-</div> <!-- col -->
-</div> <!-- row -->
 
 <div class="row">
 
