@@ -146,7 +146,7 @@ if ($plane_details['compteur_vol'] != 0)
 $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, l_start_hour, l_start_minute,
 	timediff(l_end, l_start) as duration,
 	l_flight_end_hour, l_flight_end_minute, l_flight_start_hour, l_flight_start_minute,
-	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark, l_pax_count,
+	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark, l_pax_count, l_cp1, l_cp2,
 	l_booking
 	from $table_logbook l 
 	join $table_users p on l_pilot=p.id
@@ -224,6 +224,11 @@ while ($row = mysqli_fetch_array($result)) {
 			$row['l_flight_start_minute'] = "0$row[l_flight_start_minute]" ;
 	if ($row['l_flight_end_minute'] < 10)
 			$row['l_flight_end_minute'] = "0$row[l_flight_end_minute]" ;
+	if ($row['l_cp1'] != '')
+		if ($row['l_cp2'] != '')
+			$row['l_remark'] = '<b>CP2</b> ' . $row['l_remark'] ;
+		else
+			$row['l_remark'] = '<b>CP1</b> ' . $row['l_remark'] ;
 	print("<tr>
 		<td class=\"logCell\">$row[date]</td>
 		<td class=\"logCell\">$pilot_name$instructor</td>
