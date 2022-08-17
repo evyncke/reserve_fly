@@ -358,12 +358,7 @@ function initLogbook() {
 	prefillDropdownMenus('plane', planes, planeId) ;
 	prefillDropdownMenus('pilot', pilots, pilotId) ;
 	prefillDropdownMenus('instructor', instructors, instructorId) ;
-	prefillDropdownMenus('cp1', shareCodes, 0) ;
-	prefillDropdownMenus('cp1', members, 0) ;
-	prefillDropdownMenus('cp2', [{id: 0, name: "Aucun partage"}], 0) ;
-	prefillDropdownMenus('cp2', members, 0) ;
-	// Hide optional fields on mobile devices
-//	hideOptionalFields = !isMobile ;
-//	toggleOptionalFields() ;
+	prefillDropdownMenus('share_member', shareCodes, 0) ;
+	prefillDropdownMenus('share_member', members, 0) ;
 	console.log("end of initLogbook()") ;
 }

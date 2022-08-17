@@ -38,7 +38,7 @@ $result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r
 	from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a
 	where r_id = $id and a.id = r_plane and a.ressource = 0") or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 $booking = mysqli_fetch_array($result) ;
-if (! $booking) die("D&eacute;sol&eacute; cette r&eacute;servation n'existe pas") ;
+if (! $booking) die("D&eacute;sol&eacute; cette r&eacute;servation #$id n'existe pas") ;
 
 // TODO check planes[compteur_vol]
 $engine_flight_label = ($booking['r_plane'] == 'PH-AML') ? 'vol' : 'moteur' ;
@@ -100,15 +100,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$dayLandings = trim($_REQUEST['dayLandings']) ; if (!is_numeric($dayLandings) or $dayLandings < 0) die("dayLandings $dayLandings is not numeric or is not valid") ;
 	$nightLandings = trim($_REQUEST['nightLandings']) ; if (!is_numeric($nightLandings) or $nightLandings < 0) die("nightLandings $nightLandings is not numeric or is not valid") ;
 	$paxCount = trim($_REQUEST['pax_count']) ; if (!is_numeric($paxCount) or $paxCount < 0 or $paxCount > 3) die("paxCount $paxCount is not numeric or is not valid") ;
-	$cp1 = trim($_REQUEST['cp1']) ; 
-	if ($cp1 == '' or $cp1 == '0') // 0 is hard coded as not shared
-		$cp1 = 'NULL' ;
-	else if (!is_numeric($cp1)) die("cp1 $cp1 is not numeric") ;
-	$cp2 = trim($_REQUEST['cp2']) ; 
-	if ($cp2 == '' or $cp2 == '0') // 0 is hard coded as not shared
-		$cp2 = 'NULL' ;
-	else if (!is_numeric($cp2)) die("cp2 $cp2 is not numeric") ;
-	if ($cp2 != 'NULL' and $cp1 == 'NULL') die("Cannot share with CP2 with empty CP1") ;
+	$share_type = strtoupper(trim($_REQUEST['share_type'])) ; 
+	if ($share_type != '' and $share_type != 'CP1' and $share_type != 'CP2') die("Invalid share_type: $share_type") ;
+	$share_member = trim($_REQUEST['share_member']) ; 
+	if ($share_member == '') $share_member = 0 ;
+	if ($share_type != '' and $share_member == 0) die("Invalid, for share_type $share_type, a share_member is required") ;
+	if ($share_type == '' and $share_member != 0) die("Invalid, when not shared, share_member must be 0 and not $share_member") ;
+	if (! is_numeric($share_member)) die("Share_member $share_member must be numeric") ;
 	$remark = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['remark'])) ;
 	// Do some checks
 	if ($endDayTime <= $startDayTime)  
@@ -121,13 +119,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		mysqli_query($mysqli_link, "insert into $table_logbook(l_plane, l_model, l_booking, l_from, l_to,
 			l_start_hour, l_start_minute, l_end_hour, l_end_minute,
 			l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
-			l_start, l_end, l_flight_type, l_remark, l_pax_count, l_cp1, l_cp2,
+			l_start, l_end, l_flight_type, l_remark, l_pax_count, l_share_type, l_share_member,
 			l_pilot, l_instructor, l_day_landing, l_night_landing,
 			l_audit_who, l_audit_ip, l_audit_time) values
 			('$planeId', '$planeModel', $id, '$fromAirport', '$toAirport',
 			$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute,
 			$flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
-			'$startDayTime', '$endDayTime', '$flightType', '$remark', $paxCount, $cp1, $cp2,
+			'$startDayTime', '$endDayTime', '$flightType', '$remark', $paxCount, '$share_type', $share_member,
 			$pilotId, $instructorId, $dayLandings, $nightLandings,
 			$userId, '" . getClientAddress() . "', sysdate())") or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
@@ -321,7 +319,7 @@ if (isset($insert_message) and $insert_message != '') {
 <?php
 // Now, display any previous entries related to this booking
 $result = mysqli_query($mysqli_link, "select l_start, l_end, l_plane, l_from, l_to, l_flight_type, l_audit_time, p.last_name as pilotName, i.last_name as instructorName,
-			l_pax_count, l_remark, l_cp1, l_cp2
+			l_pax_count, l_remark, l_share_type, l_share_member
 		from $table_logbook l join $table_person p on l.l_pilot = p.jom_id left join $table_person i on l.l_instructor = i.jom_id
 		where l_booking = $id order by l_start")
 	or die("Impossible de lire les entrees pour reservation $id: " . mysqli_error($mysqli_link)) ;
@@ -345,11 +343,8 @@ if ($this_segment_id > 1) {
 			$crew = $row['pilotName'] ;
 		else
 			$crew = $row['pilotName'] . '/' . $row['instructorName'] ;
-		if ($row['l_cp1'] != '')
-			if ($row['l_cp2'] != '')
-				$row['l_remark'] = "<b>CP2</b> " . $row['l_remark'] ;
-			else
-				$row['l_remark'] = "<b>CP1</b> " . $row['l_remark'] ;
+		if ($row['l_share_type'] != '')
+			$row['l_remark'] = "<b>$row[share_type]</b> $row[l_remark]" ;
 		print("<tr>
 			<td class=\"previousLogEntry\">$row[l_plane]</td>
 			<td class=\"previousLogEntry\">$crew</td>
@@ -482,11 +477,12 @@ if ($booking['compteur_vol'] != 0) {
 
 <div class="col-xs-12 col-md-2">
 <table class="logbookTable">
-	<tr><td class="logbookSeparator" colspan="2">Type de vol (local, nav, ...)</td><tr>
+	<tr><td class="logbookSeparator" colspan="2">Type de vol (local, nav, IF, ...)</td><tr>
 	<tr><td class="logbookLabel">Type de vol:</td><td class="logbookValue">
 		<select name="flightType">
 			<option value="local">local</option>
 			<option value="navigation">navigation</option>
+			<option value="IF">introduction flight (IF)</option>
 			<option value="initiation">initiation</option>
 		</select>
 </table>
@@ -502,12 +498,15 @@ if ($booking['compteur_vol'] != 0) {
 <div class="col-xs-12 col-md-4">
 <table class="logbookTable">
 	<tr><td class="logbookSeparator" colspan="2">Partage des coûts (en test)</td><tr>
-	<tr><td class="logbookLabel">CP1:</td><td class="logbookValue">
-		<select name="cp1">
+	<tr><td class="logbookLabel">Type de partage:</td><td class="logbookValue">
+		<select name="share_type">
+			<option value="">Aucun partage: 100% pour le pilote</option>
+			<option value="CP1">CP1: 100% pour le membre ci-dessous</option>
+			<option value="CP2">CP2: 50% pilote + 50% pour le membre ci-dessous</option>
 		</select>
 	</td><tr>
-	<tr><td class="logbookLabel">CP2:</td><td class="logbookValue">
-		<select name="cp2">
+	<tr><td class="logbookLabel">Avec:</td><td class="logbookValue">
+		<select name="share_member">
 		</select>
 	</td><tr>
 </table>
