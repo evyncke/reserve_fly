@@ -113,10 +113,11 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
         $share_type = strtoupper(trim($_REQUEST['share_type'])) ; 
         if ($share_type != '' and $share_type != 'CP1' and $share_type != 'CP2') die("Invalid share_type: $share_type") ;
         $share_member = trim($_REQUEST['share_member']) ; 
+        if (! is_numeric($share_member)) die("Share_member $share_member must be numeric") ;
         if ($share_member == '') $share_member = 0 ;
         if ($share_type != '' and $share_member == 0) die("Invalid, for share_type $share_type, a share_member is required") ;
         if ($share_type == '' and $share_member != 0) die("Invalid, when not shared, share_member must be 0 and not $share_member") ;
-        if (! is_numeric($share_member)) die("Share_member $share_member must be numeric") ;
+	if ($share_type == '') $share_type = 'NULL' ;
 	$remark = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['remark'])) ;
 	// Do some checks
 	if ($endDayTime <= $startDayTime)  
