@@ -107,7 +107,10 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	if ($share_member == '') $share_member = 0 ;
 	if ($share_type != '' and $share_member == 0) die("Invalid, for share_type $share_type, a share_member is required") ;
 	if ($share_type == '' and $share_member != 0) die("Invalid, when not shared, share_member must be 0 and not $share_member") ;
-	if ($share_type == '') $share_type = 'NULL' ;
+	if ($share_type == '') // We need to prepare the SQL INSERT VALUE which is char()
+		$share_type = 'NULL' ;
+	else
+		$share_type = "'$share_type'" ;
 	$remark = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['remark'])) ;
 	// Do some checks
 	if ($endDayTime <= $startDayTime)  
@@ -126,7 +129,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 			('$planeId', '$planeModel', $id, '$fromAirport', '$toAirport',
 			$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute,
 			$flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
-			'$startDayTime', '$endDayTime', '$flightType', '$remark', $paxCount, '$share_type', $share_member,
+			'$startDayTime', '$endDayTime', '$flightType', '$remark', $paxCount, $share_type, $share_member,
 			$pilotId, $instructorId, $dayLandings, $nightLandings,
 			$userId, '" . getClientAddress() . "', sysdate())") or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
