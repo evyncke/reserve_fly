@@ -486,8 +486,6 @@ if ($booking['compteur_vol'] != 0) {
 		<select name="flightType">
 			<option value="local">local</option>
 			<option value="navigation">navigation</option>
-			<option value="IF">introduction flight (IF)</option>
-			<option value="initiation">initiation</option>
 		</select>
 </table>
 </div> <!-- col-->
