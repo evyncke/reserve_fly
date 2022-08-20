@@ -455,11 +455,11 @@ function showPilotDetails(id) {
 	document.getElementById("pilotDetailsImage").style.display = 'none' ;
 
 	var booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
-	if (booking.log_pilot == 'undefined' || booking.log_pilot != booking.user) { // The booked pilot is not the same as in logbook
+	if (booking.log_pilot != 0 && booking.log_pilot != booking.user) { // The booked pilot is not the same as in logbook and there is a logbook entry
 		span.innerHTML = '<b>' + booking.log_pilotName + "</b>" ;
 		span.innerHTML += '<a href="vcard.php?id=' + booking.log_pilot + '"><i class="material-icons" style="font-size:18px;color:blue;">cloud_download</i></a>' ;
 		span.innerHTML += '<br>Vol réserve par: ' + booking.name ;
-	} else { // No logbook information (possibly future reservation
+	} else { // No logbook information (possibly future reservation)
 		span.innerHTML = '<b>' + booking.name + "</b>" ;
 		if (booking.user)
 			span.innerHTML += '<a href="vcard.php?id=' + booking.user + '"><i class="material-icons" style="font-size:18px;color:blue;">cloud_download</i></a>' ;
