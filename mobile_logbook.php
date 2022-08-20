@@ -55,7 +55,7 @@ $id = $booking['r_id'] ;
 
 // Check authorization
 if ($auth == '') {
-	if (! ($userId == $booking['r_pilot'] or $userId == $booking['r_who'] or $userId == $booking['r_instructor']))
+	if (! ($userId == $booking['r_pilot'] or $userId == $booking['r_who'] or $userId == $booking['r_instructor'] or $userIsAdmin))
 		die("Logbook: you ($userId) are not authorized") ;
 	$auth = md5($id . $shared_secret) ; // It may be used later
 } else 
@@ -117,7 +117,10 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
         if ($share_member == '') $share_member = 0 ;
         if ($share_type != '' and $share_member == 0) die("Invalid, for share_type $share_type, a share_member is required") ;
         if ($share_type == '' and $share_member != 0) die("Invalid, when not shared, share_member must be 0 and not $share_member") ;
-	if ($share_type == '') $share_type = 'NULL' ;
+        if ($share_type == '') // We need to prepare the SQL INSERT VALUE which is char()
+                $share_type = 'NULL' ;
+        else
+                $share_type = "'$share_type'" ;
 	$remark = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['remark'])) ;
 	// Do some checks
 	if ($endDayTime <= $startDayTime)  
@@ -136,7 +139,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 			('$planeId', '$planeModel', $id, '$fromAirport', '$toAirport',
 			$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute,
 			$flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
-			'$startDayTime', '$endDayTime', '$flightType', '$remark', $paxCount, '$share_type', $share_member,
+			'$startDayTime', '$endDayTime', '$flightType', '$remark', $paxCount, $share_type, $share_member,
 			$pilotId, $instructorId, $dayLandings, $nightLandings,
 			$userId, '" . getClientAddress() . "', sysdate())") or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
@@ -460,8 +463,6 @@ if ($booking['compteur_vol'] != 0) {
 		<select name="flightType">
 			<option value="local">local</option>
 			<option value="navigation">navigation</option>
-			<option value="IF">introduction flight (IF)</option>
-			<option value="initiation">initiation</option>
 		</select>
 	</td><tr>
 </table>
