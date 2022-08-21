@@ -35,6 +35,8 @@ if ($since == '')
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <title>Carnet de route <?=$plane?></title>
+<script src="members.js"></script>
+<script src="shareCodes.js"></script>
 <script>
 const
 	// preset Javascript constant fill with the right data from db.php PHP variables
@@ -50,9 +52,26 @@ function planeChanged(elem) {
 	window.location.href = '<?=$_SERVER['PHP_SELF']?>?plane=' + elem.value ;
 }
 
+function findMember(a, m) {
+	for (let i = 0 ; i < a.length ; i++)
+		if (a[i].id == m)
+			return a[i].name ;
+	return null ;
+}
+
 function init() {
 	var planeSelect = document.getElementById('planeSelect') ;
 	if (planeSelect) planeSelect.value = '<?=$plane?>' ;
+	var collection = document.getElementsByClassName("shareCodeClass") ;
+	for (let i = 0; i < collection.length ; i++) {
+		var spanElem = collection[i] ;
+		var member = spanElem.innerText ;
+		memberText = findMember(shareCodes, member) ;
+		if (memberText == null)
+			memberText = findMember(members, member) ;
+		if (memberText != null)
+			spanElem.innerText = ' (' + memberText + ')';
+	}
 }
 </script>
 <!-- Matomo -->
@@ -111,7 +130,11 @@ print("Mois: <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString>&l
 <th class="logHeader">Pilot(s)</th>
 <th class="logHeader" colspan="2">Airports</th>
 <th class="logHeader" colspan="2">Time (UTC)</th>
-<th class="logHeader">Total time</th>
+<th class="logHeader">Engine time</th>
+<?php 
+if ($plane_details['compteur_vol'] != 0)
+	print("<th class=\"logHeader\">Flight Time</th>\n") ;
+?>
 <th class="logHeader">Passengers</th>
 <th class="logHeader">Type of</th>
 <th class="logHeader" colspan="2">Engine index</th>
@@ -129,6 +152,10 @@ if ($plane_details['compteur_vol'] != 0)
 <th class="logLastHeader">Takeoff</th>
 <th class="logLastHeader">Landing</th>
 <th class="logLastHeader">hh:mm</th>
+<?php 
+if ($plane_details['compteur_vol'] != 0)
+	print("<th class=\"logLastHeader\">minutes</th>\n") ;
+?>
 <th class="logLastHeader">Count</th>
 <th class="logLastHeader">flight</th>
 <th class="logLastHeader">Begin</th>
@@ -211,8 +238,6 @@ while ($row = mysqli_fetch_array($result)) {
 	$pilot_name = db2web($row['pilot_name']) ;
 	$instructor_name = db2web($row['instructor_name']) ;
 	// Time in $table_logbook is already in UTC
-	// $l_start = gmdate('H:i', strtotime("$row[l_start] $default_timezone")) ;
-	// $l_end = gmdate('H:i', strtotime("$row[l_end] $default_timezone")) ;
 	$l_start = substr($row['l_start'], 11, 5) ;
 	$l_end = substr($row['l_end'], 11, 5) ;
 	$instructor = ($instructor_name != '') ? " /<br/>$instructor_name" : '' ;
@@ -224,7 +249,7 @@ while ($row = mysqli_fetch_array($result)) {
 			$row['l_flight_start_minute'] = "0$row[l_flight_start_minute]" ;
 	if ($row['l_flight_end_minute'] < 10)
 			$row['l_flight_end_minute'] = "0$row[l_flight_end_minute]" ;
-	if ($row['l_share_type'] != '') $row['l_remark'] = '<b>' . $row['l_share_type'] . '</b> ' . $row['l_remark'] ;
+	if ($row['l_share_type'] != '') $row['l_remark'] = '<b>' . $row['l_share_type'] . '<span class="shareCodeClass">' . $row['l_share_member'] . '</span></b> ' . $row['l_remark'] ;
 	print("<tr>
 		<td class=\"logCell\">$row[date]</td>
 		<td class=\"logCell\">$pilot_name$instructor</td>
@@ -232,8 +257,12 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"logCell\">$row[l_to]</td>
 		<td class=\"logCell\">$l_start</td>
 		<td class=\"logCell\">$l_end</td>
-		<td class=\"logCell\">$duration</td>
-		<td class=\"logCell\">$row[l_pax_count]</td>
+		<td class=\"logCell\">$duration</td>\n") ;
+		if ($plane_details['compteur_vol'] != 0) {
+			$flight_duration = 60 * ($row['l_flight_end_hour'] - $row['l_flight_start_hour']) + $row['l_flight_end_minute'] - $row['l_flight_start_minute'] ;
+			print("<td class=\"logCell\">$flight_duration</td>\n") ;
+		}
+		print("<td class=\"logCell\">$row[l_pax_count]</td>
 		<td class=\"logCell\">$row[l_flight_type]</td>
 		<td class=\"logCell\">$row[l_start_hour]:$row[l_start_minute]</td>
 		<td class=\"logCell\">$row[l_end_hour]:$row[l_end_minute]</td>\n") ;
