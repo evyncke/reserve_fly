@@ -337,9 +337,6 @@ if ($this_segment_id > 1) {
 		<tr><th>Avion</th><th>Pilote</th><th>De</th><th>D&eacute;part (UTC)</th><th>A</th><th>Arriv&eacute;e (UTC)</th><th>Passagers</th><th>Type vol</th><th>Remarque</th><th>Action</th></tr>
 		</thead>') ;
 	while ($row = mysqli_fetch_array($result)) {
-		// As the OVH MySQL server does not have the timezone support, needs to be done in PHP
-//		$start_UTC = gmdate('H:i', strtotime("$row[l_start] $default_timezone")) ;
-//		$end_UTC = gmdate('H:i', strtotime("$row[l_end] $default_timezone")) ;
 		// datetime is coming back as UTC from early 2021
 		$start_UTC = $row['l_start'] ;
 		$end_UTC = $row['l_end'] ;
@@ -348,7 +345,7 @@ if ($this_segment_id > 1) {
 		else
 			$crew = $row['pilotName'] . '/' . $row['instructorName'] ;
 		if ($row['l_share_type'] != '')
-			$row['l_remark'] = "<b>$row[share_type]</b> $row[l_remark]" ;
+			$row['l_remark'] = "<b>$row[l_share_type]<span class=\"shareCodeClass\">$row[l_share_member]</span></b> $row[l_remark]" ;
 		print("<tr>
 			<td class=\"previousLogEntry\">$row[l_plane]</td>
 			<td class=\"previousLogEntry\">$crew</td>

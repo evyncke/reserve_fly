@@ -327,6 +327,13 @@ function prefillDropdownMenus(selectName, valuesArray, selectedValue) {
 	}
 }
 
+function findMember(a, m) {
+        for (let i = 0 ; i < a.length ; i++)
+                if (a[i].id == m)
+                        return a[i].name ;
+        return null ;
+}
+
 function initLogbook() {
 	console.log("starting initLogbook()") ;
 //	document.getElementById('logDiv').style.top = browserHeight - 100 ;
@@ -360,5 +367,17 @@ function initLogbook() {
 	prefillDropdownMenus('instructor', instructors, instructorId) ;
 	prefillDropdownMenus('share_member', shareCodes, 0) ;
 	prefillDropdownMenus('share_member', members, 0) ;
+
+	// Convert all share codes into strings
+        var collection = document.getElementsByClassName("shareCodeClass") ;
+        for (let i = 0; i < collection.length ; i++) {
+                var spanElem = collection[i] ;
+                var member = spanElem.innerText ;
+                memberText = findMember(shareCodes, member) ;
+                if (memberText == null)
+                        memberText = findMember(members, member) ;
+                if (memberText != null)
+                        spanElem.innerText = ' (' + memberText + ')';
+        }
 	console.log("end of initLogbook()") ;
 }
