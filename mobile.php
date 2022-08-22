@@ -250,6 +250,7 @@ Vous n'avez pas encore encodé les index moteurs.
 	<br/>
 	<div class="col-xs-12 text-center ">
 		<button id="logbookButton" class="btn btn-success" onclick="logbookClick(<?=$id?>, '<?=$auth?>');">Carnet de route</button>
+		<button id="newLogbookButton" class="btn btn-success" onclick="newLogbookClick(<?=$id?>, '<?=$auth?>');">Nouveau Carnet de route</button>
 	</div><!-- col-->
 </div> <!-- row -->
 <?php
