@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2020 Eric Vyncke
+   Copyright 2013-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -231,7 +231,20 @@ if ($booking['can_cancel']) {
 </div> <!-- row -->
 <?php
 } 
-if ($booking['can_log']) { // Should also be also checked when not already logged
+if ($booking['can_log']) { // Check whether something has been logged
+	$result2 = mysqli_query($mysqli_link, "SELECT COUNT(*) AS log_count
+		FROM $table_logbook
+		WHERE l_booking = $id") or die("Cannot retrieve booking entries... " . mysqli_error($mysqli_link)) ;
+	$row2 = mysqli_fetch_array($result2) ;
+	if ($row2['log_count'] == 0) {
+?>
+<div class="row">
+	<div class="col-xs-12 text-center jumbotron">
+Vous n'avez pas encore encodé les index moteurs.
+	</div><!-- col-->
+</div> <!-- row -->
+<?
+	}
 ?>
 <div class="row">
 	<br/>
