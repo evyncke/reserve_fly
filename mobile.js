@@ -179,6 +179,11 @@ console.log('logbookClick() id=' + id) ;
 	window.location.href = 'mobile_logbook.php?id=' + id + '&auth=' + auth ;
 }
 
+function newLogbookClick (id, auth) {
+console.log('newLogbookClick() id=' + id) ;
+	window.location.href = '../scripts/carnetdevol/IntroCarnetVol.php?id=' + id + '&auth=' + auth ;
+}
+
 function modifyClick(id, auth) {
 	window.location.href = 'mobile_book.php?id=' + id + '&auth=' + auth ;
 }
