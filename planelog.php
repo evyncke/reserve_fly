@@ -275,6 +275,9 @@ while ($row = mysqli_fetch_array($result)) {
 }
 
 // Missing logbook entries until now
+if (! $previous_end_lt) {
+	$previous_end_lt = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+}
 $missingPilots = array() ;
 // A little tricky as the data in $table_logbook is in UTC and in $table_bookings in local time :-O
 // Moreover, the MySQL server at OVH does not support timezone... I.e., everything must be done in PHP
