@@ -39,9 +39,9 @@ exportSQL("SELECT id, model, actif, cout, compteur, compteur_vol_valeur, compteu
 	array('id', 'model', 'actif', 'cout', 'compteur', 'compteur_vol_valeur', 'compteur_type', 'compteur_vol', 'entretien', 'ressource'),
 	"data/$table_planes.csv") ;
 
-exportSQL("SELECT id, jom_id, name, first_name, last_name, email, home_phone, cell_phone, activated
+exportSQL("SELECT id, jom_id, name, first_name, last_name, email, home_phone, cell_phone, activated, ciel_code
 		FROM $table_person",
-	array('id', 'jom_id', 'name', 'first_name', 'last_name', 'email', 'home_phone', 'cell_phone', 'activated'),
+	array('id', 'jom_id', 'name', 'first_name', 'last_name', 'email', 'home_phone', 'cell_phone', 'activated', 'ciel_code'),
 	"data/$table_person.csv") ;
 
 exportSQL("SELECT l_id, l_plane, l_start, l_end, l_start_hour,
