@@ -178,9 +178,10 @@ $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_h
 	from $table_logbook l 
 	join $table_users p on l_pilot=p.id
 	left join $table_users i on l_instructor = i.id
-	where l_plane = '$plane' and l_booking is not null
+	where l_plane = '$plane'
 		and '$since' <= l_start and l_start < '$monthAfterString'
 	order by l_start asc" ;
+//	where l_plane = '$plane' and l_booking is not null
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur système à propos de l'accès au carnet de route: " . mysqli_error($mysqli_link)) ;
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
