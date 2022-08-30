@@ -52,8 +52,8 @@ emit_header("X-PUBLISHED-TTL:PT15M" . $eol .
 $result = mysqli_query($mysqli_link, "SELECT *,u.name AS full_name, DATE_SUB(r_start, INTERVAL 1 HOUR) AS alert
 		FROM $table_bookings b JOIN $table_users u ON b.r_pilot = u.id, $table_person p
 		WHERE p.jom_id=u.id AND (b.r_pilot = $user_id OR b.r_instructor = $user_id) AND r_start >= DATE_SUB(SYSDATE(), INTERVAL 2 MONTH) AND r_cancel_who is null
-		ORDER BY r_start 
-		LIMIT 0,150") or die("impossible de lire les reservations: " . mysqli_error($mysqli_link));
+		ORDER BY r_start DESC
+		LIMIT 0,100") or die("impossible de lire les reservations: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
 	if ($row['r_cancel_who'] == '') // Do not generate VCALENDAR entries for cancelled bookings, they will 'disappear' automagically
 		emit_booking($row) ;
