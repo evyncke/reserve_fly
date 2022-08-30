@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2021 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -296,10 +296,6 @@ switch ($_REQUEST['action']) {
 		if (!is_numeric($_REQUEST['pic'])) die("Invalid parameter for pic '$_REQUEST[pic]'") ;
 		if (isset($_REQUEST['id']) and !is_numeric($_REQUEST['id'])) die("Invalid parameter for id") ;
 		$tokens = preg_split(',[/-],', $_REQUEST['date']) ;
-		// Time in DB is local time while time on screen is UTC...
-		// $l_start = date("Y-m-d H:i:s", strtotime("$tokens[0]-$tokens[1]-$tokens[2] $_REQUEST[startTime] UTC")) ;
-		// $l_end = date("Y-m-d H:i:s", strtotime("$tokens[0]-$tokens[1]-$tokens[2] $_REQUEST[endTime] UTC")) ;
-		// Time in DB is in UTC and display is also UTC
 		$l_start = date("Y-m-d H:i:s", strtotime("$tokens[0]-$tokens[1]-$tokens[2] $_REQUEST[startTime]")) ;
 		$l_end = date("Y-m-d H:i:s", strtotime("$tokens[0]-$tokens[1]-$tokens[2] $_REQUEST[endTime]")) ;
 		$l_from = mysqli_real_escape_string($mysqli_link, $_REQUEST['from']) ;
@@ -310,12 +306,19 @@ switch ($_REQUEST['action']) {
 		$l_day_landing = mysqli_real_escape_string($mysqli_link, $_REQUEST['dayLanding']) ;
 		$l_night_landing = mysqli_real_escape_string($mysqli_link, $_REQUEST['nightLanding']) ;
 		$pic = mysqli_real_escape_string($mysqli_link, $_REQUEST['pic']) ;
-		if ($pic == 0) $pic = 'NULL' ;
+		if ($pic == 0) {
+			$pic = 'NULL' ;
+			$pilotIsPIC = 1 ;
+			$instructorPaid = 0 ;
+		} else {
+			$pilotIsPIC = 0 ;
+			$instructorPaid = 1 ;
+		}
 		if (isset($_REQUEST['id'])) $id = mysqli_real_escape_string($mysqli_link, $_REQUEST['id']) ;
 		if ($_REQUEST['action'] == 'new') {
-			$sql = "insert into $table_logbook(l_start, l_end, l_from, l_to, l_model, l_plane, l_pilot, l_instructor, l_day_landing, l_night_landing,
+			$sql = "insert into $table_logbook(l_start, l_end, l_from, l_to, l_model, l_plane, l_pilot, l_is_pic, l_instructor, l_instructor_paid, l_day_landing, l_night_landing,
 					l_audit_who, l_audit_time, l_audit_ip)
-				values('$l_start', '$l_end', '$l_from', '$l_to', '$l_model', '$l_plane', $owner, $pic, $l_day_landing, $l_night_landing,
+				values('$l_start', '$l_end', '$l_from', '$l_to', '$l_model', '$l_plane', $owner, $pilotIsPIC, $pic, $instructorPaid, $l_day_landing, $l_night_landing,
 					$userId, sysdate(), '" . getClientAddress() . "')";
 			if (!mysqli_query($mysqli_link, $sql)) {
 				$error_message = "Impossible d'ajouter la ligne: " . mysqli_error($mysqli_link) ;
@@ -361,7 +364,7 @@ print("P&eacute;riode: <select id=\"periodSelect\" onchange=\"selectChanged();\"
 <br/>") ;
 
 $sql = "select l_id, date_format(l_start, '%d/%m/%y') as date,
-	l_model, l_plane, l_pilot, l_instructor, p.last_name as instructor_name,
+	l_model, l_plane, l_pilot, l_is_pic, l_instructor, p.last_name as instructor_name,
 	upper(l_from) as l_from, upper(l_to) as l_to, 
 	l_start, l_end, timediff(l_end, l_start) as duration,
 	timediff(addtime(l_end, '24:00:00'), l_start) as duration_rollover,
@@ -413,15 +416,10 @@ while (($row = mysqli_fetch_array($result)) && ($line_count < $items)) {
 	$duration_total_minute += $duration[1] ;
 	$day_landing_total += $row['l_day_landing'] ;
 	$night_landing_total += $row['l_night_landing'] ;
-	// DB contains local daytime while display is in UTC
-	// As the OVH MySQL server does not have the timezone support, needs to be done in PHP
-//	$l_start = gmdate('H:i', strtotime("$row[l_start] $default_timezone")) ;
-//	$l_end = gmdate('H:i', strtotime("$row[l_end] $default_timezone")) ;
 	// DB contains UTC time
 	$l_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
 	$l_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
 	if ($row['l_instructor'] < 0) $row['instructor_name'] = 'Autre FI' ;
-// print("<br/>l_start is now $l_start raw $row[l_start] and UTC $row[l_start_utc]<br/>") ;
 	print("<tr>
 		<td class=\"logCell\">
 			<a href=\"$_SERVER[PHP_SELF]?action=edit&id=$row[l_id]&owner=$owner\"><img src=\"gtk-edit.png\" border=\"0\" width=\"15\" height=\"15\"></a>
@@ -436,7 +434,7 @@ while (($row = mysqli_fetch_array($result)) && ($line_count < $items)) {
 		<td class=\"logCell\">$row[l_plane]</td>
 		<td class=\"logCell\">$duration[0]</td>
 		<td class=\"logCell\">$duration[1]</td>\n") ;
-	if ($row['l_instructor'] == '') { // Solo, no instructor
+	if ($row['l_instructor'] == '' or $row['l_is_pic']) { // Solo, no instructor
 		print("<td class=\"logCell\">SELF</td>
 			<td class=\"logCell\">$row[l_day_landing]</td>
 			<td class=\"logCell\">$row[l_night_landing]</td>
