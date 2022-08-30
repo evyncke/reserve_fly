@@ -20,7 +20,10 @@ ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
 
-if (isset($_REQUEST['user'])) $userId = $_REQUEST['user'] ;
+if (isset($_REQUEST['user'])) {
+	$userId = $_REQUEST['user'] ;
+	if (! is_numeric($userId)) die("Invalid user ID") ;
+}
 if (isset($_REQUEST['start'])) 
 	$folio_start = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
 else
@@ -29,6 +32,10 @@ else
 $cost_fi_minute = 0.80 ;
 $tax_per_pax = 10.0 ;
 
+function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
+	if ($n == 0) return '' ;
+	return number_format($n, $decimals, $decimal_separator, $thousand_separator) . '&nbsp;&euro;';
+}
 function ShowTableHeader() {
 ?>
 <thead>
@@ -107,14 +114,14 @@ function valueOfField(suffix, name) {
 <!-- End Matomo Code -->
 </head>
 <body>
-<center><h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=date('d-m-Y')?>) pour <?=$userFullName?></h2></center>
+<center><h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=date('d-m-Y')?>) pour le membre <?=$userId?></h2></center>
 <?php
 $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
 	l_model, l_plane, l_pilot, l_instructor, p.last_name as instructor_name,
 	UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
 	l_start, l_end, timediff(l_end, l_start) as duration,
 	timediff(addtime(l_end, '24:00:00'), l_start) as duration_rollover,
-	l_share_type, l_share_member, cout, l_pax_count
+	l_share_type, l_share_member, cout, l_pax_count, l_instructor_paid
 	FROM $table_logbook l JOIN $table_planes AS a ON l_plane = a.id
 	LEFT JOIN $table_person p ON p.jom_id = l_instructor
 	WHERE (l_pilot = $userId OR l_share_member = $userId)
@@ -162,7 +169,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$cost_fi = 0 ;
 	} else { // Dual command
 		print("<td class=\"logCell\">$row[instructor_name]</td>\n") ;
-		$cost_fi = $cost_fi_minute * (60 * $duration[0] + $duration[1]) ;
+		$cost_fi = $row['l_instructor_paid'] * $cost_fi_minute * (60 * $duration[0] + $duration[1]) ;
 	}
 	if (stripos($row['l_from'], 'EB') === 0 or stripos($row['l_to'], 'EB') === 0)
 		$cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
@@ -181,38 +188,37 @@ while ($row = mysqli_fetch_array($result)) {
 		$cost_taxes = 0 ;
 	}
 	$cost_total = $cost_plane + $cost_fi + $cost_taxes ;
-	// Let's have a nice format
-	$cost_plane = number_format($cost_plane, 2, ',', ' ') ;
-	$cost_fi = number_format($cost_fi, 2, ',', ' ') ;
-	$cost_taxes = number_format($cost_taxes, 2, ',', ' ') ;
-	$cost_total = number_format($cost_total, 2, ',', ' ') ;
 	// Prepare the bottom line for grand total
 	$cost_plane_total += $cost_plane ;
 	$cost_fi_total += $cost_fi ;
 	$cost_taxes_total += $cost_taxes ;
 	$cost_grand_total += $cost_total ;
-	$cost_total = number_format($cost_total, 2, ',', ' ') ;
-	print("<td class=\"logCellRight\">$cost_plane &euro;</td>\n") ;
-	print("<td class=\"logCellRight\">$cost_fi &euro;</td>\n") ;
-	print("<td class=\"logCellRight\">$cost_taxes &euro;</td>\n") ;
-	print("<td class=\"logCellRight\">$cost_total &euro;</td>\n") ;
+	// Let's have a nice format
+	$cost_plane = numberFormat($cost_plane, 2, ',', ' ') ;
+	$cost_fi = numberFormat($cost_fi, 2, ',', ' ') ;
+	$cost_taxes = numberFormat($cost_taxes, 2, ',', ' ') ;
+	$cost_total = numberFormat($cost_total, 2, ',', ' ') ;
+	print("<td class=\"logCellRight\">$cost_plane</td>\n") ;
+	print("<td class=\"logCellRight\">$cost_fi</td>\n") ;
+	print("<td class=\"logCellRight\">$cost_taxes</td>\n") ;
+	print("<td class=\"logCellRight\">$cost_total</td>\n") ;
 	print("</tr>\n") ;
 }
 $duration_total_hour += floor($duration_total_minute / 60) ;
 $duration_total_minute = $duration_total_minute % 60 ;
-$cost_plane_total = number_format($cost_plane_total, 2, ',', ' ') ;
-$cost_fi_total = number_format($cost_fi_total, 2, ',', ' ') ;
-$cost_taxes_total = number_format($cost_taxes_total, 2, ',', ' ') ;
-$cost_grand_total = number_format($cost_grand_total, 2, ',', ' ') ;
+$cost_plane_total = numberFormat($cost_plane_total, 2, ',', ' ') ;
+$cost_fi_total = numberFormat($cost_fi_total, 2, ',', ' ') ;
+$cost_taxes_total = numberFormat($cost_taxes_total, 2, ',', ' ') ;
+$cost_grand_total = numberFormat($cost_grand_total, 2, ',', ' ') ;
 ?>
-<tr><td colspan="9" class="logTotal">Total</td>
+<tr><td colspan="7" class="logTotal">Total</td>
 <td class="logTotal"><?=$duration_total_hour?></td>
 <td class="logTotal"><?=$duration_total_minute?></td>
-<td class="logTotal"></td>
-<td class="logTotal"><?=$cost_plane_total?> &euro;</td>
-<td class="logTotal"><?=$cost_fi_total?> &euro;</td>
-<td class="logTotal"><?=$cost_taxes_total?> &euro;</td>
-<td class="logTotal"><?=$cost_grand_total?> &euro;</td>
+<td class="logTotal" colspan="3"></td>
+<td class="logTotalRight"><?=$cost_plane_total?></td>
+<td class="logTotalRight"><?=$cost_fi_total?></td>
+<td class="logTotalRight"><?=$cost_taxes_total?></td>
+<td class="logTotalRight"><?=$cost_grand_total?></td>
 </tr>
 </tbody>
 </table>
