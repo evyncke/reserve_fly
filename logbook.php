@@ -96,7 +96,14 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$endDayTime = "$day " . substr("0" . $endHours, -2) . ":" . substr("0" . $endMinutes, -2) ;
 	$pilotId = trim($_REQUEST['pilot']) ; if (!is_numeric($pilotId)) die("pilotId $pilotId is not numeric") ;
 	$instructorId = trim($_REQUEST['instructor']) ; if (!is_numeric($instructorId)) die("instructorId $instructorId is not numeric") ;
-	if ($instructorId <= 0) $instructorId = "NULL" ;
+	if ($instructorId <= 0) {
+		$instructorId = "NULL" ;
+		$pilotIsPIC = 1 ;
+		$instructorPaid = 0 ;
+	} else {
+		$pilotIsPIC = 0;
+		$instructorPaid = 1 ;
+	}
 	$dayLandings = trim($_REQUEST['dayLandings']) ; if (!is_numeric($dayLandings) or $dayLandings < 0) die("dayLandings $dayLandings is not numeric or is not valid") ;
 	$nightLandings = trim($_REQUEST['nightLandings']) ; if (!is_numeric($nightLandings) or $nightLandings < 0) die("nightLandings $nightLandings is not numeric or is not valid") ;
 	$paxCount = trim($_REQUEST['pax_count']) ; if (!is_numeric($paxCount) or $paxCount < 0 or $paxCount > 3) die("paxCount $paxCount is not numeric or is not valid") ;
@@ -124,13 +131,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 			l_start_hour, l_start_minute, l_end_hour, l_end_minute,
 			l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
 			l_start, l_end, l_flight_type, l_remark, l_pax_count, l_share_type, l_share_member,
-			l_pilot, l_instructor, l_day_landing, l_night_landing,
+			l_pilot, l_is_pic, l_instructor, l_instructor_paid, l_day_landing, l_night_landing,
 			l_audit_who, l_audit_ip, l_audit_time) values
 			('$planeId', '$planeModel', $id, '$fromAirport', '$toAirport',
 			$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute,
 			$flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
 			'$startDayTime', '$endDayTime', '$flightType', '$remark', $paxCount, $share_type, $share_member,
-			$pilotId, $instructorId, $dayLandings, $nightLandings,
+			$pilotId, $pilotIsPIC, $instructorId, $instructorPaid, $dayLandings, $nightLandings,
 			$userId, '" . getClientAddress() . "', sysdate())") or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
 			$insert_message = "Carnet de routes mis &agrave; jour" ;
