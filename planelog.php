@@ -151,7 +151,7 @@ if ($plane_details['compteur_vol'] != 0)
 <th class="logLastHeader">Destination</th>
 <th class="logLastHeader">Takeoff</th>
 <th class="logLastHeader">Landing</th>
-<th class="logLastHeader">hh:mm</th>
+<th class="logLastHeader">minutes</th>
 <?php 
 if ($plane_details['compteur_vol'] != 0)
 	print("<th class=\"logLastHeader\">minutes</th>\n") ;
@@ -181,6 +181,7 @@ $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_h
 	where l_plane = '$plane'
 		and '$since' <= l_start and l_start < '$monthAfterString'
 	order by l_start asc" ;
+// Before, all entries add a l_booking for the flight club planes...
 //	where l_plane = '$plane' and l_booking is not null
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur système à propos de l'accès au carnet de route: " . mysqli_error($mysqli_link)) ;
 $duration_total_hour = 0 ;
@@ -196,6 +197,8 @@ $previous_end_hour = false ;
 $previous_end_minute = false ;
 $previous_end_utc = false ;
 $previous_end_lt = false ;
+$engine_total_minute = 0 ;
+$flight_total_minute = 0 ;
 while ($row = mysqli_fetch_array($result)) {
 	// Emit a red line for missing entries...
 	if ($previous_end_hour) {
@@ -209,6 +212,7 @@ while ($row = mysqli_fetch_array($result)) {
 			$previous_end_lt->setTimezone(new DateTimeZone($default_timezone)) ;
 			$this_start_lt = new DateTime($row['l_start'], new DateTimeZone('UTC')) ;
 			$this_start_lt->setTimezone(new DateTimeZone($default_timezone)) ;
+			if (! $row['l_booking']) $row['l_booking'] = -1 ; // As logbook can now contain entries without a booking ... say bye bye to integrity
 			$result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type
 				FROM $table_bookings JOIN $table_person ON r_pilot = jom_id
 				WHERE r_plane = '$plane' AND r_cancel_date IS NULL
@@ -232,9 +236,9 @@ while ($row = mysqli_fetch_array($result)) {
 	$previous_end_lt = new DateTime($previous_end_utc, new DateTimeZone('UTC')) ;
 	$previous_end_lt->setTimezone(new DateTimeZone($default_timezone)) ;
 	$line_count ++ ;
-	// Need to change duration from HH:MM:SS into HH:MM
-	$duration = explode(':', $row['duration']) ;
-	$duration = "$duration[0]:$duration[1]" ;
+	// Don't trust the row but the diff of engine index
+	$duration = 60 * ($row['l_end_hour'] - $row['l_start_hour']) + $row['l_end_minute'] - $row['l_start_minute'] ;
+	$engine_total_minute += $duration ;
 	// Handling character sets...
 	$pilot_name = db2web($row['pilot_name']) ;
 	$instructor_name = db2web($row['instructor_name']) ;
@@ -261,6 +265,7 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"logCell\">$duration</td>\n") ;
 		if ($plane_details['compteur_vol'] != 0) {
 			$flight_duration = 60 * ($row['l_flight_end_hour'] - $row['l_flight_start_hour']) + $row['l_flight_end_minute'] - $row['l_flight_start_minute'] ;
+			$flight_total_minute += $flight_duration ;
 			print("<td class=\"logCell\">$flight_duration</td>\n") ;
 		}
 		print("<td class=\"logCell\">$row[l_pax_count]</td>
@@ -298,6 +303,25 @@ while ($row2 = mysqli_fetch_array($result2)) {
 if (count($missingPilots) > 0)
 	print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Missing entries..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
 
+$engine_total_hour = floor($engine_total_minute / 60) ;
+$engine_total_minute = $engine_total_minute % 60 ;
+if ($engine_total_minute < 10)
+	$engine_total_minute = "0$engine_total_minute" ;
+if ($plane_details['compteur_vol'] != 0) {
+	$flight_total_hour = floor($flight_total_minute / 60) ;
+	$flight_total_minute = $flight_total_minute % 60 ;
+	if ($flight_total_minute < 10)
+		$flight_total_minute = "0$flight_total_minute" ;
+}
+?>
+<tr><td colspan="6" class="logTotal">Logged total</td>
+<td class="logTotal"><?="$engine_total_hour:$engine_total_minute"?></td>
+<?php
+if ($plane_details['compteur_vol'] != 0) {
+	print("<td class=\"logTotal\">$flight_total_hour:$flight_total_minute</td>") ;
+	print('<td colspan="7" class="logTotal"></td>') ;
+} else
+	print('<td colspan="5" class="logTotal"></td>') ;
 ?>
 </tbody>
 </table>
