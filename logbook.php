@@ -40,9 +40,6 @@ $result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r
 $booking = mysqli_fetch_array($result) ;
 if (! $booking) die("D&eacute;sol&eacute; cette r&eacute;servation #$id n'existe pas") ;
 
-// TODO check planes[compteur_vol]
-$engine_flight_label = ($booking['r_plane'] == 'PH-AML') ? 'vol' : 'moteur' ;
-
 // Check authorization
 if ($auth == '') {
 	if (! ($userId == $booking['r_pilot'] or $userId == $booking['r_who'] or $userId == $booking['r_instructor'] or $userIsAdmin))
@@ -119,13 +116,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	else
 		$share_type = "'$share_type'" ;
 	$remark = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['remark'])) ;
-	// Do some checks
+	// Do some basic consistency checks
 	if ($endDayTime <= $startDayTime)  
 		$insert_message = "Le temps d'arriv&eacute;e=$endDayTime doit &ecirc;tre plus grand que le temps de d&eacute;part= $startDayTime" ;
 	elseif ($endHours < $startHours) 
 		$insert_message = "Le temps moteur de fin =$endHours doit &ecirc;tre plus grand que le temps de d&eacute;part= $startHours" ;
-	elseif ($endHours <= 0) 
-		$insert_message = "Le temps moteur ($endHours) doit &ecirc;tre plus grand que 0" ;
+	elseif ($startHours <= 0) 
+		$insert_message = "Le temps moteur ($startHours) doit &ecirc;tre plus grand que 0" ;
 	else {
 		mysqli_query($mysqli_link, "insert into $table_logbook(l_plane, l_model, l_booking, l_from, l_to,
 			l_start_hour, l_start_minute, l_end_hour, l_end_minute,
@@ -188,18 +185,12 @@ $logbook = mysqli_fetch_array($result) ;
 
 // Select the most recent entry for the engine hour counter
 
-//print("logbook['l_end'] $logbook[l_end] > booking['compteur_date' $booking[compteur_date]<br/>") ;
-//var_dump($logbook) ;
-//logbook['l_end'] 2017-01-05 14:51:00 > booking['compteur_date' 2018-04-19 20:05:14, bernard penders
-
 if ($logbook['l_end']  && ($logbook['l_end'] > $booking['compteur_date'])) { // entry in logbook is the most recent one
-//print("Doing 1<br/>") ;
 	$engineStartHour = ($logbook['l_end_hour'] == '') ? 0 : $logbook['l_end_hour'] ;
 	$engineStartMinute = ($logbook['l_end_minute'] == '') ? 0 : $logbook['l_end_minute'] ;
 	$flightStartHour = ($logbook['l_flight_end_hour'] == '') ? 0 : $logbook['l_flight_end_hour'] ;
 	$flightStartMinute = ($logbook['l_flight_end_minute'] == '') ? 0 : $logbook['l_flight_end_minute'] ;
 } else { // Use data from maintenance logs
-// print("Doing 2<br/>") ;
 	$engineStartHour = $booking['compteur'] ;
 	$engineStartMinute = 0 ;
 	$flightStartHour = 0 ;
