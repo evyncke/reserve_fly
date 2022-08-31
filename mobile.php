@@ -84,15 +84,17 @@ if (isset($result) and $result) {
 		}
 		
 		// Find the previous/next booking
-		$result = mysqli_query($mysqli_link, "select * from $table_bookings 
-			where r_cancel_date is null and r_stop < '$booking[r_start]' and r_type <> " . BOOKING_MAINTENANCE . " and $condition 
+		$result = mysqli_query($mysqli_link, "select * from $table_bookings JOIN $table_planes ON r_plane = $table_planes.id
+			where r_cancel_date is null and r_stop < '$booking[r_start]' and r_type <> " . BOOKING_MAINTENANCE . " and ressource = 0
+			and $condition 
 			order by r_start desc limit 0,1")
 			or die("Cannot access previous booking: ".mysqli_error()) ;
 		$row = mysqli_fetch_array($result) ;
 		$previous_id = $row['r_id'] ;
 		$previous_auth = md5($previous_id . $shared_secret) ;
-		$result = mysqli_query($mysqli_link, "select * from $table_bookings 
-			where r_cancel_date is null and r_start > '$booking[r_stop]' and r_type <> " . BOOKING_MAINTENANCE . " and $condition 
+		$result = mysqli_query($mysqli_link, "select * from $table_bookings JOIN $table_planes ON r_plane = $table_planes.id
+			where r_cancel_date is null and r_start > '$booking[r_stop]' and r_type <> " . BOOKING_MAINTENANCE . " and ressource = 0
+			and $condition 
 			order by r_start asc limit 0,1")
 			or die("Cannot access previous booking: ".mysqli_error()) ;
 		$row = mysqli_fetch_array($result) ;
