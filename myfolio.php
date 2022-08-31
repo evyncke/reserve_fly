@@ -184,7 +184,8 @@ while ($row = mysqli_fetch_array($result)) {
 		print("<td class=\"logCell\">$row[instructor_name]</td>\n") ;
 		$cost_fi = $row['l_instructor_paid'] * $cost_fi_minute * (60 * $duration[0] + $duration[1]) ;
 	}
-	if (stripos($row['l_from'], 'EB') === 0 or stripos($row['l_to'], 'EB') === 0)
+	// Flights taking off Belgium have to pay taxes (distance depending but ignored for now)
+	if (stripos($row['l_from'], 'EB') === 0)
 		$cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
 	else
 		$cost_taxes = 0 ;
