@@ -130,11 +130,6 @@ function engineTimeChanged(onInit) {
 	var inputEngineEndHour = parseInt(document.getElementsByName('engineEndHour')[0].value) ;
 	
 	if (engineStartHour > 10) { // Need to have a sensible value
-//		if (inputEngineStartHour + 10 < engineStartHour) {
-//			bsAlert('Temps moteur début doit être supérieur à ' + engineStartHour ) ;
-//			toggleButtons(false) ;
-//			return ;
-//		}
 		if (inputEngineEndHour > engineStartHour + 50) {
 			bsAlert('Temps moteur fin ne peut être supérieur à ' + (engineStartHour + 50) ) ;
 		}
