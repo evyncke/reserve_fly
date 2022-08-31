@@ -16,18 +16,31 @@
 
 */
 
+// TODO
+// Generate QR-code https://www.qr-code-generator.com/solutions/epc-qr-code/
+// or https://fr.wikipedia.org/wiki/QR_code_EPC
+
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
 
 if (isset($_REQUEST['user'])) {
+	journalise($userId, "I", "Start of folio, setting user to $_REQUEST[user]") ;
 	$userId = $_REQUEST['user'] ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
-}
+} else
+	journalise($userId, "I", "Start of folio") ;
 if (isset($_REQUEST['start'])) 
 	$folio_start = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
 else
 	$folio_start = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+
+$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $userId")
+	or die("Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
+$pilot = mysqli_fetch_array($result) or die("Pilote $userId inconnu") ;
+$userName = db2web("$pilot[first_name] $pilot[last_name]") ;
+$codeCiel = $pilot['ciel_code'] ;
+mysqli_free_result($result) ;
 
 $cost_fi_minute = 0.80 ;
 $tax_per_pax = 10.0 ;
@@ -114,7 +127,7 @@ function valueOfField(suffix, name) {
 <!-- End Matomo Code -->
 </head>
 <body>
-<center><h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=date('d-m-Y')?>) pour le membre <?=$userId?></h2></center>
+<center><h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=date('d-m-Y')?>) pour le membre <?=$userId?> <?=$userName?></h2></center>
 <?php
 $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
 	l_model, l_plane, l_pilot, l_instructor, p.last_name as instructor_name,
@@ -209,6 +222,7 @@ $duration_total_minute = $duration_total_minute % 60 ;
 $cost_plane_total = numberFormat($cost_plane_total, 2, ',', ' ') ;
 $cost_fi_total = numberFormat($cost_fi_total, 2, ',', ' ') ;
 $cost_taxes_total = numberFormat($cost_taxes_total, 2, ',', ' ') ;
+$invoice_total = $cost_grand_total;
 $cost_grand_total = numberFormat($cost_grand_total, 2, ',', ' ') ;
 ?>
 <tr><td colspan="7" class="logTotal">Total</td>
@@ -231,7 +245,29 @@ Les heures sont les heures UTC.</div>
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
+
+$iban = "BE16340092367074" ; // Eric ING
+$bic = "BBRUBEBB" ; // ING BIC
+$name = "Eric Vyncke" ;
+
+$epcString =
+"BCD
+001
+1
+SCT
+CREGBEBB
+Royal Areo Para Club Spa
+BE64732038421852
+EUR$invoice_total
+Frais de $userName $codeCiel
+Frais de $userName $codeCiel" ;
+
 ?>
+<h3>Test QR-code pour payer</h3>
+<p>Ceci est simplement un test pour les informaticiens, ne pas l'utiliser car notre trésorier ne saura pas comment faire pour
+associer cette facture à votre compte pilote <?=$codeCiel?>. Le QR-code est à utiliser avec une application bancaire
+et pas Payconiq (ce dernier étant payant).</p>
+<img width="400" height="400" src="https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=<?=urlencode($epcString)?>">
 <hr>
 <div class="copyright">R&eacute;alisation: Eric Vyncke, août 2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
