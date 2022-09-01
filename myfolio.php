@@ -16,24 +16,21 @@
 
 */
 
-// TODO
-// Generate QR-code https://www.qr-code-generator.com/solutions/epc-qr-code/
-// or https://fr.wikipedia.org/wiki/QR_code_EPC
-
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
 
 if (isset($_REQUEST['user'])) {
-	journalise($userId, "I", "Start of folio, setting user to $_REQUEST[user]") ;
+	if ($userId != 62) journalise($userId, "I", "Start of folio, setting user to $_REQUEST[user]") ;
 	$userId = $_REQUEST['user'] ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
 } else
-	journalise($userId, "I", "Start of folio") ;
+	if ($userId != 62) journalise($userId, "I", "Start of folio") ;
 if (isset($_REQUEST['start'])) 
 	$folio_start = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
 else
 	$folio_start = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+$previous_month = $folio_start->sub(new DateInterval('P1M')) ;
 
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $userId")
 	or die("Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
@@ -88,22 +85,39 @@ function ShowTableHeader() {
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <title>Folio</title>
+<script src="members.js"></script>
+<script src="shareCodes.js"></script>
 <script>
 var
 	// preset Javascript constants filled with the right data from db.php PHP variables
 	userFullName = '<?=$userFullName?>' ;
 	userName = '<?=$userName?>' ;
 	userId = <?=$userId?> ;
-	userIsPilot = <?=($userIsPilot)? 'true' : 'false'?> ;
-	userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?> ;
-	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ;
-	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ;
-	page = <?=$page?> ;
 
 function valueOfField(suffix, name) {
 	return name + '=' + document.getElementById(name + suffix.charAt(0).toUpperCase() + suffix.slice(1)).value ;
 }
 
+function findMember(a, m) {
+        for (let i = 0 ; i < a.length ; i++)
+                if (a[i].id == m)
+                        return a[i].name ;
+        return null ;
+}
+
+function init() {
+        var collection = document.getElementsByClassName("shareCodeClass") ;
+        for (let i = 0; i < collection.length ; i++) {
+                var spanElem = collection[i] ;
+                var member = spanElem.innerText ;
+                memberText = findMember(shareCodes, member) ;
+                if (memberText == null)
+                        memberText = findMember(members, member) ;
+                if (memberText != null)
+                        spanElem.innerText = ' (' + memberText + ')';
+        }
+}
+</script>
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
@@ -126,15 +140,16 @@ function valueOfField(suffix, name) {
 </script>
 <!-- End Matomo Code -->
 </head>
-<body>
+<body onload="init();">
 <center><h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=date('d-m-Y')?>) pour le membre <?=$userId?> <?=$userName?></h2></center>
+Folio du mois <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>">précédent.</a>
 <?php
 $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
-	l_model, l_plane, l_pilot, l_instructor, p.last_name as instructor_name,
+	l_model, l_plane, l_pilot, l_is_pic, l_instructor, l_instructor_paid, p.last_name as instructor_name,
 	UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
 	l_start, l_end, timediff(l_end, l_start) as duration,
 	timediff(addtime(l_end, '24:00:00'), l_start) as duration_rollover,
-	l_share_type, l_share_member, cout, l_pax_count, l_instructor_paid
+	l_share_type, l_share_member, cout, l_pax_count
 	FROM $table_logbook l JOIN $table_planes AS a ON l_plane = a.id
 	LEFT JOIN $table_person p ON p.jom_id = l_instructor
 	WHERE (l_pilot = $userId OR l_share_member = $userId)
@@ -177,13 +192,12 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"logCell\">$duration[0]</td>
 		<td class=\"logCell\">$duration[1]</td>\n") ;
 	$cost_plane = $row['cout'] * (60 * $duration[0] + $duration[1]) ;
-	if ($row['l_instructor'] == '') { // Solo, no instructor
+	if ($row['l_instructor'] == '' or $row['l_is_pic']) { // Solo, no instructor
 		print("<td class=\"logCell\">SELF</td>\n") ;
-		$cost_fi = 0 ;
 	} else { // Dual command
 		print("<td class=\"logCell\">$row[instructor_name]</td>\n") ;
-		$cost_fi = $row['l_instructor_paid'] * $cost_fi_minute * (60 * $duration[0] + $duration[1]) ;
 	}
+	$cost_fi = ($row['l_instructor']) ? $row['l_instructor_paid'] * $cost_fi_minute * (60 * $duration[0] + $duration[1]) : 0 ;
 	// Flights taking off Belgium have to pay taxes (distance depending but ignored for now)
 	if (stripos($row['l_from'], 'EB') === 0)
 		$cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
@@ -191,7 +205,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$cost_taxes = 0 ;
 	print("<td class=\"logCell\">$row[l_pax_count]</td>\n") ;
 	if ($row['l_share_type'])
-		print("<td class=\"logCell\">$row[l_share_type] $row[l_share_member]</td>\n") ;
+		print("<td class=\"logCell\">$row[l_share_type] <span class=\"shareCodeClass\">$row[l_share_member]</span></td>\n") ;
 	else
 		print("<td class=\"logCell\"></td>\n") ;
 	if ($row['l_share_type'] == 'CP2') {
