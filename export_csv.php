@@ -47,20 +47,20 @@ exportSQL("SELECT id, jom_id, name, first_name, last_name, email, home_phone, ce
 exportSQL("SELECT l_id, l_plane, l_start, l_end, l_start_hour,
 			l_start_minute, l_end_hour, l_end_minute,
 			l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
-			l_flight_type, l_booking, l_from, l_to, l_pilot, l_instructor,
+			l_flight_type, l_booking, l_from, l_to, l_pilot, l_is_pic, l_instructor, l_instructor_paid,
 			l_pax_count, l_remark, l_share_type, l_share_member
 		FROM $table_logbook
-		WHERE l_start >= '$startDate'",
+		WHERE l_start >= SUBDATE('$startDate', INTERVAL 1 MONTH)",
 	array('l_id', 'l_plane', 'l_start', 'l_end', 'l_start_hour',
                         'l_start_minute', 'l_end_hour', 'l_end_minute',
                         'l_flight_start_hour', 'l_flight_start_minute', 'l_flight_end_hour', 'l_flight_end_minute',
-			'l_flight_type', 'l_booking', 'l_from', 'l_to', 'l_pilot', 'l_instructor',
+			'l_flight_type', 'l_booking', 'l_from', 'l_to', 'l_pilot', 'l_is_pic', 'l_instructor', 'l_instructor_paid',
 			'l_pax_count', 'l_remark', 'l_share_type', 'l_share_member'),
 	"data/$table_logbook.csv") ;
 
 exportSQL("SELECT r_id, r_plane, r_start, r_stop, r_pilot, r_instructor, r_comment, r_who, r_from, r_to, r_cancel_date, r_cancel_who, r_cancel_reason
 		FROM $table_bookings
-		WHERE r_start >= '$startDate'",
+		WHERE r_start >= SUBDATE('$startDate', INTERVAL 1 MONTH)",
 	array('r_id', 'r_plane', 'r_start', 'r_stop', 'r_pilot', 'r_instructor', 'r_comment', 'r_who', 'r_from', 'r_to', 'r_cancel_date', 'r_cancel_who', 'r_cancel_reason'),
 	"data/$table_bookings.csv") ;
 ?>
