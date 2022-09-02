@@ -28,6 +28,14 @@ $since = mysqli_real_escape_string($mysqli_link, $_REQUEST['since']) ;
 if ($since == '')
 	$since = date('Y-m-01') ;
 
+$sinceDate = new DateTime($since) ;
+$monthAfter = new DateTime($since) ;
+$monthBefore = new DateTime($since) ;
+$monthInterval = new DateInterval('P1M') ; // One month
+$monthBefore = $monthBefore->sub($monthInterval) ;
+$monthBeforeString = $monthBefore->format('Y-m-d') ;
+$monthAfter = $monthAfter->add($monthInterval) ;
+$monthAfterString = $monthAfter->format('Y-m-d') ;
 
 ?><html>
 <head>
@@ -96,7 +104,7 @@ function init() {
 <!-- End Matomo Code -->
 </head>
 <body onload="init();">
-<center><h2>Carnet de route de <?=$plane?></h2></center>
+<center><h2>Carnet de route de <?=$plane?> du <?=$since?> au <?=$monthAfterString?></h2></center>
 <?php
 print("Carnet de route de: <select id=\"planeSelect\" onchange=\"planeChanged(this);\">" ) ;
 $result = mysqli_query($mysqli_link, "select * from $table_planes
@@ -110,15 +118,6 @@ while ($row = mysqli_fetch_array($result)) {
 		$plane_details = $row ;
 }
 print("</select> ") ;
-
-$sinceDate = new DateTime($since) ;
-$monthAfter = new DateTime($since) ;
-$monthBefore = new DateTime($since) ;
-$monthInterval = new DateInterval('P1M') ; // One month
-$monthBefore = $monthBefore->sub($monthInterval) ;
-$monthBeforeString = $monthBefore->format('Y-m-d') ;
-$monthAfter = $monthAfter->add($monthInterval) ;
-$monthAfterString = $monthAfter->format('Y-m-d') ;
 
 print("Mois: <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString>&lt;</a> $since <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthAfterString>&gt;</a>\n") ;
 ?>
@@ -219,6 +218,7 @@ while ($row = mysqli_fetch_array($result)) {
 					AND r_id != $row[l_booking]
 					AND '" . $previous_end_lt->format('Y-m-d H:i') . "' <= r_start
 					AND r_stop < '" . $this_start_lt->format('Y-m-d H:i') . "' 
+					AND r_start < '$monthAfterString'
 				ORDER by r_start ASC") or die("Erreur système à propos de l'accès aux réservations manquantes: " . mysqli_error($mysqli_link));
 			while ($row2 = mysqli_fetch_array($result2)) {
 				if ($row2['r_type'] == BOOKING_MAINTENANCE)
@@ -293,6 +293,7 @@ $result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type
 	WHERE r_plane = '$plane' AND r_cancel_date IS NULL
 		AND '" . $previous_end_lt->format('Y-m-d H:i') . "' <= r_start
 		AND r_stop < SYSDATE()
+		AND r_start < '$monthAfterString'
 	ORDER by r_start ASC") or die("Erreur système à propos de l'accès aux réservations manquantes après: " . mysqli_error($mysqli_link));
 while ($row2 = mysqli_fetch_array($result2)) {
 	if ($row2['r_type'] == BOOKING_MAINTENANCE)
@@ -326,7 +327,7 @@ if ($plane_details['compteur_vol'] != 0) {
 </tbody>
 </table>
 <br>
-Sur base des donn&eacute;es que vous avez entr&eacute;es apr&egrave;s les vols dans le
+Sur base des donn&eacute;es entr&eacute;es apr&egrave;s les vols dans le
 carnet de route des avions. Heure affich&eacute;e en heure universelle.
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('planelog.php')) ;
