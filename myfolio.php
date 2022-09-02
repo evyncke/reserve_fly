@@ -26,11 +26,14 @@ if (isset($_REQUEST['user'])) {
 	if (! is_numeric($userId)) die("Invalid user ID") ;
 } else
 	if ($userId != 62) journalise($userId, "I", "Start of folio") ;
-if (isset($_REQUEST['start'])) 
+if (isset($_REQUEST['start']))  {
 	$folio_start = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
-else
+	$previous_month = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
+} else {
 	$folio_start = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
-$previous_month = $folio_start->sub(new DateInterval('P1M')) ;
+	$previous_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+}
+$previous_month = $previous_month->sub(new DateInterval('P1M')) ;
 
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $userId")
 	or die("Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
