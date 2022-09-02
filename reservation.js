@@ -15,6 +15,7 @@
 // TODO:
 // - copyright & disclaimer
 // - AJAX pour aéroport départ/destination
+// l1610 allow logbook as soon as booking has started ?
 //
 
 var

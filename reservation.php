@@ -419,7 +419,7 @@ if ($userId == 0) {
 // Verify non-logged flights in the last week
 	if (! $userIsInstructor) {
 	$result = mysqli_query($mysqli_link, "select * from $table_bookings b join $table_planes p on r_plane = p.id  
-		where p.actif = 1 and 
+		where p.actif = 1 and ressource = 0 and
 			(b.r_pilot = $userId or b.r_who = $userId or b.r_instructor = $userId) and
 			r_start > date_sub(curdate(), interval 1 month) and
 			r_start < now() and
