@@ -20,12 +20,15 @@ ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
 
-if (isset($_REQUEST['user'])) {
+if ($userId <= 0) die("Vous devez être connecté") ;
+
+if (isset($_REQUEST['user']) and $userIsAdmin) {
 	if ($userId != 62) journalise($userId, "I", "Start of folio, setting user to $_REQUEST[user]") ;
 	$userId = $_REQUEST['user'] ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
 } else
 	if ($userId != 62) journalise($userId, "I", "Start of folio") ;
+
 if (isset($_REQUEST['start']))  {
 	$folio_start = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
 	$previous_month = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
@@ -254,13 +257,26 @@ $cost_grand_total = numberFormat($cost_grand_total, 2, ',', ' ') ;
 </tr>
 </tbody>
 </table>
-<br/>
+<p>
 <div style="border-style: inset;background-color: AntiqueWhite;">
 Sur base des donn&eacute;es que vous avez entr&eacute;es apr&egrave;s les vols dans le
-carnet de route des avions (&agrave; pr&eacute;f&eacute;rer pour avoir les heures moteur).
+carnet de route des avions.
 Les heures sont les heures UTC.</div>
-<br/>
+</p >
 <?php
+
+$result = mysqli_query($mysqli_link, "SELECT *
+		FROM $table_bk_balance JOIN $table_person ON bkb_account = CONCAT('400', ciel_code)
+		WHERE jom_id = $userId
+		ORDER BY bkb_date DESC
+		LIMIT 0,1")
+	or die("Cannot read booking keeping balance: " . mysqli_error($mysqli_link)) ;
+$row = mysqli_fetch_array($result) ;
+if ($row)
+	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $row[bkb_amount]&euro; (si positif vous devez de l'argent au RAPCS ASBL). Il faut plusieurs jours avant que vos paiements soient pris en compte.</p>") ;
+else
+	print("<p>Le solde de votre compte n'est pas disponible.</p>") ;
+
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 
@@ -283,7 +299,7 @@ Frais de $userName $codeCiel" ;
 ?>
 <h3>Test QR-code pour payer</h3>
 <p>Ceci est simplement un test pour les informaticiens, ne pas l'utiliser car notre trésorier ne saura pas comment faire pour
-associer cette facture à votre compte pilote <?=$codeCiel?>. Le QR-code est à utiliser avec une application bancaire
+associer cette facture à votre compte membre RAPCS <?=$codeCiel?>. Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant).</p>
 <img width="400" height="400" src="https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=<?=urlencode($epcString)?>">
 <hr>
