@@ -198,6 +198,7 @@ $previous_end_utc = false ;
 $previous_end_lt = false ;
 $engine_total_minute = 0 ;
 $flight_total_minute = 0 ;
+$previous_airport = false ;
 while ($row = mysqli_fetch_array($result)) {
 	// Emit a red line for missing entries...
 	if ($previous_end_hour) {
@@ -230,6 +231,10 @@ while ($row = mysqli_fetch_array($result)) {
 		} else if ($gap < 0)
 			print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Overlapping / duplicate entries for $gap minutes...</td></tr>\n") ;
 	}
+	// Emit a red line if previous arrival apt and this departure airport do not match
+	if ($previous_airport and $previous_airport != $row['l_from'])
+		print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Departure airport below($row[l_from]) does not match previous arrival airport ($previous_airport)... taxes are probably invalid.</td></tr>\n") ;
+	$previous_airport = $row['l_to'] ;
 	$previous_end_hour = $row['l_end_hour'] ;
 	$previous_end_minute = $row['l_end_minute'] ;
 	$previous_end_utc = $row['l_end'] ;
