@@ -15,8 +15,8 @@
 // TODO:
 // - copyright & disclaimer
 // - AJAX pour aéroport départ/destination
-// l1610 allow logbook as soon as booking has started ?
 //
+// l1610 allow logbook as soon as booking has started ?
 
 var
 	planePlanningTable, instructorPlanningTable, planningDate, columnCount, allBookings, allFIAgendas, ephemerides = new Array(), nightColumn,
@@ -1314,7 +1314,7 @@ function redirectLogBook(event) {
 	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
 	var id = event.target.id ;
 	if (id == 0) return ; // When clicking on pilot details, this event is also triggered :-(
-	window.location.href = 'logbook.php?id=' + bookingFromID(id) ;
+	window.location.href = '../scripts/carnetdevol/IntroCarnetVol.php?id=' + bookingFromID(id) ;
 }
 
 function editBookingDetails(event) {
