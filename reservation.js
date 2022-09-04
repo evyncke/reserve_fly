@@ -49,14 +49,16 @@ function planeClassIsMember(member, group) {
         return false ;
 }
 
-function isInThePast(planningYear, planningMonth, planningDay, planningHour) {
+function isInThePast(planningYear, planningMonth, planningDay, planningHour, planningMinute) {
 	if (planningYear < nowYear) return true ;
 	if (planningYear > nowYear) return false ;
 	if (Number(planningMonth) < Number(nowMonth)) return true ;
 	if (Number(planningMonth) > Number(nowMonth)) return false ;
 	if (Number(planningDay) < Number(nowDay)) return true ;
 	if (Number(planningDay) > Number(nowDay)) return false ;
-	return Number(planningHour) < Number(nowHour) ;
+	var planningMinutes = planningHour * 60 + planningMinute ;
+	var nowMinutes = nowHour * 60 + nowMinute ;
+	return planningMinutes <= nowMinutes ;
 }
 
 function isToday() {
@@ -1307,7 +1309,7 @@ function hideEditAgendaItemDetails() {
 }
 
 function engineHoursClicked() {
-	console.log("Not implemented yet") ;
+	window.location.href = '../scripts/carnetdevol/IntroCarnetVol.php?id=' + currentlyDisplayedBooking ;
 }
 
 function redirectLogBook(event) {
@@ -1397,7 +1399,8 @@ function editBookingDetails(event) {
 	} else {
 		buttonHide('cancelMaintenanceButton') ;
 	}
-	buttonHide('engineHoursButton') ;
+	// Allow for engine hour entry if booking.start <= now
+	buttonDisplayIf('engineHoursButton', startDate <= nowDate) ;
 	// Make the form appear
 	showDivDetails('bookingDiv', event) ;
 }
@@ -1608,12 +1611,12 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 			}
 			thisCell.onmouseenter = function () { displayBookingDetails(booking.id + '-' + booking.log_id) ; } ;
 			thisCell.onmouseleave = function () { clearBookingDetails() ; } ;
-			if (!isInThePast(displayYear, displayMonth, displayDay, hour) &&
+			if (!isInThePast(displayYear, displayMonth, displayDay, hour, minute) &&
 					(userIsAdmin || userIsMechanic || userIsInstructor || userId == booking.user || userId == booking.bookedById)) {
 				thisCell.id = booking.id + '-' + booking.log_id ;
 				thisCell.removeEventListener('click', newBookingDetails) ;
 				thisCell.addEventListener('click', editBookingDetails) ;
-			} else if (isInThePast(displayYear, displayMonth, displayDay, hour) &&
+			} else if (isInThePast(displayYear, displayMonth, displayDay, hour, minute) &&
 					(userIsAdmin || userId == booking.user || userId == booking.instructorId || userId == booking.bookedById)) {
 				thisCell.id = booking.id + '-' + booking.log_id ;
 				thisCell.removeEventListener('click', newBookingDetails) ;
@@ -1717,7 +1720,7 @@ function displayAgenda(row, item, displayDay, displayMonth, displayYear) {
 					else
 						thisCell.className = (item.callType & 0x01) ? 'onsite' : 'oncall' ; 
 				}
-				if (!isInThePast(displayYear, displayMonth, displayDay, hour) &&
+				if (!isInThePast(displayYear, displayMonth, displayDay, hour, minute) &&
 						(userIsAdmin || userId == item.fi)) {
 					thisCell.id = item.item ;
 					thisCell.removeEventListener('click', newAgendaItemDetails) ;
@@ -1784,7 +1787,7 @@ function refreshPlanePlanningRow(rowIndex, plane, displayDay, displayMonth, disp
 			// Should place the plane index?
 			// encodeURIComponent(value).replace(/%20/g,'+');
 			row.cells[i].id = encodeURIComponent(plane).replace(/%20/g,' ') + '/' + rowIndex + '/' + displayYear + '/' + displayMonth + '/' + displayDay + '/' + hour + '/' + minute ;
-			if (!isInThePast(displayYear, displayMonth, displayDay, hour) && userRatingValid && (userIsPilot || userIsInstructor || userIsMechanic || userIsAdmin)) 
+			if (!isInThePast(displayYear, displayMonth, displayDay, hour, minute) && userRatingValid && (userIsPilot || userIsInstructor || userIsMechanic || userIsAdmin)) 
 				row.cells[i].addEventListener('click', newBookingDetails) ;
 			else {
 				row.cells[i].removeEventListener('click', newBookingDetails) ;
@@ -1872,7 +1875,7 @@ function refreshInstructorPlanningRow(rowIndex, instructor, displayDay, displayM
 			// Need to set the TD cell id?
 			// Should place the plane index?
 			row.cells[i].id = instructor + '/' + rowIndex + '/' + displayYear + '/' + displayMonth + '/' + displayDay + '/' + hour + '/' + minute ;
-			if (!isInThePast(displayYear, displayMonth, displayDay, hour) && userRatingValid && (userIsInstructor || userIsAdmin)) 
+			if (!isInThePast(displayYear, displayMonth, displayDay, hour, minute) && userRatingValid && (userIsInstructor || userIsAdmin)) 
 				row.cells[i].addEventListener('click', newAgendaItemDetails) ;
 			else {
 				row.cells[i].removeEventListener('click', newAgendaItemDetails) ;

@@ -1,7 +1,7 @@
 <?php
 // Some icons (fast forward & co) by Snowish Icon Pack by Alexander Moore 
 /*
-   Copyright 2014-2021 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -407,7 +407,7 @@ if ($userId == 0) {
 	print('<input type="button" value="Mon carnet de vol" onclick="javascript:document.location.href=\'mylog.php\';"> ') ;
 	print('<input type="button" value="Carte de mes vols" onclick="javascript:document.location.href=\'mymap.php\';"> ') ;
 	print('<input type="button" value="Mobile" onclick="javascript:document.location.href=\'mobile.php?news\';"> ') ;
-	print('<input type="button" value="Folio" onclick="javascript:document.location.href=\'myfolio.php\';"> ') ;
+	print('<input type="button" value="Folio du mois" onclick="javascript:document.location.href=\'myfolio.php\';"> ') ;
 	if ($userIsAdmin) print('<input type="button" value="Journal des opérations" onclick="javascript:document.location.href=\'journal.php\';"> ') ;
 	if ($userIsAdmin || $userIsMechanic) print('<input type="button" value="Echéances des maintenances" onclick="javascript:document.location.href=\'plane_planning.php\';"> ') ;
 	print('<input type="button" value="No log" style="background-color: yellow; visibility: hidden;" id="logButton" onclick="javascript:toggleLogDisplay();"> ') ;
@@ -612,7 +612,7 @@ if (! $userNoFlight && ($userIsPilot || $userIsMechanic || $userIsInstructor || 
 }
 if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin) {
 	print('<button id="cancelBookingButton" onclick="javascript:confirmCancelBooking();">Annuler la r&eacute;servation</button>' . "\n") ;
-	print('<button id="engineHoursButton" onclick="javascript:engineHoursClicked();">Enregistrer les heures moteur</button>' . "\n") ;
+	print('<button id="engineHoursButton" onclick="javascript:engineHoursClicked();">Encoder les heures moteur</button>' . "\n") ;
 }
 ?>
 <button onclick="javascript:hideEditBookingDetails();">Fermer la fen&ecirc;tre</button>
@@ -680,7 +680,7 @@ $version_css = date ("Y-m-d H:i:s.", filemtime('reservation.css')) ;
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 ?>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, d&eacute;cembre 2014-2022 et Patrick Reginster 2020-2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, d&eacute;cembre 2014-2022 et Patrick Reginster 2020-2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
 Open Source code: <a href="https://github.com/evyncke/reserve_fly">on github</a><br/>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, ex&eacute;cut&eacute en <?=$execution_time?> sec</div>
 <br/>
