@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2021 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ $month = $_REQUEST['month'] ;
 if (!is_numeric($month) or $month < 1 or 12 < $month) $error_message = "Bien essaye... (month)" ;
 $year = $_REQUEST['year'] ;
 if (!is_numeric($year) or $year < 2014 or 3000 < $year) $error_message = "Bien essaye...(year)" ;
-$date = "$year-$month-$day" ;
+$date = date_format(date_create("$year-$month-$day"), 'Y-m-d H:i:s') ; // Let's make a nice SQL format date
 
 
 if ($error_message != '') {
@@ -55,6 +55,7 @@ if ($error_message != '') {
 		while ($row = mysqli_fetch_array($result)) {
 			$booking = array() ;
 			$booking['id'] = $row['r_id'] ;
+			$booking['date'] = $date ;
 			$booking['ressource'] = $row['ressource'] ;
 			if ($row['ressource'] == 0) // Normal plane
 				$booking['plane'] = $row['r_plane'] ; // This one is in upper-case matching the javascript case
@@ -120,7 +121,6 @@ if ($error_message != '') {
 			}
 			$booking['bookedById'] = $row['r_who'] ;
 			$booking['bookedByUsername'] = $row['username2'] ;
-			$booking['bookedByName'] = ($convertToUtf8 ) ? iconv( "ISO-8859-1", "UTF-8", $row['name2']) :  $row['name2'] ;
 			$booking['bookedByName'] = db2web($row['name2']) ;
 			$booking['bookedDate'] = str_replace('-', '/', $row['r_date']) ;  // Safari javascript does not like - in dates !!!
 			if ($userId > 0) {
@@ -134,13 +134,17 @@ if ($error_message != '') {
 				elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
 					$booking['avatar'] = $avatar_root_uri . '/' . $row['avatar'] ;
 			}
-			// Now the logbook entries (often empty...)
-			// Need to convert date time to local timezone...
+			// Now the logbook entries that may be before or after the current date when booking is for multiple days...
 			if ($row['log_id']) {
-				$booking['log_start'] = str_replace('-', '/', $row['log_start']) ;  // Safari javascript does not like - in dates !!!
-				$booking['log_end'] = str_replace('-', '/', $row['log_end']) ;  // Safari javascript does not like - in dates !!!
-				$booking['log_id'] = $row['log_id'] ;
-				$booking['log_pilot'] = $row['log_pilot'] ;
+				// If logbook entry ends before the current day, then don't specify the logbook entry but let's keep the normal booking dates
+//				if (strtotime($row['log_end']) >= strtotime($date)) {
+				if ($row['log_end'] >= $date) {
+					// TODO ? Need to convert date time to local timezone...
+					$booking['log_start'] = str_replace('-', '/', $row['log_start']) ;  // Safari javascript does not like - in dates !!!
+					$booking['log_end'] = str_replace('-', '/', $row['log_end']) ;  // Safari javascript does not like - in dates !!!
+					$booking['log_id'] = $row['log_id'] ;
+					$booking['log_pilot'] = $row['log_pilot'] ;
+				}
 			}
 			// To allow asynchronous AJAX calls, we need to pass back an argument...
 			if ($_REQUEST['arg'] != '') $booking['arg'] = $_REQUEST['arg'] ;
