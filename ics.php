@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -49,21 +49,30 @@ emit_header("X-PUBLISHED-TTL:PT15M" . $eol .
 			"\tics.php?user=$user_id&auth=$auth" . $eol ) ;
 
 // Start with the specific user bookings
+//$result = mysqli_query($mysqli_link, "SELECT * 
+//		FROM (SELECT *,u.name AS full_name, DATE_SUB(r_start, INTERVAL 1 HOUR) AS alert
+//			FROM $table_bookings b JOIN $table_users u ON b.r_pilot = u.id, $table_person p
+//			WHERE p.jom_id=u.id AND (b.r_pilot = $user_id OR b.r_instructor = $user_id) AND r_start >= DATE_SUB(SYSDATE(), INTERVAL 1 MONTH) AND r_cancel_who is null
+//			ORDER BY r_start DESC
+//			LIMIT 0,50) AS bookings
+//		ORDER BY r_start ASC") or journalise($user_id, "E", "impossible de lire les reservations: " . mysqli_error($mysqli_link));
 $result = mysqli_query($mysqli_link, "SELECT *,u.name AS full_name, DATE_SUB(r_start, INTERVAL 1 HOUR) AS alert
-		FROM $table_bookings b JOIN $table_users u ON b.r_pilot = u.id, $table_person p
-		WHERE p.jom_id=u.id AND (b.r_pilot = $user_id OR b.r_instructor = $user_id) AND r_start >= DATE_SUB(SYSDATE(), INTERVAL 2 MONTH) AND r_cancel_who is null
-		ORDER BY r_start DESC
-		LIMIT 0,100") or die("impossible de lire les reservations: " . mysqli_error($mysqli_link));
+			FROM $table_bookings b JOIN $table_users u ON b.r_pilot = u.id, $table_person p
+			WHERE p.jom_id=u.id AND (b.r_pilot = $user_id OR b.r_instructor = $user_id) AND r_start >= DATE_SUB(SYSDATE(), INTERVAL 1 MONTH) AND r_cancel_who is null
+			ORDER BY r_start DESC
+			LIMIT 0,50") or journalise($user_id, "E", "impossible de lire les reservations: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
+	journalise($user_id, "D", "Looping") ;
 	if ($row['r_cancel_who'] == '') // Do not generate VCALENDAR entries for cancelled bookings, they will 'disappear' automagically
 		emit_booking($row) ;
 }
 
 // Then the generic agenda
 $result = mysqli_query($mysqli_link, "SELECT *, DATE_SUB(ag_start, INTERVAL 1 DAY) AS alert
-		FROM $table_agenda a 
-		WHERE ag_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH) AND ag_active != 0
-		ORDER BY ag_start LIMIT 0,50") or die("impossible de lire l'agenda: " . mysqli_error($mysqli_link));
+			FROM $table_agenda
+			WHERE ag_start >= DATE_SUB(SYSDATE(), INTERVAL 6 MONTH) AND ag_active != 0
+			ORDER BY ag_start DESC
+			LIMIT 0,40") or journalise($user_id, "E", "impossible de lire l'agenda: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
 	emit_agenda($row) ;
 }
@@ -87,5 +96,5 @@ $content
 ---
 ", 'Content-Type: text/plain; charset="UTF-8"') ;
 
-//journalise($user_id, "I", "ICS download: $_SERVER[HTTP_USER_AGENT]") ;
+journalise($user_id, "I", "ICS download for $user_id: $_SERVER[HTTP_USER_AGENT]," . strlen($content) . ' bytes') ;
 ?>
