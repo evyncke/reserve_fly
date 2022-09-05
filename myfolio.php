@@ -272,9 +272,10 @@ $result = mysqli_query($mysqli_link, "SELECT *
 		LIMIT 0,1")
 	or die("Cannot read booking keeping balance: " . mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
-if ($row)
+if ($row) {
 	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $row[bkb_amount]&euro; (si positif vous devez de l'argent au RAPCS ASBL). Il faut plusieurs jours avant que vos paiements soient pris en compte.</p>") ;
-else
+	if ($row['bkb_amount'] > 0) $invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
+} else
 	print("<p>Le solde de votre compte n'est pas disponible.</p>") ;
 
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
@@ -293,11 +294,11 @@ CREGBEBB
 Royal Areo Para Club Spa
 BE64732038421852
 EUR$invoice_total
-Frais de $userName $codeCiel
-Frais de $userName $codeCiel" ;
+De $userName compte 400$codeCiel
+De $userName compte 400$codeCiel" ;
 
 ?>
-<h3>Test QR-code pour payer</h3>
+<h3>Test QR-code pour payer <?=$invoice_total?> &euro;</h3>
 <p>Ceci est simplement un test pour les informaticiens, ne pas l'utiliser car notre trésorier ne saura pas comment faire pour
 associer cette facture à votre compte membre RAPCS <?=$codeCiel?>. Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant).</p>
