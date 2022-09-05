@@ -62,7 +62,6 @@ $result = mysqli_query($mysqli_link, "SELECT *,u.name AS full_name, DATE_SUB(r_s
 			ORDER BY r_start DESC
 			LIMIT 0,50") or journalise($user_id, "E", "impossible de lire les reservations: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
-	journalise($user_id, "D", "Looping") ;
 	if ($row['r_cancel_who'] == '') // Do not generate VCALENDAR entries for cancelled bookings, they will 'disappear' automagically
 		emit_booking($row) ;
 }
