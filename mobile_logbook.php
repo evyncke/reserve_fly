@@ -233,13 +233,13 @@ else {
 }
 
 $result = mysqli_query($mysqli_link, "select * from $table_bookings JOIN $table_planes ON r_plane = $table_planes.id
-		where ressource = 0 and r_cancel_date is null and r_stop < '$booking[r_start]' and r_start <= sysdate() and $condition order by r_start desc limit 0,1")
+		where ressource = 0 and r_cancel_date is null and r_stop <= '$booking[r_start]' and r_start <= sysdate() and $condition order by r_start desc limit 0,1")
 	or die("Cannot access previous booking: ".mysqli_error()) ;
 $row = mysqli_fetch_array($result) ;
 $previous_id = $row['r_id'] ;
 $previous_auth = md5($previous_id . $shared_secret) ;
 $result = mysqli_query($mysqli_link, "select * from $table_bookings JOIN $table_planes ON r_plane = $table_planes.id
-		where ressource = 0 and r_cancel_date is null and r_start > '$booking[r_stop]' and r_start <= sysdate() and $condition order by r_start asc limit 0,1")
+		where ressource = 0 and r_cancel_date is null and r_start >= '$booking[r_stop]' and r_start <= sysdate() and $condition order by r_start asc limit 0,1")
 	or die("Cannot access previous booking: ".mysqli_error()) ;
 $row = mysqli_fetch_array($result) ;
 $next_id = $row['r_id'] ;
