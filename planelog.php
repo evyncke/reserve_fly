@@ -173,7 +173,7 @@ $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_h
 	timediff(l_end, l_start) as duration,
 	l_flight_end_hour, l_flight_end_minute, l_flight_start_hour, l_flight_start_minute,
 	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark, l_pax_count, l_share_type, l_share_member,
-	l_booking
+	l_booking, l_pilot, l_instructor
 	from $table_logbook l 
 	join $table_users p on l_pilot=p.id
 	left join $table_users i on l_instructor = i.id
@@ -234,6 +234,9 @@ while ($row = mysqli_fetch_array($result)) {
 	// Emit a red line if previous arrival apt and this departure airport do not match
 	if ($previous_airport and $previous_airport != $row['l_from'])
 		print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Departure airport below($row[l_from]) does not match previous arrival airport ($previous_airport)... taxes are probably invalid.</td></tr>\n") ;
+	// Emit a red line if pilot and instructor are the same
+	if ($row['l_pilot'] == $row['l_instructor'])
+		print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">The pilot is the instructor on the line below...</td></tr>\n") ;
 	$previous_airport = $row['l_to'] ;
 	$previous_end_hour = $row['l_end_hour'] ;
 	$previous_end_minute = $row['l_end_minute'] ;
