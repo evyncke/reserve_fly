@@ -95,5 +95,5 @@ $content
 ---
 ", 'Content-Type: text/plain; charset="UTF-8"') ;
 
-journalise($user_id, "I", "ICS download for $user_id: $_SERVER[HTTP_USER_AGENT]," . strlen($content) . ' bytes') ;
+//journalise($user_id, "I", "ICS download for $user_id: $_SERVER[HTTP_USER_AGENT]," . strlen($content) . ' bytes') ;
 ?>
