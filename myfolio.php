@@ -210,7 +210,7 @@ while ($row = mysqli_fetch_array($result)) {
 	}
 	$cost_fi = ($row['l_instructor']) ? $row['l_instructor_paid'] * $cost_fi_minute * $duration : 0 ;
 	// Flights taking off Belgium have to pay taxes (distance depending but ignored for now)
-	if (stripos($row['l_from'], 'EB') === 0)
+	if (stripos($row['l_from'], 'EB') === 0 and $row['l_from'] != $row['l_to'])
 		$cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
 	else
 		$cost_taxes = 0 ;
