@@ -203,7 +203,8 @@ while ($row = mysqli_fetch_array($result)) {
 		"Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] \n" .
 		"avec $row[full_name] en tant que pilote.</p>\n" ;
 	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
-	$email_message .= "<p>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation ou l'annuler a posteriori via ce lien \n"  .
+	$email_message .= "<p>Il est conseill&eacute; d'utiliser la nouvelle page pour <a href=\"https://www.spa-aviation.be/scripts/carnetdevol/IntroCarnetVol.php?id=$booking_id\">encoder les compteurs</a>.</p>" ;
+	$email_message .= "<p>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation ou l'annuler a posteriori via ce lien (qui fonctionne toujours) \n"  .
 		"<a href=\"https://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> \n" .
 		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu \n" .
 		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle \n" .
@@ -243,13 +244,13 @@ print(date('Y-m-d H:i:s').": total of $engine_reminders engine reminders sent.\n
 
 if (date('G') == 6) { // Send reminders _AFTER_ the flight, once a day in early morning
 // Reminder after start to enter engine time
-print(date('Y-m-d H:i:s').": start of log book reminder(s) after 7 days after the flight(s).\n") ;
+print(date('Y-m-d H:i:s').": start of log book reminder(s) after 3 days after the flight(s).\n") ;
 
 $engine_reminders = 0 ;
 $sql ="SELECT *,u.name AS full_name
 FROM $table_bookings b JOIN $table_users u ON b.r_pilot = u.id JOIN $table_planes a ON r_plane = a.id
 LEFT JOIN $table_logbook AS l ON l.l_booking = r_id, $table_person p
-WHERE a.actif = 1 AND a.ressource = 0 AND p.jom_id = u.id AND DATE_SUB(SYSDATE(), INTERVAL 7 DAY) <= r_start
+WHERE a.actif = 1 AND a.ressource = 0 AND p.jom_id = u.id AND DATE_SUB(SYSDATE(), INTERVAL 3 DAY) <= r_start
 AND r_start <= DATE_SUB(SYSDATE(), INTERVAL 1 DAY) AND r_cancel_date IS NULL AND l.l_start IS NULL" ;
 print(date('Y-m-d H:i:s').": running $sql.\n") ;
 $result = mysqli_query($mysqli_link, $sql)
