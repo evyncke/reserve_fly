@@ -74,7 +74,8 @@ function ShowTableHeader() {
 <th class="logLastHeader">Time UTC</th>
 <th class="logLastHeader">Model</th>
 <th class="logLastHeader">Registration</th>
-<th class="logLastHeader" colspan="2">of flight</th>
+<th class="logLastHeader">hh</th>
+<th class="logLastHeader">mm</th>
 <th class="logLastHeader">PIC</th>
 <th class="logLastHeader">Number</th>
 <th class="logLastHeader">Sharing</th>
@@ -151,10 +152,10 @@ function init() {
 Folio du mois <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>">précédent.</a>
 <?php
 $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
-	l_model, l_plane, l_pilot, l_is_pic, l_instructor, l_instructor_paid, p.last_name as instructor_name,
+	l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, p.last_name as instructor_name,
 	UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
-	l_start, l_end, timediff(l_end, l_start) as duration,
-	timediff(addtime(l_end, '24:00:00'), l_start) as duration_rollover,
+	l_start, l_end, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute as duration,
+	60 * (l_flight_end_hour - l_flight_start_hour) + l_flight_end_minute - l_flight_start_minute as flight_duration,
 	l_share_type, l_share_member, cout, l_pax_count
 	FROM $table_logbook l JOIN $table_planes AS a ON l_plane = a.id
 	LEFT JOIN $table_person p ON p.jom_id = l_instructor
@@ -174,15 +175,19 @@ $cost_plane_total = 0 ;
 $cost_fi_total = 0 ;
 $cost_taxes_total = 0 ;
 $cost_grand_total = 0 ;
+$diams_explanation = false ; // Whether to display explanation about flight duration
 while ($row = mysqli_fetch_array($result)) {
-	if (substr($row['duration'], 0, 1) == '-')
-		$duration = explode(':', $row['duration_rollover']) ; // Looking like 01:33:00 (in case of over rolling the 24:00:00 mark)
-	else
-		$duration = explode(':', $row['duration']) ; // Looking like 01:33:00
-	$duration_total_hour += $duration[0] ;
-	$duration_total_minute += $duration[1] ;
-	$day_landing_total += $row['l_day_landing'] ;
-	$night_landing_total += $row['l_night_landing'] ;
+	// On which index is the invoice based ?
+	$duration = ($row['compteur_vol']) ? $row['flight_duration'] : $row['duration'] ;
+	$duration_hh = floor($duration / 60) ;
+	$duration_mm = $duration % 60 ;
+	$duration_total_hour += $duration_hh ;
+	$duration_total_minute += $duration_mm ;
+	if ($row['compteur_vol']) {
+		$diams_explanation = true ;
+		$plane_token = ' &diams;' ;
+	} else
+		$plane_token = '' ;
 	// DB contains UTC time
 	$l_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
 	$l_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
@@ -194,16 +199,16 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"logCell\">$row[l_to]</td>
 		<td class=\"logCell\">$l_end</td>
 		<td class=\"logCell\">$row[l_model]</td>
-		<td class=\"logCell\">$row[l_plane]</td>
-		<td class=\"logCell\">$duration[0]</td>
-		<td class=\"logCell\">$duration[1]</td>\n") ;
-	$cost_plane = $row['cout'] * (60 * $duration[0] + $duration[1]) ;
+		<td class=\"logCell\">$row[l_plane]$plane_token</td>
+		<td class=\"logCell\">$duration_hh</td>
+		<td class=\"logCell\">$duration_mm</td>\n") ;
+	$cost_plane = $row['cout'] * $duration ;
 	if ($row['l_instructor'] == '' or $row['l_is_pic']) { // Solo, no instructor
 		print("<td class=\"logCell\">SELF</td>\n") ;
 	} else { // Dual command
 		print("<td class=\"logCell\">$row[instructor_name]</td>\n") ;
 	}
-	$cost_fi = ($row['l_instructor']) ? $row['l_instructor_paid'] * $cost_fi_minute * (60 * $duration[0] + $duration[1]) : 0 ;
+	$cost_fi = ($row['l_instructor']) ? $row['l_instructor_paid'] * $cost_fi_minute * $duration : 0 ;
 	// Flights taking off Belgium have to pay taxes (distance depending but ignored for now)
 	if (stripos($row['l_from'], 'EB') === 0)
 		$cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
@@ -260,10 +265,15 @@ $cost_grand_total = numberFormat($cost_grand_total, 2, ',', ' ') ;
 <p>
 <div style="border-style: inset;background-color: AntiqueWhite;">
 Sur base des donn&eacute;es que vous avez entr&eacute;es apr&egrave;s les vols dans le
-carnet de route des avions.
+carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui.
 Les heures sont les heures UTC.</div>
 </p >
 <?php
+if ($diams_explanation)
+	print("<p>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</p>") ;
+
+$invoice_reason = 'le montant du folio' ;
+// Check the bookkeeping balance
 
 $result = mysqli_query($mysqli_link, "SELECT *
 		FROM $table_bk_balance JOIN $table_person ON bkb_account = CONCAT('400', ciel_code)
@@ -274,8 +284,11 @@ $result = mysqli_query($mysqli_link, "SELECT *
 $row = mysqli_fetch_array($result) ;
 if ($row) {
 	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $row[bkb_amount]&euro; (si positif vous devez de l'argent au RAPCS ASBL). Il faut plusieurs jours avant que vos paiements soient pris en compte.</p>") ;
-	if ($row['bkb_amount'] > 0) $invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
-} else
+	if ($row['bkb_amount'] > 0) {
+		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
+		$invoice_reason = 'le solde' ;
+	}
+} else 
 	print("<p>Le solde de votre compte n'est pas disponible.</p>") ;
 
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
@@ -298,7 +311,7 @@ De $userName compte 400$codeCiel
 De $userName compte 400$codeCiel" ;
 
 ?>
-<h3>Test QR-code pour payer <?=$invoice_total?> &euro;</h3>
+<h3>Test QR-code pour payer <?=$invoice_reason?> de <?=$invoice_total?> &euro;</h3>
 <p>Ceci est simplement un test pour les informaticiens, ne pas l'utiliser car notre trésorier ne saura pas comment faire pour
 associer cette facture à votre compte membre RAPCS <?=$codeCiel?>. Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant).</p>

@@ -342,7 +342,7 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('planelog.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 ?>
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, janvier 2015, pour RAPCS, Royal A&eacute;ro Para Club de Spa<br>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, janvier 2015 - septembre 2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa<br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
 </body>
 </html>
