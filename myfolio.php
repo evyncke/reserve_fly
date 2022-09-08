@@ -221,10 +221,10 @@ while ($row = mysqli_fetch_array($result)) {
 		print("<td class=\"logCell\"></td>\n") ;
 	if ($row['l_share_type'] == 'CP2') {
 		$cost_plane = round($cost_plane * 0.5, 2) ;
-		$cost_taxes = round($cost_taxes * 0.5, 2) ;
+//		$cost_taxes = round($cost_taxes * 0.5, 2) ; // taxes are not shared
 	} else if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] != $userId) {
 		$cost_plane = 0 ;
-		$cost_taxes = 0 ;
+//		$cost_taxes = 0 ;
 	}
 	$cost_total = $cost_plane + $cost_fi + $cost_taxes ;
 	// Prepare the bottom line for grand total
