@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2022 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -448,20 +448,12 @@ if ($booking['compteur_vol'] != 0) {
 		<input type="number" min="0" max="23" name="startHoursUTC" size="4" maxlength="2" onchange="takeoffTimeChanged();" disabled> :
 		<input type="number" min="0" max="59" name="startMinutesUTC" size="4" maxlength="2" onchange="takeoffTimeChanged();" disabled>
 	</td></tr>
-	<!--- tr><td class="logbookLabel"><i>D&eacute;but (heure locale)</i>:</td><td class="logbookValue">
-		<input type="text" name="startHours" size="3" maxlength="2" readonly> : <input type="text" name="startMinutes" size="2" maxlength="2" readonly>
-	</td></tr-->
 	<tr><td class="logbookLabel">Fin (UTC):</td><td class="logbookValue">
 		<input type="number" min="0" max="23" name="endHoursUTC" size="3" maxlength="2" onchange="landingTimeChanged();" disabled> :
 		<input type="number" min="0" max="59" name="endMinutesUTC" size="3" maxlength="2" onchange="landingTimeChanged();" disabled>
 	</td></tr>
-	<!--- tr><td class="logbookLabel">Fin (<i>heure locale</i>):</td><td class="logbookValue">
-		<input type="text" name="endHours" size="2" maxlength="2" readonly>:<input type="text" name="endMinutes" size="2" maxlength="2" readonly>
-	</td></tr --->
-	<!-- PRE -->
 	<tr><td class="logbookLabel">Dur&eacute;e Moteur:</td><td class="logbookValue"><input type="text" size="5" maxlength="5" name="UTCDurationHour" value="<?=$durationHour?>" readonly> H
 		<input type="text" size="3" maxlength="2" name="UTCDurationMinute" value="<?=$durationMinute?>" readonly> min.</td></tr>
-	<!-- PRE -->
 </table>
 </div> <!-- col -->
 
