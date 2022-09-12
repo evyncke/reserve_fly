@@ -213,7 +213,7 @@ while ($row = mysqli_fetch_array($result)) {
 			$this_start_lt = new DateTime($row['l_start'], new DateTimeZone('UTC')) ;
 			$this_start_lt->setTimezone(new DateTimeZone($default_timezone)) ;
 			if (! $row['l_booking']) $row['l_booking'] = -1 ; // As logbook can now contain entries without a booking ... say bye bye to integrity
-			$result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type
+			$result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type, r_id
 				FROM $table_bookings JOIN $table_person ON r_pilot = jom_id
 				WHERE r_plane = '$plane' AND r_cancel_date IS NULL
 					AND r_id != $row[l_booking]
@@ -223,9 +223,9 @@ while ($row = mysqli_fetch_array($result)) {
 				ORDER by r_start ASC") or die("Erreur système à propos de l'accès aux réservations manquantes: " . mysqli_error($mysqli_link));
 			while ($row2 = mysqli_fetch_array($result2)) {
 				if ($row2['r_type'] == BOOKING_MAINTENANCE)
-					$missingPilots[] = 'Maintenance (' . substr($row2['r_start'], 0, 10) . ')' ;
+					$missingPilots[] = 'Maintenance (' . substr($row2['r_start'], 0, 10) . ') #' . $row2['r_id'] ;
 				else
-					$missingPilots[] = db2web($row2['last_name']) . ' (' . substr($row2['r_start'], 0, 10) . ')' ;
+					$missingPilots[] = db2web($row2['last_name']) . ' (' . substr($row2['r_start'], 0, 10) . ') #' . $row2['r_id'] ;
 			}
 			print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Missing entries for $gap minutes..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
 		} else if ($gap < 0)
@@ -254,6 +254,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$l_start = substr($row['l_start'], 11, 5) ;
 	$l_end = substr($row['l_end'], 11, 5) ;
 	$instructor = ($instructor_name != '') ? " /<br/>$instructor_name" : '' ;
+	$bookingLink = ($userIsAdmin) ? " <a href=\"https://www.spa-aviation.be/scripts/carnetdevol/IntroCarnetVol.php?id=$row[l_booking]\" title=\"Go to booking $row[l_booking]\" target=\"_blank\">&boxbox;</a>" : '' ;
 	if ($row['l_start_minute'] < 10)
 			$row['l_start_minute'] = "0$row[l_start_minute]" ;
 	if ($row['l_end_minute'] < 10)
@@ -265,7 +266,7 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['l_share_type'] != '') $row['l_remark'] = '<b>' . $row['l_share_type'] . '<span class="shareCodeClass">' . $row['l_share_member'] . '</span></b> ' . $row['l_remark'] ;
 	print("<tr>
 		<td class=\"logCell\">$row[date]</td>
-		<td class=\"logCell\">$pilot_name$instructor</td>
+		<td class=\"logCell\">$pilot_name$instructor$bookingLink</td>
 		<td class=\"logCell\">$row[l_from]</td>
 		<td class=\"logCell\">$row[l_to]</td>
 		<td class=\"logCell\">$l_start</td>
@@ -296,7 +297,7 @@ $missingPilots = array() ;
 // A little tricky as the data in $table_logbook is in UTC and in $table_bookings in local time :-O
 // Moreover, the MySQL server at OVH does not support timezone... I.e., everything must be done in PHP
 // I.e., the logging data must be converted into local time
-$result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type
+$result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type, r_id
 	FROM $table_bookings JOIN $table_person ON r_pilot = jom_id
 	WHERE r_plane = '$plane' AND r_cancel_date IS NULL
 		AND '" . $previous_end_lt->format('Y-m-d H:i') . "' <= r_start
@@ -305,9 +306,9 @@ $result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type
 	ORDER by r_start ASC") or die("Erreur système à propos de l'accès aux réservations manquantes après: " . mysqli_error($mysqli_link));
 while ($row2 = mysqli_fetch_array($result2)) {
 	if ($row2['r_type'] == BOOKING_MAINTENANCE)
-		$missingPilots[] = 'Maintenance (' . substr($row2['r_start'], 0, 10) . ')' ;
+		$missingPilots[] = 'Maintenance (' . substr($row2['r_start'], 0, 10) . ') #' . $row2['r_id'] ;
 	else
-		$missingPilots[] = db2web($row2['last_name']) . ' (' . substr($row2['r_start'], 0, 10) . ')' ;
+		$missingPilots[] = db2web($row2['last_name']) . ' (' . substr($row2['r_start'], 0, 10) . ') #' . $row2['r_id'] ;
 }
 if (count($missingPilots) > 0)
 	print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Missing entries..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
