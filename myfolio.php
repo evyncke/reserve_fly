@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2022 Eric Vyncke
+   Copyright 2022-2022 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -210,10 +210,14 @@ while ($row = mysqli_fetch_array($result)) {
 	}
 	$cost_fi = ($row['l_instructor']) ? $row['l_instructor_paid'] * $cost_fi_minute * $duration : 0 ;
 	// Flights taking off Belgium have to pay taxes (distance depending but ignored for now)
-	if (stripos($row['l_from'], 'EB') === 0 and $row['l_from'] != $row['l_to'])
+	// Except Local flight
+    	$aPos = stripos($row['l_from'], 'EB');
+	if ($aPos !== false and $aPos == 0 and $row['l_from'] != $row['l_to']) {
 		$cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
-	else
+	}
+	else {
 		$cost_taxes = 0 ;
+	}
 	print("<td class=\"logCell\">$row[l_pax_count]</td>\n") ;
 	if ($row['l_share_type'])
 		print("<td class=\"logCell\">$row[l_share_type] <span class=\"shareCodeClass\">$row[l_share_member]</span></td>\n") ;
@@ -221,10 +225,8 @@ while ($row = mysqli_fetch_array($result)) {
 		print("<td class=\"logCell\"></td>\n") ;
 	if ($row['l_share_type'] == 'CP2') {
 		$cost_plane = round($cost_plane * 0.5, 2) ;
-//		$cost_taxes = round($cost_taxes * 0.5, 2) ; // taxes are not shared
 	} else if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] != $userId) {
 		$cost_plane = 0 ;
-//		$cost_taxes = 0 ;
 	}
 	$cost_total = $cost_plane + $cost_fi + $cost_taxes ;
 	// Prepare the bottom line for grand total
