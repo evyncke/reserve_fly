@@ -1,4 +1,3 @@
-<pre>
 <?php
 /*
    Copyright 2022 Eric Vyncke
@@ -22,32 +21,11 @@ ini_set("auto_detect_line_endings", true); // process CR CR/LF or LF as line sep
 
 
 $fileName = "/Users/evyncke/Temp/factures.eml" ;
+$filePrefix = "invoices/" ;
 $lines = array() ;
-
-//$parser = mailparse_msg_parse_file('~/Temp/factures.eml') or die("Cannot read file") ;
-//$parser = mailparse_msg_parse_file('factures.eml') or die("Cannot read file") ;
-//print_r(mailparse_msg_get_structure($parser));
-//mailparse_msg_free($parser) ;
-
-// Read one char taking into account the read-ahead ungetChar
-// Return FALSE at the end of the file
-function readChar($f) {
-	global $ungetChar ;
-
-	if ($ungetChar === false)
-		return fgetc($f) ;
-	$tmp = $ungetChar ;
-	$ungetChar = false ;
-	return $tmp ;
-}
-
-function ungetChar($c) {
-	global $ungetChar ;
-
-	if ($ungetChar !== false)
-		die("Cannot ungetChar twice") ;
-	$ungetChar = $c ;
-}
+$lastTo = false ;
+$lastSubject = false ;
+$lastDate = false ;
 
 // Return a single RFC 822 header line (unfolded)
 // Return FALSE at the end of the header (empty line)
@@ -63,34 +41,10 @@ function readHeaderLine($lines, &$iLine, $linesCount) {
 	return $line ;
 }
 
-// Return a single RFC 822 header line (unfolded)
-// Return FALSE at the end of the header (empty line)
-function XreadHeaderLine($f) {
-	$line = '' ;
-	while (true) {
-		$c = readChar($f) ;
-		if ($c == "\r" or $c == "\n") { // End of line, need to check for folded line
-			$nextC = readChar($f) ;
-			if ($nextC == "\n" or $nextC == "\r")
-				$nextC = readChar($f) ;
-			if ($nextC == ' ' or $nextC == "\t") { // Need to skip leading space
-				while ($nextC = readChar($f) and ($nextC == "\t" or $nextC == ' ')) ;
-				$line .= " $nextC" ;
-			} else { // Next line as no leading space, time to return the line
-				ungetChar($nextC) ;
-				return $line ;
-			}
-		} else { // Normal char
-			$line .= $c ;
-		}
-	}
-}
-
 // parse the RFC 822 email headers and return an associative array (header -> value)
 function parseHeaders($lines, &$iLine, $linesCount) {
 	$headers = array() ;
 	while ($line = readHeaderLine($lines, $iLine, $linesCount) and $line != '') {
-//		print("\n\nJust read $line\n") ;
 		$delimiterPos = strpos($line, ':') ;
 		if ($delimiterPos === false)
 			die("Invalid header line, missing a ':', in <$line>") ;
@@ -101,31 +55,94 @@ function parseHeaders($lines, &$iLine, $linesCount) {
 	return $headers ;
 }
 
+// Process a multi-part body
+function processMultipart($lines, &$iLine, $linesCount, $boundary) {
+	// Find the first delimiter
+	$firstLine = $iLine ;
+	while ($firstLine < $linesCount and ($lines[$firstLine-1] != '' or $lines[$firstLine] != "--$boundary"))
+		$firstLine ++ ;
+	$firstLine ++ ; // Skip the boundary itself
+	$lastLine = $firstLine + 1 ; // Let's find the next delimiter
+	while ($lastLine < $linesCount) {
+		while ($lastLine < $linesCount and ($lines[$lastLine-1] != '' or $lines[$lastLine] != "--$boundary"))
+			$lastLine ++ ;
+		$lastLine ++ ; // Skip the boundary itself
+		processMessage($lines, $firstLine, $lastLine - 2) ; // Need to remove the delimiter
+		$firstLine = $lastLine ;
+		$lastLine = $firstLine + 1 ;
+	}
+}
+
+// Process a application/pdf body part and save the file in $outFileName
+function processPDF($lines, &$iLine, $linesCount, $MIMEEncoding, $outFileName) {
+	global $sqlFile, $lastTo, $lastDate ;
+
+	if ($MIMEEncoding != 'base64') die("Unsupported Content-Transfer-Encoding: $MIMEEncoding for $outFileName") ;
+	$encoded = '' ;
+	while ($iLine < $linesCount) {
+		$encoded .= "\n" . $lines[$iLine++] ;
+	}
+	$decoded = base64_decode($encoded) ;
+	$f = fopen($outFileName, 'w') or die("Cannot open $outFileName for writing") ;
+	fwrite($f, $decoded) or die("Cannot write to $outFileName") ;
+	fclose($f) ;
+	// Let's have SQL parsing the date as "Tue, 29 Mar 2022 18:24:22 +0200"
+	fwrite($sqlFile, "REPLACE INTO rapcs_bk_invoices(bki_email, bki_date, bki_file_name) VALUES ('$lastTo', DATE(STR_TO_DATE('$lastDate', '%a, %e %b %Y %H:%i:%s')), '$outFileName');\n") ;
+}
+
 // Read and process one single email message
 function processMessage($lines, &$iLine, $linesCount) {
+	global $lastTo, $lastSubject, $lastDate, $filePrefix ;
 	$headers = parseHeaders($lines, $iLine, $linesCount) ;
-//	print_r($headers) ;
-print("To: $headers[to]\n") ;
-print("Subject: $headers[subject]\n") ;
-print("Content-type: " . $headers['content-type'] . "\n") ;
+	if (isset($headers['to'])) $lastTo = $headers['to'] ;
+	if (isset($headers['subject'])) $lastSubject = $headers['subject'] ;
+	if (isset($headers['date'])) $lastDate = $headers['date'] ;
 	$contentType = $headers['content-type'] ;
 	if ($contentType) {
-		if (preg_match('|multipart/mixed; boundary="(\S+)"|', $contentType, $matches)) {
-			$boundary = $matches[1] ;
-			print("Multipart $boundary\n") ;
+		$semicolonPos = strpos($contentType, ';') ;
+		if ($semicolonPos !== false)
+			$contentMIMEType = substr($contentType, 0, $semicolonPos) ;
+		else
+			$contentMIMEType = $contentType ;
+		switch ($contentMIMEType) {
+			case 'multipart/mixed':
+				if (preg_match('|multipart/mixed; boundary="(\S+)"|', $contentType, $matches)) {
+					$boundary = $matches[1] ;
+					processMultipart($lines, $iLine, $linesCount, $boundary) ;
+				} ;
+				break ;
+			case 'message/rfc822':
+				processMessage($lines, $iLine, $linesCount) ;
+				break ;
+			case 'text/plain':
+				break ;
+			case 'application/pdf':
+				if (preg_match('/Facture (\d+)/', $lastSubject, $matches))
+					$outFileName = $filePrefix . "$matches[1].pdf" ;
+				else
+					$outFineName = $filePrefix . "facture.pdf" ; // Should actually use Content-Disposition: attachment; filename="Facture RAPCS.pdf"
+				processPDF($lines, $iLine, $linesCount, $headers['content-transfer-encoding'], $outFileName) ;
+				break ;
+			default: die("Unsupported MIME type: $contentMIMEType") ;
 		}
 	}
 }
 
+function processFile($fileName) {
+	global $lines, $iLine, $linesCount ;
 
-//$f = fopen($fileName, 'r') or die("Cannot open email archive: $fileName\n") ;
+	$lines = file($fileName, FILE_IGNORE_NEW_LINES) or die("Cannot read file $fileName") ;
+	$iLine = 0 ;
+	$linesCount = count($lines) ;
+	processMessage($lines, $iLine, $linesCount) ;
+}
 
-$lines = file($fileName, FILE_IGNORE_NEW_LINES) ;
-$iLine = 0 ;
-$linesCount = count($lines) ;
+$sqlFile = fopen($filePrefix . "inject.sql", 'a') ;
 
-processMessage($lines, $iLine, $linesCount) ;
+foreach (glob($filePrefix . "*.eml") as $fileName) {
+	print("Processing $fileName\n") ;
+	processFile($fileName) ;
+}
+fclose($sqlFile) ;
 
 ?>
-
-</pre>
