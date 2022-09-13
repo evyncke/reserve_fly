@@ -22,6 +22,8 @@ ini_set("auto_detect_line_endings", true); // process CR CR/LF or LF as line sep
 
 $fileName = "/Users/evyncke/Temp/factures.eml" ;
 $filePrefix = "invoices/" ;
+$shared_secret = "124.75=EBSP" ;
+
 $lines = array() ;
 $lastTo = false ;
 $lastSubject = false ;
@@ -74,7 +76,7 @@ function processMultipart($lines, &$iLine, $linesCount, $boundary) {
 }
 
 // Process a application/pdf body part and save the file in $outFileName
-function processPDF($lines, &$iLine, $linesCount, $MIMEEncoding, $outFileName) {
+function processPDF($lines, &$iLine, $linesCount, $MIMEEncoding, $invoiceId, $outFileName) {
 	global $sqlFile, $lastTo, $lastDate ;
 
 	if ($MIMEEncoding != 'base64') die("Unsupported Content-Transfer-Encoding: $MIMEEncoding for $outFileName") ;
@@ -87,12 +89,12 @@ function processPDF($lines, &$iLine, $linesCount, $MIMEEncoding, $outFileName) {
 	fwrite($f, $decoded) or die("Cannot write to $outFileName") ;
 	fclose($f) ;
 	// Let's have SQL parsing the date as "Tue, 29 Mar 2022 18:24:22 +0200"
-	fwrite($sqlFile, "REPLACE INTO rapcs_bk_invoices(bki_email, bki_date, bki_file_name) VALUES ('$lastTo', DATE(STR_TO_DATE('$lastDate', '%a, %e %b %Y %H:%i:%s')), '$outFileName');\n") ;
+	fwrite($sqlFile, "REPLACE INTO rapcs_bk_invoices(bki_email, bki_date, bki_id, bki_file_name) VALUES ('$lastTo', DATE(STR_TO_DATE('$lastDate', '%a, %e %b %Y %H:%i:%s')), '$invoiceId', '$outFileName');\n") ;
 }
 
 // Read and process one single email message
 function processMessage($lines, &$iLine, $linesCount) {
-	global $lastTo, $lastSubject, $lastDate, $filePrefix ;
+	global $lastTo, $lastSubject, $lastDate, $filePrefix, $shared_secret ;
 	$headers = parseHeaders($lines, $iLine, $linesCount) ;
 	if (isset($headers['to'])) $lastTo = $headers['to'] ;
 	if (isset($headers['subject'])) $lastSubject = $headers['subject'] ;
@@ -117,11 +119,13 @@ function processMessage($lines, &$iLine, $linesCount) {
 			case 'text/plain':
 				break ;
 			case 'application/pdf':
-				if (preg_match('/Facture (\d+)/', $lastSubject, $matches))
-					$outFileName = $filePrefix . "$matches[1].pdf" ;
-				else
-					$outFineName = $filePrefix . "facture.pdf" ; // Should actually use Content-Disposition: attachment; filename="Facture RAPCS.pdf"
-				processPDF($lines, $iLine, $linesCount, $headers['content-transfer-encoding'], $outFileName) ;
+				if (preg_match('/Facture (\d+)/', $lastSubject, $matches)) {
+					$invoiceId = $matches[1] ;
+				} else {
+					$invoiceId = substr(sha1($lastTo . $lastDate), 0, 8) ; // Hopefully a unique ID !
+				}
+				$outFileName = $filePrefix . sha1($invoiceId . $shared_secret) . '.pdf' ;
+				processPDF($lines, $iLine, $linesCount, $headers['content-transfer-encoding'], $invoiceId, $outFileName) ;
 				break ;
 			default: die("Unsupported MIME type: $contentMIMEType") ;
 		}
@@ -129,11 +133,14 @@ function processMessage($lines, &$iLine, $linesCount) {
 }
 
 function processFile($fileName) {
-	global $lines, $iLine, $linesCount ;
+	global $lines, $iLine, $linesCount, $lastTo, $lastSubject, $lastDate ;
 
 	$lines = file($fileName, FILE_IGNORE_NEW_LINES) or die("Cannot read file $fileName") ;
 	$iLine = 0 ;
 	$linesCount = count($lines) ;
+	$lastTo = false ;
+	$lastSubject = false ;
+	$lastDate = false ;
 	processMessage($lines, $iLine, $linesCount) ;
 }
 
