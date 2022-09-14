@@ -1,3 +1,4 @@
+<pre>
 <?php
 /*
    Copyright 2014-2022 Eric Vyncke
@@ -98,6 +99,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$booker = mysqli_fetch_array($result_booker) ;
 	$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 	if ($row['r_instructor'] != '') {
+		if ($row['r_instructor'] == $row['r_pilot']) continue ; // Don't send a reminder when FI prebook a flight
 		$result_instructor = mysqli_query($mysqli_link, "select name, email from $table_users where id = $row[r_instructor]") ;
 		$instructor = mysqli_fetch_array($result_instructor) ;
 		$instructor['name'] = db2web($instructor['name']) ; // SQL DB is latin1 and the rest is in UTF-8
@@ -510,15 +512,19 @@ if (! $f) journalise(0, "E", "Cannot open members.js for writing") ;
 else {
 	$first = true ;
 	fwrite($f,"var members = [ ") ;
-	$result = mysqli_query($mysqli_link, "select distinct id, name, email, group_concat(group_id) as groups
-		from $table_users join $table_user_usergroup_map on id=user_id
+	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, u.email as email, group_concat(group_id) as groups
+		from $table_users as u join $table_user_usergroup_map on u.id=user_id join $table_person as p on u.id=p.jom_id
 		where block = 0 and group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group)
 		group by user_id
-		order by name") ;
+		order by last_name, first_name" ;
+	$result = mysqli_query($mysqli_link, $sql)
+		or journalise(0, "E", "Cannot read members: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		$row['name'] = db2web($row['name']) ;
 		if ($row['name'] === FALSE) 
 			journalise(0, 'E', "There was an error while converting\n") ; 
+		$row['first_name'] = db2web($row['first_name']) ;
+		$row['last_name'] = db2web($row['last_name']) ;
 		if ($first)
 			$first = false ;
 		else
@@ -526,7 +532,7 @@ else {
 		$groups = explode(',', $row['groups']) ;
 		$pilot = (in_array($joomla_pilot_group, $groups)) ? 'true' : 'false' ;
 		$student = (in_array($joomla_student_group, $groups)) ? 'true' : 'false' ;
-		fwrite($f, "{ id: $row[id], name: \"$row[name]\", email: \"$row[email]\", pilot: $pilot, student: $student}") ;
+		fwrite($f, "{ id: $row[id], name: \"$row[name]\", first_name: \"$row[first_name]\", last_name: \"$row[last_name]\", email: \"$row[email]\", pilot: $pilot, student: $student}") ;
 	}
 	fwrite($f, "\n]; \n") ;
 	fclose($f) ;
@@ -713,4 +719,4 @@ if (time() + 3600 >= airport_opening_local_time($year, $month, $day) and time() 
 print(date('Y-m-d H:i:s').": End of CRON.\n") ;
 journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2].") ;
 ?>
-	
+</pre>
