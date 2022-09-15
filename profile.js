@@ -12,12 +12,13 @@ function prefillDropdownMenus(selectId, valuesArray, selectedValue) {
 
         for (var i = 0; i < valuesArray.length; i++) {
                 var option = document.createElement("option");
-                option.text = valuesArray[i].name ;
-			//	if (valuesArray[i].student) {  // after many attemps no way to add an icon after a student name...
-			//		option.text += '<span class="glyphicon glyphicon-education"></span>' 
-			//		option.text = '&#xe233;' + valuesArray[i].name;
-			//		option.class = 'glyphicon glyphicon-education' ;
-			//	}
+		if (valuesArray[i].last_name == '')
+			option.innerHTML = valuesArray[i].name ;
+		else
+			option.innerHTML = valuesArray[i].last_name + ', ' + valuesArray[i].first_name ;
+		if (valuesArray[i].student) {  // Add a student icon
+			option.innerHTML += ' &#x1f4da;' ;
+		}
                 option.value = valuesArray[i].id ;
                 option.selected = valuesArray[i].id == selectedValue ;
                 select.add(option) ;
