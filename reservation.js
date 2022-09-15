@@ -2072,7 +2072,14 @@ function init() {
 	}
 	for (var member = 0; member < members.length; member++) {
 		var option = document.createElement("option");
-		option.text = members[member].name ;
+		if (members[member].last_name == '') {
+			option.innerHTML = members[member].name ;
+		} else {
+			option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
+		}
+                if (members[member].student) {  // Add a student icon
+                        option.innerHTML += ' &#x1f4da;' ;
+                }
 		option.value = members[member].id ;
 		document.getElementById('memberSelect').add(option) ;
 	}
