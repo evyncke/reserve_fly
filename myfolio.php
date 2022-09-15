@@ -268,7 +268,7 @@ $cost_grand_total = numberFormat($cost_grand_total, 2, ',', ' ') ;
 <p>
 <div style="border-style: inset;background-color: AntiqueWhite;">
 Sur base des donn&eacute;es que vous avez entr&eacute;es apr&egrave;s les vols dans le
-carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui.
+carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui (<?=date('D, j-m-Y H:i e')?>).
 Les heures sont les heures UTC.</div>
 </p >
 <?php
