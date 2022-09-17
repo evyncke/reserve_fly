@@ -164,9 +164,7 @@ function displayClock() {
 		document.getElementById('hhmmUTC').innerHTML = ('0' + (nowHour - utcOffset)).substr(-2, 2) + ':' + ('0' + nowMinute).substr(-2, 2) + 'Z';
 	else
 		document.getElementById('hhmmUTC').innerHTML = ('0' + (24 + nowHour - utcOffset)).substr(-2, 2) + ':' + ('0' + nowMinute).substr(-2, 2) + 'Z' ;
-	console.log('before setTimeout') ;
 	setTimeout(displayClock, 1000 * 60) ; // Refresh every 60 seconds
-	console.log('after setTimeout') ;
 }
 
 
@@ -175,12 +173,10 @@ function redirect(id, auth) {
 }
 
 function logbookClick (id, auth) {
-console.log('logbookClick() id=' + id) ;
 	window.location.href = 'mobile_logbook.php?id=' + id + '&auth=' + auth ;
 }
 
 function newLogbookClick (id, auth) {
-console.log('newLogbookClick() id=' + id) ;
 	window.location.href = '../scripts/carnetdevol/IntroCarnetVol.php?id=' + id + '&auth=' + auth ;
 }
 
@@ -189,13 +185,11 @@ function modifyClick(id, auth) {
 }
 
 function cancelConfirm(id, auth) {
-console.log("cancelConfirm") ;
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
 		if(XHR.readyState  == 4) {
 			if(XHR.status  == 200) {
 				try {
-console.log('cancel_booking:' + XHR.responseText) ;
 					var response = eval('(' + XHR.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
@@ -209,7 +203,6 @@ console.log('cancel_booking:' + XHR.responseText) ;
 		}
 	}
 	var requestUrl = "cancel_booking.php?id=" + id + "&auth=" + auth + "&reason=mobile" ;
-console.log(requestUrl) ;
 	XHR.open("GET", requestUrl, false) ;
 	XHR.send(null) ;
 
@@ -225,7 +218,6 @@ function abandonCancel() {
 }
 
 function cancelFirstClick () {
-console.log("cancelFirstClick()") ;
 	document.getElementById('confirmCancellation').style.visibility = 'visible' ;
 	document.getElementById('confirmCancellation').style.display = 'block' ;
 	document.getElementById('bookingTable').style.visibility = 'hidden' ;
@@ -302,7 +294,6 @@ if (false) {
 		'&type=' + bookingType + '&comment=' + comment + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
 		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
 		'&duration=' + flightDuration ;
-console.log('requestURL: ' + requestUrl) ;
 	XHR.open("GET", requestUrl, false) ;
 	XHR.send(null) ;
 }
@@ -348,7 +339,6 @@ function modifyBooking(id, auth) {
 		'&comment=' + comment + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
 		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
 		'&duration=' + flightDuration ;
-console.log(requestUrl) ;
 	XHR.open("GET", requestUrl, false) ;
 	XHR.send(null) ;
 }
@@ -356,12 +346,12 @@ console.log(requestUrl) ;
 function prefillDropdownMenus(selectName, valuesArray, selectedValue) {
 	var select = document.getElementsByName(selectName)[0] ;
 
-console.log('select is') ;
-console.log(select) ;
-console.log('selectedValue=' + selectedValue) ;
 	for (var i = 0; i < valuesArray.length; i++) {
 		var option = document.createElement("option");
-		option.text = valuesArray[i].name ;
+		if ('last_name' in valuesArray[i])
+			option.innerHTML = valuesArray[i].last_name + ' ' + valuesArray[i].first_name ;
+		else
+			option.inneHTML = valuesArray[i].name ;
 		option.value = valuesArray[i].id ;
 		option.selected = valuesArray[i].id == selectedValue ;
 		select.add(option) ;

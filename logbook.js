@@ -315,7 +315,10 @@ function prefillDropdownMenus(selectName, valuesArray, selectedValue) {
 		alert("Aucune valeur pour: " + selectName + ". Prévenir par email eric@vyncke.org avec si possible une capture d'écran. Essayez de rafraîchir la page.") ;
 	for (var i = 0; i < valuesArray.length; i++) {
 		var option = document.createElement("option");
-		option.text = valuesArray[i].name ;
+		if ('last_name' in valuesArray[i]) {
+			option.innerHTML = valuesArray[i].last_name + ', ' + valuesArray[i].first_name;
+		} else
+			option.innerHTML = valuesArray[i].name ;
 		option.value = valuesArray[i].id ;
 		option.selected = valuesArray[i].id == selectedValue ;
 		select.add(option) ;

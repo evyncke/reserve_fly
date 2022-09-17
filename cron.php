@@ -457,18 +457,23 @@ if (! $f) journalise(0, "E", "Cannot open pilots.js for writing") ;
 else {
 	fwrite($f,"var pilots = [ ") ;
 	$first = true ;
-	$result = mysqli_query($mysqli_link, "select id, name from $table_users
-		where block = 0 and exists (select * from $table_user_usergroup_map
-			where id=user_id and group_id in ($joomla_student_group, $joomla_pilot_group, $joomla_instructor_group))
-		order by name") or journalise(0, "E", "In cron cannot get pilot list")
-		or journalise(0, "E", "Cannot read pilots: " . mysqli_error($mysqli_link)) ;
+	$result = mysqli_query($mysqli_link, "select u.id as id, first_name, last_name, u.name as name, group_concat(group_id) as groups
+                from $table_users as u join $table_user_usergroup_map on u.id=user_id join $table_person as p on u.id=p.jom_id
+                where block = 0 and group_id in ($joomla_student_group, $joomla_pilot_group, $joomla_instructor_group)
+                group by user_id
+		order by last_name") 
+			or journalise(0, "E", "Cannot read pilots: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		$row['name'] = db2web($row['name']) ;
+		$row['first_name'] = db2web($row['first_name']) ;
+		$row['last_name'] = db2web($row['last_name']) ;
+		$groups = explode(',', $row['groups']) ;
+		$student = (in_array($joomla_student_group, $groups)) ? 'true' : 'false' ;
 		if ($first)
 			$first = false ;
 		else
 			fwrite($f, ",\n\t") ;
-		fwrite($f, "{ id: $row[id], name: \"$row[name]\"}") ;
+		fwrite($f, "{ id: $row[id], name: \"$row[name]\", first_name: \"$row[first_name]\", last_name: \"$row[last_name]\", student: $student}") ;
 	}
 	fwrite($f, "\n]; \n") ;
 	fclose($f) ;
