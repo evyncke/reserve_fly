@@ -219,10 +219,16 @@ function init() {
 	var itemsSelect = document.getElementById('itemsSelect') ;
 	if (itemsSelect) itemsSelect.value = '<?=$items?>' ;
 	if (userIsInstructor || userIsAdmin) {
-		// Initiliaze pilotSelect from member.js
+		// Initiliaze pilotSelect from members.js
 	       for (var member = 0; member < members.length; member++) {
 			var option = document.createElement("option");
-			option.text = members[member].name ;
+			if (members[member].last_name == '')
+				option.innerHTML = members[member].name ;
+			else
+				option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
+			if (members[member].student) {  // Add a student icon
+				option.innerHTML += ' &#x1f4da;' ;
+			}
 			option.value = members[member].id ;
 			document.getElementById('pilotSelect').add(option) ;
 		}
@@ -510,7 +516,7 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('mylog.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 ?>
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, janvier 2015, avril 2018, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, janvier 2015 - septembre 2022 pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
 </body>
 </html>

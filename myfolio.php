@@ -100,6 +100,8 @@ var
 	userFullName = '<?=$userFullName?>' ;
 	userName = '<?=$userName?>' ;
 	userId = <?=$userId?> ;
+        userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?> ;
+        userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ;
 
 function valueOfField(suffix, name) {
 	return name + '=' + document.getElementById(name + suffix.charAt(0).toUpperCase() + suffix.slice(1)).value ;
@@ -113,6 +115,8 @@ function findMember(a, m) {
 }
 
 function init() {
+        var pilotSelect = document.getElementById('pilotSelect') ;
+	// Add names for shared cost members
         var collection = document.getElementsByClassName("shareCodeClass") ;
         for (let i = 0; i < collection.length ; i++) {
                 var spanElem = collection[i] ;
@@ -123,6 +127,27 @@ function init() {
                 if (memberText != null)
                         spanElem.innerText = ' (' + memberText + ')';
         }
+	// Dropdown selected the pilot
+        if (userIsInstructor || userIsAdmin) {
+                // Initiliaze pilotSelect from members.js
+               for (var member = 0; member < members.length; member++) {
+                        var option = document.createElement("option");
+                        if (members[member].last_name == '')
+                                option.innerHTML = members[member].name ;
+                        else
+                                option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
+                        if (members[member].student) {  // Add a student icon
+                                option.innerHTML += ' &#x1f4da;' ;
+                        }
+                        option.value = members[member].id ;
+                        document.getElementById('pilotSelect').add(option) ;
+                }
+        }
+        if (pilotSelect) pilotSelect.value = <?=$userId?> ;
+}
+
+function selectChanged() {
+        window.location.href = '<?=$_SERVER['PHP_SELF']?>?user=' + document.getElementById('pilotSelect').value ;
 }
 </script>
 <!-- Matomo -->
@@ -164,6 +189,15 @@ $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
 	ORDER by l.l_start ASC" ;
 
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
+
+if ($userIsInstructor or $userIsAdmin) {
+        print("En tant qu'instructeur/administrateur, vous pouvez consulter les flios des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
+        print("</select><br/><br/>") ;
+} else { // ($userIsInstructor or $userIsAdmin)
+        print("Folio de: <select id=\"pilotSelect\" onchange=\"selectChanged();\">
+        <option value=\"$userId\" selected>$userName</option>
+        </select><br/><br/>") ;
+}
 
 print("<table class=\"logTable\">\n") ;
 ShowTableHeader() ;

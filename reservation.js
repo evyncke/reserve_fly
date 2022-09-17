@@ -2072,10 +2072,10 @@ function init() {
 	}
 	for (var member = 0; member < members.length; member++) {
 		var option = document.createElement("option");
-		if (members[member].last_name == '') {
-			option.innerHTML = members[member].name ;
-		} else {
+		if ('last_name' in members[member]) {
 			option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
+		} else {
+			option.innerHTML = members[member].name ;
 		}
                 if (members[member].student) {  // Add a student icon
                         option.innerHTML += ' &#x1f4da;' ;
@@ -2085,7 +2085,14 @@ function init() {
 	}
 	for (var pilot = 0; pilot < pilots.length; pilot++) {
 		var option = document.createElement("option");
-		option.text = pilots[pilot].name ;
+		if ('last_name' in pilots[pilot]) {
+			option.innerHTML = pilots[pilot].last_name + ', ' + pilots[pilot].first_name ;
+		} else {
+			option.innerHTML = pilots[pilot].name ;
+		}
+                if (pilots[pilot].student) {  // Add a student icon
+                        option.innerHTML += ' &#x1f4da;' ;
+                }
 		option.value = pilots[pilot].id ;
 		document.getElementById('pilotSelect').add(option) ;
 		id2Name[pilots[pilot].id] = pilots[pilot].name ;
