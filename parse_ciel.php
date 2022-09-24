@@ -72,9 +72,16 @@ while ($row = mysqli_fetch_array($result)) {
 		mysqli_query($mysqli_link, "REPLACE INTO $table_bk_balance (bkb_account, bkb_date, bkb_amount)
 			VALUES('400$row[ciel_code]', '$balance_date', $balance)")
 			or die("Cannot replace value in $table_bk_balance: " . mysqli_error($mysqli_link)) ;
+		unset($balances["400$row[ciel_code]"]) ;
 	} else
 		print(" no balance\n") ;
 }
+
+print("<h2>Comptes clients inconnus</h2>\n") ;
+
+foreach ($balances as $client => $balance)
+	print("$client => $balance\n") ;
+
 ?>
 
 </pre>
