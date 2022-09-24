@@ -1913,7 +1913,6 @@ function refreshInstructorPlanningRow(rowIndex, instructor, displayDay, displayM
 }
 
 function refreshPlanningTable() {
-	myLog("start refreshPlanningTable(), " + planningYear + "/" + planningMonth + "/" + planningDay + ', plane: ' + planningPlaneIndex) ;
 	var hour, minute, compteur ;
 
 	clearBookingDetails() ;
@@ -1963,9 +1962,10 @@ function refreshPlanningTable() {
 			}
 			// add for engine hours using the most recent data but not for ressources
 			if (allPlanes[plane].ressource == 0) {
-				// Add FlightAware link only for members
+				// Add FlightAware link only for members, need to stop event propagation to the TD click causing a switch of presentation
 				if (userId > 0)
-					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="https://flightaware.com/live/flight/' + allPlanes[plane].id.toUpperCase() + '" target="_blank"><img src="fa.ico" border="0" width="12" height="12"></a>' ;
+					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="https://flightaware.com/live/flight/' + allPlanes[plane].id.toUpperCase() +
+						'" onclick="event.stopPropagation();" target="_blank"><img src="fa.ico" border="0" width="12" height="12"></a>' ;
 				if (allPlanes[plane].compteur_pilote_date > allPlanes[plane].compteur_date)
 					compteur = allPlanes[plane].compteur_pilote ;
 				else
@@ -2003,8 +2003,8 @@ function presentationByPlane(event) {
 	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
 	planningPlaneIndex = event.target.id ;
 	planningByPlane = true ; 
-    document.getElementById('roadBookButton').disabled = false ;
-    document.getElementById('roadBookButton').style.display = 'inline' ;
+	document.getElementById('roadBookButton').disabled = false ;
+	document.getElementById('roadBookButton').style.display = 'inline' ;
 	initPlanningTable() ;
 	refreshPlanningTable() ;
 }
