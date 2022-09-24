@@ -191,7 +191,7 @@ $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
 
 if ($userIsInstructor or $userIsAdmin) {
-        print("En tant qu'instructeur/administrateur, vous pouvez consulter les flios des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
+        print("En tant qu'instructeur/administrateur, vous pouvez consulter les folios des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
         print("</select><br/><br/>") ;
 } else { // ($userIsInstructor or $userIsAdmin)
         print("Folio de: <select id=\"pilotSelect\" onchange=\"selectChanged();\">
@@ -303,6 +303,7 @@ $cost_grand_total = numberFormat($cost_grand_total, 2, ',', ' ') ;
 <div style="border-style: inset;background-color: AntiqueWhite;">
 Sur base des donn&eacute;es que vous avez entr&eacute;es apr&egrave;s les vols dans le
 carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui (<?=date('D, j-m-Y H:i e')?>).
+Le montant n'inclut aucune note de frais (par exemple carburant), note de crédit, ainsi que d'autres frais (par exemple, cotisations, ou taxes d'atterrissage).
 Les heures sont les heures UTC.</div>
 </p >
 <?php
@@ -327,34 +328,52 @@ if ($row) {
 	}
 } else 
 	print("<p>Le solde de votre compte n'est pas disponible.</p>") ;
+?>
+<h2>Factures r&eacute;centes</h2>
+<p>A titre <b>exp&eacute;rimental</b>, voici quelques factures r&eacute;centes:
+<ul>
+<?php
+$sql = "SELECT * FROM $table_person JOIN $table_bk_invoices ON bki_email = email
+        WHERE jom_id = $userId" ;
+
+$result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access factures: " . mysqli_error($mysqli_link)) ;
+$count = 0 ;
+while ($row = mysqli_fetch_array($result)) {
+        print("<li><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_date] #$row[bki_id] &boxbox;</a></li>\n") ;
+        $count ++ ;
+}
+
+if ($count == 0) print("<li>Hélas, pas encore de facture à votre nom dans le système.</li>\n") ;
+
+print("</ul>\n</p>\n") ;
 
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 
-$iban = "BE16340092367074" ; // Eric ING
-$bic = "BBRUBEBB" ; // ING BIC
-$name = "Eric Vyncke" ;
+$iban = "BE64732038421852" ;
+$bic = "CREGBEBB" ;
+$name = "Royal Areo Para Club Spa " ;
 
 $epcString =
 "BCD
 001
 1
 SCT
-CREGBEBB
-Royal Areo Para Club Spa
-BE64732038421852
+$bic
+$name
+$iban
 EUR$invoice_total
 De $userName compte 400$codeCiel
 De $userName compte 400$codeCiel" ;
 
 ?>
-<h3>Test QR-code pour payer <?=$invoice_reason?> de <?=$invoice_total?> &euro;</h3>
+<h2>Test QR-code pour payer <?=$invoice_reason?> de <?=$invoice_total?> &euro;</h3>
 <p>Ceci est simplement un test pour les informaticiens, ne pas l'utiliser car notre trésorier ne saura pas comment faire pour
-associer cette facture à votre compte membre RAPCS <?=$codeCiel?>. Le QR-code est à utiliser avec une application bancaire
+associer ce virement à votre compte membre RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant).</p>
 <img width="400" height="400" src="https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=<?=urlencode($epcString)?>">
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, août 2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, août-septembre 2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
 </body>
 </html>
