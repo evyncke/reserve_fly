@@ -87,6 +87,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$line_count ++ ;
 	$last_id = $row['j_id'] ;
 	switch (strtoupper($row['j_severity'])) {
+		case 'F': $rowStyle = ' style="background-color: red; color: white;"' ; break ;
 		case 'E': $rowStyle = ' style="background-color: pink;"' ; break ;
 		case 'W': $rowStyle = ' style="background-color: lightyellow;"' ; break ;
 		default: $rowStyle = '' ;
