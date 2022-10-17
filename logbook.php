@@ -29,26 +29,26 @@ $id = (isset($_REQUEST['id'])) ? mysqli_real_escape_string($mysqli_link, trim($_
 $auth = (isset($_REQUEST['auth'])) ? $_REQUEST['auth'] : '' ;
 
 // Basic parameters sanitization
-if (! is_numeric($id)) die("Logbook: wrong booking id: $id") ;
+if (! is_numeric($id)) journalise($userId, 'F', "Logbook: wrong booking id: $id") ;
 
 // Retrieve the booking
 $result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
 	r_from, r_to, compteur_type, compteur_vol, compteur_vol_valeur, model, compteur, compteur_date, 
 	r_duration,date_add(r_start, interval 15 minute) as r_takeoff, date(r_start) as r_day
 	from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a
-	where r_id = $id and a.id = r_plane and a.ressource = 0") or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
+	where r_id = $id and a.id = r_plane and a.ressource = 0") or journalise($userId, 'F', "Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 $booking = mysqli_fetch_array($result) ;
-if (! $booking) die("D&eacute;sol&eacute; cette r&eacute;servation #$id n'existe pas") ;
+if (! $booking) journalise($userId, 'F', "D&eacute;sol&eacute; cette r&eacute;servation #$id n'existe pas") ;
 
 // Check authorization
 if ($auth == '') {
 	if (! ($userId == $booking['r_pilot'] or $userId == $booking['r_who'] or $userId == $booking['r_instructor'] or $userIsAdmin))
-		die("Logbook: you ($userId) are not authorized") ;
+		journalise($userId, 'F', "Logbook: you ($userId) are not authorized") ;
 	$auth = md5($id . $shared_secret) ; // It may be used later
 } else 
 	if ($auth != md5($id . $shared_secret)) {
 		journalise(0, 'E', "logbook: wrong key for booking#$id: $auth") ;
-		die("logbook: wrong key for booking#$id: $auth") ;
+		journalise($userId, 'F', "logbook: wrong key for booking#$id: $auth") ;
 	} else {
 		$userId = $booking['r_pilot'] ; // Assumption
 		$userName = $booking['username'] ;
@@ -65,17 +65,17 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$planeId = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['plane'])) ;
 	$day = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['day'])) ;
 	$planeModel = $booking['model'] ;
-	$engineStartHour = trim($_REQUEST['engineStartHour']) ; if (!is_numeric($engineStartHour)) die("engineStartHour $engineStartHour is not numeric") ;
-	$engineStartMinute = trim($_REQUEST['engineStartMinute']) ; if (!is_numeric($engineStartMinute)) die("engineStartMinute $engineStartMinute is not numeric") ;
+	$engineStartHour = trim($_REQUEST['engineStartHour']) ; if (!is_numeric($engineStartHour)) journalise($userId, 'F', "engineStartHour $engineStartHour is not numeric") ;
+	$engineStartMinute = trim($_REQUEST['engineStartMinute']) ; if (!is_numeric($engineStartMinute)) journalise($userId, 'F', "engineStartMinute $engineStartMinute is not numeric") ;
 	$engineStartMinute *= $booking['compteur_type'] ;
-	$engineEndHour = trim($_REQUEST['engineEndHour']) ; if (!is_numeric($engineEndHour)) die("engineEndHour $engineEndHour is not numeric") ;
-	$engineEndMinute = trim($_REQUEST['engineEndMinute']) ; if (!is_numeric($engineEndMinute)) die("engineEndMinute $engineEndMinute is not numeric") ;
+	$engineEndHour = trim($_REQUEST['engineEndHour']) ; if (!is_numeric($engineEndHour)) journalise($userId, 'F', "engineEndHour $engineEndHour is not numeric") ;
+	$engineEndMinute = trim($_REQUEST['engineEndMinute']) ; if (!is_numeric($engineEndMinute)) journalise($userId, 'F', "engineEndMinute $engineEndMinute is not numeric") ;
 	$engineEndMinute *= $booking['compteur_type'] ;
 	if (isset($_REQUEST['flightStartHour']) and $_REQUEST['flightStartHour'] != '') {
-		$flightStartHour = trim($_REQUEST['flightStartHour']) ; if (!is_numeric($flightStartHour)) die("flightStartHour $flightStartHour is not numeric") ;
-		$flightStartMinute = trim($_REQUEST['flightStartMinute']) ; if (!is_numeric($flightStartMinute)) die("flightStartMinute $flightStartMinute is not numeric") ;
-		$flightEndHour = trim($_REQUEST['flightEndHour']) ; if (!is_numeric($flightEndHour)) die("flightEndHour $flightEndHour is not numeric") ;
-		$flightEndMinute = trim($_REQUEST['flightEndMinute']) ; if (!is_numeric($flightEndMinute)) die("flightEndMinute $flightEndMinute is not numeric") ;
+		$flightStartHour = trim($_REQUEST['flightStartHour']) ; if (!is_numeric($flightStartHour)) journalise($userId, 'F', "flightStartHour $flightStartHour is not numeric") ;
+		$flightStartMinute = trim($_REQUEST['flightStartMinute']) ; if (!is_numeric($flightStartMinute)) journalise($userId, 'F', "flightStartMinute $flightStartMinute is not numeric") ;
+		$flightEndHour = trim($_REQUEST['flightEndHour']) ; if (!is_numeric($flightEndHour)) journalise($userId, 'F', "flightEndHour $flightEndHour is not numeric") ;
+		$flightEndMinute = trim($_REQUEST['flightEndMinute']) ; if (!is_numeric($flightEndMinute)) journalise($userId, 'F', "flightEndMinute $flightEndMinute is not numeric") ;
 	} else {
 		$flightStartHour = 'NULL';
 		$flightStartMinute = 'NULL';
@@ -85,14 +85,14 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$fromAirport = mysqli_real_escape_string($mysqli_link, strtoupper(trim($_REQUEST['fromAirport']))) ;
 	$toAirport = mysqli_real_escape_string($mysqli_link, strtoupper(trim($_REQUEST['toAirport']))) ;
 	$flightType = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['flightType'])) ;
-	$startHours = trim($_REQUEST['startHoursUTC']) ; if (!is_numeric($startHours)) die("startHours $startHours is not numeric") ;
-	$startMinutes = trim($_REQUEST['startMinutesUTC']) ; if (!is_numeric($startMinutes)) die("startMinutes $startMinutes is not numeric") ;
+	$startHours = trim($_REQUEST['startHoursUTC']) ; if (!is_numeric($startHours)) journalise($userId, 'F', "startHours $startHours is not numeric") ;
+	$startMinutes = trim($_REQUEST['startMinutesUTC']) ; if (!is_numeric($startMinutes)) journalise($userId, 'F', "startMinutes $startMinutes is not numeric") ;
 	$startDayTime = "$day " . substr("0" . $startHours, -2) . ":" . substr("0" . $startMinutes, -2) ;
-	$endHours = trim($_REQUEST['endHoursUTC']) ; if (!is_numeric($endHours)) die("endHours $endHours is not numeric") ;
-	$endMinutes = trim($_REQUEST['endMinutesUTC']) ; if (!is_numeric($endMinutes)) die("endMinutes $endMinutes is not numeric") ;
+	$endHours = trim($_REQUEST['endHoursUTC']) ; if (!is_numeric($endHours)) journalise($userId, 'F', "endHours $endHours is not numeric") ;
+	$endMinutes = trim($_REQUEST['endMinutesUTC']) ; if (!is_numeric($endMinutes)) journalise($userId, 'F', "endMinutes $endMinutes is not numeric") ;
 	$endDayTime = "$day " . substr("0" . $endHours, -2) . ":" . substr("0" . $endMinutes, -2) ;
-	$pilotId = trim($_REQUEST['pilot']) ; if (!is_numeric($pilotId)) die("pilotId $pilotId is not numeric") ;
-	$instructorId = trim($_REQUEST['instructor']) ; if (!is_numeric($instructorId)) die("instructorId $instructorId is not numeric") ;
+	$pilotId = trim($_REQUEST['pilot']) ; if (!is_numeric($pilotId)) journalise($userId, 'F', "pilotId $pilotId is not numeric") ;
+	$instructorId = trim($_REQUEST['instructor']) ; if (!is_numeric($instructorId)) journalise($userId, 'F', "instructorId $instructorId is not numeric") ;
 	if ($instructorId <= 0) {
 		$instructorId = "NULL" ;
 		$pilotIsPIC = 1 ;
@@ -101,16 +101,16 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		$pilotIsPIC = 0;
 		$instructorPaid = 1 ;
 	}
-	$dayLandings = trim($_REQUEST['dayLandings']) ; if (!is_numeric($dayLandings) or $dayLandings < 0) die("dayLandings $dayLandings is not numeric or is not valid") ;
-	$nightLandings = trim($_REQUEST['nightLandings']) ; if (!is_numeric($nightLandings) or $nightLandings < 0) die("nightLandings $nightLandings is not numeric or is not valid") ;
-	$paxCount = trim($_REQUEST['pax_count']) ; if (!is_numeric($paxCount) or $paxCount < 0 or $paxCount > 3) die("paxCount $paxCount is not numeric or is not valid") ;
+	$dayLandings = trim($_REQUEST['dayLandings']) ; if (!is_numeric($dayLandings) or $dayLandings < 0) journalise($userId, 'F', "dayLandings $dayLandings is not numeric or is not valid") ;
+	$nightLandings = trim($_REQUEST['nightLandings']) ; if (!is_numeric($nightLandings) or $nightLandings < 0) journalise($userId, 'F', "nightLandings $nightLandings is not numeric or is not valid") ;
+	$paxCount = trim($_REQUEST['pax_count']) ; if (!is_numeric($paxCount) or $paxCount < 0 or $paxCount > 3) journalise($userId, 'F', "paxCount $paxCount is not numeric or is not valid") ;
 	$share_type = strtoupper(trim($_REQUEST['share_type'])) ; 
-	if ($share_type != '' and $share_type != 'CP1' and $share_type != 'CP2') die("Invalid share_type: $share_type") ;
+	if ($share_type != '' and $share_type != 'CP1' and $share_type != 'CP2') journalise($userId, 'F', "Invalid share_type: $share_type") ;
 	$share_member = trim($_REQUEST['share_member']) ; 
-	if (! is_numeric($share_member)) die("Share_member $share_member must be numeric") ;
+	if (! is_numeric($share_member)) journalise($userId, 'F', "Share_member $share_member must be numeric") ;
 	if ($share_member == '') $share_member = 0 ;
-	if ($share_type != '' and $share_member == 0) die("Invalid, for share_type $share_type, a share_member is required") ;
-	if ($share_type == '' and $share_member != 0) die("Invalid, when not shared, share_member must be 0 and not $share_member") ;
+	if ($share_type != '' and $share_member == 0) journalise($userId, 'F', "Invalid, for share_type $share_type, a share_member is required") ;
+	if ($share_type == '' and $share_member != 0) journalise($userId, 'F', "Invalid, when not shared, share_member must be 0 and not $share_member") ;
 	if ($share_type == '') // We need to prepare the SQL INSERT VALUE which is char()
 		$share_type = 'NULL' ;
 	else
@@ -135,7 +135,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 			$flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
 			'$startDayTime', '$endDayTime', '$flightType', '$remark', $paxCount, $share_type, $share_member,
 			$pilotId, $pilotIsPIC, $instructorId, $instructorPaid, $dayLandings, $nightLandings,
-			$userId, '" . getClientAddress() . "', sysdate())") or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
+			$userId, '" . getClientAddress() . "', sysdate())") or journalise($userId, 'F', "Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
 			$insert_message = "Carnet de routes mis &agrave; jour" ;
 			if ($test_mode) $insert_message .= " " . mysqli_error($mysqli_link) ;
@@ -164,7 +164,7 @@ if (isset($_REQUEST['cancel']) and $_REQUEST['cancel'] != '') {
 // Do we need to delete an entry?
 if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 	$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
-	mysqli_query($mysqli_link, "DELETE FROM $table_logbook WHERE l_booking=$id AND l_audit_time='$audit_time'") or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "DELETE FROM $table_logbook WHERE l_booking=$id AND l_audit_time='$audit_time'") or journalise($userId, 'F', "Cannot delete: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
 		$insert_message = "Carnet de routes mis &agrave; jour" ;
 		journalise($userId, 'I', "Logbook entry deleted for booking $id (done at $audit_time).") ;
@@ -178,7 +178,7 @@ if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_logbook 
 		where l_plane = '$booking[r_plane]' and l_start_hour is not null and l_start_hour > 0
 		order by l_end desc limit 0,1")
-	or die("Cannot access the plan journey log: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, 'F', "Cannot access the plan journey log: " . mysqli_error($mysqli_link)) ;
 $logbook = mysqli_fetch_array($result) ;
 
 // Humm even when l_end is < compteur_date, prendre le engine_time de logbook et être sûr que le flight_time de rapcs_plane est flight_time è
@@ -324,7 +324,7 @@ $result = mysqli_query($mysqli_link, "select l_start, l_end, l_plane, l_from, l_
 			l_pax_count, l_remark, l_share_type, l_share_member
 		from $table_logbook l join $table_person p on l.l_pilot = p.jom_id left join $table_person i on l.l_instructor = i.jom_id
 		where l_booking = $id order by l_start")
-	or die("Impossible de lire les entrees pour reservation $id: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, 'F', "Impossible de lire les entrees pour reservation $id: " . mysqli_error($mysqli_link)) ;
 $this_segment_id = mysqli_num_rows($result) + 1 ;
 if ($this_segment_id > 1) {
 	print('<div class="row">
