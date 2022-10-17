@@ -45,7 +45,7 @@ $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 $codeCiel = $pilot['ciel_code'] ;
 mysqli_free_result($result) ;
 
-$cost_fi_minute = 0.80 ;
+$cost_fi_minute = 0.83 ;
 $tax_per_pax = 10.0 ;
 
 function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
