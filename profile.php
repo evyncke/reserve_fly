@@ -542,7 +542,7 @@ if (array_key_exists($joomla_pilot_group, $joomla_groups)) $groupes[] = "Pilote"
 if (array_key_exists($joomla_student_group, $joomla_groups)) $groupes[] = "&Eacute;l&egrave;ve" ;
 if (array_key_exists($joomla_mechanic_group, $joomla_groups)) $groupes[] = "M&eacute;cano" ;
 if (array_key_exists($joomla_instructor_group, $joomla_groups)) $groupes[] = "Instructeur" ;
-if (array_key_exists($joomla_admin_group, $joomla_groups)) $groupes[] = "membre du Conseil d'Administration" ;
+if (array_key_exists($joomla_board_group, $joomla_groups)) $groupes[] = "membre du Conseil d'Administration" ;
 if (array_key_exists($joomla_admin_group, $joomla_groups) || array_key_exists($joomla_sysadmin_group, $joomla_groups) || array_key_exists($joomla_superuser_group, $joomla_groups)) $groupes[] = "Administrateur syst&egrave;me" ;
 print("<i>" . implode(', ', $groupes) . "</i>. <br/>Vous ne pouvez pas changer vous-m&ecirc;mes vos groupes, c'est li&eacute; &agrave; au type d'inscription.") ;
 ?>

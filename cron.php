@@ -604,7 +604,7 @@ $f = fopen("email.ca", "w") ;
 if (! $f) journalise(0, "E", "Cannot open email.ca for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
-		where block = 0 and group_id in ($joomla_admin_group)
+		where block = 0 and group_id in ($joomla_board_group)
 		order by name") or die("Erreur SQL while creating ca: " . mysqli_error($mysqli_link));
 	$first = true ;
 	while ($row = mysqli_fetch_array($result)) {
