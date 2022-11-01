@@ -86,6 +86,7 @@ while ($row = mysqli_fetch_array($result)) {
 	if (!isset($first_id)) $first_id = $row['j_id'] ;
 	$line_count ++ ;
 	$last_id = $row['j_id'] ;
+	$nameStyle = ($row['j_trusted_booker'] == 1) ? ' style="font-weight: bold;"' : '' ;
 	switch (strtoupper($row['j_severity'])) {
 		case 'F': $rowStyle = ' style="background-color: red; color: white;"' ; break ;
 		case 'E': $rowStyle = ' style="background-color: pink;"' ; break ;
@@ -94,7 +95,7 @@ while ($row = mysqli_fetch_array($result)) {
 	}
 	print("<tr$rowStyle>
 		<td class=\"logCell\">$row[j_datetime]</td>
-		<td class=\"logCell\">" . db2web($row['name']) . "</td>
+		<td$nameStyle class=\"logCell\">" . db2web($row['name']) . "</td>
 		<td class=\"logCell\">$row[j_address]</td>
 		<td class=\"logCellLeft\">" . db2web($row['j_message']) . "</td>
 		<td class=\"logCellLeft\">" . db2web($row['j_uri']) . "</td>
