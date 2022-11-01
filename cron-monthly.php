@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ $mime_preferences = array(
 	"output-charset" => "UTF-8",
 	"scheme" => "Q") ;
 
-$max_profile_count = 10 ;
+$max_profile_count = 7 ;
 
 $actions = (isset($_REQUEST['actions']) and $_REQUEST['actions'] != '') ? trim(strtolower($_REQUEST['actions'])) : 'pblme' ;
 // Values for $actions
@@ -185,11 +185,11 @@ foreach ($all_rows as $row) {
         if ($row['email'] != '') $profile_count ++ ;
         if ($row['first_name'] != '') $profile_count ++ ; else $missing_items[] = '<b>pr&eacute;nom</b>' ;
         if ($row['last_name'] != '') $profile_count ++ ; else $missing_items[] = '<b>nom de famille</b>' ;
-        if ($row['home_phone'] != '') $profile_count ++ ; else $missing_items[] = 't&eacute;l&eacute;phone priv&eacute;' ;
-        if ($row['work_phone'] != '') $profile_count ++ ; else $missing_items[] = 't&eacute;l&eacute;phone travail' ;
+        if ($row['home_phone'] == '')  $missing_items[] = 't&eacute;l&eacute;phone priv&eacute;' ;
+        if ($row['work_phone'] == '') $missing_items[] = 't&eacute;l&eacute;phone travail' ;
         if ($row['cell_phone'] != '') $profile_count ++ ; else $missing_items[] = '<b>t&eacute;l&eacute;phone mobile</b>' ;
         if ($row['city'] != '') $profile_count ++ ; else $missing_items[] = 'ville' ;
-        if ($row['country'] != '') $profile_count ++ ; else $missing_items[] = 'pays' ; 
+        if ($row['country'] == '') $missing_items[] = 'pays' ; 
         if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ; else $missing_items[] = 'genre' ; 
         if ($row['birthdate'] != '' and $row['birthdate'] != '0000-00-00 00:00:00') $profile_count ++ ; else $missing_items[] = 'date de naissance' ; 
 		$missing_items_string = implode(', ', $missing_items) ;
@@ -318,7 +318,7 @@ print_table("Utilisateurs sans aucune r&eacute;servation dans les 12 derniers mo
 $sql = "select *,u.name as full_name
 	from $table_users u 
 	where block = 0 and exists (select * from $table_user_usergroup_map m
-		where u.id = m.user_id and m.group_id in ($joomla_admin_group)) 
+		where u.id = m.user_id and m.group_id in ($joomla_board_group)) 
 	order by name" ; 
 print_table("Membres du Conseil d'Administration (ca@spa-aviation.be)", $sql) ;
 
