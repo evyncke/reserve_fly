@@ -107,6 +107,12 @@ function processMessage($lines, &$iLine, $linesCount) {
 		else
 			$contentMIMEType = $contentType ;
 		switch ($contentMIMEType) {
+			case 'multipart/alternative': // It should include HTML and plain text subparts
+				if (preg_match('|multipart/alternative; boundary="(\S+)"|', $contentType, $matches)) {
+					$boundary = $matches[1] ;
+					processMultipart($lines, $iLine, $linesCount, $boundary) ;
+				} ;
+				break ;
 			case 'multipart/mixed':
 				if (preg_match('|multipart/mixed; boundary="(\S+)"|', $contentType, $matches)) {
 					$boundary = $matches[1] ;
@@ -116,6 +122,7 @@ function processMessage($lines, &$iLine, $linesCount) {
 			case 'message/rfc822':
 				processMessage($lines, $iLine, $linesCount) ;
 				break ;
+			case 'text/html':
 			case 'text/plain':
 				break ;
 			case 'application/pdf':
@@ -144,7 +151,7 @@ function processFile($fileName) {
 	processMessage($lines, $iLine, $linesCount) ;
 }
 
-$sqlFile = fopen($filePrefix . "inject.sql", 'a') ;
+$sqlFile = fopen($filePrefix . "inject.sql", 'w') ;
 
 foreach (glob($filePrefix . "*.eml") as $fileName) {
 	print("Processing $fileName\n") ;
