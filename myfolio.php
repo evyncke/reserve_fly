@@ -46,6 +46,7 @@ $codeCiel = $pilot['ciel_code'] ;
 mysqli_free_result($result) ;
 
 $cost_fi_minute = 0.83 ;
+$revenue_fi_minute = 0.75 ;
 $tax_per_pax = 10.0 ;
 
 function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
@@ -184,7 +185,7 @@ $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
 	l_share_type, l_share_member, cout, l_pax_count
 	FROM $table_logbook l JOIN $table_planes AS a ON l_plane = a.id
 	LEFT JOIN $table_person p ON p.jom_id = l_instructor
-	WHERE (l_pilot = $userId OR l_share_member = $userId)
+	WHERE (l_pilot = $userId OR l_share_member = $userId or l_instructor = $userId)
 		AND l_start >= '" . $folio_start->format('Y-m-d') . "'
 	ORDER by l.l_start ASC" ;
 
@@ -236,13 +237,22 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"logCell\">$row[l_plane]$plane_token</td>
 		<td class=\"logCell\">$duration_hh</td>
 		<td class=\"logCell\">$duration_mm</td>\n") ;
-	$cost_plane = $row['cout'] * $duration ;
+	if ($row['l_instructor'] == $userId and $row['l_pilot'] != $userId and $row['l_share_member'] != $userId) // FI only pays the plane rental when they are the pilot
+		$cost_plane = 0 ;
+	else
+		$cost_plane = $row['cout'] * $duration ;
 	if ($row['l_instructor'] == '' or $row['l_is_pic']) { // Solo, no instructor
 		print("<td class=\"logCell\">SELF</td>\n") ;
 	} else { // Dual command
 		print("<td class=\"logCell\">$row[instructor_name]</td>\n") ;
 	}
-	$cost_fi = ($row['l_instructor']) ? $row['l_instructor_paid'] * $cost_fi_minute * $duration : 0 ;
+	if ($row['l_instructor'])
+		if ($row['l_instructor'] != $userId) // The user is not the FI
+			$cost_fi = $row['l_instructor_paid'] * $cost_fi_minute * $duration ;
+		else
+			$cost_fi = - $row['l_instructor_paid'] * $revenue_fi_minute * $duration ;
+	else
+		$cost_fi = 0 ;
 	// Flights taking off Belgium have to pay taxes (distance depending but ignored for now)
 	// Except Local flight
 //    	$aPos = stripos($row['l_from'], 'EB');
@@ -366,12 +376,16 @@ EUR$invoice_total
 De $userName compte 400$codeCiel
 De $userName compte 400$codeCiel" ;
 
+if ($invoice_total > 0) {
 ?>
 <h2>Test QR-code pour payer <?=$invoice_reason?> de <?=$invoice_total?> &euro;</h3>
 <p>Ceci est simplement un test pour les informaticiens, ne pas l'utiliser car notre trésorier ne saura pas comment faire pour
 associer ce virement à votre compte membre RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant).</p>
 <img width="400" height="400" src="https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=<?=urlencode($epcString)?>">
+<?php
+}
+?>
 <hr>
 <div class="copyright">R&eacute;alisation: Eric Vyncke, août-septembre 2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
