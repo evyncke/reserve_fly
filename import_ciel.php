@@ -48,13 +48,47 @@ foreach ($rows as $client) {
 		or die("Cannot read $table_person for $email: " . mysqli_error($mysqli_link));
 	$person = mysqli_fetch_array($result) ;
 	if (! $person) continue ; // Not found
+	if ($person['id'] == '') continue ; // Not found
+	if ($person['jom_id'] == '') $person['jom_id'] = -1 ;
+	$client_nom = web2db($client['Nom']) ;
+	if ($person['address'] == '' and $client['Adresse 1'] != '') {
+		$address = web2db(mysqli_real_escape_string($mysqli_link, $client['Adresse 1'])) ;
+		$return_code = mysqli_query($mysqli_link, "UPDATE $table_person SET address = '$address' WHERE id = $person[id]") ;
+		if ($return_code)
+			 Journalise($person['jom_id'], "I", "Address $address ajouté pour $person[id]/$person[name]/$client_nom") ;
+		else
+			 Journalise($person['jom_id'], "E", "Cannot add address $address for $person[id]/$person[name]/$client_nom") ;
+	}
+	if ($person['city'] == '' and $client['Ville'] != '') {
+		$city = web2db($client['Ville']) ;
+		$return_code = mysqli_query($mysqli_link, "UPDATE $table_person SET city = '$city' WHERE id = $person[id]") ;
+		if ($return_code)
+			 Journalise($person['jom_id'], "I", "City $city ajouté pour $person[id]/$person[name]/$client_nom") ;
+		else
+			 Journalise($person['jom_id'], "E", "Cannot add city $city for $person[id]/$person[name]/$client_nom") ;
+	}
+	if ($person['zipcode'] == '' and $client['C.P.'] != '') {
+		$zipcode = web2db($client['C.P.']) ;
+		$return_code = mysqli_query($mysqli_link, "UPDATE $table_person SET zipcode = '$zipcode' WHERE id = $person[id]") ;
+		if ($return_code)
+			 Journalise($person['jom_id'], "I", "Zipcode $zipcode ajouté pour $person[id]/$person[name]/$client_nom") ;
+		else
+			 Journalise($person['jom_id'], "E", "Cannot add zipcode $zipcode for $person[id]/$person[name]/$client_nom") ;
+	}
+	if ($person['cell_phone'] == '' and $client['Portable'] != '') {
+		$return_code = mysqli_query($mysqli_link, "UPDATE $table_person SET cell_phone = '$client[Portable]' WHERE id = $person[id]") ;
+		if ($return_code)
+			 Journalise($person['jom_id'], "I", "Cell_number $client[Portable] ajouté pour $person[id]/$person[name]/$client_nom") ;
+		else
+			 Journalise($person['jom_id'], "E", "Cannot add cell_number $client[Portable] for $person[id]/$person[name]/$client_nom") ;
+	}
 	if ($person['ciel_code'] == $client['Code'] ) continue ; // Already existing
 	print("... No ciel_code for $person[name]/$client[Nom], adding $client[Code]<br/>\n") ;
 	$return_code = mysqli_query($mysqli_link, "UPDATE $table_person SET ciel_code = '$client[Code]' WHERE id = $person[id]") ;
 	if ($return_code)
-		 Journalise($person['jom_id'], "I", "Ciel_code $client[Code] ajouté pour $person[id]/$person[name]/$client[Nom]") ;
+		 Journalise($person['jom_id'], "I", "Ciel_code $client[Code] ajouté pour $person[id]/$person[name]/$client_nom") ;
 	else
-		 Journalise($person['jom_id'], "E", "Cannot add ciel_code $client[Code] for $person[id]/$person[name]/$client[Nom]") ;
+		 Journalise($person['jom_id'], "E", "Cannot add ciel_code $client[Code] for $person[id]/$person[name]/$client_nom") ;
 }
 
 print("<hr><pre>") ; print_r($rows) ; print("</pre>") ;
