@@ -40,6 +40,8 @@ $result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r
 $booking = mysqli_fetch_array($result) ;
 if (! $booking) journalise($userId, 'F', "D&eacute;sol&eacute; cette r&eacute;servation #$id n'existe pas") ;
 
+journalise($userId, "W", "Utilisation de l'ancienne page, referer = $_SERVER[HTTP_REFERER]") ;
+
 // Check authorization
 if ($auth == '') {
 	if (! ($userId == $booking['r_pilot'] or $userId == $booking['r_who'] or $userId == $booking['r_instructor'] or $userIsAdmin))

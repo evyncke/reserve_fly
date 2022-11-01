@@ -29,6 +29,8 @@ $auth = (isset($_REQUEST['auth'])) ? $_REQUEST['auth'] : '' ;
 // Basic parameters sanitization
 if ($id and ! is_numeric($id)) journalise($userId, 'F', "Logbook: wrong booking id: $id") ;
 
+journalise($userId, "W", "Utilisation de l'ancienne page, referer = $_SERVER[HTTP_REFERER]") ;
+
 // Retrieve the booking
 if ($id) {
 	$result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
