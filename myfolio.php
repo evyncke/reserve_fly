@@ -22,7 +22,7 @@ require_once "dbi.php" ;
 
 if ($userId <= 0) die("Vous devez être connecté") ;
 
-if (isset($_REQUEST['user']) and $userIsAdmin) {
+if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
 	if ($userId != 62) journalise($userId, "I", "Start of folio, setting user to $_REQUEST[user]") ;
 	$userId = $_REQUEST['user'] ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
@@ -340,23 +340,58 @@ if ($row) {
 	print("<p>Le solde de votre compte n'est pas disponible.</p>") ;
 ?>
 <h2>Factures r&eacute;centes</h2>
-<p>A titre <b>exp&eacute;rimental</b>, voici quelques factures r&eacute;centes:
+<p>Voici quelques factures r&eacute;centes:
 <ul>
 <?php
-$sql = "SELECT * FROM $table_person JOIN $table_bk_invoices ON bki_email = email
+$sql = "SELECT * FROM $table_person JOIN $table_bk_invoices ON bki_email = email LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
         WHERE jom_id = $userId" ;
 
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access factures: " . mysqli_error($mysqli_link)) ;
 $count = 0 ;
 while ($row = mysqli_fetch_array($result)) {
-        print("<li><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_date] #$row[bki_id] &boxbox;</a></li>\n") ;
+	// Using the invoice date from the email import as the general ledger is in the future
+        print("<li><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_date] #$row[bki_id] &boxbox;</a>") ;
+	if ($row['bkl_debit'] != '') print(" pour un montant de $row[bkl_debit] &euro;") ;
+	print("</li>\n") ;
         $count ++ ;
 }
 
 if ($count == 0) print("<li>Hélas, pas encore de facture à votre nom dans le système.</li>\n") ;
 
 print("</ul>\n</p>\n") ;
+?>
 
+<h2>Détails de votre compte pour l'année en cours</h2>
+<p><b>De manière expérimentale</b>, voici une vue de votre compte member RAPCS pour l'année en cours.</p>
+<table border=1>
+<thead>
+<th>Date</th><th>Opération</th><th>Description</th><th>Débit</th><th>Crédit</th>
+</thead>
+<tbody>
+<?php
+$sql = "SELECT * FROM $table_person JOIN $table_bk_ledger ON ciel_code = bkl_client
+	WHERE jom_id = $userId
+	ORDER BY bkl_date ASC, bkl_id ASC" ;
+$result = mysqli_query($mysqli_link, $sql) or journalise($userId, "F", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
+while ($row = mysqli_fetch_array($result)) {
+	switch ($row['bkl_journal']) {
+		case 'ANX': $journal = 'Report année précédente' ; break ;
+		case 'F01': $journal = 'Banque de la Poste' ; break ;
+		case 'F06': $journal = 'BNP Fortis' ; break ;
+		case 'F08': $journal = 'CBC' ; break ;
+		case 'OD':
+		case 'OPD': $journal = 'Operations diverses' ; break ;
+		case 'V':
+		case 'VEN': $journal = 'Facture' ; break ;
+		case 'VNC': $journal = 'Note de crédit' ; break ;
+		default : $journal = $row['bkl_journal'] ;
+	}
+	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$row[bkl_label]</td><td>$row[bkl_debit]</td><td>$row[bkl_credit]</td></tr>\n") ;
+}
+?>
+</tbody>
+</table>
+<?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 
