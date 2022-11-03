@@ -21,7 +21,8 @@ require_once 'dbi.php' ;
 ini_set("auto_detect_line_endings", true); // process CR CR/LF or LF as line separator
 
 function comma2dot($s) {
-	return str_replace(',', '.', $s) ;
+	if ($s == '') return 'NULL' ;
+	return str_replace([',', ' '], ['.', ''], $s) ;
 }
 
 function date2sql($s) {
@@ -31,7 +32,7 @@ function date2sql($s) {
 
 $lines = file('GrandLivre.txt', FILE_IGNORE_NEW_LINES || FILE_SKIP_EMPTY_LINES) ;
 
-
+// Alas, using the direct export as .txt rather than .pdf does not have headers...
 $last_line = array_pop($lines) ;
 $last_line = array_pop($lines) ;
 $last_line = array_pop($lines) ; // Dossier : RAPCS - Royal Aéro Para Club de Spa asbl Grand livre Le 31-08-22
@@ -40,6 +41,8 @@ if (preg_match('/^Dossier : .+ Grand livre Le (.+)$/', trim($last_line), $matche
 	$balance_date = $matches[1] ;
 	$tokens = explode('-', $balance_date) ;
 	$balance_date = "20$tokens[2]-$tokens[1]-$tokens[0]" ;
+} else { // Let's use the file date
+	$balance_date = date('Y-m-d', filemtime('GrandLivre.txt')) ;
 }
 
 // Try to find all balances
@@ -50,22 +53,20 @@ if (preg_match('/^Dossier : .+ Grand livre Le (.+)$/', trim($last_line), $matche
 $balances = array() ;
 
 foreach ($lines as $line) {
-	if (preg_match('/^TOTAL COMPTE (\S+) Solde compte (\S+) (.+)/', trim($line), $matches)) {
-		$tokens = preg_split('/\s+/', $matches[3]) ;
-		$tokens = preg_split('/ /', $matches[3]) ;
-		$amount = 0.0 + str_replace(',', '.', array_pop($tokens)) ;
-		$token = array_pop($tokens) ;
-		$multiplier = 1000 ;
-		while (strpos($token, ',') === false) {
-			$amount += $multiplier * $token ;
-			$multiplier *= 1000 ;
-			$token = array_pop($tokens) ;
+	$columns = explode("\t", $line) ; // TAB separated file
+	if (strpos($columns[0], "TOTAL COMPTE 400") !== false) {
+		if (preg_match('/TOTAL COMPTE (\S+)/', trim($columns[0]), $matches)) {
+			$account = $matches[1] ;
+			if (trim($columns[12]) == '')
+				$amount = 0.0 ;
+			else
+				$amount = str_replace([',', ' '], ['.', ''], trim($columns[12])) ;
+			$balances[$account] = $amount ;	
 		}
-		$balances[$matches[1]] = $amount ;
-	} else if (preg_match('/^TOTAL COMPTE (\S+) Compte soldé (.+)/', trim($line), $matches)) {
-		$balances[$matches[1]] = 0.0 ;
 	}
 }
+
+var_dump($balances) ;
 
 $result = mysqli_query($mysqli_link, "SELECT ciel_code, first_name, last_name
 		FROM $table_person
@@ -82,7 +83,7 @@ while ($row = mysqli_fetch_array($result)) {
 		print("$balance\n") ;
 		mysqli_query($mysqli_link, "REPLACE INTO $table_bk_balance (bkb_account, bkb_date, bkb_amount)
 			VALUES('400$row[ciel_code]', '$balance_date', $balance)")
-			or die("Cannot replace value in $table_bk_balance: " . mysqli_error($mysqli_link)) ;
+			or die("Cannot replace values('400$row[ciel_code]', '$balance_date', $balance) in $table_bk_balance: " . mysqli_error($mysqli_link)) ;
 		unset($balances["400$row[ciel_code]"]) ;
 	} else
 		print(" no balance\n") ;
@@ -95,10 +96,20 @@ foreach ($balances as $client => $balance)
 
 // Souci général: trouver une clé unique... ni le numéro de mouvement, ni le numéro de pièce sont uniques
 print("<h2>Analyse de toutes les lignes du grand livre</h2>\n") ;
+mysqli_query($mysqli_link, "DELETE FROM $table_bk_ledger")
+	or die("Cannot erase content of $table_bk_ledger: " . mysqli_error($mysqli_link)) ;
+
 $currentClient = false ;
 foreach($lines as $line) {
 	$line = trim($line) ; // Just to avoid any space characters, if any...
-	if (preg_match('/^400(\S+) (.+)/', $line, $matches)) {
+	$columns = explode("\t", $line) ; // TAB separated file
+	$journal = $columns[1] ;
+	$date = date2sql($columns[2]) ;
+	$reference = $columns[3] ;
+	$label = mysqli_real_escape_string($mysqli_link, web2db($columns[4])) ;
+	$debit = comma2dot($columns[8]) ;
+	$credit = comma2dot($columns[10]) ;
+	if (preg_match('/^400(\S+) (.+)/', $columns[0], $matches)) {
 		$codeClient = $matches[1] ;
 		if (isset($known_clients[$codeClient])) {
 			print("Processing $matches[2]\n") ;
@@ -108,72 +119,13 @@ foreach($lines as $line) {
 			$currentClient = false ;
 		}
 	} else if ($currentClient) { // Is it useful information ?
-		if (preg_match('/(\d+) ANX ([0-9,\-]+) (\d+)/', $line, $matches)) {
-			print("Report $matches[3] on $matches[2] <$line>\n") ;
-
-		} else if (preg_match('/(\d+) F01 ([0-9,\-]+) (\d+) (.+) B ([A-Z]+) ([0-9,\,]+)/', $line, $matches)) {
-			print("Compte financier F01 $matches[3] en date du $matches[2] lettre '$matches[5]' <$line>\n") ;
-			$credit = comma2dot($matches[6]) ;
-			$date = date2sql($matches[2]) ;
-			$label = mysqli_real_escape_string($mysqli_link, web2db($matches[4])) ;
+		if ($journal == 'ANX' or $journal == 'F01' or $journal == 'F08' or $journal == 'VEN' or $journal == 'VNC' or $journal == 'OPD') {
+			print("Journal $journal $label en date du $date lettre '$columns[9]' <$line>\n") ;
 			$sql = "REPLACE INTO $table_bk_ledger (bkl_id, bkl_client, bkl_journal, bkl_date, bkl_reference, bkl_label, bkl_debit, bkl_letter, bkl_credit)
-				VALUES ($matches[1], '$currentClient', 'F01', '$date', '$matches[3]',  '$label', NULL, '$matches[5]', $credit)";
+				VALUES ($columns[0], '$currentClient', '$journal', '$date', '$reference',  '$label', $debit, '$columns[9]', $credit)";
 			print("$sql\n") ;
 			mysqli_query($mysqli_link, $sql)
 				or die("Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
-
-		} else if (preg_match('/(\d+) F01 ([0-9,\-]+) (\d+) (.+) B ([0-9,\,]+)/', $line, $matches)) {
-			print("Compte financier F01 $matches[3] en date du $matches[2] pas de lettre <$line>\n") ;
-			$credit = comma2dot($matches[5]) ;
-			$date = date2sql($matches[2]) ;
-			$label = mysqli_real_escape_string($mysqli_link, web2db($matches[4])) ;
-			$sql = "REPLACE INTO $table_bk_ledger (bkl_id, bkl_client, bkl_journal, bkl_date, bkl_reference, bkl_label, bkl_debit, bkl_letter, bkl_credit)
-				VALUES ($matches[1], '$currentClient', 'F01', '$date', '$matches[3]',  '$label', NULL, NULL, $credit)" ;
-			print("$sql\n") ;
-			mysqli_query($mysqli_link, $sql)
-				or die("Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
-
-		} else if (preg_match('/(\d+) F08 ([0-9,\-]+) (\d+) (.+) B ([A-Z]+) ([0-9,\,]+)/', $line, $matches)) {
-			print("Compte financier F08 $matches[3] en date du $matches[2] lettre '$matches[5]' <$line>\n") ;
-			$credit = comma2dot($matches[6]) ;
-			$date = date2sql($matches[2]) ;
-			$label = mysqli_real_escape_string($mysqli_link, web2db($matches[4])) ;
-			$sql = "REPLACE INTO $table_bk_ledger (bkl_id, bkl_client, bkl_journal, bkl_date, bkl_reference, bkl_label, bkl_debit, bkl_letter, bkl_credit)
-				VALUES ($matches[1], '$currentClient', 'F08', '$date', '$matches[3]',  '$label', NULL, '$matches[5]', $credit)";
-			print("$sql\n") ;
-			mysqli_query($mysqli_link, $sql)
-				or die("Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
-
-		} else if (preg_match('/(\d+) F08 ([0-9,\-]+) (\d+) (.+) B ([0-9,\,]+)/', $line, $matches)) {
-			print("Compte financier F08 $matches[3] en date du $matches[2] pas de lettre <$line>\n") ;
-			$credit = comma2dot($matches[5]) ;
-			$date = date2sql($matches[2]) ;
-			$label = mysqli_real_escape_string($mysqli_link, web2db($matches[4])) ;
-			$sql = "REPLACE INTO $table_bk_ledger (bkl_id, bkl_client, bkl_journal, bkl_date, bkl_reference, bkl_label, bkl_debit, bkl_letter, bkl_credit)
-				VALUES ($matches[1], '$currentClient', 'F08', '$date', '$matches[3]',  '$label', NULL, NULL, $credit)" ;
-			print("$sql\n") ;
-			mysqli_query($mysqli_link, $sql)
-				or die("Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
-
-		} else if (preg_match('/(\d+) VEN ([0-9,\-]+) (\d+) (.+) B ([0-9,\,]+) ([A-Z]+) /', $line, $matches)) {
-			print("Facture $matches[3] on $matches[2] pour $matches[5] lettre $matches[6] <$line>\n") ;
-			$debit = comma2dot($matches[5]) ;
-			$date = date2sql($matches[2]) ;
-			$label = mysqli_real_escape_string($mysqli_link, web2db($matches[4])) ;
-			mysqli_query($mysqli_link, "REPLACE INTO $table_bk_ledger (bkl_id, bkl_client, bkl_journal, bkl_date, bkl_reference, bkl_label, bkl_debit, bkl_letter, bkl_credit)
-				VALUES ($matches[1], '$currentClient', 'VEN', '$date', '$matches[3]', '$label', $debit, '$matches[6]', NULL)")
-				or die("Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
-		} else if (preg_match('/(\d+) VEN ([0-9,\-]+) (\d+) (.+) B ([0-9,\,]+) /', $line, $matches)) {
-			print("Facture $matches[3] on $matches[2] pour $matches[5] pas de lettre <$line>\n") ;
-			$debit = comma2dot($matches[5]) ;
-			$date = date2sql($matches[2]) ;
-			$label = mysqli_real_escape_string($mysqli_link, web2db($matches[4])) ;
-			mysqli_query($mysqli_link, "REPLACE INTO $table_bk_ledger (bkl_id, bkl_client, bkl_journal, bkl_date, bkl_reference, bkl_label, bkl_debit, bkl_letter, bkl_credit)
-				VALUES ($matches[1], '$codeClient', 'VEN', '$date', '$matches[3]', '$label',  $debit, NULL, NULL)")
-				or die("Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
-
-		} else if (preg_match('/(\d+) VNC ([0-9,\-]+) (.+)/', $line, $matches)) {
-			print("Note de crédit $matches[3] on $matches[2] <$line>\n") ;
 		} else
 			print("Cannot process: $line\n") ;
 	}
