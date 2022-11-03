@@ -47,6 +47,8 @@ mysqli_free_result($result) ;
 
 $cost_fi_minute = 0.83 ;
 $revenue_fi_minute = 0.75 ;
+$revenue_fi_initiation = 30.0 ; // Initiation flight when shareCode = -3
+$code_initiation = -3 ; // Hard coded :-(
 $tax_per_pax = 10.0 ;
 
 function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
@@ -253,6 +255,10 @@ while ($row = mysqli_fetch_array($result)) {
 			$cost_fi = - $row['l_instructor_paid'] * $revenue_fi_minute * $duration ;
 	else
 		$cost_fi = 0 ;
+	// Initiation flights
+//	journalise($userId, "D", "$userIsInstructor and $row[l_share_type] == 'CP1' and $row[l_share_member] == $code_initiation") ;
+	if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] == $code_initiation)
+		$cost_fi -= $revenue_fi_initiation ;
 	// Flights taking off Belgium have to pay taxes (distance depending but ignored for now)
 	// Except Local flight
 //    	$aPos = stripos($row['l_from'], 'EB');
