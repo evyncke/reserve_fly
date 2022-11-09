@@ -196,13 +196,15 @@ while ($row = mysqli_fetch_array($result)) {
 	$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 	$email_subject = "Ne pas oublier d'entrer les heures ⏱ moteur du $row[r_plane] pour $row[full_name] [#$booking_id]" ;
 	$email_message = "<p>$row[first_name],</p>" ;
-	$email_message .= "<p>L'encodage des heures moteur, des heures de vol, des a&eacute;roports de d&eacute;part et de destination ainsi que du nombre de passagers est " .
-		"devenu <b>OBLIGATOIRE</b> apr&egrave;s chaque vol. Cette d&eacute;marcge est indispensable pour une gestion efficace de la flotte (planification de la maintenance " .
-		"des avions, aide &agrave; la facturation des heures de vol, ...).<p>" .
-		"<p>Merci d'effectuer cette d&eacute;marche au plus vite. Dans le cas contraire, le syst&egrave;me vous bloquera et il ne vous <b>sera plus possible " .
-		"d'effectuer votre prochaine r&eacute;servation</b>.<p>" .
-		"<p>La proc&eacute; dure est simple et peut &ecirc;tre effectu&eacute;e sur un smartphone ou une tablette depuis l'a&eacute;rodrome (3G ou WiFi du club).<br/><br/>\n" .
-		"Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] \n" .
+	$email_message .= "<p>L'encodage des heures moteur, des heures de vol, des a&eacute;roports de d&eacute;part et de destination ainsi " .
+		"que du nombre de passagers est devenu <b>OBLIGATOIRE</b> apr&egrave;s chaque vol.<p>" .
+		"Cette d&eacute;marche est indispensable pour une gestion efficace de la flotte (planification de la maintenance des avions, " .
+		"aide &agrave; la facturation des heures de vol, ...).</p>" .
+		"<p>Merci d’entrer ces données en utilisant ce lien : <a href=\"https://www.spa-aviation.be/scripts/carnetdevol/IntroCarnetVol.php?id=$booking_id\">encoder les index</a>.</p>" .
+		"<p>Dans le cas contraire, le système vous bloquera et il ne vous sera plus possible d'effectuer votre prochaine r&eacute;servation.</p>" .
+		"<p>Merci pour votre compréhension et votre collaboration.</p>" .
+		"<p>Le conseil d'administration</p>" .
+		"<hr><p>Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] \n" .
 		"avec $row[full_name] en tant que pilote.</p>\n" ;
 	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
 	$email_message .= "<p>Il est conseill&eacute; d'utiliser la nouvelle page pour <a href=\"https://www.spa-aviation.be/scripts/carnetdevol/IntroCarnetVol.php?id=$booking_id\">encoder les compteurs</a>.</p>" ;
