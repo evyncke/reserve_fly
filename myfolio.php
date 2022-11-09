@@ -84,7 +84,7 @@ function ShowTableHeader() {
 <th class="logLastHeader">Sharing</th>
 <th class="logLastHeader">Plane</th>
 <th class="logLastHeader">FI</th>
-<th class="logLastHeader">Taxes</th>
+<th class="logLastHeader">Taxes &ddagger;</th>
 <th class="logLastHeader">Total</th>
 </thead>
 <?php
@@ -180,13 +180,14 @@ function selectChanged() {
 Folio du mois <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>">précédent.</a>
 <?php
 $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
-	l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, p.last_name as instructor_name,
+	l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, i.last_name as instructor_name, p.last_name as pilot_name,
 	UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
 	l_start, l_end, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute as duration,
 	60 * (l_flight_end_hour - l_flight_start_hour) + l_flight_end_minute - l_flight_start_minute as flight_duration,
 	l_share_type, l_share_member, cout, l_pax_count
 	FROM $table_logbook l JOIN $table_planes AS a ON l_plane = a.id
-	LEFT JOIN $table_person p ON p.jom_id = l_instructor
+	LEFT JOIN $table_person p ON p.jom_id = l_pilot
+	LEFT JOIN $table_person i ON i.jom_id = l_instructor
 	WHERE (l_pilot = $userId OR l_share_member = $userId or l_instructor = $userId)
 		AND l_start >= '" . $folio_start->format('Y-m-d') . "'
 	ORDER by l.l_start ASC" ;
@@ -245,9 +246,11 @@ while ($row = mysqli_fetch_array($result)) {
 		$cost_plane = $row['cout'] * $duration ;
 	if ($row['l_instructor'] == '' or $row['l_is_pic']) { // Solo, no instructor
 		print("<td class=\"logCell\">SELF</td>\n") ;
-	} else { // Dual command
-		print("<td class=\"logCell\">$row[instructor_name]</td>\n") ;
-	}
+	} else  // Dual command
+		if ($userId == $row['l_instructor'])
+			print("<td class=\"logCell\">" . db2web($row['pilot_name']) . "</td>\n") ;
+		else
+			print("<td class=\"logCell\">" . db2web($row['instructor_name']) . "</td>\n") ;
 	if ($row['l_instructor'])
 		if ($row['l_instructor'] != $userId) // The user is not the FI
 			$cost_fi = $row['l_instructor_paid'] * $cost_fi_minute * $duration ;
@@ -269,6 +272,9 @@ while ($row = mysqli_fetch_array($result)) {
 	else {
 		$cost_taxes = 0 ;
 	}
+	// From 2022-11-01 no more taxes
+	if ($row['date'] >= '2022-11-01')
+		$cost_taxes = 0 ;
 	print("<td class=\"logCell\">$row[l_pax_count]</td>\n") ;
 	if ($row['l_share_type'])
 		print("<td class=\"logCell\">$row[l_share_type] <span class=\"shareCodeClass\">$row[l_share_member]</span></td>\n") ;
@@ -322,6 +328,7 @@ carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes
 Le montant n'inclut aucune note de frais (par exemple carburant), note de crédit, ainsi que d'autres frais (par exemple, cotisations, ou taxes d'atterrissage).
 Les heures sont les heures UTC.</div>
 </p >
+<p>&ddagger;: depuis le 1er novembre 2022, le CA a décidé de ne plus faire payer les taxes en avance.</p>
 <?php
 if ($diams_explanation)
 	print("<p>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</p>") ;
