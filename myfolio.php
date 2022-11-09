@@ -227,15 +227,15 @@ while ($row = mysqli_fetch_array($result)) {
 	} else
 		$plane_token = '' ;
 	// DB contains UTC time
-	$l_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
-	$l_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
+	$time_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
+	$time_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
 	if ($row['l_instructor'] < 0) $row['instructor_name'] = 'Autre FI' ;
 	print("<tr>
 		<td class=\"logCell\">$row[date]</td>
 		<td class=\"logCell\">$row[l_from]</td>
-		<td class=\"logCell\">$l_start</td>
+		<td class=\"logCell\">$time_start</td>
 		<td class=\"logCell\">$row[l_to]</td>
-		<td class=\"logCell\">$l_end</td>
+		<td class=\"logCell\">$time_end</td>
 		<td class=\"logCell\">$row[l_model]</td>
 		<td class=\"logCell\">$row[l_plane]$plane_token</td>
 		<td class=\"logCell\">$duration_hh</td>
@@ -259,21 +259,17 @@ while ($row = mysqli_fetch_array($result)) {
 	else
 		$cost_fi = 0 ;
 	// Initiation flights
-//	journalise($userId, "D", "$userIsInstructor and $row[l_share_type] == 'CP1' and $row[l_share_member] == $code_initiation") ;
 	if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] == $code_initiation)
 		$cost_fi -= $revenue_fi_initiation ;
 	// Flights taking off Belgium have to pay taxes (distance depending but ignored for now)
 	// Except Local flight
-//    	$aPos = stripos($row['l_from'], 'EB');
-//	if ($aPos !== false and $aPos == 0 and $row['l_from'] != $row['l_to']) {
 	if (stripos($row['l_from'], 'EB') === 0 and $row['l_from'] != $row['l_to']) {
 		$cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
-	}
-	else {
+	} else {
 		$cost_taxes = 0 ;
 	}
 	// From 2022-11-01 no more taxes
-	if ($row['date'] >= '2022-11-01')
+	if ($row['l_start'] >= '2022-11-01')
 		$cost_taxes = 0 ;
 	print("<td class=\"logCell\">$row[l_pax_count]</td>\n") ;
 	if ($row['l_share_type'])
