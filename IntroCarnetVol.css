@@ -1,0 +1,64 @@
+@viewport {
+/*	width: 320 ; */
+	width: device-width; /* largeur du viewport */
+	zoom: 1; /* zoom initial à 1.0 (et clin d'oeil aux fans d'IE6/7) */
+}
+
+
+/* #cancelButton { background-color: red; border-width: 2px; margin-left:auto; margin-right: auto; } */
+#confirmCancellation { visibility: hidden ; display: none; }
+
+body {
+/*
+	background-image: url("/LogoRAPCS-dim.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+*/
+}
+
+table {
+	border: 1px solid black ;
+	border-spacing: 0px ; // To ensure that the background color touches the border
+	border-collapse: collapse ;
+}
+
+tr {
+	height: 14px ;
+}
+
+th {
+	text-align: center ;
+	border: 1px solid black;
+}
+
+.borderless {
+	border: 0px ;
+}
+
+.segmentLabel {
+	background-color: #13d8f2;
+	text-align: right;
+	border: 0px;
+	width: 50%;
+}
+
+.segmentInput {
+	background-color: white ;
+	text-align: left ;
+	border: 0px ;
+}
+
+.button {font-size: 20px;}
+
+td {
+	border: 1px solid black;
+}
+
+.vertical-center {
+  min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+  min-height: 100vh; /* These two lines are counted as one :-)       */
+
+  display: flex;
+  align-items: center;
+}
