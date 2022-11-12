@@ -641,7 +641,10 @@ function compute_prix()
 	 	document.getElementById("id_submitButton").disabled=true;
 		document.getElementById("id_submitButton").style.backgroundColor = 'GhostWhite';		
 	}
+	var anAircraftName=document.getElementById("id_cdv_aircraft").value;
+	var aPrixUnitaireAvion=Number(GetPropertyFromId(anAircraftName, "prix", planes_properties));
 	var aPrixFI=compute_prix_fi();
+	var aPrixUnitaireFI=Number(GetPropertyFromId("FI", "prix", prix));
 	var aPrixPassager=compute_prix_passager();
 	var aCPType=document.getElementById("id_cdv_frais_CP").value;
 	var aPrixTotal=aPrixAvion + aPrixFI + aPrixPassager;
@@ -669,8 +672,8 @@ function compute_prix()
 	
 	var aSolde=getPiloteSolde();
 	aSolde=aSolde - aPrixTotalPilote;
-	document.getElementById("id_cdv_prix_avion").value=aPrixAvion.toFixed(2)+" €";
-	document.getElementById("id_cdv_prix_fi").value=aPrixFI.toFixed(2)+" €";
+	document.getElementById("id_cdv_prix_avion").value=aPrixAvion.toFixed(2)+" € (P.U.: "+aPrixUnitaireAvion.toFixed(2)+"€)";
+	document.getElementById("id_cdv_prix_fi").value=aPrixFI.toFixed(2)+" € (P.U.: "+aPrixUnitaireFI.toFixed(2)+"€)";
 	document.getElementById("id_cdv_prix_passager").value=aPrixPassager.toFixed(2)+" €";
 	document.getElementById("id_cdv_prix_total_pilote").value=aPrixTotalPilote.toFixed(2)+" €";
 	document.getElementById("id_cdv_prix_total_cp1").value=aPrixTotalCP1.toFixed(2)+" €";
