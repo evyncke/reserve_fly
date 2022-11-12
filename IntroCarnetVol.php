@@ -867,11 +867,11 @@ print("<button type=\"button\" value=\"Fill\" onclick=\"window.location.href='$_
 </tr>
 <tr id="id_cdv_prix_avion_row">
 <td width="50%" style="background-color: #edc4f5; text-align: right;">Avion</td>
-<td><input id="id_cdv_prix_avion" name="cdv_prix_avion" size="10" type="text" value="- €" /></td>
+<td><input id="id_cdv_prix_avion" name="cdv_prix_avion" size="20" type="text" value="- €" /></td>
 </tr>
 <tr id="id_cdv_prix_fi_row">
 <td style="background-color: #edc4f5; text-align: right;">FI</td>
-<td><input id="id_cdv_prix_fi" name="cdv_prix_fi" size="10" type="text" value="- €" /></td>
+<td><input id="id_cdv_prix_fi" name="cdv_prix_fi" size="20" type="text" value="- €" /></td>
 </tr>
 <tr id="id_cdv_prix_passager_row">
 <td style="background-color: #edc4f5; text-align: right;">Taxe Passagers</td>
