@@ -432,7 +432,7 @@ if ($userId == 0) {
 		print("<p style=\"color: red;\">Vous avez une ou plusieurs r&eacute;servations sans entr&eacute;es dans les carnets de routes des avions, pour la bonne
 			gestion de notre flotte, veuillez compl&eacute;ter les carnets <b>(cela sera obligatoire pour effectuer une r&eacute;servation d&egrave;s le 1er septembre 2022)</b>.:<ul>\n") ;
 		while ($row = mysqli_fetch_array($result)) {
-			print("<li>$row[r_start]: <a href=\"logbook.php?id=$row[r_id]\">remplir le carnet de routes de $row[r_plane] ou annuler la r&eacute;servation</a>;") ;
+			print("<li>$row[r_start]: <a href=\"IntroCarnetVol.php?id=$row[r_id]\">remplir le carnet de routes de $row[r_plane] ou annuler la r&eacute;servation</a>;") ;
 			if ($userIsInstructor) print(" <img src=\"gtk-delete.png\" onclick=\"javascript:document.getElementById('reasonTextArea').value='Old booking';cancelOldBooking($row[r_id]);\">" ) ;
 			print("</li>\n") ;
 		}
