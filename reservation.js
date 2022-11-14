@@ -1309,14 +1309,14 @@ function hideEditAgendaItemDetails() {
 }
 
 function engineHoursClicked() {
-	window.location.href = '../scripts/carnetdevol/IntroCarnetVol.php?id=' + currentlyDisplayedBooking ;
+	window.location.href = 'IntroCarnetVol.php?id=' + currentlyDisplayedBooking ;
 }
 
 function redirectLogBook(event) {
 	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
 	var id = event.target.id ;
 	if (id == 0) return ; // When clicking on pilot details, this event is also triggered :-(
-	window.location.href = '../scripts/carnetdevol/IntroCarnetVol.php?id=' + bookingFromID(id) ;
+	window.location.href = 'IntroCarnetVol.php?id=' + bookingFromID(id) ;
 }
 
 function editBookingDetails(event) {
