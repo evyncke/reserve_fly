@@ -254,7 +254,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$l_start = substr($row['l_start'], 11, 5) ;
 	$l_end = substr($row['l_end'], 11, 5) ;
 	$instructor = ($instructor_name != '') ? " /<br/>$instructor_name" : '' ;
-	$bookingLink = ($userIsAdmin) ? " <a href=\"https://www.spa-aviation.be/scripts/carnetdevol/IntroCarnetVol.php?id=$row[l_booking]\" title=\"Go to booking $row[l_booking]\" target=\"_blank\">&boxbox;</a>" : '' ;
+	$bookingLink = ($userIsAdmin) ? " <a href=\"https://www.spa-aviation.be/resa/IntroCarnetVol.php?id=$row[l_booking]\" title=\"Go to booking $row[l_booking]\" target=\"_blank\">&boxbox;</a>" : '' ;
 	if ($row['l_start_minute'] < 10)
 			$row['l_start_minute'] = "0$row[l_start_minute]" ;
 	if ($row['l_end_minute'] < 10)
