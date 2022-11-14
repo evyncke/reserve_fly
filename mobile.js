@@ -177,7 +177,7 @@ function logbookClick (id, auth) {
 }
 
 function newLogbookClick (id, auth) {
-	window.location.href = '../scripts/carnetdevol/IntroCarnetVol.php?id=' + id + '&auth=' + auth ;
+	window.location.href = 'IntroCarnetVol.php?id=' + id + '&auth=' + auth ;
 }
 
 function modifyClick(id, auth) {

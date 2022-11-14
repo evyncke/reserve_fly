@@ -200,14 +200,14 @@ while ($row = mysqli_fetch_array($result)) {
 		"que du nombre de passagers est devenu <b>OBLIGATOIRE</b> apr&egrave;s chaque vol.<p>" .
 		"Cette d&eacute;marche est indispensable pour une gestion efficace de la flotte (planification de la maintenance des avions, " .
 		"aide &agrave; la facturation des heures de vol, ...).</p>" .
-		"<p>Merci d’entrer ces données en utilisant ce lien : <a href=\"https://www.spa-aviation.be/scripts/carnetdevol/IntroCarnetVol.php?id=$booking_id\">encoder les index</a>.</p>" .
+		"<p>Merci d’entrer ces données en utilisant ce lien : <a href=\"https://www.spa-aviation.be/resa/IntroCarnetVol.php?id=$booking_id\">encoder les index</a>.</p>" .
 		"<p>Dans le cas contraire, le système vous bloquera et il ne vous sera plus possible d'effectuer votre prochaine r&eacute;servation.</p>" .
 		"<p>Merci pour votre compréhension et votre collaboration.</p>" .
 		"<p>Le conseil d'administration</p>" .
 		"<hr><p>Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] \n" .
 		"avec $row[full_name] en tant que pilote.</p>\n" ;
 	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
-	$email_message .= "<p>Il est conseill&eacute; d'utiliser la nouvelle page pour <a href=\"https://www.spa-aviation.be/scripts/carnetdevol/IntroCarnetVol.php?id=$booking_id\">encoder les compteurs</a>.</p>" ;
+	$email_message .= "<p>Il est conseill&eacute; d'utiliser la nouvelle page pour <a href=\"https://www.spa-aviation.be/resa/IntroCarnetVol.php?id=$booking_id\">encoder les compteurs</a>.</p>" ;
 	$email_message .= "<p>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation ou l'annuler a posteriori via ce lien (qui fonctionne toujours) \n"  .
 		"<a href=\"https://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> \n" .
 		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu \n" .
