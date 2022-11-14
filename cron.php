@@ -421,6 +421,9 @@ print(date('Y-m-d H:i:s').": preparing JS files.\n") ;
 $f = fopen("planes.js", "w") ;
 if (! $f) journalise(0, "E", "Cannot open planes.js for writing") ;
 else {
+	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
+	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
+	fwrite($f, '// Last update: ' . date('Y-m-d H:i:s') . "\n") ;
 	fwrite($f,"var planes = [ ") ;
 	$first = true ;
 	$result = mysqli_query($mysqli_link, "select upper(id) from $table_planes where actif != 0 and ressource = 0 order by id")
@@ -439,6 +442,9 @@ else {
 $f = fopen("ressources.js", "w") ;
 if (! $f) journalise(0, "E", "Cannot open ressources.js for writing") ;
 else {
+	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
+	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
+	fwrite($f, '// Last update: ' . date('Y-m-d H:i:s') . "\n") ;
 	fwrite($f,"var ressources = [ ") ;
 	$first = true ;
 	$result = mysqli_query($mysqli_link, "select id from $table_planes where actif != 0 and ressource != 0 order by id")
@@ -457,6 +463,9 @@ else {
 $f = fopen("pilots.js", "w") ;
 if (! $f) journalise(0, "E", "Cannot open pilots.js for writing") ;
 else {
+	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
+	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
+	fwrite($f, '// Last update: ' . date('Y-m-d H:i:s') . "\n") ;
 	fwrite($f,"var pilots = [ ") ;
 	$first = true ;
 	$result = mysqli_query($mysqli_link, "select u.id as id, first_name, last_name, u.name as name, group_concat(group_id) as groups
@@ -484,6 +493,9 @@ else {
 $f = fopen("instructors.js", "w") ;
 if (! $f) journalise(0, "E", "Cannot open instructors.js for writing") ;
 else {
+	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
+	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
+	fwrite($f, '// Last update: ' . date('Y-m-d H:i:s') . "\n") ;
 	$e = fopen("email.fis", "w") ;
 	fwrite($f,"var instructors = [ ") ;
 	fwrite($f, "{ id : -1, name: \" - solo -\"}") ;
@@ -501,6 +513,8 @@ else {
 	fclose($f) ;
 	fclose($e) ;
 }
+
+// Let's prepare the email aliases
 
 $e = fopen("email.tkis", "w") ;
 if (! $e) journalise(0, "E", "Cannot open email.tkis for writing") ;
