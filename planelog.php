@@ -203,15 +203,15 @@ while ($row = mysqli_fetch_array($result)) {
 	// Emit a red line for missing entries...
 	if ($previous_end_hour) {
 		$gap = 60 * ($row['l_start_hour'] - $previous_end_hour) + $row['l_start_minute'] - $previous_end_minute ;
+		// A little tricky as the data in $table_logbook is in UTC and in $table_bookings in local time :-O
+		// Moreover, the MySQL server at OVH does not support timezone... I.e., everything must be done in PHP
+		// I.e., the logging data must be converted into local time
+		$previous_end_lt = new DateTime($previous_end_utc, new DateTimeZone('UTC')) ;
+		$previous_end_lt->setTimezone(new DateTimeZone($default_timezone)) ;
+		$this_start_lt = new DateTime($row['l_start'], new DateTimeZone('UTC')) ;
+		$this_start_lt->setTimezone(new DateTimeZone($default_timezone)) ;
 		if ($gap > 0) {
 			$missingPilots = array() ;
-			// A little tricky as the data in $table_logbook is in UTC and in $table_bookings in local time :-O
-			// Moreover, the MySQL server at OVH does not support timezone... I.e., everything must be done in PHP
-			// I.e., the logging data must be converted into local time
-			$previous_end_lt = new DateTime($previous_end_utc, new DateTimeZone('UTC')) ;
-			$previous_end_lt->setTimezone(new DateTimeZone($default_timezone)) ;
-			$this_start_lt = new DateTime($row['l_start'], new DateTimeZone('UTC')) ;
-			$this_start_lt->setTimezone(new DateTimeZone($default_timezone)) ;
 			if (! $row['l_booking']) $row['l_booking'] = -1 ; // As logbook can now contain entries without a booking ... say bye bye to integrity
 			$result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type, r_id
 				FROM $table_bookings JOIN $table_person ON r_pilot = jom_id
@@ -230,6 +230,8 @@ while ($row = mysqli_fetch_array($result)) {
 			print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Missing entries for $gap minutes..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
 		} else if ($gap < 0)
 			print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Overlapping / duplicate entries for $gap minutes...</td></tr>\n") ;
+		if ($previous_end_lt > $this_start_lt)
+			print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Overlapping entries (previous end time after next start)...</td></tr>\n") ;
 	}
 	// Emit a red line if previous arrival apt and this departure airport do not match
 	if ($previous_airport and $previous_airport != $row['l_from'])
