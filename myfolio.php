@@ -349,7 +349,7 @@ if ($row) {
 	print("<p>Le solde de votre compte n'est pas disponible.</p>") ;
 ?>
 <h2>Factures r&eacute;centes</h2>
-<p>Voici quelques factures r&eacute;centes:
+<p>Voici quelques pièces r&eacute;centes:
 <ul>
 <?php
 $sql = "SELECT * FROM $table_person JOIN $table_bk_invoices ON bki_email = email LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
@@ -360,7 +360,8 @@ $count = 0 ;
 while ($row = mysqli_fetch_array($result)) {
 	// Using the invoice date from the email import as the general ledger is in the future
         print("<li><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_date] #$row[bki_id] &boxbox;</a>") ;
-	if ($row['bkl_debit'] != '') print(" pour un montant de $row[bkl_debit] &euro;") ;
+	if ($row['bkl_debit'] != '') print(" facture pour un montant de $row[bkl_debit] &euro;") ;
+	if ($row['bkl_credit'] != '') print(" note de crédit pour un montant de " . (0.0 - $row['bkl_credit']) . " &euro;") ;
 	print("</li>\n") ;
         $count ++ ;
 }
@@ -374,11 +375,13 @@ print("</ul>\n</p>\n") ;
 <p><b>De manière expérimentale</b>, voici une vue de votre compte member RAPCS pour l'année en cours.</p>
 <table border=1>
 <thead>
-<th>Date</th><th>Opération</th><th>Description</th><th>Débit</th><th>Crédit</th>
+<th>Date</th><th>Opération</th><th>Pièce</th><th>Description</th><th>Débit</th><th>Crédit</th>
 </thead>
 <tbody>
 <?php
-$sql = "SELECT * FROM $table_person JOIN $table_bk_ledger ON ciel_code = bkl_client
+$sql = "SELECT *
+	FROM $table_person JOIN $table_bk_ledger ON ciel_code = bkl_client
+		LEFT JOIN $table_bk_invoices ON bki_id = bkl_reference
 	WHERE jom_id = $userId
 	ORDER BY bkl_date ASC, bkl_id ASC" ;
 $result = mysqli_query($mysqli_link, $sql) or journalise($userId, "F", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
@@ -395,7 +398,11 @@ while ($row = mysqli_fetch_array($result)) {
 		case 'VNC': $journal = 'Note de crédit' ; break ;
 		default : $journal = $row['bkl_journal'] ;
 	}
-	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$row[bkl_label]</td><td>$row[bkl_debit]</td><td>$row[bkl_credit]</td></tr>\n") ;
+	if ($row['bki_file_name'])
+		$reference = '<a href="' . $row['bki_file_name'] . '" target="_blank">' . $row['bki_id'] . " &boxbox;</a>" ;
+	else
+		$reference = $row['bkl_reference'] ;
+	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>$row[bkl_label]</td><td>$row[bkl_debit]</td><td>$row[bkl_credit]</td></tr>\n") ;
 }
 ?>
 </tbody>
