@@ -329,7 +329,7 @@ Les heures sont les heures UTC.</div>
 if ($diams_explanation)
 	print("<p>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</p>") ;
 
-$invoice_reason = 'le montant du folio' ;
+$invoice_reason = 'folio' ;
 // Check the bookkeeping balance
 
 $result = mysqli_query($mysqli_link, "SELECT *
@@ -343,13 +343,13 @@ if ($row) {
 	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $row[bkb_amount]&euro; (si positif vous devez de l'argent au RAPCS ASBL). Il faut plusieurs jours avant que vos paiements soient pris en compte.</p>") ;
 	if ($row['bkb_amount'] > 0) {
 		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
-		$invoice_reason = 'le solde' ;
+		$invoice_reason = 'solde' ;
 	}
 } else 
 	print("<p>Le solde de votre compte n'est pas disponible.</p>") ;
 ?>
 <h2>Factures r&eacute;centes</h2>
-<p>Voici quelques pièces r&eacute;centes:
+<p><b>De manière expérimentale</b>, voici quelques pièces comptables r&eacute;centes:
 <ul>
 <?php
 $sql = "SELECT * FROM $table_person JOIN $table_bk_invoices ON bki_email = email LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
@@ -360,7 +360,7 @@ $count = 0 ;
 while ($row = mysqli_fetch_array($result)) {
 	// Using the invoice date from the email import as the general ledger is in the future
         print("<li><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_date] #$row[bki_id] &boxbox;</a>") ;
-	if ($row['bkl_debit'] != '') print(" facture pour un montant de $row[bkl_debit] &euro;") ;
+	if ($row['bkl_debit'] != '') print(" facture pour un montant de $row[bkl_debit] &euro; <button onClick=\"pay('Facture $row[bki_id]', $row[bkl_debit]);\">Payer par QR-code</button>") ;
 	if ($row['bkl_credit'] != '') print(" note de crédit pour un montant de " . (0.0 - $row['bkl_credit']) . " &euro;") ;
 	print("</li>\n") ;
         $count ++ ;
@@ -372,7 +372,7 @@ print("</ul>\n</p>\n") ;
 ?>
 
 <h2>Détails de votre compte pour l'année en cours</h2>
-<p><b>De manière expérimentale</b>, voici une vue de votre compte member RAPCS pour l'année en cours.</p>
+<p><b>De manière expérimentale</b>, voici une vue de votre compte membre RAPCS pour l'année en cours (mise à jour de temps en temps).</p>
 <table border=1>
 <thead>
 <th>Date</th><th>Opération</th><th>Pièce</th><th>Description</th><th>Débit</th><th>Crédit</th>
@@ -383,8 +383,10 @@ $sql = "SELECT *
 	FROM $table_person JOIN $table_bk_ledger ON ciel_code = bkl_client
 		LEFT JOIN $table_bk_invoices ON bki_id = bkl_reference
 	WHERE jom_id = $userId
-	ORDER BY bkl_date ASC, bkl_id ASC" ;
+	ORDER BY bkl_date ASC, bkl_posting ASC" ;
 $result = mysqli_query($mysqli_link, $sql) or journalise($userId, "F", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
+$total_debit = 0.0 ;
+$total_credit = 0.0 ;
 while ($row = mysqli_fetch_array($result)) {
 	switch ($row['bkl_journal']) {
 		case 'ANX': $journal = 'Report année précédente' ; break ;
@@ -402,10 +404,15 @@ while ($row = mysqli_fetch_array($result)) {
 		$reference = '<a href="' . $row['bki_file_name'] . '" target="_blank">' . $row['bki_id'] . " &boxbox;</a>" ;
 	else
 		$reference = $row['bkl_reference'] ;
+	if ($row['bkl_debit']) $total_debit += $row['bkl_debit'] ;
+	if ($row['bkl_credit']) $total_credit += $row['bkl_credit'] ;
 	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>$row[bkl_label]</td><td>$row[bkl_debit]</td><td>$row[bkl_credit]</td></tr>\n") ;
 }
 ?>
 </tbody>
+<tfoot>
+<tr><td colspan=4>Totaux</td><td><?=$total_debit?>&nbsp;&euro;</td><td><?=$total_credit?>&nbsp;&euro;</td><tr>
+</tfoot>
 </table>
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
@@ -426,19 +433,41 @@ $iban
 EUR$invoice_total
 De $userName compte 400$codeCiel
 De $userName compte 400$codeCiel" ;
-
-if ($invoice_total > 0) {
 ?>
-<h2>Test QR-code pour payer <?=$invoice_reason?> de <?=$invoice_total?> &euro;</h3>
+<span id="payment">
+<h2>Test QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
 <p>Ceci est simplement un test pour les informaticiens, ne pas l'utiliser car notre trésorier ne saura pas comment faire pour
 associer ce virement à votre compte membre RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant).</p>
-<img width="400" height="400" src="https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=<?=urlencode($epcString)?>">
-<?php
-}
-?>
+<img id="payment_qr_code" width="400" height="400" src="https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=<?=urlencode($epcString)?>">
+</span id="payment">
 <hr>
 <div class="copyright">R&eacute;alisation: Eric Vyncke, août-septembre 2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
+<script>
+var 
+	invoice_reason = '<?=$invoice_reason?>' ;
+	invoice_total = <?=$invoice_total?> ;
+	epcBic = '<?=$bic?>' ;
+	epcName = '<?=$name?>' ;
+	epcIban = '<?=$iban?>' ;
+	compteCiel = '400<?=$codeCiel?>' ;
+
+function pay(reason, amount) {
+	if (amount == 0.0) {
+		document.getElementById('payment').display = 'none' ;
+		return ;
+	}
+	document.getElementById('payment').display = 'block' ;
+	document.getElementById('payment_reason').innerText = reason ;
+	document.getElementById('payment_amount').innerText = amount ;
+	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel ;
+	console.log(epcURI) ;
+	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=" + encodeURI(epcURI) ;
+}
+
+pay(invoice_reason, invoice_total) ;
+</script>
+
 </body>
 </html>
