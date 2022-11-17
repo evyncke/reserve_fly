@@ -16,11 +16,14 @@
 
 */
 
+// On Eric's laptop, the easiest way to get copy of the emails is:
+//
+// mv ~/OneDrive/CA_RAPCS_SHARED/Facturation/Infos\ Ciel/*.eml invoices
+
 // require_once 'dbi.php' ;
 ini_set("auto_detect_line_endings", true); // process CR CR/LF or LF as line separator
 
 
-$fileName = "/Users/evyncke/Temp/factures.eml" ;
 $filePrefix = "invoices/" ;
 $shared_secret = "124.75=EBSP" ;
 
@@ -128,6 +131,9 @@ function processMessage($lines, &$iLine, $linesCount) {
 			case 'application/pdf':
 				if (preg_match('/Facture (\d+)/', $lastSubject, $matches)) {
 					$invoiceId = $matches[1] ;
+				// =?UTF-8?Q?Note_de_cr=c3=a9dit_NC_221740?=
+				} else if (preg_match('/=\?UTF-8\?Q\?Note_de_cr=c3=a9dit_NC_(\d+)\?=/', $lastSubject, $matches)) {
+					$invoiceId = "NC $matches[1]" ;
 				} else {
 					$invoiceId = substr(sha1($lastTo . $lastDate), 0, 8) ; // Hopefully a unique ID !
 				}
