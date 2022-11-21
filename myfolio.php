@@ -340,7 +340,7 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	or die("Cannot read booking keeping balance: " . mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 if ($row) {
-	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $row[bkb_amount]&euro; (si positif vous devez de l'argent au RAPCS ASBL). Il faut plusieurs jours avant que vos paiements soient pris en compte.</p>") ;
+	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $row[bkb_amount] &euro; (si positif vous devez de l'argent au RAPCS ASBL). Il faut plusieurs jours avant que vos paiements soient pris en compte.</p>") ;
 	if ($row['bkb_amount'] > 0) {
 		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
 		$invoice_reason = 'solde' ;
@@ -454,11 +454,11 @@ var
 	compteCiel = '400<?=$codeCiel?>' ;
 
 function pay(reason, amount) {
-	if (amount == 0.0) {
-		document.getElementById('payment').display = 'none' ;
+	if (amount <= 0.0 || amount <= 0) {
+		document.getElementById('payment').style.display = 'none' ;
 		return ;
 	}
-	document.getElementById('payment').display = 'block' ;
+	document.getElementById('payment').style.display = 'block' ;
 	document.getElementById('payment_reason').innerText = reason ;
 	document.getElementById('payment_amount').innerText = amount ;
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel ;
