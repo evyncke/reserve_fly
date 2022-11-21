@@ -420,19 +420,7 @@ $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 
 $iban = "BE64732038421852" ;
 $bic = "CREGBEBB" ;
-$name = "Royal Areo Para Club Spa " ;
-
-$epcString =
-"BCD
-001
-1
-SCT
-$bic
-$name
-$iban
-EUR$invoice_total
-De $userName compte 400$codeCiel
-De $userName compte 400$codeCiel" ;
+$name = "Royal Aero Para Club Spa" ;
 ?>
 <span id="payment">
 <h2>Test QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
@@ -461,6 +449,8 @@ function pay(reason, amount) {
 	document.getElementById('payment').style.display = 'block' ;
 	document.getElementById('payment_reason').innerText = reason ;
 	document.getElementById('payment_amount').innerText = amount ;
+	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
+	// There should be 2 reasons, first one is structued, the second one is free text
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel ;
 	console.log(epcURI) ;
 	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=" + encodeURI(epcURI) ;
