@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,32 +20,8 @@ ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
 
-$session_name = session_name('RAPCS') ;
-$cookie_lifetime = 3600 * 24 * 31 ;
-//session_start(['cookie_lifetime' => $cookie_lifetime, 'cookie_httponly' => '1', 'cookie_domain' => '.spa-aviation.be', 'cookie_path' => '/', 'use_cookies' => '1']) 
-//	or journalise($userId, "E", "Cannot start session in flight header") ;
-// As it seems that session_start() parameters do not influence the cookie, here we go again...
-// setcookie ( string $name , string $value = "" , int $expires = 0 , string $path = "" , string $domain = "" , bool $secure = false , bool $httponly = false ) : bool
-setcookie(session_name(),session_id(),time() + $cookie_lifetime, '/', '.spa-aviation.be', true, true)
-	or journalise($userId, "E", "Cannot modify setcookie() in flight_header") ;
-
-if (!session_id()) {
-	journalise($userId, 'W', "session_id() does not return any value") ; 
-} else {
-	journalise($userId, 'D', "session_id()=" . session_id() . ", session_name()=" . session_name() . ", _SESSION['jom_id']=$_SESSION[jom_id], _SESSION['truc']=$_SESSION[truc] ");
-}
-
-if ($userId <= 0 and isset($_SESSION['jom_id']) and is_numeric($_SESSION['jom_id']) and $_SESSION['jom_id'] > 0) {
-	$joomla_user = JFactory::getUser($_SESSION['jom_id']) ;
-	CheckJoomlaUser($joomla_user) ;
-	journalise($userId, 'I', "Using _SESSION['jom_id']=$_SESSION[jom_id] for authentication") ;
-} else
-	$_SESSION['jom_id'] = $userId ;
-$_SESSION['truc'] = 'muche' ;
-session_commit() ;
-
-require_once 'facebook.php' ;
-
+if (! ($userIfFlightPilot or $userIsFlightManager)) 
+	journalise($userId, "F", "Vous n'êtes pas autorisé sur cette page") ;
 ?>
 <html>
 <head>
@@ -76,6 +52,8 @@ var
 	userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?> ;
 	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ;
 	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ;
+	userIsFlightPilot = <?=($userIsFlightPilot)? 'true' : 'false'?> ;
+	userIsFlightManager = <?=($userIsFlightManager)? 'true' : 'false'?> ;
 
 </script>
 <!-- Matomo -->
