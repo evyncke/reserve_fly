@@ -69,8 +69,10 @@ while ($row = mysqli_fetch_array($result)) {
 		$status = "Avion réservé</td><td>$row[f_date_scheduled]" ;
 	else if ($row['f_date_assigned'])
 		$status = "Pilote sélectionné</td><td>$row[f_date_assigned]" ;
+	else if ($row['f_date_paid'])
+		$status = "Paiement effectué</td><td>$row[f_date_paid]" ;
 	else
-		$status = "Attente pilote</td><td>" ;
+		$status = "Attente paiement</td><td>" ;
 	if ($row['f_date_flown'])
 		$date_vol = "ATD $row[f_date_flown] ($row[r_plane])" ;
 	else if ($row['r_start'])

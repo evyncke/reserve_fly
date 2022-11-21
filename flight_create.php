@@ -302,6 +302,18 @@ if (isset($flight_id) and $flight_id != 0) {
 		<label for="phone">Téléphone:</label>
 		<input type="tel" class="form-control" name="phone">
 	</div><!-- form-group -->
+	<div class="form-group col-xs-12 col-sm-4">
+		<label for="phone">Rue:</label>
+		<input type="tel" class="form-control" name="street">
+	</div><!-- form-group -->
+	<div class="form-group col-xs-4 col-sm-2">
+		<label for="phone">CP:</label>
+		<input type="tel" class="form-control" name="zip">
+	</div><!-- form-group -->
+	<div class="form-group col-xs-12 col-sm-4">
+		<label for="phone">Ville:</label>
+		<input type="tel" class="form-control" name="city">
+	</div><!-- form-group -->
 	<div class="form-group col-xs-6 col-sm-2">
 		<label for="weight">Poids:</label>
 		<input type="number" min="10" max="150" class="form-control" name="weight" value="80">
@@ -407,6 +419,11 @@ for ($i = $known_pax_count+1; $i <= $row_flight['f_pax_cnt']; $i++) {
 			<tr><td>$i</td><td>$role</td>
 			<td><input type=\"text\" name=\"lname\"></td>
 			<td><input type=\"text\" name=\"fname\"></td>
+			<td><select name=\"age\">
+				<option value=\"C\">< 12 ans</option>
+				<option value=\"T\">< 18 ans</option>
+				<option value=\"A\" selected>>= 18 ans</option>
+			</select>
 			<td><input type=\"text\" name=\"weight\" size=\"3\"> kg</td>
 			<td><span class=\"glyphicon glyphicon-floppy-disk text-primary\" onclick=\"submitForm('form_add_$i');\"></span></td></tr></form>\n") ;
 	} // for
@@ -521,6 +538,7 @@ function show_reservation($date, $header) {
 <?php if (! isset($row_flight['first_name']) or $row_flight['first_name'] == '') $row_flight['first_name'] = 'client via la page web' ; ?>
 Ce vol a été créé le <?=$row_flight['f_date_created']?> par <?=db2web("$row_flight[first_name] $row_flight[last_name]")?>.<br/>
 <?php
+if ($row_flight['f_date_paid']) print("Paiement ($row_flight[f_reference_payment]) effectué le $row[f_date_paid].<br/>") ;
 if ($row_flight['f_date_cancelled']) print("Puis a été annulé le $row_flight[f_date_cancelled].<br/>") ;
 if ($row_flight['f_date_assigned']) print("Le pilote a été sélectionné le $row_flight[f_date_assigned].<br/>") ;
 if ($row_flight['f_date_scheduled']) print("Le pilote a réservé l'avion le $row_flight[f_date_scheduled].<br/>") ;
@@ -548,6 +566,9 @@ document.getElementsByName('pax')[0].checked = ('<?=$row_contact['pr_role']?>' =
 setValue('pax_cnt', '<?=db2web($row_flight['f_pax_cnt'])?>') ;
 setValue('lname', '<?=db2web($row_flight['p_lname'])?>') ;
 setValue('fname', '<?=db2web($row_flight['p_fname'])?>') ;
+setValue('street', '<?=db2web($row_flight['p_street'])?>') ;
+setValue('zip', '<?=db2web($row_flight['p_zip'])?>') ;
+setValue('city', '<?=db2web($row_flight['p_city'])?>') ;
 setValue('email', '<?=db2web($row_flight['p_email'])?>') ;
 setValue('phone', '<?=db2web($row_flight['p_tel'])?>') ;
 setValue('weight', '<?=db2web($row_flight['p_weight'])?>') ;
