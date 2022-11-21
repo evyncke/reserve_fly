@@ -27,6 +27,17 @@ ini_set("auto_detect_line_endings", true); // process CR CR/LF or LF as line sep
 $filePrefix = "invoices/" ;
 $shared_secret = "124.75=EBSP" ;
 
+// Ciel invoices are sent to different email addresses for those people...
+$ciel2profiles = array(
+	'xavier@ffxconstruction.be' => 'xh@ffx-toiture.be',
+	'wynands.l@yahoo.com' => 'flyingluc@gmail.com',
+	'charlysix@skynet.be' => 'charlysix@gmail.com',
+	'dakota77vfr@gmail.com' => 'mario.barp@telenet.be',
+	'flaviengrandjean@hotmail.com' => 'grandjeanflavien@gmail.com',
+	'jhu@live.be' => 'eg.lukeschova@gmail.com',
+	'michel.mos@skynet.be' => 'mickey.moes@gmail.com'
+) ;
+
 $lines = array() ;
 $lastTo = false ;
 $lastSubject = false ;
@@ -163,6 +174,11 @@ foreach (glob($filePrefix . "*.eml") as $fileName) {
 	print("Processing $fileName\n") ;
 	processFile($fileName) ;
 }
+
+// Converting email addresses...
+foreach ($ciel2profiles as $ciel => $rapcs) 
+	fwrite($sqlFile, "UPDATE rapcs_bk_invoices SET bki_email = '$rapcs' WHERE bki_email = '$ciel';\n") ;
+	
 fclose($sqlFile) ;
 
 ?>
