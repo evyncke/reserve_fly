@@ -452,7 +452,6 @@ function pay(reason, amount) {
 	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structued, the second one is free text
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel ;
-	console.log(epcURI) ;
 	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=" + encodeURI(epcURI) ;
 }
 
