@@ -19,6 +19,8 @@ require_once 'flight_header.php' ;
 $modify = (isset($_REQUEST['modify']) and $_REQUEST['modify'] != '') ? TRUE : FALSE ;
 $delete = (isset($_REQUEST['delete']) and $_REQUEST['delete'] != '') ? TRUE : FALSE ;
 $create = (isset($_REQUEST['create']) and $_REQUEST['create'] != '') ? TRUE : FALSE ;
+$pay_open = (isset($_REQUEST['pay_open']) and $_REQUEST['pay_open'] != '') ? TRUE : FALSE ;
+$pay = (isset($_REQUEST['pay']) and $_REQUEST['pay'] != '') ? TRUE : FALSE ;
 $assign_pilot = (isset($_REQUEST['assign_pilot']) and $_REQUEST['assign_pilot'] != '') ? TRUE : FALSE ;
 $add_pax = (isset($_REQUEST['add_pax']) and $_REQUEST['add_pax'] != '') ? TRUE : FALSE ;
 $delete_pax = (isset($_REQUEST['delete_pax']) and $_REQUEST['delete_pax'] != '') ? TRUE : FALSE ;
@@ -30,6 +32,13 @@ $title = ($flight_id) ? "Modification d'une réservation de vol" : "Création d'
 // TODO be ready to pre-load when asking for modification/cancellation
 // and of course add 'modify' 'cancel' button
 
+// Prepare the active tab
+$contact_active = 'active in' ;
+$payment_active = '' ;
+if ($pay_open) {
+	$contact_active = '' ;
+	$payment_active = 'active in' ;
+}
 
 if ($create or $modify) {
 	if ($_REQUEST['discovery_flight'] == 'on')
@@ -76,19 +85,19 @@ if ($create or $modify) {
 if ($create) {
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_birthdate, p_weight, p_gender)
 		VALUES('" . web2db($lname) . "', '" . web2db($fname) . "', '$email', '$phone', '$birthdate', $weight, '$gender')")
-		or die("Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
 	$pax_id = mysqli_insert_id($mysqli_link) ; 
 	mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_pilot) 
 		VALUES(SYSDATE(), $userId, '$flight_type', $pax_cnt, $circuit, '$schedule', $date1, $date2, '" . web2db($comment) . "', NULL)")
-		or die("Cannot add flight, system error: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot add flight, system error: " . mysqli_error($mysqli_link)) ;
 	$flight_id = mysqli_insert_id($mysqli_link) ; 
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax_role(pr_flight, pr_pax, pr_role)
 		VALUES('$flight_id', '$pax_id', 'C')") 
-		or die("Cannot add contact role C, system error: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot add contact role C, system error: " . mysqli_error($mysqli_link)) ;
 	if ($role != 'C')
 		mysqli_query($mysqli_link, "INSERT INTO $table_pax_role(pr_flight, pr_pax, pr_role)
 			VALUES('$flight_id', '$pax_id', '$role')") 
-			or die("Cannot add contact role $role, system error: " . mysqli_error($mysqli_link)) ;
+			or journalise($userId, "F", "Cannot add contact role $role, system error: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, 'I', "$flight_type flight ($flight_id) created for $lname $fname ($comment)") ;
 }
 
@@ -96,25 +105,25 @@ if ($modify) {
 	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
 	if (! in_array($_REQUEST['age'], array('C', 'T', 'A'))) die("Pax age is invalid") ;
 	$result = mysqli_query($mysqli_link, "SELECT * from $table_pax_role WHERE pr_flight = $flight_id and pr_role='C'")
-		or die("Cannot retrieve contact for $flight_id: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot retrieve contact for $flight_id: " . mysqli_error($mysqli_link)) ;
 	$row_pax = mysqli_fetch_array($result) or die("Contact not found") ;
 	mysqli_free_result($result) ;
 	$pax_id = $row_pax['pr_pax'] ;
 	mysqli_query($mysqli_link, "UPDATE $table_pax
 			SET p_lname='" . web2db($lname) . "', p_fname='" . web2db($fname) . "', p_email='$email', p_tel='$phone', p_age='$_REQUEST[age]', p_weight=$weight, p_gender='$gender'
 			WHERE p_id = $pax_id")
-		or die("Cannot modify contact, system error: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot modify contact, system error: " . mysqli_error($mysqli_link)) ;
 	mysqli_query($mysqli_link, "UPDATE $table_flight 
 		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "'
 		WHERE f_id = $flight_id")
-		or die("Cannot modify flight, system error: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot modify flight, system error: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "W", "Flight $flight_id modified") ;
 }
 
 if ($delete) {
 	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
 	$result = mysqli_query($mysqli_link, "UPDATE $table_flight SET f_date_cancelled = SYSDATE() WHERE f_id = $flight_id")
-		or die("Cannot cancel flight $flight_id: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot cancel flight $flight_id: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "W", "Flight $flight_id cancelled") ;
 }
 
@@ -123,74 +132,78 @@ if ($assign_pilot) {
 	$assigned_pilot = (isset($_REQUEST['assignedPilot'])) ? intval($_REQUEST['assignedPilot']) : '' ;
 	if (! $assigned_pilot or ! is_numeric($assigned_pilot)) die("Invalid pilot ($assigned_pilot)") ;
 	if ($assigned_pilot <= 0) $assigned_pilot = 'NULL' ;
-	mysqli_query($mysqli_link, "UPDATE $table_flights SET f_pilot=$assigned_pilot, f_date_assigned = SYSDATE() WHERE f_id = $flight_id")
-		or die("Cannot assign pilot: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "UPDATE $table_flights
+		SET f_pilot=$assigned_pilot, f_date_assigned = SYSDATE(), f_who_assigned = $userId
+		WHERE f_id = $flight_id")
+		or journalise($userId, "F", "Cannot assign pilot: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) == 0)
-		die("No change made") ;
+		journalise($userId, "F", "No change made") ;
 	journalise($userId, "W", "Flight $flight_id has now a pilot $assigned_pilot") ;
 }
 
 if ($add_pax) {
 	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
 	$lname = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['lname'])) ;
-	if ($lname == '') die("Last name cannot be empty") ;
+	if ($lname == '') journalise($userId, "F", "Last name cannot be empty") ;
 	$fname = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['fname'])) ;
-	if ($fname == '') die("First name cannot be empty") ;
+	if ($fname == '') journalise($userId, "F", "First name cannot be empty") ;
 	$weight = intval(trim($_REQUEST['weight'])) ;
 	// TODO also allow non P role (could be S)
 	if ($weight == '' or $weight <= 10) die("Weight is invalid") ;
 	// TODO check whether we are already max-ed out about passagers
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax(p_lname, p_fname, p_weight)
 		VALUES ('" . web2db($lname) . "', '" . web2db($fname) . "', $weight)")
-		or die("Cannot add passenger: " . mysqli_error($mysqli_error)) ;
+		or journalise($userId, "F", "Cannot add passenger: " . mysqli_error($mysqli_error)) ;
 	$pax_id = mysqli_insert_id($mysqli_link) ; 
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax_role(pr_flight, pr_pax, pr_role)
 		VALUES('$flight_id', '$pax_id', 'P')") 
-		or die("Cannot add passenger role , system error: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot add passenger role , system error: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "I", "Passenger $fname $lname added to flight $flight_id") ;
 }
 
 if ($modify_pax) {
 	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
 	$lname = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['lname'])) ;
-	if ($lname == '') die("Last name cannot be empty") ;
+	if ($lname == '') journalise($userId, "F", "Last name cannot be empty") ;
 	$fname = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['fname'])) ;
-	if ($fname == '') die("First name cannot be empty") ;
+	if ($fname == '') journalise($userId, "F", "First name cannot be empty") ;
 	$weight = intval(trim($_REQUEST['weight'])) ;
-	if ($weight == '' or $weight <= 10) die("Weight is invalid") ;
+	if ($weight == '' or $weight <= 10) journalise($userId, "F", "Weight is invalid") ;
 	$pax_id = intval(trim($_REQUEST['pax_id'])) ;
-	if ($pax_id == '' or $pax_id <= 0) die("Pax_id is invalid") ;
+	if ($pax_id == '' or $pax_id <= 0) journalise($userId, "F", "Pax_id is invalid") ;
 	if (! in_array($_REQUEST['age'], array('C', 'T', 'A'))) die("Pax age is invalid") ;
 	// TODO check whether we are already max-ed out about passagers
 	// TODO also allow non P role (could be S)
 	mysqli_query($mysqli_link, "UPDATE $table_pax SET
 		p_lname = '" . web2db($lname) . "', p_fname = '" . web2db($fname) . "', p_weight = $weight, p_age = '$_REQUEST[age]'
 		WHERE p_id = $pax_id")
-		or die("Cannot modify passenger: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot modify passenger: " . mysqli_error($mysqli_link)) ;
 }
 
 if ($delete_pax) {
 	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
 	$pax_id = intval(trim($_REQUEST['pax_id'])) ;
-	if ($pax_id == '' or $pax_id <= 0) die("Pax_id is invalid") ;
+	if ($pax_id == '' or $pax_id <= 0) journalise($userId, "F", "Pax_id is invalid") ;
 	mysqli_query($mysqli_link, "DELETE FROM $table_pax_role WHERE pr_flight=$flight_id AND pr_role in ('P', 'S') AND pr_pax = $pax_id")
-		or die("Cannot remove role for passenger $pax_id: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot remove role for passenger $pax_id: " . mysqli_error($mysqli_link)) ;
 	// Let's find it back and check how many roles he has, if only P or S then we can safely remove it
 	// We should never remove the role Contact
 	$result_delete = mysqli_query($mysqli_link, "SELECT * FROM $table_pax_role 
 		WHERE pr_flight=$flight_id AND pr_pax = $pax_id")
-		or die("Cannot check remaining role for passenger $pax_id: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot check remaining role for passenger $pax_id: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_num_rows($result_delete) == 0) // We can safely remove passenger details
 		mysqli_query($mysqli_link, "DELETE FROM $table_pax WHERE p_id = $pax_id")
-			or die("Cannot delete passenger detail: " . mysqli_error($mysqli_link)) ;
+			or journalise($userId, "F", "Cannot delete passenger detail: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "I", "Passenger $pax_id deleted from flight $flight_id") ;
 }
 
 if ($link_to) {
 	if (! is_numeric($link_to))
 		die("Numéro de réservation invalide $link_to") ;
-	mysqli_query($mysqli_link, "UPDATE $table_flight SET f_booking=$link_to, f_date_scheduled=SYSDATE() WHERE f_id=$flight_id")
-		or die("Impossible de mettre à jour le vol: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "UPDATE $table_flight, $table_bookings
+			SET f_booking=$link_to, f_date_linked=SYSDATE(), f_who_linked = $userId, f_pilot = r_pilot
+			WHERE f_id=$flight_id AND r_id = $link_to")
+		or journalise($userId, "F", "Impossible de mettre à jour le vol: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "I", "Flight $flight_id is linked to booking $link_to") ;
 }
 
@@ -198,9 +211,9 @@ if (isset($flight_id) and $flight_id != 0) {
 	$result = mysqli_query($mysqli_link, "SELECT * 
 			FROM $table_flight JOIN $table_pax_role ON pr_flight = f_id LEFT JOIN $table_pax ON pr_pax = p_id LEFT JOIN $table_person ON f_who_created = jom_id
 			WHERE f_id = $flight_id and pr_role='C'")
-		or die("Cannot retrieve flight $flight_id: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot retrieve flight $flight_id: " . mysqli_error($mysqli_link)) ;
 	$row_flight = mysqli_fetch_array($result) ;
-	if (!$row_flight) die("Vol #$flight_id inconnu!") ;
+	if (!$row_flight) journalise($userId, "F", "Vol #$flight_id inconnu!") ;
 }
 ?>
 
@@ -209,16 +222,17 @@ if (isset($flight_id) and $flight_id != 0) {
 </div><!-- page header -->
 
 <ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#menuContact">Résumé</a></li>
+  <li class="<?=$contact_active?>"><a data-toggle="tab" href="#menuContact">Résumé</a></li>
   <li><a data-toggle="tab" href="#menuPassenger">Passagers</a></li>
+  <li class="<?=$payment_active?>"><a data-toggle="tab" href="#menuPayment">Paiement</a></li>
   <li><a data-toggle="tab" href="#menuPilot">Pilote</a></li>
-  <li><a data-toggle="tab" href="#menuPlane">Avion</a></li>
+  <li><a data-toggle="tab" href="#menuPlane">Réservation</a></li>
   <li><a data-toggle="tab" href="#menuAudit">Historique</a></li>
 </ul>
 
 <div class="tab-content">
 
-<div id="menuContact" class="tab-pane fade in active">
+<div id="menuContact" class="tab-pane fade <?=$contact_active?>">
 
 <form action="flight_create.php" method="get" autocomplete="off">
 
@@ -294,6 +308,8 @@ if (isset($flight_id) and $flight_id != 0) {
 		<label for="fname">Prénom:</label>
 		<input type="text" class="form-control" name="fname">
 	</div><!-- form-group -->
+</div> <!-- row -->
+<div class="row">
 	<div class="form-group col-xs-12 col-sm-4">
 		<label for="email">Adresse email:</label>
 		<input type="email" class="form-control" name="email">
@@ -302,6 +318,8 @@ if (isset($flight_id) and $flight_id != 0) {
 		<label for="phone">Téléphone:</label>
 		<input type="tel" class="form-control" name="phone">
 	</div><!-- form-group -->
+</div> <!-- row -->
+<div class="row">
 	<div class="form-group col-xs-12 col-sm-4">
 		<label for="phone">Rue:</label>
 		<input type="tel" class="form-control" name="street">
@@ -314,6 +332,8 @@ if (isset($flight_id) and $flight_id != 0) {
 		<label for="phone">Ville:</label>
 		<input type="tel" class="form-control" name="city">
 	</div><!-- form-group -->
+</div> <!-- row -->
+<div class="row">
 	<div class="form-group col-xs-6 col-sm-2">
 		<label for="weight">Poids:</label>
 		<input type="number" min="10" max="150" class="form-control" name="weight" value="80">
@@ -355,8 +375,8 @@ if (isset($flight_id) and $flight_id != 0) {
 		print('<button type="submit" class="btn btn-danger" name="delete" value="delete">Annuler la demande</button>') ;
 		$result = mysqli_query($mysqli_link, "SELECT * 
 				FROM $table_flight JOIN $table_pax_role ON pr_flight = f_id LEFT JOIN $table_pax ON pr_pax = p_id
-				WHERE f_id = $flight_id and pr_role!='C'")
-			or die("Cannot retrieve contact role $flight_id: " . mysqli_error($mysqli_link)) ;
+				WHERE f_id = $flight_id and pr_role = 'C'")
+			or journalise($userId, "F", "Cannot retrieve contact role $flight_id: " . mysqli_error($mysqli_link)) ;
 		$row_contact = mysqli_fetch_array($result) ;
 		mysqli_free_result($result) ;
 ?>
@@ -384,7 +404,7 @@ if (isset($flight_id) and $flight_id != 0) {
 // Should use the pax_count data to display just the right amount of rows
 $result_pax = mysqli_query($mysqli_link, "SELECT * FROM $table_pax_role JOIN $table_pax ON pr_pax = p_id
 			WHERE pr_flight = $flight_id AND pr_role <> 'C'") 
-			or die("Cannot retrieve passengers list: " . mysqli_error($mysqli_link)) ;
+			or journalise($userId, "F", "Cannot retrieve passengers list: " . mysqli_error($mysqli_link)) ;
 $known_pax_count = 0 ;
 while ($row_pax = mysqli_fetch_array($result_pax)) {
 	$delete = " <a href=\"flight_create.php?pax_id=$row_pax[p_id]&delete_pax=true&pax_role=$row_pax[pr_role]&flight_id=$flight_id\"><span class=\"glyphicon glyphicon-trash text-danger\"></span></a>" ;
@@ -436,6 +456,19 @@ for ($i = $known_pax_count+1; $i <= $row_flight['f_pax_cnt']; $i++) {
 
 </div> <!-- menu passenger -->
 
+<div id="menuPayment" class="tab-pane fade <?=$payment_active?>">
+
+<div class="row text-info">
+<?php
+if ($row_flight['f_date_paid'])
+	print("<p>Ce vol a déjà été payé en date du $row_flight[f_date_paid] ($row_flight[f_reference_payment]).</p>") ;
+else
+	print("<p>Ce vol doit encore être payé.</p>") ;
+?>
+</div><!-- row -->
+
+</div> <!-- menu Payment -->
+
 <div id="menuPilot" class="tab-pane fade">
 
 <div class="row text-info">
@@ -461,9 +494,10 @@ else
 	if (isset($condition)) {
 		$selected = ($row_flight['f_pilot'] == '') ? ' selected' : '' ;
 		print("<option value=\"-1\"$selected>Pas de pilote</option>\n") ;
-		$result_pilots = mysqli_query($mysqli_link, "SELECT * FROM $table_flights_pilots JOIN $table_person ON p_id=jom_id 
+		$result_pilots = mysqli_query($mysqli_link, "SELECT *
+			FROM $table_flights_pilots JOIN $table_person ON p_id=jom_id 
 			WHERE $condition ORDER BY last_name ASC, first_name ASC")
-			or die("Cannot retrieve pilots: " . mysqli_error($mysqli_link)) ;
+			or journalise($userId, "F", "Cannot retrieve pilots: " . mysqli_error($mysqli_link)) ;
 		while ($row_pilot = mysqli_fetch_array($result_pilots)) {
 			$selected = ($row_pilot['p_id'] == $row_flight['f_pilot']) ? ' selected' : '' ;
 			print("<option value=\"$row_pilot[p_id]\"$selected>" . db2web("$row_pilot[first_name] $row_pilot[last_name]") . "</option>\n") ;
@@ -490,7 +524,7 @@ else
 </div><!-- row -->
 <?php
 function show_reservation($date, $header) {
-	global $mysqli_link, $table_bookings, $table_person, $table_planes ;
+	global $mysqli_link, $table_bookings, $table_person, $table_planes, $row_flight ;
 	print("<div class=\"row\">
 		<h4 class=\"text-center\">$header: $date</h4>
 		</div><!-- row -->\n" ) ;
@@ -506,7 +540,7 @@ function show_reservation($date, $header) {
 		JOIN $table_planes p ON r_plane = p.id		
 		WHERE r_cancel_date IS NULL AND ressource = 0 AND actif = 1 AND DATE(r_start) <= '$date' AND '$date' <= DATE(r_stop)
 		ORDER BY r_start ASC")
-		or die("Cannot retrieve bookings($plane): " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot retrieve bookings($plane): " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
 		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
@@ -514,13 +548,16 @@ function show_reservation($date, $header) {
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
 			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
 		$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="danger"' : '' ;
+		if ($row['r_id'] == $row_flight['f_booking'])
+			$class = ' class="success"' ;
+		// Only display time for the current date
 		if (strpos($row['r_start'], $date) === 0) 
 			$row['r_start'] = substr($row['r_start'], 11) ;
 		if (strpos($row['r_stop'], $date) === 0) 
 			$row['r_stop'] = substr($row['r_stop'], 11) ;
 		print("<tr$class><td>$row[r_start]</td><td>$row[r_stop]</td><td>$row[r_plane]</td><td><span class=\"hidden-xs\">" . db2web($row['pfirst_name']) . " </span><b>" . 
 			db2web($row['plast_name']) . "</b>$ptelephone$instructor</td><td>". nl2br(db2web($row['r_comment'])) . "</td>
-			<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&link_to=$row[r_id]\"><span class=\"glyphicon glyphicon-link\"></span></a></td></tr>\n") ;
+			<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&link_to=$row[r_id]\"><span class=\"glyphicon glyphicon-link\" title=\"Lier cette réservation à ce vol\"></span></a></td></tr>\n") ;
 	}
 	print("</table>
 	</div><!-- row -->\n" ) ;
@@ -541,7 +578,7 @@ Ce vol a été créé le <?=$row_flight['f_date_created']?> par <?=db2web("$row_
 if ($row_flight['f_date_paid']) print("Paiement ($row_flight[f_reference_payment]) effectué le $row[f_date_paid].<br/>") ;
 if ($row_flight['f_date_cancelled']) print("Puis a été annulé le $row_flight[f_date_cancelled].<br/>") ;
 if ($row_flight['f_date_assigned']) print("Le pilote a été sélectionné le $row_flight[f_date_assigned].<br/>") ;
-if ($row_flight['f_date_scheduled']) print("Le pilote a réservé l'avion le $row_flight[f_date_scheduled].<br/>") ;
+if ($row_flight['f_date_linked']) print("Une réservation a été liée à ce vol le $row_flight[f_date_linked].<br/>") ;
 if ($row_flight['f_date_flown']) print("Le vol a eu lieu le $row_flight[f_date_flown].<br/>") ;
 ?>
 </div>
@@ -559,22 +596,23 @@ function submitForm(id) {
 function setValue(name, value) {
 	document.getElementsByName(name)[0].value = value.replace(/<br\s*[\/]?>/gi, "\n") ;
 }
+
 document.getElementsByName('discovery_flight')[0].checked = ('<?=$row_flight['f_type']?>' == 'D') ;
 document.getElementsByName('initiation_flight')[0].checked = ('<?=$row_flight['f_type']?>' == 'I') ;
 document.getElementsByName('student')[0].checked = ('<?=$row_contact['pr_role']?>' == 'S') ;
 document.getElementsByName('pax')[0].checked = ('<?=$row_contact['pr_role']?>' == 'P') ;
 setValue('pax_cnt', '<?=db2web($row_flight['f_pax_cnt'])?>') ;
-setValue('lname', '<?=db2web($row_flight['p_lname'])?>') ;
-setValue('fname', '<?=db2web($row_flight['p_fname'])?>') ;
-setValue('street', '<?=db2web($row_flight['p_street'])?>') ;
+setValue('lname', '<?=db2web(addslashes($row_flight['p_lname']))?>') ;
+setValue('fname', '<?=db2web(addslashes($row_flight['p_fname']))?>') ;
+setValue('street', '<?=db2web(addslashes($row_flight['p_street']))?>') ;
 setValue('zip', '<?=db2web($row_flight['p_zip'])?>') ;
-setValue('city', '<?=db2web($row_flight['p_city'])?>') ;
+setValue('city', '<?=db2web(addslashes($row_flight['p_city']))?>') ;
 setValue('email', '<?=db2web($row_flight['p_email'])?>') ;
 setValue('phone', '<?=db2web($row_flight['p_tel'])?>') ;
 setValue('weight', '<?=db2web($row_flight['p_weight'])?>') ;
 //setValue('birthdate', '<?=db2web($row_flight['p_birthdate'])?>') ;
 document.getElementById('ageSelect').value = '<?=$row_contact['p_age']?>';
-setValue('comment', '<?=db2web(str_replace(array("\r\n", "\n", "\r"), "<br/>", $row_flight['f_description']))?>') ;
+setValue('comment', '<?=db2web(str_replace(array("\r\n", "\n", "\r"), "<br/>", addslashes($row_flight['f_description'])))?>') ;
 //for (var i = 0; i < document.getElementsByName("gender")[0].options.length; i++) {
 //	if (document.getElementsByName("gender")[0].options[i].value == '<?=$row_flight['p_gender']?>')
 //		document.getElementsByName("gender")[0].options.selectedIndex = i ;
