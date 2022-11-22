@@ -194,7 +194,7 @@ if (! $row_flight) {
 	exit ;
 }
 mysqli_free_result($result) ;
-$scheduled_date = (isset($row_flight['f_date_scheduled']) and $row_flight['f_date_scheduled']) ? " $row_flight[f_date_scheduled]" : '' ;
+$scheduled_date = (isset($row_flight['f_date_linked']) and $row_flight['f_date_linked']) ? " $row_flight[f_date_linked]" : '' ;
 $flight_type = ($row_flight['f_type'] == 'D') ? 'découverte' : "d'initiation" ;
 
 // Get the circuit names

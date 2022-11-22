@@ -67,7 +67,7 @@ if ($response['error'] == '') {
 		r_cancel_who = $userId, r_cancel_address = '" . getClientAddress() . "', r_sequence = r_sequence + 1 where r_id = $id") ;
 	if ($result && mysqli_affected_rows($mysqli_link) == 1) {
 		if ($booking_type == BOOKING_CUSTOMER) {
-			mysqli_query($mysqli_link, "UPDATE $table_flights SET f_booking = NULL, f_date_scheduled = NULL WHERE f_booking = $id")
+			mysqli_query($mysqli_link, "UPDATE $table_flights SET f_booking = NULL, f_date_linked = NULL WHERE f_booking = $id")
 				or $response['error'] .= "Cannot delete customer booking: " . mysqli_error($mysqli_link) ;
 		}
 		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $pilot_id") ;

@@ -60,15 +60,15 @@ while ($row = mysqli_fetch_array($result)) {
 	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-pencil\" title=\"Modifier/Annuler\"></span></a> " ;
 	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-print\" title=\"Imprimer sous format PDF\"></span></a> " ;
 	$pay =  ($row['f_date_paid']) ? "<span class=\"glyphicon glyphicon-euro\" style=\"color: green;\" title=\"Vol déjà payé\"></span>" :
-		" <a href=\"flight_create.php?flight_id=$row[f_id]&pay=true\"><span class=\"glyphicon glyphicon-euro\" title=\"Indiquer le paiement\"></span></a> " ;
+		" <a href=\"flight_create.php?flight_id=$row[f_id]&pay_open=true\"><span class=\"glyphicon glyphicon-euro\" title=\"Indiquer le paiement\"></span></a> " ;
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 	$description = nl2br(db2web($row['f_description'])) ;
 	if ($row['f_date_cancelled'])
 		$status = "Annulé</td><td>$row[f_date_cancelled]" ;
 	else if ($row['f_date_flown'])
 		$status = "Accompli</td><td>$row[f_date_flown]" ;
-	else if ($row['f_date_scheduled'])
-		$status = "Avion réservé</td><td>$row[f_date_scheduled]" ;
+	else if ($row['f_date_linked'])
+		$status = "Avion réservé</td><td>$row[f_date_linked]" ;
 	else if ($row['f_date_assigned'])
 		$status = "Pilote sélectionné</td><td>$row[f_date_assigned]" ;
 	else if ($row['f_date_paid'])

@@ -306,7 +306,7 @@ if ($response['error'] == '') {
 		$auth = md5($booking_id . $shared_secret) ;
 		// If for a customer flight, then let's modify the flight
 		if ($customer_id > 0) {
-			mysqli_query($mysqli_link, "UPDATE $table_flights SET f_booking = $booking_id, f_date_scheduled = SYSDATE() WHERE f_id = $customer_id")
+			mysqli_query($mysqli_link, "UPDATE $table_flights SET f_booking = $booking_id, f_date_linked = SYSDATE() WHERE f_id = $customer_id")
 				or journalise($userId, 'E', "Cannot update flight: " . mysqli_error($mysqli_link)) ;
 		}
 		if ($booking_type == BOOKING_MAINTENANCE) {
