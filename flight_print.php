@@ -47,8 +47,8 @@ while ($row = mysqli_fetch_array($result)) {
 		$status = "Annulé</td><td>$row[f_date_cancelled]" ;
 	else if ($row['f_date_flown'])
 		$status = "Accompli</td><td>$row[f_date_flown]" ;
-	else if ($row['f_date_scheduled'])
-		$status = "Avion</td><td>$row[f_date_scheduled]" ;
+	else if ($row['f_date_linked'])
+		$status = "Avion</td><td>$row[f_date_linked]" ;
 	else if ($row['f_date_assigned'])
 		$status = "Pilote sélectionné</td><td>$row[f_date_assigned]" ;
 	else
