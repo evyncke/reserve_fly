@@ -65,9 +65,11 @@ while ($row = mysqli_fetch_array($result)) {
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 	$description = nl2br(db2web($row['f_description'])) ;
 	$notes = nl2br(db2web($row['f_notes'])) ;
-	if ($row['f_date_cancelled'])
+	$row_style = '' ;
+	if ($row['f_date_cancelled']) {
 		$status = "Annulé</td><td>$row[f_date_cancelled]" ;
-	else if ($row['f_date_flown'])
+		$row_style = ' style="color: lightgray;"' ;
+	} else if ($row['f_date_flown'])
 		$status = "Accompli</td><td>$row[f_date_flown]" ;
 	else if ($row['f_date_linked'])
 		$status = "Avion réservé</td><td>$row[f_date_linked]" ;
@@ -83,7 +85,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$date_vol = "ETD $row[r_start] ($row[r_plane])"  ;
 	else
 		$date_vol = "à déterminer" ;
-	print("<tr><td>$edit$print$pay</td><td>$row[f_date_created]</td><td>$status</td><td>$date_vol</td>
+	print("<tr$row_style><td>$edit$print$pay</td><td>$row[f_date_created]</td><td>$status</td><td>$date_vol</td>
 		<td>" . db2web($row['first_name']) . " <b>" . db2web($row['last_name']) . "</b></td>
 		<td>$type$is_gift</td>
 		<td>" . db2web($row['p_fname']) . " <b>" . db2web($row['p_lname']) . "$email$telephone</b></td>
