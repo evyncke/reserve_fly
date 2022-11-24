@@ -22,6 +22,7 @@ $create = (isset($_REQUEST['create']) and $_REQUEST['create'] != '') ? TRUE : FA
 $pay_open = (isset($_REQUEST['pay_open']) and $_REQUEST['pay_open'] != '') ? TRUE : FALSE ;
 $pay = (isset($_REQUEST['pay']) and $_REQUEST['pay'] != '') ? TRUE : FALSE ;
 $assign_pilot = (isset($_REQUEST['assign_pilot']) and $_REQUEST['assign_pilot'] != '') ? TRUE : FALSE ;
+$pilot_open = (isset($_REQUEST['pilot_open']) and $_REQUEST['pilot_open'] != '') ? TRUE : FALSE ;
 $add_pax = (isset($_REQUEST['add_pax']) and $_REQUEST['add_pax'] != '') ? TRUE : FALSE ;
 $delete_pax = (isset($_REQUEST['delete_pax']) and $_REQUEST['delete_pax'] != '') ? TRUE : FALSE ;
 $modify_pax = (isset($_REQUEST['modify_pax']) and $_REQUEST['modify_pax'] != '') ? TRUE : FALSE ;
@@ -35,18 +36,26 @@ $title = ($flight_id) ? "Modification d'une réservation de vol" : "Création d'
 // Prepare the active tab
 $contact_active = 'active in' ;
 $payment_active = '' ;
+$pilot_active = '' ;
 if ($pay_open) {
 	$contact_active = '' ;
 	$payment_active = 'active in' ;
 }
+if ($pilot_open) {
+	$contact_active = '' ;
+	$pilot_active = 'active in' ;
+}
 
 // Clean-up input data and canonicalize
 if ($create or $modify) {
-	if ($_REQUEST['discovery_flight'] == 'on')
+	if ($_REQUEST['discovery_flight'] == 'on') {
 		$flight_type = 'D' ;
-	elseif ($_REQUEST['initiation_flight'] == 'on')
+		$circuit = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['selectedCircuit'])) ;
+		if (!is_numeric($circuit)) die("Invalid circuit: $circuit") ;
+	} elseif ($_REQUEST['initiation_flight'] == 'on') {
 		$flight_type = 'I' ;
-	else 
+		$circuit = -1 ;
+	} else 
 		die("Vous devez choisir le type de vol (initiation ou découverte)") ;
 	$pax_cnt = $_REQUEST['pax_cnt'] ;
 	if (!is_numeric($pax_cnt)) die("Invalid pax_cnt: $pax_cnt") ;
@@ -74,8 +83,6 @@ if ($create or $modify) {
 	if ($phone == '') die("Phone number cannot be empty") ;
 	$weight = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['weight'])) ;
 	if (!is_numeric($weight)) die("Invalid weight: $weight") ;
-	$circuit = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['selectedCircuit'])) ;
-	if (!is_numeric($circuit)) die("Invalid circuit: $circuit") ;
 	$schedule = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['selectedSchedule'])) ;
 	$date1 = (trim($_REQUEST['date1']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date1'])))) : 'NULL';
 	$date2 = (trim($_REQUEST['date2']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date2'])))) : 'NULL';
@@ -112,7 +119,7 @@ if ($modify) {
 	mysqli_free_result($result) ;
 	$pax_id = $row_pax['pr_pax'] ;
 	mysqli_query($mysqli_link, "UPDATE $table_pax
-			SET p_lname='" . web2db($lname) . "', p_fname='" . web2db($fname) . "', p_email='$email', p_tel='$phone', p_age='$_REQUEST[age]', p_weight=$weight, p_gender='$gender'
+			SET p_lname='" . web2db($lname) . "', p_fname='" . web2db($fname) . "', p_email='$email', p_tel='$phone', p_gender='$gender'
 			WHERE p_id = $pax_id")
 		or journalise($userId, "F", "Cannot modify contact, system error: " . mysqli_error($mysqli_link)) ;
 	$sql = "UPDATE $table_flight 
@@ -228,7 +235,7 @@ if (isset($flight_id) and $flight_id != 0) {
   <li class="<?=$contact_active?>"><a data-toggle="tab" href="#menuContact">Résumé</a></li>
   <li><a data-toggle="tab" href="#menuPassenger">Passagers</a></li>
   <li class="<?=$payment_active?>"><a data-toggle="tab" href="#menuPayment">Paiement</a></li>
-  <li><a data-toggle="tab" href="#menuPilot">Pilote</a></li>
+  <li class="<?=$pilot_active?>"><a data-toggle="tab" href="#menuPilot">Pilote</a></li>
   <li><a data-toggle="tab" href="#menuPlane">Réservation</a></li>
   <li><a data-toggle="tab" href="#menuAudit">Historique</a></li>
 </ul>
@@ -336,6 +343,10 @@ if (isset($flight_id) and $flight_id != 0) {
 		<input type="tel" class="form-control" name="city">
 	</div><!-- form-group -->
 </div> <!-- row -->
+
+<?php // Don't ask age/weight on the contact form when the flight exists
+if ($flight_id == '') {
+?>
 <div class="row">
 	<div class="form-group col-xs-6 col-sm-2">
 		<label for="weight">Poids:</label>
@@ -359,6 +370,9 @@ if (isset($flight_id) and $flight_id != 0) {
 		</div><!-- checkbox-->
 	</div> <!-- form-group -->
 </div><!-- row -->
+<?php
+}
+?>
 
 <div class="row">
 	<div class="form-group col-xs-12">
@@ -469,17 +483,39 @@ for ($i = $known_pax_count+1; $i <= $row_flight['f_pax_cnt']; $i++) {
 <div id="menuPayment" class="tab-pane fade <?=$payment_active?>">
 
 <div class="row text-info">
+<br/>
 <?php
-if ($row_flight['f_date_paid'])
+if ($row_flight['f_date_paid']) {
 	print("<p>Ce vol a déjà été payé en date du $row_flight[f_date_paid] ($row_flight[f_reference_payment]).</p>") ;
-else
+	$paid = ' checked' ;
+} else {
 	print("<p>Ce vol doit encore être payé.</p>") ;
+	$paid = '' ;
+}
 ?>
+<p style="color: red;">En cours de développement, ne pas utiliser.</p>
 </div><!-- row -->
 
+<form action="<?=$_SERVER['PHP_SELF']?>" method="GET" class="form-horizontal" >
+<input type="hidden" name="flight_id" value="<?=$flight_id?>">
+<input type="hidden" name="pay_open" value="true">
+	<div class="form-group">
+		<div class="col-xs-1">
+			<input type="checkbox" id="paymentCheckbox" name="paymentCheckbox" value="paid"$paid>
+		</div>
+		<label class="control-label col-xs-2 col-md-1" for=""paymentCheckbox>Paiement effectué</label>
+	</div> <!- form-group-->
+<?php
+?>
+	<div class="form-group">
+		<div class="col-xs-3 col-md-2">
+			<input type="submit" class="btn btn-primary" name="pay" value="Enregistrer"/>
+   		</div><!-- col -->
+	</div> <!- form-group-->
+</form>
 </div> <!-- menu Payment -->
 
-<div id="menuPilot" class="tab-pane fade">
+<div id="menuPilot" class="tab-pane fade <?=$pilot_active?>">
 
 <div class="row text-info">
 <?php
@@ -492,6 +528,7 @@ else
 
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" class="form-horizontal" >
 <input type="hidden" name="flight_id" value="<?=$flight_id?>">
+<input type="hidden" name="pilot_open" value="true">
 	<div class="form-group">
 		<label class="control-label col-xs-2 col-md-1" for="pilotSelect">Pilote:</label>
 		<div class="col-xs-6 col-md-3 col-lg-2">
@@ -520,7 +557,7 @@ else
 	</div><!-- form-group-->
 	<div class="form-group">
 		<div class="col-xs-3 col-md-2">
-			<input type="submit" class="btn btn-primary" name="assign_pilot" value="Selectionner ce pilote"/>
+			<input type="submit" class="btn btn-primary" name="assign_pilot" value="Sélectionner ce pilote"/>
    		</div><!-- col -->
 	</div><!-- formgroup-->
 </form>
@@ -609,8 +646,18 @@ function setValue(name, value) {
 
 document.getElementsByName('discovery_flight')[0].checked = ('<?=$row_flight['f_type']?>' == 'D') ;
 document.getElementsByName('initiation_flight')[0].checked = ('<?=$row_flight['f_type']?>' == 'I') ;
+<?php
+// Some fields do not exist when modifying a flight
+if ($flight_id == '') {
+?>
 document.getElementsByName('student')[0].checked = ('<?=$row_contact['pr_role']?>' == 'S') ;
 document.getElementsByName('pax')[0].checked = ('<?=$row_contact['pr_role']?>' == 'P') ;
+document.getElementById('ageSelect').value = '<?=$row_contact['p_age']?>';
+//setValue('birthdate', '<?=db2web($row_flight['p_birthdate'])?>') ;
+setValue('weight', '<?=db2web($row_flight['p_weight'])?>') ;
+<?php
+}
+?>
 setValue('pax_cnt', '<?=db2web($row_flight['f_pax_cnt'])?>') ;
 setValue('lname', '<?=db2web(addslashes($row_flight['p_lname']))?>') ;
 setValue('fname', '<?=db2web(addslashes($row_flight['p_fname']))?>') ;
@@ -619,9 +666,6 @@ setValue('zip', '<?=db2web($row_flight['p_zip'])?>') ;
 setValue('city', '<?=db2web(addslashes($row_flight['p_city']))?>') ;
 setValue('email', '<?=db2web($row_flight['p_email'])?>') ;
 setValue('phone', '<?=db2web($row_flight['p_tel'])?>') ;
-setValue('weight', '<?=db2web($row_flight['p_weight'])?>') ;
-//setValue('birthdate', '<?=db2web($row_flight['p_birthdate'])?>') ;
-document.getElementById('ageSelect').value = '<?=$row_contact['p_age']?>';
 setValue('comment', '<?=db2web(str_replace(array("\r\n", "\n", "\r"), "<br/>", addslashes($row_flight['f_description'])))?>') ;
 setValue('notes', '<?=db2web(str_replace(array("\r\n", "\n", "\r"), "<br/>", addslashes($row_flight['f_notes'])))?>') ;
 //for (var i = 0; i < document.getElementsByName("gender")[0].options.length; i++) {
