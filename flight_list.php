@@ -44,7 +44,7 @@ if (isset($_REQUEST['pattern'])) {
 
 <table class="table table-striped table-responsive">
 <thead>
-<tr><th>Créé le</th><th>Etat</th><th>Depuis</th><th>Vol</th><th>Pilote</th><th>Type</th><th>Client</th><th>Description</th></tr>
+<tr><th>Actions</th><th>Créé le</th><th>Etat</th><th>Depuis</th><th>Vol</th><th>Pilote</th><th>Type</th><th>Client</th><th>Remarque client</th><th>Notes club</th></tr>
 </thead>
 <tbody>
 <?php
@@ -61,8 +61,10 @@ while ($row = mysqli_fetch_array($result)) {
 	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-print\" title=\"Imprimer sous format PDF\"></span></a> " ;
 	$pay =  ($row['f_date_paid']) ? "<span class=\"glyphicon glyphicon-euro\" style=\"color: green;\" title=\"Vol déjà payé\"></span>" :
 		" <a href=\"flight_create.php?flight_id=$row[f_id]&pay_open=true\"><span class=\"glyphicon glyphicon-euro\" title=\"Indiquer le paiement\"></span></a> " ;
+	$is_gift = ($row['f_gift'] != 0) ? ' <span class="glyphicon glyphicon-gift" style="color: red;" title="Bon cadeau"></span>' : '' ;
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 	$description = nl2br(db2web($row['f_description'])) ;
+	$notes = nl2br(db2web($row['f_notes'])) ;
 	if ($row['f_date_cancelled'])
 		$status = "Annulé</td><td>$row[f_date_cancelled]" ;
 	else if ($row['f_date_flown'])
@@ -81,12 +83,12 @@ while ($row = mysqli_fetch_array($result)) {
 		$date_vol = "ETD $row[r_start] ($row[r_plane])"  ;
 	else
 		$date_vol = "à déterminer" ;
-	print("<tr><td>$edit$print$pay$row[f_date_created]</td><td>$status</td><td>$date_vol</td>
+	print("<tr><td>$edit$print$pay</td><td>$row[f_date_created]</td><td>$status</td><td>$date_vol</td>
 		<td>" . db2web($row['first_name']) . " <b>" . db2web($row['last_name']) . "</b></td>
-		<td>$type</td>
+		<td>$type$is_gift</td>
 		<td>" . db2web($row['p_fname']) . " <b>" . db2web($row['p_lname']) . "$email$telephone</b></td>
-		
-		<td>$description</td></tr>\n") ;
+		<td>$description</td>
+		<td>$notes</td></tr>\n") ;
 }
 ?>
 </tbody>

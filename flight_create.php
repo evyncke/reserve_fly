@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ if ($pay_open) {
 	$payment_active = 'active in' ;
 }
 
+// Clean-up input data and canonicalize
 if ($create or $modify) {
 	if ($_REQUEST['discovery_flight'] == 'on')
 		$flight_type = 'D' ;
@@ -80,6 +81,7 @@ if ($create or $modify) {
 	$date2 = (trim($_REQUEST['date2']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date2'])))) : 'NULL';
 	$birthdate = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['birthdate'])) ;
 	$comment = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['comment'])) ;
+	$notes = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['notes'])) ;
 }
 
 if ($create) {
@@ -87,8 +89,8 @@ if ($create) {
 		VALUES('" . web2db($lname) . "', '" . web2db($fname) . "', '$email', '$phone', '$birthdate', $weight, '$gender')")
 		or journalise($userId, "F", "Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
 	$pax_id = mysqli_insert_id($mysqli_link) ; 
-	mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_pilot) 
-		VALUES(SYSDATE(), $userId, '$flight_type', $pax_cnt, $circuit, '$schedule', $date1, $date2, '" . web2db($comment) . "', NULL)")
+	mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_notes, f_pilot) 
+		VALUES(SYSDATE(), $userId, '$flight_type', $pax_cnt, $circuit, '$schedule', $date1, $date2, '" . web2db($comment) . "', '" . web2db($notes) . "', NULL)")
 		or journalise($userId, "F", "Cannot add flight, system error: " . mysqli_error($mysqli_link)) ;
 	$flight_id = mysqli_insert_id($mysqli_link) ; 
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax_role(pr_flight, pr_pax, pr_role)
@@ -113,16 +115,17 @@ if ($modify) {
 			SET p_lname='" . web2db($lname) . "', p_fname='" . web2db($fname) . "', p_email='$email', p_tel='$phone', p_age='$_REQUEST[age]', p_weight=$weight, p_gender='$gender'
 			WHERE p_id = $pax_id")
 		or journalise($userId, "F", "Cannot modify contact, system error: " . mysqli_error($mysqli_link)) ;
-	mysqli_query($mysqli_link, "UPDATE $table_flight 
-		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "'
-		WHERE f_id = $flight_id")
+	$sql = "UPDATE $table_flight 
+		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "', f_notes='" . web2db($notes) . "'
+		WHERE f_id = $flight_id" ;
+	mysqli_query($mysqli_link, $sql)
 		or journalise($userId, "F", "Cannot modify flight, system error: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "W", "Flight $flight_id modified") ;
 }
 
 if ($delete) {
 	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
-	$result = mysqli_query($mysqli_link, "UPDATE $table_flight SET f_date_cancelled = SYSDATE() WHERE f_id = $flight_id")
+	$result = mysqli_query($mysqli_link, "UPDATE $table_flight SET f_date_cancelled = SYSDATE(), f_who_cancelled = $userId WHERE f_id = $flight_id")
 		or journalise($userId, "F", "Cannot cancel flight $flight_id: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "W", "Flight $flight_id cancelled") ;
 }
@@ -359,8 +362,15 @@ if (isset($flight_id) and $flight_id != 0) {
 
 <div class="row">
 	<div class="form-group col-xs-12">
-		<label for="comment">Commentaires:</label>
+		<label for="comment">Remarque client:</label>
 		<textarea class="form-control" rows="5" name="comment"></textarea>
+	</div><!-- form-group -->
+</div><!-- row -->
+
+<div class="row">
+	<div class="form-group col-xs-12">
+		<label for="notes">Notes club:</label>
+		<textarea class="form-control" rows="5" name="notes"></textarea>
 	</div><!-- form-group -->
 </div><!-- row -->
 
@@ -613,6 +623,7 @@ setValue('weight', '<?=db2web($row_flight['p_weight'])?>') ;
 //setValue('birthdate', '<?=db2web($row_flight['p_birthdate'])?>') ;
 document.getElementById('ageSelect').value = '<?=$row_contact['p_age']?>';
 setValue('comment', '<?=db2web(str_replace(array("\r\n", "\n", "\r"), "<br/>", addslashes($row_flight['f_description'])))?>') ;
+setValue('notes', '<?=db2web(str_replace(array("\r\n", "\n", "\r"), "<br/>", addslashes($row_flight['f_notes'])))?>') ;
 //for (var i = 0; i < document.getElementsByName("gender")[0].options.length; i++) {
 //	if (document.getElementsByName("gender")[0].options[i].value == '<?=$row_flight['p_gender']?>')
 //		document.getElementsByName("gender")[0].options.selectedIndex = i ;
