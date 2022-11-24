@@ -36,7 +36,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'delete' and isset($_R
 
 <table class="table table-striped table-responsive">
 <thead>
-<tr><th>Créé le</th><th>Type</th><th>Circuit</th><th>Dates</th><th>Heures</th><th>Contact</th><th>Description</th></tr>
+<tr><th>Créé le</th><th>Type</th><th>Circuit</th><th>Dates</th><th>Heures</th><th>Contact</th><th>Description</th><th>Notes club</th></tr>
 </thead>
 <tbody>
 <?php
@@ -52,12 +52,15 @@ while ($row = mysqli_fetch_array($result)) {
 	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-print\"></span></a> " ;
 	$cancel =  " <a href=\"flight_home.php?action=delete&flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-trash\"></span></a> " ;
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
+	$row['p_fname'] = db2web($row['p_fname']) ;
+	$row['p_lname'] = db2web($row['p_lname']) ;
 	if ($row['f_type'] == 'D')
 		$circuit_name = (isset($circuits[$row['f_circuit']])) ? $circuits[$row['f_circuit']] : "Circuit #$row[f_circuit] inconnu" ;
 	else
 		$circuit_name = '' ;
 	$description = db2web($row['f_description']) ;
-	print("<tr><td>$edit$print$cancel$row[f_date_created]</td><td>$type</td><td>$circuit_name</td><td>$row[f_date_1]<br/>$row[f_date_2]</td><td>$row[f_schedule]</td><td>$row[p_fname] <b>$row[p_lname]$email$telephone</b></td><td>$description</td></tr>\n") ;
+	$notes = db2web($row['f_notes']) ;
+	print("<tr><td>$edit$print$cancel$row[f_date_created]</td><td>$type</td><td>$circuit_name</td><td>$row[f_date_1]<br/>$row[f_date_2]</td><td>$row[f_schedule]</td><td>$row[p_fname] <b>$row[p_lname]$email$telephone</b></td><td>$description</td><td>$notes</td></tr>\n") ;
 }
 ?>
 </tbody>

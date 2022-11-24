@@ -21,7 +21,7 @@ ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 
 if (! ($userIfFlightPilot or $userIsFlightManager)) 
-	journalise($userId, "F", "Vous n'êtes pas autorisé sur cette page") ;
+	journalise($userId, "F", "Vous n'êtes pas autorisé sur cette page: il faut être connecté sur site web d'abord") ;
 ?>
 <html>
 <head>
