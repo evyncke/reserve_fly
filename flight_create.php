@@ -213,8 +213,27 @@ if ($link_to) {
 	mysqli_query($mysqli_link, "UPDATE $table_flight, $table_bookings
 			SET f_booking=$link_to, f_date_linked=SYSDATE(), f_who_linked = $userId, f_pilot = r_pilot
 			WHERE f_id=$flight_id AND r_id = $link_to")
-		or journalise($userId, "F", "Impossible de mettre à jour le vol: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Impossible de lier le vol: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "I", "Flight $flight_id is linked to booking $link_to") ;
+}
+
+if ($pay) {
+	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
+	if ($_REQUEST['paid'] == 'on') {
+		if ($_REQUEST['paymentDate'] == '')
+			$date = "SYSDATE()";
+		else
+			$date = "'" . mysqli_real_escape_string($mysqli_link, $_REQUEST['paymentDate']) . "'";
+		$reference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['paymentReference'])) . "'";
+	} else {
+		$date = 'NULL' ;
+		$reference = 'NULL' ;
+	}
+	mysqli_query($mysqli_link, "UPDATE $table_flight
+		SET f_date_paid=$date, f_reference_payment=$reference, f_who_paid=$userId
+		WHERE f_id=$flight_id")
+		or journalise($userId, "F", "Impossible de mettre à jour le paiement: " . mysqli_error($mysqli_link)) ;
+	journalise($userId, "I", "Flight $flight_id payment information updated") ;
 }
 
 if (isset($flight_id) and $flight_id != 0) {
@@ -486,33 +505,48 @@ for ($i = $known_pax_count+1; $i <= $row_flight['f_pax_cnt']; $i++) {
 <br/>
 <?php
 if ($row_flight['f_date_paid']) {
-	print("<p>Ce vol a déjà été payé en date du $row_flight[f_date_paid] ($row_flight[f_reference_payment]).</p>") ;
+	print("<p>Ce vol a déjà été payé en date du " . substr($row_flight['f_date_paid'], 0, 10) . " (" . db2web($row_flight['f_reference_payment']) . ").</p>") ; // It is only a date field...
 	$paid = ' checked' ;
 } else {
 	print("<p>Ce vol doit encore être payé.</p>") ;
 	$paid = '' ;
 }
 ?>
-<p style="color: red;">En cours de développement, ne pas utiliser.</p>
 </div><!-- row -->
+
 
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" class="form-horizontal" >
 <input type="hidden" name="flight_id" value="<?=$flight_id?>">
 <input type="hidden" name="pay_open" value="true">
-	<div class="form-group">
-		<div class="col-xs-1">
-			<input type="checkbox" id="paymentCheckbox" name="paymentCheckbox" value="paid"$paid>
-		</div>
-		<label class="control-label col-xs-2 col-md-1" for=""paymentCheckbox>Paiement effectué</label>
+<div class="row">
+	<div class="form-group col-xs-6 col-md-2">
+		<div class="checkbox">
+			<label><input type="checkbox" name="paid"<?=$paid?>>paiement effectué</label>
+		</div><!-- checkbox-->
 	</div> <!- form-group-->
-<?php
-?>
+	<div class="form-group col-xs-62 col-md-1">
+		<label class="control-label" for="paymentDate">Date paiement:</label>
+		<div>
+			<input type="date" name="paymentDate" value="<?=$row_flight['f_date_paid']?>">
+		</div>
+	</div> <!- form-group-->
+	<div class="form-group col-xs-12 col-md-4">
+		<label class="control-label" for="paymentReference">Référence paiement:</label>
+		<div>
+			<input type="text" size=32 name="paymentReference" value="<?=db2web($row_flight['f_reference_payment'])?>">
+		</div>
+	</div> <!- form-group-->
+</div><!-- row -->
+
+<div class="row">
 	<div class="form-group">
 		<div class="col-xs-3 col-md-2">
 			<input type="submit" class="btn btn-primary" name="pay" value="Enregistrer"/>
    		</div><!-- col -->
 	</div> <!- form-group-->
+<p style="color: red;">En cours de développement, ne pas utiliser.</p>
 </form>
+</div><!-- row -->
 </div> <!-- menu Payment -->
 
 <div id="menuPilot" class="tab-pane fade <?=$pilot_active?>">
@@ -622,7 +656,7 @@ function show_reservation($date, $header) {
 <?php if (! isset($row_flight['first_name']) or $row_flight['first_name'] == '') $row_flight['first_name'] = 'client via la page web' ; ?>
 Ce vol a été créé le <?=$row_flight['f_date_created']?> par <?=db2web("$row_flight[first_name] $row_flight[last_name]")?>.<br/>
 <?php
-if ($row_flight['f_date_paid']) print("Paiement ($row_flight[f_reference_payment]) effectué le $row[f_date_paid].<br/>") ;
+if ($row_flight['f_date_paid']) print("Paiement (" . db2web($row_flight['f_reference_payment']) . ") effectué le $row_flight[f_date_paid].<br/>") ;
 if ($row_flight['f_date_cancelled']) print("Puis a été annulé le $row_flight[f_date_cancelled].<br/>") ;
 if ($row_flight['f_date_assigned']) print("Le pilote a été sélectionné le $row_flight[f_date_assigned].<br/>") ;
 if ($row_flight['f_date_linked']) print("Une réservation a été liée à ce vol le $row_flight[f_date_linked].<br/>") ;
