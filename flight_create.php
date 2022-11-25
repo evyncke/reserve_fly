@@ -81,12 +81,14 @@ if ($create or $modify) {
 	if ($email == '') die("Email address cannot be empty") ;
 	$phone = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['phone'])) ;
 	if ($phone == '') die("Phone number cannot be empty") ;
-	$weight = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['weight'])) ;
-	if (!is_numeric($weight)) die("Invalid weight: $weight") ;
+	if ($create) {
+		$weight = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['weight'])) ;
+		if (!is_numeric($weight)) die("Invalid weight: $weight") ;
+		$birthdate = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['birthdate'])) ;
+	}
 	$schedule = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['selectedSchedule'])) ;
 	$date1 = (trim($_REQUEST['date1']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date1'])))) : 'NULL';
 	$date2 = (trim($_REQUEST['date2']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date2'])))) : 'NULL';
-	$birthdate = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['birthdate'])) ;
 	$comment = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['comment'])) ;
 	$notes = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['notes'])) ;
 }
