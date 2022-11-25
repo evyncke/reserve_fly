@@ -36,10 +36,15 @@ $title = ($flight_id) ? "Modification d'une réservation de vol" : "Création d'
 // Prepare the active tab
 $contact_active = 'active in' ;
 $payment_active = '' ;
+$pax_active = '' ;
 $pilot_active = '' ;
 if ($pay_open) {
 	$contact_active = '' ;
 	$payment_active = 'active in' ;
+}
+if ($pax_open) {
+	$contact_active = '' ;
+	$pax_active = 'active in' ;
 }
 if ($pilot_open) {
 	$contact_active = '' ;
@@ -114,7 +119,6 @@ if ($create) {
 
 if ($modify) {
 	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
-	if (! in_array($_REQUEST['age'], array('C', 'T', 'A'))) die("Pax age is invalid") ;
 	$result = mysqli_query($mysqli_link, "SELECT * from $table_pax_role WHERE pr_flight = $flight_id and pr_role='C'")
 		or journalise($userId, "F", "Cannot retrieve contact for $flight_id: " . mysqli_error($mysqli_link)) ;
 	$row_pax = mysqli_fetch_array($result) or die("Contact not found") ;
@@ -160,11 +164,18 @@ if ($add_pax) {
 	$fname = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['fname'])) ;
 	if ($fname == '') journalise($userId, "F", "First name cannot be empty") ;
 	$weight = intval(trim($_REQUEST['weight'])) ;
+	if ($weight == '' or $weight <= 10) {
+		journalise($userId, "E", "Weight is invalid") ;
+		$weight = 80 ;
+	}
+	if (! in_array($_REQUEST['age'], array('C', 'T', 'A'))) {
+		journalise($userId, "E", "Pax age is invalid: $_REQUEST[age]") ;
+		$_REQUEST['age'] = 'A' ;
+	}
 	// TODO also allow non P role (could be S)
-	if ($weight == '' or $weight <= 10) die("Weight is invalid") ;
 	// TODO check whether we are already max-ed out about passagers
-	mysqli_query($mysqli_link, "INSERT INTO $table_pax(p_lname, p_fname, p_weight)
-		VALUES ('" . web2db($lname) . "', '" . web2db($fname) . "', $weight)")
+	mysqli_query($mysqli_link, "INSERT INTO $table_pax(p_lname, p_fname, p_weight, p_age)
+		VALUES ('" . mysqli_real_escape_string($mysqli_link, web2db($lname)) . "', '" . mysqli_real_escape_string($mysqli_link, web2db($fname)) . "', $weight, '$_REQUEST[age]')")
 		or journalise($userId, "F", "Cannot add passenger: " . mysqli_error($mysqli_error)) ;
 	$pax_id = mysqli_insert_id($mysqli_link) ; 
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax_role(pr_flight, pr_pax, pr_role)
@@ -180,14 +191,20 @@ if ($modify_pax) {
 	$fname = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['fname'])) ;
 	if ($fname == '') journalise($userId, "F", "First name cannot be empty") ;
 	$weight = intval(trim($_REQUEST['weight'])) ;
-	if ($weight == '' or $weight <= 10) journalise($userId, "F", "Weight is invalid") ;
+	if ($weight == '' or $weight <= 10) {
+		journalise($userId, "E", "Weight is invalid") ;
+		$weight = 80 ;
+	}
 	$pax_id = intval(trim($_REQUEST['pax_id'])) ;
 	if ($pax_id == '' or $pax_id <= 0) journalise($userId, "F", "Pax_id is invalid") ;
-	if (! in_array($_REQUEST['age'], array('C', 'T', 'A'))) die("Pax age is invalid") ;
+	if (! in_array($_REQUEST['age'], array('C', 'T', 'A'))) {
+		journalise($userId, "E", "Pax age is invalid: $_REQUEST[age]") ;
+		$_REQUEST['age'] = 'A' ;
+	}
 	// TODO check whether we are already max-ed out about passagers
 	// TODO also allow non P role (could be S)
 	mysqli_query($mysqli_link, "UPDATE $table_pax SET
-		p_lname = '" . web2db($lname) . "', p_fname = '" . web2db($fname) . "', p_weight = $weight, p_age = '$_REQUEST[age]'
+		p_lname = '" . mysqli_real_escape_string($mysqli_link, web2db($lname)) . "', p_fname = '" . mysql_real_escape_string($mysqli_link, web2db($fname)) . "', p_weight = $weight, p_age = '$_REQUEST[age]'
 		WHERE p_id = $pax_id")
 		or journalise($userId, "F", "Cannot modify passenger: " . mysqli_error($mysqli_link)) ;
 }
@@ -254,7 +271,7 @@ if (isset($flight_id) and $flight_id != 0) {
 
 <ul class="nav nav-tabs">
   <li class="<?=$contact_active?>"><a data-toggle="tab" href="#menuContact">Résumé</a></li>
-  <li><a data-toggle="tab" href="#menuPassenger">Passagers</a></li>
+  <li class="<?=$pax_active?>"><a data-toggle="tab" href="#menuPassenger">Passagers</a></li>
   <li class="<?=$payment_active?>"><a data-toggle="tab" href="#menuPayment">Paiement</a></li>
   <li class="<?=$pilot_active?>"><a data-toggle="tab" href="#menuPilot">Pilote</a></li>
   <li><a data-toggle="tab" href="#menuPlane">Réservation</a></li>
@@ -432,7 +449,7 @@ if ($flight_id == '') {
 </div><!-- menu contact -->
 
 
-<div id="menuPassenger" class="tab-pane fade">
+<div id="menuPassenger" class="tab-pane fade$pax_active">
 <div class="page-header">
 <h4>Liste des passagers</h4>
 </div><!-- page-header -->
@@ -481,6 +498,7 @@ for ($i = $known_pax_count+1; $i <= $row_flight['f_pax_cnt']; $i++) {
 	print("<form id=\"form_add_$i\" action=\"$_SERVER[PHP_SELF]\">
 			<input type=\"hidden\" name=\"flight_id\" value=\"$flight_id\">
 			<input type=\"hidden\" name=\"add_pax\" value=\"add_pax\">
+			<input type=\"hidden\" name=\"open_pax\" value=\"true\">
 			<tr><td>$i</td><td>$role</td>
 			<td><input type=\"text\" name=\"lname\"></td>
 			<td><input type=\"text\" name=\"fname\"></td>
