@@ -230,7 +230,7 @@ if ($link_to) {
 	if (! is_numeric($link_to))
 		die("Numéro de réservation invalide $link_to") ;
 	mysqli_query($mysqli_link, "UPDATE $table_flight, $table_bookings
-			SET f_booking=$link_to, f_date_linked=SYSDATE(), f_who_linked = $userId, f_pilot = r_pilot
+			SET f_booking=$link_to, f_date_linked=SYSDATE(), f_who_linked = $userId, f_pilot = r_pilot, r_type = " . BOOKING_CUSTOMER . "
 			WHERE f_id=$flight_id AND r_id = $link_to")
 		or journalise($userId, "F", "Impossible de lier le vol: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "I", "Flight $flight_id is linked to booking $link_to") ;
