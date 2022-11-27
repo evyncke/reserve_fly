@@ -29,7 +29,6 @@ $modify_pax = (isset($_REQUEST['modify_pax']) and $_REQUEST['modify_pax'] != '')
 $link_to = (isset($_REQUEST['link_to']) and $_REQUEST['link_to'] != '') ? $_REQUEST['link_to'] : FALSE ;
 $flight_id = (isset($_REQUEST['flight_id'])) ? trim($_REQUEST['flight_id']) : 0 ;
 if (!is_numeric($flight_id) and $flight_id != '') die("Invalid ID: $flight_id") ;
-$title = ($flight_id) ? "Modification d'une réservation de vol #$flight_id" : "Création d'une réservation de vol" ;
 // TODO be ready to pre-load when asking for modification/cancellation
 // and of course add 'modify' 'cancel' button
 
@@ -262,7 +261,12 @@ if (isset($flight_id) and $flight_id != 0) {
 		or journalise($userId, "F", "Cannot retrieve flight $flight_id: " . mysqli_error($mysqli_link)) ;
 	$row_flight = mysqli_fetch_array($result) ;
 	if (!$row_flight) journalise($userId, "F", "Vol #$flight_id inconnu!") ;
-}
+	$prefix = ($row_flight['f_gift'] != 0) ? 'V-' : '' ;
+	$type = ($row_flight['f_type'] == 'D') ? 'IF-' : 'INIT-' ;
+	$flight_number = $prefix . $type . sprintf("%03d", $flight_id) ;
+	$title = "Modification d'une réservation de vol $flight_number" ;
+} else
+	$title = "Création d'une réservation de vol" ;
 ?>
 
 <div class="page-header">
