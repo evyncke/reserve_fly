@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2022 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -392,9 +392,9 @@ $pdf->Ln(30) ;
 
 // Also before of web application firewall in cloudflare or mod_security on the server as the request is not built with user-agent or accept...
 ini_set("user_agent","RAPCS - flight engine");
-$pdf->Image("https://www.spa-aviation.be/TippingPoint/scatter.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg", null, null, 0, 0, 'PNG') ;
+// Annoying as the output is no more a PNG...
+//$pdf->Image("https://www.spa-aviation.be/TippingPoint/scatter.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg", null, null, 0, 0, 'PNG') ;
 
-//$pdf->Image("http://spaaviat.cluster015.ovh.net/TippingPoint/scatter.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg", null, null, 0, 0, 'PNG') ;
 } // $row_flight[r_plane]) No W&B when plane is unknown 
 
 //
