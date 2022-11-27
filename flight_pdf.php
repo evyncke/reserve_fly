@@ -185,7 +185,7 @@ $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today
 	LEFT JOIN $table_person ON f_pilot = jom_id
 	LEFT JOIN $table_bookings ON f_booking = r_id 
 	WHERE pr_role = 'C' AND f_id = $flight_id ")
-	or die("Cannot retrieve flight: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "F", "Cannot retrieve flight: " . mysqli_error($mysqli_link)) ;
 $row_flight = mysqli_fetch_array($result) ;
 if (! $row_flight) {
 	$pdf->NouveauChapitre(0, 5, "Ce vol $flight_id n'existe pas.") ;
@@ -234,6 +234,12 @@ if ($row_flight['r_start'])
 	$pdf->CellUtf8(0, 5, "Début du vol (heure locale): $row_flight[r_start]") ;
 else
 	$pdf->CellUtf8(0, 5, "Ce vol n'est pas encore planifié.") ;
+$pdf->Ln() ;
+
+if ($row_flight['f_date_paid'])
+	$pdf->CellUtf8(0, 5, "Vol déjà payé le $row_flight[f_date_paid]: $row_flight[f_reference_payment]") ;
+else
+	$pdf->CellUtf8(0, 5, "Ce vol doit encore être payé.") ;
 $pdf->Ln(20) ;
 
 //
@@ -307,7 +313,7 @@ mysqli_free_result($result) ;
 $pdf->Ln() ;
 $pdf->CellUtf8(60, 5, "Date: " . date('Y-m-d'), 0, 0, 'L') ;
 $pdf->CellUtf8(100, 5, " Responsable sécurité:", 0, 0, 'C') ;
-$pdf->Ln(50) ;
+$pdf->Ln(40) ;
 $pdf->MultiCellUtf8(0, 6, "Cette page doit rester à terre et être conservée tant que tous les passagers n'ont pas débarqué sans incidents de l'aéronef. " .
 	"En cas d'incident, cette liste sera transmise au secrétariat ou au Président (info@spa-aviation.be). " .
 	"Le secrétariat conservera cette liste et la transmettra sur demande aux autorités compétentes.", 0, 1, 'C', true);
