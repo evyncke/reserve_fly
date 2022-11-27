@@ -29,7 +29,7 @@ $modify_pax = (isset($_REQUEST['modify_pax']) and $_REQUEST['modify_pax'] != '')
 $link_to = (isset($_REQUEST['link_to']) and $_REQUEST['link_to'] != '') ? $_REQUEST['link_to'] : FALSE ;
 $flight_id = (isset($_REQUEST['flight_id'])) ? trim($_REQUEST['flight_id']) : 0 ;
 if (!is_numeric($flight_id) and $flight_id != '') die("Invalid ID: $flight_id") ;
-$title = ($flight_id) ? "Modification d'une réservation de vol" : "Création d'une réservation de vol" ;
+$title = ($flight_id) ? "Modification d'une réservation de vol #$flight_id" : "Création d'une réservation de vol" ;
 // TODO be ready to pre-load when asking for modification/cancellation
 // and of course add 'modify' 'cancel' button
 
@@ -445,6 +445,7 @@ if ($flight_id == '') {
 	</div>
 </div>
 </form>
+<button class="btn btn-info" onclick="location.href='flight_pdf.php?flight_id=<?=$flight_id?>';">Imprimer le dossier</button>
 
 </div><!-- menu contact -->
 

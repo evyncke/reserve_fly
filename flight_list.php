@@ -58,7 +58,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"glyphicon glyphicon-envelope\" title=\"Envoyer un email\"></span></a>" : "" ; 
 	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"glyphicon glyphicon-earphone\" title=\"Téléphoner\"></span></a>" : "" ; 
 	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-pencil\" title=\"Modifier/Annuler\"></span></a> " ;
-	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-print\" title=\"Imprimer sous format PDF\"></span></a> " ;
+	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\" target=\"_blank\"><span class=\"glyphicon glyphicon-print\" title=\"Imprimer sous format PDF\"></span></a> " ;
 	$pay =  ($row['f_date_paid']) ? "<span class=\"glyphicon glyphicon-euro\" style=\"color: green;\" title=\"Vol déjà payé\"></span>" :
 		" <a href=\"flight_create.php?flight_id=$row[f_id]&pay_open=true\"><span class=\"glyphicon glyphicon-euro\" style=\"color: red;\" title=\"Indiquer le paiement\"></span></a> " ;
 	$is_gift = ($row['f_gift'] != 0) ? ' <span class="glyphicon glyphicon-gift" style="color: red;" title="Bon cadeau"></span>' : '' ;
