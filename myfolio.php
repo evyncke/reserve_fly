@@ -269,7 +269,8 @@ while ($row = mysqli_fetch_array($result)) {
 		$cost_fi -= $revenue_fi_initiation ;
 	// Flights taking off Belgium have to pay taxes (distance depending but ignored for now)
 	// Except Local flight
-	if (stripos($row['l_from'], 'EB') === 0 and $row['l_from'] != $row['l_to']) {
+	// And only the pilot pays the taxes
+	if (stripos($row['l_from'], 'EB') === 0 and $row['l_from'] != $row['l_to'] and $row['l_pilot'] == $userId) {
 		$cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
 	} else {
 		$cost_taxes = 0 ;
