@@ -18,7 +18,7 @@
 require_once 'flight_header.php' ;
 if (isset($_REQUEST['pattern'])) {
 	$pattern = mysqli_real_escape_string($mysqli_link, web2db(trim($_REQUEST['pattern']))) ;
-	$other_filter = " AND (p_lname LIKE '%$pattern%' OR p_fname LIKE '%$pattern%' or f_description LIKE '%$pattern%' or p_email LIKE '%$pattern%' OR first_name LIKE '%$pattern%' OR last_name LIKE '%$pattern%') " ;
+	$other_filter = " AND (p_lname LIKE '%$pattern%' OR p_fname LIKE '%$pattern%' or f_description LIKE '%$pattern%' or f_notes LIKE '%$pattern%' or p_email LIKE '%$pattern%' OR first_name LIKE '%$pattern%' OR last_name LIKE '%$pattern%') " ;
 } else
 	$other_filter = '' ;
 ?>
@@ -61,7 +61,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\" target=\"_blank\"><span class=\"glyphicon glyphicon-print\" title=\"Imprimer sous format PDF\"></span></a> " ;
 	$pay =  ($row['f_date_paid']) ? "<span class=\"glyphicon glyphicon-euro\" style=\"color: green;\" title=\"Vol déjà payé\"></span>" :
 		" <a href=\"flight_create.php?flight_id=$row[f_id]&pay_open=true\"><span class=\"glyphicon glyphicon-euro\" style=\"color: red;\" title=\"Indiquer le paiement\"></span></a> " ;
-	$is_gift = ($row['f_gift'] != 0) ? ' <span class="glyphicon glyphicon-gift" style="color: red;" title="Bon cadeau"></span>' : '' ;
+	$is_gift = ($row['f_gift'] != 0) ? '&nbsp;<span class="glyphicon glyphicon-gift" style="color: red;" title="Bon cadeau"></span>' : '' ;
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 	$description = nl2br(db2web($row['f_description'])) ;
 	$notes = nl2br(db2web($row['f_notes'])) ;
