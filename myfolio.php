@@ -84,7 +84,7 @@ function ShowTableHeader() {
 <th class="logLastHeader">Sharing</th>
 <th class="logLastHeader">Plane</th>
 <th class="logLastHeader">FI</th>
-<th class="logLastHeader">Taxes &ddagger;</th>
+<th class="logLastHeader">Taxes <!--&ddagger;--></th>
 <th class="logLastHeader">Total</th>
 </thead>
 <?php
@@ -243,7 +243,13 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['l_instructor'] == $userId and $row['l_pilot'] != $userId and $row['l_share_member'] != $userId) // FI only pays the plane rental when they are the pilot
 		$cost_plane = 0 ;
 	else
-		$cost_plane = $row['cout'] * $duration ;
+		if ($row['l_share_type'] == 'CP2') {
+			$cost_plane = round($row['cout'] * 0.5, 2) * $duration ;
+		} else if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] != $userId) {
+			$cost_plane = 0 ;
+		} else
+			$cost_plane = $row['cout'] * $duration ;	
+
 	if ($row['l_instructor'] == '' or $row['l_is_pic']) { // Solo, no instructor
 		print("<td class=\"logCell\">SELF</td>\n") ;
 	} else  // Dual command
@@ -268,19 +274,15 @@ while ($row = mysqli_fetch_array($result)) {
 	} else {
 		$cost_taxes = 0 ;
 	}
-	// From 2022-11-01 no more taxes
-	if ($row['l_start'] >= '2022-11-01')
-		$cost_taxes = 0 ;
+	// From 2022-11-01 no more taxes, actually they are back !
+	// if ($row['l_start'] >= '2022-11-01')
+	//	$cost_taxes = 0 ;
 	print("<td class=\"logCell\">$row[l_pax_count]</td>\n") ;
 	if ($row['l_share_type'])
 		print("<td class=\"logCell\">$row[l_share_type] <span class=\"shareCodeClass\">$row[l_share_member]</span></td>\n") ;
 	else
 		print("<td class=\"logCell\"></td>\n") ;
-	if ($row['l_share_type'] == 'CP2') {
-		$cost_plane = round($cost_plane * 0.5, 2) ;
-	} else if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] != $userId) {
-		$cost_plane = 0 ;
-	}
+
 	$cost_total = $cost_plane + $cost_fi + $cost_taxes ;
 	// Prepare the bottom line for grand total
 	$cost_plane_total += $cost_plane ;
@@ -324,7 +326,7 @@ carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes
 Le montant n'inclut aucune note de frais (par exemple carburant), note de crédit, ainsi que d'autres frais (par exemple, cotisations, ou taxes d'atterrissage).
 Les heures sont les heures UTC.</div>
 </p >
-<p>&ddagger;: depuis le 1er novembre 2022, le CA a décidé de ne plus faire payer les taxes en avance.</p>
+<!-- p>&ddagger;: depuis le 1er novembre 2022, le CA a décidé de ne plus faire payer les taxes en avance.</p-->
 <?php
 if ($diams_explanation)
 	print("<p>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</p>") ;
