@@ -597,7 +597,9 @@ function compute_prix_passager()
 	var aDateText=document.getElementById("id_cdv_flight_date").value;
 	var aDate=Date.parse(aDateText);
 	var aOneNovember= Date.parse("2022-11-01");
-	if(aDate>aOneNovember) {
+	// Decision de garder la taxe passager le 28 novembre 2022. Donc suppression du test.
+	// Tester garder pour une future utilisation
+	if(0 && aDate>aOneNovember) {
 		return 0.;
 	}
 	
