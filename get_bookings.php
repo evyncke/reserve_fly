@@ -79,10 +79,13 @@ if ($error_message != '') {
 				$customer_row = mysqli_fetch_array($customer_result) ;
 				mysqli_free_result($customer_result) ;
 				if ($customer_row)
-					$booking['customerName'] = "$customer_row[p_fname] $customer_row[p_lname]" ;
+					$booking['customerName'] = db2web($customer_row['p_fname']) . ' ' . db2web($customer_row['p_lname']) ;
 					$booking['customerPhone'] = "$customer_row[p_tel]" ;
 					$type_vol = ($customer_row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
-					$booking['comment'] = "Vol $type_vol pour $customer_row[p_fname] $customer_row[p_lname]" ;
+					$prefix = ($customer_row['f_gift'] != 0) ? 'V-' : '' ;
+					$type = ($customer_row['f_type'] == 'D') ? 'IF-' : 'INIT-' ;
+					$flight_reference = $prefix . $type . sprintf("%03d", $customer_row['f_id']) ;
+					$booking['comment'] = "Vol $type_vol $flight_reference pour $customer_row[p_fname] $customer_row[p_lname]" ;
 			}
 			if ($row['log_from'])
 				$booking['from'] = $row['log_from'] ;

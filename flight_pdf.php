@@ -35,7 +35,7 @@ public $column_width ;
 
 // En-tête
 function Header() {
-	global $flight_id, $userFullName ;
+	global $flight_reference, $userFullName ;
     // Logo
     $this->Image('../logo_rapcs_256x256.png',10,6,30);
 //    $this->Image('http://www.spa-aviation.be/logo_rapcs_256x256.png',10,6,30);
@@ -44,7 +44,7 @@ function Header() {
     // Décalage à droite
     $this->CellUtf8(80);
     // Titre
-    $this->CellUtf8(70,10,"RAPCS ASBL, Vol #$flight_id",1,0,'C');
+    $this->CellUtf8(70,10,"RAPCS ASBL, Vol $flight_reference",1,0,'C');
     // Saut de ligne
     $this->Ln(30);
 }
@@ -196,6 +196,9 @@ if (! $row_flight) {
 mysqli_free_result($result) ;
 $scheduled_date = (isset($row_flight['f_date_linked']) and $row_flight['f_date_linked']) ? " $row_flight[f_date_linked]" : '' ;
 $flight_type = ($row_flight['f_type'] == 'D') ? 'découverte' : "d'initiation" ;
+$flight_reference = ($row_flight['f_gift']) ? 'V-' : '' ;
+$flight_reference .= ($row_flight['f_type'] == 'D') ? 'IF-' : "INIT-" ;
+$flight_reference .= sprintf("%03d", $flight_id) ;
 
 // Get the circuit names
 $circuits = json_decode(file_get_contents("../voldecouverte/script/circuits.js"), true);
@@ -213,7 +216,7 @@ if ($row_flight['r_plane']) {
 //
 // The most important part...
 //
-$pdf->NouveauChapitre("Dossier sécurité pour le vol $flight_type $flight_id ($row_flight[p_lname]$scheduled_date)") ;
+$pdf->NouveauChapitre("Dossier sécurité pour le vol $flight_type $flight_reference ($row_flight[p_lname]$scheduled_date)") ;
 
 $pdf->CellUtf8(0, 5, "Circuit: $circuit_name") ;
 $pdf->Ln() ;
@@ -286,7 +289,7 @@ $pdf->ImprovedTableRow(array("Masse et centrage" , (($row_flight['r_plane'])) ? 
 if ($licence_info['checked']) {
 	$pdf->MultiCellUtf8(0, 8, "(*) $licence_info[name]: $licence_info[ident] jusqu'au $licence_info[expiration].") ;
 }
-$pdf->Ln(20) ;
+$pdf->Ln(10) ;
 
 //
 // Liste des passagers
@@ -313,8 +316,8 @@ mysqli_free_result($result) ;
 $pdf->Ln() ;
 $pdf->CellUtf8(60, 5, "Date: " . date('Y-m-d'), 0, 0, 'L') ;
 $pdf->CellUtf8(100, 5, " Responsable sécurité:", 0, 0, 'C') ;
-$pdf->Ln(40) ;
-$pdf->MultiCellUtf8(0, 6, "Cette page doit rester à terre et être conservée tant que tous les passagers n'ont pas débarqué sans incidents de l'aéronef. " .
+$pdf->SetY(-45); // Position absolue au dessus de la marge du bas
+$pdf->MultiCellUtf8(0, 5, "Cette page doit rester à terre et être conservée tant que tous les passagers n'ont pas débarqué sans incidents de l'aéronef. " .
 	"En cas d'incident, cette liste sera transmise au secrétariat ou au Président (info@spa-aviation.be). " .
 	"Le secrétariat conservera cette liste et la transmettra sur demande aux autorités compétentes.", 0, 1, 'C', true);
 
@@ -324,8 +327,9 @@ function passengerWB($i) {
 	if (isset($all_pax[$i])) {
 		$fname = $all_pax[$i]['p_fname'] ;
 		$lname = $all_pax[$i]['p_lname'] ;
-		$row['item'] .= " ($fname $lname)" ;
-		$item_weight = round($all_pax[$i]['p_weight'] * 2.20462, 2) ;
+		$pax_weight = $all_pax[$i]['p_weight'] ;
+		$row['item'] .= " ($fname $lname $pax_weight kg)" ;
+		$item_weight = round($pax_weight * 2.20462, 2) ;
 		$item_moment = $row['arm'] * $item_weight ;
 	} else {
 		$row['item'] .= " (absent)" ;
@@ -338,7 +342,7 @@ function passengerWB($i) {
 // Weight and balance
 //
 if ($row_flight['r_plane']) { // No W&B when plane is unknown 
-$pdf->NouveauChapitre("Masse et centrage du vol $flight_id ($row_flight[p_lname]$scheduled)") ;
+$pdf->NouveauChapitre("Masse et centrage du vol $flight_reference ($row_flight[p_lname]$scheduled)") ;
 $pdf->SetColumnsWidth(array(80, 30, 30, 30)) ;
 $pdf->ImprovedTableHeader(array("Poste", "Poids", "Bras", "Moment")) ; 
 $totmoment_to = 0 ;
@@ -349,7 +353,8 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	FROM tp_aircraft_weights AS w JOIN tp_aircraft AS a ON a.id = w.tailnumber
 	WHERE a.tailnumber = '$row_flight[r_plane]' 
 	ORDER BY w.order")
-	or die("Cannot access W&B: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "F", "Cannot access W&B: " . mysqli_error($mysqli_link)) ;
+$url_params = array() ;
 while ($row = mysqli_fetch_array($result)) {
 	switch ($row['item']) {
 		case 'Pilot':
@@ -360,7 +365,8 @@ while ($row = mysqli_fetch_array($result)) {
 			$row_pilot = mysqli_fetch_array($result_pilot) ;
 			$item_weight = round($row_pilot['p_weight'] * 2.20462, 2) ; // kg to lbs
 			$item_moment = $row['arm'] * $item_weight;
-			$row['item'] .= " ($row_pilot[first_name] $row_pilot[last_name])" ; 
+			$row['item'] .= " ($row_pilot[first_name] $row_pilot[last_name] $row_pilot[p_weight] kg)" ; 
+			$url_params["line$row[id]_wt"] = $item_weight  ;
 			break ;
 		case 'Co-Pilot' : passengerWB(0) ; break ;
 		case 'Passenger 1' : passengerWB(1) ; break ;
@@ -399,15 +405,24 @@ $pdf->Ln(30) ;
 // Also before of web application firewall in cloudflare or mod_security on the server as the request is not built with user-agent or accept...
 ini_set("user_agent","RAPCS - flight engine");
 // Annoying as the output is no more a PNG...
-//$pdf->Image("https://www.spa-aviation.be/TippingPoint/scatter.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg", null, null, 0, 0, 'PNG') ;
+// No longer a PNG but a javascript...
+// $pdf->Image("https://www.spa-aviation.be/TippingPoint/scatter.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg", null, null, 0, 0, 'PNG') ;
 
 } // $row_flight[r_plane]) No W&B when plane is unknown 
 
 //
 // Description 
 //
-$pdf->NouveauChapitre("Description du vol $flight_type $flight_id ($row_flight[p_lname]$scheduled)") ;
+$pdf->NouveauChapitre("Description du vol $flight_type $flight_reference ($row_flight[p_lname]$scheduled)") ;
 $pdf->MulticellUtf8(0, 5, "La personne de contact pour ce vol est: $row_flight[p_fname] $row_flight[p_lname], numéro de téléphone: $row_flight[p_tel], email: $row_flight[p_email].") ;
+if ($row_flight['f_description'] != '') {
+	$pdf->Ln(5) ;
+	$pdf->MulticellUtf8(0, 5, "Description de la demande:\n$row_flight[f_description]") ;
+}
+if ($row_flight['f_notes'] != '') {
+	$pdf->Ln(5) ;
+	$pdf->MulticellUtf8(0, 5, "Notes club:\n$row_flight[f_notes]") ;
+}
 
 //
 // Responsability waivers
@@ -415,7 +430,7 @@ $pdf->MulticellUtf8(0, 5, "La personne de contact pour ce vol est: $row_flight[p
 
 foreach($all_pax as $pax_row) {
 	if ($pax_row['p_age'] == 'A') { // For an adump
-		$pdf->NouveauChapitre("Décharge de " . db2web($pax_row['p_fname']) . " " . db2web($pax_row['p_lname']) . " pour le vol $flight_type $flight_id ($row_flight[p_lname]$scheduled)") ;
+		$pdf->NouveauChapitre("Décharge de " . db2web($pax_row['p_fname']) . " " . db2web($pax_row['p_lname']) . " pour le vol $flight_type $flight_reference ($row_flight[p_lname]$scheduled)") ;
 		$pdf->CellUtf8(0, 30, "Je, soussigné:") ;
 		$pdf->Ln() ;
 		$pdf->CellUtf8(30, 10 ) ;
@@ -433,7 +448,7 @@ foreach($all_pax as $pax_row) {
 		$pdf->Ln() ;
 		$pdf->CellUtf8(0, 60, "(signature)", 0, 1, 'C') ;
 	} else { // For a minor or children
-		$pdf->NouveauChapitre("Autorisation et décharge de " . db2web($pax_row['p_fname']) . " " . db2web($pax_row['p_lname']) . " pour le vol $flight_type $flight_id ($row_flight[p_lname]$scheduled)") ;
+		$pdf->NouveauChapitre("Autorisation et décharge de " . db2web($pax_row['p_fname']) . " " . db2web($pax_row['p_lname']) . " pour le vol $flight_type $flight_reference ($row_flight[p_lname]$scheduled)") ;
 		$pdf->CellUtf8(0, 30, "Je, soussigné:") ;
 		$pdf->Ln() ;
 		$pdf->CellUtf8(30, 10 ) ;
