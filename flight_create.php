@@ -26,6 +26,7 @@ $pilot_open = (isset($_REQUEST['pilot_open']) and $_REQUEST['pilot_open'] != '')
 $add_pax = (isset($_REQUEST['add_pax']) and $_REQUEST['add_pax'] != '') ? TRUE : FALSE ;
 $delete_pax = (isset($_REQUEST['delete_pax']) and $_REQUEST['delete_pax'] != '') ? TRUE : FALSE ;
 $modify_pax = (isset($_REQUEST['modify_pax']) and $_REQUEST['modify_pax'] != '') ? TRUE : FALSE ;
+$pax_open = (isset($_REQUEST['pax_open']) and $_REQUEST['pax_open'] != '') ? TRUE : FALSE ;
 $link_to = (isset($_REQUEST['link_to']) and $_REQUEST['link_to'] != '') ? $_REQUEST['link_to'] : FALSE ;
 $flight_id = (isset($_REQUEST['flight_id'])) ? trim($_REQUEST['flight_id']) : 0 ;
 if (!is_numeric($flight_id) and $flight_id != '') die("Invalid ID: $flight_id") ;
@@ -203,7 +204,7 @@ if ($modify_pax) {
 	// TODO check whether we are already max-ed out about passagers
 	// TODO also allow non P role (could be S)
 	mysqli_query($mysqli_link, "UPDATE $table_pax SET
-		p_lname = '" . mysqli_real_escape_string($mysqli_link, web2db($lname)) . "', p_fname = '" . mysql_real_escape_string($mysqli_link, web2db($fname)) . "', p_weight = $weight, p_age = '$_REQUEST[age]'
+		p_lname = '" . mysqli_real_escape_string($mysqli_link, web2db($lname)) . "', p_fname = '" . mysqli_real_escape_string($mysqli_link, web2db($fname)) . "', p_weight = $weight, p_age = '$_REQUEST[age]'
 		WHERE p_id = $pax_id")
 		or journalise($userId, "F", "Cannot modify passenger: " . mysqli_error($mysqli_link)) ;
 }
@@ -243,12 +244,14 @@ if ($pay) {
 		else
 			$date = "'" . mysqli_real_escape_string($mysqli_link, $_REQUEST['paymentDate']) . "'";
 		$reference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['paymentReference'])) . "'";
+		$amount = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['paymentAmount'])) . "'";
 	} else {
 		$date = 'NULL' ;
 		$reference = 'NULL' ;
+		$amount = 'NULL' ;
 	}
 	mysqli_query($mysqli_link, "UPDATE $table_flight
-		SET f_date_paid=$date, f_reference_payment=$reference, f_who_paid=$userId
+		SET f_date_paid=$date, f_reference_payment=$reference, f_who_paid=$userId, f_amount_payment=$amount
 		WHERE f_id=$flight_id")
 		or journalise($userId, "F", "Impossible de mettre à jour le paiement: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "I", "Flight $flight_id payment information updated") ;
@@ -454,7 +457,7 @@ if ($flight_id == '') {
 </div><!-- menu contact -->
 
 
-<div id="menuPassenger" class="tab-pane fade$pax_active">
+<div id="menuPassenger" class="tab-pane fade <?=$pax_active?>">
 <div class="page-header">
 <h4>Liste des passagers</h4>
 </div><!-- page-header -->
@@ -485,6 +488,7 @@ while ($row_pax = mysqli_fetch_array($result_pax)) {
 		<input type=\"hidden\" name=\"pax_id\" value=\"$row_pax[p_id]\">
 		<input type=\"hidden\" name=\"flight_id\" value=\"$flight_id\">
 		<input type=\"hidden\" name=\"modify_pax\" value=\"modify_pax\">
+		<input type=\"hidden\" name=\"pax_open\" value=\"true\">
 		<tr><td>$known_pax_count</td><td>$role</td>
 		<td><input type=\"text\" name=\"lname\" value=\"" . db2web($row_pax['p_lname']) . "\"></td>
 		<td><input type=\"text\" name=\"fname\" value=\"" . db2web($row_pax['p_fname']) . "\"></td>
@@ -549,13 +553,18 @@ if ($row_flight['f_date_paid']) {
 			<label><input type="checkbox" name="paid"<?=$paid?>>paiement effectué</label>
 		</div><!-- checkbox-->
 	</div> <!- form-group-->
-	<div class="form-group col-xs-62 col-md-1">
+	<div class="form-group col-xs-6 col-md-2">
 		<label class="control-label" for="paymentDate">Date paiement:</label>
 		<div>
 			<input type="date" name="paymentDate" value="<?=$row_flight['f_date_paid']?>">
 		</div>
 	</div> <!- form-group-->
-	<div class="form-group col-xs-12 col-md-4">
+	<div class="form-group col-xs-6 col-md-4">
+		<label class="control-label" for="paymentAmount">Montant du paiement:</label>
+		<div>
+			<input type="text" size=10 name="paymentAmount" value="<?=$row_flight['f_amount_payment']?>">
+		</div>
+	</div> <!- form-group-->	<div class="form-group col-xs-12 col-md-4">
 		<label class="control-label" for="paymentReference">Référence paiement:</label>
 		<div>
 			<input type="text" size=32 name="paymentReference" value="<?=db2web($row_flight['f_reference_payment'])?>">
