@@ -289,7 +289,7 @@ if (isset($flight_id) and $flight_id != 0) {
 
 <div id="menuContact" class="tab-pane fade <?=$contact_active?>">
 
-<form action="flight_create.php" method="get" autocomplete="off">
+<form action="flight_create.php" method="post" autocomplete="off">
 
 <div class="row">
 	<div class="form-group col-xs-3 col-sm-2">
