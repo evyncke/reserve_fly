@@ -42,9 +42,9 @@ function Header() {
     // Police Arial gras 15
     $this->SetFont('Arial','B',15);
     // Décalage à droite
-    $this->CellUtf8(80);
+    $this->CellUtf8(70);
     // Titre
-    $this->CellUtf8(70,10,"RAPCS ASBL, Vol $flight_reference",1,0,'C');
+    $this->CellUtf8(90,10,"RAPCS ASBL, Vol $flight_reference",1,0,'C');
     // Saut de ligne
     $this->Ln(30);
 }
@@ -218,8 +218,10 @@ if ($row_flight['r_plane']) {
 //
 $pdf->NouveauChapitre("Dossier sécurité pour le vol $flight_type $flight_reference ($row_flight[p_lname]$scheduled_date)") ;
 
-$pdf->CellUtf8(0, 5, "Circuit: $circuit_name") ;
-$pdf->Ln() ;
+if ($row_flight['f_type'] == 'D') {
+	$pdf->CellUtf8(0, 5, "Circuit: $circuit_name") ;
+	$pdf->Ln() ;
+}
 
 if ($row_flight['first_name'])
 	$pdf->CellUtf8(0, 5, "Pilote: " . db2web("$row_flight[first_name] $row_flight[last_name] ($row_flight[cell_phone] $row_flight[email])")) ;
@@ -258,7 +260,7 @@ $pdf->Ln(20) ;
 
 // Voire page 14 de https://drive.google.com/file/d/1XYZWORUndRYdqAqUmnbHWXKOB7IotbO4/view
 
-$pdf->SetColumnsWidth(array(60, 100, 15, 10)) ;
+$pdf->SetColumnsWidth(array(70, 90, 15, 10)) ;
 $pdf->ImprovedTableHeader(array("Actions", "Information", "Chck", "Sig")) ; 
 if ($row_flight['f_pilot']) {
 	$licence_info = pilotLicence($row_flight['f_pilot']) ;
