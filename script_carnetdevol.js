@@ -1,9 +1,8 @@
-
-
+// JavaScript used by IntroCarnetVol.php to manage the page
+//
 function carnetdevol_page_loaded() {
 
-//document.getElementById("id_valeur_virement").style.display="none";
-
+  //document.getElementById("id_valeur_virement").style.display="none";
   //document.getElementById("id_cdv_bookingid_row").style.display="none";
   document.getElementById("id_cdv_bookingid").readOnly=true;;
   document.getElementById("id_cdv_bookingid").style.backgroundColor = ReadOnlyColor;
@@ -41,7 +40,11 @@ function carnetdevol_page_loaded() {
 	  compute_hideshow_instructor();
 	  compute_prix();
   };
+  document.getElementById("id_cdv_nombre_crew").onchange = function() {
+	  check_passager_crew();
+  };
   document.getElementById("id_cdv_nombre_passager").onchange = function() {
+	  check_passager_crew();
 	  compute_prix();
   };
   document.getElementById("id_cdv_frais_CP").onchange = function() {
@@ -591,6 +594,38 @@ function compute_prix_fi()
 
 //==============================================
 
+function check_passager_crew()
+{
+	var anAircraftName=document.getElementById("id_cdv_aircraft").value;
+	var aCrews=Number(document.getElementById("id_cdv_nombre_crew").value);
+	var aPassagers=Number(document.getElementById("id_cdv_nombre_passager").value);
+	var anAircraftModel=GetPropertyFromId(anAircraftName, "model", planes_properties);
+	var aPOB=aCrews+aPassagers;
+	if(anAircraftModel.indexOf("C172")==0 || anAircraftModel.indexOf("C182")==0) {
+		if(aPOB>4) {
+			document.getElementById("id_cdv_nombre_crew").style.backgroundColor = 'orange';
+			document.getElementById("id_cdv_nombre_passager").style.backgroundColor = 'orange';
+			alert("Le nombre de crew + nombre de passagers ne peut pas exceder 4");
+		}
+		else {
+			document.getElementById("id_cdv_nombre_crew").style.backgroundColor = 'white';
+			document.getElementById("id_cdv_nombre_passager").style.backgroundColor = 'white';
+		}
+	}
+	else {
+		if(aPOB>2) {
+			document.getElementById("id_cdv_nombre_crew").style.backgroundColor = 'orange';
+			document.getElementById("id_cdv_nombre_passager").style.backgroundColor = 'orange';
+			alert("Le nombre de crew + nombre de passagers ne peut pas exceder 2");
+		}
+		else {
+			document.getElementById("id_cdv_nombre_crew").style.backgroundColor = 'white';
+			document.getElementById("id_cdv_nombre_passager").style.backgroundColor = 'white';
+		}
+	}
+}
+//==============================================
+
 function compute_prix_passager()
 {
 	// Plus de taxes passager après 1/11/2022
@@ -929,6 +964,7 @@ function compute_defaultValues()
 	   } 
 	}
 	document.getElementById("id_cdv_nature_vol").value=default_flight_type;
+	document.getElementById("id_cdv_nombre_crew").value=default_crew_count;
 	document.getElementById("id_cdv_nombre_passager").value=default_pax_count;
 
 	compute_defaultPartageFrais();
@@ -1207,6 +1243,7 @@ function compute_hideshow_instructor()
     else {
         document.getElementById("id_cdv_flight_instructor_row").style.display="";  	
         document.getElementById("id_cdv_frais_DC_row").style.display="";
+		document.getElementById("id_cdv_nombre_crew").value=2;
      }
 }
 //==============================================
@@ -1430,6 +1467,7 @@ var ReadOnlyColor="AliceBlue";
 //var default_date_heure_depart=;
 //var default_date_heure_arrivee="";
 //var default_day_landing=0;
+//var default_crew_count=1;
 //var default_pax_count=0;
 //var default_flight_type="";
 //var default_from="";
