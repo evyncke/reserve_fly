@@ -29,6 +29,7 @@ print("var default_instructor=0;\n");
 print("var default_date_heure_depart=\"\";\n");
 print("var default_date_heure_arrivee=\"\";\n");
 print("var default_day_landing=1;\n");
+print("var default_crew_count=1;\n");
 print("var default_pax_count=0;\n");
 print("var default_flight_type=\"Local\";\n");	
 print("var default_from=\"EBSP\";\n");	
@@ -237,6 +238,7 @@ if($bookingid) {
 	}
 	$crew = db2web($crew) ; // As DB is latin and web is UTF-8
 	print('<p></p>');
+	//print(" 1. BookingId=$bookingid (r_id)</br>");
 	
 	// Table Resume de la reservation selectionnee
 	print('<center><table  width=100%" border-spacing="0px">
@@ -285,6 +287,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$cdv_compteur_vol_arrivee=$_REQUEST['cdv_compteur_vol_arrivee'];
 	$cdv_compteur_vol_duree=$_REQUEST['cdv_compteur_vol_duree'];
 	$cdv_nombre_atterrissage=$_REQUEST['cdv_nombre_atterrissage'];
+	$cdv_nombre_crew=$_REQUEST['cdv_nombre_crew'];
 	$cdv_nombre_passager=$_REQUEST['cdv_nombre_passager'];
 	$cdv_nature_vol=$_REQUEST['cdv_nature_vol'];
 	$cdv_frais_CP=$_REQUEST['cdv_frais_CP'];
@@ -343,6 +346,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	//print("remark3:$remark</br>\n");
 		
 	$paxCount=$cdv_nombre_passager;
+	$crewCount=$cdv_nombre_crew;
 	$pilotId=$cdv_pilot_name;
 	$instructorId=CheckVar($cdv_flight_instructor);
 	$dayLandings= $cdv_nombre_atterrissage;
@@ -392,11 +396,11 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		//print("Insert a segment</br>");
 		mysqli_query($mysqli_link, "insert into $table_logbook(l_plane, l_model, l_booking, l_from, l_to,
 				l_start_hour, l_start_minute, l_end_hour, l_end_minute, l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
-				l_start, l_end, l_flight_type, l_remark, l_pax_count, l_pilot, l_is_pic, l_instructor, l_instructor_paid, l_day_landing, l_night_landing, 
+				l_start, l_end, l_flight_type, l_remark, l_pax_count, l_crew_count, l_pilot, l_is_pic, l_instructor, l_instructor_paid, l_day_landing, l_night_landing, 
 				l_share_type, l_share_member, l_audit_who, l_audit_ip, l_audit_time)
 				values ('$planeId', '$planeModel', $bookingidPage, '$fromAirport', '$toAirport',
 				$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute, $flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
-				'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
+				'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
 				'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
 			or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
 		$l_id = mysqli_insert_id($mysqli_link) ; 
@@ -414,11 +418,11 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	    //print("Edit a segment $cdv_logbookid </br>");
 		mysqli_query($mysqli_link, "replace into $table_logbook(l_id, l_plane, l_model, l_booking, l_from, l_to,
 				l_start_hour, l_start_minute, l_end_hour, l_end_minute, l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
-				l_start, l_end, l_flight_type, l_remark, l_pax_count, l_pilot, l_is_pic, l_instructor, l_instructor_paid, l_day_landing, l_night_landing, 
+				l_start, l_end, l_flight_type, l_remark, l_pax_count, l_crew_count, l_pilot, l_is_pic, l_instructor, l_instructor_paid, l_day_landing, l_night_landing, 
 				l_share_type, l_share_member, l_audit_who, l_audit_ip, l_audit_time)
 				values ('$cdv_logbookid', '$planeId', '$planeModel', $bookingidPage, '$fromAirport', '$toAirport',
 				$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute, $flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
-				'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
+				'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
 				'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
 			or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
 		$l_id = mysqli_insert_id($mysqli_link) ; 
@@ -451,9 +455,10 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 
 print('<p></p>');
 if($bookingid) {
+	//print(" 2. bookingid=$bookingid</br>");
 	// Now, display any previous entries related to this booking
 	$result = mysqli_query($mysqli_link, "select l_id, l_start, l_end, l_plane, l_from, l_to, l_flight_type, 
-	l_start_hour, l_start_minute, l_end_hour, l_end_minute, l_day_landing,l_pax_count,l_flight_type,l_is_pic, l_share_type, l_share_member, l_remark, l_instructor_paid,
+	l_start_hour, l_start_minute, l_end_hour, l_end_minute, l_day_landing,l_pax_count, l_crew_count, l_flight_type,l_is_pic, l_share_type, l_share_member, l_remark, l_instructor_paid,
 	l_audit_time, p.last_name as pilotName, i.last_name as instructorName
 			from $table_logbook l join $table_person p on l.l_pilot = p.jom_id left join $table_person i on l.l_instructor = i.jom_id
 			where l_booking = $bookingid order by l_start")
@@ -466,7 +471,7 @@ if($bookingid) {
         // Table Segments deja introduits
 		print('<center><table width="100%" border-spacing="0px"><tbody>
 		<tr><td style="background-color: GreenYellow; text-align: center;" colspan="13">Segments déjà introduits pour cette réservation. (Heure UTC)</td></tr>
-			<tr><th>#</th><th>Avion</th><th>Pilote</th><th>De</th><th>Départ</th><th>A</th><th>Arrivée</th><th>Type</th><th>Compteur</th><th>Atterr</th><th>Pass</th><th>Remarques</th><th>Action</th></tr>') ;
+			<tr><th>#</th><th>Avion</th><th>Pilote</th><th>De</th><th>Départ</th><th>A</th><th>Arrivée</th><th>Type</th><th>Compteur</th><th>Atterr</th><th>Crew/Pass</th><th>Remarques</th><th>Action</th></tr>') ;
 		$aSegment=0;
 		while ($row = mysqli_fetch_array($result)) {
 			$logid=$row['l_id'];
@@ -480,6 +485,8 @@ if($bookingid) {
 			$MO=$MO.$row['l_end_hour'].'.'.$row['l_end_minute'];
 			$aSegment+=1;
 			$instructorPaid="";
+			$crew_Count=$row[l_crew_count];
+			if($crew_Count==0) $crew_Count=1;
 			if ($row['instructorName'] == '')
 				$crew = $row['pilotName'] ;
 			else {
@@ -491,16 +498,20 @@ if($bookingid) {
 			if ($row['l_is_pic']==1) {
 				if ($row['instructorName'] == '')
 					$crew=$crew.' (PIC)';
-				else
+				else {
 					$crew=$crew.' (PIC-Recheck)';
+					if($crew_Count==1) $crew_Count=2;
+				}
 			}
-			else
+			else {
 				$crew=$crew.' (DC)';
+				if($crew_Count==1) $crew_Count=2;
+			}
 
 			$remark="";
 			$remark=GetFullRemarks($row['l_share_type'],$row['l_share_member'], $row['l_remark'], $instructorPaid );
 			
-			print("<tr>
+			print("<tr style='text-align: center;'>
 				<td>$aSegment ($logid)</td>
 				<td>$row[l_plane]</td>
 				<td>$crew</td>
@@ -511,7 +522,7 @@ if($bookingid) {
 				<td>$row[l_flight_type]</td>
 				<td>$MO</td>
 				<td>$row[l_day_landing]</td>
-				<td>$row[l_pax_count]</td>
+				<td>$crew_Count / $row[l_pax_count]</td>
 				<td>$remark</td>
 				<td><button type=\"button\" value=\"Del\" onclick=\"redirectLogbookDelete('$_SERVER[PHP_SELF]',$bookingid,$logid,'$auth','$row[l_audit_time]');\">&#128465; Effacer</button>&nbsp;
 				
@@ -559,7 +570,7 @@ if (isset($_REQUEST['edit']) and $_REQUEST['edit'] != '') {
    // Load N entries related to this logid
    $result = mysqli_query($mysqli_link, "select l_id, l_instructor, l_pilot, l_start, l_end, l_plane, l_from, l_to, l_flight_type, 
 	 l_start_hour, l_start_minute, l_end_hour, l_end_minute, l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
-     l_day_landing,l_pax_count,l_flight_type,l_is_pic, l_share_type, l_share_member, 
+     l_day_landing,l_pax_count, l_crew_count, l_flight_type,l_is_pic, l_share_type, l_share_member, 
 	 l_remark, l_instructor_paid,
      l_audit_time, p.last_name as pilotName, i.last_name as instructorName
 		from $table_logbook l join $table_person p on l.l_pilot = p.jom_id left join $table_person i on l.l_instructor = i.jom_id
@@ -591,6 +602,12 @@ if (isset($_REQUEST['edit']) and $_REQUEST['edit'] != '') {
 			print("var default_date_heure_arrivee=\"$end_UTC\";\n");
 			print("var default_day_landing=$row[l_day_landing];\n");
 			print("var default_pax_count=$row[l_pax_count];\n");
+			if($row[l_crew_count] != NULL){
+				print("var default_crew_count=$row[l_crew_count];\n");
+			}
+			else {
+				print("var default_crew_count=1;\n");				
+			}
 			print("var default_flight_type=\"$row[l_flight_type]\";\n");	
 			print("var default_from=\"$row[l_from]\";\n");	
 			print("var default_to=\"$row[l_to]\";\n");
@@ -819,6 +836,15 @@ else {
 <option value="Nav">Nav</option>
 </select></td>
 </tr>
+<tr id="id_cdv_nombre_crew_row" style="height: 14px;">
+<td class="segmentLabel">Nombre de crews</td>
+<td class="segmentInput"><select id="id_cdv_nombre_crew" name="cdv_nombre_crew">
+<option selected="selected" value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+</select></td>
+</tr>
 <tr>
 <td class="segmentLabel">Nombre de passagers</td>
 <td class="segmentInput"><select id="id_cdv_nombre_passager" name="cdv_nombre_passager">
@@ -916,6 +942,7 @@ print("<button type=\"button\" value=\"Fill\" onclick=\"window.location.href='$_
 <script src="https://www.spa-aviation.be/resa/pilots.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/CP_frais_type.js"\></script>-->
 <script src="https://www.spa-aviation.be/resa/prix.js"></script>
+<!--<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
 <script src="https://www.spa-aviation.be/resa/script_carnetdevol.js"></script>
 </body>
 </html>
