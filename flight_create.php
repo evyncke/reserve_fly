@@ -88,7 +88,8 @@ if ($create or $modify) {
 	if ($phone == '') die("Phone number cannot be empty") ;
 	if ($create) {
 		$weight = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['weight'])) ;
-		if (!is_numeric($weight)) die("Invalid weight: $weight") ;
+		if ($weight == '') $weight = 0 ;
+		if (!is_numeric($weight) or $weight < 0) die("Invalid weight: $weight") ;
 		$birthdate = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['birthdate'])) ;
 	}
 	$schedule = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['selectedSchedule'])) ;
@@ -164,12 +165,12 @@ if ($add_pax) {
 	$fname = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['fname'])) ;
 	if ($fname == '') journalise($userId, "F", "First name cannot be empty") ;
 	$weight = intval(trim($_REQUEST['weight'])) ;
-	if ($weight == '' or $weight <= 10) {
-		journalise($userId, "E", "Weight is invalid") ;
+	if ($weight == '' or $weight < 0) {
+		journalise($userId, "W", "Weight ($weight) is invalid") ;
 		$weight = 80 ;
 	}
 	if (! in_array($_REQUEST['age'], array('C', 'T', 'A'))) {
-		journalise($userId, "E", "Pax age is invalid: $_REQUEST[age]") ;
+		journalise($userId, "W", "Pax age is invalid: $_REQUEST[age]") ;
 		$_REQUEST['age'] = 'A' ;
 	}
 	// TODO also allow non P role (could be S)
@@ -191,9 +192,9 @@ if ($modify_pax) {
 	$fname = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['fname'])) ;
 	if ($fname == '') journalise($userId, "F", "First name cannot be empty") ;
 	$weight = intval(trim($_REQUEST['weight'])) ;
-	if ($weight == '' or $weight <= 10) {
-		journalise($userId, "E", "Weight is invalid") ;
-		$weight = 80 ;
+	if ($weight == '' or $weight < 0) {
+		journalise($userId, "W", "Weight ($weight) is invalid") ;
+		$weight = 0 ;
 	}
 	$pax_id = intval(trim($_REQUEST['pax_id'])) ;
 	if ($pax_id == '' or $pax_id <= 0) journalise($userId, "F", "Pax_id is invalid") ;
@@ -395,7 +396,7 @@ if ($flight_id == '') {
 <div class="row">
 	<div class="form-group col-xs-6 col-sm-2">
 		<label for="weight">Poids:</label>
-		<input type="number" min="10" max="150" class="form-control" name="weight" value="80">
+		<input type="number" min="0" max="150" class="form-control" name="weight" value="80">
 	</div> <!-- form-group -->
 	<div class="form-group col-xs-6 col-sm-3">
 		<label for="age">Âge:</label>
