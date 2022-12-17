@@ -21,6 +21,13 @@ if (isset($_REQUEST['pattern'])) {
 	$other_filter = " AND (p_lname LIKE '%$pattern%' OR p_fname LIKE '%$pattern%' or f_description LIKE '%$pattern%' or f_notes LIKE '%$pattern%' or p_email LIKE '%$pattern%' OR first_name LIKE '%$pattern%' OR last_name LIKE '%$pattern%') " ;
 } else
 	$other_filter = '' ;
+if (isset($_REQUEST['deleted'])) {
+	$deleted = ' checked' ;
+	$deleted_filter = '' ;
+} else {
+	$deleted = '' ;
+	$deleted_filter = " AND f_date_cancelled IS NULL" ;
+}
 ?>
 
 <div class="page-header hidden-xs">
@@ -29,11 +36,15 @@ if (isset($_REQUEST['pattern'])) {
 
 <div class="row">
 <form class="" action="<?=$_SERVER['PHP_SELF']?>">
+<!--div class="form-group"-->
+	<div class="checkbox col-md-offset-1 col-xs-6 col-md-2">
+			<label><input type="checkbox" name="deleted"<?=$deleted?> onchange="this.form.submit();">Inclure les vols annulés</label>
+	</div><!-- checkbox-->
 	<div class="form-group">
 		<div class="col-xs-6 col-md-offset-10 col-md-1">
 			<input type="text" class="form-control" name="pattern" value="<?=db2web($pattern)?>"/>
 		</div>
-	</div>
+	</div> <!-- formgroup-->
 	<div class="form-group">
 		<div class="col-xs-3 col-md-1">
 			<input type="submit" class="btn btn-primary" name="add" value="Chercher"/>
@@ -51,7 +62,7 @@ if (isset($_REQUEST['pattern'])) {
 $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today 
 	FROM $table_flight JOIN $table_pax_role ON f_id = pr_flight JOIN $table_pax ON pr_pax = p_id LEFT JOIN $table_person ON f_pilot = jom_id
 	LEFT JOIN $table_bookings AS b ON f_booking = b.r_id
-	WHERE pr_role = 'C' $other_filter
+	WHERE pr_role = 'C' $other_filter $deleted_filter
 	ORDER BY f_id DESC") 
 	or die("Impossible de lister les vols: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
