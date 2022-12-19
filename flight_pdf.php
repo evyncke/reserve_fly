@@ -242,7 +242,7 @@ else
 $pdf->Ln() ;
 
 if ($row_flight['f_date_paid'])
-	$pdf->CellUtf8(0, 5, "Vol déjà payé le $row_flight[f_date_paid]: $row_flight[f_reference_payment]") ;
+	$pdf->CellUtf8(0, 5, "Vol déjà payé le $row_flight[f_date_paid]: " . db2web($row_flight['f_reference_payment'])) ;
 else
 	$pdf->CellUtf8(0, 5, "Ce vol doit encore être payé.") ;
 $pdf->Ln(20) ;
@@ -327,8 +327,8 @@ function passengerWB($i) {
 	global $row, $all_pax, $item_weight, $item_moment ;
 	
 	if (isset($all_pax[$i])) {
-		$fname = $all_pax[$i]['p_fname'] ;
-		$lname = $all_pax[$i]['p_lname'] ;
+		$fname = db2web($all_pax[$i]['p_fname']) ;
+		$lname = db2web($all_pax[$i]['p_lname']) ;
 		$pax_weight = $all_pax[$i]['p_weight'] ;
 		$row['item'] .= " ($fname $lname $pax_weight kg)" ;
 		$item_weight = round($pax_weight * 2.20462, 2) ;
@@ -419,11 +419,11 @@ $pdf->NouveauChapitre("Description du vol $flight_type $flight_reference ($row_f
 $pdf->MulticellUtf8(0, 5, "La personne de contact pour ce vol est: $row_flight[p_fname] $row_flight[p_lname], numéro de téléphone: $row_flight[p_tel], email: $row_flight[p_email].") ;
 if ($row_flight['f_description'] != '') {
 	$pdf->Ln(5) ;
-	$pdf->MulticellUtf8(0, 5, "Description de la demande:\n$row_flight[f_description]") ;
+	$pdf->MulticellUtf8(0, 5, "Description de la demande:\n" . db2web($row_flight['f_description'])) ;
 }
 if ($row_flight['f_notes'] != '') {
 	$pdf->Ln(5) ;
-	$pdf->MulticellUtf8(0, 5, "Notes club:\n$row_flight[f_notes]") ;
+	$pdf->MulticellUtf8(0, 5, "Notes club:\n" . db2web($row_flight['f_notes'])) ;
 }
 
 //
