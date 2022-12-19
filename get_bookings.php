@@ -85,7 +85,7 @@ if ($error_message != '') {
 					$prefix = ($customer_row['f_gift'] != 0) ? 'V-' : '' ;
 					$type = ($customer_row['f_type'] == 'D') ? 'IF-' : 'INIT-' ;
 					$flight_reference = $prefix . $type . sprintf("%03d", $customer_row['f_id']) ;
-					$booking['comment'] = "Vol $type_vol $flight_reference pour $customer_row[p_fname] $customer_row[p_lname]" ;
+					$booking['comment'] = $booking['comment'] . "\n (Vol $type_vol $flight_reference pour $customer_row[p_fname] $customer_row[p_lname])." ;
 			}
 			if ($row['log_from'])
 				$booking['from'] = $row['log_from'] ;
