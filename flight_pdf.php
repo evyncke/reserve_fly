@@ -346,7 +346,7 @@ function passengerWB($i) {
 if ($row_flight['r_plane']) { // No W&B when plane is unknown 
 $pdf->NouveauChapitre("Masse et centrage du vol $flight_reference ($row_flight[p_lname]$scheduled)") ;
 $pdf->SetColumnsWidth(array(80, 30, 30, 30)) ;
-$pdf->ImprovedTableHeader(array("Poste", "Poids", "Bras", "Moment")) ; 
+$pdf->ImprovedTableHeader(array("Poste", "Poids (lbs.)", "Bras (in.)", "Moment")) ; 
 $totmoment_to = 0 ;
 $totwt_to = 0 ;
 $totmoment_ldg = 0 ;
@@ -358,6 +358,10 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	or journalise($userId, "F", "Cannot access W&B: " . mysqli_error($mysqli_link)) ;
 $url_params = array() ;
 while ($row = mysqli_fetch_array($result)) {
+	// Let's copy the plane enveloppe gross bounds
+	$maxwt = $row['maxwt'] ;
+	$cgwarnfwd = $row['cgwarnfwd'] ;
+	$cgwarnaft = $row['cgwarnaft'] ;
 	switch ($row['item']) {
 		case 'Pilot':
 			$result_pilot = mysqli_query($mysqli_link, "SELECT * 
@@ -367,7 +371,7 @@ while ($row = mysqli_fetch_array($result)) {
 			$row_pilot = mysqli_fetch_array($result_pilot) ;
 			$item_weight = round($row_pilot['p_weight'] * 2.20462, 2) ; // kg to lbs
 			$item_moment = $row['arm'] * $item_weight;
-			$row['item'] .= " ($row_pilot[first_name] $row_pilot[last_name] $row_pilot[p_weight] kg)" ; 
+			$row['item'] .= db2web(" ($row_pilot[first_name] $row_pilot[last_name] $row_pilot[p_weight] kg)") ; 
 			$url_params["line$row[id]_wt"] = $item_weight  ;
 			break ;
 		case 'Co-Pilot' : passengerWB(0) ; break ;
@@ -386,7 +390,7 @@ while ($row = mysqli_fetch_array($result)) {
 	}
 	
 	// $item_moment = $row['arm'] * $item_weight ;
-	$pdf->ImprovedTableRow(array($row['item'], "$item_weight lbs", "$row[arm]\"", $item_moment)) ;
+	$pdf->ImprovedTableRow(array($row['item'], $item_weight, $row['arm'], $item_moment)) ;
 	$totwt_to += $item_weight ;
 	$totmoment_to += $item_moment ;
 	if ($row['fuel'] == 'true') {
@@ -400,8 +404,9 @@ while ($row = mysqli_fetch_array($result)) {
 mysqli_free_result($result) ;
 $totarm_to = round($totmoment_to/$totwt_to, 2) ;
 $totarm_ldg = round($totmoment_ldg/$totwt_ldg, 2) ;
-$pdf->ImprovedTableRow(array("Total décollage", "$totwt_to lbs", "$totarm_to\"", $totmoment_to)) ;
-$pdf->ImprovedTableRow(array("Total atterrissage", "$totwt_ldg lbs", "$totarm_ldg\"", $totmoment_ldg)) ;
+$checked = ($totwt_to <= $maxwt and $cgarnfwd <= $totarm_to and $totarm_to <= $cgwarnaft) ? ', checked' : ' !!! WARNING !!!' ;
+$pdf->ImprovedTableRow(array("Total décollage$checked", $totwt_to, $totarm_to, $totmoment_to)) ;
+$pdf->ImprovedTableRow(array("Total atterrissage$checked", $totwt_ldg, $totarm_ldg, $totmoment_ldg)) ;
 $pdf->Ln(30) ;
 
 // Also before of web application firewall in cloudflare or mod_security on the server as the request is not built with user-agent or accept...
