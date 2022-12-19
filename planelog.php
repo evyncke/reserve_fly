@@ -134,7 +134,7 @@ print("Mois: <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString>&l
 if ($plane_details['compteur_vol'] != 0)
 	print("<th class=\"logHeader\">Flight Time</th>\n") ;
 ?>
-<th class="logHeader">Passengers</th>
+<th class="logHeader">Pax/crew</th>
 <th class="logHeader">Type of</th>
 <th class="logHeader" colspan="2">Engine index</th>
 <?php 
@@ -172,7 +172,8 @@ if ($plane_details['compteur_vol'] != 0)
 $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, l_start_hour, l_start_minute,
 	timediff(l_end, l_start) as duration,
 	l_flight_end_hour, l_flight_end_minute, l_flight_start_hour, l_flight_start_minute,
-	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark, l_pax_count, l_share_type, l_share_member,
+	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark, l_pax_count, l_crew_count, 
+	l_share_type, l_share_member,
 	l_booking, l_pilot, l_instructor
 	from $table_logbook l 
 	join $table_users p on l_pilot=p.id
@@ -279,7 +280,7 @@ while ($row = mysqli_fetch_array($result)) {
 			$flight_total_minute += $flight_duration ;
 			print("<td class=\"logCell\">$flight_duration</td>\n") ;
 		}
-		print("<td class=\"logCell\">$row[l_pax_count]</td>
+		print("<td class=\"logCell\">$row[l_pax_count]/$row[l_crew_count]</td>
 		<td class=\"logCell\">$row[l_flight_type]</td>
 		<td class=\"logCell\">$row[l_start_hour]:$row[l_start_minute]</td>
 		<td class=\"logCell\">$row[l_end_hour]:$row[l_end_minute]</td>\n") ;
