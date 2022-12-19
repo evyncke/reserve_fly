@@ -28,10 +28,19 @@ if (isset($_REQUEST['deleted'])) {
 	$deleted = '' ;
 	$deleted_filter = " AND f_date_cancelled IS NULL" ;
 }
+if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == true) {
+	$completed = true ;
+	$completed_filter = ' AND f_date_flown IS NOT NULL' ;
+	$title = 'terminés' ;
+} else {
+	$compleyed = false ;
+	$completed_filter = ' AND f_date_flown IS NULL' ;
+	$title = 'non terminés' ;
+}
 ?>
 
 <div class="page-header hidden-xs">
-<h3>Tous les vols non terminés</h3>
+<h3>Tous les vols <?=$title?></h3>
 </div><!-- page header -->
 
 <div class="row">
@@ -62,7 +71,7 @@ if (isset($_REQUEST['deleted'])) {
 $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today 
 	FROM $table_flight JOIN $table_pax_role ON f_id = pr_flight JOIN $table_pax ON pr_pax = p_id LEFT JOIN $table_person ON f_pilot = jom_id
 	LEFT JOIN $table_bookings AS b ON f_booking = b.r_id
-	WHERE pr_role = 'C' $other_filter $deleted_filter
+	WHERE pr_role = 'C' $other_filter $deleted_filter $completed_filter
 	ORDER BY f_id DESC") 
 	or die("Impossible de lister les vols: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {

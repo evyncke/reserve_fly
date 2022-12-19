@@ -88,7 +88,7 @@ var
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>                        
       </button>
-      <a class="navbar-brand" href="flight_home.php">Vols découvertes/initiations <span style="color:red; font-weight: bold; font-style: italic;">EN TEST !!!</span></a>
+      <a class="navbar-brand" href="flight_home.php">Vols découvertes/initiations <!--span style="color:red; font-weight: bold; font-style: italic;">EN TEST !!!</span--></a>
     </div><!-- navbar-header -->
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
@@ -99,6 +99,7 @@ var
             <!--li><a href="mobile.php">Ma prochaine</a></li-->
             <li><a href="flight_create.php">Nouveau</a></li>
             <li><a href="flight_list.php">Tous les vols</a></li>
+            <li><a href="flight_list.php?completed=true">Historique des vols terminés</a></li>
             <li><a href="flight_list_mine.php">Mes vols à venir</a></li>
           </ul><!-- dropdown-menu -->
         </li><!-- dropdown -->
