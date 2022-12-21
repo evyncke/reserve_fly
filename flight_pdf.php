@@ -70,7 +70,7 @@ function NouveauChapitre($libelle) {
     $this->MultiCellUtf8(0,6,"$libelle",0,1,'C',true);
     // Saut de ligne
     $this->Ln(4);
-    $this->SetFont('Arial','',12);
+    $this->SetFont('Arial','',10);
 }
 
 function MulticellUtf8($w, $h, $txt = '', $border = 0, $align = 'L', $fill = false) {
@@ -91,7 +91,7 @@ function ImprovedTableHeader($header) {
     
     $this->SetFont('','B');
     for($i=0; $i<count($header); $i++)
- 	   $this->CellUtf8($this->column_width[$i], 7, $header[$i], 1, 0, 'C');
+ 	   $this->CellUtf8($this->column_width[$i], 6, $header[$i], 1, 0, 'C');
  	$this->SetFont('','');
 	$this->Ln();
 }
@@ -99,7 +99,7 @@ function ImprovedTableHeader($header) {
 function ImprovedTableRow($row) {
     // Data
     for($i=0; $i<count($row); $i++)
-        $this->CellUtf8($this->column_width[$i], 7, $row[$i], 1, 0, 'C');
+        $this->CellUtf8($this->column_width[$i], 6, $row[$i], 1, 0, 'C');
     $this->Ln();
     // Closing line
  //   $this->CellUtf8(array_sum($this->column_width), 0, '', 'T');
@@ -129,6 +129,20 @@ function pilotLicence($pilot) {
 	if ($info->checked) return $info ;
 	$info = getSpecificPilotLicence($pilot, "SEP") ;
 	return $info ;
+}
+
+
+function getPilotELP($pilot) {
+	global $mysqli_link, $table_validity_type, $table_validity ;
+
+	$result = mysqli_query($mysqli_link, "SELECT * 
+		FROM $table_validity_type t JOIN $table_validity v ON validity_type_id = t.id
+		WHERE jom_id = $pilot AND name like '%$ELP%'") or die("Cannot read ELP: " . mysqli_error($mysqli_link)) ;
+	$row = mysqli_fetch_array($result) ;
+	mysqli_free_result($result) ;
+	if ($row)
+		return [checked=>true, name=>$row['name'], expiration=> $row['expire_date']] ;
+	return ['name' => null, 'checked' => false] ;
 }
 
 function pilotFlightTimeInfo($pilot) {
@@ -265,6 +279,8 @@ $pdf->ImprovedTableHeader(array("Actions", "Information", "Chck", "Sig")) ;
 if ($row_flight['f_pilot']) {
 	$licence_info = pilotLicence($row_flight['f_pilot']) ;
 	$pdf->ImprovedTableRow(array("Licence" , "$licence_info[name] (*)", (!$licence_info['checked']) ? '' : ($licence_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
+	$elp_info = getPilotELP($row_flight['f_pilot']) ;
+	$pdf->ImprovedTableRow(array("ELP" , "Expiration: $elp_info[expiration]", (!$elp_info['checked']) ? '' : ($elp_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
 	if ($row_flight['r_plane']) {
 		$result_booking = mysqli_query($mysqli_link, "select upper(id) as id, classe, delai_reservation
 			from $table_planes where ressource = 0
@@ -282,6 +298,7 @@ if ($row_flight['f_pilot']) {
 	$pdf->ImprovedTableRow(array("Heures de vol sur l'année (PPL)" , $flight_time_info['hours'], ($flight_time_info['hours'] >= 10.0) ? "OUI" : "NON", '')) ;
 } else {
 	$pdf->ImprovedTableRow(array("Licence" , '', '', '')) ;
+	$pdf->ImprovedTableRow(array("ELP" , '', '', '')) ;
 	$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , "", "", '')) ;
 	$pdf->ImprovedTableRow(array("Heures de vol sur l'année (PPL)" , '', '', '')) ;
 }
