@@ -82,9 +82,12 @@ if ($error_message != '') {
 					$booking['customerName'] = db2web($customer_row['p_fname']) . ' ' . db2web($customer_row['p_lname']) ;
 					$booking['customerPhone'] = "$customer_row[p_tel]" ;
 					$type_vol = ($customer_row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
-					$prefix = ($customer_row['f_gift'] != 0) ? 'V-' : '' ;
-					$type = ($customer_row['f_type'] == 'D') ? 'IF-' : 'INIT-' ;
-					$flight_reference = $prefix . $type . sprintf("%03d", $customer_row['f_id']) ;
+					if ($customer_row['f_reference'] == '') {
+						$prefix = ($customer_row['f_gift'] != 0) ? 'V-' : '' ;
+						$type = ($customer_row['f_type'] == 'D') ? 'IF-' : 'INIT-' ;
+						$flight_reference = $prefix . $type . sprintf("%03d", $customer_row['f_id']) ;
+					} else
+						$flight_reference = db2web($customer_row['f_reference']) ;
 					$booking['comment'] = $booking['comment'] . "\n (Vol $type_vol $flight_reference pour $customer_row[p_fname] $customer_row[p_lname])." ;
 			}
 			if ($row['log_from'])
