@@ -163,8 +163,8 @@ function getPilotELP($pilot) {
 	$row = mysqli_fetch_array($result) ;
 	mysqli_free_result($result) ;
 	if ($row)
-		return [checked=>true, name=>$row['name'], expiration=> $row['expire_date']] ;
-	return ['name' => null, 'checked' => false] ;
+		return array('checked'=>true, 'name'=>$row['name'], 'expiration'=> $row['expire_date']) ;
+	return array('name' => null, 'checked' => false) ;
 }
 
 function getPilotMedical($pilot) {
@@ -176,8 +176,35 @@ function getPilotMedical($pilot) {
 	$row = mysqli_fetch_array($result) ;
 	mysqli_free_result($result) ;
 	if ($row)
-		return [checked=>true, name=>$row['name'], expiration=> $row['expire_date']] ;
-	return ['name' => null, 'checked' => false] ;
+		return array('checked'=>true, 'name'=>$row['name'], 'expiration'=> $row['expire_date']) ;
+	return array('name' => null, 'checked' => false) ;
+}
+
+function getPilot100h($pilot) {
+	global $mysqli_link, $table_validity_type, $table_validity ;
+
+	$result = mysqli_query($mysqli_link, "SELECT * 
+		FROM $table_validity_type t JOIN $table_validity v ON validity_type_id = t.id
+		WHERE jom_id = $pilot AND name like '%100%'") or die("Cannot read 100hours: " . mysqli_error($mysqli_link)) ;
+	$row = mysqli_fetch_array($result) ;
+	mysqli_free_result($result) ;
+	if ($row)
+		return array('checked'=>true, 'name'=>$row['name'], 'since'=>$row['grant_date']);
+	return array('name' => null, 'checked' => false, 'since' => '???') ;
+}
+
+function getPilotIF($pilot, $flight_type) {
+	global $mysqli_link, $table_flights_pilots ;
+
+	$column = ($flight_type == 'initiation') ? 'p_initiation' : 'p_discovery' ;
+	$result = mysqli_query($mysqli_link, "SELECT * 
+		FROM $table_flights_pilots
+		WHERE p_id = $pilot") or die("Cannot read $table_flights_pilots: " . mysqli_error($mysqli_link)) ;
+	$row = mysqli_fetch_array($result) ;
+	mysqli_free_result($result) ;
+	if ($row)
+		return $row[$column] != 0 ;
+	return false ;
 }
 
 function pilotFlightTimeInfo($pilot) {
@@ -225,6 +252,23 @@ function RecentBooking($plane, $userId, $delai_reservation) {
 	}
 }
 
+function RecentLandings($plane, $userId) {
+	global $mysqli_link, $table_logbook, $table_bookings ;
+	global $message ;
+
+	$result = mysqli_query($mysqli_link, "SELECT SUM(l_day_landing) AS landings
+		FROM $table_logbook l
+		WHERE l_plane = '$plane' and (l_pilot = $userId or (l_instructor is not null and l_instructor = $userId))
+		AND l_end >= DATE_SUB(SYSDATE(), INTERVAL 90 DAY)") or die("Cannot get landings count: " . mysqli_error($mysqli_link)) ;
+	$row = mysqli_fetch_array($result) ;
+	mysqli_free_result($result) ;
+	if (! $row) {
+		return 0 ;
+	} else {
+		return $row['landings'] ;
+	}
+}
+
 $pdf = new PDF('P','mm','A4');
 $pdf->AliasNbPages(); // Prepare the page numbering
 
@@ -266,7 +310,7 @@ if ($row_flight['r_plane']) {
 	$result_plane = mysqli_query($mysqli_link, "SELECT * FROM $table_planes WHERE id = '$row_flight[r_plane]' and ressource = 0")
 		or die("Cannot retrieve information about plane: " . mysqli_error($mysqli_link)) ;
 	$row_plane = mysqli_fetch_array($result_plane) ;
-	mysqli_free_result($row_plane) ;
+	mysqli_free_result($result_plane) ;
 } else
 	$row_plane = false ;
 //
@@ -319,11 +363,11 @@ $pdf->Ln() ;
 
 $pdf->CellUtf8(0, 3, "En signant ci-dessous, je certifie sur l’honneur que (parapher les différents points dans la colonne 'paraphe') :") ;
 $pdf->Ln() ;
-$pdf->SetColumnsWidth(array(120, 30, 10, 20)) ;
-$pdf->ImprovedTableHeader(array("Actions", "Information", "Check", "Paraphe")) ; 
+$pdf->SetColumnsWidth(array(110, 50, 10, 20)) ;
+$pdf->ImprovedTableHeader(array("Point", "Information", "Check", "Paraphe")) ; 
 if ($row_flight['f_pilot']) {
 	$licence_info = pilotLicence($row_flight['f_pilot']) ;
-	$pdf->ImprovedTableRow(array("Licence" , "$licence_info[name] (*)", (!$licence_info['checked']) ? '' : ($licence_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
+	$pdf->ImprovedTableRow(array("Licence: $licence_info[name]", "Expiration: $licence_info[expiration]", (!$licence_info['checked']) ? '' : ($licence_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
 	$medical_info = getPilotMedical($row_flight['f_pilot']) ;
 	$pdf->ImprovedTableRow(array("Certificat médical" , "Expiration: $medical_info[expiration]", (!$medical_info['checked']) ? '' : ($medical_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
 	$elp_info = getPilotELP($row_flight['f_pilot']) ;
@@ -333,20 +377,28 @@ if ($row_flight['f_pilot']) {
 			from $table_planes where ressource = 0
 			order by id") or die("Cannot get all active planes:".mysqli_error($mysqli_link)) ;
 		$check_club = false ;
+		$landings_count = 0 ;
 		while ($row_booking = mysqli_fetch_array($result_booking) and !$check_club) {
-			if (planeClassIsMember($row_plane['classe'], $row_booking['classe']))
+			if (planeClassIsMember($row_plane['classe'], $row_booking['classe'])) {
 				$check_club = RecentBooking($row_flight['r_plane'], $row_flight['f_pilot'], $row_booking['delai_reservation']) ; // Only if recent flight !!!
+				$landings_count += RecentLandings($row_flight['r_plane'], $row_flight['f_pilot']) ; 
+			}
 		}
 		mysqli_free_result($result_booking) ;
 		$pdf->ImprovedTableMultiLineRow(2, array("Check club (90 days / 6 weeks)\nClass: $row_plane[classe]" , $check_club->explanation,($check_club->result) ? 'OUI' : 'NON', '')) ;
-	} else // $row_flight['r_plane']
+		$pdf->ImprovedTableMultiLineRow(2, array("Vols complets (atterrissages et décollages)\nderniers 90 jours sur classe: $row_plane[classe]" , $landings_count,
+			($landings_count >= 3) ? 'OUI' : 'NON', '')) ;
+	} else {// $row_flight['r_plane']
 		$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , "Avion non spécifié", "", "")) ;
-	$pdf->ImprovedTableRow(array("100 heures de vol en tant que PIC (PPL)", '', '', '')) ;
+		$pdf->ImprovedTableRow(array("Vols complets (atterrissages et décollages)" , "Avion non spécifié", "", "")) ;
+	}
+	$pic100_info = getPilot100h($row_flight['f_pilot']) ;
+	$pdf->ImprovedTableRow(array("100 heures de vol en tant que PIC", "Depuis: $pic100_info[since]", ($pic100_info['checked']) ? 'OUI' : 'NON', '')) ;
 	$flight_time_info = pilotFlightTimeInfo($row_flight['f_pilot']) ;
-	$pdf->ImprovedTableRow(array("Heures de vol sur l'année (PPL)" , $flight_time_info['hours'], ($flight_time_info['hours'] >= 10.0) ? "OUI" : "NON", '')) ;
+	$pdf->ImprovedTableRow(array("Heures de vol sur les 12 derniers mois (SEP)" , "$flight_time_info[hours] h.", ($flight_time_info['hours'] >= 10.0) ? "OUI" : "NON", '')) ;
 // TODO check 10 heures sur classe C150/152 ou C172 ou C182 ou PA18
 
-	$pdf->ImprovedTableRow(array("Je suis toujours agré(e) pour le vol découverte", '', '', '')) ;
+	$pdf->ImprovedTableRow(array("Je suis toujours agré(e) pour le vol $flight_type", '', (getPilotIF($row_flight['f_pilot'], $flight_type)) ? 'OUI' : 'NON', '')) ;
 	$pdf->ImprovedTableRow(array("J'ai vérifié toutes les assurances et certificats nécessaires à l'avion", '', '', '')) ;
 	$pdf->ImprovedTableRow(array("Les passagers ne montrent aucun signe apparent de contre-indication à ce vol", '', '', '')) ;
 } else {
@@ -361,9 +413,9 @@ d'avant vol (en particulier toutes les conditions de sécurité),
 et je les aide à monter et descendre de l'avion." , "", "", '')) ;
 $pdf->ImprovedTableRow(array("Vérification de la quantité de carburant emportée" , " litres", "", '')) ;
 $pdf->ImprovedTableRow(array("Masse et centrage" , (($row_flight['r_plane'])) ? "Voir page suivante" : "Avion non spécifié", "", '')) ;
-if ($licence_info['checked']) {
-	$pdf->MultiCellUtf8(0, 8, "(*) $licence_info[name]: $licence_info[ident] jusqu'au $licence_info[expiration].") ;
-}
+//if ($licence_info['checked']) {
+//	$pdf->MultiCellUtf8(0, 8, "(*) $licence_info[name]: $licence_info[ident] jusqu'au $licence_info[expiration].") ;
+//}
 $pdf->Ln(10) ;
 
 //
