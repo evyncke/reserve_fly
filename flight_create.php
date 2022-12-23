@@ -96,6 +96,7 @@ if ($create or $modify) {
 	$date1 = (trim($_REQUEST['date1']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date1'])))) : 'NULL';
 	$date2 = (trim($_REQUEST['date2']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date2'])))) : 'NULL';
 	$comment = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['comment'])) ;
+	$reference = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['reference'])) ;
 	$notes = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['notes'])) ;
 }
 
@@ -130,10 +131,13 @@ if ($modify) {
 			WHERE p_id = $pax_id")
 		or journalise($userId, "F", "Cannot modify contact, system error: " . mysqli_error($mysqli_link)) ;
 	$sql = "UPDATE $table_flight 
-		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "', f_notes='" . web2db($notes) . "'
+		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "', f_reference='" . web2db($reference) . "', f_notes='" . web2db($notes) . "'
 		WHERE f_id = $flight_id" ;
-	mysqli_query($mysqli_link, $sql)
-		or journalise($userId, "F", "Cannot modify flight, system error: " . mysqli_error($mysqli_link)) ;
+	if (!mysqli_query($mysqli_link, $sql))
+		if (mysqli_errno($mysqli_link) == 1062)
+			journalise($userId, "F", "***Impossible de modifier le vol, la reference est deja utilisee ou deux vols crees en meme temps***" . mysqli_error($mysqli_link)) ;
+		else
+			journalise($userId, "F", "Cannot modify flight, system error #" . mysqli_errno($mysqli_link) . ": " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "W", "Flight $flight_id modified") ;
 }
 
@@ -265,9 +269,15 @@ if (isset($flight_id) and $flight_id != 0) {
 		or journalise($userId, "F", "Cannot retrieve flight $flight_id: " . mysqli_error($mysqli_link)) ;
 	$row_flight = mysqli_fetch_array($result) ;
 	if (!$row_flight) journalise($userId, "F", "Vol #$flight_id inconnu!") ;
-	$prefix = ($row_flight['f_gift'] != 0) ? 'V-' : '' ;
-	$type = ($row_flight['f_type'] == 'D') ? 'IF-' : 'INIT-' ;
-	$flight_number = $prefix . $type . sprintf("%03d", $flight_id) ;
+	if ($row_flight['f_reference'] != '')
+		$flight_number = strtoupper($row_flight['f_reference']) ;
+	else {
+		$prefix = ($row_flight['f_gift'] != 0) ? 'V-' : '' ;
+		$type = ($row_flight['f_type'] == 'D') ? 'IF-' : 'INIT-' ;
+		$flight_number = $prefix . $type . sprintf("%03d", $flight_id) ;
+		// As flight manager wants to use another manual process
+		$flight_number = sprintf("#%03d", $flight_id) ;
+	}
 	$title = "Modification d'une réservation de vol $flight_number" ;
 } else
 	$title = "Création d'une réservation de vol" ;
@@ -336,7 +346,7 @@ if (isset($flight_id) and $flight_id != 0) {
 ?>
 			</select>
 	</div> <!-- form-group schedule -->
-	<div class="form-group col-xs-6 col-sm-2">
+	<div class="form-group col-xs-6 col-sm-3">
 		<label for="lname">Nombre de passagers (au total en dehors du pilote/FI):</label>
 		<input type="number" min="1" max="3" class="form-control" name="pax_cnt" value="1">
 	</div> <!-- form-group pax count -->
@@ -431,6 +441,13 @@ if ($flight_id == '') {
 	<div class="form-group col-xs-12">
 		<label for="notes">Notes club:</label>
 		<textarea class="form-control" rows="5" name="notes"></textarea>
+	</div><!-- form-group -->
+</div><!-- row -->
+
+<div class="row">
+	<div class="form-group col-xs-6 col-sm-2">
+		<label for="reference">Référence club (V-INIT-999 ou IF-999 ou ...) ou code René:</label>
+		<input type="text" class="form-control" name="reference">
 	</div><!-- form-group -->
 </div><!-- row -->
 
@@ -736,6 +753,7 @@ setValue('city', '<?=db2web(addslashes($row_flight['p_city']))?>') ;
 setValue('email', '<?=db2web($row_flight['p_email'])?>') ;
 setValue('phone', '<?=db2web($row_flight['p_tel'])?>') ;
 setValue('comment', '<?=db2web(str_replace(array("\r\n", "\n", "\r"), "<br/>", addslashes($row_flight['f_description'])))?>') ;
+setValue('reference', '<?=db2web($row_flight['f_reference'])?>') ;
 setValue('notes', '<?=db2web(str_replace(array("\r\n", "\n", "\r"), "<br/>", addslashes($row_flight['f_notes'])))?>') ;
 //for (var i = 0; i < document.getElementsByName("gender")[0].options.length; i++) {
 //	if (document.getElementsByName("gender")[0].options[i].value == '<?=$row_flight['p_gender']?>')

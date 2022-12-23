@@ -40,13 +40,13 @@ function Header() {
     $this->Image('../logo_rapcs_256x256.png',10,6,30);
 //    $this->Image('http://www.spa-aviation.be/logo_rapcs_256x256.png',10,6,30);
     // Police Arial gras 15
-    $this->SetFont('Arial','B',15);
+    $this->SetFont('Arial','B',12);
     // Décalage à droite
     $this->CellUtf8(70);
     // Titre
-    $this->CellUtf8(90,10,"RAPCS ASBL, Vol $flight_reference",1,0,'C');
+    $this->CellUtf8(90,9,"RAPCS ASBL, Vol $flight_reference",1,0,'C');
     // Saut de ligne
-    $this->Ln(30);
+    $this->Ln(25);
 }
 
 // Pied de page
@@ -55,7 +55,7 @@ function Footer() {
     // Positionnement à 1,5 cm du bas
     $this->SetY(-15);
     // Police Arial italique 8
-    $this->SetFont('Arial','I',8);
+    $this->SetFont('Arial','I',6);
     // Numéro de page
     $this->CellUtf8(0,10,'Page '.$this->PageNo().'/{nb} ' . "(Imprimé le " . date('Y-m-d H:i:s') . " par $userFullName)",0,0,'C');
 }
@@ -70,7 +70,7 @@ function NouveauChapitre($libelle) {
     $this->MultiCellUtf8(0,6,"$libelle",0,1,'C',true);
     // Saut de ligne
     $this->Ln(4);
-    $this->SetFont('Arial','',10);
+    $this->SetFont('Arial','',8);
 }
 
 function MulticellUtf8($w, $h, $txt = '', $border = 0, $align = 'L', $fill = false) {
@@ -91,7 +91,7 @@ function ImprovedTableHeader($header) {
     
     $this->SetFont('','B');
     for($i=0; $i<count($header); $i++)
- 	   $this->CellUtf8($this->column_width[$i], 6, $header[$i], 1, 0, 'C');
+ 	   $this->CellUtf8($this->column_width[$i], 4, $header[$i], 1, 0, 'C');
  	$this->SetFont('','');
 	$this->Ln();
 }
@@ -99,10 +99,33 @@ function ImprovedTableHeader($header) {
 function ImprovedTableRow($row) {
     // Data
     for($i=0; $i<count($row); $i++)
-        $this->CellUtf8($this->column_width[$i], 6, $row[$i], 1, 0, 'C');
+        $this->CellUtf8($this->column_width[$i], 4, $row[$i], 1, 0, 'C');
     $this->Ln();
-    // Closing line
- //   $this->CellUtf8(array_sum($this->column_width), 0, '', 'T');
+}
+
+function ImprovedTableMultiLineRow($line_count, $row) {
+    // Data
+	if ($line_count == 1) return ImprovedTableRow($row) ;
+	// Emit first line with top lines
+	for($i=0; $i<count($row); $i++) {
+		$lines = explode("\n", $row[$i]) ;
+		$this->CellUtf8($this->column_width[$i], 4, $lines[0], 'LTR', 0, 'C');
+	}
+	$this->Ln();
+	// Emit middle lines
+	for ($line = 1; $line < $line_count-1; $line++) {
+		for($i=0; $i<count($row); $i++) {
+			$lines = explode("\n", $row[$i]) ;
+			$this->CellUtf8($this->column_width[$i], 4, $lines[$line], 'LR', 0, 'C');
+		}
+		$this->Ln();
+	}
+	// Emit first line with top lines
+	for($i=0; $i<count($row); $i++) {
+		$lines = explode("\n", $row[$i]) ;
+		$this->CellUtf8($this->column_width[$i], 4, $lines[$line_count-1], 'LBR', 0, 'C');
+	}
+	$this->Ln();
 }
 
 }
@@ -131,13 +154,25 @@ function pilotLicence($pilot) {
 	return $info ;
 }
 
-
 function getPilotELP($pilot) {
 	global $mysqli_link, $table_validity_type, $table_validity ;
 
 	$result = mysqli_query($mysqli_link, "SELECT * 
 		FROM $table_validity_type t JOIN $table_validity v ON validity_type_id = t.id
-		WHERE jom_id = $pilot AND name like '%$ELP%'") or die("Cannot read ELP: " . mysqli_error($mysqli_link)) ;
+		WHERE jom_id = $pilot AND name like '%ELP%'") or die("Cannot read ELP: " . mysqli_error($mysqli_link)) ;
+	$row = mysqli_fetch_array($result) ;
+	mysqli_free_result($result) ;
+	if ($row)
+		return [checked=>true, name=>$row['name'], expiration=> $row['expire_date']] ;
+	return ['name' => null, 'checked' => false] ;
+}
+
+function getPilotMedical($pilot) {
+	global $mysqli_link, $table_validity_type, $table_validity ;
+
+	$result = mysqli_query($mysqli_link, "SELECT * 
+		FROM $table_validity_type t JOIN $table_validity v ON validity_type_id = t.id
+		WHERE jom_id = $pilot AND name like 'M%dical%'") or die("Cannot read medical: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
 	mysqli_free_result($result) ;
 	if ($row)
@@ -171,6 +206,7 @@ function RecentBooking($plane, $userId, $delai_reservation) {
 	global $mysqli_link, $table_logbook, $table_bookings ;
 	global $message ;
 
+	$return_value = new stdClass() ;
 	$result = mysqli_query($mysqli_link, "select l_end, datediff(sysdate(), l_end) as temps_dernier 
 		from $table_logbook l
 		where l_plane = '$plane' and (l_pilot = $userId or (l_instructor is not null and l_instructor = $userId))
@@ -183,7 +219,7 @@ function RecentBooking($plane, $userId, $delai_reservation) {
 		return $return_value ;
 	} else {
 		mysqli_free_result($result) ;
-		$return_value->explanation = "$plane $row[l_end] $row[temps_dernier] days ago" ;
+		$return_value->explanation = "$plane " . substr($row['l_end'], 0, 10) . "\n$row[temps_dernier] days ago" ;
 		$return_value->result = ($row['temps_dernier'] <= $delai_reservation) ;
 		return $return_value ;
 	}
@@ -214,7 +250,13 @@ $flight_reference = ($row_flight['f_gift']) ? 'V-' : '' ;
 $flight_reference .= ($row_flight['f_type'] == 'D') ? 'IF-' : "INIT-" ;
 $flight_reference .= sprintf("%03d", $flight_id) ;
 
-// Get the circuit names
+// Unsure why the manager insists on using his manual numbers...
+if ($row_flight['f_reference'] == '')
+	$flight_reference = sprintf("#%03d", $flight_id) ;
+else
+	$flight_reference = db2web($row_flight['f_reference']) . ' (' . sprintf("#%03d", $flight_id) . ')';
+
+	// Get the circuit names
 $circuits = json_decode(file_get_contents("../voldecouverte/script/circuits.js"), true);
 $circuit_name = (isset($circuits[$row_flight['f_circuit']])) ? $circuits[$row_flight['f_circuit']] : "Circuit #$row_flight[f_circuit] inconnu" ;
 
@@ -233,33 +275,34 @@ if ($row_flight['r_plane']) {
 $pdf->NouveauChapitre("Dossier sécurité pour le vol $flight_type $flight_reference ($row_flight[p_lname]$scheduled_date)") ;
 
 if ($row_flight['f_type'] == 'D') {
-	$pdf->CellUtf8(0, 5, "Circuit: $circuit_name") ;
+	$pdf->CellUtf8(0, 3, "Circuit: $circuit_name") ;
 	$pdf->Ln() ;
 }
 
 if ($row_flight['first_name'])
-	$pdf->CellUtf8(0, 5, "Pilote: " . db2web("$row_flight[first_name] $row_flight[last_name] ($row_flight[cell_phone] $row_flight[email])")) ;
+	$pdf->CellUtf8(0, 3, "Pilote: " . db2web("$row_flight[first_name] $row_flight[last_name] ($row_flight[cell_phone] $row_flight[email])")) ;
 else
-	$pdf->CellUtf8(0, 5, "Pilote:") ;
+	$pdf->CellUtf8(0, 3, "Pilote:") ;
 $pdf->Ln() ;
 
 if ($row_flight['r_plane'])
-	$pdf->CellUtf8(0, 5, "Avion: $row_flight[r_plane]") ;
+	$pdf->CellUtf8(0, 3, "Avion: $row_flight[r_plane]") ;
 else
-	$pdf->CellUtf8(0, 5, "Avion: ") ;
+	$pdf->CellUtf8(0, 3, "Avion: ") ;
 $pdf->Ln() ;
 
 if ($row_flight['r_start'])
-	$pdf->CellUtf8(0, 5, "Début du vol (heure locale): $row_flight[r_start]") ;
+	$pdf->CellUtf8(0, 3, "Début du vol (heure locale): $row_flight[r_start]") ;
 else
-	$pdf->CellUtf8(0, 5, "Ce vol n'est pas encore planifié.") ;
+	$pdf->CellUtf8(0, 3, "Ce vol n'est pas encore planifié.") ;
 $pdf->Ln() ;
 
 if ($row_flight['f_date_paid'])
-	$pdf->CellUtf8(0, 5, "Vol déjà payé le $row_flight[f_date_paid]: " . db2web($row_flight['f_reference_payment'])) ;
+	$pdf->CellUtf8(0, 3, "Vol payé le $row_flight[f_date_paid]: " . db2web($row_flight['f_reference_payment'])) ;
 else
-	$pdf->CellUtf8(0, 5, "Ce vol doit encore être payé.") ;
-$pdf->Ln(20) ;
+	$pdf->CellUtf8(0, 3, "Ce vol doit encore être payé.") ;
+$pdf->Ln() ;
+$pdf->Ln() ;
 
 //
 // Check-list
@@ -274,11 +317,15 @@ $pdf->Ln(20) ;
 
 // Voire page 14 de https://drive.google.com/file/d/1XYZWORUndRYdqAqUmnbHWXKOB7IotbO4/view
 
-$pdf->SetColumnsWidth(array(70, 90, 15, 10)) ;
-$pdf->ImprovedTableHeader(array("Actions", "Information", "Chck", "Sig")) ; 
+$pdf->CellUtf8(0, 3, "En signant ci-dessous, je certifie sur l’honneur que (parapher les différents points dans la colonne 'paraphe') :") ;
+$pdf->Ln() ;
+$pdf->SetColumnsWidth(array(120, 30, 10, 20)) ;
+$pdf->ImprovedTableHeader(array("Actions", "Information", "Check", "Paraphe")) ; 
 if ($row_flight['f_pilot']) {
 	$licence_info = pilotLicence($row_flight['f_pilot']) ;
 	$pdf->ImprovedTableRow(array("Licence" , "$licence_info[name] (*)", (!$licence_info['checked']) ? '' : ($licence_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
+	$medical_info = getPilotMedical($row_flight['f_pilot']) ;
+	$pdf->ImprovedTableRow(array("Certificat médical" , "Expiration: $medical_info[expiration]", (!$medical_info['checked']) ? '' : ($medical_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
 	$elp_info = getPilotELP($row_flight['f_pilot']) ;
 	$pdf->ImprovedTableRow(array("ELP" , "Expiration: $elp_info[expiration]", (!$elp_info['checked']) ? '' : ($elp_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
 	if ($row_flight['r_plane']) {
@@ -291,19 +338,28 @@ if ($row_flight['f_pilot']) {
 				$check_club = RecentBooking($row_flight['r_plane'], $row_flight['f_pilot'], $row_booking['delai_reservation']) ; // Only if recent flight !!!
 		}
 		mysqli_free_result($result_booking) ;
-		$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , $check_club->explanation,($check_club->result) ? 'OUI' : 'NON', '')) ;
+		$pdf->ImprovedTableMultiLineRow(2, array("Check club (90 days / 6 weeks)\nClass: $row_plane[classe]" , $check_club->explanation,($check_club->result) ? 'OUI' : 'NON', '')) ;
 	} else // $row_flight['r_plane']
-		$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , "", "", "")) ;
+		$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , "Avion non spécifié", "", "")) ;
+	$pdf->ImprovedTableRow(array("100 heures de vol en tant que PIC (PPL)", '', '', '')) ;
 	$flight_time_info = pilotFlightTimeInfo($row_flight['f_pilot']) ;
 	$pdf->ImprovedTableRow(array("Heures de vol sur l'année (PPL)" , $flight_time_info['hours'], ($flight_time_info['hours'] >= 10.0) ? "OUI" : "NON", '')) ;
+// TODO check 10 heures sur classe C150/152 ou C172 ou C182 ou PA18
+
+	$pdf->ImprovedTableRow(array("Je suis toujours agré(e) pour le vol découverte", '', '', '')) ;
+	$pdf->ImprovedTableRow(array("J'ai vérifié toutes les assurances et certificats nécessaires à l'avion", '', '', '')) ;
+	$pdf->ImprovedTableRow(array("Les passagers ne montrent aucun signe apparent de contre-indication à ce vol", '', '', '')) ;
 } else {
 	$pdf->ImprovedTableRow(array("Licence" , '', '', '')) ;
 	$pdf->ImprovedTableRow(array("ELP" , '', '', '')) ;
 	$pdf->ImprovedTableRow(array("Check club (90 days / 6 weeks)" , "", "", '')) ;
 	$pdf->ImprovedTableRow(array("Heures de vol sur l'année (PPL)" , '', '', '')) ;
 }
-$pdf->ImprovedTableRow(array("Repos observé" , "", "", '')) ;
-$pdf->ImprovedTableRow(array("Briefing passagers" , "", "", '')) ;
+$pdf->ImprovedTableMultiLineRow(2, array("Repos observé (1 heure de repos après 2 heures de vol,\nmax 4 heures de vol par 24 heures)" , "", "", '')) ;
+$pdf->ImprovedTableMultiLineRow(3, array("J'accompagne les passagers sur les parkings, je leur donne le briefing
+d'avant vol (en particulier toutes les conditions de sécurité),
+et je les aide à monter et descendre de l'avion." , "", "", '')) ;
+$pdf->ImprovedTableRow(array("Vérification de la quantité de carburant emportée" , " litres", "", '')) ;
 $pdf->ImprovedTableRow(array("Masse et centrage" , (($row_flight['r_plane'])) ? "Voir page suivante" : "Avion non spécifié", "", '')) ;
 if ($licence_info['checked']) {
 	$pdf->MultiCellUtf8(0, 8, "(*) $licence_info[name]: $licence_info[ident] jusqu'au $licence_info[expiration].") ;
@@ -315,8 +371,8 @@ $pdf->Ln(10) ;
 //
 $pdf->CellUtf8(0, 5, "Liste des passagers") ;
 $pdf->Ln() ;
-$pdf->SetColumnsWidth(array(60, 50)) ;
-$pdf->ImprovedTableHeader(array("Nom", "Prénom")) ; 
+$pdf->SetColumnsWidth(array(60, 60, 20, 20)) ;
+$pdf->ImprovedTableHeader(array("Nom", "Prénom", "Age", "Poids")) ; 
 $result = mysqli_query($mysqli_link, "SELECT * 
 	FROM $table_flight JOIN $table_pax_role ON f_id = pr_flight JOIN $table_pax ON pr_pax = p_id
 	WHERE pr_role <> 'C' AND f_id = $flight_id 
@@ -324,7 +380,13 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	or die("Cannot retrieve flight: " . mysqli_error($mysqli_link)) ;
 $all_pax = array() ;
 while ($row_pax = mysqli_fetch_array($result)) {
-	$pdf->ImprovedTableRow(array(db2web($row_pax['p_lname']), db2web($row_pax['p_fname']))) ;
+	switch ($row_pax['p_age']) {
+		case 'C': $age = "< 12 ans" ; break ;
+		case 'T': $age = "< 18 ans" ; break ;
+		case 'A':
+		default: $age = ">= 18 ans" ;
+	}
+	$pdf->ImprovedTableRow(array(db2web($row_pax['p_lname']), db2web($row_pax['p_fname']), $age, "$row_pax[p_weight] kg")) ;
 	$all_pax[] = $row_pax ;
 }
 mysqli_free_result($result) ;
@@ -333,10 +395,14 @@ mysqli_free_result($result) ;
 // Bottom approval and signature
 //
 $pdf->Ln() ;
-$pdf->CellUtf8(60, 5, "Date: " . date('Y-m-d'), 0, 0, 'L') ;
-$pdf->CellUtf8(100, 5, " Responsable sécurité:", 0, 0, 'C') ;
-$pdf->SetY(-45); // Position absolue au dessus de la marge du bas
-$pdf->MultiCellUtf8(0, 5, "Cette page doit rester à terre et être conservée tant que tous les passagers n'ont pas débarqué sans incidents de l'aéronef. " .
+$pdf->CellUtf8(50, 5, "Date: " . date('Y-m-d'), 0, 0, 'L') ;
+$pdf->CellUtf8(70, 5, " Pilote:", 0, 0, 'C') ;
+$pdf->CellUtf8(70, 5, " Responsable sécurité:", 0, 0, 'C') ;
+$pdf->SetY(-50); // Position absolue au dessus de la marge du bas
+$pdf->MultiCellUtf8(0, 4, "Le non-respect de ces règles pourra entraîner votre retrait de la liste des pilotes autorisés à effectuer
+des vols découverte, et votre entière responsabilité en cas d’accident ou d’incident.", 0, 1, 'C', true);
+$pdf->Ln() ;
+$pdf->MultiCellUtf8(0, 4, "Cette page doit rester à terre et être conservée tant que tous les passagers n'ont pas débarqué sans incidents de l'aéronef. " .
 	"En cas d'incident, cette liste sera transmise au secrétariat ou au Président (info@spa-aviation.be). " .
 	"Le secrétariat conservera cette liste et la transmettra sur demande aux autorités compétentes.", 0, 1, 'C', true);
 
@@ -441,11 +507,19 @@ $pdf->NouveauChapitre("Description du vol $flight_type $flight_reference ($row_f
 $pdf->MulticellUtf8(0, 5, "La personne de contact pour ce vol est: $row_flight[p_fname] $row_flight[p_lname], numéro de téléphone: $row_flight[p_tel], email: $row_flight[p_email].") ;
 if ($row_flight['f_description'] != '') {
 	$pdf->Ln(5) ;
-	$pdf->MulticellUtf8(0, 5, "Description de la demande:\n" . db2web($row_flight['f_description'])) ;
+	$pdf->SetFont(null, 'B', null) ;
+	$pdf->MulticellUtf8(0, 4, "Description de la demande:") ;
+	$pdf->SetFont(null, 'I', null) ;
+	$pdf->MulticellUtf8(0, 4, db2web($row_flight['f_description'])) ;
+	$pdf->SetFont(null, null, null) ;
 }
 if ($row_flight['f_notes'] != '') {
 	$pdf->Ln(5) ;
-	$pdf->MulticellUtf8(0, 5, "Notes club:\n" . db2web($row_flight['f_notes'])) ;
+	$pdf->SetFont(null, 'B', null) ;
+	$pdf->MulticellUtf8(0, 4, "Notes club:") ;
+	$pdf->SetFont(null, 'I', null) ;
+	$pdf->MulticellUtf8(0, 4, db2web($row_flight['f_notes'])) ;
+	$pdf->SetFont(null, null, null) ;
 }
 
 //
@@ -453,26 +527,31 @@ if ($row_flight['f_notes'] != '') {
 //
 
 foreach($all_pax as $pax_row) {
-	if ($pax_row['p_age'] == 'A') { // For an adump
-		$pdf->NouveauChapitre("Décharge de " . db2web($pax_row['p_fname']) . " " . db2web($pax_row['p_lname']) . " pour le vol $flight_type $flight_reference ($row_flight[p_lname]$scheduled)") ;
-		$pdf->CellUtf8(0, 30, "Je, soussigné:") ;
-		$pdf->Ln() ;
-		$pdf->CellUtf8(30, 10 ) ;
-		$pdf->CellUtf8(0, 10, "nom: " . db2web($pax_row['p_lname'])) ;
-		$pdf->Ln() ;
-		$pdf->CellUtf8(30, 10 ) ;
-		$pdf->CellUtf8(0, 10, "prénom: " . db2web($pax_row['p_fname'])) ;
-		$pdf->Ln() ;
-		$pdf->CellUtf8(30, 10 ) ;
-		$pdf->CellUtf8(0, 10, "carte d'identité: ...............................................,") ;
-		$pdf->Ln() ;
-		$pdf->CellUtf8(0, 10, "décharge le pilote et le club RAPCS ASBL de toute responsabilité en cas d’accident.") ;
-		$pdf->Ln() ;
-		$pdf->CellUtf8(0, 30, "Fait à Spa, le _ _ / _ _ / 2 0 _ _") ;
-		$pdf->Ln() ;
-		$pdf->CellUtf8(0, 60, "(signature)", 0, 1, 'C') ;
+	if ($pax_row['p_age'] == 'A') { // For an adult per René's "let's not overdo it", do not print... code kept because "who knows"
+		if (false) {
+			$pdf->NouveauChapitre("Décharge de " . db2web($pax_row['p_fname']) . " " . db2web($pax_row['p_lname']) . " pour le vol $flight_type $flight_reference ($row_flight[p_lname]$scheduled)") ;
+			$pdf->CellUtf8(0, 30, "Je, soussigné:") ;
+			$pdf->Ln() ;
+			$pdf->CellUtf8(30, 10 ) ;
+			$pdf->CellUtf8(0, 10, "nom: " . db2web($pax_row['p_lname'])) ;
+			$pdf->Ln() ;
+			$pdf->CellUtf8(30, 10 ) ;
+			$pdf->CellUtf8(0, 10, "prénom: " . db2web($pax_row['p_fname'])) ;
+			$pdf->Ln() ;
+			$pdf->CellUtf8(30, 10 ) ;
+			$pdf->CellUtf8(0, 10, "carte d'identité: ...............................................,") ;
+			$pdf->Ln() ;
+			$pdf->CellUtf8(0, 10, "décharge le pilote et le club RAPCS ASBL de toute responsabilité en cas d’accident.") ;
+			$pdf->Ln() ;
+			$pdf->CellUtf8(0, 30, "Fait à Spa, le _ _ / _ _ / 2 0 _ _") ;
+			$pdf->Ln() ;
+			$pdf->CellUtf8(0, 60, "(signature)", 0, 1, 'C') ;
+		} else {
+			//NOOP			
+		}
 	} else { // For a minor or children
-		$pdf->NouveauChapitre("Autorisation et décharge de " . db2web($pax_row['p_fname']) . " " . db2web($pax_row['p_lname']) . " pour le vol $flight_type $flight_reference ($row_flight[p_lname]$scheduled)") ;
+		$pdf->NouveauChapitre("Vol $flight_type de " . db2web($pax_row['p_fname']) . " " . db2web($pax_row['p_lname']) . " à bord d'un avion du Royal Aéro Para Club de Spa RAPCS ASBL.") ;
+		$pdf->SetFont(null, '', 10) ;
 		$pdf->CellUtf8(0, 30, "Je, soussigné:") ;
 		$pdf->Ln() ;
 		$pdf->CellUtf8(30, 10 ) ;
@@ -495,7 +574,7 @@ foreach($all_pax as $pax_row) {
 		$pdf->CellUtf8(30, 10 ) ;
 		$pdf->CellUtf8(0, 10, "* autorise MON FILS - MA FILLE (". db2web($pax_row['p_lname']) . " " . db2web($pax_row['p_fname']) .") à participer à ce vol") ;
 		$pdf->Ln() ;
-		$pdf->CellUtf8(0, 10, "et je décharge le pilote et le club RAPCS ASBL de toute responsabilité en cas d’accident.") ;
+		$pdf->CellUtf8(0, 10, "Je décharge le pilote et le club RAPCS ASBL de toute responsabilité en cas d’accident.") ;
 		$pdf->Ln() ;
 		$pdf->CellUtf8(0, 30, "Fait à Spa, le _ _ / _ _ / 2 0 _ _") ;
 		$pdf->Ln() ;
