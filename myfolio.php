@@ -427,9 +427,9 @@ $name = "Royal Aero Para Club Spa" ;
 ?>
 <span id="payment">
 <h2>Test QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
-<p>Ceci est simplement un test pour les informaticiens, ne pas l'utiliser car notre trésorier ne saura pas comment faire pour
-associer ce virement à votre compte membre RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
-et pas Payconiq (ce dernier étant payant).</p>
+<p>Le QR-code contient votre identifiant au niveau de la comptabilité
+RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
+et pas Payconiq (ce dernier étant payant pour le commerçant).</p>
 <img id="payment_qr_code" width="400" height="400" src="https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=<?=urlencode($epcString)?>">
 </span id="payment">
 <hr>
