@@ -105,7 +105,10 @@ function ImprovedTableRow($row) {
 
 function ImprovedTableMultiLineRow($line_count, $row) {
     // Data
-	if ($line_count == 1) return ImprovedTableRow($row) ;
+	if ($line_count == 1) {
+		ImprovedTableRow($row)  ;
+		return ;
+	}
 	// Emit first line with top lines
 	for($i=0; $i<count($row); $i++) {
 		$lines = explode("\n", $row[$i]) ;
@@ -139,17 +142,17 @@ function getSpecificPilotLicence($pilot, $rating) {
 	$row = mysqli_fetch_array($result) ;
 	mysqli_free_result($result) ;
 	if ($row)
-		return [checked=>true, name=>$row['name'], ident=>$row['ident_value'], expiration=> $row['expire_date']] ;
-	return ['name' => null, 'checked' => false] ;
+		return array('checked'=>true, 'name'=>$row['name'], 'ident'=>$row['ident_value'], 'expiration'=> $row['expire_date']) ;
+	return array('name' => null, 'checked' => false) ;
 }
 
 function pilotLicence($pilot) {
 	if ($pilot == '' or $pilot <= 0)
-		return ['licence' => null, 'checked' => false, 'ident' => null, 'expiration' => null] ;
+		return array('licence' => null, 'checked' => false, 'ident' => null, 'expiration' => null) ;
 	$info = getSpecificPilotLicence($pilot, "Instructor") ;
-	if ($info->checked) return $info ;
+	if ($info['checked']) return $info ;
 	$info = getSpecificPilotLicence($pilot, "CPL") ;
-	if ($info->checked) return $info ;
+	if ($info['checked']) return $info ;
 	$info = getSpecificPilotLicence($pilot, "SEP") ;
 	return $info ;
 }
@@ -367,11 +370,11 @@ $pdf->SetColumnsWidth(array(110, 50, 10, 20)) ;
 $pdf->ImprovedTableHeader(array("Point", "Information", "Check", "Paraphe")) ; 
 if ($row_flight['f_pilot']) {
 	$licence_info = pilotLicence($row_flight['f_pilot']) ;
-	$pdf->ImprovedTableRow(array("Licence: $licence_info[name]", "Expiration: $licence_info[expiration]", (!$licence_info['checked']) ? '' : ($licence_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
+	$pdf->ImprovedTableRow(array("Licence: $licence_info[name]", "Expiration: $licence_info[expiration]", (!$licence_info['checked']) ? '' : (($licence_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI'), '' )) ;
 	$medical_info = getPilotMedical($row_flight['f_pilot']) ;
-	$pdf->ImprovedTableRow(array("Certificat médical" , "Expiration: $medical_info[expiration]", (!$medical_info['checked']) ? '' : ($medical_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
+	$pdf->ImprovedTableRow(array("Certificat médical" , "Expiration: $medical_info[expiration]", (!$medical_info['checked']) ? '' : (($medical_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI'), '' )) ;
 	$elp_info = getPilotELP($row_flight['f_pilot']) ;
-	$pdf->ImprovedTableRow(array("ELP" , "Expiration: $elp_info[expiration]", (!$elp_info['checked']) ? '' : ($elp_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI', '' )) ;
+	$pdf->ImprovedTableRow(array("ELP" , "Expiration: $elp_info[expiration]", (!$elp_info['checked']) ? '' : (($elp_info['expiration'] < date('Y-m-d')) ? 'NON' : 'OUI'), '' )) ;
 	if ($row_flight['r_plane']) {
 		$result_booking = mysqli_query($mysqli_link, "select upper(id) as id, classe, delai_reservation
 			from $table_planes where ressource = 0
