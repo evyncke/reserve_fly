@@ -51,6 +51,23 @@ if ($pilot_open) {
 	$pilot_active = 'active in' ;
 }
 
+function id2name($id) {
+	global $mysqli_link, $table_person, $userId ;
+
+	if ($id == '' or $id == 0) return 'page web' ;
+	$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $id") ;
+	if (! $result) {
+		journalise($userId, "W", "User $id not found:" . mysqli_error($mysqli_link)) ;
+		return 'inconnu' ;
+	}
+	$row = mysqli_fetch_array($result) ;
+	if (! $row) {
+		journalise($userId, "W", "User $id does not exist") ;
+		return 'inconnu' ;
+	}
+	return db2web($row['first_name'] . ' ' . $row['last_name']) ;
+}
+
 // Clean-up input data and canonicalize
 if ($create or $modify) {
 	if ($_REQUEST['discovery_flight'] == 'on') {
@@ -673,7 +690,7 @@ function show_reservation($date, $header) {
 		JOIN $table_planes p ON r_plane = p.id		
 		WHERE r_cancel_date IS NULL AND ressource = 0 AND actif = 1 AND DATE(r_start) <= '$date' AND '$date' <= DATE(r_stop)
 		ORDER BY r_start ASC")
-		or journalise($userId, "F", "Cannot retrieve bookings($plane): " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot retrieve bookings(: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
 		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
@@ -706,12 +723,12 @@ function show_reservation($date, $header) {
 
 <div class="row">
 <?php if (! isset($row_flight['first_name']) or $row_flight['first_name'] == '') $row_flight['first_name'] = 'client via la page web' ; ?>
-Ce vol a été créé le <?=$row_flight['f_date_created']?> par <?=db2web("$row_flight[first_name] $row_flight[last_name]")?>.<br/>
+Ce vol a été créé le <?=$row_flight['f_date_created']?> par  par <?= id2name($row_flight['f_who_assigned'])?>.<br/>
 <?php
-if ($row_flight['f_date_paid']) print("Paiement (" . db2web($row_flight['f_reference_payment']) . ") effectué le $row_flight[f_date_paid].<br/>") ;
-if ($row_flight['f_date_cancelled']) print("Puis a été annulé le $row_flight[f_date_cancelled].<br/>") ;
-if ($row_flight['f_date_assigned']) print("Le pilote a été sélectionné le $row_flight[f_date_assigned].<br/>") ;
-if ($row_flight['f_date_linked']) print("Une réservation a été liée à ce vol le $row_flight[f_date_linked].<br/>") ;
+if ($row_flight['f_date_paid']) print("Paiement (" . db2web($row_flight['f_reference_payment']) . ") effectué le $row_flight[f_date_paid] par " . id2name($row_flight['f_who_paid']) . ".<br/>") ;
+if ($row_flight['f_date_cancelled']) print("Puis a été annulé le $row_flight[f_date_cancelled] par " . id2name($row_flight['f_who_cancelled']) . ".<br/>") ;
+if ($row_flight['f_date_assigned']) print("Le pilote a été sélectionné le $row_flight[f_date_assigned] par " . id2name($row_flight['f_who_assigned']) . ".<br/>") ;
+if ($row_flight['f_date_linked']) print("Une réservation a été liée à ce vol le $row_flight[f_date_linked] par " . id2name($row_flight['f_who_linked']) . ".<br/>") ;
 if ($row_flight['f_date_flown']) print("Le vol a eu lieu le $row_flight[f_date_flown].<br/>") ;
 ?>
 </div>
