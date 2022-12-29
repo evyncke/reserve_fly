@@ -424,6 +424,12 @@ $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 $iban = "BE64732038421852" ;
 $bic = "CREGBEBB" ;
 $name = "Royal Aero Para Club Spa" ;
+
+/*
+as Google Charts API is about to be deprecated, alternatives could be:
+http://image-charts.com/
+https://github.com/typpo/quickchart
+*/
 ?>
 <span id="payment">
 <h2>Test QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
