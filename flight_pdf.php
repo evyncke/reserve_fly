@@ -295,13 +295,12 @@ $scheduled_date = (isset($row_flight['f_date_linked']) and $row_flight['f_date_l
 $flight_type = ($row_flight['f_type'] == 'D') ? 'découverte' : "d'initiation" ;
 $flight_reference = ($row_flight['f_gift']) ? 'V-' : '' ;
 $flight_reference .= ($row_flight['f_type'] == 'D') ? 'IF-' : "INIT-" ;
-$flight_reference .= sprintf("%03d", $flight_id) ;
+// in 2022, numbers from 0 to 80 were used, since 2023 it is more like 23xxxx
+$flight_reference .= ($fligh_id < 1000) ? sprintf("%03d", $flight_id) : sprintf("%06d", $flight_id) ;
 
 // Unsure why the manager insists on using his manual numbers...
-if ($row_flight['f_reference'] == '')
-	$flight_reference = sprintf("#%03d", $flight_id) ;
-else
-	$flight_reference = db2web($row_flight['f_reference']) . ' (' . sprintf("#%03d", $flight_id) . ')';
+if ($row_flight['f_reference'] != '')
+	$flight_reference = db2web($row_flight['f_reference']) . ' (' . sprintf("#%06d", $flight_id) . ')';
 
 	// Get the circuit names
 $circuits = json_decode(file_get_contents("../voldecouverte/script/circuits.js"), true);
