@@ -674,7 +674,7 @@ else
 </div><!-- row -->
 <?php
 function show_reservation($date, $header) {
-	global $mysqli_link, $table_bookings, $table_person, $table_planes, $row_flight ;
+	global $mysqli_link, $table_bookings, $table_person, $table_planes, $row_flight, $userId ;
 	print("<div class=\"row\">
 		<h4 class=\"text-center\">$header: $date</h4>
 		</div><!-- row -->\n" ) ;
