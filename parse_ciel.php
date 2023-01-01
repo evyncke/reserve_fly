@@ -32,6 +32,7 @@ function date2sql($s) {
 
 $lines = file('GrandLivre.txt', FILE_IGNORE_NEW_LINES || FILE_SKIP_EMPTY_LINES) ;
 
+// Find the balance date
 // Alas, using the direct export as .txt rather than .pdf does not have headers...
 $last_line = array_pop($lines) ;
 $last_line = array_pop($lines) ;
@@ -43,6 +44,18 @@ if (preg_match('/^Dossier : .+ Grand livre Le (.+)$/', trim($last_line), $matche
 	$balance_date = "20$tokens[2]-$tokens[1]-$tokens[0]" ;
 } else { // Let's use the file date
 	$balance_date = date('Y-m-d', filemtime('GrandLivre.txt')) ;
+}
+
+// As we need to have a yearly ledger, try to find the 1st post date as in:
+// P<E9>riode du 01-01-22 au 31-12-23 (expected in the first lines)
+// Fallback is current year
+$legder_year = date('y') ;
+foreach($lines as $line) {
+	$line = trim($line) ; // Just to avoid any space characters, if any...
+	if (preg_match('/^P.riode du ..-..-(..) au ..-..-../', $line, $matches)) {
+		$ledger_year = $matches[1] ;
+		break ;
+	}
 }
 
 // Try to find all balances
@@ -95,9 +108,9 @@ foreach ($balances as $client => $balance)
 	print("$client => $balance\n") ;
 
 // Souci général: trouver une clé unique... ni le numéro de mouvement, ni le numéro de pièce sont uniques
-print("<h2>Analyse de toutes les lignes du grand livre</h2>\n") ;
-mysqli_query($mysqli_link, "DELETE FROM $table_bk_ledger")
-	or die("Cannot erase content of $table_bk_ledger: " . mysqli_error($mysqli_link)) ;
+print("<h2>Analyse de toutes les lignes du grand livre client</h2>\n") ;
+mysqli_query($mysqli_link, "DELETE FROM $table_bk_ledger WHERE bkl_year = $legder_year")
+	or die("Cannot erase content of $table_bk_ledger for year $ledger_year: " . mysqli_error($mysqli_link)) ;
 
 $currentClient = false ;
 foreach($lines as $line) {
@@ -121,8 +134,8 @@ foreach($lines as $line) {
 	} else if ($currentClient) { // Is it useful information ?
 		if ($journal == 'ANX' or $journal == 'F01' or $journal == 'F08' or $journal == 'VEN' or $journal == 'VNC' or $journal == 'OPD') {
 			print("Journal $journal $label en date du $date lettre '$columns[9]' <$line>\n") ;
-			$sql = "REPLACE INTO $table_bk_ledger (bkl_posting, bkl_client, bkl_journal, bkl_date, bkl_reference, bkl_label, bkl_debit, bkl_letter, bkl_credit)
-				VALUES ($columns[0], '$currentClient', '$journal', '$date', '$reference',  '$label', $debit, '$columns[9]', $credit)";
+			$sql = "REPLACE INTO $table_bk_ledger (bkl_year, bkl_posting, bkl_client, bkl_journal, bkl_date, bkl_reference, bkl_label, bkl_debit, bkl_letter, bkl_credit)
+				VALUES ($ledger_year, $columns[0], '$currentClient', '$journal', '$date', '$reference',  '$label', $debit, '$columns[9]', $credit)";
 			print("$sql\n") ;
 			mysqli_query($mysqli_link, $sql)
 				or die("Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
