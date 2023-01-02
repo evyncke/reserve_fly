@@ -463,7 +463,7 @@ if ($flight_id == '') {
 
 <div class="row">
 	<div class="form-group col-xs-6 col-sm-2">
-		<label for="reference">Référence club (V-INIT-999 ou IF-999 ou ...) ou code René:</label>
+		<label for="reference">Référence club (V-INIT-23999 ou IF-23999) :</label>
 		<input type="text" class="form-control" name="reference">
 	</div><!-- form-group -->
 </div><!-- row -->
