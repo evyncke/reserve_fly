@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2021 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -81,7 +81,23 @@ if ($booking_type == BOOKING_MAINTENANCE) {
 	}
 }
 // Is the user on the no flight list ?
-if ($userNoFlight) $response['error'] .= "Vous &ecirc;tes interdit(e) de vol. Contactez l'a&eacute;roclub." ;
+$blocked_user = false ;
+$blocked_msg = '' ;
+if ($userNoFlight) {
+	$response['error'] .= "Vous &ecirc;tes interdit(e) de vol. Contactez l'a&eacute;roclub." ;
+	$blocked_user = true ;
+	$blocked_msg =  "<p>Vous &ecirc;tes interdit(e) de vol. Contactez l'a&eacute;roclub.</p>\n" ;
+}
+// Check whether the user is blocked for some specific reason
+$result_blocked = mysqli_query($mysqli_link, "SELECT * FROM $table_blocked WHERE b_jom_id=$pilot_id")
+	or journalise($userId, 'E', "Cannot checked whether pilot $pilot_id is blocked: " . mysqli_error($mysqli_link)) ;
+$row_blocked = mysqli_fetch_array($result_blocked) ;
+if ($row_blocked) {
+	journalise($userId, "W", "This pilot $pilot_id is blocked: $row_blocked[b_reason]") ;
+	$response['error'] .= "Vous &ecirc;tes interdit(e) de vol: " . db2web($row_blocked['b_reason']) . ". Contactez info@spa-aviation.be" ;
+	$blocked_user = true ;
+	$blocked_msg =  "<p>Vous &ecirc;tes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. Contactez info@spa-aviation.be.</p>\n" ;
+}
 
 // Check whether userId is the assigned pilot !
 if ($customer_id > 0) {
@@ -241,24 +257,27 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 	else
 		$validity_msg = "<h2>Certificats et ratings</h2><p>$validity_msg</p>" ;
 //	if (!$userRatingValid) $reservation_permise = false ;
-	if (!$reservation_permise or !$userRatingValid) {
+	if (!$reservation_permise or !$userRatingValid or $blocked_user) {
 		journalise($pilot_id, "E", "Check club: Cette réservation pour $plane devrait être refusée...") ;
-//		$message .= "<p style='color: red;'>Cette r&eacute;servation devrait &ecirc;tre refus&eacute;e, mais, accept&eacute;e en phase de test.</p>" ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		$email_header .= "To: $fleetName <$fleetEmail>, $pilot[name] <$pilot[email]>\r\n" ;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 		$email_recipients = "$fleetEmail,fis@spa-aviation.be,$pilot[email]" ;
-		if ($userRatingValid) {
-			$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>\r\n" ;
-			$subject = "La réservation de $plane devrait être refusée pour $pilot[name]/$userFullName" ;
-		} else {
+		if (!$userRatingValid) {
 			$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>, $managerName <$managerEmail>\r\n" ;
 			$email_recipients .= ",$managerEmail" ;
 			$subject =  "Validité expirée pour $pilot[name]/$userFullName... pour la réservation de $plane" ;
-		}
+		} elseif ($blocked_user) {
+			$email_header .= "Cc: RAPCS CA <ca@spa-aviation.be>\r\n" ;
+			$subject = "$pilot[name]/$userFullName est bloqué: " . db2web($row_blocked['b_reason']) ;
+		} else {
+			$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>\r\n" ;
+			$subject = "La réservation de $plane devrait être refusée pour $pilot[name]/$userFullName" ;
+		} 
+
 		if ($bccTo)
 			$email_recipients .= ",$bccTo" ;
-		@smtp_mail($email_recipients, substr(iconv_mime_encode('Subject', $subject), 9), $intro  . $validity_msg . $message, $email_header) ;
+		@smtp_mail($email_recipients, substr(iconv_mime_encode('Subject', $subject), 9), $intro  . $blocked_msg . $validity_msg . $message, $email_header) ;
 		journalise($pilot_id, "D", "Email sent with $subject") ;
 //		@smtp_mail('evyncke@cisco.com', substr(iconv_mime_encode('Subject',"Réservation $plane refusée pour $pilot[name]/$userFullName"), 9), $message, $email_header) ;
 	} else if ($bccTo) {
