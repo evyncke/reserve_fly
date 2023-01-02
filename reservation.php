@@ -390,7 +390,7 @@ $row_blocked = mysqli_fetch_array($result_blocked) ;
 if ($row_blocked) {
 	journalise($userId, "W", "This user is blocked: " . db2web($row_blocked['b_reason'])) ;
 	$userNoFlight = true ;
-	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. Contactez <a href=\"mailto:info@spa-aviation.be\">l'a&eacute;roclub).</div>") ;
+	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. Contactez <a href=\"mailto:info@spa-aviation.be\">l'a&eacute;roclub info@spa-aviation.be</a>.</div>") ;
 }
 if ($userId == 0) {
 	print("<br/><font color=red>Vous devez &ecirc;tre connect&eacute;(e) pour r&eacute;server un avion.</font> ") ;
