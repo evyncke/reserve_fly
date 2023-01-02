@@ -57,6 +57,7 @@ foreach($lines as $line) {
 		break ;
 	}
 }
+journalise($userId, "D", "Ledger version $ledger_year") ;
 
 // Try to find all balances
 // Lines look like TOTAL COMPTE 400VUJE Solde compte débiteur 6 179,08 3 447,76 2 731,32 
@@ -109,8 +110,8 @@ foreach ($balances as $client => $balance)
 
 // Souci général: trouver une clé unique... ni le numéro de mouvement, ni le numéro de pièce sont uniques
 print("<h2>Analyse de toutes les lignes du grand livre client</h2>\n") ;
-mysqli_query($mysqli_link, "DELETE FROM $table_bk_ledger WHERE bkl_year = $legder_year")
-	or die("Cannot erase content of $table_bk_ledger for year $ledger_year: " . mysqli_error($mysqli_link)) ;
+mysqli_query($mysqli_link, "DELETE FROM $table_bk_ledger WHERE bkl_year = $ledger_year")
+	or die("Cannot erase content of $table_bk_ledger for year $$ledger_year: " . mysqli_error($mysqli_link)) ;
 
 $currentClient = false ;
 foreach($lines as $line) {
