@@ -481,7 +481,7 @@ function passengerWB($i) {
 // Weight and balance
 //
 if ($row_flight['r_plane']) { // No W&B when plane is unknown 
-$pdf->NouveauChapitre("Masse et centrage du vol $flight_reference ($row_flight[p_lname]$scheduled)") ;
+$pdf->NouveauChapitre("Masse et centrage $row_flight[r_plane] pour le vol $flight_reference ($row_flight[p_lname]$scheduled)") ;
 $pdf->SetColumnsWidth(array(80, 30, 30, 30)) ;
 $pdf->ImprovedTableHeader(array("Poste", "Poids (lbs.)", "Bras (in.)", "Moment")) ; 
 $totmoment_to = 0 ;
@@ -547,11 +547,14 @@ $pdf->ImprovedTableRow(array("Total atterrissage$checked", $totwt_ldg, $totarm_l
 $pdf->Ln(30) ;
 
 // Also before of web application firewall in cloudflare or mod_security on the server as the request is not built with user-agent or accept...
-ini_set("user_agent","RAPCS - flight engine");
+//ini_set("user_agent","RAPCS - flight engine");
 // Annoying as the output is no more a PNG...
 // No longer a PNG but a javascript...
 // $pdf->Image("https://www.spa-aviation.be/TippingPoint/scatter.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg", null, null, 0, 0, 'PNG') ;
 
+$pdf->MultiCellUtf8(0, 4, "Enveloppe masse et centrage: ") ;
+$url = "https://www.spa-aviation.be/TippingPoint/scatter.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg" ;
+$pdf->Write(4, $url, $url) ;
 } // $row_flight[r_plane]) No W&B when plane is unknown 
 
 //
