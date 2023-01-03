@@ -122,10 +122,19 @@ if ($create) {
 		VALUES('" . web2db($lname) . "', '" . web2db($fname) . "', '$email', '$phone', '$birthdate', $weight, '$gender')")
 		or journalise($userId, "F", "Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
 	$pax_id = mysqli_insert_id($mysqli_link) ; 
-	mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_notes, f_pilot) 
-		VALUES(SYSDATE(), $userId, '$flight_type', $pax_cnt, $circuit, '$schedule', $date1, $date2, '" . web2db($comment) . "', '" . web2db($notes) . "', NULL)")
+	// As f_reference is a unique index, let's simply use a random value
+	mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_reference, f_date_created, f_who_created, f_type, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_notes, f_pilot) 
+		VALUES(RAND()*10000, SYSDATE(), $userId, '$flight_type', $pax_cnt, $circuit, '$schedule', $date1, $date2, '" . web2db($comment) . "', '" . web2db($notes) . "', NULL)")
 		or journalise($userId, "F", "Cannot add flight, system error: " . mysqli_error($mysqli_link)) ;
 	$flight_id = mysqli_insert_id($mysqli_link) ; 
+	// Now that we have the flight_id, let's update the flight reference
+	$prefix = ''  ; // Currently cannot change it to 'voucher' with a 'V-' prefix :-(
+	$type = ($flight_type == 'D') ? 'IF-' : 'INIT-' ;
+	$flight_reference = $prefix . $type . sprintf("%06d", $flight_id) ;
+	mysqli_query($mysqli_link, "UPDATE $table_flight 
+							SET f_reference='$flight_reference' 
+							WHERE f_id=$flight_id")
+				or journalise(0, 'E', "Cannot update reference in $table_flight to $flight_reference: " . mysqli_error($mysqli_link)) ;
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax_role(pr_flight, pr_pax, pr_role)
 		VALUES('$flight_id', '$pax_id', 'C')") 
 		or journalise($userId, "F", "Cannot add contact role C, system error: " . mysqli_error($mysqli_link)) ;
@@ -463,7 +472,7 @@ if ($flight_id == '') {
 
 <div class="row">
 	<div class="form-group col-xs-6 col-sm-2">
-		<label for="reference">Référence club (V-INIT-23999 ou IF-23999) :</label>
+		<label for="reference">Référence (V-INIT-239999, IF-239999, ...) :</label>
 		<input type="text" class="form-control" name="reference">
 	</div><!-- form-group -->
 </div><!-- row -->
