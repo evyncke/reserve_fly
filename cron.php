@@ -1,7 +1,7 @@
 <pre>
 <?php
 /*
-   Copyright 2014-2022 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -246,8 +246,9 @@ while ($row = mysqli_fetch_array($result)) {
 }
 print(date('Y-m-d H:i:s').": total of $engine_reminders engine reminders sent.\n") ;
 
-if (date('G') == 6) { // Send reminders _AFTER_ the flight, once a day in early morning
 // Reminder after start to enter engine time
+
+if (date('G') == 6) { // Send reminders _AFTER_ the flight, once a day in early morning
 print(date('Y-m-d H:i:s').": start of log book reminder(s) after 3 days after the flight(s).\n") ;
 
 $engine_reminders = 0 ;
@@ -577,7 +578,7 @@ $f = fopen("email.eleves", "w") ;
 if (! $f) journalise(0, "E", "Cannot open email.eleves for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
-		where block = 0 and group_id = $joomla_student_group
+		where block = 0 and group_id in ($joomla_student_group, $joomla_instructor_group, $joomla_instructor_group2)
 		order by name") ;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
