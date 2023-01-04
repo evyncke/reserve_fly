@@ -176,7 +176,7 @@ if (isset($_REQUEST['cancel']) and $_REQUEST['cancel'] != '') {
 // Do we need to delete an entry?
 if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 	$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
-	mysqli_query($mysqli_link, "delete from $table_logbook where l_booking=$id and l_audit_time='$audit_time'") or journalise($userId, 'F', "Cannot delete: " . mysql_error()) ;
+	mysqli_query($mysqli_link, "delete from $table_logbook where l_booking=$id and l_audit_time='$audit_time'") or journalise($userId, 'F', "Cannot delete: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
 		$insert_message = "Carnet de routes mis &agrave; jour" ;
 		journalise($userId, 'I', "Logbook entry deleted for booking $id (done at $audit_time).") ;
@@ -238,13 +238,13 @@ else {
 
 $result = mysqli_query($mysqli_link, "select * from $table_bookings JOIN $table_planes ON r_plane = $table_planes.id
 		where ressource = 0 and r_cancel_date is null and r_stop <= '$booking[r_start]' and r_start <= sysdate() and $condition order by r_start desc limit 0,1")
-	or journalise($userId, 'F', "Cannot access previous booking: ".mysqli_error()) ;
+	or journalise($userId, 'F', "Cannot access previous booking: ".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 $previous_id = $row['r_id'] ;
 $previous_auth = md5($previous_id . $shared_secret) ;
 $result = mysqli_query($mysqli_link, "select * from $table_bookings JOIN $table_planes ON r_plane = $table_planes.id
 		where ressource = 0 and r_cancel_date is null and r_start >= '$booking[r_stop]' and r_start <= sysdate() and $condition order by r_start asc limit 0,1")
-	or journalise($userId, 'F', "Cannot access previous booking: ".mysqli_error()) ;
+	or journalise($userId, 'F', "Cannot access previous booking: ".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 $next_id = $row['r_id'] ;
 $next_auth = md5($next_id . $shared_secret) ;
