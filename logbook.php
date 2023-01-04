@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2022 Eric Vyncke, Patrick Reginster
+   Copyright 2014-2023 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -40,7 +40,9 @@ $result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r
 $booking = mysqli_fetch_array($result) ;
 if (! $booking) journalise($userId, 'F', "D&eacute;sol&eacute; cette r&eacute;servation #$id n'existe pas") ;
 
-journalise($userId, "W", "Utilisation de l'ancienne page, referer = $_SERVER[HTTP_REFERER]") ;
+journalise($userId, "I", "Utilisation de l'ancienne page, referer = $_SERVER[HTTP_REFERER]") ;
+header("Location: https://" .  $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/IntroCarnetVol.php?auth=$auth&id=$id") ;
+exit ;
 
 // Check authorization
 if ($auth == '') {

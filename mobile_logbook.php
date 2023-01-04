@@ -29,7 +29,10 @@ $auth = (isset($_REQUEST['auth'])) ? $_REQUEST['auth'] : '' ;
 // Basic parameters sanitization
 if ($id and ! is_numeric($id)) journalise($userId, 'F', "Logbook: wrong booking id: $id") ;
 
-journalise($userId, "W", "Utilisation de l'ancienne page, referer = $_SERVER[HTTP_REFERER]") ;
+journalise($userId, "I", "Utilisation de l'ancienne page, referer = $_SERVER[HTTP_REFERER]") ;
+// TODO make the new page bootstrap/responsive compatible
+header("Location: https://" .  $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/IntroCarnetVol.php?auth=$auth&id=$id") ;
+exit ;
 
 // Retrieve the booking
 if ($id) {

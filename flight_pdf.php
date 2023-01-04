@@ -554,6 +554,7 @@ $pdf->Ln(30) ;
 
 $pdf->MultiCellUtf8(0, 4, "Enveloppe masse et centrage: ") ;
 $url = "https://www.spa-aviation.be/TippingPoint/scatter.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg" ;
+// $url = "https://www.spa-aviation.be/TippingPoint/index.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg" ;
 $pdf->Write(4, $url, $url) ;
 } // $row_flight[r_plane]) No W&B when plane is unknown 
 
