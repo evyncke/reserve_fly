@@ -1,4 +1,20 @@
 <?php
+/*
+   Copyright 2022-2023 Patrick Reginster (and Eric Vyncke)
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
 require_once 'dbi.php';
 if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year 
 	// TODO only send it when not received
@@ -148,12 +164,12 @@ if ($bookingidForPrevious) {
 }
 
 $result = mysqli_query($mysqli_link, "select * from $table_bookings where r_cancel_date is null and r_stop < '$booking[r_start]' and r_start <= sysdate() and $condition order by r_start desc limit 0,1")
-	or die("Cannot access previous booking: ".mysqli_error()) ;
+	or die("Cannot access previous booking: ".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 $previous_id = $row['r_id'] ;
 $previous_auth = md5($previous_id . $shared_secret) ;
 $result = mysqli_query($mysqli_link, "select * from $table_bookings where r_cancel_date is null and r_start > '$booking[r_stop]' and r_start <= sysdate() and $condition order by r_start asc limit 0,1")
-	or die("Cannot access next booking: ".mysqli_error()) ;
+	or die("Cannot access next booking: ".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 $next_id = $row['r_id'] ;
 $next_auth = md5($next_id . $shared_secret) ;
@@ -182,8 +198,7 @@ print('</table>');
 if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 	$logid=$_REQUEST['logid'];
 	$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
-	mysqli_query($mysqli_link, "delete from $table_logbook where l_id=$logid and l_audit_time='$audit_time'") or die("Cannot delete: " . mysql_error()) ;
-	//mysqli_query($mysqli_link, "delete from $table_logbook where l_booking=$bookingid and l_audit_time='$audit_time'") or die("Cannot delete: " . mysql_error()) ;
+	mysqli_query($mysqli_link, "delete from $table_logbook where l_id=$logid and l_audit_time='$audit_time'") or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
 		$insert_message = "Carnet de routes mis &agrave; jour" ;
 		journalise($userId, 'I', "Logbook entry deleted for booking $bookingid (done at $audit_time).") ;
@@ -197,14 +212,14 @@ if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 // Do we need to delete a reservation in booking table?
 if (isset($_REQUEST['bookingtable']) and $_REQUEST['bookingtable'] == '1') {
 	// Delete all segments associated to this bookingid
-	mysqli_query($mysqli_link, "delete from $table_logbook where l_booking=$bookingid") or die("Cannot delete: " . mysql_error()) ;
+	mysqli_query($mysqli_link, "delete from $table_logbook where l_booking=$bookingid") or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
 		$insert_message = "Carnet de routes mis &agrave; jour" ;
 		journalise($userId, 'I', "Logbook entri(es) deleted for booking $bookingid.") ;
 	}
 	
 	// Delete the entry in the bookings table
-	mysqli_query($mysqli_link, "update $table_bookings set r_cancel_date=sysdate(), r_cancel_who=$userId, r_cancel_reason='IntroCarnetVol' where r_id=$bookingid") or die("Cannot cancel: " . mysql_error()) ;
+	mysqli_query($mysqli_link, "update $table_bookings set r_cancel_date=sysdate(), r_cancel_who=$userId, r_cancel_reason='IntroCarnetVol' where r_id=$bookingid") or die("Cannot cancel: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
 		$insert_message = "booking table mise &agrave; jour" ;
 		journalise($userId, 'I', "Booking table entry cancelled for booking $bookingid.") ;
@@ -230,10 +245,10 @@ if($bookingid) {
 	$end_UTC = gmdate('H:i', strtotime("$row[r_stop] UTC")) ;
 	$dateFlight=gmdate('l j-m-Y', strtotime("$row[r_start] UTC")) ;
 	if ($row['instructorName'] == '' )
-		$crew = $row['pilotName'] ;
+		$crew = db2web($row['pilotName']) ;
 	else
-		$crew = $row['pilotName'] . '/' . $row['instructorName'] ;
-	if($row[r_type] == BOOKING_MAINTENANCE) {
+		$crew = db2web($row['pilotName'] . '/' . $row['instructorName']) ;
+	if($row['r_type'] == BOOKING_MAINTENANCE) {
 		$crew= $crew." (Maintenance)";
 	}
 	$crew = db2web($crew) ; // As DB is latin and web is UTF-8
@@ -485,7 +500,7 @@ if($bookingid) {
 			$MO=$MO.$row['l_end_hour'].'.'.$row['l_end_minute'];
 			$aSegment+=1;
 			$instructorPaid="";
-			$crew_Count=$row[l_crew_count];
+			$crew_Count=$row['l_crew_count'];
 			if($crew_Count==0) $crew_Count=1;
 			if ($row['instructorName'] == '')
 				$crew = $row['pilotName'] ;
@@ -592,8 +607,8 @@ if (isset($_REQUEST['edit']) and $_REQUEST['edit'] != '') {
 			print("var default_plane=\"$row[l_plane]\";\n");
 			print("var default_pilot=$row[l_pilot];\n");
 			$anInstructor=0;
-			if($row[l_instructor]!=NULL){
-				$anInstructor=$row[l_instructor];
+			if($row['l_instructor']!=NULL){
+				$anInstructor=$row['l_instructor'];
 			}
 			print("var default_instructor=$anInstructor;\n");
 			$start_UTC = gmdate('Y-m-d H:i', strtotime("$row[l_start] UTC")) ;
@@ -602,7 +617,7 @@ if (isset($_REQUEST['edit']) and $_REQUEST['edit'] != '') {
 			print("var default_date_heure_arrivee=\"$end_UTC\";\n");
 			print("var default_day_landing=$row[l_day_landing];\n");
 			print("var default_pax_count=$row[l_pax_count];\n");
-			if($row[l_crew_count] != NULL){
+			if($row['l_crew_count'] != NULL){
 				print("var default_crew_count=$row[l_crew_count];\n");
 			}
 			else {
@@ -613,7 +628,7 @@ if (isset($_REQUEST['edit']) and $_REQUEST['edit'] != '') {
 			print("var default_to=\"$row[l_to]\";\n");
 			print("var default_is_pic=$row[l_is_pic];\n");
 			print("var default_instructor_paid=$row[l_instructor_paid];\n");
-			$shareType=$row[l_share_type];
+			$shareType=$row['l_share_type'];
 			if($shareType=="") {
 				$shareType="NoCP";
 			}
@@ -671,7 +686,7 @@ else {
 			$rinstructor=0;
 		}
 		else {
-			$rinstructor=$row[r_instructor];		
+			$rinstructor=$row['r_instructor'];		
 		}
 		
 		print("var default_plane=\"$row[r_plane]\";\n");
