@@ -377,7 +377,8 @@ if ($userIsStudent) print(" &eacute;l&egrave;ve ") ;
 if ($userIsPilot) print(" pilote ") ;
 if ($userIsMechanic) print(" mecano ") ;
 if ($userIsInstructor) print(" instructor ") ;
-if ($userIsAdmin) print(" administrateur ") ;
+if ($userIsAdmin) print(" gestionnaire-système ") ;
+if ($userIsBoardMember) print(" administrateur-CA ") ;
 if ($userNoFlight) print(" <span style=\"color: red;\">interdit de vol</span> ") ;
 if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
 	print("<br/><font color=red>Vous devez &ecirc;tre au moins pilote pour r&eacute;server un avion.</font>") ;
