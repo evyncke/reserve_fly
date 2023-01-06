@@ -4,6 +4,8 @@ function carnetdevol_page_loaded() {
 
   //document.getElementById("id_valeur_virement").style.display="none";
   //document.getElementById("id_cdv_bookingid_row").style.display="none";
+  document.getElementById("id_cdv_nombre_crew_row").style.display="none"; 
+   
   document.getElementById("id_cdv_bookingid").readOnly=true;;
   document.getElementById("id_cdv_bookingid").style.backgroundColor = ReadOnlyColor;
 
@@ -1105,6 +1107,11 @@ function check_compteur(id_cdv_val)
 	if(aDelta > 100) {
 		aTextInput.style.backgroundColor = 'orange';
 		// Warning: Alert stop the script process
+		if (confirm("La valeur du compteur ne semble pas correcte.\nValeur trop différente de la dernière valeur introduite ("+
+			aTextInput.placeholder+
+			").\nVoulez-vous vraiment introduire cette valeur?") == false) {
+				aTextInput.value="";
+		}
 		//alert("Valeur compteur trop differente!/nValeur introduite: "+Compteur+"/nDernière valeur introduite: "+aCompteurMOText);
 	}
 }
