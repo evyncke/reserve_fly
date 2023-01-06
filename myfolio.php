@@ -189,6 +189,7 @@ $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
 	LEFT JOIN $table_person p ON p.jom_id = l_pilot
 	LEFT JOIN $table_person i ON i.jom_id = l_instructor
 	WHERE (l_pilot = $userId OR l_share_member = $userId or l_instructor = $userId)
+  		AND l_booking IS NOT NULL
 		AND l_start >= '" . $folio_start->format('Y-m-d') . "'
 	ORDER by l.l_start ASC" ;
 
@@ -343,7 +344,10 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	or die("Cannot read booking keeping balance: " . mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 if ($row) {
-	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $row[bkb_amount] &euro; (si positif vous devez de l'argent au RAPCS ASBL). Il faut plusieurs jours avant que vos paiements soient pris en compte.</p>") ;
+	$balance = -1 * $row['bkb_amount'] ;
+	if ($balance < 0)
+		$balance = '<span style="color: red;">' . $balance . '</span>' ;
+	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $balance &euro; (si négatif vous devez de l'argent au RAPCS ASBL). Il faut plusieurs jours avant que vos paiements soient pris en compte.</p>") ;
 	if ($row['bkb_amount'] > 0) {
 		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
 		$invoice_reason = 'solde' ;
@@ -376,7 +380,7 @@ print("</ul>\n</p>\n") ;
 
 <h2>Détails de votre compte pour l'année en cours</h2>
 <p><b>De manière expérimentale</b>, voici une vue de votre compte membre RAPCS pour l'année en cours (mise à jour de temps en temps).</p>
-<table border=1>
+<table border="1">
 <thead>
 <th>Date</th><th>Opération</th><th>Pièce</th><th>Description</th><th>Débit</th><th>Crédit</th>
 </thead>
@@ -436,7 +440,7 @@ https://github.com/typpo/quickchart
 <p>Le QR-code contient votre identifiant au niveau de la comptabilité
 RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant pour le commerçant).</p>
-<img id="payment_qr_code" width="400" height="400" src="https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=<?=urlencode($epcString)?>">
+<img id="payment_qr_code" width="300" height="300" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>">
 </span id="payment">
 <hr>
 <div class="copyright">R&eacute;alisation: Eric Vyncke, août-septembre 2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
@@ -461,7 +465,7 @@ function pay(reason, amount) {
 	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structued, the second one is free text
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel ;
-	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=400x400&&chl=" + encodeURI(epcURI) ;
+	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 }
 
 pay(invoice_reason, invoice_total) ;
