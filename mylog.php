@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2022 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ function ShowTableHeader() {
 }
 
 function ShowEntryCell($line, $action, $dom_id, $col_name, $default_value, $input_type, $size) {
-	global $joomla_instructor_group, $table_person ;
+	global $joomla_instructor_group, $table_person, $mysqli_link ;
 
 	$value = (isset($line[$col_name])) ? $line[$col_name] : $default_value ;
 	$min_max = ($input_type == 'number') ? ' min="0" max="99" ' : '' ;
@@ -119,7 +119,7 @@ function ShowEntryCell($line, $action, $dom_id, $col_name, $default_value, $inpu
 			where group_id = $joomla_instructor_group
 			order by name") or print(mysqli_error($mysqli_link)) ;
 		while ($row = mysqli_fetch_array($result)) {
-			$instructor_name = ($convertToUtf8) ? iconv("ISO-8859-1", "UTF-8", $row['last_name']) : $row['last_name'] ;
+			$instructor_name = db2web($row['last_name']) ;
 			print("<option value=\"$row[jom_id]\"" . (($default_value == $row['jom_id']) ? 'selected' : '') . ">$instructor_name</option>\n") ;
 		}
 		print("<option value=\"-1\"" . (($default_value == '-1') ? ' selected' : '') . ">Autre FI</option>\n") ;
@@ -172,6 +172,7 @@ function ShowEntryRow($action, $line, $id) {
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <title>Mon carnet de vol</title>
 <script src="members.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
+<script src="planes.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
 <script>
 var
 	// preset Javascript constants filled with the right data from db.php PHP variables
@@ -183,6 +184,7 @@ var
 	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ;
 	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ;
 	page = <?=$page?> ;
+	clubPlanes = [] ; // The list of club tail numbers as they cannot be entered by this page
 
 function valueOfField(suffix, name) {
 	return name + '=' + document.getElementById(name + suffix.charAt(0).toUpperCase() + suffix.slice(1)).value ;
@@ -190,6 +192,14 @@ function valueOfField(suffix, name) {
 
 function saveButton(action, owner, id) {
 	var formURL = '<?=$_SERVER['PHP_SELF']?>' ;
+	var plane = document.getElementById('plane' + action.charAt(0).toUpperCase() + action.slice(1)).value ;
+	for (var i = 0; i < clubPlanes.length; i++) {
+		if (clubPlanes[i] == plane.trim().replace('-', '').toUpperCase()) {
+			alert('Pour les avions du club, il y a une page spécifique, vous allez y être redirigé.') ;
+			window.location.href = 'IntroCarnetVol.php?cdv_aircraft=' + plane ;
+			return ;
+		}
+	}
 	
 	formURL += '?owner=' + owner + '&action=' + action ;
 	if (id > 0) formURL += '&id=' + id ;
@@ -234,6 +244,12 @@ function init() {
 		}
 	}
 	pilotSelect.value = <?=$owner?> ;
+	// Prepare a list of club tail numbers as they cannot be entered by this page
+	for (var i = 0; i < planes.length; i++) {
+		var tailNumber = planes[i].id.replace('-', '').toUpperCase() ;
+		clubPlanes.push(tailNumber) ;
+	}
+
 }
 </script>
 <!-- Matomo -->
@@ -397,6 +413,8 @@ if ($userIsInstructor or $userIsAdmin) {
 	</select><br/><br/>") ;
 }
 
+print("<p>Cette table reprend tous vos vols y compris des vols en dehors des avions de notre aéroclub. Utilisez la page <a href=\"IntroCarnetVol.php\">IntroCarnetVol.php</a> 
+	pour entrer des vols sur les avions de l'aéroclub.</p>") ;
 print("<table class=\"logTable\">\n") ;
 ShowTableHeader() ;
 print("<tbody>\n") ;
@@ -516,7 +534,7 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('mylog.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 ?>
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, janvier 2015 - septembre 2022 pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, janvier 2015 - janvier 2023 pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
 </body>
 </html>
