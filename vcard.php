@@ -35,10 +35,10 @@ $result = mysqli_query($mysqli_link, "select *,u.username as username,u.email as
 	where u.id = $displayed_id") or die("Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) ;
 $name_db = $me['name'] ;
-$me['name'] = db2web($me['name'])) ; 
+$me['name'] = db2web($me['name']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
-$me['city'] = db2wrb($me['city']) ; 
+$me['city'] = db2web($me['city']) ; 
 // Be paranoid
 foreach($me as $key => $value)
 	$me[$key] = htmlspecialchars($value, ENT_QUOTES) ;
