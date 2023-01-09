@@ -28,14 +28,15 @@ $filePrefix = "invoices/" ;
 $shared_secret = "124.75=EBSP" ;
 
 // Ciel invoices are sent to different email addresses for those people...
-$ciel2profiles = array(
+$ciel2profiles = array( // Booking email => invoice email 
 	'xavier@ffxconstruction.be' => 'xh@ffx-toiture.be',
 	'wynands.l@yahoo.com' => 'flyingluc@gmail.com',
 	'charlysix@skynet.be' => 'charlysix@gmail.com',
 	'dakota77vfr@gmail.com' => 'mario.barp@telenet.be',
 	'flaviengrandjean@hotmail.com' => 'grandjeanflavien@gmail.com',
 	'jhu@live.be' => 'eg.lukeschova@gmail.com',
-	'michel.mos@skynet.be' => 'mickey.moes@gmail.com'
+	'michel.mos@skynet.be' => 'mickey.moes@gmail.com',
+	'eg.lukeschova@gmail.com' => 'jhu@live.be'
 ) ;
 
 $lines = array() ;
