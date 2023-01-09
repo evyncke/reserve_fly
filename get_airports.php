@@ -26,7 +26,7 @@ if ($error_message != '') {
 		while ($row = mysqli_fetch_array($result)) {
 			$airport = array() ;
 			$airport['code'] = $row['a_code'] ;
-			$airport['name'] = ($convertToUtf8) ? iconv("ISO-8859-1", "UTF-8", $row['a_name']) : $row['a_name'] ;
+			$airport['name'] = db2web($row['a_name']) ;
 			$airports[] = $airport ;
 		}
 	else
