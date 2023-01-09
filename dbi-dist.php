@@ -240,14 +240,35 @@ function getClientAddress() {
 
 // $message must be UTF-8
 function journalise($userId, $severity, $message) {
-	global $table_journal, $mysqli_link ;
+	global $table_journal, $mysqli_link, $db_host, $db_user, $db_password, $db_name ;
+	
+	if ($table_journal == '') $table_journal = 'rapcs_journal' ;
+
+	if (! is_resource($mysqli_link)) { // Naive ? attempt to reconnect in case of lost connection...
+		$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
+		if (! $mysqli_link) die("Impossible de se connecter a MySQL: " . mysqli_connect_error()) ;
+		if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees: " . mysqli_error($mysqli_link)) ;
+	}
+	
 	$remote_address = getClientAddress() ;
 	$message = web2db($message) ;
 	$message = mysqli_real_escape_string($mysqli_link, $message) ;
 	$uri = $_SERVER['REQUEST_URI'] ;
-	mysqli_query($mysqli_link, "insert into $table_journal(j_datetime, j_address, j_jom_id, j_severity, j_message, j_uri)
-		values(sysdate(),'$remote_address', $userId, '$severity', '$message', '$uri')") 
-		or print("Cannot journalise: " . mysqli_error($mysqli_link)) ;
+	$trusted_booker = (isset($_COOKIE['trusted_booker']) and $_COOKIE['trusted_booker'] == 1) ? 1 : 0 ;
+	$params = '' ;
+	foreach($_POST as $var => $value) {
+		if ($var != "password")	$params .= "$var=$value," ;
+	}
+	$params =  mysqli_real_escape_string($mysqli_link, web2db($params)) ;
+	$result = mysqli_query($mysqli_link, "INSERT INTO $table_journal(j_datetime, j_address, j_jom_id, j_trusted_booker, j_severity, j_message, j_uri)
+		VALUES(SYSDATE(),'$remote_address', $userId, $trusted_booker, '$severity', '$message', '$uri $params')") ;
+	if (! $result) {
+		$sql_error_message = mysqli_error($mysqli_link) ;
+		print("Cannot journalise($userId, $severity, $message): $sql_error_message for table $table_journal\n\n") ;
+		@mail('eric@vyncke.org', "Cannot journalise in $table_journal", "Error message: $sql_error_message\nremote address = '$remote_address'\nuserId='$userId'\nserverity=$severity\nmessage=$message\nuri=$uri\nparams=$params") ;
+	}
+	if ($severity == 'F') // Fatal
+		die("Une erreur fatale a eu lieu. Impossible de continuer l'execution de $_SERVER[PHP_SELF]. Veuillez contacter eric@vyncke.org avec ce message:\n $message \n") ;
 }
 
 // same function exists in reservation.js
@@ -270,17 +291,16 @@ function planeClassIsMember($member, $group) {
 function web2db($msg) {
 	global $convertToUtf8 ;
 	if ($convertToUtf8 )
-		return(iconv("UTF-8", "ISO-8859-1//TRANSLIT", $msg)) ; 
+		return mb_convert_encoding($msg, "ISO-8859-1", mb_detect_encoding($msg, "UTF-8, ISO-8859-1, ISO-8859-15", false)) ;
 	else
 		return $msg ;
 }
 
-
 function db2web($msg) {
 	global $convertToUtf8 ;
-	if ($convertToUtf8 )
-		return(iconv("ISO-8859-1", "UTF-8//TRANSLIT", $msg)) ; 
-	else
+	if ($convertToUtf8 ) {
+		return mb_convert_encoding($msg, "UTF-8", mb_detect_encoding($msg, "ISO-8859-1, UTF-8, ISO-8859-15", false)) ;
+	} else
 		return $msg ;
 }
 
