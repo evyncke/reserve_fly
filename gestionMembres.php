@@ -68,7 +68,7 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 	
 	while ($row = mysqli_fetch_array($result)) {
 		$count++;
-		$userid=$row[id];
+		$userid=$row['id'];
 		$row['name'] = db2web($row['name']) ;
 		if ($row['name'] === FALSE) 
 			journalise(0, 'E', "There was an error while converting\n") ; 
@@ -80,6 +80,7 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 		$ville=db2web($row['city']);
 		$pays=db2web($row['country']);
 		$nom=$row['last_name'];
+		if($nom=="") $nom=$row['name'];
 		$prenom=$row['first_name'];		
 		$groups = explode(',', $row['groups']) ;
 		$effectif = (in_array($joomla_effectif_group, $groups)) ? $CheckMark : '' ;
