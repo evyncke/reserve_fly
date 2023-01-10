@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -55,9 +55,6 @@ if (!is_numeric($id)) die("Bien essaye... booking: $id") ;
 
 $response['booking'] = $id ;
 
-// TODO check that:
-// - add copyright / disclaimer
-
 $result = mysqli_query($mysqli_link, "select * from $table_bookings where r_id = $id") ;
 if ((!$result) || (mysqli_num_rows($result) == 0))
         $response['error'] .= "Cette reservation, $id, n'existe pas, " . mysqli_error($mysqli_link) . '<br/>' ;
@@ -72,7 +69,7 @@ else {
 		$response['previous_booking_stop'] = $booking['r_stop'] ;
 		$response['previous_comment'] = db2web($booking['r_comment']) ;
         if (!($userIsAdmin or $userIsInstructor)) {
-               if (($booking['r_pilot'] != $userId) && ($booking['r_who'] != $userId) && !($userIsMechanic && ($booking['r_type'] == BOOKING_TYPE_MAINTENANCE)))
+               if (($booking['r_pilot'] != $userId) && ($booking['r_who'] != $userId) && !($userIsMechanic && ($booking['r_type'] == BOOKING_MAINTENANCE)))
                        $response['error'] .= "Cette réservation, $id, ne peut être modifiée par vous ($userId), uniquement par $pilot_id ou $booking[r_who]<br/>" ;
         }
 }
@@ -96,9 +93,25 @@ if ($booking_type == BOOKING_MAINTENANCE) {
 	}
 }
 
+// Is the user on the no flight list ?
+$blocked_user = false ;
+$blocked_msg = '' ;
+if ($userNoFlight) {
+	$response['error'] .= "Vous &ecirc;tes interdit(e) de vol. Contactez l'a&eacute;roclub." ;
+	$blocked_user = true ;
+}
+
+// Check whether the user is blocked for some specific reason
+$result_blocked = mysqli_query($mysqli_link, "SELECT * FROM $table_blocked WHERE b_jom_id=$pilot_id")
+	or journalise($userId, 'E', "Cannot checked whether pilot $pilot_id is blocked: " . mysqli_error($mysqli_link)) ;
+$row_blocked = mysqli_fetch_array($result_blocked) ;
+if ($row_blocked) {
+	journalise($userId, "W", "This pilot $pilot_id is blocked: $row_blocked[b_reason]") ;
+	$response['error'] .= "Vous &ecirc;tes interdit(e) de vol: " . db2web($row_blocked['b_reason']) . ". Contactez info@spa-aviation.be" ;
+	$blocked_user = true ;
+}
 
 // TODO check that:
-// - copyright & disclaimer
 // BUG cannot have to consecutive bookings!
 
 // Check whether the plane exists and is active
