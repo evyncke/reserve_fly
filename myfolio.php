@@ -42,6 +42,7 @@ $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id =
 	or die("Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
 $pilot = mysqli_fetch_array($result) or die("Pilote $userId inconnu") ;
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
+$userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
 $codeCiel = $pilot['ciel_code'] ;
 mysqli_free_result($result) ;
 
@@ -425,8 +426,8 @@ while ($row = mysqli_fetch_array($result)) {
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 
-$iban = "BE64732038421852" ;
-$bic = "CREGBEBB" ;
+$iban = "BE14000078161283" ;
+$bic = "BPOTBEB1" ;
 $name = "Royal Aero Para Club Spa" ;
 
 /*
@@ -453,6 +454,7 @@ var
 	epcName = '<?=$name?>' ;
 	epcIban = '<?=$iban?>' ;
 	compteCiel = '400<?=$codeCiel?>' ;
+	userLastName = '<?=$userLastName?>' ;
 
 function pay(reason, amount) {
 	if (amount <= 0.0 || amount <= 0) {
@@ -464,7 +466,7 @@ function pay(reason, amount) {
 	document.getElementById('payment_amount').innerText = amount ;
 	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structued, the second one is free text
-	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel ;
+	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel + '/' + userLastName ;
 	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 }
 
