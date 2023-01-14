@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2019 Eric Vyncke
+   Copyright 2013-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ require_once 'mobile_header.php' ;
 $displayTimestamp = (isset($_REQUEST['time'])) ? intval($_REQUEST['time']) : time() ;
 
 setlocale(LC_TIME, "fr_BE.utf8");
-$today = strftime("%A %e %B", $displayTimestamp) ;
+$today = date("l j F", $displayTimestamp) ;
 $sql_date = date('Y-m-d', $displayTimestamp) ;
 
 ?> 
@@ -78,13 +78,13 @@ if ($userId > 0) { // Only members can see all bookings
 ?>
 <div class="row">
 <ul class="pager col-xs-12">
-<li class="previous"><a href="<?=$_SERVER[PHP_SELF] . '?time=' . ($displayTimestamp - 24 * 3600)?>">Jour précédent</a></li>
-<li class="next"><a href="<?=$_SERVER[PHP_SELF] . '?time=' . ($displayTimestamp + 24 * 3600)?>">Jour suivant</a></li>
+<li class="previous"><a href="<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp - 24 * 3600)?>">Jour précédent</a></li>
+<li class="next"><a href="<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp + 24 * 3600)?>">Jour suivant</a></li>
 </ul>
 </div> <!-- row -->
 <script>
-document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER[PHP_SELF] . '?time=' . ($displayTimestamp + 24 * 3600)?>' }) ;
-document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER[PHP_SELF] . '?time=' . ($displayTimestamp - 24 * 3600)?>' }) ;
+document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp + 24 * 3600)?>' }) ;
+document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp - 24 * 3600)?>' }) ;
 </script>
 <?php
 } // $userId > 0

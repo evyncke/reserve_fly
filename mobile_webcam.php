@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013 Eric Vyncke
+   Copyright 2013-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ function refreshWebcam() {
 refreshWebcam() ;
 setInterval(refreshWebcam, 1000 * 30) ; // Refresh every 30 seconds
 // Swipe to change to next webcam
-document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER[PHP_SELF] . '?cam=' . $previous_cam?>' }) ;
-document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER[PHP_SELF] . '?cam=' . $next_cam?>' }) ;
+document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?cam=' . $previous_cam?>' }) ;
+document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?cam=' . $next_cam?>' }) ;
 
 </script>
 
