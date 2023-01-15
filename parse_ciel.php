@@ -120,6 +120,7 @@ foreach($lines as $line) {
 	$journal = $columns[1] ;
 	$date = date2sql($columns[2]) ;
 	$reference = $columns[3] ;
+	// GrandLivre.txt charset seems to be Windows ISO-8859-1
 	$label = mysqli_real_escape_string($mysqli_link, web2db($columns[4])) ;
 	$debit = comma2dot($columns[8]) ;
 	$credit = comma2dot($columns[10]) ;
@@ -134,14 +135,14 @@ foreach($lines as $line) {
 		}
 	} else if ($currentClient) { // Is it useful information ?
 		if ($journal == 'ANX' or $journal == 'F01' or $journal == 'F08' or $journal == 'VEN' or $journal == 'VNC' or $journal == 'OPD') {
-			print("Journal $journal $label en date du $date lettre '$columns[9]' <$line>\n") ;
+			print("Journal $journal " . db2web($label) . " en date du $date lettre '$columns[9]' <$line>\n") ;
 			$sql = "REPLACE INTO $table_bk_ledger (bkl_year, bkl_posting, bkl_client, bkl_journal, bkl_date, bkl_reference, bkl_label, bkl_debit, bkl_letter, bkl_credit)
 				VALUES ($ledger_year, $columns[0], '$currentClient', '$journal', '$date', '$reference',  '$label', $debit, '$columns[9]', $credit)";
 			print("$sql\n") ;
 			mysqli_query($mysqli_link, $sql)
 				or die("Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
 		} else
-			print("Cannot process: $line\n") ;
+			print("Cannot process: " . db2web($line) . "\n") ;
 	}
 }
 ?>

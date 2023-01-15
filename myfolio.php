@@ -414,7 +414,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$reference = $row['bkl_reference'] ;
 	if ($row['bkl_debit']) $total_debit += $row['bkl_debit'] ;
 	if ($row['bkl_credit']) $total_credit += $row['bkl_credit'] ;
-	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>$row[bkl_label]</td><td>$row[bkl_debit]</td><td>$row[bkl_credit]</td></tr>\n") ;
+	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td>$row[bkl_debit]</td><td>$row[bkl_credit]</td></tr>\n") ;
 }
 ?>
 </tbody>
