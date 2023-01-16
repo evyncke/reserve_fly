@@ -107,7 +107,7 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 		//SELECT * FROM `rapcs_bk_balance`.   bkb_amount
 		//SELECT * FROM `rapcs_bk_balance` ORDER BY `rapcs_bk_balance`.`bkb_date` DESC
 		
-		$ciel="";
+		$ciel="00000000";
 		if($row['ciel_code'] != "") {
 			$ciel="400".$row['ciel_code'];
 		}
