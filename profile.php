@@ -299,8 +299,8 @@ const
 	</div> <!-- form-group -->
 	<div class="col-sm-12 col-md-3">
 		Ajouter <?=$me['name']?> &agrave; mes contacts: 
-		<a href="vcard.php?id=<?=$displayed_id?>"><i class="material-icons">cloud_download</i></a> 
-		<a href="vcard.php?id=<?=$displayed_id?>&qr=yes"><i class="material-icons">qr_code_2</i></a> 
+		<a href="vcard.php?id=<?=$displayed_id?>" title="Télécharge VCF"><i class="material-icons">cloud_download</i></a> 
+		<a href="vcard.php?id=<?=$displayed_id?>&qr=yes" title="Affiche un QR code"><i class="material-icons">qr_code_2</i></a> 
  	</div> <!--- col -->
 </div> <!--- row -->
 
