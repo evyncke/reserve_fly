@@ -13,9 +13,29 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://www.spa-aviation.be/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-<script>
+<!-- Matomo -->
+<script type="text/javascript">
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(['setUserId', '<?=$userName?>']);
+  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+  _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
+  _paq.push(['enableHeartBeatTimer']);
+  _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
+  _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//analytics.vyncke.org/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '5']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
 </script>
-<p> </p>
+<!-- End Matomo Code -->
+</head>
+<body>
 <table width="100%" style="margin-left: auto; margin-right: auto;" class="table table-striped table-hover table-bordered"> 
 <tbody>
 <!--><tr style="background-color: #13d8f2; text-align: Center;">-->
@@ -60,7 +80,7 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 	
 	while ($row = mysqli_fetch_array($result)) {
 		$count++;
-		$userid=$row[id];
+		$userid=$row['id'];
 		$row['name'] = db2web($row['name']) ;
 		if ($row['name'] === FALSE) 
 			journalise(0, 'E', "There was an error while converting\n") ; 
