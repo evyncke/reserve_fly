@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -43,41 +43,60 @@ $me['city'] = db2web($me['city']) ;
 foreach($me as $key => $value)
 	$me[$key] = htmlspecialchars($value, ENT_QUOTES) ;
 
-header("Content-Type: text/vcard;charset=UTF-8") ;
-if ($me['first_name'] != '' && $me['last_name'] != '')
-	header("Content-Disposition: attachment; filename=\"$me[first_name] $me[last_name].vcf\"") ;
-else
-	header("Content-Disposition: attachment; filename=\"$me[name].vcf\"") ;
 
-print("BEGIN:VCARD
+
+$s = "BEGIN:VCARD
 VERSION:3.0
 PRODID:aeroclub management by Eric Vyncke
 N;charset=utf-8:$me[last_name];$me[first_name];;;
 FN;charset=utf-8:$me[name]
 LOGO;MEDIATYPE=image/x-icon:https://www.spa-aviation.be/favicon32x32.ico
-ORG;charset=utf-8:RAPCS\n") ;
-if ($me['birthdate'] && $me['birthdate'] != '0000-00-00') print("BDAY:$me[birthdate]\n") ;
-if ($me['avatar'] != '') {
+ORG;charset=utf-8:RAPCS\n" ;
+if ($me['birthdate'] && $me['birthdate'] != '0000-00-00') $s .= "BDAY:$me[birthdate]\n" ;
+if (!isset($_REQUEST['qr']) and $me['avatar'] != '') {
 	$file_name = '../media/kunena/avatars/' . $me['avatar'] ;
 	$f = fopen($file_name, 'rb') ;
 	$binary_photo = fread($f, filesize($file_name)) ;
 	fclose($f) ;
 	$base64_photo = base64_encode($binary_photo) ;
 	$base64_photo = chunk_split($base64_photo, 76, "\n ") ;
-	print("PHOTO;ENCODING=b;TYPE=jpeg:\n $base64_photo\n") ;
+	$s .= "PHOTO;ENCODING=b;TYPE=jpeg:\n $base64_photo" ;
 }
-if ($me['home_phone'] != '') print("TEL;TYPE=HOME,VOICE:$me[home_phone]\n") ;
-if ($me['work_phone'] != '') print("TEL;TYPE=WORK,VOICE:$me[work_phone]\n") ;
-if ($me['cell_phone'] != '') print("TEL;TYPE=CELL,VOICE:$me[cell_phone]\n") ;
-if ($me['skype'] != '') print("IMPP:skype:$me[skype]\n") ;
-if ($me['msn'] != '') print("IMPP:msn:$me[msn]\n") ;
-if ($me['aim'] != '') print("IMPP:aim:$me[aim]\n") ;
-if ($me['twitter'] != '') print("IMPP:twitter:$me[twitter]\n") ;
-if ($me['sex'] == 1) print("GENDER:M\n") ;
-if ($me['sex'] == 2) print("GENDER:F\n") ;
-print("TITLE:Membre
+if ($me['home_phone'] != '') $s .= "TEL;TYPE=HOME,VOICE:$me[home_phone]\n" ;
+if ($me['work_phone'] != '') $s .= "TEL;TYPE=WORK,VOICE:$me[work_phone]\n" ;
+if ($me['cell_phone'] != '') $s .= "TEL;TYPE=CELL,VOICE,TEXT:$me[cell_phone]\n" ;
+if ($me['skype'] != '') $s .= "IMPP:skype:$me[skype]\n" ;
+if ($me['msn'] != '') $s .= "IMPP:msn:$me[msn]\n" ;
+if ($me['aim'] != '') $s .= "IMPP:aim:$me[aim]\n" ;
+if ($me['twitter'] != '') $s .= "IMPP:twitter:$me[twitter]\n" ;
+if ($me['sex'] == 1) $s .= "GENDER:M\n" ;
+if ($me['sex'] == 2) $s .= "GENDER:F\n" ;
+$s .= "TITLE:Membre
 EMAIL;TYPE=PREF,INTERNET:$me[email]
-REV:" . date('Y-m-d') . "
-END:VCARD") ;
-journalise($userId, 'I', "Downloading of vcard for $me[name]") ;
+REV:" . date('Ymd') . 'T' . date('His') . "Z
+END:VCARD" ;
+
+if (isset($_REQUEST['qr']) and $_REQUEST['qr'] != '') {
+	$s = str_replace("\n", "\r\n", $s) ;
+?>
+<html>
+<head>
+<title>Contact QR-code pour <?=$me['first_name'] . ' ' . $me['last_name']?></title>
+</head>
+<body>
+<h1>Contact QR-code pour <?=$me['first_name'] . ' ' . $me['last_name']?></h1>
+<?php
+	print("<img src=\"https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" . urlencode($s) . "\">") ;
+	journalise($userId, 'I', "QR-code for $me[name] displayed") ;
+} else {
+		header("Content-Type: text/vcard;charset=UTF-8") ;
+		if ($me['first_name'] != '' && $me['last_name'] != '')
+			header("Content-Disposition: attachment; filename=\"$me[first_name] $me[last_name].vcf\"") ;
+		else
+			header("Content-Disposition: attachment; filename=\"$me[name].vcf\"") ;
+        print($s) ;
+		journalise($userId, 'I', "Downloading of vcard for $me[name]") ;
+}
+
+
 ?>

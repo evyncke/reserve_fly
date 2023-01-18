@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2021 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ if (isset($_POST['action']) and $_POST['action'] == 'photo' and !$read_only) {
 	$image_type = $image_size[2] ;
 	$image_basename = basename($source_file) ;
 	$image_filetype = pathinfo($source_file, PATHINFO_EXTENSION) ;
-	$avatar_filename = "$_SERVER[DOCUMENT_ROOT]/${avatar_root_directory}/users/avatar${displayed_id}.${image_filetype}" ;
+	$avatar_filename = "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/users/avatar$displayed_id.$image_filetype" ;
 	// Do we need to resize the image ?
 	if ($image_width <= 200 and $image_height <= 200) {
 		if (!move_uploaded_file($source_file, $avatar_filename)) {
@@ -82,8 +82,7 @@ if (isset($_POST['action']) and $_POST['action'] == 'photo' and !$read_only) {
 		$resize_ratio = ($image_width > $image_height) ? 200 / $image_width  : 200 / $image_height;
 		switch ($image_type) {
 			case IMAGETYPE_GIF: $upload_image = imagecreatefromgif($source_file) ; break ;
-			case IMAGETYPE_JPEG:
-			case IMAGETYPE_JPG: $upload_image = imagecreatefromjpeg($source_file) ; break ;
+			case IMAGETYPE_JPEG: $upload_image = imagecreatefromjpeg($source_file) ; break ;
 			case IMAGETYPE_PNG: $upload_image = imagecreatefrompng($source_file) ; break ;
 			default:
 				journalise($userId, 'E', "Format photo non supporté ($image_type) for $displayed_id: " . $_FILES['photoFile']['name'] . " == $source_file") ;
@@ -95,14 +94,13 @@ if (isset($_POST['action']) and $_POST['action'] == 'photo' and !$read_only) {
 		if (! $new_image) journalise($userId, 'E', "Impossible de scaler ($resize_ratio) for $displayed_id: " . $_FILES['photoFile']['name']) ;
 		imagedestroy($upload_image) ;
 		switch ($image_type) {
-			case IMAGETYPE_GIF: imagegif($new_image, "$_SERVER[DOCUMENT_ROOT]/${avatar_root_directory}/users/avatar${displayed_id}.gif") ; $image_filetype = 'gif' ; break ;
-			case IMAGETYPE_JPEG:
-			case IMAGETYPE_JPG: imagejpeg($new_image, "$_SERVER[DOCUMENT_ROOT]/${avatar_root_directory}/users/avatar${displayed_id}.jpg") ; $image_filetype = 'jpg' ; break ;
-			case IMAGETYPE_PNG: imagepng($new_image, "$_SERVER[DOCUMENT_ROOT]/${avatar_root_directory}/users/avatar${displayed_id}.png") ; $image_filetype = 'png' ; break ;
+			case IMAGETYPE_GIF: imagegif($new_image, "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/users/avatar$displayed_id.gif") ; $image_filetype = 'gif' ; break ;
+			case IMAGETYPE_JPEG: imagejpeg($new_image, "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/users/avatar$displayed_id.jpg") ; $image_filetype = 'jpg' ; break ;
+			case IMAGETYPE_PNG: imagepng($new_image, "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/users/avatar$displayed_id.png") ; $image_filetype = 'png' ; break ;
 		}
 	}
 	// Update the kunena line for this user
-	mysqli_query($mysqli_link, "update jom_kunena_users set avatar = 'users/avatar${displayed_id}.${image_filetype}' where userid = $displayed_id")
+	mysqli_query($mysqli_link, "update jom_kunena_users set avatar = 'users/avatar$displayed_id.$image_filetype' where userid = $displayed_id")
                         or die("Erreur systeme lors de la mise a jour de jom_kunena_users (avatar): " . mysqli_error($mysqli_link)) ;
 	if ($affected_rows > 0) 
 		journalise($userId, 'I', "Changement de photo($me[username]/$displayed_id)") ;
@@ -245,6 +243,8 @@ foreach($me as $key => $value)
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<!-- Some icons by Google -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <title>Profil de <?=$me['name']?></title>
 <script>
 const
@@ -297,11 +297,11 @@ const
 		</select>
 	</div> <!-- col -->
 	</div> <!-- form-group -->
-<div class="col-sm-12 col-md-3">
-Ajouter <?=$me['name']?> &agrave; mes contacts: <a href="vcard.php?id=<?=$displayed_id?>">
-          <span class="glyphicon glyphicon-cloud-download"></span>
-        </a>
-	</div> <!--- col -->
+	<div class="col-sm-12 col-md-3">
+		Ajouter <?=$me['name']?> &agrave; mes contacts: 
+		<a href="vcard.php?id=<?=$displayed_id?>"><i class="material-icons">cloud_download</i></a> 
+		<a href="vcard.php?id=<?=$displayed_id?>&qr=yes"><i class="material-icons">qr_code_2</i></a> 
+ 	</div> <!--- col -->
 </div> <!--- row -->
 
 <div class="row">
