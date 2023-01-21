@@ -14,13 +14,124 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  
+	<style>
+	.tooltip {
+	  position: relative;
+	  display: inline-block;
+	  border-bottom: 1px dotted black;
+	  opacity: 1;
+	}
+
+	.tooltip .tooltiptext {
+	  visibility: hidden;
+	  width: 120px;
+	  background-color: #555;
+	  color: #fff;
+	  text-align: center;
+	  border-radius: 6px;
+	  padding: 5px 0;
+	  position: absolute;
+	  z-index: 1;
+	  bottom: 125%;
+	  left: 50%;
+	  margin-left: -60px;
+	  opacity: 0;
+	  transition: opacity 0.3s;
+	}
+
+	.tooltip .tooltiptext::after {
+	  content: "";
+	  position: absolute;
+	  top: 100%;
+	  left: 50%;
+	  margin-left: -5px;
+	  border-width: 5px;
+	  border-style: solid;
+	  border-color: #555 transparent transparent transparent;
+	}
+
+	.tooltip:hover .tooltiptext {
+	  visibility: visible;
+	  opacity: 1;
+	}
+	</style>
+  
 <script>
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+function blockFunction(PHP_Self, theBlockedFlag, theNom, theUserId, theSolde)
+{
+	var aReason="";
+	if(theBlockedFlag=="Block") {
+		aReason=getReason(theSolde);
+		if (confirm("Confirmer que vous voulez bloquer " + theNom + "?\nRaison: "+aReason) == true) {			
+   		 	var aCommand=PHP_Self+"?block=true&personid="+theUserId+"&reason="+aReason;		 
+   		 	window.location.href = aCommand;
+		}
+	}
+	else {
+		if (confirm("Confirmer que vous voulez débloquer " + theNom + "?") == true) {
+			aText="Débloquer";
+      		 var aCommand=PHP_Self+"?unblock=true&personid="+theUserId;
+      		 window.location.href = aCommand;
+		}		
+	}
+	//alert("Action="+aText);
+}
+function getReason(theSolde)
+{
+	var reason = prompt("Entrer la raison du blocage", "Votre solde est negatif ("+theSolde+" euros). Vous etes donc interdit(e)s de reservation tant que le solde n'est pas regle.");
+	return reason;
+}
 </script>
+
+</head>
+<?php
+if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
+	$personid=$_REQUEST['personid'];
+	if (isset($_REQUEST['unblock']) and $_REQUEST['unblock'] == 'true') {
+		//print("Unblock $personid</br>\n");
+		//print("delete from $table_blocked where b_jom_id=$personid</br>\n");
+		$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
+		mysqli_query($mysqli_link, "delete from $table_blocked where b_jom_id=$personid") or die("Cannot delete: " . mysql_error()) ;
+		if (mysqli_affected_rows($mysqli_link) > 0) {
+			$insert_message = "Table blocked  mis &agrave; jour" ;
+			journalise($userId, 'I', "Table_blocked entry deleted for person $personid (done at $audit_time).") ;
+		} else {
+			$insert_message = "Impossible d'effacer la ligne dans la table_blocked" ;
+			journalise($userId, 'E', "Error (" . mysqli_error($mysqli_link). ") while deleting person entry for person $personid (done at $audit_time).") ;
+		}			
+		print("<p><h2><b>Le membre $personid a été débloqué</b></h2><p>");
+	}
+	if (isset($_REQUEST['block']) and $_REQUEST['block'] == 'true') {
+		$reason=web2db($_REQUEST['reason']);
+		//print("Block $personid Reason=$reason</br>\n");
+		print("insert into $table_blocked (b_jom_id, b_reason, b_who, b_when)
+				values ('$personid', \"$reason\", '$userId', sysdate());</br>");
+
+		mysqli_query($mysqli_link, "insert into $table_blocked (b_jom_id, b_reason, b_who, b_when)
+				values ('$personid', \"$reason\", '$userId', sysdate());")
+			or die("Impossible d'ajouter dans les blocked: " . mysqli_error($mysqli_link)) ;
+			
+		print("<p><h2><b>Le membre $personid a été bloqué :</b> Raison \"$reason\"</h2><p>");
+	}
+}
+?>
 <h1>Table des membres du RAPCS</h1>
   <p>Type something to search the table for first names, last names , ciel ref, ...</p>  
   <input class="form-control" id="myInput" type="text" placeholder="Search..">
   <br>
-<table width="100%" style="margin-left: auto; margin-right: auto;" class="table table-striped table-hover table-bordered"> 
+  
+<div class="table">
+<table width="100%" style="margin-left: auto; margin-right: auto; stickyHeader: true" class="table table-striped table-hover table-bordered"> 
+	<thead style="position: sticky;">
 <tr style="text-align: Center;">
 <th style="text-align: right;">#</th>
 <th>Id</th>
@@ -39,6 +150,7 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 <th>Bloqué</th>
 <th>Status</th>
 </tr>
+</thead>
 <tbody id="myTable">
 <?php
 // ajouter block (Pour les pilotes bloque) + inverser les soldes.
@@ -64,11 +176,11 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 	$blockedCount=0;
 	$soldeTotal=0.0;
 	
-	$CheckMark="&#9989";
+	$CheckMark="&#9989;";
 	
 	while ($row = mysqli_fetch_array($result)) {
 		$count++;
-		$userid=$row['id'];
+		$personid=$row['id'];
 		$row['name'] = db2web($row['name']) ;
 		if ($row['name'] === FALSE) 
 			journalise(0, 'E', "There was an error while converting\n") ; 
@@ -80,7 +192,7 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 		$ville=db2web($row['city']);
 		$pays=db2web($row['country']);
 		$nom=$row['last_name'];
-		if($nom=="") $nom=$row['name'];
+		if($nom == "") $nom=$row['name'];
 		$prenom=$row['first_name'];		
 		$groups = explode(',', $row['groups']) ;
 		$effectif = (in_array($joomla_effectif_group, $groups)) ? $CheckMark : '' ;
@@ -88,12 +200,19 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 		$student = (in_array($joomla_student_group, $groups)) ? $CheckMark : '' ;
 		$status=db2web($row['b_reason']);
 		$blocked=$row['block'];
-		if($blocked!=0) $status="Web blocked";
 		if($status=="") {
-			$blocked='';
+			if($blocked!=0) {
+				$status="Web blocked";	
+				$blocked=2;
+			}
+			else {
+				//$blocked='&#x2714;';
+				$blocked=0;
+			}
 		}
 		else {
-			$blocked='&#x26D4;';
+			//$blocked='&#x26D4;';
+			$blocked=1;
 		}
 		if($status=="") $status="OK";
 		$member=$CheckMark;
@@ -107,7 +226,7 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 		//SELECT * FROM `rapcs_bk_balance`.   bkb_amount
 		//SELECT * FROM `rapcs_bk_balance` ORDER BY `rapcs_bk_balance`.`bkb_date` DESC
 		
-		$ciel="00000000";
+		$ciel="000000";
 		if($row['ciel_code'] != "") {
 			$ciel="400".$row['ciel_code'];
 		}
@@ -118,19 +237,22 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 		if($pilot == $CheckMark) $pilotCount++;
 		if($effectif == $CheckMark) $effectifCount++;
 	    if($ciel != '') $cielCount++;
-		if($blocked != '') $blockedCount++;
+		if($blocked == 1) $blockedCount++;
 		$soldeStyle='';
 		$rowStyle="";
 		if($solde<0.0) {
 			$soldeStyle="style='color: red';";
 			$rowStyle="class='warning'";
 		}
-		if($blocked!='') {
+		if($blocked==1) {
 			$rowStyle="class='danger'";	
 		}
-		print("<tr style='text-align: right'; $rowStyle>
+		else if($blocked==2) {
+			$rowStyle="class='table-primary'";	
+		}
+		print("<tr id='$personid_row' style='text-align: right'; $rowStyle>
 			<td>$count</td>
-		    <td style='text-align: right;'>$userid</td>
+		    <td style='text-align: right;'>id$personid</td>
 			<td style='text-align: left;'>$ciel</td>
 			<td style='text-align: left;'>$row[last_name]</td>
 			<td style='text-align: left;'>$row[first_name]</td>
@@ -148,11 +270,20 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 		else {			
 			print("<td></td>");
 		}
-		print("<td style='text-align: center;font-size: 17px;'>$blocked</td>");
-
+		if($blocked==1) {
+			print("<td style='text-align: center;font-size: 17px;color: green;'>
+			<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Unblock','$nom $prenom','$personid','$solde')\">&#x26D4;<span class='tooltiptext'>Click pour DEBLOQUER</span></a></td>");
+		}
+		else if($blocked==2){
+			print("<td style='text-align: center;font-size: 15px;color: red;'>&#10060;</td>");		
+		}
+		else {
+			print("<td style='text-align: center;font-size: 17px;color: green;'>
+				<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Block','$nom $prenom','$personid','$solde')\">&#x2714;<span class='tooltiptext'>Click pour BLOQUER</span></a></td>");		
+		}
 		print("<td style='text-align: left;'>$status</td>");
 		/*
-		print("<td style='text-align: left;'><select id='id_blocked_$userid' name='blocked_$userid'>
+		print("<td style='text-align: left;'><select id='id_blocked_$personid' name='blocked_$personid'>
 			<option value='OK'>$status</option>
 		<option value='B1'>Solde trop négatif</option>
 		<option value='B2'>Cotisation non payée</option>
@@ -183,17 +314,9 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 	print("<td>$blockedCount</td>
 		<td></td>
 		</tr>\n");
-	print('</tbody></table></center>');
 ?>
-<script>
-$(document).ready(function(){
-  $("#myInput").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    $("#myTable tr").filter(function() {
-      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-    });
-  });
-});
-</script>
+</tbody>
+</table>
+</div>
 </body>
 </html>
