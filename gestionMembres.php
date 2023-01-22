@@ -147,8 +147,8 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 <th>Pilote</th>
 <th>Membre Effectif</th>
 <th>Solde</th>
-<th>Bloqué</th>
 <th>Status</th>
+<th>Raison</th>
 </tr>
 </thead>
 <tbody id="myTable">
