@@ -176,13 +176,15 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 <?php
 // ajouter block (Pour les pilotes bloque) + inverser les soldes.
 	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
-	ciel_code, block, bkb_amount, b_reason, u.email as email, group_concat(group_id) as groups
+	ciel_code, block, bkb_amount, b_reason, u.email as email, group_concat(group_id) as groups, sum(distinct bkl_debit) as invoice_total
 		from $table_users as u join $table_user_usergroup_map on u.id=user_id 
 		join $table_person as p on u.id=p.jom_id
 		left join $table_bk_balance on concat('400',ciel_code)=bkb_account
+		left join $table_bk_ledger on bkl_client = ciel_code
 		left join $table_blocked on u.id = b_jom_id
 		where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
 		and (bkb_date is null or bkb_date=(select max(bkb_date) from $table_bk_balance))
+		and bkl_journal = 'VEN' and bkl_date between '2023-01-01' and '2023-01-31'
 		group by user_id
 		order by last_name, first_name" ;
 		$count=0;
@@ -254,6 +256,14 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 
 		$soldeTotal+=$solde;
 		if($member == $CheckMark) $memberCount++;
+		// Let's do some checks on January invoice
+		if ($row['invoice_total'] == 70) {
+			if ($member != $CheckMark)
+				$member .= '<br/> ! cotisation de 70 €' ;
+	 	}  else if ($row['invoice_total'] == 255) {
+			if ($member == $CheckMark)
+				$member .= '<br/> ! cotisation de 255 €' ;
+		}
 		if($student == $CheckMark) $studentCount++;
 		if($pilot == $CheckMark) $pilotCount++;
 		if($effectif == $CheckMark) $effectifCount++;
