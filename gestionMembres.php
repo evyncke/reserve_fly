@@ -225,7 +225,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		$blocked=$row['block'];
 		if($status=="") {
 			if($blocked!=0) {
-				$status="Web blocked";	
+				$status="Web déactivé";	
 				$blocked=2;
 			}
 			else {
@@ -249,7 +249,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		//SELECT * FROM `rapcs_bk_balance`.   bkb_amount
 		//SELECT * FROM `rapcs_bk_balance` ORDER BY `rapcs_bk_balance`.`bkb_date` DESC
 		
-		$ciel="000000";
+		$ciel="xxxxxxx";
 		if($row['ciel_code'] != "") {
 			$ciel="400".$row['ciel_code'];
 		}
@@ -258,11 +258,10 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		if($member == $CheckMark) $memberCount++;
 		// Let's do some checks on January invoice
 		if ($row['invoice_total'] == 70) {
-			if ($member != $CheckMark)
-				$member .= '<br/> ! cotisation de 70 €' ;
-	 	}  else if ($row['invoice_total'] == 255) {
-			if ($member == $CheckMark)
-				$member .= '<br/> ! cotisation de 255 €' ;
+			if ($member != $CheckMark) $status .= '<br/> ! cotisation de 70 €' ;
+	 	}  
+		else if ($row['invoice_total'] == 255) {
+			if ($member == $CheckMark) $status .= '<br/> ! cotisation de 255 €' ;
 		}
 		if($student == $CheckMark) $studentCount++;
 		if($pilot == $CheckMark) $pilotCount++;
@@ -296,7 +295,8 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 			<td style='text-align: center;'>$pilot</td>
 			<td style='text-align: center;'>$effectif</td>");
 		if($row['ciel_code'] != '') {
-				print("<td $soldeStyle>$solde €</td>");				
+			$soldeText=number_format($solde,2,",",".");
+			print("<td $soldeStyle>$soldeText €</td>");				
 		}
 		else {			
 			print("<td></td>");
@@ -336,11 +336,12 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		<td>$studentCount</td>
 		<td>$pilotCount</td>
 		<td>$effectifCount</td>");
+	$soldeTotalText=number_format($soldeTotal,2,",",".");
 	if($soldeTotal<0.0) {
-		print("<td style='color: red;text-align: right;'>$soldeTotal €</td>");
+		print("<td style='color: red;text-align: right;'>$soldeTotalText €</td>");
 	}
 	else {
-		print("<td style='text-align: right;'>$soldeTotal €</td>");		
+		print("<td style='text-align: right;'>$soldeTotalText €</td>");		
 	}
 	print("<td>$blockedCount</td>
 		<td></td>
