@@ -120,7 +120,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		//print("Unblock $personid</br>\n");
 		//print("delete from $table_blocked where b_jom_id=$personid</br>\n");
 		$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
-		mysqli_query($mysqli_link, "delete from $table_blocked where b_jom_id=$personid") or die("Cannot delete: " . mysql_error()) ;
+		mysqli_query($mysqli_link, "delete from $table_blocked where b_jom_id=$personid") or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
 			$insert_message = "Table blocked  mis &agrave; jour" ;
 			journalise($userId, 'I', "Table_blocked entry deleted for person $personid (done at $audit_time).") ;
