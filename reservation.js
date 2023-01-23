@@ -461,11 +461,14 @@ function showPilotDetails(id) {
 	if (booking.log_pilot != 0 && booking.log_pilot != booking.user) { // The booked pilot is not the same as in logbook and there is a logbook entry
 		span.innerHTML = '<b>' + booking.log_pilotName + "</b>" ;
 		span.innerHTML += '<a href="vcard.php?id=' + booking.log_pilot + '"><i class="material-icons" style="font-size:18px;color:blue;">cloud_download</i></a>' ;
+		span.innerHTML += '<a href="vcard.php?id=' + booking.log_pilot + '&qr=yes"><i class="material-icons" style="font-size:18px;color:blue;">qr_code_2</i></a>' ;
 		span.innerHTML += '<br>Vol réserve par: ' + booking.name ;
 	} else { // No logbook information (possibly future reservation)
 		span.innerHTML = '<b>' + booking.name + "</b>" ;
-		if (booking.user)
+		if (booking.user) {
 			span.innerHTML += '<a href="vcard.php?id=' + booking.user + '"><i class="material-icons" style="font-size:18px;color:blue;">cloud_download</i></a>' ;
+			span.innerHTML += '<a href="vcard.php?id=' + booking.user + '&qr=yes"><i class="material-icons" style="font-size:18px;color:blue;">qr_code_2</i></a>' ;
+		}
 		if (booking.cell_phone)
 			span.innerHTML += '<br/>Mobile: <a href="tel:' + booking.cell_phone + '">' + booking.cell_phone + '</a>';
 		if (booking.home_phone)
