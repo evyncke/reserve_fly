@@ -62,7 +62,7 @@ if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == true) {
 </form>
 </div><!-- row -->
 
-<table class="table table-striped table-responsive">
+<table class="table table-striped table-responsive table-hover">
 <thead>
 <tr><th>Réf</th><th>Actions</th><th>Créé le</th><th>Etat</th><th>Depuis</th><th>Vol</th><th>Pilote</th><th>Type</th><th>Client</th><th>Remarque client</th><th>Notes club</th></tr>
 </thead>
