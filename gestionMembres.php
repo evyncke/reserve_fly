@@ -130,6 +130,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 			journalise($userId, 'E', "Error (" . mysqli_error($mysqli_link). ") while deleting person entry for person $personid (done at $audit_time).") ;
 		}			
 		print("<p><h2><b>Le membre $personid a été débloqué</b></h2><p>");
+		journalise($userId, "I", "Member $personid is now unblocked") ;
 	}
 	if (isset($_REQUEST['block']) and $_REQUEST['block'] == 'true') {
 		$reason=urldecode($_REQUEST['reason']);
@@ -143,6 +144,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 			or journalise($userID, 'F', "Impossible d'ajouter dans les blocked: " . mysqli_error($mysqli_link)) ;
 		$reason=db2web($reason);
 		print("<p><h2><b>Le membre $personid a été bloqué :</b> Raison \"$reason\"</h2><p>");
+		journalise($userId, "W", "Member $persid is now blocked, $reason") ;
 	}
 }
 ?>
