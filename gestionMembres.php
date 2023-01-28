@@ -120,7 +120,8 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		//print("Unblock $personid</br>\n");
 		//print("delete from $table_blocked where b_jom_id=$personid</br>\n");
 		$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
-		mysqli_query($mysqli_link, "delete from $table_blocked where b_jom_id=$personid") or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
+		mysqli_query($mysqli_link, "delete from $table_blocked where b_jom_id=$personid") 
+			or journalise($userId, 'F', "Cannot delete: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
 			$insert_message = "Table blocked  mis &agrave; jour" ;
 			journalise($userId, 'I', "Table_blocked entry deleted for person $personid (done at $audit_time).") ;
@@ -138,8 +139,8 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 				values ('$personid', \"$reason\", '$userId', sysdate());</br>");
 
 		mysqli_query($mysqli_link, "insert into $table_blocked (b_jom_id, b_reason, b_who, b_when)
-				values ('$personid', \"$reason\", '$userId', sysdate());")
-			or die("Impossible d'ajouter dans les blocked: " . mysqli_error($mysqli_link)) ;
+				values ('$personid', \"$reason\", '$userId', sysdate())")
+			or journalise($userID, 'F', "Impossible d'ajouter dans les blocked: " . mysqli_error($mysqli_link)) ;
 		$reason=db2web($reason);
 		print("<p><h2><b>Le membre $personid a été bloqué :</b> Raison \"$reason\"</h2><p>");
 	}
