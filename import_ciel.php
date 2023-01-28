@@ -21,7 +21,11 @@ require_once 'SimpleXLSX.php' ;
 
 use Shuchkin\SimpleXLSX;
 
- $xlsx = SimpleXLSX::parse('ciel.xlsx') ;
+// Ciel Commercial -> Listes -> Clients... 
+// Selection de toutes les lignes -> engrenage -> liste des membres -> XLSX
+// Selection de toutes les lignes -> engrenage -> les colonnes de la liste -> TXT
+
+$xlsx = SimpleXLSX::parse('ciel.xlsx') ;
 
 if (! $xlsx)
 	die(SimpleXLSX::parseError()) ;
