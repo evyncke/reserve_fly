@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022 Eric Vyncke
+   Copyright 2022-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ $filePrefix = "invoices/" ;
 $shared_secret = "124.75=EBSP" ;
 
 // Ciel invoices are sent to different email addresses for those people...
-$ciel2profiles = array( // Booking email => invoice email 
+$ciel2profiles = array( // Invoice email => web site email 
 	'xavier@ffxconstruction.be' => 'xh@ffx-toiture.be',
 	'wynands.l@yahoo.com' => 'flyingluc@gmail.com',
 	'charlysix@skynet.be' => 'charlysix@gmail.com',
@@ -36,7 +36,8 @@ $ciel2profiles = array( // Booking email => invoice email
 	'flaviengrandjean@hotmail.com' => 'grandjeanflavien@gmail.com',
 	'jhu@live.be' => 'eg.lukeschova@gmail.com',
 	'michel.mos@skynet.be' => 'mickey.moes@gmail.com',
-	'eg.lukeschova@gmail.com' => 'jhu@live.be'
+	'eg.lukeschova@gmail.com' => 'jhu@live.be',
+	'lionel.martin@skynet.be' => 'lm-architecte@outlook.com'
 ) ;
 
 $lines = array() ;
