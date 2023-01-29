@@ -65,6 +65,81 @@ $(document).ready(function(){
     });
   });
 });
+
+// Based on https://www.w3schools.com/howto/howto_js_sort_table.asp
+function sortTable(n, isNumeric) {
+  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  table = document.getElementById("myTable");
+  switching = true;
+  // Set the sorting direction to ascending:
+  dir = "asc";
+  /* Make a loop that will continue until
+  no switching has been done: */
+  while (switching) {
+    // Start by saying: no switching is done:
+    switching = false;
+    rows = table.rows;
+    /* Loop through all table rows (except the
+    first, which contains table headers): 
+	Eric: actually, the table headers are not in table.rows()
+	Eric: last row is for total, do not sort*/
+    for (i = 0; i < (rows.length - 2); i++) {
+      // Start by saying there should be no switching:
+      shouldSwitch = false;
+      /* Get the two elements you want to compare,
+      one from current row and one from the next: */
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+      /* Check if the two rows should switch place,
+      based on the direction, asc or desc: */
+      if (dir == "asc") {
+		if (isNumeric) {
+			if (parseFloat(x.innerHTML) > parseFloat(y.innerHTML)) {
+				// If so, mark as a switch and break the loop:
+				shouldSwitch = true;
+				break;
+			}
+	  	} else {
+			if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          		// If so, mark as a switch and break the loop:
+          		shouldSwitch = true;
+          		break;
+        	}
+		}	
+       } else if (dir == "desc") {
+		if (isNumeric) {
+			if (parseFloat(x.innerHTML) < parseFloat(y.innerHTML)) {
+				// If so, mark as a switch and break the loop:
+				shouldSwitch = true;
+				break;
+			}
+	  	} else {
+			if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+          		// If so, mark as a switch and break the loop:
+          		shouldSwitch = true;
+          		break;
+        	}
+		}	
+      }
+    }
+    if (shouldSwitch) {
+      /* If a switch has been marked, make the switch
+      and mark that a switch has been done: */
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      // Each time a switch is done, increase this count by 1:
+      switchcount ++;
+    } else {
+      /* If no switching has been done AND the direction is "asc",
+      set the direction to "desc" and run the while loop again. */
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+
 function blockFunction(PHP_Self, theBlockedFlag, theNom, theUserId, theSolde)
 {
 	var aReason="";
@@ -157,22 +232,23 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 <table width="100%" style="margin-left: auto; margin-right: auto; stickyHeader: true" class="table table-striped table-hover table-bordered"> 
 	<thead style="position: sticky;">
 <tr style="text-align: Center;">
-<th style="text-align: right;">#</th>
-<th>Id</th>
-<th>Ref. Ciel</th>
-<th>Nom</th>
-<th>Prénom</th>
-<th>Adresse</th>
-<th>Code</th>
-<th>Ville</th>
-<th>Pays</th>
-<th>Membre non-navigant</th>
-<th>Elève</th>
-<th>Pilote</th>
-<th>Membre Effectif</th>
-<th>Solde</th>
-<th>Status</th>
-<th>Raison</th>
+<th onclick="sortTable(0, true)" style="text-align: right;">#</th>
+<th onclick="sortTable(1, false)">Id</th>
+<th onclick="sortTable(2, false)">Ref. Ciel</th>
+<th onclick="sortTable(3, false)">Nom</th>
+<th onclick="sortTable(4, false)">Prénom</th>
+<th onclick="sortTable(5, false)">Adresse</th>
+<th onclick="sortTable(6, false)">Code</th>
+<th onclick="sortTable(7, false)">Ville</th>
+<th onclick="sortTable(8, false)">Pays</th>
+<th onclick="sortTable(9, false)">Membre non-navigant</th>
+<th onclick="sortTable(10, false)">Elève</th>
+<th onclick="sortTable(11, false)">Pilote</th>
+<th onclick="sortTable(12, false)">Membre Effectif</th>
+<th onclick="sortTable(13, true)">Solde</th>
+<th onclick="sortTable(14, false)">Status</th>
+<th onclick="sortTable(15
+)">Raison</th>
 </tr>
 </thead>
 <tbody id="myTable">
