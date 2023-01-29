@@ -66,6 +66,10 @@ $(document).ready(function(){
   });
 });
 
+function parseFloatEU(s) {
+	return parseFloat(s.replace(/\./g, "").replace(/\,/g, ".")) ;
+}
+
 // Based on https://www.w3schools.com/howto/howto_js_sort_table.asp
 function sortTable(n, isNumeric) {
   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
@@ -94,7 +98,7 @@ function sortTable(n, isNumeric) {
       based on the direction, asc or desc: */
       if (dir == "asc") {
 		if (isNumeric) {
-			if (parseFloat(x.innerHTML) > parseFloat(y.innerHTML)) {
+			if (parseFloatEU(x.innerHTML) > parseFloatEU(y.innerHTML)) {
 				// If so, mark as a switch and break the loop:
 				shouldSwitch = true;
 				break;
@@ -108,7 +112,7 @@ function sortTable(n, isNumeric) {
 		}	
        } else if (dir == "desc") {
 		if (isNumeric) {
-			if (parseFloat(x.innerHTML) < parseFloat(y.innerHTML)) {
+			if (parseFloatEU(x.innerHTML) < parseFloatEU(y.innerHTML)) {
 				// If so, mark as a switch and break the loop:
 				shouldSwitch = true;
 				break;
