@@ -57,6 +57,7 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
 	</style>
   
 <script type="text/javascript">
+// Manage Search when keyup
 $(document).ready(function(){
   $("#myInput").on("keyup", function() {
     var value = $(this).val().toLowerCase();
@@ -64,6 +65,13 @@ $(document).ready(function(){
       $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
     });
   });
+});
+// Manage Search when document loaded
+$(document).ready(function() {
+     var value = $("#id_SearchInput").val().toLowerCase();
+      $("#myTable tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
 });
 
 function parseFloatEU(s) {
@@ -146,11 +154,15 @@ function sortTable(n, isNumeric) {
 
 function blockFunction(PHP_Self, theBlockedFlag, theNom, theUserId, theSolde)
 {
+	var aSearchText=document.getElementById("id_SearchInput").value;
 	var aReason="";
 	if(theBlockedFlag=="Block") {
 		aReason=getReason(theSolde);
 		if (confirm("Confirmer que vous voulez bloquer " + theNom + "?\nRaison: "+aReason) == true) {			
-   		 	var aCommand=PHP_Self+"?block=true&personid="+theUserId+"&reason="+aReason;		 
+   		 	var aCommand=PHP_Self+"?block=true&personid="+theUserId+"&reason="+aReason;	
+			if(aSearchText!="")	 {
+				aCommand+="&search="+aSearchText;
+			}
    		 	window.location.href = encodeURI(aCommand);
 		}
 	}
@@ -158,14 +170,20 @@ function blockFunction(PHP_Self, theBlockedFlag, theNom, theUserId, theSolde)
 		if (confirm("Confirmer que vous voulez débloquer " + theNom + "?") == true) {
 			aText="Débloquer";
       		 var aCommand=PHP_Self+"?unblock=true&personid="+theUserId;
+ 			if(aSearchText!="")	 {
+ 				aCommand+="&search="+aSearchText;
+ 			}
       		 window.location.href = aCommand;
 		}		
 	}
-	//alert("Action="+aText);
 }
 function getReason(theSolde)
 {
-	var reason = prompt("Entrer la raison du blocage", "Votre solde est négatif ("+theSolde+"€). Vous êtes donc interdit(e)s de réservation tant que le solde n'est pas réglé.");
+	var aPredefinedReason="Votre solde est négatif ("+theSolde+"EUR). Vous êtes donc interdit(e)s de réservation tant que le solde n'est pas réglé.";
+	if(theSolde==70 || theSolde==255){
+		aPredefinedReason="Vous n'êtes pas en ordre de cotisation. Vous êtes donc interdit(e)s de réservation tant que votre cotisation n'est pas réglée.";
+	}
+	var reason = prompt("Entrer la raison du blocage", aPredefinedReason);
 	return reason;
 }
 </script>
@@ -193,6 +211,10 @@ function getReason(theSolde)
 </head>
 <body>
 <?php
+$searchText=""; 	
+if (isset($_REQUEST['search']) and $_REQUEST['search'] != '') {
+	$searchText=$_REQUEST['search'];
+}
 if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 	$personid=$_REQUEST['personid'];
 	if (isset($_REQUEST['unblock']) and $_REQUEST['unblock'] == 'true') {
@@ -215,8 +237,8 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		$reason=urldecode($_REQUEST['reason']);
 		$reason=web2db($reason);
 		//print("Block $personid Reason=$reason</br>\n");
-		print("insert into $table_blocked (b_jom_id, b_reason, b_who, b_when)
-				values ('$personid', \"$reason\", '$userId', sysdate());</br>");
+		//print("insert into $table_blocked (b_jom_id, b_reason, b_who, b_when)
+		//		values ('$personid', \"$reason\", '$userId', sysdate());</br>");
 
 		mysqli_query($mysqli_link, "insert into $table_blocked (b_jom_id, b_reason, b_who, b_when)
 				values ('$personid', \"$reason\", '$userId', sysdate())")
@@ -229,7 +251,9 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 ?>
 <h1>Table des membres du RAPCS</h1>
   <p>Type something to search the table for first names, last names , ciel ref, ...</p>  
-  <input class="form-control" id="myInput" type="text" placeholder="Search..">
+<?php	
+  print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeholder=\"Search..\" value=\"$searchText\">");
+?>
   <br>
   
 <div class="table">
