@@ -383,7 +383,9 @@ if ($userNoFlight) print(" <span style=\"color: red;\">interdit de vol</span> ")
 if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
 	print("<br/><font color=red>Vous devez &ecirc;tre au moins pilote pour r&eacute;server un avion.</font>") ;
 if ($userNoFlight)
-	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol (par exemple: factures non pay&eacute;es, contactez <a href=\"mailto:info@spa-aviation.be\">info@spa-aviation.be.</div>") ;
+	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol (par exemple: factures non pay&eacute;es, 
+		contactez <a href=\"mailto:info@spa-aviation.be\">info@spa-aviation.be</a>.
+		Un clic sur le bouton <i>Folio du mois</i> ci-dessus vous permet de visualiser votre situation comptable.</div>") ;
 // Check whether the user is blocked
 $result_blocked = mysqli_query($mysqli_link, "SELECT * FROM $table_blocked WHERE b_jom_id=$userId")
 	or journalise($userId, 'E', "Cannot checked whether user is blocked: " . mysqli_error($mysqli_link)) ;
@@ -391,7 +393,9 @@ $row_blocked = mysqli_fetch_array($result_blocked) ;
 if ($row_blocked) {
 	journalise($userId, "W", "This user is blocked: " . db2web($row_blocked['b_reason'])) ;
 	$userNoFlight = true ;
-	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. Contactez <a href=\"mailto:info@spa-aviation.be\">l'a&eacute;roclub info@spa-aviation.be</a>.</div>") ;
+	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. 
+		Contactez <a href=\"mailto:info@spa-aviation.be\">l'a&eacute;roclub info@spa-aviation.be</a>.
+		Un clic sur le bouton <i>Folio du mois</i> ci-dessus vous permet de visualiser votre situation comptable.</div>") ;
 }
 if ($userId == 0) {
 	print("<br/><font color=red>Vous devez &ecirc;tre connect&eacute;(e) pour r&eacute;server un avion.</font> ") ;
