@@ -72,14 +72,7 @@ $(document).ready(function() {
         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
       });
 });
-//$(document).ready(function(){
-//  $("#id_SearchInput").on("keyup", function() {
-//    var value = $(this).val().toLowerCase();
-//    $("#myTable tr").filter(function() {
-//      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-//    });
-//  });
-//});
+
 function parseFloatEU(s) {
 	return parseFloat(s.replace(/\./g, "").replace(/\,/g, ".")) ;
 }
@@ -395,7 +388,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 			$rowStyle="class='danger'";	
 		}
 		else if($blocked==1) {
-			$rowStyle="class='table-primary'";	
+			$rowStyle="class='info'";	
 		}
 		print("<tr id='$personid_row' style='text-align: right'; $rowStyle>
 			<td>$count</td>
