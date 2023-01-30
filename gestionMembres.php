@@ -58,22 +58,28 @@ if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'ave
   
 <script type="text/javascript">
 // Manage Search when keyup
-$(document).ready(function(){
-  $("#myInput").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    $("#myTable tr").filter(function() {
-      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-    });
-  });
-});
+
 // Manage Search when document loaded
 $(document).ready(function() {
-     var value = $("#id_SearchInput").val().toLowerCase();
+   $("#id_SearchInput").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      $("#myTable tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+     });
+    });
+    var value = $("#id_SearchInput").val().toLowerCase();
       $("#myTable tr").filter(function() {
         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
       });
 });
-
+//$(document).ready(function(){
+//  $("#id_SearchInput").on("keyup", function() {
+//    var value = $(this).val().toLowerCase();
+//    $("#myTable tr").filter(function() {
+//      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+//    });
+//  });
+//});
 function parseFloatEU(s) {
 	return parseFloat(s.replace(/\./g, "").replace(/\,/g, ".")) ;
 }
@@ -330,19 +336,23 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		$student = (in_array($joomla_student_group, $groups)) ? $CheckMark : '' ;
 		$status=db2web($row['b_reason']);
 		$blocked=$row['block'];
-		if($status=="") {
+		if($blocked==1) {
+			$status="Web déactivé";				
+		}
+		else if($status!="") {
+			//$blocked='&#x26D4;';
+			$blocked=2;
+		}
+		else {
+			/*
 			if($blocked!=0) {
-				$status="Web déactivé";	
-				$blocked=2;
+				$blocked=1;
 			}
 			else {
 				//$blocked='&#x2714;';
 				$blocked=0;
 			}
-		}
-		else {
-			//$blocked='&#x26D4;';
-			$blocked=1;
+			*/
 		}
 		if($status=="") $status="OK";
 		$member=$CheckMark;
@@ -374,17 +384,17 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		if($pilot == $CheckMark) $pilotCount++;
 		if($effectif == $CheckMark) $effectifCount++;
 	    if($ciel != '') $cielCount++;
-		if($blocked == 1) $blockedCount++;
+		if($blocked == 2) $blockedCount++;
 		$soldeStyle='';
 		$rowStyle="";
 		if($solde<0.0) {
 			$soldeStyle="style='color: red';";
 			$rowStyle="class='warning'";
 		}
-		if($blocked==1) {
+		if($blocked==2) {
 			$rowStyle="class='danger'";	
 		}
-		else if($blocked==2) {
+		else if($blocked==1) {
 			$rowStyle="class='table-primary'";	
 		}
 		print("<tr id='$personid_row' style='text-align: right'; $rowStyle>
@@ -408,11 +418,11 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		else {			
 			print("<td></td>");
 		}
-		if($blocked==1) {
+		if($blocked==2) {
 			print("<td style='text-align: center;font-size: 17px;color: green;'>
 			<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Unblock','$nom $prenom','$personid','$solde')\">&#x26D4;<span class='tooltiptext'>Click pour DEBLOQUER</span></a></td>");
 		}
-		else if($blocked==2){
+		else if($blocked==1){
 			print("<td style='text-align: center;font-size: 15px;color: red;'>&#10060;</td>");		
 		}
 		else {
