@@ -330,7 +330,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		$status=db2web($row['b_reason']);
 		$blocked=$row['block'];
 		if($blocked==1) {
-			$status="Web déactivé";				
+			$status="Web désactivé";				
 		}
 		else if($status!="") {
 			//$blocked='&#x26D4;';
