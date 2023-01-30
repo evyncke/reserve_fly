@@ -394,7 +394,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 			<td>$count</td>
 		    <td style='text-align: right;'>id$personid</td>
 			<td style='text-align: left;'>$ciel</td>
-			<td style='text-align: left;'>$row[last_name]</td>
+			<td style='text-align: left;'><a href=\"https://www.spa-aviation.be/resa/myfolio.php?user=$personid\">$row[last_name]</a></td>
 			<td style='text-align: left;'>$row[first_name]</td>
 			<td style='text-align: left;'>$address</td>
 			<td style='text-align: left;'>$code</td>
