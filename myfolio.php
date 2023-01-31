@@ -22,6 +22,8 @@ require_once "dbi.php" ;
 
 if ($userId <= 0) die("Vous devez être connecté") ;
 
+$originalUserId = $userId ;
+
 if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
 	if ($userId != 62) journalise($userId, "I", "Start of folio, setting user to $_REQUEST[user]") ;
 	$userId = $_REQUEST['user'] ;
@@ -39,8 +41,8 @@ if (isset($_REQUEST['start']))  {
 $previous_month = $previous_month->sub(new DateInterval('P1M')) ;
 
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $userId")
-	or die("Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
-$pilot = mysqli_fetch_array($result) or die("Pilote $userId inconnu") ;
+	or journalise(0, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
+$pilot = mysqli_fetch_array($result) or journalise(0, 'F', "Pilote $userId inconnu") ;
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 $userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
 $codeCiel = $pilot['ciel_code'] ;
@@ -162,7 +164,7 @@ function selectChanged() {
   _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
   _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
   _paq.push(['enableHeartBeatTimer']);
-  _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
+  _paq.push(['setCustomVariable', 1, "userID", <?=$originalUserId?>, "visit"]);
   _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
   _paq.push(['trackPageView']);
   _paq.push(['enableLinkTracking']);
@@ -194,7 +196,7 @@ $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
 		AND l_start >= '" . $folio_start->format('Y-m-d') . "'
 	ORDER by l.l_start ASC" ;
 
-$result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
+$result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
 
 if ($userIsInstructor or $userIsAdmin) {
         print("En tant qu'instructeur/administrateur, vous pouvez consulter les folios des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
@@ -342,7 +344,7 @@ $result = mysqli_query($mysqli_link, "SELECT *
 		WHERE jom_id = $userId
 		ORDER BY bkb_date DESC
 		LIMIT 0,1")
-	or die("Cannot read booking keeping balance: " . mysqli_error($mysqli_link)) ;
+	or journalise($originalUserId, "F", "Cannot read booking keeping balance: " . mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 if ($row) {
 	$balance = -1 * $row['bkb_amount'] ;
@@ -363,15 +365,15 @@ if ($row) {
 $sql = "SELECT * FROM $table_person JOIN $table_bk_invoices ON bki_email = email LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
         WHERE jom_id = $userId" ;
 
-$result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access factures: " . mysqli_error($mysqli_link)) ;
+$result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Erreur systeme a propos de l'access factures: " . mysqli_error($mysqli_link)) ;
 $count = 0 ;
 while ($row = mysqli_fetch_array($result)) {
 	// Using the invoice date from the email import as the general ledger is in the future
-        print("<li><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_date] #$row[bki_id] &boxbox;</a>") ;
+    print("<li><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_date] #$row[bki_id] &boxbox;</a>") ;
 	if ($row['bkl_debit'] != '') print(" facture pour un montant de $row[bkl_debit] &euro; <button onClick=\"pay('Facture $row[bki_id]', $row[bkl_debit]);\">Payer par QR-code</button>") ;
 	if ($row['bkl_credit'] != '') print(" note de crédit pour un montant de " . (0.0 - $row['bkl_credit']) . " &euro;") ;
 	print("</li>\n") ;
-        $count ++ ;
+    $count ++ ;
 }
 
 if ($count == 0) print("<li>Hélas, pas encore de facture à votre nom dans le système.</li>\n") ;
