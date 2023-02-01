@@ -428,8 +428,13 @@ while ($row = mysqli_fetch_array($result)) {
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 
+// Banque de la poste
 $iban = "BE14000078161283" ;
 $bic = "BPOTBEB1" ;
+// CBC
+$iban = "BE64732038421852" ;
+$bic = "CREGBEBB" ;
+
 $name = "Royal Aero Para Club Spa" ;
 
 /*
@@ -467,7 +472,7 @@ function pay(reason, amount) {
 	document.getElementById('payment_reason').innerText = reason ;
 	document.getElementById('payment_amount').innerText = amount ;
 	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
-	// There should be 2 reasons, first one is structued, the second one is free text
+	// There should be 2 reasons, first one is structured, the second one is free text
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel + '/' + userLastName ;
 	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 }
