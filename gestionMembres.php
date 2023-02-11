@@ -74,6 +74,7 @@ $(document).ready(function() {
 });
 
 function parseFloatEU(s) {
+	if (s == '') return 0 ;
 	return parseFloat(s.replace(/\./g, "").replace(/\,/g, ".")) ;
 }
 
@@ -105,7 +106,7 @@ function sortTable(n, isNumeric) {
       based on the direction, asc or desc: */
       if (dir == "asc") {
 		if (isNumeric) {
-			if (parseFloatEU(x.innerHTML) > parseFloatEU(y.innerHTML)) {
+			if (parseFloatEU(x.innerText) > parseFloatEU(y.innerText)) {
 				// If so, mark as a switch and break the loop:
 				shouldSwitch = true;
 				break;
@@ -119,7 +120,7 @@ function sortTable(n, isNumeric) {
 		}	
        } else if (dir == "desc") {
 		if (isNumeric) {
-			if (parseFloatEU(x.innerHTML) < parseFloatEU(y.innerHTML)) {
+			if (parseFloatEU(x.innerText) < parseFloatEU(y.innerText)) {
 				// If so, mark as a switch and break the loop:
 				shouldSwitch = true;
 				break;
@@ -280,8 +281,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 <th onclick="sortTable(12, false)">Membre Effectif</th>
 <th onclick="sortTable(13, true)">Solde</th>
 <th onclick="sortTable(14, false)">Status</th>
-<th onclick="sortTable(15
-)">Raison</th>
+<th onclick="sortTable(15, false)">Raison</th>
 </tr>
 </thead>
 <tbody id="myTable">
