@@ -1,7 +1,7 @@
 <?php
 require_once 'dbi.php';
 
-if (! $userIsAdmin && ! $userIsBoardMember) journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
+if (! $userIsAdmin && ! $userIsBoardMember && !$userIsInstructor) journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
 // ob_start("ob_gzhandler"); // Enable gzip compression over HTTP
 
 ?><!DOCTYPE html>
@@ -217,20 +217,26 @@ if (isset($_REQUEST['search']) and $_REQUEST['search'] != '') {
 if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 	$personid=$_REQUEST['personid'];
 	if (isset($_REQUEST['unblock']) and $_REQUEST['unblock'] == 'true') {
-		//print("Unblock $personid</br>\n");
-		//print("delete from $table_blocked where b_jom_id=$personid</br>\n");
-		$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
-		mysqli_query($mysqli_link, "delete from $table_blocked where b_jom_id=$personid") 
-			or journalise($userId, 'F', "Cannot delete: " . mysqli_error($mysqli_link)) ;
-		if (mysqli_affected_rows($mysqli_link) > 0) {
-			$insert_message = "Table blocked  mis &agrave; jour" ;
-			journalise($userId, 'I', "Table_blocked entry deleted for person $personid (done at $audit_time).") ;
-		} else {
-			$insert_message = "Impossible d'effacer la ligne dans la table_blocked" ;
-			journalise($userId, 'E', "Error (" . mysqli_error($mysqli_link). ") while deleting person entry for person $personid (done at $audit_time).") ;
-		}			
-		print("<p><h2><b>Le membre $personid a été débloqué</b></h2><p>");
-		journalise($userId, "I", "Member $personid is now unblocked") ;
+		if($userIsBoardMember) {
+			//print("Unblock $personid</br>\n");
+			//print("delete from $table_blocked where b_jom_id=$personid</br>\n");
+			$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
+			mysqli_query($mysqli_link, "delete from $table_blocked where b_jom_id=$personid") 
+				or journalise($userId, 'F', "Cannot delete: " . mysqli_error($mysqli_link)) ;
+			if (mysqli_affected_rows($mysqli_link) > 0) {
+				$insert_message = "Table blocked  mis &agrave; jour" ;
+				journalise($userId, 'I', "Table_blocked entry deleted for person $personid (done at $audit_time).") ;
+			} else {
+				$insert_message = "Impossible d'effacer la ligne dans la table_blocked" ;
+				journalise($userId, 'E', "Error (" . mysqli_error($mysqli_link). ") while deleting person entry for person $personid (done at $audit_time).") ;
+			}			
+			print("<p><h2><b>Le membre $personid a été débloqué</b></h2><p>");
+			journalise($userId, "I", "Member $personid is now unblocked") ;
+		}
+		else {
+			print("<p><h2 style='color: red;'><b>Vous n'êtes pas autorisés à débloquer un membre.<br/>Seuls les membres du CA peuvent débloquer un membre !</b></h2></p>");
+			journalise($userId, "I", "One FI try to unblock a member $personid. Not allowed") ;
+		}
 	}
 	if (isset($_REQUEST['block']) and $_REQUEST['block'] == 'true') {
 		$reason=urldecode($_REQUEST['reason']);
@@ -256,7 +262,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
   <br>
   
 <div class="table">
-<table width="100%" style="margin-left: auto; margin-right: auto; stickyHeader: true" class="table table-striped table-hover table-bordered"> 
+<table width="100%" style="margin-left: auto; margin-right: auto; stickyHeader: true;" class="table table-striped table-hover table-bordered"> 
 	<thead style="position: sticky;">
 <tr style="text-align: Center;">
 <th onclick="sortTable(0, true)" style="text-align: right;">#</th>
@@ -389,7 +395,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		$soldeStyle='';
 		$rowStyle="";
 		if($solde<0.0) {
-			$soldeStyle="style='color: red';";
+			$soldeStyle="style='color: red;'";
 			$rowStyle="class='warning'";
 		}
 		if($blocked==2) {
