@@ -297,7 +297,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		left join $table_blocked on u.id = b_jom_id
 		where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
 		and (bkb_date is null or bkb_date=(select max(bkb_date) from $table_bk_balance))
-		and bkl_journal = 'VEN' and bkl_date between '2023-01-01' and '2023-01-31'
+	    and bkl_journal = 'VEN' and bkl_date between '2023-01-01' and '2023-01-31'.  //removed//
 		group by user_id
 		order by last_name, first_name" ;
 */
