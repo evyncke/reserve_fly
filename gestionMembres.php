@@ -211,6 +211,9 @@ function getReason(theSolde)
 </head>
 <body>
 <?php
+// Display or not Web deActicated member (Must be managed by a toggle button)
+$displayWebDeactivated=false;
+
 $searchText=""; 	
 if (isset($_REQUEST['search']) and $_REQUEST['search'] != '') {
 	$searchText=$_REQUEST['search'];
@@ -376,6 +379,10 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		$solde=$solde*-1.00;
 		if(abs($solde)<0.01) $solde=0.0;
 		
+		//Don't display webdeactivated member if solde == 0
+		if(!$displayWebDeactivated && $blocked == 1 && $solde == 0.0) {
+			continue;
+		}
 		//SELECT * FROM `rapcs_bk_balance`.   bkb_amount
 		//SELECT * FROM `rapcs_bk_balance` ORDER BY `rapcs_bk_balance`.`bkb_date` DESC
 		
