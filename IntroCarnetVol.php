@@ -899,7 +899,7 @@ else {
 </select><select id="id_cdv_frais_CP_type" name="cdv_frais_CP_type">
 <option selected="selected" value="0"></option>
 </select>
-<input id="id_cdv_frais_numero_vol" name="cdv_frais_numero_vol" size="5" type="text" placeholder="123" autocomplete="off" />
+<input id="id_cdv_frais_numero_vol" name="cdv_frais_numero_vol" size="15" type="text" placeholder="V-INIT-231xxx" autocomplete="off" />
 <select id="id_cdv_frais_CP_PAX" name="cdv_frais_CP_PAX">
 <option selected="selected" value=""></option>
 </select><br /><input id="id_cdv_frais_remarque" name="cdv_frais_remarque" size="20" type="text" placeholder="Remarques" autocomplete="off"/></td>
