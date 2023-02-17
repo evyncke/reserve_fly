@@ -1000,7 +1000,7 @@ function check_airport(id_cdv_val)
 function check_numero_vol()
 {
 	
-	// Check if the structure is something like V-INI-xxxxx or INI-xxxxx
+	// Check if the structure is something like V-INIT-xxxxx or INIT-xxxxx
 	var aTextInput=document.getElementById("id_cdv_frais_numero_vol");
 	var aNumeroVolText=aTextInput.value.trim();
 	var anArray = aNumeroVolText.split("-");
@@ -1035,7 +1035,7 @@ function check_numero_vol()
 	}
 	var aCPType=document.getElementById("id_cdv_frais_CP_type").value;
 	// IF(-4), Initiation(-3), vol membre(-5),  vol D.H.F(-6),vol PR(-7),
-	if(aCPType==-3 && aFlightType!="INI") {
+	if(aCPType==-3 && aFlightType!="INIT") {
 		aTextInput.style.backgroundColor = 'orange';
 		aFlag=false;
 		aFlightType="INI";	
@@ -1342,7 +1342,7 @@ function compute_frais_CP()
 		if(aCPType==-3 || aCPType==-4|| aCPType==-5|| aCPType==-6|| aCPType==-7) {
 			document.getElementById("id_cdv_frais_numero_vol").style.display="";
 			if(aCPType==-3) {
-				document.getElementById("id_cdv_frais_numero_vol").placeholder="V-INI-231XXX";
+				document.getElementById("id_cdv_frais_numero_vol").placeholder="V-INIT-231XXX";
 			}
 			else if(aCPType==-4) {
 				document.getElementById("id_cdv_frais_numero_vol").placeholder="V-IF-231XXX";
