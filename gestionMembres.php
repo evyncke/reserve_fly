@@ -64,15 +64,16 @@ $(document).ready(function() {
    $("#id_SearchInput").on("keyup", function() {
       var value = $(this).val().toLowerCase();
       $("#myTable tr").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        $(this).toggle($(this).text().toLowerCase().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '').indexOf(value) > -1)
      });
     });
     var value = $("#id_SearchInput").val().toLowerCase();
       $("#myTable tr").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      $(this).toggle($(this).text().toLowerCase().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '').indexOf(value) > -1)
       });
 });
-
+//.normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '');
+//        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
 function parseFloatEU(s) {
 	if (s == '') return 0 ;
 	return parseFloat(s.replace(/\./g, "").replace(/\,/g, ".")) ;
@@ -391,7 +392,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 			$ciel="400".$row['ciel_code'];
 		}
 
-		$soldeTotal+=$solde;
+		if($solde < 0.0) $soldeTotal+=$solde;
 		// Let's do some checks on January invoice
 		if ($row['invoice_total'] == 70) {
 			if ($member != $CheckMark) $status .= '<br/> ! cotisation de 70 €' ;
