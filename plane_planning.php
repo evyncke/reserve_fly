@@ -90,7 +90,7 @@ while ($row = mysqli_fetch_array($result)) {
 		print("<td>$row[entretien] ????</td><td></td><td></td>") ;
 	print("<td>$row[limite_moteur_heure]<br/>$row[limite_moteur_12ans]</td>" . GenCell($row['limite_helice']) . "
 		<td></td><td></td><td></td>
-		<td>$row[cn]</td>" . 
+		<td>$row['cn']</td>" . 
 		GenCell($row['limite_magnetos']) . "
 		<td>$row[pesage]</td>
 		</tr>\n") ;
