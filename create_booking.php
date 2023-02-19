@@ -44,12 +44,12 @@ if ($instructor_id) {
 } else
 	$instructor_id = "NULL" ;
 $customer_id = (isset($_REQUEST['customerId'])) ? intval(trim($_REQUEST['customerId'])) : 0 ;
-if (!is_numeric($customer_id)) die("Invalid customerId") ;
+if (!is_numeric($customer_id)) journalise($userId, "F", "Invalid customerId") ;
 $booking_type = $_REQUEST['type'] ;
-if (!is_numeric($booking_type)) die("Bien essaye... type: $booking_type") ;
+if (!is_numeric($booking_type)) journalise($userId, "F", "Bien essaye... type: $booking_type") ;
 $duration = str_replace(',', '.', $_REQUEST['duration']) ;
-if ($duration != '' and !is_numeric($duration) or $duration < 0) die("Bien essaye... duree: $duration") ;
-if ($duration == '') $duration = 0 ;
+if (isset($_REQUEST['duration']) and $duration != '' and (!is_numeric($duration) or $duration < 0)) journalise($userId, "F", "Bien essaye... duree: $duration") ;
+if (! isset($_REQUEST['duration']) or $duration == '') $duration = 0 ;
 $start = mysqli_real_escape_string($mysqli_link, $_REQUEST['start']) ;
 $end = mysqli_real_escape_string($mysqli_link, $_REQUEST['end']) ;
 $comment = mysqli_real_escape_string($mysqli_link, $_REQUEST['comment']) ;
