@@ -64,15 +64,16 @@ $(document).ready(function() {
    $("#id_SearchInput").on("keyup", function() {
       var value = $(this).val().toLowerCase();
       $("#myTable tr").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        $(this).toggle($(this).text().toLowerCase().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '').indexOf(value) > -1)
      });
     });
     var value = $("#id_SearchInput").val().toLowerCase();
       $("#myTable tr").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      $(this).toggle($(this).text().toLowerCase().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '').indexOf(value) > -1)
       });
 });
-
+//.normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '');
+//        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
 function parseFloatEU(s) {
 	if (s == '') return 0 ;
 	return parseFloat(s.replace(/\./g, "").replace(/\,/g, ".")) ;
@@ -211,6 +212,9 @@ function getReason(theSolde)
 </head>
 <body>
 <?php
+// Display or not Web deActicated member (Must be managed by a toggle button)
+$displayWebDeactivated=false;
+
 $searchText=""; 	
 if (isset($_REQUEST['search']) and $_REQUEST['search'] != '') {
 	$searchText=$_REQUEST['search'];
@@ -297,7 +301,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		left join $table_blocked on u.id = b_jom_id
 		where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
 		and (bkb_date is null or bkb_date=(select max(bkb_date) from $table_bk_balance))
-		and bkl_journal = 'VEN' and bkl_date between '2023-01-01' and '2023-01-31'
+	    and bkl_journal = 'VEN' and bkl_date between '2023-01-01' and '2023-01-31'.  //removed//
 		group by user_id
 		order by last_name, first_name" ;
 */
@@ -378,6 +382,10 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		$solde=$solde*-1.00;
 		if(abs($solde)<0.01) $solde=0.0;
 		
+		//Don't display webdeactivated member if solde == 0
+		if(!$displayWebDeactivated && $blocked == 1 && $solde == 0.0) {
+			continue;
+		}
 		//SELECT * FROM `rapcs_bk_balance`.   bkb_amount
 		//SELECT * FROM `rapcs_bk_balance` ORDER BY `rapcs_bk_balance`.`bkb_date` DESC
 		
@@ -386,7 +394,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 			$ciel="400".$row['ciel_code'];
 		}
 
-		$soldeTotal+=$solde;
+		if($solde < 0.0) $soldeTotal+=$solde;
 		// Let's do some checks on January invoice
 		if ($row['invoice_total'] == 70) {
 			if ($member != $CheckMark) $status .= '<br/> ! cotisation de 70 €' ;
