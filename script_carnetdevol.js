@@ -999,15 +999,69 @@ function check_airport(id_cdv_val)
 //==============================================
 function check_numero_vol()
 {
+	
+	// Check if the structure is something like V-INIT-xxxxx or INIT-xxxxx
 	var aTextInput=document.getElementById("id_cdv_frais_numero_vol");
 	var aNumeroVolText=aTextInput.value.trim();
-	var aNumeroVol=parseInt(aNumeroVolText,10);
-	if(isNaN(aNumeroVol) || aNumeroVol<=0) {
+	var anArray = aNumeroVolText.split("-");
+	var aFlag=true;
+	aTextInput.style.backgroundColor = 'white';	
+	if(anArray.length==1){
 		aTextInput.style.backgroundColor = 'orange';
-		return;				
+		aFlag=false;
 	}
-	else {
-		aTextInput.style.backgroundColor = 'white';		
+	else if(anArray.length>3){
+		aTextInput.style.backgroundColor = 'orange';
+		aFlag=false;
+	}
+	var aFlightPresales="";
+	var aFlightType="";
+	var aFlightNumber="";
+	if(anArray.length==3){
+		aFlightPresales=anArray[0];
+		aFlightType=anArray[1];
+		aFlightNumber=anArray[2];
+	}
+	if(anArray.length==2){
+		aFlightType=anArray[0];
+		aFlightNumber=anArray[1];
+	}
+	if(anArray.length==1){
+		aFlightNumber=anArray[0];
+	}
+	if(aFlightPresales !="V" && aFlightPresales !=""){
+		aTextInput.style.backgroundColor = 'orange';
+		aFlag=false;			
+	}
+	var aCPType=document.getElementById("id_cdv_frais_CP_type").value;
+	// IF(-4), Initiation(-3), vol membre(-5),  vol D.H.F(-6),vol PR(-7),
+	if(aCPType==-3 && aFlightType!="INIT") {
+		aTextInput.style.backgroundColor = 'orange';
+		aFlag=false;
+		aFlightType="INI";	
+	}
+	else if(aCPType==-4 && aFlightType!="IF") {
+		aTextInput.style.backgroundColor = 'orange';
+		aFlag=false;
+		aFlightType="IF";	
+	}
+	else if(aCPType==-4 && aFlightType!="MEM") {
+		aTextInput.style.backgroundColor = 'orange';
+		aFlag=false;
+		aFlightType="MEM";	
+	}
+	
+	var aNumeroVol=parseInt(aFlightNumber,10);
+	if(isNaN(aNumeroVol)) {
+		aTextInput.style.backgroundColor = 'orange';
+		aFlag=false;
+	}
+	else if(aNumeroVol < 23000) {
+		aTextInput.style.backgroundColor = 'orange';
+		aFlag=false;
+	}
+	if(!aFlag) {
+		alert("Le numéro du vol n'est pas correct. Il doit avoir une structure du genre.\n"+aFlightType+"-23123 ou V-"+aFlightType+"-23123");
 	}
 }
 //==============================================
@@ -1275,7 +1329,7 @@ function compute_frais_CP()
 {
     var aCP=document.getElementById("id_cdv_frais_CP").value;
 	if(aCP=="NoCP") {
-		document.getElementById("id_cdv_frais_CP_type").style.display="none";
+		document.getElementById("").style.display="none";
 		document.getElementById("id_cdv_frais_CP_PAX").style.display="none";
 		document.getElementById("id_cdv_frais_numero_vol").style.display="none";
 		document.getElementById("id_cdv_frais_CP_type").style.value=0;
@@ -1284,16 +1338,34 @@ function compute_frais_CP()
 	else {
 		document.getElementById("id_cdv_frais_CP_type").style.display="";
 		var aCPType=document.getElementById("id_cdv_frais_CP_type").value;
-		// Activer numero vol pour Vol IF(-4), Initiation(-3), vol membre(-5), vol PR(-7), vol D.H.F(-6).
+		// Activer numero vol pour Vol IF(-4), Initiation(-3), vol membre(-5),  vol D.H.F(-6),vol PR(-7),
 		if(aCPType==-3 || aCPType==-4|| aCPType==-5|| aCPType==-6|| aCPType==-7) {
-			document.getElementById("id_cdv_frais_numero_vol").style.display="";			
+			document.getElementById("id_cdv_frais_numero_vol").style.display="";
+			if(aCPType==-3) {
+				document.getElementById("id_cdv_frais_numero_vol").placeholder="V-INIT-231XXX";
+			}
+			else if(aCPType==-4) {
+				document.getElementById("id_cdv_frais_numero_vol").placeholder="V-IF-231XXX";
+			}
+			else if(aCPType==-5) {
+				document.getElementById("id_cdv_frais_numero_vol").placeholder="V-MEM-231XXX";
+			}
+			else if(aCPType==-6) {
+				document.getElementById("id_cdv_frais_numero_vol").placeholder="V-DHF-231XXX";
+			}
+			else if(aCPType==-7) {
+				document.getElementById("id_cdv_frais_numero_vol").placeholder="V-PR-231XXX";
+			}
+			else {
+				document.getElementById("id_cdv_frais_numero_vol").placeholder="V-XXX-231XXX";
+			}
 		}	
 		else {
-			document.getElementById("id_cdv_frais_numero_vol").style.display="none";						
+			document.getElementById("id_cdv_frais_numero_vol").style.display="none";
 			document.getElementById("id_cdv_frais_numero_vol").value="";
 		}
 		// L'input PAX n'est plus utilise. Il est integre dans CP_Type
-		document.getElementById("id_cdv_frais_CP_PAX").style.display="none";						
+		document.getElementById("id_cdv_frais_CP_PAX").style.display="none";
 	}	
 }
 //===============================================
