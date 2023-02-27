@@ -22,7 +22,7 @@ require_once 'SimpleXLSX.php' ;
 use Shuchkin\SimpleXLSX;
 
 // Ciel Commercial -> Listes -> Clients... 
-// Selection de toutes les lignes -> engrenage -> liste des membres -> XLSX
+// Selection de toutes les lignes -> engrenage -> exporter -> F liste des clients -> exporter -> XLSX (voire tab/CRLF) sélectionner toutes les colonnes
 // Selection de toutes les lignes -> engrenage -> les colonnes de la liste -> TXT
 
 $xlsx = SimpleXLSX::parse('ciel.xlsx') ;
