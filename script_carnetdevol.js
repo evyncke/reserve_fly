@@ -1001,9 +1001,9 @@ function check_numero_vol()
 {
 	
 	// Check if the structure is something like V-INIT-xxxxx or INIT-xxxxx
-	var aTextInput=document.getElementById("id_cdv_frais_numero_vol").value.toUpperCase();
-	document.getElementById("id_cdv_frais_numero_vol").value=aTextInput;
-	var aNumeroVolText=aTextInput.value.trim();
+	var aTextInput=document.getElementById("id_cdv_frais_numero_vol");
+	var aNumeroVolText=aTextInput.value.toUpperCase().trim();
+	aTextInput.value=aNumeroVolText;
 	var anArray = aNumeroVolText.split("-");
 	var aFlag=true;
 	aTextInput.style.backgroundColor = 'white';	
@@ -1046,7 +1046,7 @@ function check_numero_vol()
 		aFlag=false;
 		aFlightType="IF";	
 	}
-	else if(aCPType==-4 && aFlightType!="MEM") {
+	else if(aCPType==-5 && aFlightType!="MEM") {
 		aTextInput.style.backgroundColor = 'orange';
 		aFlag=false;
 		aFlightType="MEM";	
@@ -1057,7 +1057,7 @@ function check_numero_vol()
 		aTextInput.style.backgroundColor = 'orange';
 		aFlag=false;
 	}
-	else if(aNumeroVol < 23000) {
+	else if(aNumeroVol < 23000 || aNumeroVol > 29999) {
 		aTextInput.style.backgroundColor = 'orange';
 		aFlag=false;
 	}
