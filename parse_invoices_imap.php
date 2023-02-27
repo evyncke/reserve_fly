@@ -164,7 +164,7 @@ function processEmail($overview, $header) {
 		var_dump(imap_fetchbody($mbox, $overview->msgno, $part_id+1, FT_PEEK)) ; 
 	}
 	exit ;
-	$lines = imap_body($mbox, $overview->msgno, FT_PEEK ) ; // FT_PEEK keep unread flag ;
+	$lines = imap_body($mbox, $overview->uid, FT_PEEK || FT_UID) ; // FT_PEEK keep unread flag ;
 	var_dump($lines) ; exit ;
 	$iLine = 0 ;
 	$linesCount = count($lines) ;
@@ -186,23 +186,16 @@ $mbox = imap_open ("{" . $invoice_imap . ":993/imap/ssl}" . $invoice_folder, $in
 
 $folders = imap_listmailbox($mbox, "{" . $invoice_imap . ":993}" . $invoice_folder, "*");
 
-print("<h1>Folders in $invoice_imap $invoice_folder</h1>\n") ;
-if ($folders == false) {
-	echo "Appel échoué<br />\n";
-} else {
-	foreach ($folders as $val) {
-		echo $val . "<br />\n";
-	}
-}
-
 print("<h1>imap_headers() in $invoice_folder</h1>\n") ;
 foreach (imap_headers($mbox) as $val) 
         print("$val<br/>\n");
 
+/*
 print("<h1>imap_check($invoice_folder)</h1>\n") ;
 print("<pre>") ;
 print_r(imap_check($mbox)) ;
 print("</pre>") ;
+*/
 
 $checks = imap_check($mbox) ;
 $nmsgs = $checks->Nmsgs ;
@@ -215,7 +208,7 @@ print("<h1>imap_fetch_overview($first_msg:$last_msg)</h1>\n<pre>\n") ;
 
 $now = new DateTimeImmutable('now') ;
 foreach(imap_fetch_overview($mbox, "$first_msg:$last_msg") as $overview) {
-//	print_r($overview) ;
+	print_r($overview) ;
 	$date =  new DateTimeImmutable($overview->date) ;
 	$diff = $date->diff($now) ;
 	$days_old = $diff->days ;
@@ -223,16 +216,12 @@ foreach(imap_fetch_overview($mbox, "$first_msg:$last_msg") as $overview) {
 		print("Message $overview->msgno to $overview->to dated $overview->date is $days_old days old, skipping.\n") ;
 		continue ;
 	}
-	$header = imap_headerinfo($mbox, $overview->msgno) ;
-	print_r($header) ;
-	if (!str_starts_with($header->Subject, 'Facture ')) {
-		print("Message $overview->msgno to $overview->to dated $overview->date about $header->Subject is not an invoice, skipping.\n") ;
+	$header = imap_headerinfo($mbox, $overview->msgno) ; // TODO use UUID rather than sequence numbers... but does not see obvious...
+	if (!str_starts_with($header->Subject, 'Facture ') and !str_starts_with($header->Subject, '=?UTF-8?Q?Note_de_cr=c3=a9dit')) {
+		print("Message $overview->msgno to $overview->to dated $overview->date about $header->Subject is not interesting, skipping.\n") ;
 		continue ;
 	}
 	processEmail($overview, $header) ;
-	$body = imap_body($mbox, $overview->msgno, FT_PEEK ) ; // FT_PEEK keep unread flag
-//	print($body) ;
-//	break ;
 }
 
 print("</pre>\n") ;
