@@ -1001,7 +1001,8 @@ function check_numero_vol()
 {
 	
 	// Check if the structure is something like V-INIT-xxxxx or INIT-xxxxx
-	var aTextInput=document.getElementById("id_cdv_frais_numero_vol");
+	var aTextInput=document.getElementById("id_cdv_frais_numero_vol").value.toUpperCase();
+	document.getElementById("id_cdv_frais_numero_vol").value=aTextInput;
 	var aNumeroVolText=aTextInput.value.trim();
 	var anArray = aNumeroVolText.split("-");
 	var aFlag=true;
@@ -1329,7 +1330,7 @@ function compute_frais_CP()
 {
     var aCP=document.getElementById("id_cdv_frais_CP").value;
 	if(aCP=="NoCP") {
-		document.getElementById("").style.display="none";
+		document.getElementById("id_cdv_frais_numero_vol").style.display="none";
 		document.getElementById("id_cdv_frais_CP_PAX").style.display="none";
 		document.getElementById("id_cdv_frais_numero_vol").style.display="none";
 		document.getElementById("id_cdv_frais_CP_type").style.value=0;
