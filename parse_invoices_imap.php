@@ -18,9 +18,12 @@
 
 require_once 'dbi.php' ;
 
-ini_set("auto_detect_line_endings", true); // process CR CR/LF or LF as line separator
+if (! $userIsBoardMember) 
+	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
 
-$filePrefix = "invoices/" ;
+// var_dump($_SERVER) ;
+//$filePrefix = dirname($_SERVER['SCRIPT_FILENAME']) . "/invoices/" ;
+$filePrefix =  "/home/spaaviat/www/resa/invoices/" ;
 $shared_secret = "124.75=EBSP" ;
 
 // Ciel invoices are sent to different email addresses for those people...
@@ -41,71 +44,7 @@ $lastTo = false ;
 $lastSubject = false ;
 $lastDate = false ;
 
-// Return a single RFC 822 header line (unfolded)
-// Return FALSE at the end of the header (empty line)
-//Unused with IMAP folders
-function readHeaderLine($lines, &$iLine, $linesCount) {
-	
-	if ($iLine >= $linesCount) return false ; // end of file
-	$line = $lines[$iLine++] ;
-	if ($line == '') return false ; // Empty line => end of header
-	while ($iLine < $linesCount and (substr($lines[$iLine], 0, 1) == ' ' or substr($lines[$iLine], 0, 1) == "\t")) {
-		$line .= " " . trim($lines[$iLine]) ;
-		$iLine++ ;
-	}
-	return $line ;
-}
-
-// parse the RFC 822 email headers and return an associative array (header -> value)
-// Unused with IMAP folders
-function parseHeaders($lines, &$iLine, $linesCount) {
-	$headers = array() ;
-	while ($line = readHeaderLine($lines, $iLine, $linesCount) and $line != '') {
-		$delimiterPos = strpos($line, ':') ;
-		if ($delimiterPos === false)
-			die("Invalid header line, missing a ':', in <$line>") ;
-		$header = strtolower(substr($line, 0, $delimiterPos)) ;
-		$value = trim(substr($line, $delimiterPos+1)) ;
-		$headers[$header] = $value ;
-	}
-	return $headers ;
-}
-
-// Process a multi-part body
-function processMultipart($lines, &$iLine, $linesCount, $boundary) {
-	// Find the first delimiter
-	$firstLine = $iLine ;
-	while ($firstLine < $linesCount and ($lines[$firstLine-1] != '' or $lines[$firstLine] != "--$boundary"))
-		$firstLine ++ ;
-	$firstLine ++ ; // Skip the boundary itself
-	$lastLine = $firstLine + 1 ; // Let's find the next delimiter
-	while ($lastLine < $linesCount) {
-		while ($lastLine < $linesCount and ($lines[$lastLine-1] != '' or $lines[$lastLine] != "--$boundary"))
-			$lastLine ++ ;
-		$lastLine ++ ; // Skip the boundary itself
-		processMessage($lines, $firstLine, $lastLine - 2) ; // Need to remove the delimiter
-		$firstLine = $lastLine ;
-		$lastLine = $firstLine + 1 ;
-	}
-}
-
-// Process a application/pdf body part and save the file in $outFileName
-function processPDF($lines, &$iLine, $linesCount, $MIMEEncoding, $invoiceId, $outFileName) {
-	global $sqlFile, $lastTo, $lastDate ;
-
-	if ($MIMEEncoding != 'base64') die("Unsupported Content-Transfer-Encoding: $MIMEEncoding for $outFileName") ;
-	$encoded = '' ;
-	while ($iLine < $linesCount) {
-		$encoded .= "\n" . $lines[$iLine++] ;
-	}
-	$decoded = base64_decode($encoded) ;
-	$f = fopen($outFileName, 'w') or die("Cannot open $outFileName for writing") ;
-	fwrite($f, $decoded) or die("Cannot write to $outFileName") ;
-	fclose($f) ;
-	// Let's have SQL parsing the date as "Tue, 29 Mar 2022 18:24:22 +0200"
-	fwrite($sqlFile, "REPLACE INTO rapcs_bk_invoices(bki_email, bki_date, bki_id, bki_file_name) VALUES ('$lastTo', DATE(STR_TO_DATE('$lastDate', '%a, %e %b %Y %H:%i:%s')), '$invoiceId', '$outFileName');\n") ;
-}
-
+/*
 // Read and process one single email message
 function processMessage($lines, &$iLine, $linesCount) {
 	global $lastTo, $lastSubject, $lastDate, $filePrefix, $shared_secret ;
@@ -151,46 +90,59 @@ function processMessage($lines, &$iLine, $linesCount) {
 		}
 	}
 }
+*/
 
 function processEmail($overview, $header) {
-	global $mbox ;
-	global $lines, $iLine, $linesCount, $lastTo, $lastSubject, $lastDate ;
+	global $mbox, $userId, $mysqli_link, $filePrefix, $shared_secret ;
 
-	var_dump(imap_fetchstructure($mbox, $overview->msgno)) ;
-	foreach(imap_fetchstructure($mbox, $overview->msgno)->parts as $part_id => $part) {
-		var_dump($part) ;
-		if ($part->type != TYPEAPPLICATION or $part->subtype != 'PDF') continue ;
-		print("Part #$part_id is interesting\n") ;
-		var_dump(imap_fetchbody($mbox, $overview->msgno, $part_id+1, FT_PEEK)) ; 
+	foreach(imap_fetchstructure($mbox, $overview->uid, FT_UID)->parts as $part_id => $part) {
+		// TODO recurse if content is yet another email
+		if ($part->type == TYPEAPPLICATION and $part->subtype == 'PDF') {
+			if (preg_match('/Facture (\d+)/', $header->Subject, $matches)) {
+				$invoiceId = $matches[1] ;
+			// =?UTF-8?Q?Note_de_cr=c3=a9dit_NC_221740?=
+			} else if (preg_match('/=\?UTF-8\?Q\?Note_de_cr=c3=a9dit_NC_(\d+)\?=/', $header->Subject, $matches)) {
+				$invoiceId = "NC $matches[1]" ;
+			} else {
+				$invoiceId = substr(sha1($overview->to . $overview->date), 0, 8) ; // Hopefully a unique ID !
+			}
+			$outFileName = sha1($invoiceId . $shared_secret) . '.pdf' ;
+			print("Saving PDF as $outFileName for $overview->to\n") ;
+			$bodyPart = imap_base64(imap_fetchbody($mbox, $overview->uid, $part_id+1, FT_UID || FT_PEEK)) ; // FT_PEEK keep unread flag ;
+			if (!$bodyPart) {
+				journalise($userId, 'E', "Cannot get attachemenet in email to $overview->to dated $overview->date") ;
+				continue ;
+			} 
+			$f = fopen($filePrefix . $outFileName, 'w') ;
+			if (!$f) {
+				print_r(error_get_last());
+				journalise($userId, "F", "Cannot open $outFileName for writing") ;
+			} ;
+			if (!fwrite($f, $bodyPart)){
+				print_r(error_get_last());
+				journalise($userId, "F", "Cannot write to $outFileName") ;
+			};
+			fclose($f) ;
+			// Let's have SQL parsing the date as "Tue, 29 Mar 2022 18:24:22 +0200"
+			mysqli_query($mysqli_link, "REPLACE INTO rapcs_bk_invoices(bki_email, bki_date, bki_id, bki_file_name) VALUES('$overview->to', DATE(STR_TO_DATE('$overview->date', '%a, %e %b %Y %H:%i:%s')), '$invoiceId', 'invoices/$outFileName')")
+				or journalise($userId, "E", "Cannot insert into rapcs_bk_invoices: " . mysqli_error($mysqli_link)) ;
+			journalise($userId, "I", "Invoice $invoiceId for $overview->to dated $overview->date saved as $outFileName") ;
+		}
 	}
-	exit ;
-	$lines = imap_body($mbox, $overview->uid, FT_PEEK || FT_UID) ; // FT_PEEK keep unread flag ;
-	var_dump($lines) ; exit ;
-	$iLine = 0 ;
-	$linesCount = count($lines) ;
-	$lastTo = $header->toaddress ;
-	$lastSubject = $header->Subject ;
-	$lastDate = $header->Date ;
-	processMessage($lines, $iLine, $linesCount) ;
 }
-
-//$sqlFile = fopen($filePrefix . "inject.sql", 'w') ;
-// Converting email addresses...
-//foreach ($ciel2profiles as $ciel => $rapcs) 
-//	fwrite($sqlFile, "UPDATE rapcs_bk_invoices SET bki_email = '$rapcs' WHERE bki_email = '$ciel';\n") ;
-//	
-//fclose($sqlFile) ;
 
 $mbox = imap_open ("{" . $invoice_imap . ":993/imap/ssl}" . $invoice_folder, $invoice_user, $invoice_psw, OP_READONLY)
 	or journalise($userId, "F", "Cannot open mailbox for $invoice_imap user $invoice_user: " . imap_last_error()) ;
 
+// TODO: scan all folders recursively ?
+
+/*
 $folders = imap_listmailbox($mbox, "{" . $invoice_imap . ":993}" . $invoice_folder, "*");
 
 print("<h1>imap_headers() in $invoice_folder</h1>\n") ;
 foreach (imap_headers($mbox) as $val) 
         print("$val<br/>\n");
 
-/*
 print("<h1>imap_check($invoice_folder)</h1>\n") ;
 print("<pre>") ;
 print_r(imap_check($mbox)) ;
@@ -199,7 +151,7 @@ print("</pre>") ;
 
 $checks = imap_check($mbox) ;
 $nmsgs = $checks->Nmsgs ;
-print("$nmsgs messages") ;
+print("There are $nmsgs message(s) in the $invoice_user $invoice_folder mailbox<br>\n") ;
 
 $first_msg = max(1, $nmsgs-200) ; // 200 invoices max... just a guess
 $last_msg = $nmsgs ;
@@ -208,7 +160,6 @@ print("<h1>imap_fetch_overview($first_msg:$last_msg)</h1>\n<pre>\n") ;
 
 $now = new DateTimeImmutable('now') ;
 foreach(imap_fetch_overview($mbox, "$first_msg:$last_msg") as $overview) {
-	print_r($overview) ;
 	$date =  new DateTimeImmutable($overview->date) ;
 	$diff = $date->diff($now) ;
 	$days_old = $diff->days ;
@@ -224,9 +175,7 @@ foreach(imap_fetch_overview($mbox, "$first_msg:$last_msg") as $overview) {
 	processEmail($overview, $header) ;
 }
 
-print("</pre>\n") ;
-
 // Let's close nicely
 imap_close($mbox) ;
-
+journalise($userId, "I", "Job done") ;
 ?>
