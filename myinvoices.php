@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2022 Eric Vyncke
+   Copyright 2022-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ $sql = "SELECT * FROM $table_person LEFT JOIN $table_bk_invoices ON bki_email = 
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access factures: " . mysqli_error($mysqli_link)) ;
 $count = 0 ;
 while ($row = mysqli_fetch_array($result)) {
-	print("<li><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_date] #$row[bki_id] &boxbox;</a></li>\n") ;
+	print("<li><a href=\"$row[bki_file_name]\">$row[bki_date] #$row[bki_id] &boxbox;</a></li>\n") ;
 	$count ++ ;
 }
 
