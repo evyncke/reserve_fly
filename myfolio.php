@@ -425,12 +425,22 @@ while ($row = mysqli_fetch_array($result)) {
 		$total_credit += $row['bkl_credit'] ;
 	}
 	$solde=$total_credit-$total_debit;
+	$solde=number_format($solde,2,",",".");
 	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td style=\"text-align: right;\">$debit</td><td style=\"text-align: right;\">$credit</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
 	//	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td>-$row[bkl_debit]</td><td>$row[bkl_credit]</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
 }
 ?>
 </tbody>
 <tfoot>
+<?
+/*
+$soldeBackground="style=\"text-align: right;";
+if($solde < 0.) {
+	$soldeBackground=$soldeBackground+" background-color: GreenYellow;";
+}	
+$soldeBackground=$soldeBackground."\"";
+*/
+?>
 <tr><td colspan=4>Totaux</td><td>-<?=$total_debit?>&nbsp;&euro;</td><td>+<?=$total_credit?>&nbsp;&euro;</td><td><?=$solde?>&nbsp;&euro;</td><tr>
 </tfoot>
 </table>
@@ -454,7 +464,7 @@ https://github.com/typpo/quickchart
 */
 ?>
 <span id="payment">
-<h2>Test QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
+<h2>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
 <p>Le QR-code contient votre identifiant au niveau de la comptabilité
 RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant pour le commerçant).</p>
