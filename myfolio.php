@@ -441,7 +441,16 @@ if($solde < 0.) {
 $soldeBackground=$soldeBackground."\"";
 */
 ?>
-<tr><td colspan=4>Totaux</td><td>-<?=$total_debit?>&nbsp;&euro;</td><td>+<?=$total_credit?>&nbsp;&euro;</td><td><?=$solde?>&nbsp;&euro;</td><tr>
+<tr><td colspan=4>Totaux</td><td>-<?=$total_debit?>&nbsp;&euro;</td><td>+<?=$total_credit?>&nbsp;&euro;</td>
+	<?
+	if($solde>=0){
+		print("<td style=\"text-align: right;;background-color: PaleGreen;\">$solde&nbsp;&euro;</td>");	
+	}
+	else{
+		print("<td style=\"text-align: right;background-color: LightPink;\">$solde&nbsp;&euro;</td>");			
+	}
+	?>
+<tr>
 </tfoot>
 </table>
 <?php
