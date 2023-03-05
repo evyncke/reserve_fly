@@ -425,7 +425,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$total_credit += $row['bkl_credit'] ;
 	}
 	$solde=$total_credit-$total_debit;
-	$solde=number_format($solde,2,",",".");
+	$solde=number_format($solde,2,".","");
 	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td style=\"text-align: right;\">$debit</td><td style=\"text-align: right;\">$credit</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
 	//	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td>-$row[bkl_debit]</td><td>$row[bkl_credit]</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
 }
