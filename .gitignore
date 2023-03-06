@@ -1,3 +1,4 @@
+invoices/
 facebook-sdk-*/
 font/*
 PHPExcel/
@@ -33,6 +34,7 @@ joomla cookies.txt
 Joomla sessions.docx
 joomla_session.txt
 *.hph
+*.xlsx
 db.php
 profile2.php
 reservation2.js
@@ -50,4 +52,5 @@ action_offrir.php
 answer_offrir_prolog.html
 answer_offrir_epilog.html
 action_reservation.php
-GrandLivre22.txt
+Grand*Livre*.txt
+ressources.js
