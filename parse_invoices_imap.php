@@ -44,54 +44,6 @@ $lastTo = false ;
 $lastSubject = false ;
 $lastDate = false ;
 
-/*
-// Read and process one single email message
-function processMessage($lines, &$iLine, $linesCount) {
-	global $lastTo, $lastSubject, $lastDate, $filePrefix, $shared_secret ;
-	$contentType = false ;
-	if ($contentType) {
-		$semicolonPos = strpos($contentType, ';') ;
-		if ($semicolonPos !== false)
-			$contentMIMEType = substr($contentType, 0, $semicolonPos) ;
-		else
-			$contentMIMEType = $contentType ;
-		switch ($contentMIMEType) {
-			case 'multipart/alternative': // It should include HTML and plain text subparts
-				if (preg_match('|multipart/alternative; boundary="(\S+)"|', $contentType, $matches)) {
-					$boundary = $matches[1] ;
-					processMultipart($lines, $iLine, $linesCount, $boundary) ;
-				} ;
-				break ;
-			case 'multipart/mixed':
-				if (preg_match('|multipart/mixed; boundary="(\S+)"|', $contentType, $matches)) {
-					$boundary = $matches[1] ;
-					processMultipart($lines, $iLine, $linesCount, $boundary) ;
-				} ;
-				break ;
-			case 'message/rfc822':
-				processMessage($lines, $iLine, $linesCount) ;
-				break ;
-			case 'text/html':
-			case 'text/plain':
-				break ;
-			case 'application/pdf':
-				if (preg_match('/Facture (\d+)/', $lastSubject, $matches)) {
-					$invoiceId = $matches[1] ;
-				// =?UTF-8?Q?Note_de_cr=c3=a9dit_NC_221740?=
-				} else if (preg_match('/=\?UTF-8\?Q\?Note_de_cr=c3=a9dit_NC_(\d+)\?=/', $lastSubject, $matches)) {
-					$invoiceId = "NC $matches[1]" ;
-				} else {
-					$invoiceId = substr(sha1($lastTo . $lastDate), 0, 8) ; // Hopefully a unique ID !
-				}
-				$outFileName = $filePrefix . sha1($invoiceId . $shared_secret) . '.pdf' ;
-				processPDF($lines, $iLine, $linesCount, $headers['content-transfer-encoding'], $invoiceId, $outFileName) ;
-				break ;
-			default: die("Unsupported MIME type: $contentMIMEType") ;
-		}
-	}
-}
-*/
-
 function processEmail($overview, $header) {
 	global $mbox, $userId, $mysqli_link, $filePrefix, $shared_secret ;
 
@@ -177,5 +129,11 @@ foreach(imap_fetch_overview($mbox, "$first_msg:$last_msg") as $overview) {
 
 // Let's close nicely
 imap_close($mbox) ;
+
+// Converting email addresses...
+foreach ($ciel2profiles as $ciel => $rapcs) 
+        mysqli_query($mysqli_link, "UPDATE rapcs_bk_invoices SET bki_email = '$rapcs' WHERE bki_email = '$ciel'")
+			or journalise($userId, "E", "Cannot update email address $ciel -> $rapcs: " . mysqli_error($mysqli_link)) ;
+
 journalise($userId, "I", "Job done") ;
 ?>
