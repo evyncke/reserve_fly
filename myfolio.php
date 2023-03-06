@@ -385,7 +385,7 @@ print("</ul>\n</p>\n") ;
 <p><b>De manière expérimentale</b>, voici une vue de votre compte membre RAPCS pour l'année en cours (mise à jour de temps en temps).</p>
 <table border="1">
 <thead>
-<th>Date</th><th>Opération</th><th>Pièce</th><th>Description</th><th>Débit</th><th>Crédit</th>
+<th>Date</th><th>Opération</th><th>Pièce</th><th>Description</th><th>Débit</th><th>Crédit</th><th>Solde</th>
 </thead>
 <tbody>
 <?php
@@ -414,14 +414,43 @@ while ($row = mysqli_fetch_array($result)) {
 		$reference = '<a href="' . $row['bki_file_name'] . '" target="_blank">' . $row['bki_id'] . " &boxbox;</a>" ;
 	else
 		$reference = $row['bkl_reference'] ;
-	if ($row['bkl_debit']) $total_debit += $row['bkl_debit'] ;
-	if ($row['bkl_credit']) $total_credit += $row['bkl_credit'] ;
-	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td>$row[bkl_debit]</td><td>$row[bkl_credit]</td></tr>\n") ;
+	$debit="";
+	if ($row['bkl_debit']) {
+		$debit="-".$row['bkl_debit'];
+		$total_debit += $row['bkl_debit'] ;
+	}
+	$credit="";
+	if ($row['bkl_credit']){ 
+		$credit="+".$row['bkl_credit'];
+		$total_credit += $row['bkl_credit'] ;
+	}
+	$solde=$total_credit-$total_debit;
+	$solde=number_format($solde,2,".","");
+	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td style=\"text-align: right;\">$debit</td><td style=\"text-align: right;\">$credit</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
+	//	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td>-$row[bkl_debit]</td><td>$row[bkl_credit]</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
 }
 ?>
 </tbody>
 <tfoot>
-<tr><td colspan=4>Totaux</td><td><?=$total_debit?>&nbsp;&euro;</td><td><?=$total_credit?>&nbsp;&euro;</td><tr>
+<?
+/*
+$soldeBackground="style=\"text-align: right;";
+if($solde < 0.) {
+	$soldeBackground=$soldeBackground+" background-color: GreenYellow;";
+}	
+$soldeBackground=$soldeBackground."\"";
+*/
+?>
+<tr><td colspan=4>Totaux</td><td>-<?=$total_debit?>&nbsp;&euro;</td><td>+<?=$total_credit?>&nbsp;&euro;</td>
+	<?
+	if($solde>=0){
+		print("<td style=\"text-align: right;;background-color: PaleGreen;\">$solde&nbsp;&euro;</td>");	
+	}
+	else{
+		print("<td style=\"text-align: right;background-color: LightPink;\">$solde&nbsp;&euro;</td>");			
+	}
+	?>
+<tr>
 </tfoot>
 </table>
 <?php
@@ -444,7 +473,7 @@ https://github.com/typpo/quickchart
 */
 ?>
 <span id="payment">
-<h2>Test QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
+<h2>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
 <p>Le QR-code contient votre identifiant au niveau de la comptabilité
 RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant pour le commerçant).</p>

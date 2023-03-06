@@ -27,7 +27,8 @@ ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
 
-?><html lang="fr">
+?>
+<html lang="fr">
 <head>
 <style>
 body { background: #f0f0f0; color: #363636; font-family: Arial, Helvetica, sans-serif; font-size: 12;}
@@ -65,7 +66,6 @@ function GenCell($value) {
 		return "<td class=\"orange\">$value</td>" ;
 	return "<td>$value</td>" ;
 }
-
 $result = mysqli_query($mysqli_link, "SELECT * from $table_planes WHERE ressource = 0 AND actif != 0 ORDER BY id")
 	or die("Cannot read $tables_planes: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
@@ -76,8 +76,10 @@ while ($row = mysqli_fetch_array($result)) {
 		where l_plane = '$row[id]' and l_booking is not null and l_end_hour > 0
 		order by compteur_pilote_date desc limit 0,1")
 		or die("Cannot get pilote engine time:" . mysqli_error($mysqli_link)) ;
+
 	$row2 = mysqli_fetch_array($result2) ;
 	$current_value_pilot = $row2['compteur_pilote'] ;
+
 	print("<tr><td><a href=\"plane_chart.php?id=$row[id]\">" . strtoupper($row['id']) . "</a></td><td>$current_value / <br/>$current_value_pilot</td>") ;
 	// Type_entretien... human encoding :-( 50h, 50h->200h, 100h
 	if (stripos($row['type_entretien'], '50h') === 0)
@@ -90,7 +92,7 @@ while ($row = mysqli_fetch_array($result)) {
 		print("<td>$row[entretien] ????</td><td></td><td></td>") ;
 	print("<td>$row[limite_moteur_heure]<br/>$row[limite_moteur_12ans]</td>" . GenCell($row['limite_helice']) . "
 		<td></td><td></td><td></td>
-		<td>$row['cn']</td>" . 
+		<td>$row[cn]</td>" . 
 		GenCell($row['limite_magnetos']) . "
 		<td>$row[pesage]</td>
 		</tr>\n") ;

@@ -180,7 +180,7 @@ function blockFunction(PHP_Self, theBlockedFlag, theNom, theUserId, theSolde)
 }
 function getReason(theSolde)
 {
-	var aPredefinedReason="Votre solde est négatif ("+theSolde+"EUR). Vous êtes donc interdit(e)s de réservation tant que le solde n'est pas réglé.";
+	var aPredefinedReason="Votre solde est actuellement négatif pour un montant de ("+theSolde+" EUR).  Merci de régulariser rapidement. Vos réservations seront débloquées une fois le paiement enregistré dans la comptabilité.";
 	if(theSolde==-70 || theSolde==-255){
 		aPredefinedReason="Vous n'êtes pas en ordre de cotisation. Vous êtes donc interdit(e)s de réservation tant que votre cotisation n'est pas réglée.";
 	}
