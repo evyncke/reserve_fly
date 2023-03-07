@@ -254,6 +254,7 @@ if ($delete_pax) {
 	if (mysqli_num_rows($result_delete) == 0) // We can safely remove passenger details
 		mysqli_query($mysqli_link, "DELETE FROM $table_pax WHERE p_id = $pax_id")
 			or journalise($userId, "F", "Cannot delete passenger detail: " . mysqli_error($mysqli_link)) ;
+	mysqli_free_result($result_delete) ;
 	journalise($userId, "I", "Passenger $pax_id deleted from flight $flight_id") ;
 }
 
@@ -264,7 +265,17 @@ if ($link_to) {
 			SET f_booking=$link_to, f_date_linked=SYSDATE(), f_who_linked = $userId, f_pilot = r_pilot, r_type = " . BOOKING_CUSTOMER . "
 			WHERE f_id=$flight_id AND r_id = $link_to")
 		or journalise($userId, "F", "Impossible de lier le vol: " . mysqli_error($mysqli_link)) ;
-	journalise($userId, "I", "Flight $flight_id is linked to booking $link_to") ;
+	// Check whether the flight log  entry already exist and mark the flight has flown
+	$result_link = mysqli_query($mysqli_link, "SELECT * FROM $table_logbook WHERE l_booking = $link_to") 
+		or journalise($userId, "F", "Cannot retrieve log entry for booking $link_to: " . mysqli_error($mysqli_link)) ;
+	$row_link = mysqli_fetch_array($result_link) ;
+	if ($row_link) {
+		$date_flown = $row_link['l_start'] ;
+		mysqli_query($mysqli_link, "UPDATE $table_flight SET f_date_flown = '$date_flown' WHERE f_id = $flight_id")
+			or journalise($userId, "F", "Cannot update flight with $date_flown as the date flown: " . mysqli_error($mysqli_link)) ;
+		journalise($userId, "I", "Flight $flight_id is linked to booking $link_to flown on $date_flown") ;
+	} else
+		journalise($userId, "I", "Flight $flight_id is linked to future booking $link_to") ;
 }
 
 if ($pay) {
