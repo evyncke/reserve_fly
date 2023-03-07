@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2022 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ $delete_pax = (isset($_REQUEST['delete_pax']) and $_REQUEST['delete_pax'] != '')
 $modify_pax = (isset($_REQUEST['modify_pax']) and $_REQUEST['modify_pax'] != '') ? TRUE : FALSE ;
 $pax_open = (isset($_REQUEST['pax_open']) and $_REQUEST['pax_open'] != '') ? TRUE : FALSE ;
 $link_to = (isset($_REQUEST['link_to']) and $_REQUEST['link_to'] != '') ? $_REQUEST['link_to'] : FALSE ;
+$unlink_from = (isset($_REQUEST['unlink_from']) and $_REQUEST['unlink_from'] != '') ? $_REQUEST['unlink_from'] : FALSE ;
 $flight_id = (isset($_REQUEST['flight_id'])) ? trim($_REQUEST['flight_id']) : 0 ;
 if (!is_numeric($flight_id) and $flight_id != '') die("Invalid ID: $flight_id") ;
 // TODO be ready to pre-load when asking for modification/cancellation
@@ -276,6 +277,20 @@ if ($link_to) {
 		journalise($userId, "I", "Flight $flight_id is linked to booking $link_to flown on $date_flown") ;
 	} else
 		journalise($userId, "I", "Flight $flight_id is linked to future booking $link_to") ;
+}
+
+
+if ($unlink_from) {
+	if (! is_numeric($unlink_from))
+		die("Numéro de réservation invalide $unlink_from") ;
+	mysqli_query($mysqli_link, "UPDATE $table_flight, $table_bookings
+			SET f_booking=NULL, f_date_linked=NULL, f_who_linked = NULL, r_type = " . BOOKING_CUSTOMER . "
+			WHERE f_id=$flight_id")
+		or journalise($userId, "F", "Impossible de délier le vol: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "UPDATE $table_bookings SET r_type = " . BOOKING_CUSTOMER . "
+		WHERE r_id=$unlink_from")
+		or journalise($userId, "F", "Impossible de délier le réservation: " . mysqli_error($mysqli_link)) ;
+	journalise($userId, "I", "Flight $flight_id is unlinked from booking $unlink_from") ;
 }
 
 if ($pay) {
@@ -726,15 +741,20 @@ function show_reservation($date, $header) {
 		if (strpos($row['r_stop'], $date) === 0) 
 			$row['r_stop'] = substr($row['r_stop'], 11) ;
 		print("<tr$class><td>$row[r_start]</td><td>$row[r_stop]</td><td>$row[r_plane]</td><td><span class=\"hidden-xs\">" . db2web($row['pfirst_name']) . " </span><b>" . 
-			db2web($row['plast_name']) . "</b>$ptelephone$instructor</td><td>". nl2br(db2web($row['r_comment'])) . "</td>
-			<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&link_to=$row[r_id]\"><span class=\"glyphicon glyphicon-link\" title=\"Lier cette réservation à ce vol\"></span></a></td></tr>\n") ;
+			db2web($row['plast_name']) . "</b>$ptelephone$instructor</td><td>". nl2br(db2web($row['r_comment'])) . "</td>\n") ;
+		if ($row['r_type'] == BOOKING_MAINTENANCE) // Cannot link to a maintenance booking ;-)
+			print("<td></td></tr>\n") ;
+		else if ($row_flight['f_booking'] == $row['r_id']) // Is the flight already linked to this existing booking ?
+			print("<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&unlink_from=$row[r_id]\"><span class=\"glyphicon glyphicon-scissors\" style=\"color: red;\" title=\"Découpler cette réservation de ce vol\"></span></a></td></tr>\n") ;
+		else // Flight is not linked yet to a booking
+			print("<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&link_to=$row[r_id]\"><span class=\"glyphicon glyphicon-link\" title=\"Lier cette réservation à ce vol\"></span></a></td></tr>\n") ;
 	}
 	print("</table>
 	</div><!-- row -->\n" ) ;
 }
 
-	if ($row_flight['f_date_1'] != '') show_reservation($row_flight['f_date_1'], 'Date préférée') ;
-	if ($row_flight['f_date_2'] != '') show_reservation($row_flight['f_date_2'], 'Date alternative') ;
+	if ($row_flight['f_date_1'] != '' and $row_flight['f_date_1'] != '0000-00-00s') show_reservation($row_flight['f_date_1'], 'Date préférée') ;
+	if ($row_flight['f_date_2'] != '' and $row_flight['f_date_2'] != '0000-00-00') show_reservation($row_flight['f_date_2'], 'Date alternative') ;
 ?>
 </div><!-- menuPlane -->
 
