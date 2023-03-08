@@ -1,7 +1,7 @@
 <pre>
 <?php
 /*
-   Copyright 2022 Eric Vyncke
+   Copyright 2022-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 */
 
 require_once 'dbi.php' ;
-ini_set("auto_detect_line_endings", true); // process CR CR/LF or LF as line separator
 
 function comma2dot($s) {
 	if ($s == '') return 'NULL' ;
