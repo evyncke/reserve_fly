@@ -283,13 +283,14 @@ if ($link_to) {
 if ($unlink_from) {
 	if (! is_numeric($unlink_from))
 		die("Numéro de réservation invalide $unlink_from") ;
-	mysqli_query($mysqli_link, "UPDATE $table_flight, $table_bookings
-			SET f_booking=NULL, f_date_linked=NULL, f_who_linked = NULL, r_type = " . BOOKING_CUSTOMER . "
+	mysqli_query($mysqli_link, "UPDATE $table_flight
+			SET f_booking=NULL, f_date_linked=NULL, f_who_linked = NULL, f_date_flown = NULL
 			WHERE f_id=$flight_id")
-		or journalise($userId, "F", "Impossible de délier le vol: " . mysqli_error($mysqli_link)) ;
-	mysqli_query($mysqli_link, "UPDATE $table_bookings SET r_type = " . BOOKING_CUSTOMER . "
-		WHERE r_id=$unlink_from")
-		or journalise($userId, "F", "Impossible de délier le réservation: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Impossible de délier le vol $flight_id: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "UPDATE $table_bookings
+			SET r_type = " . BOOKING_PILOT . "
+			WHERE r_id=$unlink_from")
+		or journalise($userId, "F", "Impossible de délier le réservation $unlink_from: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "I", "Flight $flight_id is unlinked from booking $unlink_from") ;
 }
 
