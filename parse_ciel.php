@@ -1,4 +1,9 @@
-<pre>
+<html>
+<head>
+	<title>Import du grand livre client de Ciel</title>
+</head>
+<body>
+<h1>Import du grand livre client de Ciel</h1>	
 <?php
 /*
    Copyright 2022-2023 Eric Vyncke
@@ -36,7 +41,7 @@ $lines = file('GrandLivre.txt', FILE_IGNORE_NEW_LINES || FILE_SKIP_EMPTY_LINES) 
 $last_line = array_pop($lines) ;
 $last_line = array_pop($lines) ;
 $last_line = array_pop($lines) ; // Dossier : RAPCS - Royal Aéro Para Club de Spa asbl Grand livre Le 31-08-22
-print("Last line = $last_line") ;
+
 if (preg_match('/^Dossier : .+ Grand livre Le (.+)$/', trim($last_line), $matches)) {
 	$balance_date = $matches[1] ;
 	$tokens = explode('-', $balance_date) ;
@@ -79,38 +84,46 @@ foreach ($lines as $line) {
 	}
 }
 
-var_dump($balances) ;
+// var_dump($balances) ;
 
-$result = mysqli_query($mysqli_link, "SELECT ciel_code, first_name, last_name
+print("<h2>Comptes clients connus</h2>\n") ;
+
+// Get all club members with their book keeping ID
+$result = mysqli_query($mysqli_link, "SELECT ciel_code400, first_name, last_name
 		FROM $table_person
-		WHERE ciel_code IS NOT NULL")
-	or die("Cannot read members: " . mysqli_error($mysqli_link)) ;
+		WHERE ciel_code400 IS NOT NULL")
+	or journalise($userId, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
 $known_clients = array() ;
+$known_client_balances = 0 ;
 while ($row = mysqli_fetch_array($result)) {
 	$first_name = db2web($row['first_name']) ;
 	$last_name = db2web($row['last_name']) ;
-	$known_clients[$row['ciel_code']] = true ;
-	print("Processing $first_name $last_name...") ;
-	if (isset($balances["400$row[ciel_code]"])) {
-		$balance = $balances["400$row[ciel_code]"] ;
-		print("$balance\n") ;
+	$known_clients[$row['ciel_code400']] = true ;
+	print("Processing member: $first_name $last_name...") ;
+	if (isset($balances["$row[ciel_code400]"])) {
+		$balance = $balances["$row[ciel_code400]"] ;
+		print(" $balance &euro;<br/>\n") ;
 		mysqli_query($mysqli_link, "REPLACE INTO $table_bk_balance (bkb_account, bkb_date, bkb_amount)
-			VALUES('400$row[ciel_code]', '$balance_date', $balance)")
-			or die("Cannot replace values('400$row[ciel_code]', '$balance_date', $balance) in $table_bk_balance: " . mysqli_error($mysqli_link)) ;
+			VALUES('$row[ciel_code400]', '$balance_date', $balance)")
+			or journalise($userId, "F", "Cannot replace values('$row[ciel_code400]', '$balance_date', $balance) in $table_bk_balance: " . mysqli_error($mysqli_link)) ;
 		unset($balances["400$row[ciel_code]"]) ;
+		$known_client_balances ++ ;
 	} else
-		print(" no balance\n") ;
+		print(" no balance found.<br/>\n") ;
 }
+journalise($userId, "I", "$known_client_balances members' balances processed, " . sizeof($balances) . " unknow balances") ;
 
-print("<h2>Comptes clients inconnus</h2>\n") ;
+print("<h2>Comptes clients inconnus et non soldés</h2>\n") ;
 
 foreach ($balances as $client => $balance)
-	print("$client => $balance\n") ;
+	if ($balance != 0)
+		print("$client => solde $balance &euro;<br/>\n") ;
+
 
 // Souci général: trouver une clé unique... ni le numéro de mouvement, ni le numéro de pièce sont uniques
 print("<h2>Analyse de toutes les lignes du grand livre client</h2>\n") ;
 mysqli_query($mysqli_link, "DELETE FROM $table_bk_ledger WHERE bkl_year = $ledger_year")
-	or die("Cannot erase content of $table_bk_ledger for year $$ledger_year: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "F", "Cannot erase content of $table_bk_ledger for year $$ledger_year: " . mysqli_error($mysqli_link)) ;
 
 $currentClient = false ;
 foreach($lines as $line) {
@@ -126,24 +139,24 @@ foreach($lines as $line) {
 	if (preg_match('/^400(\S+) (.+)/', $columns[0], $matches)) {
 		$codeClient = $matches[1] ;
 		if (isset($known_clients[$codeClient])) {
-			print("Processing $matches[2]\n") ;
+			print("Processing $matches[2]<br/>\n") ;
 			$currentClient = $matches[1] ;
 		} else {
-			print("$matches[2] not interesting ($codeClient not found)\n") ;
+			print(db2web("$matches[2] not interesting (account 400$codeClient not matching a member)<br/>\n")) ;
 			$currentClient = false ;
 		}
 	} else if ($currentClient) { // Is it useful information ?
 		if ($journal == 'ANX' or $journal == 'F01' or $journal == 'F08' or $journal == 'VEN' or $journal == 'VNC' or $journal == 'OPD') {
-			print("Journal $journal " . db2web($label) . " en date du $date lettre '$columns[9]' <$line>\n") ;
+//			print("Journal $journal " . db2web($label) . " en date du $date lettre '$columns[9]' <$line>\n") ;
 			$sql = "REPLACE INTO $table_bk_ledger (bkl_year, bkl_posting, bkl_client, bkl_journal, bkl_date, bkl_reference, bkl_label, bkl_debit, bkl_letter, bkl_credit)
 				VALUES ($ledger_year, $columns[0], '$currentClient', '$journal', '$date', '$reference',  '$label', $debit, '$columns[9]', $credit)";
-			print("$sql\n") ;
+//			print("$sql\n") ;
 			mysqli_query($mysqli_link, $sql)
-				or die("Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
+				or journalise($userId, "F", "Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
 		} else
 			print("Cannot process: " . db2web($line) . "\n") ;
 	}
 }
+journalise($userId, "I", "Grand Livre parsed") ;
 ?>
-
-</pre>
+</body>
