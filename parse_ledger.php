@@ -17,6 +17,13 @@
 */
 
 require_once 'dbi.php' ;
+
+if (! $userIsAdmin && ! $userIsBoardMember)
+    journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
+
+if( ! isset($_POST["submit"]) or ! isset($_FILES["ledgerFile"]))
+    journalise($userId, "F", "Cette page ne peut être utilisée en stand-alone.") ;
+
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -51,7 +58,9 @@ function date2sql($s) {
 	return "20$tokens[2]-$tokens[1]-$tokens[0]" ;
 }
 
-$lines = file('GrandLivre.txt', FILE_IGNORE_NEW_LINES || FILE_SKIP_EMPTY_LINES) ;
+// Now read the temporary file
+
+$lines = file($_FILES["ledgerFile"]["tmp_name"], FILE_IGNORE_NEW_LINES || FILE_SKIP_EMPTY_LINES) ;
 
 // Find the balance date
 // Alas, using the direct export as .txt rather than .pdf does not have headers...
@@ -64,7 +73,7 @@ if (preg_match('/^Dossier : .+ Grand livre Le (.+)$/', trim($last_line), $matche
 	$tokens = explode('-', $balance_date) ;
 	$balance_date = "20$tokens[2]-$tokens[1]-$tokens[0]" ;
 } else { // Let's use the file date
-	$balance_date = date('Y-m-d', filemtime('GrandLivre.txt')) ;
+	$balance_date = date('Y-m-d', filemtime($_FILES["ledgerFile"]["tmp_name"])) ; // Even if meaningless for a file upload...
 }
 
 // As we need to have a yearly ledger, try to find the 1st post date as in:
@@ -175,6 +184,9 @@ foreach($lines as $line) {
 	}
 }
 journalise($userId, "I", "Grand Livre parsed") ;
+
+// Clean-up temporary file
+unlink($_FILES["ledgerFile"]["tmp_name"]) ;
 ?>
 </body>
 </html>
