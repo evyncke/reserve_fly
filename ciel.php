@@ -31,7 +31,6 @@ if (! $userIsAdmin && ! $userIsBoardMember)
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<title>Mobile RAPCS ASBL</title>
 <!-- http://www.w3schools.com/bootstrap/ -->
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
