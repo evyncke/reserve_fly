@@ -34,7 +34,6 @@ if( ! isset($_POST["submit"]) or ! isset($_FILES["ledgerFile"]))
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<title>Mobile RAPCS ASBL</title>
 <!-- http://www.w3schools.com/bootstrap/ -->
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
@@ -95,6 +94,7 @@ journalise($userId, "D", "Ledger version $ledger_year") ;
 // TODO does not work yet on large negative numbers
 
 $balances = array() ;
+$names = array() ;
 
 foreach ($lines as $line) {
 	$columns = explode("\t", $line) ; // TAB separated file
@@ -107,10 +107,15 @@ foreach ($lines as $line) {
 				$amount = str_replace([',', ' '], ['.', ''], trim($columns[12])) ;
 			$balances[$account] = $amount ;	
 		}
-	}
+	} 
+	else // Is it a line like       400PETEL    PETERS LOTHAR^I^I^I^ 
+		if (strlen($columns[0]) > 8 and str_starts_with(trim($columns[0]), '400')) {
+			$tokens = explode(' ', trim($columns[0])) ;
+			$client_code = $tokens[0] ;
+			array_shift($tokens) ;
+			$names[$client_code] = db2web(implode(' ', $tokens)) ;
+		}
 }
-
-// var_dump($balances) ;
 
 print("<h2>Comptes clients connus</h2>\n") ;
 
@@ -125,14 +130,14 @@ while ($row = mysqli_fetch_array($result)) {
 	$first_name = db2web($row['first_name']) ;
 	$last_name = db2web($row['last_name']) ;
 	$known_clients[$row['ciel_code400']] = true ;
-	print("Processing member: $first_name $last_name...") ;
+	print("Processing member: $first_name $last_name ($row[ciel_code400])...") ;
 	if (isset($balances["$row[ciel_code400]"])) {
 		$balance = $balances["$row[ciel_code400]"] ;
 		print(" $balance &euro;<br/>\n") ;
 		mysqli_query($mysqli_link, "REPLACE INTO $table_bk_balance (bkb_account, bkb_date, bkb_amount)
 			VALUES('$row[ciel_code400]', '$balance_date', $balance)")
 			or journalise($userId, "F", "Cannot replace values('$row[ciel_code400]', '$balance_date', $balance) in $table_bk_balance: " . mysqli_error($mysqli_link)) ;
-		unset($balances["400$row[ciel_code]"]) ;
+		unset($balances[$row['ciel_code400']]) ;
 		$known_client_balances ++ ;
 	} else
 		print(" no balance found.<br/>\n") ;
@@ -143,7 +148,7 @@ print("<h2>Comptes clients inconnus et non soldés</h2>\n") ;
 
 foreach ($balances as $client => $balance)
 	if ($balance != 0)
-		print("$client => solde $balance &euro;<br/>\n") ;
+		print("$client ($names[$client]) => solde $balance &euro;<br/>\n") ;
 
 
 // Souci général: trouver une clé unique... ni le numéro de mouvement, ni le numéro de pièce sont uniques
@@ -164,8 +169,8 @@ foreach($lines as $line) {
 	$credit = comma2dot($columns[10]) ;
 	if (preg_match('/^400(\S+) (.+)/', $columns[0], $matches)) {
 		$codeClient = $matches[1] ;
-		if (isset($known_clients[$codeClient])) {
-			print("Processing $matches[2]<br/>\n") ;
+		if (isset($known_clients["400$codeClient"])) {
+			print("Processing " . db2web($matches[2]) . "<br/>\n") ;
 			$currentClient = $matches[1] ;
 		} else {
 			print(db2web("$matches[2] not interesting (account 400$codeClient not matching a member)<br/>\n")) ;
@@ -179,8 +184,8 @@ foreach($lines as $line) {
 //			print("$sql\n") ;
 			mysqli_query($mysqli_link, $sql)
 				or journalise($userId, "F", "Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
-		} else
-			print("Cannot process: " . db2web($line) . "\n") ;
+		} else if (strlen(trim($line)) != 0 and strpos($line, 'TOTAL COMPTE') === false)
+			print('Cannot parse this ledger line: <span style="color: red;">' . db2web($line) . "</span><br/>\n") ;
 	}
 }
 journalise($userId, "I", "Grand Livre parsed") ;
