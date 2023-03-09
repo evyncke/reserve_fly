@@ -1,9 +1,3 @@
-<html>
-<head>
-	<title>Import du grand livre client de Ciel</title>
-</head>
-<body>
-<h1>Import du grand livre client de Ciel</h1>	
 <?php
 /*
    Copyright 2022-2023 Eric Vyncke
@@ -23,6 +17,29 @@
 */
 
 require_once 'dbi.php' ;
+?><!DOCTYPE html>
+<html lang="fr">
+<head>
+<link rel="stylesheet" type="text/css" href="mobile.css">
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+<meta charset="utf-8">
+<!--meta name="viewport" content="width=320"-->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
+<link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
+<title>Mobile RAPCS ASBL</title>
+<!-- http://www.w3schools.com/bootstrap/ -->
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script><html>
+	<title>Import du grand livre client de Ciel</title>
+</head>
+<body>
+<h1>Import du grand livre client de Ciel</h1>	
+<?php
 
 function comma2dot($s) {
 	if ($s == '') return 'NULL' ;
@@ -160,3 +177,4 @@ foreach($lines as $line) {
 journalise($userId, "I", "Grand Livre parsed") ;
 ?>
 </body>
+</html>
