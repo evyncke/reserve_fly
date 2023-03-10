@@ -113,7 +113,7 @@ foreach ($lines as $line) {
 			$tokens = explode(' ', trim($columns[0])) ;
 			$client_code = $tokens[0] ;
 			array_shift($tokens) ;
-			$names[$client_code] = db2web(implode(' ', $tokens)) ;
+			$names[$client_code] = db2web(trim(implode(' ', $tokens))) ;
 		}
 }
 
@@ -178,10 +178,8 @@ foreach($lines as $line) {
 		}
 	} else if ($currentClient) { // Is it useful information ?
 		if ($journal == 'ANX' or $journal == 'F01' or $journal == 'F08' or $journal == 'VEN' or $journal == 'VNC' or $journal == 'OPD') {
-//			print("Journal $journal " . db2web($label) . " en date du $date lettre '$columns[9]' <$line>\n") ;
 			$sql = "REPLACE INTO $table_bk_ledger (bkl_year, bkl_posting, bkl_client, bkl_journal, bkl_date, bkl_reference, bkl_label, bkl_debit, bkl_letter, bkl_credit)
 				VALUES ($ledger_year, $columns[0], '$currentClient', '$journal', '$date', '$reference',  '$label', $debit, '$columns[9]', $credit)";
-//			print("$sql\n") ;
 			mysqli_query($mysqli_link, $sql)
 				or journalise($userId, "F", "Cannot replace into $table_bk_ledger " . mysqli_error($mysqli_link)) ;
 		} else if (strlen(trim($line)) != 0 and strpos($line, 'TOTAL COMPTE') === false)
