@@ -34,8 +34,6 @@ if (! $userIsAdmin && ! $userIsBoardMember)
 <!-- http://www.w3schools.com/bootstrap/ -->
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-<!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script><html>
 	<title>Ciel</title>
@@ -43,6 +41,7 @@ if (! $userIsAdmin && ! $userIsBoardMember)
 <body>
     <h1>Gestion Ciel</h1>
 
+    <p class="bg-info">Cette page est réservée aux administrateurs, aucun autre membre n'y a accès.</p>
     <h2>Import des factures Ciel dans le site</h2>
     <p>Cet import peut être effectué autant de fois que souhaité (les factures ne vont pas s'accumuler) mais il ne fonctionne que pour: <ul>
         <li>les factures envoyées par email via le compte finances@spa-aviation.be</li>
@@ -55,17 +54,17 @@ if (! $userIsAdmin && ! $userIsBoardMember)
 <a href="#" class="btn btn-primary" role="button">Import des factures</a>
 
 <h2>Import du grand livre client Ciel dans le site</h2>
-<p>Cette opération permet d'importe les mouvements comptables (factures, notes de crédit, paiements, ...) de Ciel dans les "comptes membres". 
+<p>Cette opération permet d'importer les mouvements comptables (factures, notes de crédit, paiements, ...) et les soldes de Ciel dans les "comptes membres". 
     Elle peut se faire autant de fois que souhaité (les mouvements précédents sont alors remplacés par les nouveaux sur le site).</p>
-    <p>Avant de lancer cet import, il est nécesssaire d'avoir exporter le grand livre client depuis Ciel Account Premium:<ol>
+    <p>Avant de lancer cet import, il est nécesssaire d'avoir exporté le grand livre client depuis <i>Ciel Account Premium</i>:<ol>
         <li>menu: <i>Etats -> Etats comptables -> Grand Livre</i></li>
         <li>Choisir "grand livre clients"</li>
         <li>Cliquer sur <i>Fichier</i> et accepter les défauts, être sûr d'exporter <b>TOUS</b> les comptes</i>
-        <li>Format de fichier: Texte (tab/return+line feed)</li>
-        <li>Sauver le fichier quelque part sur la VM ;-) (y compris le <i>One-Drive</i></li>
+        <li>Format de fichier: <i>Texte (tab/return+line feed)</i></li>
+        <li>Sauver le fichier quelque part sur la VM ;-) (y compris le <i>One-Drive</i>)</li>
     </ol>
 </p>
-<p>Une fois le grand livre clients exporté, il faut alors le sélectionner ci-dessous et cliquer sur "import".</p>
+<p>Une fois le grand livre clients exporté, il faut alors le sélectionner ci-dessous et cliquer sur le bouton <kbd>Import</kbd>.</p>
 <form action="parse_ledger.php" method="post" enctype="multipart/form-data">
   Grand livre à importer dans le site: <input type="file" name="ledgerFile" id="ledgerFile">
     <input type="submit" value="Import" class="btn btn-primary" name="submit">
