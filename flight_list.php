@@ -62,9 +62,9 @@ if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == true) {
 </form>
 </div><!-- row -->
 
-<table class="table table-striped table-responsive table-hover">
+<table class="table table-striped table-responsive table-hover" id="allFlights">
 <thead>
-<tr><th>Réf</th><th>Actions</th><th>Créé le</th><th>Etat</th><th>Depuis</th><th>Vol</th><th>Pilote</th><th>Type</th><th>Client</th><th>Remarque client</th><th>Notes club</th></tr>
+<tr><th>Réf</th><th>Actions</th><th>Créé le</th><th>Etat</th><th>Depuis</th><th>Vol</th><th id="pilots">Pilote</th><th>Type</th><th>Client</th><th>Remarque client</th><th>Notes club</th></tr>
 </thead>
 <tbody>
 <?php
@@ -73,7 +73,7 @@ $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today
 	LEFT JOIN $table_bookings AS b ON f_booking = b.r_id
 	WHERE pr_role = 'C' $other_filter $deleted_filter $completed_filter
 	ORDER BY f_id DESC") 
-	or die("Impossible de lister les vols: " . mysqli_error($mysqli_link));
+	or journalise($userId, "F", "Impossible de lister les vols: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
 	$reference = db2web($row['f_reference']) ;
 	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"glyphicon glyphicon-envelope\" title=\"Envoyer un email\"></span></a>" : "" ; 
@@ -117,6 +117,29 @@ while ($row = mysqli_fetch_array($result)) {
 </tbody>
 </table>
 
+<script> // https://stackoverflow.com/questions/14267781/sorting-html-table-with-javascript/49041392#49041392
+const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+
+const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
+    v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+    )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+// do the work...
+document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
+    const table = th.closest('table');
+    Array.from(table.querySelectorAll('tr:nth-child(n+2)'))
+        .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+        .forEach(tr => table.appendChild(tr) );
+})));
+</script>
 <?php
+/*
+var table = document.getElementById('allFlights') ;
+var th = document.getElementById('pilots') ;
+var rows = table.querySelectorAll('tr:nth-child(n+2)') ;
+print rows ;
+var allThs = Array.from(th.parentNode.children) ;
+print allThs ;
+*/
 require_once 'flight_trailer.php' ;
 ?>
