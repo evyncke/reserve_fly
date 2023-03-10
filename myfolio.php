@@ -20,7 +20,7 @@ ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
 
-if ($userId <= 0) die("Vous devez être connecté") ;
+MustBeLoggedIn() ;
 
 $originalUserId = $userId ;
 

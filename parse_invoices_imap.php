@@ -18,6 +18,8 @@
 
 require_once 'dbi.php' ;
 
+MustBeLoggedIn() ;
+
 if (! $userIsBoardMember) 
 	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
 

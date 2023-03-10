@@ -15,26 +15,7 @@
    limitations under the License.
 
 */
-$session_name = session_name('RAPCS') ;
-$cookie_lifetime = 3600 * 24 * 31 ;
-//session_start(['cookie_lifetime' => $cookie_lifetime, 'cookie_httponly' => '1', 'cookie_domain' => '.spa-aviation.be', 'cookie_path' => '/', 'use_cookies' => '1']) 
-//	or journalise($userId, "E", "Cannot start session in mobile header") ;
-// As it seems that session_start() parameters do not influence the cookie, here we go again...
-// setcookie ( string $name , string $value = "" , int $expires = 0 , string $path = "" , string $domain = "" , bool $secure = false , bool $httponly = false ) : bool
-setcookie(session_name(),session_id(),time() + $cookie_lifetime, '/', '.spa-aviation.be', true, true)
-	or journalise($userId, "E", "Cannot modify setcookie() in mobile_header") ;
-
-if (!session_id()) {
-	journalise($userId, 'W', "session_id() does not return any value") ; 
-} 
-if ($userId <= 0 and isset($_SESSION['jom_id']) and is_numeric($_SESSION['jom_id']) and $_SESSION['jom_id'] > 0) {
-	$joomla_user = JFactory::getUser($_SESSION['jom_id']) ;
-	CheckJoomlaUser($joomla_user) ;
-	journalise($userId, 'I', "Using _SESSION['jom_id']=$_SESSION[jom_id] for authentication") ;
-} else
-	$_SESSION['jom_id'] = $userId ;
-$_SESSION['truc'] = 'muche' ;
-session_commit() ;
+MustBeLoggedIn() ;
 
 # HTTP/2 push of CSS via header()
 header('Link: </resa/mobile.css>;rel=preload;as=style, </resa/swiped-events.js>;rel=preload;as=script,</resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;

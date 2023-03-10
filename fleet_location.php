@@ -27,7 +27,7 @@ if ($userId <= 0 && (!isset($_REQUEST['auth'])))
 	
 if (isset($_REQUEST['auth']))
 	if ($_REQUEST['auth'] != md5($_REQUEST['pilot'] . $_REQUEST['period'] . $shared_secret))
-		die("Vous n'&ecric;tes pas autoris&eacute;.") ;
+		MustBeLoggedIn() ;
 
 if ($userId != 62) journalise($userId, 'I', "Fleet location displayed") ;
 

@@ -93,10 +93,7 @@ function CheckJoomlaUser($joomla_user) {
 		$userFullName = $joomla_user->name ;
 		$userName = $joomla_user->username ;
 		$joomla_user->setLastVisit() ;
-//		if ($userId == 62) { $userId = 66 ; print("Forcing userId = $userId") ; }
-
 	}
-	
 	$joomla_groups = $joomla_user->groups ;
 	// User privileges
 	$userIsPilot = array_key_exists($joomla_pilot_group, $joomla_groups)  ;
@@ -109,6 +106,15 @@ function CheckJoomlaUser($joomla_user) {
 	$userIsFlightPilot = array_key_exists($joomla_flight_pilot_group, $joomla_groups) ;
 	$userIsFlightManager = array_key_exists($joomla_flight_manager_group, $joomla_groups) ;
 	// Session
+}
+
+function MustBeLoggedIn() {
+	global $userId ;
+
+	if ($userId == 0) {
+		header("Location: https://www.spa-aviation.be/resa/connect.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+		exit ;
+	}
 }
 
 // Facebook integration
