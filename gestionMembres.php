@@ -425,8 +425,8 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		print("<tr id='$personid_row' style='text-align: right'; $rowStyle>
 			<td>$count</td>
 		    <td style='text-align: right;'>id$personid</td>
-			<td style='text-align: left;'>$ciel</td>
-			<td style='text-align: left;'><a href=\"https://www.spa-aviation.be/resa/myfolio.php?user=$personid\">$row[last_name]</a></td>
+			<td style='text-align: left;'><a class=\"tooltip\" href=\"https://www.spa-aviation.be/resa/myfolio.php?user=$personid\">$ciel<span class='tooltiptext'>Click pour afficher le folio</span></a></td>
+			<td style='text-align: left;'><a class=\"tooltip\" href=\"https://www.spa-aviation.be/resa/profile.php?displayed_id=$personid\">$row[last_name]<span class='tooltiptext'>Click pour editer le profile</span></a></td>
 			<td style='text-align: left;'>$row[first_name]</td>
 			<td style='text-align: left;'>$address</td>
 			<td style='text-align: left;'>$code</td>
