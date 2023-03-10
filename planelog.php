@@ -20,7 +20,7 @@ ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
-if ($userId <= 0) die("Vous devez être connecté ($userIsAdmin/$userId)") ;
+MustBeLoggedIn() ;
 
 $plane = strtoupper(mysqli_real_escape_string($mysqli_link, $_REQUEST['plane'])) ;
 if ($plane == '') die("Missing parameter plane") ;

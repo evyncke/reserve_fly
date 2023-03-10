@@ -21,6 +21,8 @@
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
+MustBeLoggedIn() ;
+
 if (! $userIsAdmin)
 	die("Vous devez &ecirc;tre connect&eacute; et administrateur pour ajouter une nouvelle.") ;
 

@@ -20,11 +20,7 @@ ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
-if ($userId <= 0) {
-	print('<img src="facebook.jpg">') ;
-	print('<a href="' . htmlspecialchars($fb_loginUrl) .'">Se connecter via votre compte Facebook.</a><br/>') ;
-	die() ;
-}
+MustBeLoggedIn() ;
 
 if (!$userIsAdmin) die("This page is reserved to administrators") ;
 

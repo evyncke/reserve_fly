@@ -26,6 +26,9 @@ header('Link: </resa/reservation.css>;rel=preload;as=style, </resa/datepickr.css
 
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
 require_once "dbi.php" ;
+
+MustBeLoggedIn() ;
+
 require_once 'facebook.php' ;
 $month_names = array('N/A', 'Jan', 'F&eacute;v', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil', 'Ao&ucirc;t', 'Sept', 'Oct', 'Nov', 'D&eacute;c') ;
 

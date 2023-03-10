@@ -22,10 +22,7 @@
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
-if ($userId <= 0)
-	die("Vous devez &ecirc;tre connect&eacute; pour acc&egrave;der &agrave; votre profil.") ;
-
-// $userId = 345 ;
+MustBeLoggedIn() ;
 
 if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	$displayed_id = $_REQUEST['displayed_id'] ;

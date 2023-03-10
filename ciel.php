@@ -18,6 +18,8 @@
 
 require_once 'dbi.php' ;
 
+MustBeLoggedIn() ;
+
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
