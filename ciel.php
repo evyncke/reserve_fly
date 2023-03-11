@@ -53,7 +53,7 @@ if (! $userIsAdmin && ! $userIsBoardMember)
 </p>
 <p>Cette opération peut être effectuée depuis n'importe quel browser, pas besoin d'être sur la VM.</p>
 
-<a href="#" class="btn btn-primary" role="button">Import des factures</a>
+<a href="parse_invoices_imap.php" class="btn btn-primary" role="button">Import des factures</a>
 
 <h2>Import du grand livre clients Ciel dans le site</h2>
 <p>Cette opération permet d'importer les mouvements comptables (factures, notes de crédit, paiements, ...) et les soldes de Ciel dans les "comptes membres". 
