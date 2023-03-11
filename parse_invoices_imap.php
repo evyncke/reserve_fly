@@ -61,7 +61,7 @@ function processEmail($overview, $header) {
 				$invoiceId = substr(sha1($overview->to . $overview->date), 0, 8) ; // Hopefully a unique ID !
 			}
 			$outFileName = sha1($invoiceId . $shared_secret) . '.pdf' ;
-			print("Saving PDF as $outFileName for $overview->to\n") ;
+			print("Saving $invoiceId of $overview->date as $outFileName for $overview->to\n") ;
 			$bodyPart = imap_base64(imap_fetchbody($mbox, $overview->uid, $part_id+1, FT_UID || FT_PEEK)) ; // FT_PEEK keep unread flag ;
 			if (!$bodyPart) {
 				journalise($userId, 'E', "Cannot get attachemenet in email to $overview->to dated $overview->date") ;

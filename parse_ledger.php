@@ -23,8 +23,10 @@ MustBeLoggedIn() ;
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
-if( ! isset($_POST["submit"]) or ! isset($_FILES["ledgerFile"]))
-    journalise($userId, "F", "Cette page ne peut être utilisée en stand-alone.") ;
+if( ! isset($_POST["submit"]) or ! isset($_FILES["ledgerFile"]) or $_FILES["ledgerFile"]["tmp_name"] == '') {
+	print("<p class=\"color: red;\">Cette page ne peut être utilisée en stand-alone, vous devez sélectionner le fichier du grand livre avant de l'utiliser.</p>\n") ;
+    journalise($userId, "F", "Cette page ne peut être utilisée en stand-alone, vous devez choisir un fichier avant de l'utiliser.") ;
+}
 
 ?><!DOCTYPE html>
 <html lang="fr">
