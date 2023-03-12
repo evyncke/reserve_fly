@@ -1301,6 +1301,7 @@ function compute_hideshow_instructor()
     if(aPilotFunction=="PIC") {
         document.getElementById("id_cdv_flight_instructor_row").style.display="none";
         document.getElementById("id_cdv_frais_DC_row").style.display="none";
+		document.getElementById("id_cdv_nombre_crew").value=1;
     }
     else {
         document.getElementById("id_cdv_flight_instructor_row").style.display="";  	
