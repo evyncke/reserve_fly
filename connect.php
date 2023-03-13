@@ -46,7 +46,7 @@ if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
         exit ;
     } else {
         $connect_msg = "Utilisateur inconnu ou mauvais mot de passe." ;
-        journalise(0, "W", "Invalid password for $_REQUEST[username] from $callback")
+        journalise(0, "W", "Invalid password for $_REQUEST[username] from $callback") ;
     }
 }
 ?><!DOCTYPE html>
