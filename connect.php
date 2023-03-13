@@ -42,9 +42,12 @@ if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
     );
     if ($result_login) {
         header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
+        journalise(0, "I", "Connection of $_REQUEST[username] from $callback") ;
         exit ;
-    } else 
+    } else {
         $connect_msg = "Utilisateur inconnu ou mauvais mot de passe." ;
+        journalise(0, "W", "Invalid password for $_REQUEST[username] from $callback")
+    }
 }
 ?><!DOCTYPE html>
 <html lang="fr">
