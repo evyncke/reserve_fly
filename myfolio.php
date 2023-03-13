@@ -86,7 +86,7 @@ function ShowTableHeader() {
 <th class="logLastHeader">Number</th>
 <th class="logLastHeader">Sharing</th>
 <th class="logLastHeader">Plane</th>
-<th class="logLastHeader">FI</th>
+<th class="logLastHeader">FI<?=($userIsInstructor)? ' &spades' : ''?></th>
 <th class="logLastHeader">Taxes <!--&ddagger;--></th>
 <th class="logLastHeader">Total</th>
 </thead>
@@ -333,6 +333,10 @@ Les heures sont les heures UTC.</div>
 </p >
 <!-- p>&ddagger;: depuis le 1er novembre 2022, le CA a décidé de ne plus faire payer les taxes en avance.</p-->
 <?php
+
+if ($userIsInstructor)
+	print("<p>&spades; Veuillez noter qu'en tant qu'instructeur les montants négatifs de la colonne FI sont en fait des montants à facturer au club.</p>") ;
+
 if ($diams_explanation)
 	print("<p>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</p>") ;
 
