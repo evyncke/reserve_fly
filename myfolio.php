@@ -354,7 +354,7 @@ if ($row) {
 	$balance = -1 * $row['bkb_amount'] ;
 	if ($balance < 0)
 		$balance = '<span style="color: red;">' . $balance . '</span>' ;
-	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $balance &euro; (si négatif vous devez de l'argent au RAPCS ASBL). Il faut plusieurs jours avant que vos paiements soient pris en compte.</p>") ;
+	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $balance &euro; (si négatif vous devez de l'argent au RAPCS ASBL).</br>Il faut plusieurs jours avant que vos paiements soient pris en compte.</p>") ;
 	if ($row['bkb_amount'] > 0) {
 		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
 		$invoice_reason = 'solde' ;
@@ -363,7 +363,7 @@ if ($row) {
 	print("<p>Le solde de votre compte n'est pas disponible.</p>") ;
 ?>
 <h2>Factures r&eacute;centes</h2>
-<p><b>De manière expérimentale</b>, voici quelques pièces comptables r&eacute;centes:
+<p><b>Voici quelques pièces comptables r&eacute;centes:
 <ul>
 <?php
 $sql = "SELECT * FROM $table_person JOIN $table_bk_invoices ON bki_email = email LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
@@ -384,9 +384,61 @@ if ($count == 0) print("<li>Hélas, pas encore de facture à votre nom dans le s
 
 print("</ul>\n</p>\n") ;
 ?>
+<?php
+$version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
+$version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 
+// Banque de la poste
+$iban = "BE14000078161283" ;
+$bic = "BPOTBEB1" ;
+// CBC
+$iban = "BE64732038421852" ;
+$bic = "CREGBEBB" ;
+
+$name = "Royal Aero Para Club Spa" ;
+
+/*
+as Google Charts API is about to be deprecated, alternatives could be:
+http://image-charts.com/
+https://github.com/typpo/quickchart
+*/
+?>
+<span id="payment">
+<h2>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
+<p>Le QR-code contient votre identifiant au niveau de la comptabilité
+RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
+et pas Payconiq (ce dernier étant payant pour le commerçant).</p>
+<img id="payment_qr_code" width="200" height="200" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>">
+</span id="payment">
+<script>
+var 
+	invoice_reason = '<?=$invoice_reason?>' ;
+	invoice_total = <?=$invoice_total?> ;
+	epcBic = '<?=$bic?>' ;
+	epcName = '<?=$name?>' ;
+	epcIban = '<?=$iban?>' ;
+	compteCiel = '400<?=$codeCiel?>' ;
+	userLastName = '<?=$userLastName?>' ;
+
+function pay(reason, amount) {
+	if (amount <= 0.0 || amount <= 0) {
+		document.getElementById('payment').style.display = 'none' ;
+		return ;
+	}
+	document.getElementById('payment').style.display = 'block' ;
+	document.getElementById('payment_reason').innerText = reason ;
+	document.getElementById('payment_amount').innerText = amount ;
+	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
+	// There should be 2 reasons, first one is structured, the second one is free text
+	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel + '/' + userLastName ;
+	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
+}
+
+pay(invoice_reason, invoice_total) ;
+</script>
+<hr>
 <h2>Détails de votre compte pour l'année en cours</h2>
-<p><b>De manière expérimentale</b>, voici une vue de votre compte membre RAPCS pour l'année en cours (mise à jour de temps en temps).</p>
+<p><b>Voici une vue de votre compte membre RAPCS depuis le 01/01/2022 (mise à jour chaque semaine).</p>
 <table border="1">
 <thead>
 <th>Date</th><th>Opération</th><th>Pièce</th><th>Description</th><th>Débit</th><th>Crédit</th><th>Solde</th>
@@ -436,82 +488,10 @@ while ($row = mysqli_fetch_array($result)) {
 ?>
 </tbody>
 <tfoot>
-<?
-/*
-$soldeBackground="style=\"text-align: right;";
-if($solde < 0.) {
-	$soldeBackground=$soldeBackground+" background-color: GreenYellow;";
-}	
-$soldeBackground=$soldeBackground."\"";
-*/
-?>
-<tr><td colspan=4>Totaux</td><td>-<?=$total_debit?>&nbsp;&euro;</td><td>+<?=$total_credit?>&nbsp;&euro;</td>
-	<?
-	if($solde>=0){
-		print("<td style=\"text-align: right;;background-color: PaleGreen;\">$solde&nbsp;&euro;</td>");	
-	}
-	else{
-		print("<td style=\"text-align: right;background-color: LightPink;\">$solde&nbsp;&euro;</td>");			
-	}
-	?>
-<tr>
 </tfoot>
 </table>
-<?php
-$version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
-$version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
-
-// Banque de la poste
-$iban = "BE14000078161283" ;
-$bic = "BPOTBEB1" ;
-// CBC
-$iban = "BE64732038421852" ;
-$bic = "CREGBEBB" ;
-
-$name = "Royal Aero Para Club Spa" ;
-
-/*
-as Google Charts API is about to be deprecated, alternatives could be:
-http://image-charts.com/
-https://github.com/typpo/quickchart
-*/
-?>
-<span id="payment">
-<h2>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
-<p>Le QR-code contient votre identifiant au niveau de la comptabilité
-RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
-et pas Payconiq (ce dernier étant payant pour le commerçant).</p>
-<img id="payment_qr_code" width="300" height="300" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>">
-</span id="payment">
 <hr>
 <div class="copyright">R&eacute;alisation: Eric Vyncke, août-septembre 2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
-<script>
-var 
-	invoice_reason = '<?=$invoice_reason?>' ;
-	invoice_total = <?=$invoice_total?> ;
-	epcBic = '<?=$bic?>' ;
-	epcName = '<?=$name?>' ;
-	epcIban = '<?=$iban?>' ;
-	compteCiel = '400<?=$codeCiel?>' ;
-	userLastName = '<?=$userLastName?>' ;
-
-function pay(reason, amount) {
-	if (amount <= 0.0 || amount <= 0) {
-		document.getElementById('payment').style.display = 'none' ;
-		return ;
-	}
-	document.getElementById('payment').style.display = 'block' ;
-	document.getElementById('payment_reason').innerText = reason ;
-	document.getElementById('payment_amount').innerText = amount ;
-	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
-	// There should be 2 reasons, first one is structured, the second one is free text
-	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel + '/' + userLastName ;
-	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
-}
-
-pay(invoice_reason, invoice_total) ;
-</script>
-
 </body>
 </html>
