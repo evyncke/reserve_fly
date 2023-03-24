@@ -488,6 +488,10 @@ while ($row = mysqli_fetch_array($result)) {
 ?>
 </tbody>
 <tfoot>
+	<?php
+	$total_debit=-$total_debit;
+	print("<tr><td colspan=4>Totaux</td><td>$total_debit &euro;</td><td>$total_credit&nbsp;&euro;</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td><tr>");
+	?>
 </tfoot>
 </table>
 <hr>
