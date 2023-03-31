@@ -50,7 +50,7 @@ mysqli_free_result($result) ;
 
 $cost_fi_minute = 0.83 ;
 $revenue_fi_minute = 0.75 ;
-$revenue_fi_initiation = 30.0 ; // Initiation flight when shareCode = -3
+$revenue_fi_initiation = 50.0 ; // Initiation flight when shareCode = -3
 $code_initiation = -3 ; // Hard coded :-(
 $tax_per_pax = 10.0 ;
 
@@ -253,14 +253,18 @@ while ($row = mysqli_fetch_array($result)) {
 			$cost_plane = 0 ;
 		} else
 			$cost_plane = $row['cout'] * $duration ;	
-
-	if ($row['l_instructor'] == '' or $row['l_is_pic']) { // Solo, no instructor
-		print("<td class=\"logCell\">SELF</td>\n") ;
-	} else  // Dual command
+	// Vol PIC- Recheck : 
+	// Pour le Pilote -> SELF
+	// Pour l'Instructeur -> Pilote_name
+		
+	if ($row['l_instructor'] != $userId  and  $row['l_is_pic']) { // PIC 
+		print("<td class=\"logCell\">SELF</td>\n") ; //Pilot Point of View. A PIC-Recheck is SELF
+	}
+	else  // Dual command
 		if ($userId == $row['l_instructor'])
-			print("<td class=\"logCell\">" . db2web($row['pilot_name']) . "</td>\n") ;
+			print("<td class=\"logCell\">" . db2web($row['pilot_name']) . "</td>\n") ; //Point of view of the Instructore. A PIC Recheck is a DC
 		else
-			print("<td class=\"logCell\">" . db2web($row['instructor_name']) . "</td>\n") ;
+			print("<td class=\"logCell\">" . db2web($row['instructor_name']) . "</td>\n") ;// DC 
 	if ($row['l_instructor'])
 		if ($row['l_instructor'] != $userId) // The user is not the FI
 			$cost_fi = $row['l_instructor_paid'] * $cost_fi_minute * $duration ;

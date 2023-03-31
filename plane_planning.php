@@ -50,8 +50,8 @@ td {text-align: center; border-left: 1px solid gray ; border-bottom: 1px dotted 
 <h1>Echéances des avions</h1>
 <table border="1" class="logTable">
 <thead>
-<tr><th>Plane</th> <th>Last mechanics /</th> <th colspan="3">Inspections</th>        <th colspan="2">Time limit</th> <th colspan="3">Circ. Equip 4 ed5</th>    <th>&lt; 30 days</th>            <th>Mag.</th> <th>Pesage</th></tr>
-<tr><th>     </th> <th>pilots          </th> <th>50h</th><th>100h</th><th>200h</th>  <th>Eng</th><th>Prop</th>       <th>ATC</th><th>Enc.</th><th>Alti</th>    <th>CN</th>                      <th>500h</th> <th>10 y </th></tr>
+<tr><th>Plane</th> <th>Last mechanics /</th> <th colspan="3">Inspections</th>        <th colspan="2">Time limit</th> <th colspan="3">Circ. Equip 4 ed5</th>    <th>&lt; 30 days</th>            <th>Mag.</th> <th>Pesage</th><th>PLB</th></tr>
+<tr><th>     </th> <th>pilots          </th> <th>50h</th><th>100h</th><th>200h</th>  <th>Eng</th><th>Prop</th>       <th>ATC</th><th>Enc.</th><th>Alti</th>    <th>CN</th>                      <th>500h</th> <th>10 y </th><th>Date</th></tr>
 </thead>
 <tbody>
 <?php
@@ -66,6 +66,20 @@ function GenCell($value) {
 		return "<td class=\"orange\">$value</td>" ;
 	return "<td>$value</td>" ;
 }
+function GenCellDate($value, $orangeDays, $redDays) {	
+	$today=time();
+	$date=strtotime($value);
+	$day_diff = $date - $today;
+    $day_diff = floor($day_diff/(60*60*24));
+	if ($value == "0000-00-00")
+		return "<td class=\"orange\">$value</td>" ;
+	if($day_diff<$redDays)
+		return "<td class=\"red\">$value</td>" ;
+	if($day_diff<$orangeDays)
+		return "<td class=\"orange\">$value</td>" ;	
+	return "<td>$value</td>" ;
+}
+
 $result = mysqli_query($mysqli_link, "SELECT * from $table_planes WHERE ressource = 0 AND actif != 0 ORDER BY id")
 	or die("Cannot read $tables_planes: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
@@ -93,9 +107,9 @@ while ($row = mysqli_fetch_array($result)) {
 	print("<td>$row[limite_moteur_heure]<br/>$row[limite_moteur_12ans]</td>" . GenCell($row['limite_helice']) . "
 		<td></td><td></td><td></td>
 		<td>$row[cn]</td>" . 
-		GenCell($row['limite_magnetos']) . "
-		<td>$row[pesage]</td>
-		</tr>\n") ;
+		GenCell($row['limite_magnetos']) .
+	    GenCellDate($row['pesage'], 100, 30).GenCellDate($row['plb_date_limite'], 100, 30).
+		"</tr>\n") ;
 }
 ?>
 </tbody>
