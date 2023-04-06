@@ -1,0 +1,46 @@
+// Javascript de la table tarif "Vol Libre"
+document.write("<table style='width: 100%; margin-left: auto; margin-right: auto;' border='2' cellspacing='3'>");
+document.write("<tbody>");
+document.write("<tr style='background-color: #23ccdb; text-align: center;'>");
+document.write("<td colspan='5'>Free Flight cessna 150 or C172</td>");
+document.write("</tr>");
+document.write("<tr style='background-color: #23ccdb; text-align: center;'>");
+document.write("<td>Time (min)</td>");
+document.write("<td colspan='2'>Normal Fee (&euro;)</td>");
+document.write("<td colspan='2'>Member Fee (&euro;)</td>");
+document.write("</tr>");
+document.write("<tr style='background-color: #23ccdb; text-align: center;'>");
+document.write("<td></td>");
+document.write("<td colspan='2'>Passengers</td>");
+document.write("<td colspan='2'>Passengers</td>");
+document.write("</tr>");
+document.write("<tr style='background-color: #23ccdb; text-align: center;'>");
+document.write("<td></td>");
+document.write("<td>1</td>");
+document.write("<td>2-3</td>");
+document.write("<td>1</td>");
+document.write("<td>2-3</td>");
+document.write("</tr>");
+var aTarif_Normal_1=retrieve_tarif("decouverte", 1);
+var aTarif_Normal_2=retrieve_tarif("decouverte", 2);
+var aTarif_Membre_1=retrieve_tarif("membre", 1);
+var aTarif_Membre_2=retrieve_tarif("membre", 2);
+document.write("<tr style='background-color: #23ccdb; text-align: center;'>");
+document.write("<td></td>");
+document.write("<td>"+aTarif_Normal_1+"&euro;/min</td>");
+document.write("<td>"+aTarif_Normal_2+"&euro;/min</td>");
+document.write("<td>"+aTarif_Membre_1+"&euro;/min</td>");
+document.write("<td>"+aTarif_Membre_2+"&euro;/min</td>");
+document.write("</tr>");
+for (var i = 10;  i < 61; i++) {
+  document.write("<tr>");
+  var aTime =  i;
+  document.write("<td style='text-align: right;'>"+aTime+"\47</td>");
+  document.write("<td style='text-align: right;'>"+round_tarif(aTime*aTarif_Normal_1)+"&euro;</td>");
+  document.write("<td style='text-align: right;'>"+round_tarif(aTime*aTarif_Normal_2)+"&euro;</td>");
+  document.write("<td style='text-align: right;'>"+round_tarif(aTime*aTarif_Membre_1)+"&euro;</td>");
+  document.write("<td style='text-align: right;'>"+round_tarif(aTime*aTarif_Membre_2)+"&euro;</td>");
+  document.write("</tr>");
+}		
+document.write("</tbody>");
+document.write("</table>");
