@@ -32,7 +32,6 @@
 // This PHP script is fully integrated as a component of Joomla
 // Developped by Patrick Reginster in 2019
 // Updated Eric Vyncke 2022
-//
 require_once 'flight_tools.php' ; // it also includes the load of dbi.php
 
 $language=$_POST["form_language"];
