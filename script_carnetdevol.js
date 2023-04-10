@@ -1384,11 +1384,11 @@ function computeRenamedPilots(pilots_renamed, thePilots)
 	// Rename pilote names from "Patrick Reginster" -> "Reginster P."
 	// To be closer to the real "Logbook" and shorter (Better for smart phone)
     for (var i = 0; i < thePilots.length; i++) {
-		if(i>150) {
- 		   var aName="thePilots[i].name";			
-		}
+		//if(i>150) {
+ 		//   var aName="thePilots[i].name";			
+		//}
  	   if(thePilots[i].id != -1) {
-		   var aName=thePilots[i].name;
+		   var aName=thePilots[i].name.trim();
 		   var aPosition=aName.indexOf(" ");
 		   var aPilotName=aName.substr(aPosition+1,aName.length-aPosition-1)+" "+aName.substr(0,1)+".";
 		   var aKeesPosition=aPilotName.indexOf(")");
