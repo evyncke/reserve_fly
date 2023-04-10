@@ -33,12 +33,19 @@ if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
 
 if (isset($_REQUEST['start']))  {
 	$folio_start = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
+	$folio_end = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
 	$previous_month = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
+	$next_month = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
 } else {
 	$folio_start = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+	$folio_end = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
 	$previous_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+	$next_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
 }
+$folio_end->add(new DateInterval('P1M'));
+$folio_end->sub(new DateInterval('P1D'));
 $previous_month = $previous_month->sub(new DateInterval('P1M')) ;
+$next_month = $next_month->add(new DateInterval('P1M')) ;
 
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $userId")
 	or journalise(0, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
@@ -179,8 +186,8 @@ function selectChanged() {
 <!-- End Matomo Code -->
 </head>
 <body onload="init();">
-<center><h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=date('d-m-Y')?>) pour le membre <?=$userId?> <?=$userName?></h2></center>
-Folio du mois <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>">précédent.</a>
+<center><h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end->format('d-m-Y')?>) pour le membre <?=$userId?> <?=$userName?></h2></center>
+Folio du mois <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>">précédent</a> <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$next_month->format('Y-m-d')?>&user=<?=$userId?>">suivant.</a>
 <?php
 $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
 	l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, i.last_name as instructor_name, p.last_name as pilot_name,
@@ -194,6 +201,7 @@ $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
 	WHERE (l_pilot = $userId OR l_share_member = $userId or l_instructor = $userId)
   		AND l_booking IS NOT NULL
 		AND l_start >= '" . $folio_start->format('Y-m-d') . "'
+		AND l_start <= '" . $folio_end->format('Y-m-d') . "'
 	ORDER by l.l_start ASC" ;
 
 $result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
