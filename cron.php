@@ -570,6 +570,9 @@ else {
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
+	fwrite($f, "aeroclub.spa@gmail.com\n") ;
+	fwrite($f, "dto118@spa-aviation.be\n") ;
+	fwrite($f, "event@spa-aviation.be\n") ;
 	fclose($f) ;
 }
 
@@ -583,6 +586,9 @@ else {
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
+	fwrite($f, "aeroclub.spa@gmail.com\n") ;
+	fwrite($f, "dto118@spa-aviation.be\n") ;
+	fwrite($f, "event@spa-aviation.be\n") ;
 	fclose($f) ;
 }
 
@@ -596,6 +602,9 @@ else {
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
+	fwrite($f, "aeroclub.spa@gmail.com\n") ;
+	fwrite($f, "dto118@spa-aviation.be\n") ;
+	fwrite($f, "event@spa-aviation.be\n") ;
 	fclose($f) ;
 }
 
