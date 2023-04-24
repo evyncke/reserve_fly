@@ -20,8 +20,18 @@ require_once 'dbi.php' ;
 
 MustBeLoggedIn() ;
 
+?><html>
+	<head>
+		<title>Injection des factures CIEL</title>
+</head>
+<body>
+	<h1>Injection des factures CIEL depuis les emails</h1>
+<?php
 if (! $userIsBoardMember) 
 	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
+
+if (isset($_REQUEST['mbox']) and $_REQUEST['mbox'] != '')
+	$invoice_folder = $_REQUEST['mbox'] ;
 
 // var_dump($_SERVER) ;
 //$filePrefix = dirname($_SERVER['SCRIPT_FILENAME']) . "/invoices/" ;
@@ -91,8 +101,6 @@ $mbox = imap_open ("{" . $invoice_imap . ":993/imap/ssl}" . $invoice_folder, $in
 // TODO: scan all folders recursively ?
 
 /*
-$folders = imap_listmailbox($mbox, "{" . $invoice_imap . ":993}" . $invoice_folder, "*");
-
 print("<h1>imap_headers() in $invoice_folder</h1>\n") ;
 foreach (imap_headers($mbox) as $val) 
         print("$val<br/>\n");
@@ -105,12 +113,12 @@ print("</pre>") ;
 
 $checks = imap_check($mbox) ;
 $nmsgs = $checks->Nmsgs ;
-print("There are $nmsgs message(s) in the $invoice_user $invoice_folder mailbox<br>\n") ;
+print("Il y a $nmsgs message(s) dans le folder $invoice_user $invoice_folder<br>\n") ;
 
 $first_msg = max(1, $nmsgs-200) ; // 200 invoices max... just a guess
 $last_msg = $nmsgs ;
 
-print("<h1>imap_fetch_overview($first_msg:$last_msg)</h1>\n<pre>\n") ;
+print("<h1>Lecture des messages (de $first_msg à $last_msg)</h1>\n<pre>\n") ;
 
 $now = new DateTimeImmutable('now') ;
 foreach(imap_fetch_overview($mbox, "$first_msg:$last_msg") as $overview) {
@@ -128,6 +136,25 @@ foreach(imap_fetch_overview($mbox, "$first_msg:$last_msg") as $overview) {
 	}
 	processEmail($overview, $header) ;
 }
+print("</pre>\n") ;
+
+// Other folders to be processed ?
+print("<h1>Autres mailboxes à traiter</h1>
+<p>Tests par Eric, pas important et à ignorer.</p>
+<ul>\n") ;
+print('<li><a href="' . $_SERVER['PHP_SELF'] . '?mbox=INBOX">top</a></li>') ;
+
+$folders = imap_list($mbox, "{" . $invoice_imap . ":993}" . $invoice_folder, "*");
+foreach ($folders as $folder) {
+	if (!str_starts_with($folder,"{" . $invoice_imap . ":993}"))
+		continue ;
+	$folder_url = urlencode(substr($folder, strlen("{" . $invoice_imap . ":993}"))) ;
+	$folder_name = substr($folder, strlen("{" . $invoice_imap . ":993}")) ;
+	// $folder_name = mb_convert_encoding($folder_name, "UTF7-IMAP", "UTF-8" );
+	$folder_name = mb_convert_encoding(imap_utf7_decode($folder_name), 'ISO-8859-1' , 'UTF-8') ;
+	print('<li><a href="' . $_SERVER['PHP_SELF'] . "?mbox=$folder_url\">$folder_name</a></li>\n") ;
+}
+print("</ul>\n") ;
 
 // Let's close nicely
 imap_close($mbox) ;
@@ -139,3 +166,5 @@ foreach ($ciel2profiles as $ciel => $rapcs)
 
 journalise($userId, "I", "Job done") ;
 ?>
+</body>
+</html>
