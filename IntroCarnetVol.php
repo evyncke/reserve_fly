@@ -58,8 +58,9 @@ print("var default_remark=\"\";\n");
 print("var default_compteur_moteur_start=\"\";\n");			 	
 print("var default_compteur_moteur_end=\"\";\n");		 	
 print("var default_compteur_flight_start=\"\";\n");				 	
-print("var default_compteur_flight_end=\"\";\n");		 	
-
+print("var default_compteur_flight_end=\"\";\n");	
+print("var default_flight_reference=\"\";\n");	
+print("var default_flight_id=0;\n");	
 
 // bookingid is defined by the key "id" (coming from the booking) or by the key "cdv_booking" (coming from this page)
 if (isset($_REQUEST['id']) and $_REQUEST['id'] != '') {
@@ -303,6 +304,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	// TODO sanitize all fields to prevent SQL injection
 	$cdv_bookingid=$_REQUEST['cdv_bookingid'];
 	$cdv_logbookid=$_REQUEST['cdv_logbookid'];
+	$cdv_flightreferenceid=$_REQUEST['cdv_flightreferenceid'];
 	$cdv_segment=$_REQUEST['cdv_segment_count'];
 	$cdv_aircraft=$_REQUEST['cdv_aircraft'];
 	$cdv_aircraft_model=$_REQUEST['cdv_aircraft_model'];
@@ -470,11 +472,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	   <tr><td style="background-color: LightSalmon; text-align: center;" colspan="8">Un vol édité: Résumé (Heure UTC)</td></tr>
 	   <tr><td>Avion</td><td>Pilote</td><td>De</td><td>Heure</td><td>A</td><td>Heure</td><td>Durée</td></tr>') ;		
     }
-	
-
 	print("<tr>");
 	print("<td>$planeId</td>");
-	if($instructorId != 0) {
+	if($instructorId != 'NULL' && $instructorId != 0) {
 		print("<td>$pilotId/$instructorId</td>");
 	} else {
 		print("<td>$pilotId</td>");
@@ -486,6 +486,34 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	print("<td>$cdv_duree</td>");
 	print("</tbody></table></center>");
 }
+
+	// Associate the flight with an IF or an INIT flight
+    //print("cdv_flightreferenceid=$cdv_flightreferenceid;numeroVol=$numeroVol;shareType=$shareType;shareMember=$shareMember</br>");	
+	if($numeroVol!="" && $shareType=="CP1" && ($shareMember==-3 ||$shareMember==-4 || $shareMember==-6)) {
+		//print("Associate the flight with an IF or an INIT flight</br>");	
+		$f_date_flown=$startDayTime;
+		$cdv_flightreferenceid=0;
+		if($cdv_flightreferenceid==0) {
+			//print("SELECT f_id, f_reference, f_type, f_date_flown FROM $table_flight WHERE f_reference = '$numeroVol';</br>") ;
+			$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference, f_type, f_date_flown FROM $table_flight WHERE f_reference = '$numeroVol';") or die("Impossible de retrouver le f_reference dans table_flight: " . mysqli_error($mysqli_link)) ;
+			if ($flightResult->num_rows == 0) {
+				print("<script>alert('La reference du vol IF/INI $numeroVol n existe pas. Ce référence de vol IF/INI n\'est pas fermée.');</script>");
+			}
+			else {
+				$flightRow=mysqli_fetch_array($flightResult);
+				$cdv_flightreferenceid=	$flightRow['f_id'];	
+			}
+		}
+		if($cdv_flightreferenceid!=0) {
+			//print("update $table_flight set f_date_flown='$f_date_flown', f_pilot= $pilotId f_booking=$bookingidPage where f_id=$cdv_flightreferenceid;<br>") ;
+			mysqli_query($mysqli_link,"update $table_flight set f_date_flown='$f_date_flown', f_pilot=$pilotId, f_booking=$bookingidPage where f_id=$cdv_flightreferenceid;") 
+			or die("Impossible d'ajouter dans le table_flight:" . mysqli_error($mysqli_link)) ;
+			//$flightRow=mysqli_fetch_array($flightResult);
+			//$f_id = mysqli_insert_id($mysqli_link) ; 
+			print("<p style=\"color: red;\"><b>The flight $numeroVol is correctly closed</b></p>") ;
+		}	
+	}
+
 //-----------------------------------------------------------------------------------------------------
 // display any previous entries related to this booking
 
@@ -701,6 +729,11 @@ else {
 		//printf("SELECT r_id, r_plane, r_start FROM $table_bookings WHERE r_id = $bookingid</br>");
 		$result=mysqli_query($mysqli_link,"SELECT r_id, r_plane, r_start, r_stop, r_pilot, r_instructor FROM $table_bookings WHERE r_id = $bookingid") or die("Impossible de retrouver le bookingid dans booking: " . mysqli_error($mysqli_link)) ;
 		$row=mysqli_fetch_array($result);
+		
+		// Retrieve the flight reference
+		//print("</br>SELECT f_id, f_reference FROM $table_flight WHERE f_booking = $bookingid</br>");
+		$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference, f_type, f_date_flown FROM $table_flight WHERE f_booking = $bookingid") or die("Impossible de retrouver le f_reference dans table_flight: " . mysqli_error($mysqli_link)) ;
+		$flightRow=mysqli_fetch_array($flightResult);
 	
 		//if ($row['r_instructor']== NULL or $row['r_instructor'] == '' or $row['r_instructor'] == $row['r_pilot']) {
 		if ($row['r_instructor']== NULL or $row['r_instructor'] == '') {
@@ -714,15 +747,33 @@ else {
 		print("var default_instructor=$rinstructor;\n");
 		$start_UTC = gmdate('Y-m-d H:i', strtotime("$row[r_start] $default_timezone")) ;
 		print("var default_date_heure_depart=\"$start_UTC\";\n");
-	
+		print("var default_flight_reference=\"$flightRow[f_reference]\"\n");
+		print("var default_flight_type=\"$flightRow[f_type]\"\n");
+		if($flightRow['f_reference']!='') {
+			print("var default_flight_id=$flightRow[f_id]\n");
+			print("var default_share_type=\"CP1\";\n");
+			if($flightRow['f_type']=='D') {
+				print("var default_share_member=-4;\n");
+			} 
+			else {
+				print("var default_share_member=-3;\n");
+			}	
+		}
+		else {
+			print("var default_flight_id=0\n");
+		}
 		//printf("r_plane=$row[r_plane]</br>");
 		//printf("r_start=$row[r_start]</br>");
 
 	}
 	else {
+		print("</br>1111 SELECT f_id, f_reference FROM $table_flight WHERE f_id = $bookingid</br>");
 		print("var default_plane=\"\";\n");
 		print("var default_instructor=0;\n");
 		print("var default_date_heure_depart=\"\";\n");
+		print("var default_flight_reference=\"\"\n");
+	    print("var default_flight_id=\"$flightRow[f_id]\"\n");
+	    print("var default_flight_type=\"$flightRow[f_type]\"\n");
 	}
 
 	if($bookingid!='0') {		
@@ -769,6 +820,10 @@ else {
 <tr id="id_cdv_logbookid_row">
 <td class="segmentLabel">logbook id</td>
 <td class="segmentInput"><input id="id_cdv_logbookid" name="cdv_logbookid" size="8" type="text" value="" /></td>
+</tr>
+<tr id="id_cdv_flightreferenceid_row">
+<td class="segmentLabel">flight reference id</td>
+<td class="segmentInput"><input id="id_cdv_flightreferenceid" name="cdv_flightreferenceid" size="8" type="text" value="" /></td>
 </tr>
 <tr id="id_cdv_segment_count_row">
 <td class="segmentLabel">Segment</td>

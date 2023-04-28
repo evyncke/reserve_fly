@@ -17,6 +17,11 @@ function carnetdevol_page_loaded() {
   else {
 	  document.getElementById("id_cdv_logbookid_row").style.display="";  	
   }
+
+  document.getElementById("id_cdv_flightreferenceid").readOnly=true;
+  document.getElementById("id_cdv_flightreferenceid").style.backgroundColor = ReadOnlyColor;
+  //document.getElementById("id_cdv_flightreferenceid_row").style.display="none";
+  
   if(default_logbookid!=0) {
 	  document.getElementById("id_submitButton").disabled=false;
   }
@@ -895,7 +900,7 @@ function compute_defaultPartageFrais()
 		document.getElementById("id_cdv_frais_DC").value="No DC";
 	}	
 	var aRemark=default_remark;
-	var aNumeroVol="";
+	var aNumeroVol=default_flight_reference;
 	// Extract the flight number (#xxx) from the remark
 	if(aRemark.length>1) {
 		if(aRemark.substr(0,1) == "#") {
@@ -952,6 +957,7 @@ function compute_defaultValues()
 	document.getElementById("id_cdv_arrival_airport").value=default_to;
 	document.getElementById("id_cdv_bookingid").value=default_bookingid;
 	document.getElementById("id_cdv_logbookid").value=default_logbookid;
+	document.getElementById("id_cdv_flightreferenceid").value=default_flight_id;
 	document.getElementById("id_cdv_nombre_atterrissage").value=default_day_landing;
 	if(default_flight_type!="Local" || default_flight_type!= "Nav") {
 		var aFlightType=default_flight_type.toUpperCase().trim();
@@ -1051,13 +1057,18 @@ function check_numero_vol()
 		aFlag=false;
 		aFlightType="MEM";	
 	}
+	else if(aCPType==-6 && aFlightType!="IF") {
+		aTextInput.style.backgroundColor = 'orange';
+		aFlag=false;
+		aFlightType="IF";	
+	}
 	
 	var aNumeroVol=parseInt(aFlightNumber,10);
 	if(isNaN(aNumeroVol)) {
 		aTextInput.style.backgroundColor = 'orange';
 		aFlag=false;
 	}
-	else if(aNumeroVol < 23000 || aNumeroVol > 29999) {
+	else if(aNumeroVol < 230000 || aNumeroVol > 299999) {
 		aTextInput.style.backgroundColor = 'orange';
 		aFlag=false;
 	}
@@ -1333,7 +1344,6 @@ function compute_frais_CP()
 	if(aCP=="NoCP") {
 		document.getElementById("id_cdv_frais_numero_vol").style.display="none";
 		document.getElementById("id_cdv_frais_CP_PAX").style.display="none";
-		document.getElementById("id_cdv_frais_numero_vol").style.display="none";
 		document.getElementById("id_cdv_frais_CP_type").style.value=0;
 		document.getElementById("id_cdv_frais_CP_PAX").style.value=0;
 	}
@@ -1364,7 +1374,7 @@ function compute_frais_CP()
 		}	
 		else {
 			document.getElementById("id_cdv_frais_numero_vol").style.display="none";
-			document.getElementById("id_cdv_frais_numero_vol").value="";
+			document.getElementById("id_cdv_frais_numero_vol").value=default_flight_reference;
 		}
 		// L'input PAX n'est plus utilise. Il est integre dans CP_Type
 		document.getElementById("id_cdv_frais_CP_PAX").style.display="none";
@@ -1557,6 +1567,7 @@ var ReadOnlyColor="AliceBlue";
 //var default_instructor_paid=1;
 //var default_share_type="";
 //var default_share_member=0;
+//var default_flight_reference="";
 //var default_remark="";
 //var default_compteur_moteur_start="";
 //var default_compteur_moteur_end="";	 	
