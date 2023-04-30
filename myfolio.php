@@ -34,16 +34,20 @@ if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
 if (isset($_REQUEST['start']))  {
 	$folio_start = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
 	$folio_end = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
+	$folio_end_title = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
 	$previous_month = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
 	$next_month = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
 } else {
 	$folio_start = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
 	$folio_end = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+	$folio_end_title = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
 	$previous_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
 	$next_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
 }
 $folio_end->add(new DateInterval('P1M'));
-$folio_end->sub(new DateInterval('P1D'));
+//$folio_end->sub(new DateInterval('P1D'));
+$folio_end_title->add(new DateInterval('P1M'));
+$folio_end_title->sub(new DateInterval('P1D'));
 $previous_month = $previous_month->sub(new DateInterval('P1M')) ;
 $next_month = $next_month->add(new DateInterval('P1M')) ;
 
@@ -186,9 +190,10 @@ function selectChanged() {
 <!-- End Matomo Code -->
 </head>
 <body onload="init();">
-<center><h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end->format('d-m-Y')?>) pour le membre <?=$userId?> <?=$userName?></h2></center>
+<center><h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?>) pour le membre <?=$userId?> <?=$userName?></h2></center>
 Folio du mois <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>">précédent</a> <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$next_month->format('Y-m-d')?>&user=<?=$userId?>">suivant.</a>
 <?php
+//print("</br>l_start >=" . $folio_start->format('Y-m-d') . " AND l_start <= " . $folio_end->format('Y-m-d')."</br>");
 $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
 	l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, i.last_name as instructor_name, p.last_name as pilot_name,
 	UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
