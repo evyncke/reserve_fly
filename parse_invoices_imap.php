@@ -140,7 +140,6 @@ print("</pre>\n") ;
 
 // Other folders to be processed ?
 print("<h1>Autres mailboxes à traiter</h1>
-<p>Tests par Eric, pas important et à ignorer.</p>
 <ul>\n") ;
 print('<li><a href="' . $_SERVER['PHP_SELF'] . '?mbox=INBOX">top</a></li>') ;
 
