@@ -35,6 +35,7 @@ $monthInterval = new DateInterval('P1M') ; // One month
 $monthBefore = $monthBefore->sub($monthInterval) ;
 $monthBeforeString = $monthBefore->format('Y-m-d') ;
 $monthAfter = $monthAfter->add($monthInterval) ;
+$monthAfter = $monthAfter->sub(new DateInterval('P1D')) ;
 $monthAfterString = $monthAfter->format('Y-m-d') ;
 
 ?><html>
@@ -57,7 +58,7 @@ const
 	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ;
 
 function planeChanged(elem) {
-	window.location.href = '<?=$_SERVER['PHP_SELF']?>?plane=' + elem.value ;
+	window.location.href = '<?=$_SERVER['PHP_SELF']?>?plane=' + elem.value + '&since=<?=$_REQUEST['since']?>';
 }
 
 function findMember(a, m) {
