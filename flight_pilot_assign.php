@@ -44,7 +44,8 @@ while ($row = mysqli_fetch_array($result)) {
 	else
 		$date_vol = "à déterminer" ;
 	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-pencil\"></span></a> " ;
-	print("<tr><td>$edit$row[f_date_assigned]</td><td>$date_vol</td><td><b>" . db2web($row['last_name']) . '</b> ' . db2web($row['first_name']) . "</td><td>$row[f_type]</td><td>$row[p_fname] <b>$row[p_lname]</d></td></tr></form>\n") ;
+	print("<tr><td>$edit$row[f_date_assigned]</td><td>$date_vol</td><td><b>" . db2web($row['last_name']) . '</b> ' . db2web($row['first_name']) .
+		"</td><td>$row[f_type]</td><td>" . db2web($row['p_fname']) . " <b>" . db2web($row['p_lname']) . "</b></td></tr></form>\n") ;
 }
 ?>
 </tbody>
