@@ -1,15 +1,16 @@
 # Application web de gestion des vols pour non-navigants
 
-L'application est basée sur le concept d'un **vol** soit vol d'initiation (avec instructeur) ou découverte (avec pilote de 100 heures PIC).
+L'application est basée sur le concept d'un **vol** soit vol d'initiation (avec instructeur vol) ou découverte (avec pilote de 100 heures PIC).
 
 A chaque **vol** est associé un et un seul client, appelé **contact**. C'est la personne qui a contacté le RAPCS et avec qui il faut prévoir la date du vol, ...
 
-Lors qu'un **vol** est ajouté dans le système, les étapes suivantes sont alors:
+Lors qu'un **vol** est ajouté dans le système, il reste encore à effectuer les étapes suivantes (en cliquant sur l'icone crayon devant le vol):
 
 * assigner un **pilote** **qualifié** pour ce vol;
+* si nécessaire indiquer ou modifier la date du vol;
 * lier une réservation à ce vol, soit:
-  - au pilote alors de réserver un avion sur la page habituelle [de réservation](https://www.spa-aviation.be/resa/), le nom du **contact** apparaît alors dans la boîte de réservation;
-  - ou aller sur la page visualisation d'un vol, voir les réservations effectuées ce jour-là et cliquer sur l'icone lien pour lier la réservation de l'avion à ce vol;
+  - au pilote alors de réserver un avion sur la page habituelle [de réservation](https://www.spa-aviation.be/resa/) à la date souhaitée, le nom du **contact** apparaît alors dans la boîte de réservation;
+  - ou aller sur la page visualisation d'un vol via le tab _vol > tous les vols_ afin de voir les réservations effectuées ce jour-là et cliquer sur l'icone lien pour lier la réservation de l'avion à ce vol;
 * après le **vol**, le pilote doit entrer sur la page _carnet de routes_ pour marquer non seulement une entrée dans le _carnet de routes_ de l'avion mais aussi marquer le vol comme effectué.
 
 ## Formulaire d'inscription via le web
@@ -39,4 +40,4 @@ Dans beaucoup d'endroits, il y a des petites icones:
 * une chaîne: pour lier une réservation existante à un vol.
 
 ## Note important
-Application à tester et retester avant mise en production évidemment.
+Application encore débutant. Ne pas hésiter à envoyer des suggestions ou 'bugs' à [eric@vyncke.org](mailto:eric@vyncke.org)
