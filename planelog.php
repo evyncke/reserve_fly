@@ -30,13 +30,17 @@ if ($since == '')
 
 $sinceDate = new DateTime($since) ;
 $monthAfter = new DateTime($since) ;
+$monthAfterForTitle = new DateTime($since) ;
 $monthBefore = new DateTime($since) ;
 $monthInterval = new DateInterval('P1M') ; // One month
 $monthBefore = $monthBefore->sub($monthInterval) ;
 $monthBeforeString = $monthBefore->format('Y-m-d') ;
-$monthAfter = $monthAfter->add($monthInterval) ;
-$monthAfter = $monthAfter->sub(new DateInterval('P1D')) ;
+$monthAfter = $monthAfter->add($monthInterval) ; // Then request is from 01-01-2023 0h00 to 01-02-2023 0h00
+//$monthAfter = $monthAfter->sub(new DateInterval('P1D')) ; 
 $monthAfterString = $monthAfter->format('Y-m-d') ;
+$monthAfterForTitle = $monthAfterForTitle->add($monthInterval) ;
+$monthAfterForTitle = $monthAfterForTitle->sub(new DateInterval('P1D')) ;
+$monthAfterForTitleString = $monthAfterForTitle->format('Y-m-d') ; // Then Title is 31-01-2023 and not 01-02-2023
 
 ?><html>
 <head>
@@ -105,7 +109,7 @@ function init() {
 <!-- End Matomo Code -->
 </head>
 <body onload="init();">
-<center><h2>Carnet de route de <?=$plane?> du <?=$since?> au <?=$monthAfterString?></h2></center>
+<center><h2>Carnet de route de <?=$plane?> du <?=$since?> au <?=$monthAfterForTitleString?></h2></center>
 <?php
 print("Carnet de route de: <select id=\"planeSelect\" onchange=\"planeChanged(this);\">" ) ;
 $result = mysqli_query($mysqli_link, "select * from $table_planes
@@ -170,6 +174,7 @@ if ($plane_details['compteur_vol'] != 0)
 </thead>
 <tbody>
 <?php
+//print("</br>since=$since ; monthAfterString=$monthAfterString</br>");
 $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, l_start_hour, l_start_minute,
 	timediff(l_end, l_start) as duration,
 	l_flight_end_hour, l_flight_end_minute, l_flight_start_hour, l_flight_start_minute,
