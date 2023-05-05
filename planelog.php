@@ -41,6 +41,7 @@ $monthAfterString = $monthAfter->format('Y-m-d') ;
 $monthAfterForTitle = $monthAfterForTitle->add($monthInterval) ;
 $monthAfterForTitle = $monthAfterForTitle->sub(new DateInterval('P1D')) ;
 $monthAfterForTitleString = $monthAfterForTitle->format('Y-m-d') ; // Then Title is 31-01-2023 and not 01-02-2023
+$mounthName=$sinceDate->format('F') ;
 
 ?><html>
 <head>
@@ -123,8 +124,8 @@ while ($row = mysqli_fetch_array($result)) {
 		$plane_details = $row ;
 }
 print("</select> ") ;
-
-print("Mois: <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString>&lt;</a> $since <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthAfterString>&gt;</a>\n") ;
+print("Mois: <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString>&lt;</a><b>&nbsp; $mounthName &nbsp;</b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthAfterString>&gt;</a></br>\n") ;
+//print("Mois: <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString>&lt;</a> $since <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthAfterString>&gt;</a>\n") ;
 ?>
 <br/>
 <table class="logTable">
