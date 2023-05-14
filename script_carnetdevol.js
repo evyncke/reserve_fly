@@ -1073,7 +1073,7 @@ function check_numero_vol()
 		aFlag=false;
 	}
 	if(!aFlag) {
-		alert("Le numéro du vol n'est pas correct. Il doit avoir une structure du genre.\n"+aFlightType+"-23123 ou V-"+aFlightType+"-23123");
+		alert("Le numéro du vol n'est pas correct. Il doit avoir une structure du genre.\n"+aFlightType+"-231234 ou V-"+aFlightType+"-231234");
 	}
 }
 //==============================================
