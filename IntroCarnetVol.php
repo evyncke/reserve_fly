@@ -368,10 +368,17 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	//print("numeroVol1:$numeroVol</br>\n");
 	if ($numeroVol != 'NULL') {
 		$numeroVol = "$numeroVol" ; // As $remark is not quoted in the SQL statement
+		// Transform a ReferenceId into a Reference (String)
+		//print("SELECT f_id, f_reference FROM $table_flight WHERE f_id = '$numeroVol';</br>") ;
+		$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference FROM $table_flight WHERE f_id = '$numeroVol';") or die("Impossible de retrouver le f_id dans table_flight: " . mysqli_error($mysqli_link)) ;
+		if ($flightResult->num_rows > 0) {
+			$flightRow=mysqli_fetch_array($flightResult);
+			$numeroVol=$flightRow['f_reference'];	
+		}
 		//print("numeroVol2:$numeroVol</br>\n");
 		if ($remark != 'NULL') {
 		   $remark="#$numeroVol $remark";
-   		//print("remark1:$remark</br>\n");
+   		   //print("remark1:$remark</br>\n");
 	   }
 	   else {
 		   $remark="#$numeroVol";	   	
