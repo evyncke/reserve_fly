@@ -1013,11 +1013,7 @@ function check_numero_vol()
 	var anArray = aNumeroVolText.split("-");
 	var aFlag=true;
 	aTextInput.style.backgroundColor = 'white';	
-	if(anArray.length==1){
-		aTextInput.style.backgroundColor = 'orange';
-		aFlag=false;
-	}
-	else if(anArray.length>3){
+    if(anArray.length>3){
 		aTextInput.style.backgroundColor = 'orange';
 		aFlag=false;
 	}
@@ -1042,12 +1038,12 @@ function check_numero_vol()
 	}
 	var aCPType=document.getElementById("id_cdv_frais_CP_type").value;
 	// IF(-4), Initiation(-3), vol membre(-5),  vol D.H.F(-6),vol PR(-7),
-	if(aCPType==-3 && aFlightType!="INIT") {
+	if(anArray.length>1 && aCPType==-3 && aFlightType!="INIT") {
 		aTextInput.style.backgroundColor = 'orange';
 		aFlag=false;
-		aFlightType="INI";	
+		aFlightType="INIT";	
 	}
-	else if(aCPType==-4 && aFlightType!="IF") {
+	else if(anArray.length>1 && aCPType==-4 && aFlightType!="IF") {
 		aTextInput.style.backgroundColor = 'orange';
 		aFlag=false;
 		aFlightType="IF";	
@@ -1073,7 +1069,7 @@ function check_numero_vol()
 		aFlag=false;
 	}
 	if(!aFlag) {
-		alert("Le numéro du vol n'est pas correct. Il doit avoir une structure du genre.\n"+aFlightType+"-23123 ou V-"+aFlightType+"-23123");
+		alert("Le numéro du vol n'est pas correct. Il doit avoir une structure du genre.\n"+aFlightType+"-231234 ou V-"+aFlightType+"-231234 ou 231234");
 	}
 }
 //==============================================
