@@ -44,6 +44,27 @@ if (! $userIsAdmin && ! $userIsBoardMember)
     <h1>Gestion Ciel</h1>
 
     <p class="bg-info">Cette page est réservée aux administrateurs, aucun autre membre n'y a accès.</p>
+
+<?php
+if ($_REQUEST['save_ciel'] == 'true') {
+    foreach($_REQUEST as $name=>$code) {
+        if ($code == '') continue ;
+        if (str_starts_with($name, 'ciel')) {
+            $id = substr($name, strlen('ciel')) ;
+            if (str_starts_with($code, '400')) {
+                $code_400 = $code ;
+                $code = substr($code, strlen('400')) ;
+            } else {
+                $code_400 = '400' . $code ;
+            }
+            mysqli_query($mysqli_link, "UPDATE $table_person SET ciel_code='$code', ciel_code400='$code_400' where jom_id=$id")
+                or journalise($userId, "F", "Cannot assigne Ciel code" . mysqli_error($mysqli_link)) ;
+            print("Ciel code $code/$code_400 assigné à l'utilisateur $id.<br>\n") ;
+            journalise($userId, "I", "Ciel codes $code/$code_400 assignés à l'utilisateur $id.<br>\n") ;
+        }
+    }   
+}
+?>
     <h2>Import des factures Ciel dans le site</h2>
     <p>Cet import peut être effectué autant de fois que souhaité (les factures ne vont pas s'accumuler) mais il ne fonctionne que pour: <ul>
         <li>les factures envoyées par email via le compte finances@spa-aviation.be</li>
@@ -74,9 +95,11 @@ if (! $userIsAdmin && ! $userIsBoardMember)
 
 <h2>Membres inexistants dans Ciel</h2>
 <p>Liste des membres du club dont le numéro de compte Ciel est inconnu.</p>
+<form action="<?=$_SERVER['PHP_SELF']?>" id="ciel_form">
+    <input type="hidden" name="save_ciel" value="true">
 <table class="table table-striped table-hover table-responsive">
     <thead>
-        <tr><th>Nom utilisateur</th><th>Nom</th><th>Prénom</th><th>email</th><th>Date création</th></tr>
+        <tr><th>Nom utilisateur</th><th>Compte Ciel</th><th>Nom</th><th>Prénom</th><th>email</th><th>Date création</th></tr>
     </thead>
     <tbody>
 <?php
@@ -88,10 +111,14 @@ while ($row = mysqli_fetch_array($result)) {
     $name = db2web($row['name']) ;
     $first_name = db2web($row['first_name']) ;
     $last_name = db2web($row['last_name']) ;
-    print("<tr><td>$row[username]</td><td>$last_name</td><td>$first_name</td><td>$row[email]</td><td>$row[registerDate]</td></tr>\n") ;
+    print("<tr><td>$row[username]</td><td>
+        <input type=\"text\" name=\"ciel$row[jom_id]\"> 
+        <span class=\"glyphicon glyphicon glyphicon-floppy-saved\" style=\"color: blue;\" title=\"Enregistrer le code Ciel\" onClick=\"document.getElementById('ciel_form').submit();\"></span>
+        </td><td>$last_name</td><td>$first_name</td><td>$row[email]</td><td>$row[registerDate]</td></tr>\n") ;
 }
 ?>
 </tbody>
 </table>
+</form>
 </body>
 </html>
