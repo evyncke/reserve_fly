@@ -8,6 +8,7 @@ require_once 'flight_tools.php' ;
 
 $language=$_POST["form_language"];
 $typeofflight=$_POST["typeofflight"];
+//print("typeofflight=$typeofflight</br>");
 $numberofpassagers=$_POST["numberofpassagers"];
 
 $firstname1=$_POST["firstname1"];
@@ -32,6 +33,9 @@ $weight3=$_POST["weight3"];
 $contactmail=$_POST["contactmail"];
 $contactphone=$_POST["contactphone"];
 $circuitnumber=$_POST["circuit"];
+//print("circuitnumber=$circuitnumber</br>");
+if($circuitnumber==NULL) $circuitnumber=0;
+//print("circuitnumber=$circuitnumber</br>");
 $circuit=circuit_name($circuitnumber);
 $flightdate=compute_date($_POST["flightdate"]);
 $flightdate2=compute_date($_POST["flightdate2"]);
@@ -108,7 +112,9 @@ else {
 	    }
 		$message.="Mail: ".$contactmail ."<br/>";
 		$message.="T&eacute;l&eacute;phone: ".$contactphone ."<br/>";
-		$message.="Circuit demand&eacute;: ".htmlentities($circuit) ."<br/>";
+		if ($typeofflight == "vol_decouverte") {
+			$message.="Circuit demand&eacute;: ".htmlentities($circuit) ."<br/>";
+		}
 		$message.="Date souhait&eacute;e: ".$flightdate ." ou ".$flightdate2."<br/>";
 		$message.="Heure souhait&eacute;e: ".$heure."<br/>";
 		$message.="Vous souhaitez devenir membre du RAPCS : ".$rapcsmember;
@@ -147,7 +153,9 @@ else {
 	    }
 		$message.="Mail: ".$contactmail ."<br/>";
 		$message.="Phone: ".$contactphone ."<br/>";
-		$message.="Requested Circuit: ".htmlentities($circuit) ."<br/>";
+		if ($typeofflight == "vol_decouverte") {
+			$message.="Requested Circuit: ".htmlentities($circuit) ."<br/>";
+		}
 		$message.="Desired Date: ".$flightdate ." or ".$flightdate2."<br/>";
 		$message.="Desired time: ".$heure."<br/>";
 		$message.="You wish to become member: ";
@@ -290,13 +298,18 @@ else {
 		$flightdate = "$tokens[2]-$tokens[1]-$tokens[0]" ;
 		$tokens = explode('-', $flightdate2) ;
 		$flightdate2 = "$tokens[2]-$tokens[1]-$tokens[0]" ;
+		//print("INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_gift, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_pilot)
+		//	VALUES(SYSDATE(), 0, '$flight_type', 0, $numberofpassagers, $circuitnumber, '$flightdate', '$flightdate2', '$heure', '" .
+		//	mysqli_real_escape_string($mysqli_link, web2db("$remarque")) . "', NULL)</br>");
 		mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_gift, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_pilot)
 			VALUES(SYSDATE(), 0, '$flight_type', 0, $numberofpassagers, $circuitnumber, '$flightdate', '$flightdate2', '$heure', '" .
 			mysqli_real_escape_string($mysqli_link, web2db("$remarque")) . "', NULL)")
 			or journalise(0, "E", "Cannot add flight, system error: " . mysqli_error($mysqli_link)) ;
 		$flight_id = mysqli_insert_id($mysqli_link) ;
+		//print("flight_id=$flight_id</br>");
 		$type = ($flight_type == 'D') ? 'IF-' : 'INIT-' ;
 		$flight_reference = $type . sprintf("%06d", $flight_id) ;
+		//print("flight_reference=$flight_reference</br>");
 		mysqli_query($mysqli_link, "UPDATE $table_flight SET f_reference='$flight_reference' WHERE f_id=$flight_id")
 					or journalise(0, 'E', "Cannot update reference in $table_flight to $flight_reference: " . mysqli_error($mysqli_link)) ;
 		mysqli_query($mysqli_link, "INSERT INTO $table_pax_role(pr_flight, pr_pax, pr_role)
