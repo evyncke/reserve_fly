@@ -305,7 +305,7 @@ function init(longitude, latitude) {
 </script>
 <!-- End Matomo Code -->
 </head>
-<body onload="init(<?=$apt_latitude?>, <?=$apt_latitude?>);">
+<body onload="init(<?=$apt_longitude?>, <?=$apt_latitude?>);">
 <center><h2>Les vols de <?=$pilot_name?> sur une carte</h2></center>
 
 <?php if (isset($_REQUEST['auth'])) print('<div style="visibility: hidden;">') ; ?>
