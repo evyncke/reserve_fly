@@ -28,12 +28,12 @@ if (isset($_REQUEST['deleted'])) {
 	$deleted = '' ;
 	$deleted_filter = " AND f_date_cancelled IS NULL" ;
 }
-if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == true) {
-	$completed = true ;
+if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == "true") {
+	$completed = "true" ;
 	$completed_filter = ' AND f_date_flown IS NOT NULL' ;
 	$title = 'terminés' ;
 } else {
-	$compleyed = false ;
+	$completed = "false" ;
 	$completed_filter = ' AND f_date_flown IS NULL' ;
 	$title = 'non terminés' ;
 }
@@ -45,6 +45,7 @@ if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == true) {
 
 <div class="row">
 <form class="" action="<?=$_SERVER['PHP_SELF']?>">
+	<input type="hidden" name="completed" value="<?=$completed?>"/>
 <!--div class="form-group"-->
 	<div class="checkbox col-md-offset-1 col-xs-6 col-md-2">
 			<label><input type="checkbox" name="deleted"<?=$deleted?> onchange="this.form.submit();">Inclure les vols annulés</label>
