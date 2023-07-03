@@ -45,8 +45,8 @@ if (isset($_REQUEST['init_only'])) {
 	$init_only_filter = '' ;
 }
 
-if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == true) {
-	$completed = true ;
+if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == "true") {
+	$completed = "true" ;
 	$completed_filter = ' AND f_date_flown IS NOT NULL' ;
 	$title = 'terminés' ;
 } else {
