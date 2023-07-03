@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 */
 require_once 'flight_header.php' ;
+
 if (isset($_REQUEST['pattern'])) {
 	$pattern = mysqli_real_escape_string($mysqli_link, web2db(trim($_REQUEST['pattern']))) ;
 	$other_filter = " AND (p_lname LIKE '%$pattern%' OR p_fname LIKE '%$pattern%' or f_description LIKE '%$pattern%' or f_reference LIKE '%$pattern%' or f_notes LIKE '%$pattern%' or p_email LIKE '%$pattern%' OR first_name LIKE '%$pattern%' OR last_name LIKE '%$pattern%') " ;
@@ -28,6 +29,22 @@ if (isset($_REQUEST['deleted'])) {
 	$deleted = '' ;
 	$deleted_filter = " AND f_date_cancelled IS NULL" ;
 }
+// Should check exclusive choices
+if (isset($_REQUEST['if_only'])) {
+	$if_only = ' checked' ;
+	$if_only_filter = " AND f_type = 'D'" ;
+} else {
+	$if_only = '' ;
+	$if_only_filter = '' ;
+}
+if (isset($_REQUEST['init_only'])) {
+	$init_only = ' checked' ;
+	$init_only_filter = " AND f_type = 'I'" ;
+} else {
+	$init_only = '' ;
+	$init_only_filter = '' ;
+}
+
 if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == true) {
 	$completed = true ;
 	$completed_filter = ' AND f_date_flown IS NOT NULL' ;
@@ -44,22 +61,28 @@ if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == true) {
 </div><!-- page header -->
 
 <div class="row">
-<form class="" action="<?=$_SERVER['PHP_SELF']?>">
-<!--div class="form-group"-->
-	<div class="checkbox col-md-offset-1 col-xs-6 col-md-2">
+	<form class="" action="<?=$_SERVER['PHP_SELF']?>">
+		<!--div class="form-group"-->
+		<div class="checkbox col-xs-4 col-md-2">
 			<label><input type="checkbox" name="deleted"<?=$deleted?> onchange="this.form.submit();">Inclure les vols annulés</label>
-	</div><!-- checkbox-->
-	<div class="form-group">
-		<div class="col-xs-6 col-md-offset-10 col-md-1">
-			<input type="text" class="form-control" name="pattern" value="<?=db2web($pattern)?>"/>
-		</div>
-	</div> <!-- formgroup-->
-	<div class="form-group">
-		<div class="col-xs-3 col-md-1">
-			<input type="submit" class="btn btn-primary" name="add" value="Chercher"/>
-   		</div><!-- col -->
-	</div><!-- formgroup-->
-</form>
+		</div><!-- checkbox-->
+		<div class="checkbox col-xs-4 col-md-2">
+			<label><input type="checkbox" name="init_only"<?=$init_only?> onchange="this.form.submit();">Initiations seulement</label>
+		</div><!-- checkbox-->
+		<div class="checkbox col-xs-4 col-md-2">
+				<label><input type="checkbox" name="if_only"<?=$if_only?> onchange="this.form.submit();">Découvertes seulement</label>
+		</div><!-- checkbox-->
+		<div class="form-group">
+			<div class="col-xs-6 col-md-offset-1 col-md-4">
+				<input type="text" class="form-control" name="pattern" value="<?=db2web($pattern)?>"/>
+				</div>
+			</div> <!-- formgroup-->
+			<div class="form-group">
+				<div class="col-xs-3 col-md-1">
+					<input type="submit" class="btn btn-primary" name="add" value="Chercher"/>
+				</div><!-- col -->
+		</div><!-- formgroup-->
+	</form>
 </div><!-- row -->
 
 <table class="table table-striped table-responsive table-hover" id="allFlights">
@@ -71,7 +94,7 @@ if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == true) {
 $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today 
 	FROM $table_flight JOIN $table_pax_role ON f_id = pr_flight JOIN $table_pax ON pr_pax = p_id LEFT JOIN $table_person ON f_pilot = jom_id
 	LEFT JOIN $table_bookings AS b ON f_booking = b.r_id
-	WHERE pr_role = 'C' $other_filter $deleted_filter $completed_filter
+	WHERE pr_role = 'C' $other_filter $deleted_filter $completed_filter $if_only_filter $init_only_filter
 	ORDER BY f_id DESC") 
 	or journalise($userId, "F", "Impossible de lister les vols: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
