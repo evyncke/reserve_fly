@@ -100,8 +100,8 @@ var
           <ul class="dropdown-menu">
             <!--li><a href="mobile.php">Ma prochaine</a></li-->
             <li><a href="flight_create.php">Nouveau</a></li>
-            <li><a href="flight_list.php">Tous les vols</a></li>
-            <li><a href="flight_list.php?completed=true">Historique des vols terminés</a></li>
+            <li><a href="flight_list.php?completed=false">Vols prévus</a></li>
+            <li><a href="flight_list.php?completed=true">Vols terminés</a></li>
             <li><a href="flight_list_mine.php">Mes vols à venir</a></li>
           </ul><!-- dropdown-menu -->
         </li><!-- dropdown -->
