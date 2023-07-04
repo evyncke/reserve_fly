@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -247,6 +247,9 @@ while ($row = mysqli_fetch_array($result)) {
 	// Emit a red line if pilot and instructor are the same
 	if ($row['l_pilot'] == $row['l_instructor'])
 		print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">The pilot is the instructor on the line below...</td></tr>\n") ;
+	// Emit a red line if cost is shared with nobody
+	if (($row['l_share_type'] == 'CP1' or $row['l_share_type'] == 'CP2') and $row['l_share_member'] == 0)
+		print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Shared flight with nobody on the line below...</td></tr>\n") ;
 	$previous_airport = $row['l_to'] ;
 	$previous_end_hour = $row['l_end_hour'] ;
 	$previous_end_minute = $row['l_end_minute'] ;
