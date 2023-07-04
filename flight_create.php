@@ -343,7 +343,7 @@ if (isset($flight_id) and $flight_id != 0) {
 <ul class="nav nav-tabs">
   <li class="<?=$contact_active?>"><a data-toggle="tab" href="#menuContact">Résumé</a></li>
   <li class="<?=$pax_active?>"><a data-toggle="tab" href="#menuPassenger">Passagers</a></li>
-  <li class="<?=$payment_active?>"><a data-toggle="tab" href="#menuPayment">Paiement</a></li>
+  <li class="<?=$payment_active?>"><a data-toggle="tab" href="#menuPayment">Paiements</a></li>
   <li class="<?=$pilot_active?>"><a data-toggle="tab" href="#menuPilot">Pilote</a></li>
   <li><a data-toggle="tab" href="#menuPlane">Réservation</a></li>
   <li><a data-toggle="tab" href="#menuAudit">Historique</a></li>
@@ -649,9 +649,49 @@ if ($row_flight['f_date_paid']) {
 			<input type="submit" class="btn btn-primary" name="pay" value="Enregistrer"/>
    		</div><!-- col -->
 	</div> <!- form-group-->
-<p style="color: red;">En cours de développement, ne pas utiliser.</p>
 </form>
 </div><!-- row -->
+
+<div class="row">
+<p style="color: red;">Ce qui ci-dessous est en cours de développement, ne pas utiliser.</p>
+<h3>Historique des paiements</h3>
+<table class="table table-striped table-responsive table-hover" id="ledgerTable">
+	<thead>
+		<tr><th></th><th>Date</th><th>Montant</th><th>Référence</th><th>Par</th></tr>
+	</thead>
+	<tbody>
+<?php
+$result = mysqli_query($mysqli_link, "SELECT * FROM $table_flights_ledger JOIN $table_person ON fl_who=jom_id
+								WHERE fl_flight = $flight_id ORDER BY fl_date ASC")
+		or journalise($userId, "E", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
+$total_paid = 0 ;
+while ($row = mysqli_fetch_array($result)) {
+	// TODO allow for deleting a payment ?
+	print("<tr>
+		<td><button onclick=\"location.href='" . $_SERVER['PHP_SELF'] . "?deletePayment=$row[fl_id]&flight_id=$flight_id&pay_open=Y'\" class=\"btn btn-danger\" title=\"Enlever ce paiement\"><span class=\"glyphicon glyphicon-remove\"></span></button></td>
+		<td>$row[fl_date]</td><td>$row[fl_amount]</td><td>" . db2web($row['fl_reference']) . "</td>
+		<td>" . db2web("$row[first_name] $row[last_name]") . "</td></tr>\n") ;
+	$total_paid += $row['fl_amount'] ;
+}
+// TODO add line to add payment
+print("<form action=\"" . $_SERVER['PHP_SELF'] . "?\">
+	<input type=\"hidden\" name=\"flight_id\" value=\"$flight_id\">
+	<input type=\"hidden\" name=\"pay_open\" value=\"Y\">
+	<tr>
+    <td><button type=\"submit\" class=\"btn btn-success\" title=\"Ajouter un paiement\" name=\"addPayment\" value=\"Y\"><span class=\"glyphicon glyphicon-plus\"></span></button></td>
+	<td><input type=\"date\" name=\"date\" value=\"" . date('Y-m-d') . "\"></td>
+	<td><input type=\"text\" name=\"amount\"></td>
+	<td><input type=\"text\" name=\"reference\"></td>
+	<td></td>
+	</tr>
+	</form>\n") ;
+// Show the total
+print("<tr class=\"bg-info\"><td></td><td></td><td><b>$total_paid</b></td><td><b>TOTAL</b></td><td></td></tr>\n") ;
+?>
+	</tbody>
+</table>
+</div><!-- row -->
+
 </div> <!-- menu Payment -->
 
 <div id="menuPilot" class="tab-pane fade <?=$pilot_active?>">
