@@ -1,7 +1,7 @@
 <?php
 // Some icons (fast forward & co) by Snowish Icon Pack by Alexander Moore 
 /*
-   Copyright 2014-2022 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -567,14 +567,14 @@ else
 // If there is any pending customers list them here...
 $result_customer = mysqli_query($mysqli_link, "SELECT * 
 	FROM $table_flight JOIN $table_pax_role ON pr_role = 'C' and pr_flight = f_id JOIN $table_pax ON pr_pax = p_id
-	WHERE f_pilot = $userId and f_booking IS NULL
-	ORDER BY f_date_assigned")
+	WHERE f_pilot = $userId AND f_booking IS NULL AND f_date_cancelled IS NULL
+	ORDER BY f_id")
 	or die("Cannot retrieve customers: " . mysqli_error($mysqli_link)) ;
 if (mysqli_num_rows($result_customer)) {
 	print("Client vol découverte/initiation: <select id=\"customerSelect\">
 		<option value=\"-1\"> - aucun - </option>\n") ;
 	while ($row_customer = mysqli_fetch_array($result_customer)) {
-			print("<option value=\"$row_customer[f_id]\">" . db2web("$row_customer[p_fname] $row_customer[p_lname] (IF)") . "</option>\n") ;
+			print("<option value=\"$row_customer[f_id]\">$row_customer[f_id]: " . db2web("$row_customer[p_lname] $row_customer[p_fname]") . "</option>\n") ;
 	}
 	mysqli_free_result($result_customer) ;
 	print("</select><br/>\n") ;
