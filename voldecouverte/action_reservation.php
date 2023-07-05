@@ -3,18 +3,22 @@
 require_once 'flight_tools.php' ;
 
 // This PHP script is fully integrated as a component of Joomla
-// Developped by Patrick Reginster in 2019
-// Eric Vyncke 2022
+// Developped by Patrick Reginster in 2019-2023
+// Eric Vyncke 2022-2023
 
 $language=$_POST["form_language"];
 $typeofflight=$_POST["typeofflight"];
 //print("typeofflight=$typeofflight</br>");
 $numberofpassagers=$_POST["numberofpassagers"];
+if (!is_numeric($numberofpassagers) or $numberofpassagers < 0 or $numberofpassagers > 4)
+	journalise(0, 'F', "SQL injection detected numberofpassagers='$numberofpassagers'") ;
 
 $firstname1=$_POST["firstname1"];
 $lastname1=$_POST["lastname1"];
 $age1=$_POST["age1"];
 $weight1=$_POST["weight1"];
+if ($weight1 != '' and !is_numeric($weight1))
+	journalise(0, 'F', "SQL injection detected weight1='$weight1'") ;
 
 if($firstname1=="James" && $lastname1=="Smith") {
 	exit;
@@ -24,18 +28,23 @@ $firstname2=$_POST["firstname2"];
 $lastname2=$_POST["lastname2"];
 $age2=$_POST["age2"];
 $weight2=$_POST["weight2"];
+if ($weight2 != '' and !is_numeric($weight2))
+	journalise(0, 'F', "SQL injection detected weight2='$weight2'") ;
 
 $firstname3=$_POST["firstname3"];
 $lastname3=$_POST["lastname3"];
 $age3=$_POST["age3"];
 $weight3=$_POST["weight3"];
+if ($weight3 != '' and !is_numeric($weight3))
+	journalise(0, 'F', "SQL injection detected weight3='$weight3'") ;
 
 $contactmail=$_POST["contactmail"];
 $contactphone=$_POST["contactphone"];
 $circuitnumber=$_POST["circuit"];
-//print("circuitnumber=$circuitnumber</br>");
-if($circuitnumber==NULL) $circuitnumber=0;
-//print("circuitnumber=$circuitnumber</br>");
+if ($circuitnumber==NULL or $circuitnumber == '') $circuitnumber=0;
+if (!is_numeric($circuitnumber) or $circuitnumber < 0 or $circuitnumber > 100)
+	journalise(0, 'F', "SQL injection detected circuitnumber='$circuitnumber'") ;
+
 $circuit=circuit_name($circuitnumber);
 $flightdate=compute_date($_POST["flightdate"]);
 $flightdate2=compute_date($_POST["flightdate2"]);
