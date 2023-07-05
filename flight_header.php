@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2022 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ require_once "dbi.php" ;
 
 MustBeLoggedIn() ;
 
-if (! ($userIfFlightPilot or $userIsFlightManager)) 
-	journalise($userId, "F", "Vous n'êtes pas autorisé sur cette page: il faut être connecté sur site web d'abord") ;
+if (! ($userIsFlightPilot or $userIsFlightManager)) 
+	journalise($userId, "F", "Vous n'êtes pas autorisé(e) sur cette page: il faut avoir les bons droits d'accès.") ;
 ?>
 <html>
 <head>
