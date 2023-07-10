@@ -31,16 +31,22 @@ if ($_REQUEST['owner'] != '' && is_numeric($_REQUEST['owner']) && ($userIsAdmin 
 
 $sql_filter = [] ;
 
-if (isset($_REQUEST['period'])) {
+if (isset($_REQUEST['period']) and $_REQUEST['period'] != 'always') {
 	$period = $_REQUEST['period'] ;
 	switch ($_REQUEST['period']) {
-		case '2y': $sql_filter[] = 'l_start > date_sub(now(), interval 2 year)' ; break ;
-		case '1y': $sql_filter[] = 'l_start > date_sub(now(), interval 1 year)' ; break ;
-		case '3m': $sql_filter[] = 'l_start > date_sub(now(), interval 3 month)' ; break ;
-		case '1m': $sql_filter[] = 'l_start > date_sub(now(), interval 1 month)' ; break ;
-	}	
+		case '2y': $interval = '2 years' ; break ;
+		case '1y': $interval = '1 year' ; break ;
+		case '3m': $interval = '3 months' ; break ;
+		case '1m': 	$interval = '1 month' ; break ;
+	}
+	$today = date_create("now") ;
+	$date_from = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'd/m/Y') ;	
+	$today = date_create("now") ; // As $today has changed above...
+	$date_from_sql = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'Y-m-d') ;	
 } else {
 	$period = 'always' ; 
+	$date_from = '17/12/1903' ; // All flights should be done after this date, Wright brothers ;-)
+	$date_from_sql = '1903-12-17' ; // All flights should be done after this date, Wright brothers ;-)
 }
 
 if (isset($_REQUEST['items'])) {
@@ -62,8 +68,8 @@ if (isset($_REQUEST['page']) and is_numeric($_REQUEST['page'])) {
 	$page = 9999 ;
 }
 
-$sql_filters = implode(' and ', $sql_filter) ;
-if ($sql_filters != '') $sql_filters = " and $sql_filters" ;
+// $sql_filters = implode(' and ', $sql_filter) ;
+// if ($sql_filters != '') $sql_filters = " and $sql_filters" ;
 
 // TODO
 // - HTML5 header
@@ -213,12 +219,11 @@ function saveButton(action, owner, id) {
 	formURL += '&' + valueOfField(action, 'pic') ;
 	formURL += '&' + valueOfField(action, 'dayLanding') ;
 	formURL += '&' + valueOfField(action, 'nightLanding') ;
-console.log("Redirecting to " + formURL) ;
 	window.location.href = formURL ;
 }
 
 function selectChanged() {
-	window.location.href = '<?=$_SERVER['PHP_SELF']?>?owner=' + document.getElementById('pilotSelect').value + '&period=' + document.getElementById('periodSelect').value + '&items='  + document.getElementById('itemsSelect').value + '&page=' + page ;
+	window.location.href = '<?=$_SERVER['PHP_SELF']?>?owner=' + document.getElementById('pilotSelect').value + '&period=' + document.getElementById('periodSelect').value  ;
 }
 
 function init() {
@@ -275,7 +280,7 @@ function init() {
 <!-- End Matomo Code -->
 </head>
 <body onload="init();">
-<center><h2>Carnet de vol de <?=$owner_name?></h2></center>
+<center><h2>Carnet de vol de <?=$owner_name?> depuis <?=$date_from?></h2></center>
 <?php
 // Actions first
 if (isset($_REQUEST['action'])) {
@@ -376,16 +381,16 @@ print("P&eacute;riode: <select id=\"periodSelect\" onchange=\"selectChanged();\"
 	<option value=\"1y\">1 an</option>
 	<option value=\"3m\">3 mois</option>
 	<option value=\"1m\">1 mois</option>
-</select>,
+</select><!--
 <select id=\"itemsSelect\" onchange=\"selectChanged();\">
 	<option value=\"12\">12</option>
 	<option value=\"24\">24</option>
 	<option value=\"50\">50</option>
 	<option value=\"100\">100</option>
-</select> lignes/page.
+</select> lignes/page-->.
 <br/>") ;
 
-$sql = "select l_id, date_format(l_start, '%d/%m/%y') as date,
+$sql = "select l_id, date_format(l_start, '%d/%m/%y') as date, date_format(l_start, '%Y-%m-%d') as date_sql,
 	l_model, l_plane, l_pilot, l_is_pic, l_instructor, p.last_name as instructor_name,
 	upper(l_from) as l_from, upper(l_to) as l_to, 
 	l_start, l_end, timediff(l_end, l_start) as duration,
@@ -393,16 +398,17 @@ $sql = "select l_id, date_format(l_start, '%d/%m/%y') as date,
 	l_day_landing, l_night_landing
 	from $table_logbook l 
 	left join $table_person p on p.jom_id = l_instructor
-	where (l_pilot = $owner or l_instructor = $owner) $sql_filters
+	where (l_pilot = $owner or l_instructor = $owner)
 	order by l.l_start asc" ;
 // TODO get a more efficient way to count the rows...
-$result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
+$result = mysqli_query($mysqli_link, $sql) or journalise($userId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
 $rows_count = mysqli_num_rows($result) ;
 if ($rows_count === FALSE) die("Cannot count rows (owner = $owner, $sql): " . mysqli_error($mysqli_link));
 $page_count = ceil($rows_count / $items) ;
 if ($page > $page_count -1) $page = $page_count -1 ;
 if ($page < 0) $page = 0 ;
-mysqli_data_seek($result, $page * $items) ; //or die("Cannot data_seek(page=$page, items=$items): " . mysql_error());
+// We need to parse all lines...
+// mysqli_data_seek($result, $page * $items) ; //or die("Cannot data_seek(page=$page, items=$items): " . mysql_error());
 
 if ($userIsInstructor or $userIsAdmin) {
 	print("En tant qu'instructeur/administrateur, vous pouvez consulter les carnets de vol des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
@@ -430,68 +436,103 @@ $dual_total_minute =  0;
 $fi_total_hour = 0 ;
 $fi_total_minute =  0;
 $line_count = 0 ;
-while (($row = mysqli_fetch_array($result)) && ($line_count < $items)) {
-	$line_count ++ ;
+$duration_grand_total_hour = 0 ;
+$duration_grand_total_minute = 0 ;
+$day_landing_grand_total = 0 ;
+$night_landing_grand_total = 0 ;
+$pic_grand_total_hour = 0 ;
+$pic_grand_total_minute =  0;
+$dual_grand_total_hour = 0 ;
+$dual_grand_total_minute =  0;
+$fi_grand_total_hour = 0 ;
+$fi_grand_total_minute =  0;
+while 
+($row = mysqli_fetch_array($result)) {
 	if (substr($row['duration'], 0, 1) == '-')
 		$duration = explode(':', $row['duration_rollover']) ; // Looking like 01:33:00 (in case of over rolling the 24:00:00 mark)
 	else
 		$duration = explode(':', $row['duration']) ; // Looking like 01:33:00
-	$duration_total_hour += $duration[0] ;
-	$duration_total_minute += $duration[1] ;
-	$day_landing_total += $row['l_day_landing'] ;
-	$night_landing_total += $row['l_night_landing'] ;
-	// DB contains UTC time
-	$l_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
-	$l_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
-	if ($row['l_instructor'] < 0) $row['instructor_name'] = 'Autre FI' ;
-	print("<tr>
-		<td class=\"logCell\">
-			<a href=\"$_SERVER[PHP_SELF]?action=edit&id=$row[l_id]&owner=$owner\"><img src=\"gtk-edit.png\" border=\"0\" width=\"15\" height=\"15\"></a>
-			<a href=\"$_SERVER[PHP_SELF]?action=delete&id=$row[l_id]&owner=$owner\"><img src=\"gtk-delete.png\" border=\"0\" width=\"15\" height=\"15\"></a>
-		</td>
-		<td class=\"logCell\">$row[date]</td>
-		<td class=\"logCell\">$row[l_from]</td>
-		<td class=\"logCell\">$l_start</td>
-		<td class=\"logCell\">$row[l_to]</td>
-		<td class=\"logCell\">$l_end</td>
-		<td class=\"logCell\">$row[l_model]</td>
-		<td class=\"logCell\">$row[l_plane]</td>
-		<td class=\"logCell\">$duration[0]</td>
-		<td class=\"logCell\">$duration[1]</td>\n") ;
+	// Check whether this line should be displayed based on $date_from vs. $row[date], $page*$items vs $line_count only if $period is 'always'
+//	if ($period == 'always')
+//		$visible = $page*$items <= $line_count and $line_count < ($page+1)*$items ;
+//	else // $period is not 'always'
+	$visible = $row['date_sql'] >= $date_from_sql ;
+	$duration_grand_total_hour += $duration[0] ;
+	$duration_grand_total_minute += $duration[1] ;
+	$day_grand_landing_total += $row['l_day_landing'] ;
+	$night_grand_landing_total += $row['l_night_landing'] ;
 	if ($row['l_instructor'] == '' or $row['l_is_pic']) { // Solo, no instructor
-		print("<td class=\"logCell\">SELF</td>
-			<td class=\"logCell\">$row[l_day_landing]</td>
-			<td class=\"logCell\">$row[l_night_landing]</td>
-			<td class=\"logCell\">$duration[0]</td>
-			<td class=\"logCell\">$duration[1]</td>
-			<td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td>
-			\n") ;
-		$pic_total_hour += $duration[0] ;
-		$pic_total_minute += $duration[1] ;
-	} else { // Dual command
+		$pic_grand_total_hour += $duration[0] ;
+		$pic_grand_total_minute += $duration[1] ;
+	} else 
 		if ($row['l_pilot'] == $owner) { // Dual command as student
-			print("<td class=\"logCell\">$row[instructor_name]</td>
+			$dual_grand_total_hour += $duration[0] ;
+			$dual_grand_total_minute += $duration[1] ;
+		} else { // Dual command as instructor
+			$fi_grand_total_hour += $duration[0] ;
+			$fi_grand_total_minute += $duration[1] ;
+		}
+	if ($visible) {
+		$line_count ++ ;
+		$duration_total_hour += $duration[0] ;
+		$duration_total_minute += $duration[1] ;
+		$day_landing_total += $row['l_day_landing'] ;
+		$night_landing_total += $row['l_night_landing'] ;
+				// DB contains UTC time
+		$l_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
+		$l_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
+		if ($row['l_instructor'] < 0) $row['instructor_name'] = 'Autre FI' ;
+		print("<tr>
+			<td class=\"logCell\">
+				<a href=\"$_SERVER[PHP_SELF]?action=edit&id=$row[l_id]&owner=$owner\"><img src=\"gtk-edit.png\" border=\"0\" width=\"15\" height=\"15\"></a>
+				<a href=\"$_SERVER[PHP_SELF]?action=delete&id=$row[l_id]&owner=$owner\"><img src=\"gtk-delete.png\" border=\"0\" width=\"15\" height=\"15\"></a>
+			</td>
+			<td class=\"logCell\">$row[date]</td>
+			<td class=\"logCell\">$row[l_from]</td>
+			<td class=\"logCell\">$l_start</td>
+			<td class=\"logCell\">$row[l_to]</td>
+			<td class=\"logCell\">$l_end</td>
+			<td class=\"logCell\">$row[l_model]</td>
+			<td class=\"logCell\">$row[l_plane]</td>
+			<td class=\"logCell\">$duration[0]</td>
+			<td class=\"logCell\">$duration[1]</td>\n") ;
+		if ($row['l_instructor'] == '' or $row['l_is_pic']) { // Solo, no instructor
+			print("<td class=\"logCell\">SELF</td>
 				<td class=\"logCell\">$row[l_day_landing]</td>
 				<td class=\"logCell\">$row[l_night_landing]</td>
-				<td class=\"logCell\"></td><td class=\"logCell\"></td>
 				<td class=\"logCell\">$duration[0]</td>
 				<td class=\"logCell\">$duration[1]</td>
-				<td class=\"logCell\"></td><td class=\"logCell\">\n") ;
-			$dual_total_hour += $duration[0] ;
-			$dual_total_minute += $duration[1] ;
-		} else { // Dual command as instructor
-			print("<td class=\"logCell\">$row[instructor_name]</td>
-				<td class=\"logCell\">$row[l_day_landing]</td>
-				<td class=\"logCell\">$row[l_night_landing]</td>
 				<td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td>
-				<td class=\"logCell\">$duration[0]</td>
-				<td class=\"logCell\">$duration[1]</td>\n") ;
-			$fi_total_hour += $duration[0] ;
-			$fi_total_minute += $duration[1] ;
+				\n") ;
+			$pic_total_hour += $duration[0] ;
+			$pic_total_minute += $duration[1] ;
+		} else { // Dual command
+			if ($row['l_pilot'] == $owner) { // Dual command as student
+				print("<td class=\"logCell\">$row[instructor_name]</td>
+					<td class=\"logCell\">$row[l_day_landing]</td>
+					<td class=\"logCell\">$row[l_night_landing]</td>
+					<td class=\"logCell\"></td><td class=\"logCell\"></td>
+					<td class=\"logCell\">$duration[0]</td>
+					<td class=\"logCell\">$duration[1]</td>
+					<td class=\"logCell\"></td><td class=\"logCell\">\n") ;
+				$dual_total_hour += $duration[0] ;
+				$dual_total_minute += $duration[1] ;
+			} else { // Dual command as instructor
+				print("<td class=\"logCell\">$row[instructor_name]</td>
+					<td class=\"logCell\">$row[l_day_landing]</td>
+					<td class=\"logCell\">$row[l_night_landing]</td>
+					<td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td>
+					<td class=\"logCell\">$duration[0]</td>
+					<td class=\"logCell\">$duration[1]</td>\n") ;
+				$fi_total_hour += $duration[0] ;
+				$fi_total_minute += $duration[1] ;
+			}
 		}
 	}
 	print("</tr>\n") ;
 }
+showEntryRow("new", NULL, -1) ;
+// Beautify the total
 $duration_total_hour += floor($duration_total_minute / 60) ;
 $duration_total_minute = $duration_total_minute % 60 ;
 $pic_total_hour += floor($pic_total_minute / 60) ;
@@ -500,9 +541,17 @@ $dual_total_hour += floor($dual_total_minute / 60) ;
 $dual_total_minute = $dual_total_minute % 60 ;
 $fi_total_hour += floor($fi_total_minute / 60) ;
 $fi_total_minute = $fi_total_minute % 60 ;
-showEntryRow("new", NULL, -1) ;
+// Beautify the grand total
+$duration_grand_total_hour += floor($duration_grand_total_minute / 60) ;
+$duration_grand_total_minute = $duration_grand_total_minute % 60 ;
+$pic_grand_total_hour += floor($pic_grand_total_minute / 60) ;
+$pic_grand_total_minute = $pic_grand_total_minute % 60 ;
+$dual_grand_total_hour += floor($dual_grand_total_minute / 60) ;
+$dual_grand_total_minute = $dual_grand_total_minute % 60 ;
+$fi_grand_total_hour += floor($fi_grand_total_minute / 60) ;
+$fi_grand_total_minute = $fi_grand_total_minute % 60 ;
 ?>
-<tr><td colspan="8" class="logTotal">Total</td>
+<tr><td colspan="8" class="logTotal">Table Total</td>
 <td class="logTotal"><?=$duration_total_hour?></td>
 <td class="logTotal"><?=$duration_total_minute?></td>
 <td class="logTotal"></td>
@@ -515,6 +564,20 @@ showEntryRow("new", NULL, -1) ;
 <td class="logTotal"><?=$fi_total_hour?></td>
 <td class="logTotal"><?=$fi_total_minute?></td>
 </tr>
+<tr><td colspan="8" class="logTotal">Grand Total</td>
+<td class="logTotal"><?=$duration_grand_total_hour?></td>
+<td class="logTotal"><?=$duration_grand_total_minute?></td>
+<td class="logTotal"></td>
+<td class="logTotal"><?=$day_grand_landing_total?></td>
+<td class="logTotal"><?=$night_grand_landing_total?></td>
+<td class="logTotal"><?=$pic_grand_total_hour?></td>
+<td class="logTotal"><?=$pic_grand_total_minute?></td>
+<td class="logTotal"><?=$dual_grand_total_hour?></td>
+<td class="logTotal"><?=$dual_grand_total_minute?></td>
+<td class="logTotal"><?=$fi_grand_total_hour?></td>
+<td class="logTotal"><?=$fi_grand_total_minute?></td>
+</tr>
+
 </tbody>
 </table>
 <br/>
