@@ -21,6 +21,8 @@ $delete = (isset($_REQUEST['delete']) and $_REQUEST['delete'] != '') ? TRUE : FA
 $create = (isset($_REQUEST['create']) and $_REQUEST['create'] != '') ? TRUE : FALSE ;
 $pay_open = (isset($_REQUEST['pay_open']) and $_REQUEST['pay_open'] != '') ? TRUE : FALSE ;
 $pay = (isset($_REQUEST['pay']) and $_REQUEST['pay'] != '') ? TRUE : FALSE ;
+$addPayment = (isset($_REQUEST['addPayment']) and $_REQUEST['addPayment'] == 'Y') ? TRUE : FALSE ;
+$deletePayment = (isset($_REQUEST['deletePayment']) and $_REQUEST['deletePayment'] != '') ? TRUE : FALSE ;
 $assign_pilot = (isset($_REQUEST['assign_pilot']) and $_REQUEST['assign_pilot'] != '') ? TRUE : FALSE ;
 $pilot_open = (isset($_REQUEST['pilot_open']) and $_REQUEST['pilot_open'] != '') ? TRUE : FALSE ;
 $add_pax = (isset($_REQUEST['add_pax']) and $_REQUEST['add_pax'] != '') ? TRUE : FALSE ;
@@ -313,6 +315,30 @@ if ($pay) {
 		WHERE f_id=$flight_id")
 		or journalise($userId, "F", "Impossible de mettre à jour le paiement: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "I", "Flight $flight_id payment information updated") ;
+}
+
+if ($addPayment) {
+	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
+	if ($_REQUEST['paymentDate'] == '')
+		$date = "SYSDATE()";
+	else
+		$date = "'" . mysqli_real_escape_string($mysqli_link, $_REQUEST['paymentDate']) . "'";
+	$reference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['paymentReference'])) . "'";
+	$amount = "'" . mysqli_real_escape_string($mysqli_link, web2db(str_replace(',', '.', $_REQUEST['paymentAmount']))) . "'";
+	mysqli_query($mysqli_link, "INSERT INTO $table_flights_ledger(fl_flight, fl_date, fl_who, fl_amount, fl_reference)
+		VALUES($flight_id, $date, $userId, $amount, $reference)")
+		or journalise($userId, "F", "Impossible d'ajouter un paiement: " . mysqli_error($mysqli_link)) ;
+	journalise($userId, "I", "Flight $flight_id payment information updated $amount") ;
+}
+
+if ($deletePayment) {
+	if ($flight_id <= 0) journalise($userId, "F", "Invalid flight_id ($flight_id)") ;
+	$ledge_id = $_REQUEST['deletePayment'] ;
+	if (!is_numeric($ledge_id)) journalise($userId, "F", "Invalid ledge id ($ledge_id)") ;
+	mysqli_query($mysqli_link, "DELETE FROM $table_flights_ledger
+		WHERE fl_id = $ledge_id AND fl_flight = $flight_id")
+		or journalise($userId, "F", "Impossible d'effacer un paiement: " . mysqli_error($mysqli_link)) ;
+	journalise($userId, "I", "Flight $flight_id payment information deleted $amount") ;
 }
 
 if (isset($flight_id) and $flight_id != 0) {
@@ -653,7 +679,7 @@ if ($row_flight['f_date_paid']) {
 </div><!-- row -->
 
 <div class="row">
-<p style="color: red;">Ce qui ci-dessous est en cours de développement, ne pas utiliser.</p>
+<p style="color: red;">Ce qui est ci-dessous est en cours de développement,à utiliser en parallèle avec la partie ci-dessus.</p>
 <h3>Historique des paiements</h3>
 <table class="table table-striped table-responsive table-hover" id="ledgerTable">
 	<thead>
@@ -666,22 +692,21 @@ $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flights_ledger JOIN $
 		or journalise($userId, "E", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
 $total_paid = 0 ;
 while ($row = mysqli_fetch_array($result)) {
-	// TODO allow for deleting a payment ?
 	print("<tr>
 		<td><button onclick=\"location.href='" . $_SERVER['PHP_SELF'] . "?deletePayment=$row[fl_id]&flight_id=$flight_id&pay_open=Y'\" class=\"btn btn-danger\" title=\"Enlever ce paiement\"><span class=\"glyphicon glyphicon-remove\"></span></button></td>
 		<td>$row[fl_date]</td><td>$row[fl_amount]</td><td>" . db2web($row['fl_reference']) . "</td>
 		<td>" . db2web("$row[first_name] $row[last_name]") . "</td></tr>\n") ;
 	$total_paid += $row['fl_amount'] ;
 }
-// TODO add line to add payment
+// add line to add payment
 print("<form action=\"" . $_SERVER['PHP_SELF'] . "?\">
 	<input type=\"hidden\" name=\"flight_id\" value=\"$flight_id\">
 	<input type=\"hidden\" name=\"pay_open\" value=\"Y\">
 	<tr>
     <td><button type=\"submit\" class=\"btn btn-success\" title=\"Ajouter un paiement\" name=\"addPayment\" value=\"Y\"><span class=\"glyphicon glyphicon-plus\"></span></button></td>
-	<td><input type=\"date\" name=\"date\" value=\"" . date('Y-m-d') . "\"></td>
-	<td><input type=\"text\" name=\"amount\"></td>
-	<td><input type=\"text\" name=\"reference\"></td>
+	<td><input type=\"date\" name=\"paymentDate\" value=\"" . date('Y-m-d') . "\"></td>
+	<td><input type=\"text\" name=\"paymentAmount\"></td>
+	<td><input type=\"text\" name=\"paymentReference\"></td>
 	<td></td>
 	</tr>
 	</form>\n") ;
