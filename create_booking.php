@@ -213,8 +213,8 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 		// If pilot did not book this exact plane, let's try to find whether he/she flew a plane from a 'larger' group...
 		$result = mysqli_query($mysqli_link, "SELECT upper(id) AS id, classe, delai_reservation
 			FROM $table_planes 
-			WHERE id <> '$plane' AND ressource = 0 AND actif > 0
-			ORDER BY id") or journalise($userId, "E", "Cannot get all active planes:".mysqli_error($mysqli_link)) ;
+			WHERE id <> '$plane' AND ressource = 0
+			ORDER BY id") or journalise($userId, "E", "Cannot get all planes:".mysqli_error($mysqli_link)) ;
 		while ($row = mysqli_fetch_array($result) and !$reservation_permise) {
 			if ($row['id'] == $plane_row['id']) continue ;
 			$message .= "V&eacute;rification de $row[id] (type $row[classe]): \n" ;
