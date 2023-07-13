@@ -112,7 +112,7 @@ else {
 }
 $today = date("j-n-Y"); 
 /* Date= tommorow */
-$errormessage=check_data($contactmail,$firstname1,$lastname1,$contactphone,date('j-n-Y',time()+(1 * 24 * 60 * 60)));
+$errormessage=check_data($contactmail,$firstname1,$lastname1,$contactphone,date('j-n-Y',time()+(1 * 24 * 60 * 60)),$typeofgift);
 if(!empty($errormessage) || empty($valeur_versement)) {
 	if(empty($errormessage)) {
 		if($language=="french") {

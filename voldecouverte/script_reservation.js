@@ -15,7 +15,7 @@ function reservation_page_loaded() {
 function submitFunction() {
 	//alert("The form was submitted. Press OK and wait.");
 	//document.write("<!DOCTYPE html><html><body><p>Please wait</p></body></html>");
-	    document.getElementById("id_pleaseWait").innerHTML  = "Please Wait. It can take one minute.";
+	document.getElementById("id_pleaseWait").innerHTML  = "Please Wait. It can take one minute.";
 }
 
 //==============================================
@@ -28,51 +28,38 @@ function compute_hideshow(theTypeOfFlight)
    document.getElementById("id_form_language").style.display="none";
 
    if(theTypeOfFlight=="") {
-
      document.getElementById("id_circuit_row").style.display="none";
-
      document.getElementById("id_voldansles12mois_row").style.display="none";
-
     }
 
    if(theTypeOfFlight=="vol_initiation") {
-
        document.getElementById("id_circuit_row").style.display="none";
-
        document.getElementById("id_voldansles12mois_row").style.display="none";
-
+       document.getElementById("id_date_row").style.display="none";
+       document.getElementById("id_heure_row").style.display="none";
    }
 
    if(theTypeOfFlight=="vol_decouverte") {
-
-        document.getElementById("id_circuit_row").style.display="";
-
+       document.getElementById("id_circuit_row").style.display="";
        document.getElementById("id_voldansles12mois_row").style.display="";
-
+       document.getElementById("id_date_row").style.display="";
+       document.getElementById("id_heure_row").style.display="";
    }
 
    var aNumberOfPassagers=document.getElementById("id_numberofpassagers").value;
 
     if(aNumberOfPassagers == 1) {
-
        document.getElementById("id_passager2_row").style.display="none";
-
        document.getElementById("id_passager3_row").style.display="none";
-
     }
 
     if(aNumberOfPassagers > 1) {
-
        document.getElementById("id_passager2_row").style.display="";
-
-        document.getElementById("id_passager3_row").style.display="none";
-
+       document.getElementById("id_passager3_row").style.display="none";
    }
 
     if(aNumberOfPassagers > 2) {
-
         document.getElementById("id_passager3_row").style.display="";
-
    }
 
 }
@@ -84,7 +71,7 @@ function compute_reservation(val)
 
    var aTypeOfFlightElement=document.getElementById("id_typeofflight");
 
-    var aTypeOfFlight= aTypeOfFlightElement.value;
+   var aTypeOfFlight= aTypeOfFlightElement.value;
 
    var aMembre=document.getElementById("id_voldansles12mois").value;
 

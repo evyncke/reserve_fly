@@ -1372,6 +1372,14 @@ function compute_frais_CP()
 			document.getElementById("id_cdv_frais_numero_vol").style.display="none";
 			document.getElementById("id_cdv_frais_numero_vol").value=default_flight_reference;
 		}
+		if(aCPType==0) {
+			document.getElementById("id_cdv_frais_CP").style.backgroundColor = 'orange';
+			document.getElementById("id_cdv_frais_CP_type").style.backgroundColor = 'orange';
+		}
+		else {
+			document.getElementById("id_cdv_frais_CP").style.backgroundColor = 'white';				
+			document.getElementById("id_cdv_frais_CP_type").style.backgroundColor = 'white';				
+		}
 		// L'input PAX n'est plus utilise. Il est integre dans CP_Type
 		document.getElementById("id_cdv_frais_CP_PAX").style.display="none";
 	}	
