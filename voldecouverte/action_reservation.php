@@ -49,6 +49,15 @@ $circuit=circuit_name($circuitnumber);
 $flightdate=compute_date($_POST["flightdate"]);
 $flightdate2=compute_date($_POST["flightdate2"]);
 
+if($flightdate=="") {
+	// No date for Vol_Initiatiation
+	//$flightdate=date('j-n-Y',time()+(1 * 24 * 60 * 60));
+}
+if($flightdate2=="") {
+	// No date for Vol_Initiatiation
+	//$flightdate2=date('j-n-Y',time()+(1 * 24 * 60 * 60));
+}
+
 $heure=plages_horaire(intval($_POST["heure"]));
 $voldansles12mois=$_POST["voldansles12mois"];
 $remarque=$_POST["remarque"];
@@ -94,7 +103,7 @@ else {
 
 $today = date("j-n-Y"); 
 
-$errormessage=check_data($contactmail,$firstname1,$lastname1,$contactphone,$flightdate);
+$errormessage=check_data($contactmail,$firstname1,$lastname1,$contactphone,$flightdate,$typeofflight);
 if(!empty($errormessage)) {
 	$MessageAnswer=$errormessage;
 }
@@ -124,10 +133,12 @@ else {
 		if ($typeofflight == "vol_decouverte") {
 			$message.="Circuit demand&eacute;: ".htmlentities($circuit) ."<br/>";
 		}
-		$message.="Date souhait&eacute;e: ".$flightdate ." ou ".$flightdate2."<br/>";
-		$message.="Heure souhait&eacute;e: ".$heure."<br/>";
-		$message.="Vous souhaitez devenir membre du RAPCS : ".$rapcsmember;
-		$message.="<br/>";
+		if($typeofflight=="vol_decouverte") {
+			$message.="Date souhait&eacute;e: ".$flightdate ." ou ".$flightdate2."<br/>";
+			$message.="Heure souhait&eacute;e: ".$heure."<br/>";
+			$message.="Vous souhaitez devenir membre du RAPCS : ".$rapcsmember;
+			$message.="<br/>";
+		}
 		if(count($remarques)==0) {
 			$message.="Remarques<br/>";
 		}
