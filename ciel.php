@@ -120,5 +120,32 @@ while ($row = mysqli_fetch_array($result)) {
 </tbody>
 </table>
 </form>
+
+<h2>!!! TEST !!! Générations des factures</h2>
+<p>Cette opération va envoyer par email les factures du mois précédent (sur base du folio, 
+c-à-d sur base des carnets de routes des avions) et va générer un fichier <i>ximport.txt</i> qu'il faudra
+alors importer dans <i>Ciel Premium Account</i>.</p>
+<p class="bg-danger">Ceci est en mode test réservé à Eric Vyncke.</p>
+
+<p>Le numéro du prochain mouvement comptable est disponible dans <i>Ciel Premium Account</i> via le menu
+<i>Dossiers -> Options -> Préférences -> Liaison Comptable -> Générations des écritures / Options "Prochain n° de mouvement généré"</i>.</p>
+
+<div class=""></div>
+<form action="ximport.php">
+
+<div class="mb-3">
+    <label for="nextMove" class="form-label">Prochain mouvement comptable:</label>
+    <input type="text" class="form-control" id="nextMove" name="nextMove">
+</div>
+
+
+<div class="mb-3">
+    <label for="nextInvoice" class="form-label">Prochain numéro de facture:</label>
+    <input type="text" class="form-control" id="nextInvoice" name="nextInvoice">
+</div>
+
+<button type="submit" class="btn btn-primary">Générer les factures</button>
+
+</form>
 </body>
 </html>
