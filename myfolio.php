@@ -59,16 +59,11 @@ $userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
 $codeCiel = $pilot['ciel_code'] ;
 mysqli_free_result($result) ;
 
-$cost_fi_minute = 0.83 ;
-$revenue_fi_minute = 0.75 ;
-$revenue_fi_initiation = 50.0 ; // Initiation flight when shareCode = -3
-$code_initiation = -3 ; // Hard coded :-(
-$tax_per_pax = 10.0 ;
-
 function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
 	if ($n == 0) return '' ;
 	return number_format($n, $decimals, $decimal_separator, $thousand_separator) . '&nbsp;&euro;';
 }
+
 function ShowTableHeader() {
 ?>
 <thead>
