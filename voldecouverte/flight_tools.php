@@ -61,7 +61,7 @@ function plages_horaire($plageshorairenumber)
 	return $name;
 }
 
-function check_data($contactmail,$firstname1,$lastname1,$contactphone,$flightdate)
+function check_data($contactmail,$firstname1,$lastname1,$contactphone,$flightdate,$typeofflight)
 {
 	if(empty($contactmail)) {
 		return "Erreur: Introduisez une adresse email";
@@ -75,13 +75,15 @@ function check_data($contactmail,$firstname1,$lastname1,$contactphone,$flightdat
 	if(empty($firstname1) or empty($lastname1)) {
 		return "Erreur: Vous n'avez pas introduit un nom et un prenom";
 	}
-	if(empty($flightdate)) {
-		return "Erreur: Introduisez une date souhait&eacute;e pour votre vol";
-	}
-	$date = strtotime($flightdate)+(1 * 24 * 60 * 60)-1;
-	//echo ("Date=".date('d/M/Y H:i:s', $date)."<br/>");
-	if($date<time()) {
-		return "Erreur: Introduisez une date dans le futur";
+	if($typeofflight=="vol_decouverte") {
+		if(empty($flightdate)) {
+			return "Erreur: Introduisez une date souhait&eacute;e pour votre vol";
+		}
+		$date = strtotime($flightdate)+(1 * 24 * 60 * 60)-1;
+		//echo ("Date=".date('d/M/Y H:i:s', $date)."<br/>");
+		if($date<time()) {
+			return "Erreur: Introduisez une date dans le futur";
+		}
 	}
 	return "";
 }

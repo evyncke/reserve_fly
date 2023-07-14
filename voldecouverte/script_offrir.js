@@ -174,8 +174,16 @@ function compute_tarifs(val)
 
       if(aCircuit!="") {
 
-           var aMinute=my_offrir_circuits[aCircuit].tarif;
-
+          //var aMinute=my_offrir_circuits[aCircuit].tarif;
+          var aMinute=0;
+		  var aCurrentID=Number(aCircuit)+1;
+		   for (var i = 0; i < my_offrir_circuits.length; i++) {
+			   var aID=Number(my_offrir_circuits[i].id);
+			   if(aID==aCurrentID) {
+			   		aMinute=my_offrir_circuits[i].tarif;
+					break;
+			   }
+		   }
             //aTarif=aMinute*2.5;
 
             if(aMembre=="non") {
