@@ -627,59 +627,7 @@ for ($i = $known_pax_count+1; $i <= $row_flight['f_pax_cnt']; $i++) {
 
 <div id="menuPayment" class="tab-pane fade <?=$payment_active?>">
 
-<div class="row text-info">
-<br/>
-<?php
-if ($row_flight['f_date_paid']) {
-	print("<p>Ce vol a déjà été payé en date du " . substr($row_flight['f_date_paid'], 0, 10) . " (" . db2web($row_flight['f_reference_payment']) . ").</p>") ; // It is only a date field...
-	$paid = ' checked' ;
-} else {
-	print("<p>Ce vol doit encore être payé.</p>") ;
-	$paid = '' ;
-}
-?>
-</div><!-- row -->
-
-
-<form action="<?=$_SERVER['PHP_SELF']?>" method="GET" class="form-horizontal" >
-<input type="hidden" name="flight_id" value="<?=$flight_id?>">
-<input type="hidden" name="pay_open" value="true">
 <div class="row">
-	<div class="form-group col-xs-6 col-md-2">
-		<div class="checkbox">
-			<label><input type="checkbox" name="paid"<?=$paid?>>paiement effectué</label>
-		</div><!-- checkbox-->
-	</div> <!- form-group-->
-	<div class="form-group col-xs-6 col-md-2">
-		<label class="control-label" for="paymentDate">Date paiement:</label>
-		<div>
-			<input type="date" name="paymentDate" value="<?=$row_flight['f_date_paid']?>">
-		</div>
-	</div> <!- form-group-->
-	<div class="form-group col-xs-6 col-md-4">
-		<label class="control-label" for="paymentAmount">Montant du paiement:</label>
-		<div>
-			<input type="text" size=10 name="paymentAmount" value="<?=$row_flight['f_amount_payment']?>">
-		</div>
-	</div> <!- form-group-->	<div class="form-group col-xs-12 col-md-4">
-		<label class="control-label" for="paymentReference">Référence paiement:</label>
-		<div>
-			<input type="text" size=32 name="paymentReference" value="<?=db2web($row_flight['f_reference_payment'])?>">
-		</div>
-	</div> <!- form-group-->
-</div><!-- row -->
-
-<div class="row">
-	<div class="form-group">
-		<div class="col-xs-3 col-md-2">
-			<input type="submit" class="btn btn-primary" name="pay" value="Enregistrer"/>
-   		</div><!-- col -->
-	</div> <!- form-group-->
-</form>
-</div><!-- row -->
-
-<div class="row">
-<p style="color: red;">Ce qui est ci-dessous est en cours de développement,à utiliser en parallèle avec la partie ci-dessus.</p>
 <h3>Historique des paiements</h3>
 <table class="table table-striped table-responsive table-hover" id="ledgerTable">
 	<thead>
