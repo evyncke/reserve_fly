@@ -779,7 +779,6 @@ function show_reservation($date, $header) {
 <?php if (! isset($row_flight['first_name']) or $row_flight['first_name'] == '') $row_flight['first_name'] = 'client via la page web' ; ?>
 Ce vol a été créé le <?=$row_flight['f_date_created']?> par  par <?= id2name($row_flight['f_who_assigned'])?>.<br/>
 <?php
-if ($row_flight['f_date_paid']) print("Paiement (" . db2web($row_flight['f_reference_payment']) . ") effectué le $row_flight[f_date_paid] par " . id2name($row_flight['f_who_paid']) . ".<br/>") ;
 if ($row_flight['f_date_cancelled']) print("Puis a été annulé le $row_flight[f_date_cancelled] par " . id2name($row_flight['f_who_cancelled']) . ".<br/>") ;
 if ($row_flight['f_date_assigned']) print("Le pilote a été sélectionné le $row_flight[f_date_assigned] par " . id2name($row_flight['f_who_assigned']) . ".<br/>") ;
 if ($row_flight['f_date_linked']) print("Une réservation a été liée à ce vol le $row_flight[f_date_linked] par " . id2name($row_flight['f_who_linked']) . ".<br/>") ;
@@ -787,6 +786,18 @@ if ($row_flight['f_date_flown']) print("Le vol a eu lieu le $row_flight[f_date_f
 ?>
 </div>
 
+<h3>Historique des paiements</h3>
+<div class="row">
+	<?php
+$result = mysqli_query($mysqli_link, "SELECT * FROM $table_flights_ledger JOIN $table_person ON fl_who=jom_id
+	WHERE fl_flight = $flight_id ORDER BY fl_date ASC")
+	or journalise($userId, "E", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
+if (mysqli_num_rows($result) == 0)
+	print("<p class=\"bg-danger\">Aucun paiement effectué.</p>") ;	
+while ($row = mysqli_fetch_array($result))
+	print("Paiement de $row[fl_amount] &euro; (" . db2web($row['fl_reference']) . ") effectué le $row[fl_date] par " . id2name($row['fl_who']) . ".<br/>") 
+	?>
+</div>
 </div><!-- menuAudit -->
 
 </div> <!-- tab-content-->
