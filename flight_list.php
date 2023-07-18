@@ -108,8 +108,6 @@ while ($row = mysqli_fetch_array($result)) {
 	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\" target=\"_blank\"><span class=\"glyphicon glyphicon-print\" title=\"Imprimer sous format PDF\"></span></a> " ;
 	$pay =  ($row['payment'] > 0) ? "<span class=\"glyphicon glyphicon-euro\" style=\"color: green;\" title=\"Vol déjà payé\"></span>" :
 		" <a href=\"flight_create.php?flight_id=$row[f_id]&pay_open=true\"><span class=\"glyphicon glyphicon-euro\" style=\"color: red;\" title=\"Indiquer le paiement\"></span></a> " ;
-	$payOld =  ($row['f_date_paid']) ? "<span class=\"glyphicon glyphicon-euro\" style=\"color: green;\" title=\"Vol déjà payé\"></span>" :
-		" <a href=\"flight_create.php?flight_id=$row[f_id]&pay_open=true\"><span class=\"glyphicon glyphicon-euro\" style=\"color: red;\" title=\"Vieux\"></span></a> " ;
 	$is_gift = ($row['f_gift'] != 0) ? '&nbsp;<span class="glyphicon glyphicon-gift" style="color: red;" title="Bon cadeau"></span>' : '' ;
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 	$description = nl2br(db2web($row['f_description'])) ;
@@ -134,7 +132,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$date_vol = "ETD $row[r_start] ($row[r_plane])"  ;
 	else
 		$date_vol = "à déterminer" ;
-	print("<tr$row_style><td>$reference</td><td>$edit$print$pay$payOld</td><td>$row[f_date_created]</td><td>$status</td><td>$date_vol</td>
+	print("<tr$row_style><td>$reference</td><td>$edit$print$pay</td><td>$row[f_date_created]</td><td>$status</td><td>$date_vol</td>
 		<td>" . db2web($row['first_name']) . " <b>" . db2web($row['last_name']) . "</b></td>
 		<td>$type$is_gift</td>
 		<td>" . db2web($row['p_fname']) . " <b>" . db2web($row['p_lname']) . "$email$telephone</b></td>
