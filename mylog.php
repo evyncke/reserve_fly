@@ -390,6 +390,11 @@ print("P&eacute;riode: <select id=\"periodSelect\" onchange=\"selectChanged();\"
 </select> lignes/page-->.
 <br/>") ;
 
+$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $owner")
+	or journalise($userId, "F", "Cannot read user data:" . mysqli_error($mysqli_link)) ;
+$row_owner = mysqli_fetch_array($result) or journalise($userId, "F", "User $owner not found");
+mysqli_free_result($result) ;
+
 $sql = "select l_id, date_format(l_start, '%d/%m/%y') as date, date_format(l_start, '%Y-%m-%d') as date_sql,
 	l_model, l_plane, l_pilot, l_is_pic, l_instructor, p.last_name as instructor_name,
 	upper(l_from) as l_from, upper(l_to) as l_to, 
@@ -400,15 +405,12 @@ $sql = "select l_id, date_format(l_start, '%d/%m/%y') as date, date_format(l_sta
 	left join $table_person p on p.jom_id = l_instructor
 	where (l_pilot = $owner or l_instructor = $owner)
 	order by l.l_start asc" ;
-// TODO get a more efficient way to count the rows...
 $result = mysqli_query($mysqli_link, $sql) or journalise($userId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
 $rows_count = mysqli_num_rows($result) ;
 if ($rows_count === FALSE) die("Cannot count rows (owner = $owner, $sql): " . mysqli_error($mysqli_link));
 $page_count = ceil($rows_count / $items) ;
 if ($page > $page_count -1) $page = $page_count -1 ;
 if ($page < 0) $page = 0 ;
-// We need to parse all lines...
-// mysqli_data_seek($result, $page * $items) ; //or die("Cannot data_seek(page=$page, items=$items): " . mysql_error());
 
 if ($userIsInstructor or $userIsAdmin) {
 	print("En tant qu'instructeur/administrateur, vous pouvez consulter les carnets de vol des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
@@ -437,17 +439,16 @@ $fi_total_hour = 0 ;
 $fi_total_minute =  0;
 $line_count = 0 ;
 $duration_grand_total_hour = 0 ;
-$duration_grand_total_minute = 0 ;
-$day_landing_grand_total = 0 ;
-$night_landing_grand_total = 0 ;
+$duration_grand_total_minute = $row_owner['pic_minutes'] + $row_owner['dc_minutes'] + $row_owner['fi_minutes'];
+$day_grand_landing_total = $row_owner['day_landings'] ;
+$night_grand_landing_total = $row_owner['night_landings'] ;
 $pic_grand_total_hour = 0 ;
-$pic_grand_total_minute =  0;
+$pic_grand_total_minute =  $row_owner['pic_minutes'];
 $dual_grand_total_hour = 0 ;
-$dual_grand_total_minute =  0;
+$dual_grand_total_minute =  $row_owner['dc_minutes'];
 $fi_grand_total_hour = 0 ;
-$fi_grand_total_minute =  0;
-while 
-($row = mysqli_fetch_array($result)) {
+$fi_grand_total_minute =  $row_owner['fi_minutes'];
+while ($row = mysqli_fetch_array($result)) {
 	if (substr($row['duration'], 0, 1) == '-')
 		$duration = explode(':', $row['duration_rollover']) ; // Looking like 01:33:00 (in case of over rolling the 24:00:00 mark)
 	else
@@ -478,7 +479,7 @@ while
 		$duration_total_minute += $duration[1] ;
 		$day_landing_total += $row['l_day_landing'] ;
 		$night_landing_total += $row['l_night_landing'] ;
-				// DB contains UTC time
+		// DB contains UTC time
 		$l_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
 		$l_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
 		if ($row['l_instructor'] < 0) $row['instructor_name'] = 'Autre FI' ;

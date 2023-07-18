@@ -103,6 +103,29 @@ if (isset($_POST['action']) and $_POST['action'] == 'photo' and !$read_only) {
 		journalise($userId, 'I', "Changement de photo($me[username]/$displayed_id)") ;
 }
 
+// Apply any change on the log book tab before fetching all displayed_id information
+if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'log' and !$read_only) {
+	$pic_minutes = trim($_REQUEST['pic_minutes']) ;
+	if (!is_numeric($pic_minutes)) journalise($userId, "F", "Invalid value for pic_minutes $pic_minutes") ;
+	$dc_minutes = trim($_REQUEST['dc_minutes']) ;
+	if (!is_numeric($dc_minutes)) journalise($userId, "F", "Invalid value for dc_minutes $dc_minutes") ;
+	$fi_minutes = trim($_REQUEST['fi_minutes']) ;
+	if (!is_numeric($fi_minutes)) journalise($userId, "F", "Invalid value for fi_minutes $fi_minutes") ;
+	$day_landings = trim($_REQUEST['day_landings']) ;
+	if (!is_numeric($day_landings)) journalise($userId, "F", "Invalid value for day_landings $day_landings") ;
+	$night_landings = trim($_REQUEST['night_landings']) ;
+	if (!is_numeric($night_landings)) journalise($userId, "F", "Invalid value for night_landings $night_landings") ;
+
+	mysqli_query($mysqli_link, "UPDATE $table_person SET pic_minutes=$pic_minutes, dc_minutes=$dc_minutes, fi_minutes=$fi_minutes,
+		day_landings=$day_landings, night_landings=$night_landings
+		WHERE jom_id = $displayed_id")
+		or die("Erreur systeme lors de la mise a jour de $table_person: " . mysqli_error($mysqli_link)) ;
+	$affected_rows += mysqli_affected_rows($mysqli_link) ;
+	$change_profile_message .= ($affected_rows > 0) ? "Changement(s) effectu&eacute;(s).<br/>" : "Aucun changement effectu&eacute;.<br/>" ;
+	if ($affected_rows > 0) 
+		journalise($userId, 'I', "Changement de profil($me[username]/$displayed_id): carnet de vols") ;
+}
+
 // Apply any change on the social tab before fetching all displayed_id information
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'social' and !$read_only) {
 	$facebook = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['facebook'])) ;
@@ -171,8 +194,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 	$work_phone = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['work_phone'])) ;
 	$email = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['email'])) ;
 	if ((strlen($email) == 0) or ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-		journalise($userId, 'E', "Adresse email invalide pour $me[username]/$displayed_id: $email") ;
-		die("L'adresse email modifi&eacute;e ($email) est invalide. Changements refus&eacute;s.") ;
+		journalise($userId, 'F', "Adresse email invalide pour $me[username]/$displayed_id: $email") ;
 	}
 	$city = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['city']))) ;
 	$country = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['country'])) ;
@@ -187,20 +209,19 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 //		journalise($userId, 'E', "Nom ou pr&eacute;nom invalides pour $me[username]/$displayed_id: prenom=" . db2web($first_name) . ", nom: " . db2web($last_name)) ;
 //		die("Le nom et/ou le pr&eacute;nom sont invalides. Changements refus&eacute;s.") ;
 //	}
-//	$total_flight_time = mysqli_real_escape_string(trim($_REQUEST['total_flight_time'])) ;
 	mysqli_query($mysqli_link, "update $table_person set home_phone='$home_phone', work_phone='$work_phone', cell_phone='$cell_phone',
 		city='$city', country='$country', birthdate='$birthdate', sex=$sex, email='$email',
 		first_name='$first_name', last_name='$last_name', hide_flight_time=$hide_flight where jom_id = $displayed_id")
-		or die("Erreur systeme lors de la mise a jour de $table_person: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_person: " . mysqli_error($mysqli_link)) ;
 	$affected_rows = mysqli_affected_rows($mysqli_link) ;
 	if ($first_name != '' and $last_name != '') {
 		mysqli_query($mysqli_link, "update $table_users set name='$first_name $last_name' where id = $displayed_id")
-			or die("Erreur systeme lors de la mise a jour de $table_users: " . mysqli_error($mysqli_link)) ;
+			or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_users: " . mysqli_error($mysqli_link)) ;
 		$affected_rows += mysqli_affected_rows($mysqli_link) ;
 	}
 	if ($email != '') {
 		mysqli_query($mysqli_link, "update $table_users set email='$email' where id = $displayed_id")
-			or die("Erreur systeme lors de la mise a jour de $table_users/email: " . mysqli_error($mysqli_link)) ;
+			or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_users/email: " . mysqli_error($mysqli_link)) ;
 		$affected_rows += mysqli_affected_rows($mysqli_link) ;
 	}
 	$change_profile_message = ($affected_rows > 0) ? "Changement(s) effectu&eacute;(s).<br/>" : "Aucun changement effectu&eacute;.<br/>" ;
@@ -212,7 +233,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 // Fetch AGAIN all information about the user since they may have been modified by the above...
 $result = mysqli_query($mysqli_link, "select *,u.username as username,u.email as email, date(p.birthdate) as birthdate
 	from $table_person p join $table_users u on p.jom_id = u.id left join jom_kunena_users k on k.userid=u.id
-	where u.id = $displayed_id") or die("Erreur interne: " . mysqli_error($mysqli_link)) ;
+	where u.id = $displayed_id") or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) or die("Utilisateur inconnu") ;
 $me['name'] = db2web($me['name']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
@@ -314,7 +335,8 @@ $read_only_attribute = ($read_only) ? 'readonly' : '' ;
 <ul class="nav nav-tabs nav-justified">
         <li class="active"><a data-toggle="tab" href="#main">Contact</a></li>
         <li><a data-toggle="tab" href="#validity">Validit&eacute;s / annotations club</a></li>
-        <li><a data-toggle="tab" href="#photo">Photo</a></li>
+        <li><a data-toggle="tab" href="#log">Carnet de vols</a></li>
+		<li><a data-toggle="tab" href="#photo">Photo</a></li>
         <li><a data-toggle="tab" href="#social_network">R&eacute;seaux sociaux</a></li>
         <li><a data-toggle="tab" href="#groups">Groupes</a></li>
 </ul>
@@ -442,6 +464,52 @@ if (! $read_only) {
 </form>
 </div> <!-- id=main -->
 
+<div id="log" class="tab-pane fade">
+<div class="row">
+	Configuration initiale de votre carnet de vols. Vous pouvez aussi <a href="mylog.php">visualiser votre carnet de vols</a> sur base des entrées
+	dans les carnets de routes des avions RAPCS et autres.
+</div> <!-- row -->
+<form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
+<input type="hidden" name="action" value="log">
+<input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
+<div class="form-group">
+	<label class="control-label col-sm-4 col-md-2">Minutes de vol en tant que PIC:</label>
+	<div class="col-sm-4">
+		<input type="text" class="form-control" name="pic_minutes" value="<?=$me['pic_minutes']?>">
+	</div> <!-- col -->
+</div> <!-- form-group -->
+<div class="form-group">
+	<label class="control-label col-sm-4 col-md-2">Minutes de vol en dual command:</label>
+	<div class="col-sm-4">
+		<input type="text" class="form-control" name="dc_minutes" value="<?=$me['dc_minutes']?>">
+	</div> <!-- col -->
+</div> <!-- form-group -->
+<div class="form-group">
+	<label class="control-label col-sm-4 col-md-2">Minutes de vol en tant qu'instructeur:</label>
+	<div class="col-sm-4">
+		<input type="text" class="form-control" name="fi_minutes" value="<?=$me['fi_minutes']?>">
+	</div> <!-- col -->
+</div> <!-- form-group -->
+<div class="form-group">
+	<label class="control-label col-sm-4 col-md-2">Atterrissage de jour:</label>
+	<div class="col-sm-4">
+		<input type="text" class="form-control" name="day_landings" value="<?=$me['day_landings']?>">
+	</div> <!-- col -->
+</div> <!-- form-group -->
+<div class="form-group">
+	<label class="control-label col-sm-4 col-md-2">Atterrissage de nuit:</label>
+	<div class="col-sm-4">
+		<input type="text" class="form-control" name="night_landings" value="<?=$me['night_landings']?>">
+	</div> <!-- col -->
+</div> <!-- form-group -->
+<?php
+if (! $read_only) {
+	print('<div class="form-group"><button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Enregistrer les changements</button></div>') ;
+}
+?>
+</form>
+</div> <!-- tab id = log -->
+
 <div id="photo" class="tab-pane fade">
 <?php
 print("<div class=\"row\">") ;
@@ -530,7 +598,7 @@ else
 	print("Ce membre fait partie des groupes: ") ;
 $joomla_groups = array() ;
 $result = mysqli_query($mysqli_link, "select group_id from $table_user_usergroup_map where user_id = $displayed_id")
-	or die("Cannot access groups: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "F", "Cannot access groups: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) 
 	$joomla_groups[$row['group_id']] = true ;
 $groupes = array() ;
@@ -575,7 +643,7 @@ if (! $read_only) {
 <?php
 $result = mysqli_query($mysqli_link, "select *
 	from $table_validity_type t left join $table_validity v on validity_type_id = t.id and jom_id = $displayed_id
-	order by t.name") or die("Erreur systeme a propos de l'access a validity: " . mysqli_error($mysqli_link)) ;
+	order by t.name") or journalise($userId, "F", "Erreur systeme a propos de l'access a validity: " . mysqli_error($mysqli_link)) ;
 $options = '<option value="-1" disabled selected> -- validité/annotation à ajouter et remplir les cases sur cette ligne--</option>' ;
 while ($row = mysqli_fetch_array($result)) {
 	if ($row['grant_date']) {
@@ -645,7 +713,7 @@ $version_css = date ("Y-m-d H:i:s.", filemtime('profile.css')) ;
 ?>
 <div class="row hidden-xs">
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, d&eacute;cembre 2014 - mars 2017, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, d&eacute;cembre 2014 - juillet 2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?></div>
 </div> <!-- row-->
 </div> <!-- container -->
