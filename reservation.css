@@ -1,5 +1,5 @@
 /*
-   Copyright 2014-2022 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ td.booked2_dc { background-color: salmon; width: 15px; height: 40px; border-left
 td.nolog { background-color: grey; color: white; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap;}
 td.nolog2 { background-color: grey; color: white; width: 15px; height: 40px; border-left-width: 0px; border-right-width: 0px; padding-right: 0px; padding-left: 0px;}
 td.maintenance { background-color: red; width: 15px; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap ;} 
+td.blocked { background-color: black; color: white; width: 15px; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap ;} 
 td.customer { background-color: white; width: 15px; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap ;} 
 td.onhold { background-color: tan; width: 15px; height: 40px; overflow-x: visible ; max-width: 15px ; padding-right: 0px; border-right-width: 0px; white-space: nowrap ;} 
 td.night { background-color: blue ; width: 15px; height: 40px; }
