@@ -116,7 +116,7 @@ print("var default_pilot=$userId;\n");
 <!-- End Matomo Code -->
 </head>
 <body>
-<h1 style="text-align: center;">Introduction vol</h1>
+  <h1 style="text-align: center;">Introduction vol</h1>
 
 <?php
 
@@ -447,7 +447,16 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 				$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute, $flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
 				'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
 				'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
-			or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
+//			or die("(1)Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link). " Vol déjà introduit") ;
+			or die("<p style=\"color: red;\"><b>Impossible d'ajouter le segment dans le logbook:Vol déjà introduit.</br>Erreur SQL=" . mysqli_error($mysqli_link)."</br>9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.</br>Faite un Back avec votre Browser et corrigé l'heure de départ.</b></p>") ;		
+
+/*			
+			
+			{
+				print("<script>alert(\"Impossible d'introduire ce vol dans le logbook.\\n9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.\\nFaite un Back avec votre Browser et corrigé l'heure de départ.\");</script>");
+				die("<p style=\"color: red;\"><b>Impossible d'ajouter le segment dans le logbook:Vol déjà introduit.</br>Erreur SQL=" . mysqli_error($mysqli_link)."</br>9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.</br>Faite un Back avec votre Browser et corrigé l'heure de départ.</b></p>") ;		
+			}
+	*/		
 		$l_id = mysqli_insert_id($mysqli_link) ; 
 	
 	    journalise($userId, "I", "New Logbook entry added for $planeId, engine from $engineStartHour: $engineStartMinute to $engineEndHour:$engineEndMinute flight $startDayTime@$fromAirport to $endDayTime@$toAirport");
@@ -468,8 +477,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 				values ('$cdv_logbookid', '$planeId', '$planeModel', $bookingidPage, '$fromAirport', '$toAirport',
 				$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute, $flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
 				'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
-				'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
-			or die("Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;
+			'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
+			or 
+				die("(2)Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;		
 		$l_id = mysqli_insert_id($mysqli_link) ; 
 
 	    journalise($userId, "I", "Logbook entry replaced for $planeId, engine from $engineStartHour: $engineStartMinute to $engineEndHour:$engineEndMinute flight $startDayTime@$fromAirport to $endDayTime@$toAirport");	
@@ -549,6 +559,7 @@ if($bookingid) {
 			// As the OVH MySQL server does not have the timezone support, needs to be done in PHP
 			$start_UTC = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
 			$end_UTC = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
+			$end_Time=$row['l_end'];
 			//$MOStart=$row['l_start_hour'].'.'.$row['l_start_minute'];
 			//$MOEnd=$row['l_end_hour'].'.'.$row['l_end_minute'];
 			$MO=$row['l_start_hour'].'.'.$row['l_start_minute'];
@@ -581,6 +592,7 @@ if($bookingid) {
 
 			$remark="";
 			$remark=GetFullRemarks($row['l_share_type'],$row['l_share_member'], $row['l_remark'], $instructorPaid );
+			$toAirport=$row['l_to'];
 			
 			print("<tr style='text-align: center;'>
 				<td>$aSegment ($logid)</td>
@@ -663,7 +675,7 @@ if (isset($_REQUEST['edit']) and $_REQUEST['edit'] != '') {
 			print("var default_plane=\"$row[l_plane]\";\n");
 			print("var default_pilot=$row[l_pilot];\n");
 			$anInstructor=0;
-			if($row['l_instructor']!=NULL){
+			if($row['l_instructor']!= NULL){
 				$anInstructor=$row['l_instructor'];
 			}
 			print("var default_instructor=$anInstructor;\n");
@@ -737,7 +749,7 @@ else {
 		$result=mysqli_query($mysqli_link,"SELECT r_id, r_plane, r_start, r_stop, r_pilot, r_instructor FROM $table_bookings WHERE r_id = $bookingid") or die("Impossible de retrouver le bookingid dans booking: " . mysqli_error($mysqli_link)) ;
 		$row=mysqli_fetch_array($result);
 		
-		// Retrieve the flight reference
+		// Retrieve the flight reference for IF and INIT flight
 		//print("</br>SELECT f_id, f_reference FROM $table_flight WHERE f_booking = $bookingid</br>");
 		$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference, f_type, f_date_flown FROM $table_flight WHERE f_booking = $bookingid") or die("Impossible de retrouver le f_reference dans table_flight: " . mysqli_error($mysqli_link)) ;
 		$flightRow=mysqli_fetch_array($flightResult);
@@ -754,6 +766,9 @@ else {
 		print("var default_instructor=$rinstructor;\n");
 		$start_UTC = gmdate('Y-m-d H:i', strtotime("$row[r_start] $default_timezone")) ;
 		print("var default_date_heure_depart=\"$start_UTC\";\n");
+		if($end_Time != 'NULL') {
+			print("var default_date_heure_depart=\"$end_Time\";\n");
+		}		
 		print("var default_flight_reference=\"$flightRow[f_reference]\"\n");
 		print("var default_flight_type=\"$flightRow[f_type]\"\n");
 		if($flightRow['f_reference']!='') {
@@ -769,9 +784,12 @@ else {
 		else {
 			print("var default_flight_id=0\n");
 		}
+		if($toAirport!="") {
+			print("var default_from=\"$toAirport\";\n");	
+		}
+		print("var default_from=\"$toAirport\";\n");	
 		//printf("r_plane=$row[r_plane]</br>");
 		//printf("r_start=$row[r_start]</br>");
-
 	}
 	else {
 		print("</br>1111 SELECT f_id, f_reference FROM $table_flight WHERE f_id = $bookingid</br>");
@@ -956,8 +974,8 @@ else {
 <td class="segmentLabel"style="vertical-align: top;">Partage des frais</td>
 <td class="segmentInput"><select id="id_cdv_frais_CP" name="cdv_frais_CP">
 <option selected="selected" value="NoCP">Pas de partage</option>
-<option value="CP1">CP1</option>
-<option value="CP2">CP2</option>
+<option value="CP1">CP1(100% payé par)</option>
+<option value="CP2">CP2(50% payé par)</option>
 </select><select id="id_cdv_frais_CP_type" name="cdv_frais_CP_type">
 <option selected="selected" value="0"></option>
 </select>
@@ -1041,7 +1059,7 @@ print("<button type=\"button\" value=\"Fill\" onclick=\"window.location.href='$_
 <script src="https://www.spa-aviation.be/resa/pilots.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/CP_frais_type.js"\></script>-->
 <script src="https://www.spa-aviation.be/resa/prix.js"></script>
-<!--<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
+<!---<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
 <script src="https://www.spa-aviation.be/resa/script_carnetdevol.js"></script>
 </body>
 </html>
