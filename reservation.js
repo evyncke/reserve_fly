@@ -13,10 +13,8 @@
 //   limitations under the License.
 
 // TODO:
-// - copyright & disclaimer
 // - AJAX pour aéroport départ/destination
-//
-// l1610 allow logbook as soon as booking has started ?
+// - Should display a "Pas de connexion" message
 
 var
 	planePlanningTable, instructorPlanningTable, planningDate, columnCount, allBookings, allFIAgendas, ephemerides = new Array(), nightColumn,
@@ -1611,6 +1609,11 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 							thisCell.className = (booking.user == userId || booking.instructorId == userId) ? 'booked_by_me' :
 								(booking.instructorId > 0) ? 'booked_dc' :'booked' ;
 				}
+			}
+			if (typeof booking.blocked_date !== 'undefined') { // TODO only for future bookings ?
+				thisCell.className = 'blocked' ;
+				console.log('This booking is blocked') ;
+				console.log(booking) ;
 			}
 			thisCell.onmouseenter = function () { displayBookingDetails(booking.id + '-' + booking.log_id) ; } ;
 			thisCell.onmouseleave = function () { clearBookingDetails() ; } ;

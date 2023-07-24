@@ -44,9 +44,11 @@ if ($error_message != '') {
 		p.username as username, p.name as name, w.username AS username2, w.name AS name2,
 		p.email as email, home_phone, work_phone, cell_phone, avatar, ressource, r.id AS plane_id,
 		CONVERT_TZ(l_start, 'UTC', 'Europe/Brussels') as log_start, CONVERT_TZ(l_end, 'UTC', 'Europe/Brussels') as log_end, 
-		l_from as log_from, l_to as log_to, l_id as log_id, l.l_pilot as log_pilot, l.l_plane as log_plane
+		l_from as log_from, l_to as log_to, l_id as log_id, l.l_pilot as log_pilot, l.l_plane as log_plane,
+		b_reason AS blocked_reason, b_when AS blocked_date
 		FROM $table_bookings JOIN $table_planes AS r ON r_plane = r.id JOIN $table_users AS p ON r_pilot = p.id JOIN jom_kunena_users k ON k.userid = r_pilot
-		LEFT JOIN $table_logbook AS l ON l.l_booking = r_id,
+		LEFT JOIN $table_logbook AS l ON l.l_booking = r_id
+		LEFT JOIN $table_blocked ON b_jom_id = p.id,
 		$table_users AS w, $table_person
 		WHERE r_plane = '$plane' AND DATE(r_start) <= '$date' AND '$date' <= DATE(r_stop) AND
 		r_who = w.id AND jom_id = p.id AND r_cancel_date IS NULL
@@ -70,6 +72,10 @@ if ($error_message != '') {
 			$booking['comment'] = db2web($booking['comment']) ;
 			$booking['crew_wanted'] = $row['r_crew_wanted'] ;
 			$booking['pax_wanted'] = $row['r_pax_wanted'] ;
+			if (($userIsBoardMember or $userIsIntructor) and $row['blocked_reason'] != '') {
+				$booking['blocked_reason'] = db2web($row['blocked_reason']) ;
+				$booking['blocked_date'] = $row['blocked_date'] ;
+			}
 			$booking['type'] = $row['r_type'] ;
 			if ($row['r_type'] == BOOKING_CUSTOMER) { // Should not be too frequent, so, let's use another request...
 				$customer_result = mysqli_query($mysqli_link, "SELECT * 
