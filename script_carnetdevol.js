@@ -106,14 +106,18 @@ function carnetdevol_page_loaded() {
   };
  
   document.getElementById("id_cdv_heure_depart").onchange = function() {
-	  check_heure("id_cdv_heure_depart");
-	  check_coherence_heure();
+	if(check_heure("id_cdv_heure_depart")) {
+	  	check_coherence_heure();
+  	}
+	compute_prix();
   };
   document.getElementById("id_cdv_heure_depart").inputMode="decimal";
  
   document.getElementById("id_cdv_heure_arrivee").onchange = function() {
-	  check_heure("id_cdv_heure_arrivee");
-	  check_coherence_heure();
+	if(check_heure("id_cdv_heure_arrivee")) {
+	  	check_coherence_heure();
+  	}
+	compute_prix()
   };
   var anInput=document.getElementById("id_cdv_heure_arrivee");
   document.getElementById("id_cdv_heure_arrivee").inputMode="decimal";
@@ -127,16 +131,18 @@ function carnetdevol_page_loaded() {
   document.getElementById("id_cdv_duree").style.backgroundColor = ReadOnlyColor;
   
   document.getElementById("id_cdv_compteur_vol_depart").onchange = function() {
-	  check_compteur("id_cdv_compteur_vol_depart");
-	  check_coherence_compteur_vol();
-	  compute_prix();
+	if(check_compteur("id_cdv_compteur_vol_depart")) {
+	  	check_coherence_compteur_vol();
+	  	compute_prix();
+  	}
   };
   document.getElementById("id_cdv_compteur_vol_depart").inputMode="decimal";
 
   document.getElementById("id_cdv_compteur_vol_arrivee").onchange = function() {
-	  check_compteur("id_cdv_compteur_vol_arrivee");
-	  check_coherence_compteur_vol();
-	  compute_prix();
+	if(check_compteur("id_cdv_compteur_vol_arrivee")) {
+	  	check_coherence_compteur_vol();
+	  	compute_prix();
+  	}
   };
   document.getElementById("id_cdv_compteur_vol_arrivee").inputMode="decimal";
 
@@ -150,16 +156,18 @@ function carnetdevol_page_loaded() {
   document.getElementById("id_cdv_compteur_vol_duree").style.backgroundColor = ReadOnlyColor;
 
   document.getElementById("id_cdv_compteur_depart").onchange = function() {
-	  check_compteur("id_cdv_compteur_depart");
-	  check_coherence_compteur();
-	  compute_prix();
+	if(check_compteur("id_cdv_compteur_depart")) {
+	  	check_coherence_compteur();
+	}
+	compute_prix();
   };
   document.getElementById("id_cdv_compteur_depart").inputMode="decimal";
   
   document.getElementById("id_cdv_compteur_arrivee").onchange = function() {
-	  check_compteur("id_cdv_compteur_arrivee");
-	  check_coherence_compteur();
-	  compute_prix();
+	if(check_compteur("id_cdv_compteur_arrivee")) {
+	  	check_coherence_compteur();
+	}
+	compute_prix();
   };
   document.getElementById("id_cdv_compteur_arrivee").inputMode="decimal";
 
@@ -179,6 +187,7 @@ function carnetdevol_page_loaded() {
   compute_aircraft("id_cdv_aircraft");
   compute_hideshow_instructor();
   compute_frais_CP();
+  check_heure("id_cdv_heure_depart");
   compute_prix();
 
   var aSegmentCountText=document.getElementById("id_cdv_segment_count").value;
@@ -677,7 +686,7 @@ function getPiloteSolde()
 function compute_prix()
 {
 	var aPrixAvion=compute_prix_avion();
-	if(aPrixAvion>0.) {
+	if(aPrixAvion>0. &&  check_heure("id_cdv_heure_depart") && check_heure("id_cdv_heure_arrivee")) {
 		 document.getElementById("id_submitButton").disabled=false;
 		 document.getElementById("id_submitButton").style.backgroundColor = 'LightGreen';
 	}
@@ -1124,29 +1133,29 @@ function check_compteur(id_cdv_val)
 	var aHeureCompteur=parseInt(aHeureCompteurText,10);
 	if(isNaN(aHeureCompteur) || aHeureCompteur<0) {
 		aTextInput.style.backgroundColor = 'orange';
-		return;				
+		return false;				
 	}
 	var aMinuteCompteur=parseInt(aMinuteCompteurText,10);
 	if(isNaN(aMinuteCompteur) || aMinuteCompteur<0) {
 		aTextInput.style.backgroundColor = 'orange';
-		return;				
+		return false;				
 	}
 	if(GetPlaneCompteurType()=="6") {
 		//Compteur decimal ((OO-APV))
 		if(aMinuteCompteurText.length!=1) {
 			aTextInput.style.backgroundColor = 'orange';
-			return;				
+			return false;				
 		}
 	}
 	else {
 		//Compteur minutes All except OO-APV
 		if(aMinuteCompteurText.length!=2) {
 			aTextInput.style.backgroundColor = 'orange';
-			return;				
+			return false;				
 		}		
 		if(aMinuteCompteur>59) {
 			aTextInput.style.backgroundColor = 'orange';
-			return;							
+			return false;							
 		}
 	}
 	aTextInput.value=aHeureCompteurText+"."+aMinuteCompteurText;
@@ -1173,9 +1182,12 @@ function check_compteur(id_cdv_val)
 			aTextInput.placeholder+
 			").\nVoulez-vous vraiment introduire cette valeur?") == false) {
 				aTextInput.value="";
+				return false;
 		}
+		aTextInput.style.backgroundColor = 'white';
 		//alert("Valeur compteur trop differente!/nValeur introduite: "+Compteur+"/nDernière valeur introduite: "+aCompteurMOText);
 	}
+	return true;
 }
 //==============================================
 function check_heure(id_cdv_val)
@@ -1185,7 +1197,7 @@ function check_heure(id_cdv_val)
 	var aTime=aTextInput.value.trim();
 	if(aTime.length<3 || aTime.length>5) {
 		aTextInput.style.backgroundColor = 'orange';
-		return;
+		return false;
 	}
 	var aHourText="";
 	var aMinuteText="";
@@ -1209,7 +1221,7 @@ function check_heure(id_cdv_val)
 	}
 	else {
 		aTextInput.style.backgroundColor = 'orange';
-		return;
+		return false;
 	}
 	if(aHourText.length==1) {
 		aHourText="0"+aHourText;
@@ -1218,14 +1230,15 @@ function check_heure(id_cdv_val)
 	var aMinute=parseInt(aMinuteText,10);
 	if(isNaN(aHour) || aHour<0 ||aHour>23) {
 		aTextInput.style.backgroundColor = 'orange';
-		return;
+		return false;
 	}
 	if(isNaN(aMinute) || aMinute<0 ||aMinute>59) {
 		aTextInput.style.backgroundColor = 'orange';
-		return;
+		return false;
 	}
 	aTextInput.value=aHourText+":"+aMinuteText;
 	aTextInput.style.backgroundColor = 'white';
+	return true;
 }
 //==============================================
 function check_duree(id_cdv_val)
@@ -1404,7 +1417,7 @@ function computeRenamedPilots(pilots_renamed, thePilots)
  	   if(thePilots[i].id != -1) {
 		   var aName=thePilots[i].name.trim();
 		   var aPosition=aName.indexOf(" ");
-		   var aPilotName=aName.substr(aPosition+1,aName.length-aPosition-1)+" "+aName.substr(0,1)+".";
+		   var aPilotName=aName.substr(aPosition+1,aName.length-aPosition-1)+" "+aName.substr(0,aPosition);
 		   var aKeesPosition=aPilotName.indexOf(")");
 		   if(aKeesPosition!=-1) {
 		   	// Remove (Kees) use case
