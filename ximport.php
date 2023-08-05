@@ -131,7 +131,7 @@ $members = [62, 66, 92, 348, 439] ;
 
 print("<pre>\n") ;
 foreach($members as $member) {
-    $folio = new Folio($member, '2023-06-01', '2023-06-30') ;
+    $folio = new Folio($member, '2023-07-01', '2023-07-31') ;
     if ($folio->count == 0) continue ;
     $total_folio = 0 ;
     foreach($folio as $line) {
