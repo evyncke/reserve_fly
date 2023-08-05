@@ -60,6 +60,7 @@ function carnetdevol_page_loaded() {
   };
   document.getElementById("id_cdv_frais_CP_type").onchange = function() {
 	  compute_frais_CP();
+	  compute_prix();
   };
   document.getElementById("id_cdv_frais_CP_type").style.display="none";
 
@@ -75,6 +76,7 @@ function carnetdevol_page_loaded() {
 
   document.getElementById("id_cdv_frais_numero_vol").onchange = function() {
 	  check_numero_vol();
+	  compute_prix();
   };
   document.getElementById("id_cdv_frais_numero_vol").style.display="none";
   
@@ -182,7 +184,9 @@ function carnetdevol_page_loaded() {
 
   document.getElementById("id_cdv_prix_solde_row").style.display="none";
   document.getElementById("id_cdv_prix_reference_row").style.display="none";
-
+  
+  check_airport("id_cdv_arrival_airport");
+  check_airport("id_cdv_departure_airport");
   compute_defaultValues();
   compute_aircraft("id_cdv_aircraft");
   compute_hideshow_instructor();
@@ -224,59 +228,23 @@ function check_coherence_compteur()
 	if(anArrival!=0) aCount+=1;
     var aDureeText=document.getElementById("id_cdv_compteur_duree").value;
 	var aDuree=convertDureeEnMinute(aDureeText);
-	var aDeltaHour=anArrival-aDepart;
-	
-	//if(aDuree!=0) aCount+=1;
-	
+	var aDeltaHour=anArrival-aDepart;	
 	if(aCount <2) {
-		return;
+		return false;
 	}
-	/*
-	else if(aCount == 3) {
-		if(aDeltaHour != aDuree) {
-			document.getElementById("id_cdv_compteur_duree").style.backgroundColor = 'orange';
-			return false;
-		}
-		else {
-			document.getElementById("id_cdv_compteur_duree").style.backgroundColor = 'white';			
-		}
-	}
-	*/
 	else {
 		if(aDeltaHour < 0) {
 			document.getElementById("id_cdv_compteur_arrivee").style.backgroundColor = 'orange';
 			document.getElementById("id_cdv_compteur_depart").style.backgroundColor = 'white';
+			return false;
 		}
 		else if(aDeltaHour >0) {
 			document.getElementById("id_cdv_compteur_duree").value=convertMinutesEnDureeText(aDeltaHour);
-			//document.getElementById("id_cdv_compteur_duree").style.backgroundColor = ReadOnlyColor;
 			document.getElementById("id_cdv_compteur_arrivee").style.backgroundColor = 'white';
 			document.getElementById("id_cdv_compteur_depart").style.backgroundColor = 'white';
-			
-			//var aDureeHeure=document.getElementById("id_cdv_duree").value;
-			//if(aDureeHeure=="") {
 			document.getElementById("id_cdv_duree").value=convertMinutesEnDureeText(aDeltaHour);
-				//document.getElementById("id_cdv_duree").style.backgroundColor = 'white';
-				//}
-				
 			check_coherence_heure();
 		}
-		/*
-		else if(anArrival==0) {
-			anArrival=aDepart+aDuree;
-			document.getElementById("id_cdv_compteur_arrivee").value=convertMinutesEnCompteurText(anArrival);
-			document.getElementById("id_cdv_compteur_duree").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_compteur_arrivee").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_compteur_depart").style.backgroundColor = 'white';
-		}					
-		else if(aDepart==0) {
-			aDepart=anArrival-aDuree;
-			document.getElementById("id_cdv_compteur_depart").value=convertMinutesEnCompteurText(aDepart);
-			document.getElementById("id_cdv_compteur_duree").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_compteur_arrivee").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_compteur_depart").style.backgroundColor = 'white';
-		}
-		*/					
 	}	
 	return true;	
 }
@@ -295,53 +263,22 @@ function check_coherence_compteur_vol()
     var anArrivalText=document.getElementById("id_cdv_compteur_vol_arrivee").value
 	var anArrival=convertCompteurEnMinute(anArrivalText);
 	if(anArrival!=0) aCount+=1;
-    var aDureeText=document.getElementById("id_cdv_compteur_vol_duree").value;
-	var aDuree=convertDureeEnMinute(aDureeText);
 	var aDeltaHour=anArrival-aDepart;
 	
-	if(aDuree!=0) aCount+=1;
-	
 	if(aCount <2) {
-		return;
+		return false;
 	}
-	/*
-	else if(aCount == 3) {
-		if(aDeltaHour != aDuree) {
-			document.getElementById("id_cdv_compteur_vol_duree").style.backgroundColor = 'orange';
-			return false;
-		}
-		else {
-			document.getElementById("id_cdv_compteur_vol_duree").style.backgroundColor = 'white';			
-		}
-	}
-	*/
 	else {
 		if(aDeltaHour < 0) {
 			document.getElementById("id_cdv_compteur_vol_arrivee").style.backgroundColor = 'orange';
 			document.getElementById("id_cdv_compteur_vol_depart").style.backgroundColor = 'white';
+			return false;
 		}
-		else if(aDeltaHour >0) {
+		else if(aDeltaHour >= 0) {
 			document.getElementById("id_cdv_compteur_vol_duree").value=convertMinutesEnDureeText(aDeltaHour);
-			//document.getElementById("id_cdv_compteur_vol_duree").style.backgroundColor = 'white';
 			document.getElementById("id_cdv_compteur_vol_arrivee").style.backgroundColor = 'white';
 			document.getElementById("id_cdv_compteur_vol_depart").style.backgroundColor = 'white';			
 		}
-		/*
-		else if(anArrival==0) {
-			anArrival=aDepart+aDuree;
-			document.getElementById("id_cdv_compteur_vol_arrivee").value=convertMinutesEnCompteurText(anArrival);
-			//document.getElementById("id_cdv_compteur_vol_duree").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_compteur_vol_arrivee").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_compteur_vol_depart").style.backgroundColor = 'white';
-		}					
-		else if(aDepart==0) {
-			aDepart=anArrival-aDuree;
-			document.getElementById("id_cdv_compteur_vol_depart").value=convertMinutesEnCompteurText(aDepart);
-			//document.getElementById("id_cdv_compteur_vol_duree").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_compteur_vol_arrivee").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_compteur_vol_depart").style.backgroundColor = 'white';
-		}
-		*/					
 	}	
 	return true;	
 }
@@ -410,38 +347,39 @@ function check_coherence_heure()
 	if(aDuree!=0) aCount+=1;
 	
 	if(aCount <2) {
-		return;
+		return false;
 	}
 	else if(aCount == 3) {
 		if(aDeltaHour != aDuree) {
 			document.getElementById("id_cdv_duree").style.backgroundColor = 'orange';
 			anArrival=0;
+			//return false;
 		}
 		else {
 			document.getElementById("id_cdv_duree").style.backgroundColor = 'white';			
 		}
 	}
 
-		if(aDuree==0. && aDeltaHour < 360.) {
-			document.getElementById("id_cdv_duree").value=convertMinutesEnDureeText(aDeltaHour);
-			document.getElementById("id_cdv_duree").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_heure_arrivee").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_heure_depart").style.backgroundColor = 'white';
-		}
-		else if(anArrival==0) {
-			anArrival=aDepart+aDuree;
-			document.getElementById("id_cdv_heure_arrivee").value=convertMinutesEnHeureText(anArrival);
-			document.getElementById("id_cdv_duree").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_heure_arrivee").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_heure_depart").style.backgroundColor = 'white';
-		}					
-		else if(aDepart==0) {
-			aDepart=anArrival-aDuree;
-			document.getElementById("id_cdv_heure_depart").value=convertMinutesEnHeureText(aDepart);
-			document.getElementById("id_cdv_duree").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_heure_arrivee").style.backgroundColor = 'white';
-			document.getElementById("id_cdv_heure_depart").style.backgroundColor = 'white';
-		}					
+	if(aDuree==0. && aDeltaHour < 360.) {
+		document.getElementById("id_cdv_duree").value=convertMinutesEnDureeText(aDeltaHour);
+		document.getElementById("id_cdv_duree").style.backgroundColor = 'white';
+		document.getElementById("id_cdv_heure_arrivee").style.backgroundColor = 'white';
+		document.getElementById("id_cdv_heure_depart").style.backgroundColor = 'white';
+	}
+	else if(anArrival==0) {
+		anArrival=aDepart+aDuree;
+		document.getElementById("id_cdv_heure_arrivee").value=convertMinutesEnHeureText(anArrival);
+		document.getElementById("id_cdv_duree").style.backgroundColor = 'white';
+		document.getElementById("id_cdv_heure_arrivee").style.backgroundColor = 'white';
+		document.getElementById("id_cdv_heure_depart").style.backgroundColor = 'white';
+	}					
+	else if(aDepart==0) {
+		aDepart=anArrival-aDuree;
+		document.getElementById("id_cdv_heure_depart").value=convertMinutesEnHeureText(aDepart);
+		document.getElementById("id_cdv_duree").style.backgroundColor = 'white';
+		document.getElementById("id_cdv_heure_arrivee").style.backgroundColor = 'white';
+		document.getElementById("id_cdv_heure_depart").style.backgroundColor = 'white';
+	}					
 
 	return true;	
 }
@@ -686,7 +624,11 @@ function getPiloteSolde()
 function compute_prix()
 {
 	var aPrixAvion=compute_prix_avion();
-	if(aPrixAvion>0. &&  check_heure("id_cdv_heure_depart") && check_heure("id_cdv_heure_arrivee")) {
+	if(check_coherence_heure() &&  check_coherence_compteur() && 
+		check_heure("id_cdv_heure_depart") && check_heure("id_cdv_heure_arrivee") &&
+	check_airport("id_cdv_departure_airport") && check_airport("id_cdv_arrival_airport") &&
+    check_CP()) 
+	{
 		 document.getElementById("id_submitButton").disabled=false;
 		 document.getElementById("id_submitButton").style.backgroundColor = 'LightGreen';
 	}
@@ -1005,11 +947,13 @@ function check_airport(id_cdv_val)
 	var anAirportName=aTextInput.value.trim();
 	if(anAirportName.length!=4) {
 		aTextInput.style.backgroundColor = 'orange';
+		return false;
 	}
 	else {
 	    aTextInput.value=anAirportName.toUpperCase();
 	    aTextInput.style.backgroundColor = 'white';
     }
+	return true;
 }
 //==============================================
 function check_numero_vol()
@@ -1344,6 +1288,27 @@ function compute_aircraft(val)
    compute_defaultPlaneValues(anAircraftName);
    //var aUserId=PHPRequest("userid");
    //document.getElementById("id_cdv_frais_remarque").value = aUserId;
+}
+//===============================================
+// Check if shared CP are correctly introdi=uced (Not orange)
+function check_CP()
+{
+	if(document.getElementById("id_cdv_frais_CP").style.backgroundColor == "orange") {
+		return false;
+	}
+	if(document.getElementById("id_cdv_frais_numero_vol").style.display=="none") {
+		return true;
+	}
+	
+	if(document.getElementById("id_cdv_frais_numero_vol").value=="") {
+		document.getElementById("id_cdv_frais_numero_vol").style.backgroundColor="orange";
+		return false;
+	}
+	if(document.getElementById("id_cdv_frais_numero_vol").style.backgroundColor == "orange") {
+		return false;
+	}
+	
+	return true;
 }
 //===============================================
 
