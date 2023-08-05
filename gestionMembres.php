@@ -169,8 +169,7 @@ function blockFunction(PHP_Self, theBlockedFlag, theNom, theUserId, theSolde)
 	}
 	else {
 		if (confirm("Confirmer que vous voulez débloquer " + theNom + "?") == true) {
-			aText="Débloquer";
-      		 var aCommand=PHP_Self+"?unblock=true&personid="+theUserId;
+      		var aCommand=PHP_Self+"?unblock=true&personid="+theUserId;
  			if(aSearchText!="")	 {
  				aCommand+="&search="+aSearchText;
  			}
@@ -178,15 +177,194 @@ function blockFunction(PHP_Self, theBlockedFlag, theNom, theUserId, theSolde)
 		}		
 	}
 }
+
 function getReason(theSolde)
 {
-	var aPredefinedReason="Votre solde est actuellement négatif pour un montant de ("+theSolde+" EUR).  Merci de régulariser rapidement. Vos réservations seront débloquées une fois le paiement enregistré dans la comptabilité.";
+	var aPredefinedReason="Votre solde est actuellement négatif pour un montant de ("+theSolde+" EUR). Merci de régulariser rapidement. Vos réservations seront débloquées une fois le paiement enregistré dans la comptabilité.";
+	if(theSolde=="") {
+		aPredefinedReason="Votre solde est actuellement négatif. Merci de régulariser rapidement. Vos réservations seront débloquées une fois le paiement enregistré dans la comptabilité.";
+	}
 	if(theSolde==-70 || theSolde==-255){
 		aPredefinedReason="Vous n'êtes pas en ordre de cotisation. Vous êtes donc interdit(e)s de réservation tant que votre cotisation n'est pas réglée.";
 	}
 	var reason = prompt("Entrer la raison du blocage", aPredefinedReason);
 	return reason;
 }
+
+function filterSelected()
+{
+	for(i=1;i<=4;i++){
+	    var aToggleComponentId="id_FilterRows"+i.toString();
+		var blockedToggle = document.getElementById(aToggleComponentId);
+		blockedToggle.checked=false;
+	}
+	var aToggle = document.getElementById("id_FilterSelected");
+	var aCheckedValue=aToggle.checked;
+    var table = document.getElementById("myTable");
+    var rows = table.rows;
+	var aSelectToggleColumn=0;
+   	for (i = 0; i < rows.length; i++) {
+        var row = rows[i];
+		if(!aCheckedValue) {
+   		  row.hidden=false;
+		  continue;
+		}
+		var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
+		var aSelectedToggle = aColumn1Row.childNodes[0];
+		if(aSelectedToggle.checked) {
+     		  row.hidden=false;
+		}
+		else {
+   		  row.hidden=true;			
+		}
+	}
+}
+
+function submitSelect(theSelect)
+{
+    var table = document.getElementById("myTable");
+    var rows = table.rows;
+	var aSelectToggleColumn=0;
+   	for (i = 0; i < rows.length; i++) {
+		var row = rows[i];
+		var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
+		var aSelectedToggle = aColumn1Row.childNodes[0];
+		aSelectedToggle.checked=false;
+	}
+}
+
+function filterRows(count, blocked, sign)
+{
+	var blockedToggle = document.getElementById("id_FilterSelected");
+	blockedToggle.checked=false;
+	for(i=1;i<=4;i++){
+		if(i!=count) {
+	    	var aToggleComponentId="id_FilterRows"+i.toString();
+			blockedToggle = document.getElementById(aToggleComponentId);
+			blockedToggle.checked=false;
+		}
+	}
+    var aNegativeValueComponentId="id_FilterRows"+count.toString();
+	var blockedToggle = document.getElementById(aNegativeValueComponentId);
+	var aCheckedValue=blockedToggle.checked;
+    var table = document.getElementById("myTable");
+    var rows = table.rows;
+	var aSelectToggleColumn=0;
+  	var aStatusColumn=14;
+   	var aValueColumn=13;
+	var aCielColumn=2;
+	var aHidden=false;
+   	for (i = 0; i < rows.length; i++) {
+        var row = rows[i];
+		if(!aCheckedValue) {
+   		  row.hidden=false;
+		  continue;
+		}
+		var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
+		var aSelectedToggle = aColumn1Row.childNodes[0];
+		
+		var aCiel = row.getElementsByTagName("TD")[aCielColumn].textContent;
+		if(aCiel.indexOf("xxxxx")!=-1) {
+     		  row.hidden=true;	
+			  continue;
+		}
+
+	   	var aStatus=row.getElementsByTagName("TD")[aStatusColumn].textContent;
+		var aBlockedRow=!(aStatus.indexOf("DEBLOQUER")==-1);		
+		if(aStatus.indexOf("BLOQUER")==-1) {
+			// Deactivated row
+   		 	row.hidden=true;
+			//aSelectedToggle.checked=false;
+		 	continue;
+		}
+		if(blocked=="Blocked") {
+			if(!aBlockedRow || aStatus=="") {
+	   			row.hidden=true;
+	  			//aSelectedToggle.checked=false;
+			  continue;
+			}
+		} 
+		else if(blocked=="NotBlocked") {
+			if(aBlockedRow || aStatus=="") {
+	   		  	row.hidden=true;
+  				//aSelectedToggle.checked=false;
+			  continue;
+			}
+		}
+		 
+   		var aValueText=row.getElementsByTagName("TD")[aValueColumn].textContent;	
+		var aNegativeValue=(aValueText.indexOf("-")==0);
+		if(sign=="<") {
+			if(!aNegativeValue) {
+		 		row.hidden=true;
+	  			//aSelectedToggle.checked=false;
+ 				continue;
+			}
+		}
+		else if(sign==">") {
+			if(aNegativeValue) {
+		 		row.hidden=true;
+	  			//aSelectedToggle.checked=false;
+ 				continue;
+			}
+		}
+ 		row.hidden=false;
+		//aSelectedToggle.checked=true;
+ 	}
+}
+
+function submitBlocked(PHP_Self, blocked) {
+	var aSearchText=document.getElementById("id_SearchInput").value;
+    var table = document.getElementById("myTable");
+    var rows = table.rows;
+	var aSelectToggleColumn=0;
+	var aListOfId="";
+	var aCount=0;
+   	for (i = 0; i < rows.length; i++) {
+        var row = rows[i];
+		if(!row.hidden) {
+			var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
+			var aSelectedToggle = aColumn1Row.childNodes[0];
+			if(aSelectedToggle.checked) {
+				aCount++;
+				var aValueText=row.getElementsByTagName("TD")[1].textContent;
+				if(aListOfId!="") {
+					aListOfId+=",";
+				}
+				aListOfId+=aValueText;
+				aColumn1Row.style.backgroundColor="orange";
+			}
+			else {
+				aColumn1Row.style.backgroundColor="white";
+			}
+		}
+	}
+	if(aCount==0) {
+		alert("Pour Bloquer ou Débloquer, vous devez d'abord selectionner des lignes dans la table!");
+		return;
+	}
+	var aReason="";
+	if(blocked=="Block") {
+		aReason=getReason("");
+		if (confirm("Confirmer que vous voulez bloquer " + aCount.toString() +" personnes" + "?\nRaison: "+aReason) == true) {			
+   		 	var aCommand=PHP_Self+"?block=true&listpersonid="+aListOfId+"&reason="+aReason;	
+			if(aSearchText!="")	 {
+				aCommand+="&search="+aSearchText;
+			}
+   		 	window.location.href = encodeURI(aCommand);
+		}
+	}
+	else {
+		if (confirm("Confirmer que vous voulez débloquer "+ aCount.toString() +" personnes" + "?") == true) {
+      		var aCommand=PHP_Self+"?unblock=true&listpersonid="+aListOfId+"&reason="+aReason;
+ 			if(aSearchText!="")	 {
+ 				aCommand+="&search="+aSearchText;
+ 			}
+      		 window.location.href = aCommand;
+		}		
+	}
+}
+
 </script>
 <!-- Matomo -->
 <script type="text/javascript">
@@ -214,63 +392,110 @@ function getReason(theSolde)
 <?php
 // Display or not Web deActicated member (Must be managed by a toggle button)
 $displayWebDeactivated=false;
-
+//print("userId=$userId</br>");
 $searchText=""; 	
 if (isset($_REQUEST['search']) and $_REQUEST['search'] != '') {
 	$searchText=$_REQUEST['search'];
 }
 if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
-	$personid=$_REQUEST['personid'];
-	if (isset($_REQUEST['unblock']) and $_REQUEST['unblock'] == 'true') {
-		if($userIsBoardMember) {
-			//print("Unblock $personid</br>\n");
-			//print("delete from $table_blocked where b_jom_id=$personid</br>\n");
-			$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
-			mysqli_query($mysqli_link, "delete from $table_blocked where b_jom_id=$personid") 
-				or journalise($userId, 'F', "Cannot delete: " . mysqli_error($mysqli_link)) ;
-			if (mysqli_affected_rows($mysqli_link) > 0) {
-				$insert_message = "Table blocked  mis &agrave; jour" ;
-				journalise($userId, 'I', "Table_blocked entry deleted for person $personid (done at $audit_time).") ;
-			} else {
-				$insert_message = "Impossible d'effacer la ligne dans la table_blocked" ;
-				journalise($userId, 'E', "Error (" . mysqli_error($mysqli_link). ") while deleting person entry for person $personid (done at $audit_time).") ;
-			}			
-			print("<p><h2><b>Le membre $personid a été débloqué</b></h2><p>");
-			journalise($userId, "I", "Member $personid is now unblocked") ;
-		}
-		else {
-			print("<p><h2 style='color: red;'><b>Vous n'êtes pas autorisés à débloquer un membre.<br/>Seuls les membres du CA peuvent débloquer un membre !</b></h2></p>");
-			journalise($userId, "I", "One FI try to unblock a member $personid. Not allowed") ;
-		}
+	if(!$userIsBoardMember) {
+		print("<p><h2 style='color: red;'><b>Vous n'êtes pas autorisés à débloquer un membre.<br/>Seuls les membres du CA peuvent débloquer un membre !</b></h2></p>");
+		journalise($userId, "I", "One FI try to unblock a member $personid. Not allowed") ;
 	}
-	if (isset($_REQUEST['block']) and $_REQUEST['block'] == 'true') {
-		$reason=urldecode($_REQUEST['reason']);
-		$reason=web2db($reason);
-		//print("Block $personid Reason=$reason</br>\n");
-		//print("insert into $table_blocked (b_jom_id, b_reason, b_who, b_when)
-		//		values ('$personid', \"$reason\", '$userId', sysdate());</br>");
+	else {
+		$personid="";
+		if (isset($_REQUEST['personid']) and $_REQUEST['personid'] != '') {
+			$listpersonid=$_REQUEST['personid'];
+		}
+		else if (isset($_REQUEST['listpersonid']) and $_REQUEST['listpersonid'] != '') {
+			$listpersonid=$_REQUEST['listpersonid'];
+		}
+		$personids=explode(",",$listpersonid);
+		
+		if (isset($_REQUEST['unblock']) and $_REQUEST['unblock'] == 'true') {
+			for($i = 0; $i < sizeof($personids) ; $i++) {
+				$personid=$personids[$i];
+				$result = mysqli_query($mysqli_link, "select b_jom_id from $table_blocked where b_jom_id=$personid")
+					or journalise($userId, 'F', "Impossible to know is a persom is already blocked: " . mysqli_error($mysqli_link)) ;
 
-		mysqli_query($mysqli_link, "insert into $table_blocked (b_jom_id, b_reason, b_who, b_when)
-				values ('$personid', \"$reason\", '$userId', sysdate())")
-			or journalise($userID, 'F', "Impossible d'ajouter dans les blocked: " . mysqli_error($mysqli_link)) ;
-		$reason=db2web($reason);
-		print("<p><h2><b>Le membre $personid a été bloqué :</b> Raison \"$reason\"</h2><p>");
-		journalise($userId, "W", "Member $persid is now blocked, $reason") ;
+				$row = mysqli_fetch_array($result);
+				if($row) {
+					//print("Unblock person $personids[$i]</br>\n");
+					//print("delete from $table_blocked where b_jom_id=$personid</br>\n");
+					$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
+					mysqli_query($mysqli_link, "delete from $table_blocked where b_jom_id=$personid") 
+						or journalise($userId, 'F', "Cannot delete: " . mysqli_error($mysqli_link)) ;
+					if (mysqli_affected_rows($mysqli_link) > 0) {
+						$insert_message = "Table blocked  mis &agrave; jour" ;
+						journalise($userId, 'I', "Table_blocked entry deleted for person $personid (done at $audit_time).") ;
+					} else {
+						$insert_message = "Impossible d'effacer la ligne dans la table_blocked" ;
+						journalise($userId, 'E', "Error (" . mysqli_error($mysqli_link). ") while deleting person entry for person $personid (done at $audit_time).") ;
+					}			
+					print("<b>Le membre $personid a été débloqué</b></br>");
+					journalise($userId, "I", "Member $personid is now unblocked") ;
+				}
+				else {
+				    print("<b>Le membre $personid n'est pas bloqué !</b></br>");	
+				}
+			}
+		}
+		if (isset($_REQUEST['block']) and $_REQUEST['block'] == 'true') {
+			$reason=urldecode($_REQUEST['reason']);
+			$reason=web2db($reason);
+			$reasonWeb=db2web($reason);
+			for($i = 0; $i < sizeof($personids) ; $i++) {
+				$personid=$personids[$i];
+				
+				// Check if already blocked
+				//print("select b_jom_id from $table_blocked where b_jom_id=$personid</br>");
+
+				$result = mysqli_query($mysqli_link, "select b_jom_id from $table_blocked where b_jom_id=$personid")
+					or journalise($userId, 'F', "Impossible to know is a persom is already blocked: " . mysqli_error($mysqli_link)) ;
+
+				$row = mysqli_fetch_array($result);
+				if(!$row) {
+					print("Block person $personids[$i]</br>\n");
+					mysqli_query($mysqli_link, "insert into $table_blocked (b_jom_id, b_reason, b_who, b_when)
+							values ('$personid', \"$reason\", '$userId', sysdate())")
+						or journalise($userId, 'F', "Impossible d'ajouter dans les blocked: " . mysqli_error($mysqli_link)) ;
+
+					print("<b>Le membre $personid a été bloqué :</b> Raison \"$reasonWeb\"</br>");
+					journalise($userId, "W", "Member $persid is now blocked, $reasonWeb") ;
+				}
+				else {
+				    print("<b>Le membre $personid est déjà bloqué !</b></br>");	
+				}
+			}
+		}
 	}
 }
 ?>
-<h1>Table des membres du RAPCS</h1>
-  <p>Type something to search the table for first names, last names , ciel ref, ...</p>  
+<h1>&nbsp;&nbsp;Table des membres du RAPCS</h1>
+  <p>&nbsp;&nbsp;Type something to search the table for first names, last names , ciel ref, ...</p>  
 <?php	
   print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeholder=\"Search..\" value=\"$searchText\">");
 ?>
+  <br>&nbsp;&nbsp;Display only
+  &nbsp;&nbsp;<input type="checkbox" id="id_FilterSelected" name="name_FilterSelected" value="Selected" onclick="filterSelected();" ><label for="name_FilterSelected">&nbsp;Selected</label>
+  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows1" name="name_FilterRows1" value="Blocked" onclick="filterRows(1,'Blocked','');" ><label for="name_Blocked">&nbsp;Blocked</label>
+  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows2" name="name_FilterRows2" value="negativeValue" onclick="filterRows(2,'','<');" ><label for="name_negativeValue">&nbsp;Negative Value</label>
+  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows3" name="name_FilterRows3" value="negativeValue" onclick="filterRows(3,'NotBlocked','<');" ><label for="name_negativeValue">&nbsp;Negative Value & Not Blocked</label>
+    &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows4" name="name_FilterRows4" value="negativeValue" onclick="filterRows(4,'Blocked','>');" ><label for="name_negativeValue">&nbsp;Positive Value & Blocked</label>
   <br>
-  
+     &nbsp;&nbsp;
+<?php
+print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitSelect\" onclick=\"submitSelect('Unselect')\")> &nbsp;&nbsp;
+	<input type=\"submit\" value=\"Block\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[PHP_SELF]','Block')\")> &nbsp;&nbsp;
+    <input type=\"submit\" value=\"Unblock\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[PHP_SELF]', 'NotBlock')\">");
+?>
+</br>
+	<p></p>
 <div class="table">
 <table width="100%" style="margin-left: auto; margin-right: auto; stickyHeader: true;" class="table table-striped table-hover table-bordered"> 
 	<thead style="position: sticky;">
 <tr style="text-align: Center;">
-<th onclick="sortTable(0, true)" style="text-align: right;">#</th>
+<th class="select-checkbox" onclick="sortTable(0, true)" style="text-align: right;">#</th>
 <th onclick="sortTable(1, false)">Id</th>
 <th onclick="sortTable(2, false)">Ref. Ciel</th>
 <th onclick="sortTable(3, false)">Nom</th>
@@ -423,8 +648,8 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		}
 		if($blocked == 2) $blockedCount++;
 		print("<tr id='$personid_row' style='text-align: right'; $rowStyle>
-			<td>$count</td>
-		    <td style='text-align: right;'>id$personid</td>
+			<td><input type=\"checkbox\"> $count</td>
+		    <td style='text-align: right;'>$personid</td>
 			<td style='text-align: left;'><a class=\"tooltip\" href=\"https://www.spa-aviation.be/resa/myfolio.php?user=$personid\">$ciel<span class='tooltiptext'>Click pour afficher le folio</span></a></td>
 			<td style='text-align: left;'><a class=\"tooltip\" href=\"https://www.spa-aviation.be/resa/profile.php?displayed_id=$personid\">$row[last_name]<span class='tooltiptext'>Click pour editer le profile</span></a></td>
 			<td style='text-align: left;'>$row[first_name]</td>
