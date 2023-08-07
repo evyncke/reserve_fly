@@ -34,7 +34,7 @@ if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year
 	
 <?php
 require_once 'IntroCarnetVol_tools.php' ;
-
+// print("</script></br>DEBUG 001</br><script>");
 // Define all variables used by the javascript
 print("var default_editflag=0;\n");
 print("var default_segment=0;\n");
@@ -63,6 +63,10 @@ print("var default_flight_reference=\"\";\n");
 print("var default_flight_id=0;\n");	
 
 // bookingid is defined by the key "id" (coming from the booking) or by the key "cdv_booking" (coming from this page)
+if (isset($_REQUEST['auth']) and $_REQUEST['auth'] != '') {
+	$auth=$_REQUEST['auth'];
+	print("var default_auth='$auth';\n");
+}
 if (isset($_REQUEST['id']) and $_REQUEST['id'] != '') {
 	$bookingid=$_REQUEST['id'];
 	if (isset($_REQUEST['auth']) and $_REQUEST['auth'] != '') {
@@ -85,8 +89,10 @@ if (! is_numeric($bookingid)) die("Paramètre bookingid ($bookingid) n'est pas n
 
 // Check whether user is logged in
 if ($userId == 0) {
-	if (!isset($_REQUEST['auth']) or $_REQUEST['auth'] != md5($bookingid . $shared_secret))
-		die("You must be connected or use a valid auth code and not $_REQUEST[auth]") ;
+	if (!isset($_REQUEST['auth']) or $_REQUEST['auth'] != md5($bookingid . $shared_secret)) {
+		print("</script><p style=\"color: red;\"><b>Impossible to proceed to this request.</br>You must be connected to the spa-aviation.be site or use a valid auth code and not \"$_REQUEST[auth]\"</b></p>") ;
+		die("You must be connected or use a valid auth code and not \"$_REQUEST[auth]\"") ;
+	}
 }
 
 print("var default_bookingid=$bookingid;\n");
@@ -766,7 +772,7 @@ else {
 		print("var default_instructor=$rinstructor;\n");
 		$start_UTC = gmdate('Y-m-d H:i', strtotime("$row[r_start] $default_timezone")) ;
 		print("var default_date_heure_depart=\"$start_UTC\";\n");
-		if($end_Time != 'NULL') {
+		if($end_Time != NULL && $end_Time != '') {
 			print("var default_date_heure_depart=\"$end_Time\";\n");
 		}		
 		print("var default_flight_reference=\"$flightRow[f_reference]\"\n");
@@ -787,7 +793,6 @@ else {
 		if($toAirport!="") {
 			print("var default_from=\"$toAirport\";\n");	
 		}
-		print("var default_from=\"$toAirport\";\n");	
 		//printf("r_plane=$row[r_plane]</br>");
 		//printf("r_start=$row[r_start]</br>");
 	}
@@ -837,6 +842,10 @@ else {
 }
 ?>
 </td>
+</tr>
+<tr id="id_cdv_auth_row" hidden>
+<td class="segmentLabel">auth</td>
+<td class="segmentInput"><input id="id_cdv_auth" name="auth" size="8" type="text" value="<?=$auth?>" /></td>
 </tr>
 <tr id="id_cdv_bookingid_row">
 <td class="segmentLabel">booking id</td>
@@ -977,7 +986,7 @@ else {
 <option value="CP1">CP1(100% payé par)</option>
 <option value="CP2">CP2(50% payé par)</option>
 </select><select id="id_cdv_frais_CP_type" name="cdv_frais_CP_type">
-<option selected="selected" value="0"></option>
+<option selected="selected" value="0">Select ...</option>
 </select>
 <input id="id_cdv_frais_numero_vol" name="cdv_frais_numero_vol" size="15" type="text" placeholder="V-INIT-231xxx" autocomplete="off" />
 <select id="id_cdv_frais_CP_PAX" name="cdv_frais_CP_PAX">
