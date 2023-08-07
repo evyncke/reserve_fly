@@ -82,7 +82,7 @@ if ($_REQUEST['save_ciel'] == 'true') {
     <p>Avant de lancer cet import, il est nécesssaire d'avoir exporté le grand livre client depuis <i>Ciel Account Premium</i>:<ol>
         <li>menu: <i>Etats -> Etats comptables -> Grand Livre</i></li>
         <li>Choisir "grand livre clients"</li>
-        <li>Cliquer sur <i>Fichier</i> et accepter les défauts, être sûr d'exporter <b>TOUS</b> les comptes</i>
+        <li>Cliquer sur <i>Fichier</i> et être sûr d'exporter <b>TOUS</b> les comptes, avec les bonnes dates, écritures en brouillon <b>et</b> en simulation, dans le tab <i>+ de critères</i>: aucune option sélectionnée, et <i>les deux</i> pour les écritures</i>
         <li>Format de fichier: <i>Texte (tab/return+line feed)</i></li>
         <li>Sauver le fichier quelque part sur la VM ;-) (y compris le <i>One-Drive</i>)</li>
     </ol>
