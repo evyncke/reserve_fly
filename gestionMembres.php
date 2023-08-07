@@ -532,7 +532,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 */
 
 // The subquery should retrieve the max date for this specific user...but it burns time
-		$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
+	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
 		ciel_code, block, bkb_amount, b_reason, u.email as email, group_concat(group_id) as groups, sum(distinct bkl_debit) as invoice_total
 			from $table_users as u join $table_user_usergroup_map on u.id=user_id 
 			join $table_person as p on u.id=p.jom_id
@@ -543,8 +543,8 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			and (bkb_date is null or bkb_date=(select max(bkb_date) from $table_bk_balance))
 			group by user_id
 			order by last_name, first_name" ;
-
-		$count=0;
+	//print($sql);
+	$count=0;
 	$result = mysqli_query($mysqli_link, $sql)
 		or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
 	
@@ -559,7 +559,6 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 	$CheckMark="&#9989;";
 	
 	while ($row = mysqli_fetch_array($result)) {
-		$count++;
 		$personid=$row['id'];
 		$row['name'] = db2web($row['name']) ;
 		if ($row['name'] === FALSE) 
@@ -609,11 +608,11 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		
 		//Don't display webdeactivated member if solde == 0
 		if(!$displayWebDeactivated && $blocked == 1 && $solde == 0.0) {
-			continue;
+		   continue;
 		}
 		//SELECT * FROM `rapcs_bk_balance`.   bkb_amount
 		//SELECT * FROM `rapcs_bk_balance` ORDER BY `rapcs_bk_balance`.`bkb_date` DESC
-		
+		$count++;
 		$ciel="xxxxxxx";
 		if($row['ciel_code'] != "") {
 			$ciel="400".$row['ciel_code'];
@@ -717,5 +716,10 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 </tbody>
 </table>
 </div>
+<?php
+if(abs($cielCount-161)>15) {
+	print("<p style='color: red;'><b>La table ne semble pas correct. Il semble manquer des comptes! A vérifier.</b></p>");
+}
+?>
 </body>
 </html>

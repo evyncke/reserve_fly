@@ -1316,10 +1316,11 @@ function compute_frais_CP()
 {
     var aCP=document.getElementById("id_cdv_frais_CP").value;
 	if(aCP=="NoCP") {
+		document.getElementById("id_cdv_frais_CP").style.backgroundColor = 'white';	
 		document.getElementById("id_cdv_frais_numero_vol").style.display="none";
-		document.getElementById("id_cdv_frais_CP_PAX").style.display="none";
-		document.getElementById("id_cdv_frais_CP_type").style.value=0;
-		document.getElementById("id_cdv_frais_CP_PAX").style.value=0;
+		document.getElementById("id_cdv_frais_CP_type").style.display="none";
+		document.getElementById("id_cdv_frais_CP_type").value=0;
+		document.getElementById("id_cdv_frais_CP_PAX").value=0;
 	}
 	else {
 		document.getElementById("id_cdv_frais_CP_type").style.display="";
