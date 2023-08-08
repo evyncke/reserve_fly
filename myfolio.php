@@ -19,6 +19,7 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
+require_once "folio.php" ;
 
 MustBeLoggedIn() ;
 
@@ -188,23 +189,8 @@ function selectChanged() {
 <center><h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?>) pour le membre <?=$userId?> <?=$userName?></h2></center>
 Folio du mois <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>">précédent</a> <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$next_month->format('Y-m-d')?>&user=<?=$userId?>">suivant.</a>
 <?php
-//print("</br>l_start >=" . $folio_start->format('Y-m-d') . " AND l_start <= " . $folio_end->format('Y-m-d')."</br>");
-$sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
-	l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, i.last_name as instructor_name, p.last_name as pilot_name,
-	UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
-	l_start, l_end, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute as duration,
-	60 * (l_flight_end_hour - l_flight_start_hour) + l_flight_end_minute - l_flight_start_minute as flight_duration,
-	l_share_type, l_share_member, cout, l_pax_count
-	FROM $table_logbook l JOIN $table_planes AS a ON l_plane = a.id
-	LEFT JOIN $table_person p ON p.jom_id = l_pilot
-	LEFT JOIN $table_person i ON i.jom_id = l_instructor
-	WHERE (l_pilot = $userId OR l_share_member = $userId or l_instructor = $userId)
-  		AND l_booking IS NOT NULL
-		AND l_start >= '" . $folio_start->format('Y-m-d') . "'
-		AND l_start <= '" . $folio_end->format('Y-m-d') . "'
-	ORDER by l.l_start ASC" ;
-
-$result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
+$folio = new Folio($userId, $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) 
+	or journalise($originalUserId, "F", "Cannot get access to the folio");
 
 if ($userIsInstructor or $userIsAdmin) {
         print("En tant qu'instructeur/administrateur, vous pouvez consulter les folios des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
@@ -226,90 +212,54 @@ $cost_fi_total = 0 ;
 $cost_taxes_total = 0 ;
 $cost_grand_total = 0 ;
 $diams_explanation = false ; // Whether to display explanation about flight duration
-while ($row = mysqli_fetch_array($result)) {
-	// On which index is the invoice based ?
-	$duration = ($row['compteur_vol']) ? $row['flight_duration'] : $row['duration'] ;
-	$duration_hh = floor($duration / 60) ;
-	$duration_mm = $duration % 60 ;
+foreach ($folio as $line)	{
+	$duration_hh = $line->duration_hh ;
+	$duration_mm = $line->duration_mm ;
 	$duration_total_hour += $duration_hh ;
 	$duration_total_minute += $duration_mm ;
-	if ($row['compteur_vol']) {
+	if ($line->compteur_vol) {
 		$diams_explanation = true ;
 		$plane_token = ' &diams;' ;
 	} else
 		$plane_token = '' ;
 	// DB contains UTC time
-	$time_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
-	$time_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
-	if ($row['l_instructor'] < 0) $row['instructor_name'] = 'Autre FI' ;
+	$time_start = gmdate('H:i', strtotime("$line->l_start UTC")) ;
+	$time_end = gmdate('H:i', strtotime("$line->l_end UTC")) ;
 	print("<tr>
-		<td class=\"logCell\">$row[date]</td>
-		<td class=\"logCell\">$row[l_from]</td>
+		<td class=\"logCell\">$line->date</td>
+		<td class=\"logCell\">$line->from</td>
 		<td class=\"logCell\">$time_start</td>
-		<td class=\"logCell\">$row[l_to]</td>
+		<td class=\"logCell\">$line->to</td>
 		<td class=\"logCell\">$time_end</td>
-		<td class=\"logCell\">$row[l_model]</td>
-		<td class=\"logCell\">$row[l_plane]$plane_token</td>
+		<td class=\"logCell\">$line->model</td>
+		<td class=\"logCell\">$line->plane $plane_token</td>
 		<td class=\"logCell\">$duration_hh</td>
 		<td class=\"logCell\">$duration_mm</td>\n") ;
-	if ($row['l_instructor'] == $userId and $row['l_pilot'] != $userId and $row['l_share_member'] != $userId) // FI only pays the plane rental when they are the pilot
-		$cost_plane = 0 ;
-	else
-		if ($row['l_share_type'] == 'CP2') {
-			$cost_plane = round($row['cout'] * 0.5, 2) * $duration ;
-		} else if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] != $userId) {
-			$cost_plane = 0 ;
-		} else
-			$cost_plane = $row['cout'] * $duration ;	
-	// Vol PIC- Recheck : 
-	// Pour le Pilote -> SELF
-	// Pour l'Instructeur -> Pilote_name
-		
-	if ($row['l_instructor'] != $userId  and  $row['l_is_pic']) { // PIC 
+
+	if ($line->instructor_code != $userId  and  $line->is_pic) { // PIC 
 		print("<td class=\"logCell\">SELF</td>\n") ; //Pilot Point of View. A PIC-Recheck is SELF
 	}
 	else  // Dual command
-		if ($userId == $row['l_instructor'])
-			print("<td class=\"logCell\">" . db2web($row['pilot_name']) . "</td>\n") ; //Point of view of the Instructore. A PIC Recheck is a DC
+		if ($userId == $line->instructor_name)
+			print("<td class=\"logCell\">$line->pilot_name</td>\n") ; //Point of view of the Instructore. A PIC Recheck is a DC
 		else
-			print("<td class=\"logCell\">" . db2web($row['instructor_name']) . "</td>\n") ;// DC 
-	if ($row['l_instructor'])
-		if ($row['l_instructor'] != $userId) // The user is not the FI
-			$cost_fi = $row['l_instructor_paid'] * $cost_fi_minute * $duration ;
-		else
-			$cost_fi = - $row['l_instructor_paid'] * $revenue_fi_minute * $duration ;
-	else
-		$cost_fi = 0 ;
-	// Initiation flights
-	if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] == $code_initiation)
-		$cost_fi -= $revenue_fi_initiation ;
-	// Flights taking off Belgium have to pay taxes (distance depending but ignored for now)
-	// Except Local flight
-	// And only the pilot pays the taxes
-	if (stripos($row['l_from'], 'EB') === 0 and $row['l_from'] != $row['l_to'] and $row['l_pilot'] == $userId) {
-		$cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
-	} else {
-		$cost_taxes = 0 ;
-	}
-	// From 2022-11-01 no more taxes, actually they are back !
-	// if ($row['l_start'] >= '2022-11-01')
-	//	$cost_taxes = 0 ;
-	print("<td class=\"logCell\">$row[l_pax_count]</td>\n") ;
-	if ($row['l_share_type'])
-		print("<td class=\"logCell\">$row[l_share_type] <span class=\"shareCodeClass\">$row[l_share_member]</span></td>\n") ;
+			print("<td class=\"logCell\">$line->instructor_name</td>\n") ;// DC 
+	print("<td class=\"logCell\">$line->pax_count</td>\n") ;
+	if ($line->share_type)
+		print("<td class=\"logCell\">$line->share_type <span class=\"shareCodeClass\">$line->share_member</span></td>\n") ;
 	else
 		print("<td class=\"logCell\"></td>\n") ;
 
-	$cost_total = $cost_plane + $cost_fi + $cost_taxes ;
+	$cost_total = $line->cost_plane + $line->cost_fi + $line->cost_taxes ;
 	// Prepare the bottom line for grand total
-	$cost_plane_total += $cost_plane ;
-	$cost_fi_total += $cost_fi ;
-	$cost_taxes_total += $cost_taxes ;
+	$cost_plane_total += $line->cost_plane ;
+	$cost_fi_total += $line->cost_fi ;
+	$cost_taxes_total += $line->cost_taxes ;
 	$cost_grand_total += $cost_total ;
 	// Let's have a nice format
-	$cost_plane = numberFormat($cost_plane, 2, ',', ' ') ;
-	$cost_fi = numberFormat($cost_fi, 2, ',', ' ') ;
-	$cost_taxes = numberFormat($cost_taxes, 2, ',', ' ') ;
+	$cost_plane = numberFormat($line->cost_plane, 2, ',', ' ') ;
+	$cost_fi = numberFormat($line->cost_fi, 2, ',', ' ') ;
+	$cost_taxes = numberFormat($line->cost_taxes, 2, ',', ' ') ;
 	$cost_total = numberFormat($cost_total, 2, ',', ' ') ;
 	print("<td class=\"logCellRight\">$cost_plane</td>\n") ;
 	print("<td class=\"logCellRight\">$cost_fi</td>\n") ;
