@@ -44,7 +44,7 @@ function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_sep
 	return substr('        ' + number_format($n, $decimals, $decimal_separator, $thousand_separator) . '&nbsp;&euro;', -10, 10);
 }
 $version_php = date ("Y-m-d H:i:s.", filemtime('myinvoices.php')) ;
-?><html>
+?><!doctype html><html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
@@ -79,9 +79,13 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('myinvoices.php')) ;
 <!-- End Matomo Code -->
 </head>
 <body>
+<div class="container-fluid">
 <h2>Factures récentes de <?=$userName?></h2>
-<p>Voici quelques pièces comptables r&eacute;centes (mises à jour une fois par semaine environ par nos bénévoles).</p>
-<table class="table table-striped table-responsive table-hover">
+<p class="lead">Voici quelques pièces comptables récentes (mises à jour une fois par semaine environ par nos bénévoles).</p>
+<div class="row">
+<div class="col-sm-12 col-md-6 col-lg-4">
+<div class="table-responsive">
+<table class="table table-striped table-hover">
 	<thead>
 		<tr><th>Date</th><th>N° pièce</th><th>Type</th><th style="text-align: right;">Montant</th><th>Action</th></tr>
 	</thead>
@@ -100,8 +104,12 @@ while ($row = mysqli_fetch_array($result)) {
 	print("</tr>\n") ;
     $count ++ ;
 }
-
-print("</table>") ;
+?>
+</table>
+</div><!-- table responsive -->
+</div><!-- col -->
+</div><!-- row -->
+<?php
 if ($count == 0) print("<p class=\"text-warning\">Hélas, pas encore de facture à votre nom dans le système.</p>\n") ;
 ?>
 <span id="payment" style="display: none;">
@@ -135,7 +143,8 @@ function pay(reason, amount) {
 
 </script>
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, 2022-2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
-Version: PHP=<?=$version_php?></div>
+<p><small>R&eacute;alisation: Eric Vyncke, 2022-2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
+Version: PHP=<?=$version_php?></small></p>
+</div> <!-- container fluid -->
 </body>
 </html>
