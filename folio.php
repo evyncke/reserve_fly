@@ -20,6 +20,7 @@ class FolioLine{
     public $date ;
     public $from ;
     public $to ;
+    public $compteur_vol ;
     public $duration ;
     public $duration_hh ;
     public $duration_mm ;
@@ -34,10 +35,12 @@ class FolioLine{
     public $share_type ;
     public $share_member ;
     public $pic_name ;
+    public $is_pic ;
     public $instructor_name ;
     public $instructor_code ;
     public $pilot_name ;
     public $pilot_fname ;
+    public $pilot_code ;
     public $pilot_code_ciel ;
 
     function __construct($row, $userId) {
@@ -49,6 +52,7 @@ class FolioLine{
         $this->to = $row['l_to'] ;
         $this->plane = $row['l_plane'] ;
         $this->model = $row['l_model'] ;
+        $this->compteur_vol = $row['compteur_vol'] ;
         $this->duration = ($row['compteur_vol']) ? $row['flight_duration'] : $row['duration'] ;
         $this->duration_hh = floor($this->duration / 60) ;
         $this->duration_mm = $this->duration % 60 ;
@@ -96,11 +100,13 @@ class FolioLine{
             $this->cost_taxes = 0 ;
         }
         $this->pax_count = $row['pax_count'] ;
-        $this->share_type = $row['share_type'] ;
-        $this->share_member = $row['share_member'] ;
+        $this->share_type = $row['l_share_type'] ;
+        $this->share_member = $row['l_share_member'] ;
         $this->pilot_name = db2web($row['pilot_name']) ;
         $this->pilot_fname = db2web($row['pilot_fname']) ;
         $this->pilot_code_ciel = $row['code_ciel'] ;
+        $this->pilot_code = $row['l_pilot'] ;
+        $this->is_pic = $row['l_is_pic'] ;
         $this->instructor_name = db2web($row['instructor_name']) ;
         $this->instructor_code = $row['l_instructor'] ;
     }
