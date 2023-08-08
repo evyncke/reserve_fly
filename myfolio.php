@@ -26,11 +26,11 @@ MustBeLoggedIn() ;
 $originalUserId = $userId ;
 
 if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
-	if ($userId != 62) journalise($userId, "I", "Start of folio, setting user to $_REQUEST[user]") ;
+	if ($userId != 62) journalise($userId, "I", "Start of myfolio, setting user to $_REQUEST[user]") ;
 	$userId = $_REQUEST['user'] ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
 } else
-	if ($userId != 62) journalise($userId, "I", "Start of folio") ;
+	if ($userId != 62) journalise($userId, "I", "Start of myfolio") ;
 
 if (isset($_REQUEST['start']))  {
 	$folio_start = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
@@ -241,7 +241,7 @@ foreach ($folio as $line)	{
 	}
 	else  // Dual command
 		if ($userId == $line->instructor_name)
-			print("<td class=\"logCell\">$line->pilot_name</td>\n") ; //Point of view of the Instructore. A PIC Recheck is a DC
+			print("<td class=\"logCell\">$line->pilot_name</td>\n") ; //Point of view of the Instructor. A PIC Recheck is a DC
 		else
 			print("<td class=\"logCell\">$line->instructor_name</td>\n") ;// DC 
 	print("<td class=\"logCell\">$line->pax_count</td>\n") ;
@@ -350,15 +350,6 @@ print("</ul>\n</p>\n") ;
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 
-// Banque de la poste
-$iban = "BE14000078161283" ;
-$bic = "BPOTBEB1" ;
-// CBC
-$iban = "BE64732038421852" ;
-$bic = "CREGBEBB" ;
-
-$name = "Royal Aero Para Club Spa" ;
-
 /*
 as Google Charts API is about to be deprecated, alternatives could be:
 http://image-charts.com/
@@ -377,7 +368,7 @@ var
 	invoice_reason = '<?=$invoice_reason?>' ;
 	invoice_total = <?=$invoice_total?> ;
 	epcBic = '<?=$bic?>' ;
-	epcName = '<?=$name?>' ;
+	epcName = '<?=$bank_account_name?>' ;
 	epcIban = '<?=$iban?>' ;
 	compteCiel = '400<?=$codeCiel?>' ;
 	userLastName = '<?=$userLastName?>' ;
