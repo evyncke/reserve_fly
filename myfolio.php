@@ -99,7 +99,7 @@ function ShowTableHeader() {
 </thead>
 <?php
 }
-?><html>
+?><!doctype html><html>
 <head>
 <link rel="stylesheet" type="text/css" href="log.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
@@ -192,6 +192,7 @@ function selectChanged() {
 <!-- End Matomo Code -->
 </head>
 <body onload="init();">
+<div class="container-fluid">
 <h2>Situation comptable de <?=$userName?> (#<?=$userId?>)</h2>
 <?php
 // Check the bookkeeping balance
@@ -229,8 +230,11 @@ if ($userIsInstructor or $userIsAdmin) {
         </select><br/><br/>") ;
 }
 ?>
-<h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?>)</h2>
-<p>Folio du mois <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>">précédent</a> <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$next_month->format('Y-m-d')?>&user=<?=$userId?>">suivant.</a></p>
+<h2>Folio (estimation de la facture provisoire) du 
+	<a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>"><span class="glyphicon glyphicon-backward"></span></a>
+	<?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?>
+	<a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$next_month->format('Y-m-d')?>&user=<?=$userId?>"><span class="glyphicon glyphicon-forward"></span></a>
+	</h2>
 
 <?php
 $folio = new Folio($userId, $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) 
@@ -322,11 +326,10 @@ $cost_grand_total = numberFormat($cost_grand_total, 2, ',', ' ') ;
 </tbody>
 </table>
 <p>
-<div style="border-style: inset;background-color: AntiqueWhite;">
 Sur base des donn&eacute;es que vous avez entr&eacute;es apr&egrave;s les vols dans le
 carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui (<?=date('D, j-m-Y H:i e')?>).
 Le montant n'inclut aucune note de frais (par exemple carburant), note de crédit, ainsi que d'autres frais (par exemple, cotisations, ou taxes d'atterrissage).
-Les heures sont les heures UTC.</div>
+Les heures sont les heures UTC.
 </p >
 <!-- p>&ddagger;: depuis le 1er novembre 2022, le CA a décidé de ne plus faire payer les taxes en avance.</p-->
 <?php
@@ -335,7 +338,7 @@ if ($userIsInstructor)
 	print("<p>&spades; Veuillez noter qu'en tant qu'instructeur les montants négatifs de la colonne FI sont en fait des montants à facturer au club.</p>") ;
 
 if ($diams_explanation)
-	print("<p>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</p>") ;
+	print("<p><mark>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</mark></p>") ;
 
 $invoice_reason = 'folio' ;
 
@@ -382,9 +385,10 @@ function pay(reason, amount) {
 pay(invoice_reason, invoice_total) ;
 </script>
 <hr>
-<h2>Détails de votre compte pour l'année en cours</h2>
-<p><b>Voici une vue de votre compte membre RAPCS depuis le 01/01/2022 (mise à jour chaque semaine).</p>
-<table class="table table-striped table-responsive table-hover">
+<h2>Détails comptables de votre compte</h2>
+<p>Voici une vue de votre compte membre RAPCS depuis le 01/01/2022 (mise à jour chaque semaine).</p>
+<div class="table-responsive">
+<table class="table table-striped table-hover">
 <thead>
 <th>Date</th><th>Opération</th><th>Pièce</th><th>Description</th><th style="text-align: right;">Débit</th><th style="text-align: right;">Crédit</th><th style="text-align: right;">Solde</th>
 </thead>
@@ -434,12 +438,14 @@ while ($row = mysqli_fetch_array($result)) {
 <tfoot>
 	<?php
 	$total_debit=-$total_debit;
-	print("<tr><td colspan=4>Totaux</td><td style=\"text-align: right;\">$total_debit &euro;</td><td style=\"text-align: right;\"$total_credit&nbsp;&euro;</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td><tr>");
+	print("<tr class=\"bg-info\"><td colspan=4>Totaux</td><td style=\"text-align: right;\">$total_debit &euro;</td><td style=\"text-align: right;\"$total_credit&nbsp;&euro;</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td><tr>");
 	?>
 </tfoot>
 </table>
+</div><!-- table-responsive-->
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, 2022-2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
-Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
+<p><small>R&eacute;alisation: Eric Vyncke, 2022-2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
+Versions: PHP=<?=$version_php?></small></p>
+</div><!-- container fluid-->
 </body>
 </html>
