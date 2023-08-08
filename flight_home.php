@@ -98,7 +98,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$pilote = db2web("$row[first_name] <b>$row[last_name]</b>") ;
 	$pilote .= " <a href=\"mailto:$row[email]\"><span class=\"glyphicon glyphicon-envelope\"></span></a> " ;
 	$pilote .= " <a href=\"tel:$row[cell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a> " ;
-	print("<tr><td>$edit$print$date_vol</td><td>$pilote</td><td>$type</td><td>$row[p_fname] <b>$row[p_lname]$email$telephone</b></td><td>$description</td></tr>\n") ;
+	print("<tr><td>$edit$print$date_vol</td><td>$pilote</td><td>$type</td><td>". db2web("$row[p_fname] <b>$row[p_lname]") . "$email$telephone</b></td><td>$description</td></tr>\n") ;
 }
 ?>
 </tbody>
