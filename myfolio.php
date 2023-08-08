@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2022 Eric Vyncke, Patrick Reginster
+   Copyright 2022-2023 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -104,7 +104,13 @@ function ShowTableHeader() {
 <link rel="stylesheet" type="text/css" href="log.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<title>Folio</title>
+<!--meta name="viewport" content="width=320"-->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
+<!-- http://www.w3schools.com/bootstrap/ -->
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<title>Situation comptable de <?=$userName?> (#<?=$userId?>)</title>
 <script src="members.js"></script>
 <script src="shareCodes.js"></script>
 <script>
@@ -113,8 +119,8 @@ var
 	userFullName = '<?=$userFullName?>' ;
 	userName = '<?=$userName?>' ;
 	userId = <?=$userId?> ;
-        userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?> ;
-        userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ;
+    userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?> ;
+    userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ;
 
 function valueOfField(suffix, name) {
 	return name + '=' + document.getElementById(name + suffix.charAt(0).toUpperCase() + suffix.slice(1)).value ;
@@ -186,20 +192,49 @@ function selectChanged() {
 <!-- End Matomo Code -->
 </head>
 <body onload="init();">
-<center><h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?>) pour le membre <?=$userId?> <?=$userName?></h2></center>
-Folio du mois <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>">précédent</a> <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$next_month->format('Y-m-d')?>&user=<?=$userId?>">suivant.</a>
+<h2>Situation comptable de <?=$userName?> (#<?=$userId?>)</h2>
 <?php
-$folio = new Folio($userId, $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) 
-	or journalise($originalUserId, "F", "Cannot get access to the folio");
+// Check the bookkeeping balance
+
+$result = mysqli_query($mysqli_link, "SELECT *
+		FROM $table_bk_balance JOIN $table_person ON bkb_account = CONCAT('400', ciel_code)
+		WHERE jom_id = $userId
+		ORDER BY bkb_date DESC
+		LIMIT 0,1")
+	or journalise($originalUserId, "F", "Cannot read booking keeping balance: " . mysqli_error($mysqli_link)) ;
+$row = mysqli_fetch_array($result) ;
+if ($row) {
+	if ($row['bkb_amount'] != 0) 
+		$balance = -1 * $row['bkb_amount'] ;
+	else
+		$balance = 0.0 ;
+	if ($balance < 0)
+		$balance = '<span style="color: red;">' . $balance . '</span>' ;
+	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $balance &euro; (si négatif vous devez de l'argent au RAPCS ASBL). Ces informations sont mises à jour environ une fois par semaine par nos bénévoles.</p>") ;
+	if ($row['bkb_amount'] > 0) {
+		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
+		$invoice_reason = 'solde' ;
+	}
+} else 
+	print("<p>Le solde de votre compte n'est pas disponible.</p>") ;
+
+print("<a href=\"myinvoices.php?user=$userId\" class=\"btn btn-primary\">Factures récentes</a><br/>") ;
 
 if ($userIsInstructor or $userIsAdmin) {
-        print("En tant qu'instructeur/administrateur, vous pouvez consulter les folios des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
+        print("En tant qu'instructeur/administrateur, vous pouvez consulter les situations comptables des autres membres: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
         print("</select><br/><br/>") ;
 } else { // ($userIsInstructor or $userIsAdmin)
         print("Folio de: <select id=\"pilotSelect\" onchange=\"selectChanged();\">
         <option value=\"$userId\" selected>$userName</option>
         </select><br/><br/>") ;
 }
+?>
+<h2>Folio (estimation de la facture provisoire du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?>)</h2>
+<p>Folio du mois <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>">précédent</a> <a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$next_month->format('Y-m-d')?>&user=<?=$userId?>">suivant.</a></p>
+
+<?php
+$folio = new Folio($userId, $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) 
+	or journalise($originalUserId, "F", "Cannot get access to the folio");
 
 print("<table class=\"logTable\">\n") ;
 ShowTableHeader() ;
@@ -303,50 +338,7 @@ if ($diams_explanation)
 	print("<p>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</p>") ;
 
 $invoice_reason = 'folio' ;
-// Check the bookkeeping balance
 
-$result = mysqli_query($mysqli_link, "SELECT *
-		FROM $table_bk_balance JOIN $table_person ON bkb_account = CONCAT('400', ciel_code)
-		WHERE jom_id = $userId
-		ORDER BY bkb_date DESC
-		LIMIT 0,1")
-	or journalise($originalUserId, "F", "Cannot read booking keeping balance: " . mysqli_error($mysqli_link)) ;
-$row = mysqli_fetch_array($result) ;
-if ($row) {
-	$balance = -1 * $row['bkb_amount'] ;
-	if ($balance < 0)
-		$balance = '<span style="color: red;">' . $balance . '</span>' ;
-	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $balance &euro; (si négatif vous devez de l'argent au RAPCS ASBL).</br>Il faut plusieurs jours avant que vos paiements soient pris en compte.</p>") ;
-	if ($row['bkb_amount'] > 0) {
-		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
-		$invoice_reason = 'solde' ;
-	}
-} else 
-	print("<p>Le solde de votre compte n'est pas disponible.</p>") ;
-?>
-<h2>Factures r&eacute;centes</h2>
-<p><b>Voici quelques pièces comptables r&eacute;centes:
-<ul>
-<?php
-$sql = "SELECT * FROM $table_person JOIN $table_bk_invoices ON bki_email = email LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
-        WHERE jom_id = $userId" ;
-
-$result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Erreur systeme a propos de l'access factures: " . mysqli_error($mysqli_link)) ;
-$count = 0 ;
-while ($row = mysqli_fetch_array($result)) {
-	// Using the invoice date from the email import as the general ledger is in the future
-    print("<li><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_date] #$row[bki_id] &boxbox;</a>") ;
-	if ($row['bkl_debit'] != '') print(" facture pour un montant de $row[bkl_debit] &euro; <button onClick=\"pay('Facture $row[bki_id]', $row[bkl_debit]);\">Payer par QR-code</button>") ;
-	if ($row['bkl_credit'] != '') print(" note de crédit pour un montant de " . (0.0 - $row['bkl_credit']) . " &euro;") ;
-	print("</li>\n") ;
-    $count ++ ;
-}
-
-if ($count == 0) print("<li>Hélas, pas encore de facture à votre nom dans le système.</li>\n") ;
-
-print("</ul>\n</p>\n") ;
-?>
-<?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 
@@ -357,7 +349,7 @@ https://github.com/typpo/quickchart
 */
 ?>
 <span id="payment">
-<h2>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
+<h3>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
 <p>Le QR-code contient votre identifiant au niveau de la comptabilité
 RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant pour le commerçant).</p>
@@ -392,9 +384,9 @@ pay(invoice_reason, invoice_total) ;
 <hr>
 <h2>Détails de votre compte pour l'année en cours</h2>
 <p><b>Voici une vue de votre compte membre RAPCS depuis le 01/01/2022 (mise à jour chaque semaine).</p>
-<table border="1">
+<table class="table table-striped table-responsive table-hover">
 <thead>
-<th>Date</th><th>Opération</th><th>Pièce</th><th>Description</th><th>Débit</th><th>Crédit</th><th>Solde</th>
+<th>Date</th><th>Opération</th><th>Pièce</th><th>Description</th><th style="text-align: right;">Débit</th><th style="text-align: right;">Crédit</th><th style="text-align: right;">Solde</th>
 </thead>
 <tbody>
 <?php
@@ -420,7 +412,7 @@ while ($row = mysqli_fetch_array($result)) {
 		default : $journal = $row['bkl_journal'] ;
 	}
 	if ($row['bki_file_name'])
-		$reference = '<a href="' . $row['bki_file_name'] . '" target="_blank">' . $row['bki_id'] . " &boxbox;</a>" ;
+		$reference = '<a href="' . $row['bki_file_name'] . '" target="_blank">' . $row['bki_id'] . ' <span class="glyphicon glyphicon-new-window" title="Ouvrir la pièce comptable dans une autre fenêtre"></span></a>' ;
 	else
 		$reference = $row['bkl_reference'] ;
 	$debit="";
@@ -436,19 +428,18 @@ while ($row = mysqli_fetch_array($result)) {
 	$solde=$total_credit-$total_debit;
 	$solde=number_format($solde,2,".","");
 	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td style=\"text-align: right;\">$debit</td><td style=\"text-align: right;\">$credit</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
-	//	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td>-$row[bkl_debit]</td><td>$row[bkl_credit]</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
 }
 ?>
 </tbody>
 <tfoot>
 	<?php
 	$total_debit=-$total_debit;
-	print("<tr><td colspan=4>Totaux</td><td>$total_debit &euro;</td><td>$total_credit&nbsp;&euro;</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td><tr>");
+	print("<tr><td colspan=4>Totaux</td><td style=\"text-align: right;\">$total_debit &euro;</td><td style=\"text-align: right;\"$total_credit&nbsp;&euro;</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td><tr>");
 	?>
 </tfoot>
 </table>
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, août-septembre 2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, 2022-2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
 </body>
 </html>
