@@ -28,9 +28,13 @@ class FolioLine{
     public $time_end ;
     public $model ;
     public $plane;
+    public $cost_plane_minute ;
     public $cost_plane ;
     public $cost_fi ;
     public $cost_taxes ;
+    public $item_plane ; // From Ciel Commercial
+    public $item_tax ; // From Ciel Commercial
+    public $item_fi ; // From Ciel Commercial
     public $pax_count ;
     public $share_type ;
     public $share_member ;
@@ -51,6 +55,20 @@ class FolioLine{
         $this->from = $row['l_from'] ;
         $this->to = $row['l_to'] ;
         $this->plane = $row['l_plane'] ;
+        switch ($this->plane) {
+            case 'OO-ALD': $reference2 = '01' ; break ;
+            case 'OO-JRB': $reference2 = '02' ; break ;
+            case 'OO-APV': $reference2 = '03' ; break ;
+            case 'OO-SPP': $reference2 = '04' ; break ;
+            case 'OO-ALE': $reference2 = '05' ; break ;
+            case 'OO-FMX': $reference2 = '07' ; break ;
+            case 'OO-SPQ': $reference2 = '08' ; break ;
+            case 'PH-AML': $reference2 = '09' ; break ;
+            case 'OO-HBR': $reference2 = '11' ; break ;
+            case 'OO-MUA': $reference2 = '12' ; break ;
+            case 'OO-SHC': $reference2 = '17' ; break ; // ????
+            default: $reference2 = 'XX' ;
+        }
         $this->model = $row['l_model'] ;
         $this->compteur_vol = $row['compteur_vol'] ;
         $this->duration = ($row['compteur_vol']) ? $row['flight_duration'] : $row['duration'] ;
@@ -69,6 +87,7 @@ class FolioLine{
                 $this->cost_plane = 0 ;
             } else
                 $this->cost_plane = $row['cout'] * $this->duration ;	
+        $this->cost_plane_minute = $row['cout'] ;
         // Vol PIC- Recheck : 
         // Pour le Pilote -> SELF
         // Pour l'Instructeur -> Pilote_name    
@@ -82,24 +101,44 @@ class FolioLine{
                 $this->pic_name = db2web($row['instructor_name']) ;// DC 
         // Instructor cost
         if ($row['l_instructor'])
-            if ($row['l_instructor'] != $userId) // The user is not the FI
+            if ($row['l_instructor'] != $userId) { // The user is not the FI
                 $this->cost_fi = $row['l_instructor_paid'] * $cost_fi_minute * $this->duration ;
-            else
+            } else {
                 $this->cost_fi = - $row['l_instructor_paid'] * $revenue_fi_minute * $this->duration ;
-	    else
+        } else {
 		    $this->cost_fi = 0 ;
+        }
         // Initiation flights
         if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] == $code_initiation)
             $this->cost_fi -= $revenue_fi_initiation ;
+        // Let's generate the book keeping item reference
+        switch ($row['l_share_type']) {
+            case 'CP1': $reference3plane = '01' ; break ;
+            case 'CP2': $reference3plane = '02' ; break ;
+            case '': $reference3plane = '00' ; break ;
+            default: $reference3plane = '__' ;
+        }
+        switch ($row['l_instructor']) {
+            case  46: $reference3fi = '01' ; break ; // Benoît Mendes
+            case  50: $reference3fi = '05' ; break ; // Luc Wynand
+            case  59: $reference3fi = '06' ; break ; // Nicolas Claessen
+            case 118: $reference3fi = '07' ; break ; // David Gaspar
+            case '': $reference3fi = '00' ; break ;
+            default: $reference3fi = '__' ;
+        }
+        $this->item_plane = "1$reference2" . "0$reference3plane" ;
+        $this->item_fi = "2$reference2" . "0$reference3fi" ;
         // Flights taking off Belgium have to pay taxes (distance depending but ignored for now)
         // Except Local flight
         // And only the pilot pays the taxes
         if (stripos($row['l_from'], 'EB') === 0 and $row['l_from'] != $row['l_to'] and $row['l_pilot'] == $userId) {
             $this->cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
+            $this->item_tax = '402005' ;
         } else {
             $this->cost_taxes = 0 ;
+            $this->item_tax = NULL ;
         }
-        $this->pax_count = $row['pax_count'] ;
+        $this->pax_count = $row['l_pax_count'] ;
         $this->share_type = $row['l_share_type'] ;
         $this->share_member = $row['l_share_member'] ;
         $this->pilot_name = db2web($row['pilot_name']) ;
@@ -117,6 +156,8 @@ class Folio implements Iterator {
     public $start_date ;
     public $end_date ;
     public $count ;
+    public $fname ;
+    public $name ;
     private $result ;
     private $row ;
 
@@ -145,6 +186,8 @@ class Folio implements Iterator {
             or journalise($userId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
         $this->row = mysqli_fetch_assoc($this->result) ;
+        $this->fname = db2web($this->row['pilot_fname']) ;
+        $this->name = db2web($this->row['pilot_name']) ;
     }
 
     function __destruct() {
