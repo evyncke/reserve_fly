@@ -55,7 +55,7 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('myinvoices.php')) ;
 <!-- http://www.w3schools.com/bootstrap/ -->
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<title>Factures récentes</title>
+<title>Factures récentes de <?=$userName?></title>
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
@@ -79,11 +79,11 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('myinvoices.php')) ;
 <!-- End Matomo Code -->
 </head>
 <body>
-<h2>Factures récentes</h2>
+<h2>Factures récentes de <?=$userName?></h2>
 <p>Voici quelques pièces comptables r&eacute;centes (mises à jour une fois par semaine environ par nos bénévoles).</p>
-<table class="table table-striped table-responsive table-hover" >
+<table class="table table-striped table-responsive table-hover">
 	<thead>
-		<tr><th>Date</th><th>N° pièce</th><th>Type</th><th>Montant</th><th>Action</th></tr>
+		<tr><th>Date</th><th>N° pièce</th><th>Type</th><th style="text-align: right;">Montant</th><th>Action</th></tr>
 	</thead>
 <?php
 $sql = "SELECT * FROM $table_person JOIN $table_bk_invoices ON bki_email = email LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
@@ -95,15 +95,15 @@ while ($row = mysqli_fetch_array($result)) {
 	// Using the invoice date from the email import as the general ledger is in the future
 	$action = "<a href=\"$row[bki_file_name]\" target=\"_blank\"><span class=\"glyphicon glyphicon-new-window\" title=\"Ouvrir la pièce dans une autre fenêtre\"></span></a>" ;
     print("<tr><td>$row[bki_date]</td><td>$row[bki_id]</td>") ;
-	if ($row['bkl_debit'] != '') print("<td>Facture</td><td>$row[bkl_debit] &euro;</td><td>$action <a href=\"#\"  onClick=\"pay('facture $row[bki_id]', $row[bkl_debit]);\"><span class=\"glyphicon glyphicon-qrcode\" title=\"Payer la facture\"></span></a></td>") ;
-	if ($row['bkl_credit'] != '') print("<td>Note de crédit</td><td>" . (0.0 - $row['bkl_credit']) . " &euro;</td><td>$action</td>") ;
+	if ($row['bkl_debit'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td>$action <a href=\"#\"  onClick=\"pay('facture $row[bki_id]', $row[bkl_debit]);\"><span class=\"glyphicon glyphicon-qrcode\" title=\"Payer la facture\"></span></a></td>") ;
+	if ($row['bkl_credit'] != '') print("<td>Note de crédit</td><td  style=\"text-align: right;\">" . (0.0 - $row['bkl_credit']) . " &euro;</td><td>$action</td>") ;
 	print("</tr>\n") ;
     $count ++ ;
 }
 
-if ($count == 0) print("<li>Hélas, pas encore de facture à votre nom dans le système.</li>\n") ;
+print("</table>") ;
+if ($count == 0) print("<p class=\"text-warning\">Hélas, pas encore de facture à votre nom dans le système.</p>\n") ;
 ?>
-</table>
 <span id="payment" style="display: none;">
 <h2>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
 <p>Le QR-code contient votre identifiant au niveau de la comptabilité
