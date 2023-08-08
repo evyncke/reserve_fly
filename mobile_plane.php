@@ -67,7 +67,7 @@ exit ;
 
 <!-- should be hidden on phones -->
 <div class="col-sm-4">
-	<img class="img-responsive hidden-xs" src="<?=$plane_row[photo]?>">
+	<img class="img-responsive hidden-xs" src="<?=$plane_row['photo']?>">
 </div>
 
 <div class="col-md-8 col-sm-8">
