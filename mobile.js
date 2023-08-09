@@ -369,8 +369,6 @@ function init() {
 	if (userId > 0) {
 		document.getElementById('loginElem').style.visibility = 'hidden' ;
 		document.getElementById('loginElem').style.display = 'none' ;
-		document.getElementById('FBloginElem').style.visibility = 'visible' ;
-		document.getElementById('FBloginElem').style.display = 'block' ;
 		document.getElementById('logoutElem').style.visibility = 'visible' ;
 		document.getElementById('logoutElem').style.display = 'block' ;
 		document.getElementById('userNameElem').style.visibility = 'visible' ;
@@ -379,8 +377,6 @@ function init() {
 	} else {
 		document.getElementById('loginElem').style.visibility = 'visible' ;
 		document.getElementById('loginElem').style.display = 'block' ;
-		document.getElementById('FBloginElem').style.visibility = 'hidden' ;
-		document.getElementById('FBloginElem').style.display = 'none' ;
 		document.getElementById('logoutElem').style.visibility = 'hidden' ;
 		document.getElementById('logoutElem').style.display = 'none' ;
 		document.getElementById('userNameElem').style.visibility = 'hidden' ;
