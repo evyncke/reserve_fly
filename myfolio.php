@@ -264,15 +264,12 @@ foreach ($folio as $line)	{
 		$plane_token = ' &diams;' ;
 	} else
 		$plane_token = '' ;
-	// DB contains UTC time
-	$time_start = gmdate('H:i', strtotime("$line->l_start UTC")) ;
-	$time_end = gmdate('H:i', strtotime("$line->l_end UTC")) ;
 	print("<tr>
 		<td class=\"logCell\">$line->date</td>
 		<td class=\"logCell\">$line->from</td>
-		<td class=\"logCell\">$time_start</td>
+		<td class=\"logCell\">$line->time_start</td>
 		<td class=\"logCell\">$line->to</td>
-		<td class=\"logCell\">$time_end</td>
+		<td class=\"logCell\">$line->time_end</td>
 		<td class=\"logCell\">$line->model</td>
 		<td class=\"logCell\">$line->plane $plane_token</td>
 		<td class=\"logCell\">$duration_hh</td>
@@ -280,9 +277,8 @@ foreach ($folio as $line)	{
 
 	if ($line->instructor_code != $userId  and  $line->is_pic) { // PIC 
 		print("<td class=\"logCell\">SELF</td>\n") ; //Pilot Point of View. A PIC-Recheck is SELF
-	}
-	else  // Dual command
-		if ($userId == $line->instructor_name)
+	} else  // Dual command
+		if ($userId == $line->instructor_code)
 			print("<td class=\"logCell\">$line->pilot_name</td>\n") ; //Point of view of the Instructor. A PIC Recheck is a DC
 		else
 			print("<td class=\"logCell\">$line->instructor_name</td>\n") ;// DC 
