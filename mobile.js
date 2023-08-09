@@ -6,13 +6,6 @@ var
 var browserWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth ;
 var	browserHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
-window.onorientationchange = function() {
-  /*window.orientation returns a value that indicates whether iPhone is in portrait mode, landscape mode with the screen turned to the
-left, or landscape mode with the screen turned to the right. */
-	var orientation = window.orientation;
-	document.getElementById('logDiv').innerHTML += "New orientation: " + orientation + "<br/>" ;
-}
-
 function leadingZero(n) {
 	if (n < 10)
 		return '0' + n ;
@@ -111,7 +104,6 @@ function displayMETAR(station) {
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 }
-
 
 function refreshEphemerides(planningYear, planningMonth, planningDay) {
 	var XHR=new XMLHttpRequest();
@@ -351,7 +343,7 @@ function prefillDropdownMenus(selectName, valuesArray, selectedValue) {
 		if ('last_name' in valuesArray[i])
 			option.innerHTML = valuesArray[i].last_name + ' ' + valuesArray[i].first_name ;
 		else
-			option.inneHTML = valuesArray[i].name ;
+			option.innerHTML = valuesArray[i].name ;
 		option.value = valuesArray[i].id ;
 		option.selected = valuesArray[i].id == selectedValue ;
 		select.add(option) ;
