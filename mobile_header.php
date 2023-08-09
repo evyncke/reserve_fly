@@ -33,17 +33,21 @@ header('Link: </resa/mobile.css>;rel=preload;as=style, </resa/swiped-events.js>;
 <title>Mobile RAPCS ASBL</title>
 <!-- http://www.w3schools.com/bootstrap/ -->
 <!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
   /* Modify the background color */
   .navbar-custom {
-    background-color: lightskyBlue;
+    background-color: DodgerBlue;
+  }
+  /* Modify brand and text color */
+  .navbar-custom .navbar-text {
+            color: white;
   }
 </style>
 <!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 <!-- Allow the swipe events on phones & tablets -->
 <script src="swiped-events.js"></script>
 <script>
@@ -104,8 +108,7 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 ?>
 </head>
 <body <?=$body_attributes?>>
-<!-- deepskyBlue -->
-<nav class="navbar navbar-inverse">
+<nav class="navbar navbar-inverse bg-primary>
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
@@ -114,7 +117,7 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
         <span class="icon-bar"></span>                        
       </button>
       <a class="navbar-brand hidden-sm" href="#"><img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="32px" height="32px"></a>
-    </div>
+    </div><!-- navbar-header-->
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
         <li class="active"><a href="mobile.php?news">Home</a></li>
