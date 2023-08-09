@@ -17,7 +17,6 @@
 */
 
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
 
 session_name('RAPCSSID') ;
 session_start() ;
@@ -26,9 +25,8 @@ unset($_SESSION['jom_id']);
 session_unset();
 session_destroy();
 
-	header("Location: https://resa.spa-aviation.be/mobile.php?logout") ;
+header("Location: https://www.spa-aviation.be/resa/mobile.php?logout") ;
 journalise($userId, 'I', "$username is disconnected from the mobile web") ;
 
 exit() ;
-
 ?> 

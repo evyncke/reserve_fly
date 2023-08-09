@@ -15,7 +15,10 @@
    limitations under the License.
 
 */
-MustBeLoggedIn() ;
+if ($userId == 0) {
+  header("Location: https://www.spa-aviation.be/resa/connect.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+  exit ;
+}
 
 # HTTP/2 push of CSS via header()
 header('Link: </resa/mobile.css>;rel=preload;as=style, </resa/swiped-events.js>;rel=preload;as=script,</resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
@@ -165,7 +168,7 @@ if ($userId > 0) {
 <?php
 if ($userId > 0) {
 ?> 
-            <li><a href="mobile_team.php">Equipe SPW</a></li>
+            <li><a href="mobile_team.php">Équipe SPW</a></li>
 
 <?php
 }
@@ -180,7 +183,6 @@ if ($userId > 0) {
       <ul class="nav navbar-nav navbar-right">
         <!--li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li-->
         <li id="userNameElem" class="hidden-sm"><span id="userNameSpan" class="navbar-text"></span></li>
-        <!--li id="FBloginElem"><a href="<?= htmlspecialchars($fb_loginUrl)?>"><img src="facebook_blue_100.png" width="25" height="25"/> Lier à Facebook</a></li-->
         <li id="loginElem"><a href="https://resa.spa-aviation.be/mobile_login.php"><span class="glyphicon glyphicon-log-in"></span> Se connecter</a></li>
         <li id="logoutElem"><a href="mobile_logout.php"><span class="glyphicon glyphicon-log-out"></span> Se déconnecter</a></li>
       </ul><!-- nabvar-right -->
