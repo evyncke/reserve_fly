@@ -208,18 +208,21 @@ if ($row) {
 	if ($row['bkb_amount'] != 0) 
 		$balance = -1 * $row['bkb_amount'] ;
 	else
-		$balance = 0.0 ;
+		$balance = 0 ;
 	if ($balance < 0)
-		$balance = '<span style="color: red;">' . $balance . '</span>' ;
-	print("<p>Le solde de votre compte en date du $row[bkb_date] est de $balance &euro; (si négatif vous devez de l'argent au RAPCS ASBL). Ces informations sont mises à jour environ une fois par semaine par nos bénévoles.</p>") ;
+		$balance = "<span class=\"bg-danger\"> $balance &euro; (vous devez de l'argent au RAPCS ASBL)</span>" ;
+	else
+		$balance = "$balance &euro;" ;
+	print("<p class=\"lead\">Le solde de votre compte en date du $row[bkb_date] est de $balance.</p><p>Ces informations sont mises à jour environ une fois par semaine par nos bénévoles.</p>") ;
 	if ($row['bkb_amount'] > 0) {
 		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
 		$invoice_reason = 'solde' ;
 	}
 } else 
-	print("<p>Le solde de votre compte n'est pas disponible.</p>") ;
+	print("<p class=\"lead\">Le solde de votre compte n'est pas disponible.</p>") ;
 
-print("<a href=\"myinvoices.php?user=$userId\" class=\"btn btn-primary\">Factures récentes</a><br/>") ;
+print("<a href=\"myinvoices.php?user=$userId\" class=\"btn btn-primary\">Factures récentes</a> ") ;
+print("<a href=\"myledger.php?user=$userId\" class=\"btn btn-primary\">Mon compte</a><br/>") ;
 
 if ($userIsInstructor or $userIsAdmin) {
         print("En tant qu'instructeur/administrateur, vous pouvez consulter les situations comptables des autres membres: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
@@ -384,65 +387,6 @@ function pay(reason, amount) {
 
 pay(invoice_reason, invoice_total) ;
 </script>
-<hr>
-<h2>Détails comptables de votre compte</h2>
-<p>Voici une vue de votre compte membre RAPCS depuis le 01/01/2022 (mise à jour chaque semaine).</p>
-<div class="table-responsive">
-<table class="table table-striped table-hover">
-<thead>
-<th>Date</th><th>Opération</th><th>Pièce</th><th>Description</th><th style="text-align: right;">Débit</th><th style="text-align: right;">Crédit</th><th style="text-align: right;">Solde</th>
-</thead>
-<tbody>
-<?php
-$sql = "SELECT *
-	FROM $table_person JOIN $table_bk_ledger ON ciel_code = bkl_client
-		LEFT JOIN $table_bk_invoices ON bki_id = bkl_reference
-	WHERE jom_id = $userId
-	ORDER BY bkl_date ASC, bkl_posting ASC" ;
-$result = mysqli_query($mysqli_link, $sql) or journalise($userId, "F", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
-$total_debit = 0.0 ;
-$total_credit = 0.0 ;
-while ($row = mysqli_fetch_array($result)) {
-	switch ($row['bkl_journal']) {
-		case 'ANX': $journal = 'Report année précédente' ; break ;
-		case 'F01': $journal = 'Banque de la Poste' ; break ;
-		case 'F06': $journal = 'BNP Fortis' ; break ;
-		case 'F08': $journal = 'CBC' ; break ;
-		case 'OD':
-		case 'OPD': $journal = 'Operations diverses' ; break ;
-		case 'V':
-		case 'VEN': $journal = 'Facture' ; break ;
-		case 'VNC': $journal = 'Note de crédit' ; break ;
-		default : $journal = $row['bkl_journal'] ;
-	}
-	if ($row['bki_file_name'])
-		$reference = '<a href="' . $row['bki_file_name'] . '" target="_blank">' . $row['bki_id'] . ' <span class="glyphicon glyphicon-new-window" title="Ouvrir la pièce comptable dans une autre fenêtre"></span></a>' ;
-	else
-		$reference = $row['bkl_reference'] ;
-	$debit="";
-	if ($row['bkl_debit']) {
-		$debit="-".$row['bkl_debit'];
-		$total_debit += $row['bkl_debit'] ;
-	}
-	$credit="";
-	if ($row['bkl_credit']){ 
-		$credit="+".$row['bkl_credit'];
-		$total_credit += $row['bkl_credit'] ;
-	}
-	$solde=$total_credit-$total_debit;
-	$solde=number_format($solde,2,".","");
-	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td style=\"text-align: right;\">$debit</td><td style=\"text-align: right;\">$credit</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
-}
-?>
-</tbody>
-<tfoot>
-	<?php
-	$total_debit=-$total_debit;
-	print("<tr class=\"bg-info\"><td colspan=4>Totaux</td><td style=\"text-align: right;\">$total_debit &euro;</td><td style=\"text-align: right;\"$total_credit&nbsp;&euro;</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td><tr>");
-	?>
-</tfoot>
-</table>
-</div><!-- table-responsive-->
 <hr>
 <p><small>R&eacute;alisation: Eric Vyncke, 2022-2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
 Versions: PHP=<?=$version_php?></small></p>
