@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2020 Eric Vyncke
+   Copyright 2013-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -59,15 +59,9 @@ if ($id and is_numeric($id)) {
 	$comment = '' ;
 }
 	
-// Param plane, start, end, instructor, comment, pilot
-
-// Or should it be done in AJAX?
-// Modify & Add in AJAX but let's prefill via PHP
-
-$body_attributes = 'onload="init();initBook();"' ;
+$body_attributes = 'onload="init();initBook();"' ; // mobile_header.php will force this into the body tag
 
 require_once 'mobile_header.php' ;
-
 ?> 
 <script>
 var
@@ -75,7 +69,7 @@ var
 	pilotId = <?=(isset($booking)) ? $booking['r_pilot'] : $userId ?>,
 	instructorId = <?= ($booking['r_instructor'])? $booking['r_instructor'] : -1 ?> ;
 </script>
-<script src="planes.js"></script>
+<!--script src="planes.js"></script> already loaded by mobile_header.php -->
 <script src="instructors.js"></script>
 <script src="pilots.js"></script>
 
