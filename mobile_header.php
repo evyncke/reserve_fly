@@ -34,6 +34,12 @@ header('Link: </resa/mobile.css>;rel=preload;as=style, </resa/swiped-events.js>;
 <!-- http://www.w3schools.com/bootstrap/ -->
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<style>
+  /* Modify the background color */
+  .navbar-custom {
+    background-color: lightskyBlue;
+  }
+</style>
 <!-- jQuery library -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <!-- Latest compiled and minified JavaScript -->
@@ -98,7 +104,7 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 ?>
 </head>
 <body <?=$body_attributes?>>
-
+<!-- deepskyBlue -->
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
@@ -142,7 +148,7 @@ if ($userId > 0) {
 if ($userId > 0) {
 ?>
             <!--li><a href="mobile_logbook.php">Mon carnet de routes</a></li-->
-            <li><a href="IntroCarnetVol.php">Mon carnet de routes</a></li>
+            <li><a href="IntroCarnetVol.php">Encodage compteurs</a></li>
             <li><a href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
 <?php
 }
@@ -171,11 +177,10 @@ if ($userId > 0) {
       <ul class="nav navbar-nav navbar-right">
         <!--li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li-->
         <li id="userNameElem" class="hidden-sm"><span id="userNameSpan" class="navbar-text"></span></li>
-        <li id="FBloginElem"><a href="<?= htmlspecialchars($fb_loginUrl)?>"><img src="facebook_blue_100.png" width="25" height="25"/> Lier à Facebook</a></li>
+        <!--li id="FBloginElem"><a href="<?= htmlspecialchars($fb_loginUrl)?>"><img src="facebook_blue_100.png" width="25" height="25"/> Lier à Facebook</a></li-->
         <li id="loginElem"><a href="https://resa.spa-aviation.be/mobile_login.php"><span class="glyphicon glyphicon-log-in"></span> Se connecter</a></li>
         <li id="logoutElem"><a href="mobile_logout.php"><span class="glyphicon glyphicon-log-out"></span> Se déconnecter</a></li>
       </ul><!-- nabvar-right -->
     </div>
   </div>
 </nav>
- 
