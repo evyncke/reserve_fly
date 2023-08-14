@@ -348,7 +348,7 @@ function prefillDropdownMenus(selectName, valuesArray, selectedValue) {
 		if (valuesArray[i].id == selectedValue) {
 			option.selected = true ;
 			console.log(option.innerHTML) ;
-			option.innerHTML = option.innerHTML + ' <span class="caret">' ;
+			option.innerHTML += option.innerHTML + '    &#8964;' ;
 			console.log(option.innerHTML) ;
 		} else {
 			option.selected = false ;
