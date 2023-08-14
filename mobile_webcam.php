@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013 Eric Vyncke
+   Copyright 2013-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ if ($cam >= count($webcam_uris)) die("Invalid camera ID") ;
 $previous_cam = ($cam-1 < 0) ? count($webcam_uris) - 1 : $cam - 1 ;
 $next_cam = ($cam+1 >= count($webcam_uris)) ? 0 : $cam + 1 ;
 
-require_once 'mobile_header.php' ;
+require_once 'mobile_header5.php' ;
 
 ?> 
 <div class="container">
 
 <a href="<?=$webcam_uris[$cam]?>">
-<img class="img-responsive" src="<?=$webcam_uris[$cam]?>" id="webcamImg">
+<img class="img-fluid" src="<?=$webcam_uris[$cam]?>" id="webcamImg">
 </a>
 <script>
 function refreshWebcam() {

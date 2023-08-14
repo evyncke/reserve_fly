@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013 Eric Vyncke
+   Copyright 2013-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
-require_once 'mobile_header.php' ;
+require_once 'mobile_header5.php' ;
 
 $station = (isset($_REQUEST['station'])) ? trim(strtoupper($_REQUEST['station'])) : $default_metar_station ;
 ?> 
 <div class="container">
 
 <div class="row">
-	<div id="metarMessage" class="col bg-info">... fetching data over the Internet ...
+	<div id="metarMessage" class="col-sm-10 col-md-8 bg-muted">... fetching data over the Internet ...
 	</div> <!-- col -->
 </div> <!-- row -->
 

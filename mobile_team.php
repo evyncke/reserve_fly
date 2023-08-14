@@ -21,17 +21,17 @@ ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
 
-require_once 'mobile_header.php' ;
+require_once 'mobile_header5.php' ;
 
 ?> 
-<div class="container">
+<div class="container-fluid">
 
 <div class="row">
 <h3>Equipe du SPW</h3>
 </div> <!-- row -->
 
 <div class="row">
-	<img src="https://www.spa-aviation.be/attachments/article/314/SPW_team.png" width="1070" height="533"/>
+	<img class="img-fluid" src="https://www.spa-aviation.be/attachments/article/314/SPW_team.png" width="1070" height="533"/>
 </div> <!-- row -->
 
 

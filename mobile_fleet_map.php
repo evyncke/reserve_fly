@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2021 Eric Vyncke
+   Copyright 2021-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,11 +19,7 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
 
-if ($userId <= 0)
-	die("Vous devez &ecirc;tre connect&eacute; pour visualiser les vols de la journée.") ;
-	
 if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
 
 $header_postamble = "<!-- Load the MAP BOX scripts & CSS -->
@@ -33,11 +29,11 @@ $header_postamble = "<!-- Load the MAP BOX scripts & CSS -->
 " ;
 $body_attributes = "onload=\"init();initFleet($apt_longitude, $apt_latitude, '$mapbox_token', 'get_tracks.php?');\"" ;
 
-require_once 'mobile_header.php' ;
+require_once 'mobile_header5.php' ;
 ?> 
 
 
-<div class="container" style="height: 100%; width: 100%">
+<div class="container-fluid">
 
 <div class="page-header">
 <h3>Vols de nos avions ces dernières 24 heures</h3>

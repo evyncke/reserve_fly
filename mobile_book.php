@@ -19,7 +19,6 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
 
 $id = (isset($_REQUEST['id'])) ? $_REQUEST['id'] : '' ; // Direct access to a booking by id
 $auth = (isset($_REQUEST['auth'])) ? $_REQUEST['auth'] : '';
@@ -45,7 +44,7 @@ if ($id and is_numeric($id)) {
 	$duration = $booking['r_duration'] ;
 	$comment = db2web($booking['r_comment']) ;
 } else {
-	$action = "Créer" ;
+	$action = "Réserver" ;
 	$startDay = date('Y-m-d') ;
 	$endDay = $startDay ;
 	// Need to round up to next 15 minutes
@@ -61,7 +60,7 @@ if ($id and is_numeric($id)) {
 	
 $body_attributes = 'onload="init();initBook();"' ; // mobile_header.php will force this into the body tag
 
-require_once 'mobile_header.php' ;
+require_once 'mobile_header5.php' ;
 ?> 
 <script>
 var
@@ -75,6 +74,7 @@ var
 
 <div class="container">
 
+<!-- Not a real form as mobile.js has the onclick code to submit the form -->
 <input type="hidden" id="departingAirport" value="<?=$booking['r_from']?>">
 <input type="hidden" id="destinationAirport" value="<?=$booking['r_to']?>">
 <input type="hidden" id="via1Airport" value="<?=$booking['r_via1']?>">
@@ -89,67 +89,49 @@ var
 <div class="alert alert-info alert-dismissible" id="bookingMessageDiv" style="visibility: hidden; display: none;"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><span id="bookingMessageSpan"></span></div>
 
 <div class="row">
-	<div class="form-group">
-		<label class="control-label col-xs-6 col-md-3" for="pilotSelect">Pilote:</label>
+		<label class="form-label col-xs-6 col-md-3" for="pilotSelect">Pilote:</label>
 		<div class="col-xs-6 col-md-3">
 			<select class="form-control" id="pilotSelect" name="pilot"></select>
 		</div>
-	</div>
 
-	<div class="form-group">
 		<label class="control-label col-xs-6 col-md-3" for="instructorSelect">Instructeur:</label>
 		<div class="col-xs-6 col-md-3">
 			<select class="form-control" id="instructorSelect" name="instructor"></select>
 		</div>
-	</div>
 </div><!-- row -->
 
 <div class="row">
-	<div class="form-group">
 		<label class="control-label col-xs-6 col-md-3" for="planeSelect">Avion:</label>
 		<div class="col-xs-6 col-md-3">
 			<select class="form-control" id="planeSelect" name="plane"></select>
 		</div>
-	</div>
 
-	<div class="form-group">
 		<label class="control-label col-xs-6 col-md-3" for="durationInput">Durée vol (heure):</label>
 		<div class="col-xs-6 col-md-3">
 			<input type="number" min="0" max="50" class="form-control" id="flightDuration" name="duration" value="<?=$duration?>">
 		</div>
-	</div>
 </div><!-- row -->
 
 <div class="row">
-	<div class="form-group">
 		<label class="control-label col-xs-6 col-md-4" for="startDayInput">Jour début:</label>
 		<div class="col-xs-6 col-md-2">
 			<input type="date" class="form-control" id="startDayInput" name="startDay" value="<?=$startDay?>">
 		</div>
-	</div>
-
-	<div class="form-group">
 		<label class="control-label col-xs-6 col-md-4" for="startHourInput">Heure début:</label>
 		<div class="col-xs-6 col-md-2">
 			<input type="time" class="form-control" id="startHourInput" name="startHour" value="<?=$startHour?>" min="09:00" max="20:00" step="900">
 		</div>
-	</div>
 </div><!-- row -->
 
 <div class="row">
-	<div class="form-group">
 		<label class="control-label col-xs-6 col-md-4" for="endDayInput">Jour fin:</label>
 		<div class="col-xs-6 col-md-2">
 			<input type="date" class="form-control" id="endDayInput" name="endDay" value="<?=$endDay?>">
 		</div>
-	</div>
-
-	<div class="form-group">
 		<label class="control-label col-xs-6 col-md-4" for="endHourInput">Heure fin:</label>
 		<div class="col-xs-6 col-md-2">
 			<input type="time" class="form-control" id="endHourInput" name="endHour" value="<?=$endHour?>" min="09:00" max="20:00" step="900">
 		</div>
-	</div>
 </div><!-- row -->
 
 <div class="row">
@@ -160,7 +142,6 @@ var
 
 
 <div class="row">
-	<div class="form-group">
 		<div class="col-xs-3 col-md-4">
 <?php
 if ($action == 'Modifier') {
@@ -174,7 +155,6 @@ if ($action == 'Modifier') {
 }
 ?>
    		</div>
-	</div><!-- formgroup-->
 </div><!-- row -->
 
 <?php

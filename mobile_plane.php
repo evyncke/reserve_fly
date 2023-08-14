@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013 Eric Vyncke
+   Copyright 2013-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
 
 // Param plane
 
@@ -44,30 +43,16 @@ $result2 = mysqli_query($mysqli_link, "select $index_column as compteur_pilote, 
 	or die("Cannot get pilote engine time:" . mysqli_error($mysqli_link)) ;
 $row2 = mysqli_fetch_array($result2) ;
 
-require_once 'mobile_header.php' ;
+require_once 'mobile_header5.php' ;
 
 ?> 
-<div class="container">
-
-<?php
-if ($userId <= 0) {
-?>
-<br/><br/><br/><br/><br/>
-<div class="row text-center">
-	<div class="col-xs-12 col-md-6 jumbotron vertical-center" style="background-color: lightblue;">
-		Vous devez être connecté(e) pour voir les détails des avions.<br/>Utilisez le bouton "Se connecter" en haut à droite.
-	</div>
-</div>
-<?php
-exit ;
-} # if ($userId <= 0)
-?>
+<div class="container-fluid">
 
 <div class="row">
 
 <!-- should be hidden on phones -->
 <div class="col-sm-4">
-	<img class="img-responsive hidden-xs" src="<?=$plane_row['photo']?>">
+	<img class="img-fluid hidden-sm" src="<?=$plane_row['photo']?>">
 </div>
 
 <div class="col-md-8 col-sm-8">
@@ -88,10 +73,10 @@ function generateMaintenanceClass($entretien, $compteur) {
 	$class = generateMaintenanceClass($plane_row['entretien'], $row2['compteur_pilote']) ;
 	print("<tr$class><td>Dernier compteur pilote<span class=\"hidden-xs\"> ($row2[compteur_pilote_date])</span></td><td>$row2[compteur_pilote]</td></tr>\n") ;
 	if ($plane_row['poh'])
-		print("<tr><td>POH </td><td><a href=\"$plane_row[poh]\"><span class=\"glyphicon glyphicon-download-alt\"></span></a></td></tr>\n") ;
+		print("<tr><td>POH </td><td><a href=\"$plane_row[poh]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
 	if ($plane_row['checklist'])
-		print("<tr><td>Checklist</td><td><a href=\"$plane_row[checklist]\"><span class=\"glyphicon glyphicon-download-alt\"></span></a></td></tr>\n") ;
-	print("<tr><td>Dernier vol sur FlightAware  <span class=\"glyphicon glyphicon-new-window\"></span></td><td><a href=\"https://flightaware.com/live/flight/" . strtoupper($plane_row['id']) . "\" target=\"_blank\"><img src=\"fa.ico\" border=\"0\" width=\"24\" height=\"24\"></a></td></tr>\n") ;
+		print("<tr><td>Checklist</td><td><a href=\"$plane_row[checklist]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
+	print("<tr><td>Dernier vol sur FlightAware  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"https://flightaware.com/live/flight/" . strtoupper($plane_row['id']) . "\" target=\"_blank\"><img src=\"fa.ico\" border=\"0\" width=\"24\" height=\"24\"></a></td></tr>\n") ;
 ?>
 </table>
 </div><!-- col-->
@@ -117,8 +102,8 @@ function generateMaintenanceClass($entretien, $compteur) {
 		ORDER BY r_start ASC LIMIT 0,10")
 		or die("Cannot retrieve bookings($plane): " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
-		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
-		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
+		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\"></i></a>" : '' ;
+		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><i class=\"bi bi-telephone-fill\"></i></a>" : '' ;
 		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-toggle="tooltip" data-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
 			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
