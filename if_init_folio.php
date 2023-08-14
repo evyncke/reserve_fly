@@ -131,60 +131,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 	$filterType = '' ;
 	$filter = ' ' ;
 	$date_filter = " AND f_date_paid >= '" . $since . "' AND f_date_paid <= '" . $monthAfterString. "'";
-	/*
-	$result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today 
-		FROM $table_flight JOIN $table_pax_role ON f_id = pr_flight JOIN $table_pax ON pr_pax = p_id 
-		WHERE  pr_role = 'C' $filterType $filter $date_filter 
-		ORDER BY f_date_paid") 
-		or journalise($userId, "F", "Impossible de lister les vols: " . mysqli_error($mysqli_link));
-		
-	while ($row = mysqli_fetch_array($result)) {
-		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
-		$date=$row['f_date_paid'];
-		$datePaiement=$date." 12:00:00";
-		$datePaiement=gmdate('d/m/Y', strtotime($datePaiement)) ;
-		$type=$row['f_type'];
-		$gift=$row['f_gift'];
-		$dateFlown="";
-		if(isset($row['f_date_flown'])) {
-			$dateFlown=gmdate('Y-m-d', strtotime("$row[f_date_flown]")) ;
-		}
-		$typeVol="";
-		$moyenPaiement="";
-		if($gift==1) {
-			$typeVol=$typeVol."Bon ";
-		}
-		else {
-			$typeVol=$typeVol."Vol ";
-		}
-		if($type=="I") {
-			$typeVol=$typeVol."INIT ";
-		}
-		else if($type=="D") {
-			$typeVol=$typeVol."IF ";
-		}
-		else {
-			$typeVol=$typeVol."? ";
-		}
-		
-		if($dateFlown == $date) {
-			$moyenPaiement="Bancontact";
-		}
-		else {
-			$moyenPaiement="Virement";			
-		}
-		//$moyenPaiement=$moyenPaiement." ".$dateFlown."---".$date;
-		$montant=$row['f_amount_payment'];
-		$referencePaiement=db2web($row['f_reference_payment']);		
-		if($referencePaiement=="Facture DHF") {
-			$montant=0.00;
-			$moyenPaiement="Facture";
-			$referencePaiement="Facture DHF";
-		}
-		
-		print("<tr><td class=\"logCell\">$datePaiement</td><td class=\"logCell\">$reference</td class=\"logCell\"><td class=\"logCell\">$typeVol</td><td class=\"logCell\">$moyenPaiement</td><td class=\"logCell\">$montant</td><td class=\"logCell\">$referencePaiement</td></tr>");
-	}
-	*/
+
 	$date_filter_ledger = " fl_date >= '" . $since . "' AND fl_date <= '" . $monthAfterString. "'";
 
 	$resultLedger = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today 
@@ -267,26 +214,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 	$filterType = ' AND f_type ="I"' ;
 	$filter = ' AND f_date_flown IS NOT NULL' ;
 	$date_filter = " AND f_date_flown >= '" . $since . "' AND f_date_flown <= '" . $monthAfterString. "'";
-	/*
-	$result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today 
-		FROM $table_flight AS f  
-		JOIN $table_person ON f.f_pilot = jom_id
-		JOIN $table_logbook AS l ON f.f_booking = l.l_booking
-		WHERE true $filterType $filter $date_filter 
-		GROUP BY f_id
-		ORDER BY f_date_flown") 
-		or journalise($userId, "F", "Impossible de lister les vols: " . mysqli_error($mysqli_link));
-	while ($row = mysqli_fetch_array($result)) {
-		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
-		$date=$row['f_date_flown'];
-		$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
-		$plane=$row['l_plane'];
-		$pilote=db2web($row['first_name'])." ".db2web($row['last_name']) ;
-		$montant=$row['f_amount_payment'];
-		$referenceCiel="400R008 (INIT)";
-		print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td><td class=\"logCell\">$referenceCiel</td></tr>");
-	}
-	*/
+
 	$result = mysqli_query($mysqli_link, "SELECT *, SUM(fl_amount) as prix, SYSDATE() as today 
 		FROM $table_flight AS f  
 		JOIN $table_person ON f.f_pilot = jom_id
@@ -305,7 +233,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 			$pilote=db2web($row['first_name'])." ".db2web($row['last_name']) ;
 			$montant=$row['prix'];
 			$montantTotal+=$montant;
-			$referenceCiel="400R008 (INIT)";
+			$referenceCiel="400R004 (INIT)";
 			print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td><td class=\"logCell\">$referenceCiel</td></tr>");
 	}
 	$montantTotalText=number_format($montantTotal, 2, '.', ' ') ;
@@ -335,30 +263,6 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 	$filterType = ' AND f_type ="D"' ;
 	$filter = ' AND f_date_flown IS NOT NULL' ;
 	$date_filter = " AND f_date_flown >= '" . $since . "' AND f_date_flown <= '" . $monthAfterString. "'";
-	/*
-	$result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today 
-		FROM $table_flight AS f  
-		JOIN $table_person ON f.f_pilot = jom_id
-		JOIN $table_logbook AS l ON f.f_booking = l.l_booking
-		WHERE true $filterType $filter $date_filter 
-		GROUP BY f_id
-		ORDER BY f_date_flown") 
-		or journalise($userId, "F", "Impossible de lister les vols: " . mysqli_error($mysqli_link));
-	while ($row = mysqli_fetch_array($result)) {
-		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
-		$date=$row['f_date_flown'];
-		$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
-		$plane=$row['l_plane'];
-		$pilote=db2web($row['first_name'])." ".db2web($row['last_name']) ;
-		$montant=$row['f_amount_payment'];
-		$referenceCiel="400R006 (IF)";
-		$referencePaiement=db2web($row['f_reference_payment']);
-		if($referencePaiement=="Facture DHF") {
-			$referenceCiel="400DHF (IF)";
-		}
-		print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td><td class=\"logCell\">$referenceCiel</td></tr>");
-	}
-	*/
 	$result = mysqli_query($mysqli_link, "SELECT *, SUM(fl_amount) as prix, SYSDATE() as today 
 		FROM $table_flight AS f  
 		JOIN $table_person ON f.f_pilot = jom_id
