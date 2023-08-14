@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -287,13 +287,12 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 		print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td><td class=\"logCell\">$referenceCiel</td></tr>");
 	}
 	*/
-	$result = mysqli_query($mysqli_link, "SELECT *, SUM(fl_amount) as prix, SYSDATE() as today 
+	$result = mysqli_query($mysqli_link, "SELECT DISTINCT f_reference, f_date_flown, first_name, last_name, l_plane, fl_amount as prix 
 		FROM $table_flight AS f  
 		JOIN $table_person ON f.f_pilot = jom_id
 		JOIN $table_logbook AS l ON f.f_booking = l.l_booking
 		JOIN $table_flights_ledger ON f_id = fl_flight
 		WHERE true $filterType $filter $date_filter 
-		GROUP BY f_id
 		ORDER BY f_date_flown") 
 		or journalise($userId, "F", "Impossible de lister les vols: " . mysqli_error($mysqli_link));
 	$montantTotal=0.0;
