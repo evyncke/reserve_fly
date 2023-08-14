@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2021 Eric Vyncke
+   Copyright 2021-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
 
 if (false and $userId <= 0)
 	die("Vous devez &ecirc;tre connect&eacute; pour visualiser les vols de la journée.") ;
@@ -37,11 +36,11 @@ $header_postamble = "<!-- Load the MAP BOX scripts & CSS -->
 " ;
 $body_attributes = "onload=\"init();initLocalFlights($apt_longitude, $local_longitude_bound, $apt_latitude, $local_latitude_bound, $local_altimeter_bound, '$mapbox_token', $zoom_level, 'get_local_tracks.php?mult=0.5');\"" ;
 
-require_once 'mobile_header.php' ;
+require_once 'mobile_header5.php' ;
 ?> 
 
 
-<div class="container" style="height: 100%; width: 100%">
+<div class="container-fluid">
 
 <div class="page-header">
 <h3>Vols proches de l'aéroport ces <?=$local_delay?> dernières minutes</h3>

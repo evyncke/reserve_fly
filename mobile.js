@@ -345,7 +345,14 @@ function prefillDropdownMenus(selectName, valuesArray, selectedValue) {
 		else
 			option.innerHTML = valuesArray[i].name ;
 		option.value = valuesArray[i].id ;
-		option.selected = valuesArray[i].id == selectedValue ;
+		if (valuesArray[i].id == selectedValue) {
+			option.selected = true ;
+			console.log(option.innerHTML) ;
+			option.innerHTML = option.innerHTML + ' <span class="caret">' ;
+			console.log(option.innerHTML) ;
+		} else {
+			option.selected = false ;
+		}
 		select.add(option) ;
 	}
 }
@@ -354,7 +361,6 @@ function initBook() { // Only used by mobile_book
 	prefillDropdownMenus('plane', planes, planeId) ;
 	prefillDropdownMenus('pilot', pilots, pilotId) ;
 	prefillDropdownMenus('instructor', instructors, instructorId) ;
-
 }
 
 function init() {
@@ -362,7 +368,7 @@ function init() {
 	var planesDropdown = document.getElementById('planesDropdown') ;
 	for (var plane = 0; plane < planes.length; plane++) {
 		var option = document.createElement('li');
-		option.innerHTML = '<a href="mobile_plane.php?plane=' + planes[plane].name + '">' + planes[plane].name;
+		option.innerHTML = '<a class="dropdown-item" href="mobile_plane.php?plane=' + planes[plane].name + '">' + planes[plane].name;
 		planesDropdown.appendChild(option) ;
 	}
 	// Update the nav bar with login status
@@ -371,16 +377,12 @@ function init() {
 		document.getElementById('loginElem').style.display = 'none' ;
 		document.getElementById('logoutElem').style.visibility = 'visible' ;
 		document.getElementById('logoutElem').style.display = 'block' ;
-		document.getElementById('userNameElem').style.visibility = 'visible' ;
-		document.getElementById('userNameElem').style.display = 'block' ;
 		document.getElementById('userNameSpan').innerHTML = userName + ' (' + userFullName + ')' ;
 	} else {
 		document.getElementById('loginElem').style.visibility = 'visible' ;
 		document.getElementById('loginElem').style.display = 'block' ;
 		document.getElementById('logoutElem').style.visibility = 'hidden' ;
 		document.getElementById('logoutElem').style.display = 'none' ;
-		document.getElementById('userNameElem').style.visibility = 'hidden' ;
-		document.getElementById('userNameElem').style.display = 'none' ;
 		document.getElementById('userNameSpan').innerHTML = '' ;
 	}
 }

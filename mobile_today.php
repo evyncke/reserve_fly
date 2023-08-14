@@ -19,9 +19,8 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
 
-require_once 'mobile_header.php' ;
+require_once 'mobile_header5.php' ;
 
 $displayTimestamp = (isset($_REQUEST['time'])) ? intval($_REQUEST['time']) : time() ;
 
@@ -30,14 +29,25 @@ $today = date("l j F", $displayTimestamp) ;
 $sql_date = date('Y-m-d', $displayTimestamp) ;
 
 ?> 
-<div class="container">
+<div class="container-fluid">
 
 <div class="page-header">
-<h3>Réservations du <?=$today?></h3>
-</div> <!-- row -->
+<h3>Réservations des avions</h3>
+<?php
+if ($userId > 0) { // Only members can see all bookings
+?>
+<ul class="pagination justify-content-center">
+	<li class="page-item"><a class="page-link" href="<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp - 24 * 3600)?>">Jour précédent</a></li>
+	<li class="page-item"><a class="page-link active" href="#"><?=$today?></a></li>
+	<li class="page-item"><a class="page-link" href="<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp + 24 * 3600)?>">Jour suivant</a></li>
+</ul> <!-- pagination -->
+<?php
+}
+?>
+</div> <!-- page-header -->
 
 <div class="row">
-<table class="col-sm-12 table table-responsive table-striped">
+<table class="col-sm-12 col-lg-10 table table-striped">
 	<tr><th>Avion</th><th>De</th><th>A</th><th>Pilote</th><th>Commentaire</th></tr>
 <?php
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.cell_phone as icell_phone, i.jom_id as iid,
@@ -50,14 +60,15 @@ $sql_date = date('Y-m-d', $displayTimestamp) ;
 		ORDER BY r_start, r_plane ASC LIMIT 0,20")
 		or die("Cannot retrieve bookings($plane): " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
-		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
+		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\"></i></span></a>" : '' ;
 		$pname = ($row['pfirst_name'] == '') ? $row['pname'] : 
 			'<span class="hidden-xs">' . db2web($row['pfirst_name']) . ' </span><b>' . db2web($row['plast_name']) . '</b>' ;
-		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
-		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-toggle="tooltip" data-placement="right" title="' .
+		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><i class=\"bi bi-telephone-fill\"></i></span></a>" : '' ;
+		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-bs-toggle="tooltip" data-bs-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
 			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
 		$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="danger"' : '' ;
+		// Display date if not today, else display time
 		if (strpos($row['r_start'], $sql_date) === 0) 
 			$row['r_start'] = substr($row['r_start'], 11) ;
 		else
@@ -72,16 +83,10 @@ $sql_date = date('Y-m-d', $displayTimestamp) ;
 </table>
 </div><!-- row -->
 
-<!-- Display previous / next -->
+<!-- Swipe previous / next -->
 <?php
 if ($userId > 0) { // Only members can see all bookings
 ?>
-<div class="row">
-<ul class="pager col-xs-12">
-<li class="previous"><a href="<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp - 24 * 3600)?>">Jour précédent</a></li>
-<li class="next"><a href="<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp + 24 * 3600)?>">Jour suivant</a></li>
-</ul>
-</div> <!-- row -->
 <script>
 document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp + 24 * 3600)?>' }) ;
 document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp - 24 * 3600)?>' }) ;
@@ -90,13 +95,6 @@ document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVE
 } // $userId > 0
 ?>
 </div> <!-- container-->
-
-<!-- for the tooltip -->
-<script>
-$(document).ready(function(){
-    $('[data-toggle="tooltip"]').tooltip();   
-});
-</script>
 
 </body>
 </html>

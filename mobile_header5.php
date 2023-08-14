@@ -35,14 +35,14 @@ header('Link: </resa/mobile.css>;rel=preload;as=style, </resa/mobile.js>;rel=pre
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <title>Mobile RAPCS ASBL</title>
 
-<!-- using legacy bootstrap 3 -->
-<!-- http://www.w3schools.com/bootstrap/ -->
+<!-- Using latest bootstrap 5 -->
 <!-- Latest compiled and minified CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Latest compiled JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Glyphicon equivalent -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
 <!-- Allow the swipe events on phones & tablets -->
 <!-- TODO should only be loaded when required -->
@@ -105,89 +105,86 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 ?>
 </head>
 <body <?=$body_attributes?>>
-<nav class="navbar navbar-inverse bg-primary">
+<nav class="navbar navbar-expand-sm bg-success"> <!-- fixed-top should prevent scrolling but invade bottom part... -->
   <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>                        
-      </button>
-      <a class="navbar-brand hidden-sm" href="#"><img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="32px" height="32px"></a>
-    </div><!-- navbar-header-->
-    <div class="collapse navbar-collapse" id="myNavbar">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="mobile.php?news">Home</a></li>
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#">Réservations<span class="caret"></span></a>
+      <a class="navbar-brand hidden-sm" href="mobile.php?news"><img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="32px" height="32px"></a>
+    <!--div class="collapse navbar-collapse" id="myNavbar"-->
+      <ul class="navbar-nav"><!-- nav-bar left -->
+        <li class="navbar-item">
+          <a class="nav-link" href="mobile.php?news">Home</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Réservations<span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <!--li><a href="mobile.php">Ma prochaine</a></li-->
 <?php
 if ($userId > 0) {
 ?>
-            <li><a href="mobile_book.php">Nouvelle réservation</a></li>
+            <li><a class="dropdown-item" href="mobile_book.php">Nouvelle réservation</a></li>
 <?php
 }
 if ($userId > 0) {
 ?>
-            <li><a href="mobile.php">Mes réservations</a></li>
+            <li><a class="dropdown-item" href="mobile.php">Mes réservations</a></li>
 <?php
 }
 ?>
-            <li><a href="mobile_today.php">Réservations de ce jour</a></li>
+            <li><a class="dropdown-item" href="mobile_today.php">Réservations de ce jour</a></li>
 <?php
 	if ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager)
-		print("<li><a href=\"flight_home.php\">Vols découvertes</a></li>\n") ;
+		print("<li><a class=\"dropdown-item\" href=\"flight_home.php\">Vols découvertes <i class=\"bi bi-box-arrow-up-right\"></i></a></li>\n") ;
 ?>
           </ul>
         </li>
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#">Avions<span class="caret"></span></a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Avions<span class="caret"></span></a>
           <ul class="dropdown-menu" id="planesDropdown">
 <?php
 if ($userId > 0) {
 ?>
             <!--li><a href="mobile_logbook.php">Mon carnet de routes</a></li-->
-            <li><a href="IntroCarnetVol.php">Encodage compteurs</a></li>
-            <li><a href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
+            <li><a class="dropdown-item" href="IntroCarnetVol.php">Encodage compteurs <i class="bi bi-box-arrow-up-right"></i></span></a></li>
+            <li><a class="dropdown-item" href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
+            <!-- init() in mobile.js will insert all active planes -->
 <?php
 }
 ?>
           </ul>
         </li>
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#">Aéroport<span class="caret"></span></a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Aéroport<span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a href="mobile_ephemerides.php">Ephémérides</a></li>
+            <li><a class="dropdown-item" href="mobile_ephemerides.php">Ephémérides</a></li>
 <?php
 if ($userId > 0) {
 ?> 
-            <li><a href="mobile_team.php">Équipe SPW</a></li>
+            <li><a class="dropdown-item" href="mobile_team.php">Équipe SPW</a></li>
 
 <?php
 }
 ?>
-            <li><a href="mobile_local_flights.php">Vols proches</a></li>
-            <li><a href="mobile_metar.php">METAR</a></li>
-            <li><a href="mobile_webcam.php?cam=0">Webcam Apron</a></li>
-            <li><a href="mobile_webcam.php?cam=1">Webcam Fuel</a></li>
+            <li><a class="dropdown-item" href="mobile_local_flights.php">Vols proches</a></li>
+            <li><a class="dropdown-item" href="mobile_metar.php">METAR</a></li>
+            <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam Apron</a></li>
+            <li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam Fuel</a></li>
           </ul>
         </li>
-      </ul><!-- myNavbar -->
-      <ul class="nav navbar-nav navbar-right">
+      </ul><!-- navbar left was myNavbar -->
+      <ul class="nav navbar-nav ms-auto">
         <!--li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li-->
 <!-- testing....
         <li id="userNameElem"><span id="userNameSpan" class="navbar-text"></span></li>
         <li id="loginElem"><a href="https://resa.spa-aviation.be/mobile_login.php"><span class="glyphicon glyphicon-log-in"></span>Se connecter</a></li>
         <li id="logoutElem"><a href="mobile_logout.php"><span class="glyphicon glyphicon-log-out"></span>Se déconnecter</a></li>
 -->
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="userNameElem"><span id="userNameSpan" XXclass="navbar-text"></span><span class="caret"></a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><span id="userNameSpan"></span><span class="caret"></span></a>
           <ul class="dropdown-menu">
-              <li id="logoutElem"><a href="mobile_logout.php"><span class="glyphicon glyphicon-log-out"></span>Se déconnecter</a></li>
+              <li id="logoutElem">
+                <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i></span>Se déconnecter</a>
+              </li>
           </ul>
         </li> <!-- dropdown -->
-        <li id="loginElem"><a href="https://resa.spa-aviation.be/mobile_login.php"><span class="glyphicon glyphicon-log-in"></span>Se connecter</a></li>
+        <li id="loginElem"><a href="https://resa.spa-aviation.be/mobile_login.php"><i class="bi bi-box-arrow-in-right"></i>Se connecter</a></li>
       </ul><!-- nabvar-right -->
     </div>
   </div>
