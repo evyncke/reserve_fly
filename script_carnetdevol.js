@@ -1017,11 +1017,15 @@ function check_numero_vol()
 		aTextInput.style.backgroundColor = 'orange';
 		aFlag=false;
 	}
-	else if(aNumeroVol < 230000 || aNumeroVol > 299999) {
+	else if(aNumeroVol < 220000 || aNumeroVol > 299999) {
 		aTextInput.style.backgroundColor = 'orange';
 		aFlag=false;
 	}
 	if(!aFlag) {
+		if(aFlightType==""){
+			if(aCPType==-3) aFlightType="INIT";
+			if(aCPType==-4) aFlightType="IF";
+		}
 		alert("Le numéro du vol n'est pas correct. Il doit avoir une structure du genre.\n"+aFlightType+"-231234 ou V-"+aFlightType+"-231234 ou 231234");
 	}
 }
