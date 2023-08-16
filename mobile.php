@@ -19,7 +19,7 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-require_once 'mobile_header.php' ;
+require_once 'mobile_header5.php' ;
 
 
 $id = (isset($_REQUEST['id'])) ? $_REQUEST['id'] : '' ; // Direct access to a booking by id
@@ -194,10 +194,10 @@ if ($booking['instructor_name'] != '') {
 
 <!-- Display previous / next -->
 <div class="row">
-<ul class="pager col-xs-12">
+<ul class="pagination justify-content-center"">
 <?php
 if ($previous_id != '') {
-	print("<li class=\"previous\"><a href=\"$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth\">Ma r&eacute;servation pr&eacute;c&eacute;dente</a></li>\n") ;
+	print("<li  class=\"page-item\"><a class=\"page-link\" href=\"$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth\">Ma r&eacute;servation pr&eacute;c&eacute;dente</a></li>\n") ;
 	print("<script>
 		// Swipe to change to previous booking
 		document.addEventListener('swiped-right', function(e) {location.href='$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth' ; }) ;
@@ -205,7 +205,7 @@ if ($previous_id != '') {
 
 }
 if ($next_id != '') {
-	print("<li class=\"next\"><a href=\"$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth\">Ma r&eacute;servation suivante</a></li>\n") ;
+	print("<li class=\"page-item\"><a class=\"page-link\" href=\"$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth\">Ma r&eacute;servation suivante</a></li>\n") ;
 	print("<script>
 		// Swipe to change to next booking
 		document.addEventListener('swiped-left', function(e) {location.href='$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth' ; }) ;
@@ -249,7 +249,7 @@ Vous n'avez pas encore encodé les index moteurs.
 <div class="row">
 	<br/>
 	<div class="col-xs-12 text-center ">
-		<button id="newLogbookButton" class="btn btn-success" onclick="newLogbookClick(<?=$id?>, '<?=$auth?>');">Carnet de route</button>
+		<button id="newLogbookButton" class="btn btn-success" onclick="newLogbookClick(<?=$id?>, '<?=$auth?>');">Introduction dans carnet de routes</button>
 	</div><!-- col-->
 </div> <!-- row -->
 <?php
