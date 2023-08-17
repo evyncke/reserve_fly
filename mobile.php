@@ -90,6 +90,7 @@ if (isset($result) and $result) {
 		$row = mysqli_fetch_array($result) ;
 		$previous_id = $row['r_id'] ;
 		$previous_auth = md5($previous_id . $shared_secret) ;
+		$previous_date = $row['r_start'] ;
 		$result = mysqli_query($mysqli_link, "select * from $table_bookings JOIN $table_planes ON r_plane = $table_planes.id
 			where r_cancel_date is null and r_start >= '$booking[r_stop]' and r_type <> " . BOOKING_MAINTENANCE . " and ressource = 0
 			and $condition 
@@ -98,6 +99,7 @@ if (isset($result) and $result) {
 		$row = mysqli_fetch_array($result) ;
 		$next_id = $row['r_id'] ;
 		$next_auth = md5($next_id . $shared_secret) ;
+		$next_date = $row['r_start'] ;
 		
 		# fix the character set issue...
 		$booking['pilot_name'] = db2web($booking['pilot_name']) ;
@@ -157,7 +159,7 @@ mysqli_free_result($result_news) ;
 }
 ?>
 <div class="page-header">
-	<h2>Ma r&eacute;servation la plus proche</h2>
+	<h2><?=(isset($_REQUEST['id'])) ? "Mes réservations" : "Ma réservation la plus proche"?></h2>
 </div> <!-- page header -->
 
 <div class="row">
@@ -197,7 +199,7 @@ if ($booking['instructor_name'] != '') {
 <ul class="pagination justify-content-center"">
 <?php
 if ($previous_id != '') {
-	print("<li  class=\"page-item\"><a class=\"page-link\" href=\"$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth\">Ma r&eacute;servation pr&eacute;c&eacute;dente</a></li>\n") ;
+	print("<li  class=\"page-item\"><a class=\"page-link\" href=\"$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth\">Ma réservation précédente<br>$previous_date</a></li>\n") ;
 	print("<script>
 		// Swipe to change to previous booking
 		document.addEventListener('swiped-right', function(e) {location.href='$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth' ; }) ;
@@ -205,7 +207,7 @@ if ($previous_id != '') {
 
 }
 if ($next_id != '') {
-	print("<li class=\"page-item\"><a class=\"page-link\" href=\"$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth\">Ma r&eacute;servation suivante</a></li>\n") ;
+	print("<li class=\"page-item\"><a class=\"page-link\" href=\"$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth\">Ma réservation suivante<br/>$next_date</a></li>\n") ;
 	print("<script>
 		// Swipe to change to next booking
 		document.addEventListener('swiped-left', function(e) {location.href='$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth' ; }) ;
@@ -223,10 +225,10 @@ if ($booking['can_cancel']) {
 <div class="row">
 	<br/>
 	<div class="col-xs-6 col-md-6 text-center ">
-		<button id="cancelButton" class="btn btn-danger" onclick="cancelFirstClick();">Annuler la r&eacute;servation</button>
+		<button id="cancelButton" class="btn btn-danger" onclick="cancelFirstClick();">Annuler la réservation</button>
 	</div><!-- col-->
 	<div class="col-xs-6 col-md-6 text-center ">
-		<button id="modifyButton" class="btn btn-primary" onclick="modifyClick(<?=$id?>, '<?=$auth?>');">Modifier la r&eacute;servation</button>
+		<button id="modifyButton" class="btn btn-primary" onclick="modifyClick(<?=$id?>, '<?=$auth?>');">Modifier la réservation</button>
 	</div><!-- col-->
 </div> <!-- row -->
 <?php
