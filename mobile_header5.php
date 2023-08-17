@@ -15,10 +15,6 @@
    limitations under the License.
 
 */
-if (false and $userId == 0) {
-  header("Location: https://www.spa-aviation.be/resa/connect.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-  exit ;
-}
 
 # HTTP/2 push of CSS via header()
 header('Link: </resa/mobile.js>;rel=preload;as=script,</resa/swiped-events.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
