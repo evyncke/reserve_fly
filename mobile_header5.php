@@ -15,7 +15,7 @@
    limitations under the License.
 
 */
-if ($userId == 0) {
+if (false and $userId == 0) {
   header("Location: https://www.spa-aviation.be/resa/connect.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
   exit ;
 }
@@ -28,16 +28,7 @@ header('Link: </resa/mobile.js>;rel=preload;as=script,</resa/swiped-events.js>;r
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <meta charset="utf-8">
-<style>
-@viewport {
-	width: device-width; /* largeur du viewport */
-	zoom: 1; /* zoom initial à 1.0  */
-}
 
-#bookingTable { background-color: lightgray; border-style: solid; border-width: 2px; border-radius: 10px; margin-left:auto; margin-right: auto;
-	box-shadow: 3px 3px 10px gray;
-}
-</style>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
@@ -49,6 +40,16 @@ header('Link: </resa/mobile.js>;rel=preload;as=script,</resa/swiped-events.js>;r
 <!-- Latest compiled JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 
+<style>
+@viewport {
+	width: device-width; /* largeur du viewport */
+	zoom: 1; /* zoom initial à 1.0  */
+}
+
+#bookingTable { background-color: lightgray; border-style: solid; border-width: 2px; border-radius: 10px; margin-left:auto; margin-right: auto;
+	box-shadow: 3px 3px 10px gray;
+}
+</style>
 <!-- Glyphicon equivalent -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
@@ -119,10 +120,10 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
     <!--div class="collapse navbar-collapse" id="myNavbar"-->
       <ul class="navbar-nav"><!-- nav-bar left -->
         <li class="navbar-item">
-          <a class="nav-link" href="mobile.php?news">Home</a>
+          <a class="nav-link text-white" href="mobile.php?news">Home</a>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Réservations<span class="caret"></span></a>
+          <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Réservations<span class="caret"></span></a>
           <ul class="dropdown-menu">
 <?php
 if ($userId > 0) {
@@ -144,7 +145,7 @@ if ($userId > 0) {
           </ul>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Avions<span class="caret"></span></a>
+          <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Avions<span class="caret"></span></a>
           <ul class="dropdown-menu" id="planesDropdown">
 <?php
 if ($userId > 0) {
@@ -159,7 +160,7 @@ if ($userId > 0) {
           </ul>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Aéroport<span class="caret"></span></a>
+          <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Aéroport<span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="mobile_ephemerides.php">Ephémérides</a></li>
 <?php
@@ -176,23 +177,28 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam Fuel</a></li>
           </ul>
         </li>
-      </ul><!-- navbar left was myNavbar -->
+      </ul><!-- navbar left-->
       <ul class="nav navbar-nav ms-auto">
-        <!--li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li-->
-<!-- testing....
-        <li id="userNameElem"><span id="userNameSpan" class="navbar-text"></span></li>
-        <li id="loginElem"><a href="https://resa.spa-aviation.be/mobile_login.php"><span class="glyphicon glyphicon-log-in"></span>Se connecter</a></li>
-        <li id="logoutElem"><a href="mobile_logout.php"><span class="glyphicon glyphicon-log-out"></span>Se déconnecter</a></li>
--->
+<?php
+if ($userId <= 0) {
+?>
+        <li class="navbar-item" id="loginElem">
+          <a class="nav-link text-white" href="mobile_login.php?news"><i class="bi bi-box-arrow-in-right"></i> Se connecter</a>
+        </li>
+<?php
+} else {
+?>  
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><span id="userNameSpan"></span><span class="caret"></span></a>
+          <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown"><span id="userNameSpan"><?="$userFullName ($userName)"?></span><span class="caret"></span></a>
           <ul class="dropdown-menu">
               <li id="logoutElem">
-                <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i></span>Se déconnecter</a>
+                <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
               </li>
           </ul>
         </li> <!-- dropdown -->
-        <li id="loginElem"><a href="https://resa.spa-aviation.be/mobile_login.php"><i class="bi bi-box-arrow-in-right"></i>Se connecter</a></li>
+<?php
+}
+?>
       </ul><!-- nabvar-right -->
     </div>
   </div>

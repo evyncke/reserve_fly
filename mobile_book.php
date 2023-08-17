@@ -20,6 +20,11 @@ ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
 
+if ($userId == 0) {
+	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+	exit ;
+}
+
 $id = (isset($_REQUEST['id'])) ? $_REQUEST['id'] : '' ; // Direct access to a booking by id
 $auth = (isset($_REQUEST['auth'])) ? $_REQUEST['auth'] : '';
 
@@ -61,6 +66,7 @@ if ($id and is_numeric($id)) {
 $body_attributes = 'onload="init();initBook();"' ; // mobile_header.php will force this into the body tag
 
 require_once 'mobile_header5.php' ;
+
 ?> 
 <script>
 var

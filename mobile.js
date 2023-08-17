@@ -347,9 +347,7 @@ function prefillDropdownMenus(selectName, valuesArray, selectedValue) {
 		option.value = valuesArray[i].id ;
 		if (valuesArray[i].id == selectedValue) {
 			option.selected = true ;
-			console.log(option.innerHTML) ;
 			option.innerHTML = option.innerHTML + '    &#8964;' ;
-			console.log(option.innerHTML) ;
 		} else {
 			option.selected = false ;
 		}
@@ -370,19 +368,5 @@ function init() {
 		var option = document.createElement('li');
 		option.innerHTML = '<a class="dropdown-item" href="mobile_plane.php?plane=' + planes[plane].name + '">' + planes[plane].name;
 		planesDropdown.appendChild(option) ;
-	}
-	// Update the nav bar with login status
-	if (userId > 0) {
-		document.getElementById('loginElem').style.visibility = 'hidden' ;
-		document.getElementById('loginElem').style.display = 'none' ;
-		document.getElementById('logoutElem').style.visibility = 'visible' ;
-		document.getElementById('logoutElem').style.display = 'block' ;
-		document.getElementById('userNameSpan').innerHTML = userName + ' (' + userFullName + ')' ;
-	} else {
-		document.getElementById('loginElem').style.visibility = 'visible' ;
-		document.getElementById('loginElem').style.display = 'block' ;
-		document.getElementById('logoutElem').style.visibility = 'hidden' ;
-		document.getElementById('logoutElem').style.display = 'none' ;
-		document.getElementById('userNameSpan').innerHTML = '' ;
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2021 Eric Vyncke
+   Copyright 2013-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,75 +16,63 @@
 
 */
 
-// TODO
-// initial login is at  https://www.spa-aviation.be/resa/mobile_login.php
-// Which then redirects to https://resa.spa-aviation.be/mobile.php?news
-// Of course forcing a 2nd login :(
-//
-// $_SERVER[SERVER_NAME] www.spa-aviation.be ou resa.spa-aviation.be
-// $_SERVER[PHP_SELF] /resa/mobile_login.php ou /mobile_login.php
-
-// Start the session
-
-session_name('RAPCS') ;
-session_start(['cookie_lifetime' => 3600 * 24 * 7, 'cookie_httponly' => TRUE, 'cookie_domain' => '.spa-aviation.be', 'cookie_path' => '/']) 
-	or journalise(0, 'E', 'Cannot start session in mobile_login');
-
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
 
-if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
-	// If your script is in a spot to import the Joomla libraries, just use JUserHelper::verifyPassword() and that'll take care of it for you.
-	// If not, use PHP's `password_verify()` function to validate the password (native to PHP 5.5+, 
-	$username = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['username'])) ;
-	$password = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['password'])) ;
-	$result = mysqli_query($mysqli_link, "SELECT * FROM $table_users
-		WHERE username='$username'")
-		or die("Error retrieving user: " . mysqli_error($mysqli_link)) ;
-	if (!$result)
-		die("Cannot login, wrong username/password combination") ;
-	$row = mysqli_fetch_array($result) ;
-	if (! password_verify($password, $row['password']))
-		die("Cannot login, wrong username/password combination") ;
-	$_SESSION['jom_id'] = $row['id'] ;
-	header("Location: https://resa.spa-aviation.be/mobile.php?news") ;
-	journalise($row['id'], 'I', "$username is connected on the mobile web.") ;
-	exit() ;
+$callback = $_REQUEST['cb'] ;
+if ($callback == '') $callback = 'resa/mobile.php' ; // By default
+
+if ($userId > 0) {
+    header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
+    exit ;
 }
 
-require_once 'mobile_header.php' ;
 
+$connect_msg = '' ;
+
+if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
+    $result_login = JFactory::getApplication()->login(
+        [
+            'username' => $_REQUEST['username'],
+            'password' => $_REQUEST['password']
+        ],
+        [
+            'remember' => true,
+            'silent'   => true
+        ]
+    );
+    if ($result_login) {
+        header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
+        journalise(0, "I", "Connection of $_REQUEST[username] from $callback") ;
+        exit ;
+    } else {
+        $connect_msg = "Utilisateur inconnu ou mauvais mot de passe." ;
+        journalise(0, "W", "Invalid password for $_REQUEST[username] from $callback") ;
+    }
+}
+
+require_once 'mobile_header5.php' ;
 ?> 
 <div class="container">
-<br/><br/><br/><br/><br/><br/><br/>
-<div class="row">
-<div class="col-xs-12">
-<form action="<?=$_SERVER['PHP_SELF']?>" method="POST" class="form-horizontal" >
-	<div class="form-group">
-		<label class="control-label col-sm-2" for="username">Identifiant: </label>
-		<div class="col-sm-10">
-			<input name="username" type="text" class="form-control" id="username" size="10">
-		</div> <!-- col -->
-	</div> <!-- form-group -->
-	<div class="form-group">
-		<label class="control-label col-sm-2" for="password">Mot de passe: </label>
-		<div class="col-sm-10">
-			<input name="password" type="password" class="form-control" id="password" size="10"><br/>
-		</div> <!-- col -->
-	</div> <!-- form-group -->
-	<div class="form-group">
-		<div class="col-sm-offset-2 col-sm-10">
-			<button type="submit" class="btn btn-default value="Se connecter">Se connecter</button>
-		</div> <!-- col -->
-	</div> <!-- form-group -->
+   <h1>Connexion</h1>
+    <p class="bg-danger"><?=$connect_msg?></p>
+    <p class="bg-info">Pour accéder au site vous devez vous connecter.</p>
+
+<form method="post" action="<?=$_SERVER['PHP_SELF']?>">
+<input type="hidden" name="cb" value="<?=$callback?>">
+
+<label for="username" class="form-label">
+	Identifiant: 
+</label>
+<input type="text" class="form-control" id="username" name="username" placeholder="Votre nom d'utilisateur" value="<?=$_REQUEST['username']?>"><br/>
+
+<label for="password" class="form-label">
+	Mot de passe:
+</label>
+<input class="form-control" type="password" id="password" placeholder="Votre mot de passe" name="password"><br/>
+
+<input type="submit" class="btn btn-primary" value="Connexion">
+
 </form>
-</div> <!-- col -->
-</div> <!-- row -->
-
-<div class="row">
-	<a href="<?= htmlspecialchars($fb_loginUrl)?>"> <img src="facebook.jpg"> Se connecter via votre compte Facebook.</a><br/>(vous devez avoir lié vos comptes RAPCS/Facebook auparavant)
-</div> <!-- row -->
-
-</div> <!-- container-->
+</div> <!-- container -->
 </body>
 </html>

@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013 Eric Vyncke
+   Copyright 2013-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ require_once "dbi.php" ;
 
 session_name('RAPCSSID') ;
 session_start() ;
-unset($_SESSION['fb_access_token']);
+unset($_SESSION['fb_access_token']); // Even if no more used
 unset($_SESSION['jom_id']);
 session_unset();
 session_destroy();
 
 header("Location: https://www.spa-aviation.be/resa/mobile.php?logout") ;
-journalise($userId, 'I', "$username is disconnected from the mobile web") ;
+journalise($userId, 'I', "$userName is disconnected from the mobile web") ;
 
 exit() ;
 ?> 
