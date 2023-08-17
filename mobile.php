@@ -68,7 +68,7 @@ if (isset($result) and $result) {
 	if (! $booking) {
 		print('<br/><br/><br/><br/><br/>
 <div class="row text-center">
-	<div class="col-xs-12 col-md-6 jumbotron vertical-center">
+	<div class="col-xs-12 col-md-6 mt-4 p-5 bg-primary text-white rounded">
 		Vous n\'avez aucune réservation.
 	</div>
 </div>') ;
@@ -118,7 +118,7 @@ if ($userId <= 0 and isset($_REQUEST['logout'])) {
 ?>
 <br/><br/><br/><br/><br/>
 <div class="row text-center">
-	<div class="col-xs-12 col-md-6 jumbotron vertical-center" style="background-color: lightblue;">
+	<div class="col-xs-12 col-md-6 mt-4 p-5 bg-primary text-white rounded">
 		Vous êtes maintenant déconnecté(e).<br/>Utilisez le bouton "Se connecter" en haut à droite.
 	</div>
 </div>
@@ -130,7 +130,7 @@ if ($userId <= 0) {
 ?>
 <br/><br/><br/><br/><br/>
 <div class="row text-center">
-	<div class="col-xs-12 col-md-6 jumbotron vertical-center" style="background-color: lightblue;">
+	<div class="col-xs-12 col-md-6 mt-4 p-5 bg-primary text-white rounded">
 		Vous devez être connecté(e) pour voir vos réservations.<br/>Utilisez le bouton "Se connecter" en haut à droite.
 	</div>
 </div>
@@ -147,7 +147,7 @@ if (isset($_REQUEST['news'])) {
 		LIMIT 0,3") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
 	
 	if (mysqli_num_rows($result_news)) {
-		print('<div class="row"><div class="col-xs-12 col-md-6 jumbotron vertical-center"><ul>') ;
+		print('<div class="row"><div class="col-xs-12 col-md-6 mt-4 p-5 bg-primary text-white rounded"><ul>') ;
 		while ($row_news = mysqli_fetch_array($result_news)) {
 			$subject = db2web($row_news['n_subject']) ;
 			$text = db2web(nl2br($row_news['n_text'])) ;
@@ -166,8 +166,8 @@ mysqli_free_result($result_news) ;
 
 <!-- This div is for cancellation confirmation, not displayed by default -->
 <div class="col-sm-12">
-	<div id="confirmCancellation" class="jumbotron"><center>
-		<h3>Annulation d'une r&eacute;servation: <?=$booking['r_plane']?></h3>
+	<div id="confirmCancellation" style="visibility: hidden; display: none;"><center>
+		<h3>Annulation d'une réservation: <?=$booking['r_plane']?></h3>
 		<br/>
 		<button class="btn btn-danger" onclick="cancelConfirm(<?=$id?>, '<?=$auth?>');">Je confirme l'annulation</button>
 		<br/>
@@ -177,7 +177,7 @@ mysqli_free_result($result_news) ;
 	
 <table id="bookingTable">
 	<tr><td class="bookingLabel">Avion:</td><td class="bookingValue"><?=$booking['r_plane']?></td><tr>
-	<tr><td class="bookingLabel">D&eacute;but:</td><td class="bookingValue"><?=$booking['r_start']?></td><tr>
+	<tr><td class="bookingLabel">Début:</td><td class="bookingValue"><?=$booking['r_start']?></td><tr>
 	<tr><td class="bookingLabel">Fin:</td><td class="bookingValue"><?=$booking['r_stop']?></td><tr>
 	<tr><td class="bookingLabel">Pilote:</td><td class="bookingValue"><?=$booking['pilot_name']?></td><tr>
 <?php
