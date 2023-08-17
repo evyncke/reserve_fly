@@ -103,7 +103,6 @@ class XimportLine {
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
-<link rel="stylesheet" type="text/css" href="mobile.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <meta charset="utf-8">
 <!--meta name="viewport" content="width=320"-->
