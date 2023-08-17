@@ -21,15 +21,23 @@ if ($userId == 0) {
 }
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/mobile.css>;rel=preload;as=style, </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
+header('Link: </resa/mobile.js>;rel=preload;as=script,</resa/swiped-events.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
 	
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
-<link rel="stylesheet" type="text/css" href="mobile.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <meta charset="utf-8">
-<!--meta name="viewport" content="width=320"-->
+<style>
+@viewport {
+	width: device-width; /* largeur du viewport */
+	zoom: 1; /* zoom initial à 1.0  */
+}
+
+#bookingTable { background-color: lightgray; border-style: solid; border-width: 2px; border-radius: 10px; margin-left:auto; margin-right: auto;
+	box-shadow: 3px 3px 10px gray;
+}
+</style>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
