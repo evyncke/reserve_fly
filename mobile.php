@@ -199,7 +199,7 @@ if ($booking['instructor_name'] != '') {
 <ul class="pagination justify-content-center"">
 <?php
 if ($previous_id != '') {
-	print("<li  class=\"page-item\"><a class=\"page-link\" href=\"$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth\">Ma réservation précédente<br>$previous_date</a></li>\n") ;
+	print("<li  class=\"page-item\"><a class=\"page-link\" href=\"$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth\"><i class=\"bi bi-caret-left-fill\"></i> Ma réservation précédente<br>$previous_date</a></li>\n") ;
 	print("<script>
 		// Swipe to change to previous booking
 		document.addEventListener('swiped-right', function(e) {location.href='$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth' ; }) ;
@@ -207,7 +207,7 @@ if ($previous_id != '') {
 
 }
 if ($next_id != '') {
-	print("<li class=\"page-item\"><a class=\"page-link\" href=\"$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth\">Ma réservation suivante<br/>$next_date</a></li>\n") ;
+	print("<li class=\"page-item\"><a class=\"page-link\" href=\"$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth\">Ma réservation suivante<i class=\"bi bi-caret-right-fill\"></i><br/>$next_date</a></li>\n") ;
 	print("<script>
 		// Swipe to change to next booking
 		document.addEventListener('swiped-left', function(e) {location.href='$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth' ; }) ;
