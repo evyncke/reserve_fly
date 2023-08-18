@@ -188,7 +188,8 @@ if ($userId <= 0) {
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown"><span id="userNameSpan"><?="$userFullName ($userName)"?></span><span class="caret"></span></a>
           <ul class="dropdown-menu">
               <li id="logoutElem">
-                <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
+              <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
+              <a class="dropdown-item" href="mobile_ledger.php">Mon compte</a>
               </li>
           </ul>
         </li> <!-- dropdown -->
