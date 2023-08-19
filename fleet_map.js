@@ -298,7 +298,6 @@ function mapAddLayers() {
 
 function initFleet(longitudeArg, latitudeArg, mapBoxToken, ajaxURLArg) {
 
-	console.log("start of initFleet()") ;	
 	// Save all parameters for later use
 	longitude = longitudeArg ;
 	latitude = latitudeArg ; 
@@ -316,5 +315,4 @@ function initFleet(longitudeArg, latitudeArg, mapBoxToken, ajaxURLArg) {
 	map.addControl(new mapboxgl.NavigationControl());
 	
 	map.on('load', mapAddLayers) ;
-	console.log("end of initFleet()") ;
 }
