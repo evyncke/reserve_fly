@@ -122,8 +122,8 @@ while ($row = mysqli_fetch_array($result)) {
 		$status = "Avion réservé</td><td>$row[f_date_linked]" ;
 	else if ($row['f_date_assigned'])
 		$status = "Pilote sélectionné</td><td>$row[f_date_assigned]" ;
-	else if ($row['f_date_paid'])
-		$status = "Paiement effectué</td><td>$row[f_date_paid]" ;
+	else if ($row['fl_date'])
+		$status = "Paiement effectué</td><td>$row[fl_date]" ;
 	else
 		$status = "Attente paiement</td><td>" ;
 	if ($row['f_date_flown'])
