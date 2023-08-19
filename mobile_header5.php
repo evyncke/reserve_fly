@@ -125,6 +125,7 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 if ($userId > 0) {
 ?>
             <li><a class="dropdown-item" href="mobile_book.php">Nouvelle réservation</a></li>
+            <li><a class="dropdown-item" href="reservation.php">Réservations (plein écran) <i class="bi bi-box-arrow-up-right"></i></a></li>
 <?php
 }
 if ($userId > 0) {
@@ -191,6 +192,7 @@ if ($userId <= 0) {
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
               <li><hr class="dropdown-divider"></hr></li>
               <a class="dropdown-item" href="mobile_ledger.php">Mon compte</a>
+              <a class="dropdown-item" href="mobile_invoices.php">Mes factures</a>
               </li>
           </ul>
         </li> <!-- dropdown -->
