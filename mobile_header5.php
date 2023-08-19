@@ -170,7 +170,7 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_local_flights.php">Vols proches</a></li>
             <li><a class="dropdown-item" href="mobile_metar.php">METAR</a></li>
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam Apron</a></li>
-            <li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam Fuel</a></li>
+            <!--li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam Fuel</a></li-->
           </ul>
         </li>
       </ul><!-- navbar left-->
@@ -189,6 +189,7 @@ if ($userId <= 0) {
           <ul class="dropdown-menu">
               <li id="logoutElem">
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
+              <li><hr class="dropdown-divider"></hr></li>
               <a class="dropdown-item" href="mobile_ledger.php">Mon compte</a>
               </li>
           </ul>
