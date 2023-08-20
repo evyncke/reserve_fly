@@ -67,7 +67,7 @@ if ($userId > 0) { // Only members can see all bookings
 		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-bs-toggle="tooltip" data-bs-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
 			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
-		$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="danger"' : '' ;
+		$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
 		// Display date if not today, else display time
 		if (strpos($row['r_start'], $sql_date) === 0) 
 			$row['r_start'] = substr($row['r_start'], 11) ;
@@ -77,7 +77,7 @@ if ($userId > 0) { // Only members can see all bookings
 			$row['r_stop'] = substr($row['r_stop'], 11) ;
 		else
 			$row['r_stop'] = substr($row['r_stop'], 0, 10) ;
-		print("<tr$class><td>$row[r_plane]</td><td>$row[r_start]</td><td>$row[r_stop]</td><td>$pname$ptelephone$instructor</td><td>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
+		print("<tr><td$class>$row[r_plane]</td><td$class>$row[r_start]</td><td$class>$row[r_stop]</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
 	}
 ?>
 </table>
