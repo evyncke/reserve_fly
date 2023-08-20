@@ -133,7 +133,7 @@ function insertTrackPoints (flights) {
 		thisFlight = flights[flight] ;
 		planeColor = tailNumber2Color(flight) ;
 		if (legendDiv) {
-			legendItems.push('<span class="glyphicon glyphicon-plane" style="color:' + planeColor + ';"></span> ' + flight + ' / ' + thisFlight.first + ' UTC / ' + thisFlight.pilot + '<br/>') ;
+			legendItems.push('<i class="bi bi-airplane-fill" style="color:' + planeColor + ';"></i> ' + flight + ' / ' + thisFlight.first + ' UTC / ' + thisFlight.pilot + '<br/>') ;
 		}
 		currentFeature = {type : 'Feature',
 			properties : {title : '',comment : '', color: ''},
