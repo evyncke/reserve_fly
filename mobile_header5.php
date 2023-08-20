@@ -118,6 +118,19 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
         <li class="navbar-item">
           <a class="nav-link text-white" href="mobile.php?news">Home</a>
         </li>
+<?php
+	if ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager) {
+?>
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
+    <ul class="dropdown-menu">
+      <li><a class="dropdown-item" href="mobile_journal.php">Journal système</a></li>
+      <li><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></li>
+    </ul>
+  </li> <!-- dropdown -->
+<?php
+}
+?>        
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Réservations<span class="caret"></span></a>
           <ul class="dropdown-menu">
@@ -135,10 +148,6 @@ if ($userId > 0) {
 }
 ?>
             <li><a class="dropdown-item" href="mobile_today.php">Réservations de ce jour</a></li>
-<?php
-	if ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager)
-		print("<li><a class=\"dropdown-item\" href=\"flight_home.php\">Vols découvertes <i class=\"bi bi-box-arrow-up-right\"></i></a></li>\n") ;
-?>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -191,8 +200,8 @@ if ($userId <= 0) {
               <li id="logoutElem">
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
               <li><hr class="dropdown-divider"></hr></li>
-              <a class="dropdown-item" href="mobile_ledger.php">Mon compte</a>
               <a class="dropdown-item" href="mobile_invoices.php">Mes factures</a>
+              <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
               </li>
           </ul>
         </li> <!-- dropdown -->
