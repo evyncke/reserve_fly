@@ -355,23 +355,12 @@ Ce n'est pas le cas avec votre navigateur Internet.</span>
 	document.getElementById('noScript').style.visibility = 'hidden' ;
 </script>
 <div class="userPrivileges">
-<img src="facebook.jpg" alt="Facebook">
 <?php
 // Based on fb_accessToken and joomla connection => propose login via FB, disconnect FB account, associate FB account, ...
 if ($userId != 0) {
 	$result = mysqli_query($mysqli_link, "select * from $table_users u left join $table_person p on u.id = p.jom_id where u.id = $userId")
 		or die("Erreur systeme lors de la lecture de votre profil: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
-}
-if (isset($fb_accessToken) && $fb_accessToken != '') {
-	print("Vous êtes connecté via votre compte Facebook lié au nom de <i>$fb_userName</i>. <a href=facebook-logout.php>Déconnecter</a> le compte Facebook.<br/>") ;
-} else if ($joomla_user->guest) {
-	print('<a href="' . htmlspecialchars($fb_loginUrl) .'">Se connecter via votre compte Facebook.</a><br/>') ;
-} else {
-	if ($row['fb_app_uid'] == 0)
-		print('<a href="' . htmlspecialchars($fb_loginUrl) .'">Lier votre compte Facebook</a> à votre compte RAPCS pour des connexions plus simples.<br/>') ;
-	else
-		print('<a href="' . htmlspecialchars($fb_loginUrl) .'">Connexion via votre compte Facebook</a>. <a href=facebook-delete.php>Enlever</a> la liaison avec le compte Facebook.<br/>') ;
 }
 ?>
 Vos droits d'acc&egrave;s (<?=$userFullName?>) sur cette page: 
@@ -425,7 +414,7 @@ if ($userId == 0) {
 	print('<input type="button" value="Carte de mes vols" onclick="javascript:document.location.href=\'mymap.php\';"> ') ;
 	print('<input type="button" value="Mobile" onclick="javascript:document.location.href=\'mobile.php?news\';"> ') ;
 	print('<input type="button" value="Folio du mois" onclick="javascript:document.location.href=\'myfolio.php\';"> ') ;
-	if ($userIsAdmin) print('<input type="button" value="Journal des opérations" onclick="javascript:document.location.href=\'journal.php\';"> ') ;
+	if ($userIsAdmin) print('<input type="button" value="Journal des opérations" onclick="javascript:document.location.href=\'mobile_journal.php\';"> ') ;
 	if ($userIsAdmin || $userIsMechanic) print('<input type="button" value="Echéances des maintenances" onclick="javascript:document.location.href=\'plane_planning.php\';"> ') ;
 	print('<input type="button" value="No log" style="background-color: yellow; visibility: hidden;" id="logButton" onclick="javascript:toggleLogDisplay();"> ') ;
 	print("<a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">lier &agrave; mon calendrier (iCal)</a>") ;
