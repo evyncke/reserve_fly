@@ -58,17 +58,17 @@ while ($row = mysqli_fetch_array($result)) {
 	$last_id = $row['j_id'] ;
 	$nameStyle = ($row['j_trusted_booker'] == 1) ? ' style="font-weight: bold;"' : '' ;
 	switch (strtoupper($row['j_severity'])) {
-		case 'F': $rowStyle = ' class="bg-danger"' ; break ;
-		case 'E': $rowStyle = ' class="bg-warning"' ; break ;
-		case 'W': $rowStyle = ' class="text-info"' ; break ;
-		default: $rowStyle = '' ;
+		case 'F': $specialClass = ' bg-danger' ; break ;
+		case 'E': $specialClass = ' bg-warning' ; break ;
+		case 'W': $specialClass = ' text-info' ; break ;
+		default: $specialClass = '' ;
 	}
 	print("<tr>
-		<td$rowStyle>$row[j_datetime]</td>
-		<td$nameStyle$rowStyle>" . db2web($row['name']) . "</td>
-		<td$rowStyle class=\"d-none d-lg-table-cell\">$row[j_address]</td>
-		<td$rowStyle class=\"text-align\">" . db2web($row['j_message']) . "</td>
-		<td$rowStyle class=\"text-align d-none d-lg-table-cell\">" . db2web($row['j_uri']) . "</td>
+		<td class=\"$specialClass\">$row[j_datetime]</td>
+		<td$nameStyle class=\"$specialClass\">" . db2web($row['name']) . "</td>
+		<td class=\"d-none d-lg-table-cell$specialClass\">$row[j_address]</td>
+		<td class=\"text-align$specialClass\">" . db2web($row['j_message']) . "</td>
+		<td class=\"text-align d-none d-lg-table-cell$specialClass\">" . db2web($row['j_uri']) . "</td>
 		</tr>\n") ;
 }
 $first_id += 50 ;
