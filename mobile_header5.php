@@ -110,6 +110,10 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 ?>
 </head>
 <body <?=$body_attributes?>>
+<?php
+if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep this value
+  print("<input type=\"hidden\" name=\"user\" value\"$_REQUEST[user]\">/n") ;
+?>
 <nav class="navbar navbar-expand-sm bg-success"> <!-- fixed-top should prevent scrolling but invade bottom part... -->
   <div class="container-fluid">
       <a class="navbar-brand hidden-sm" href="mobile.php?news"><img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="32px" height="32px"></a>
