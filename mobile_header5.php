@@ -114,11 +114,17 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep this value
   print("<input type=\"hidden\" name=\"user\" value\"$_REQUEST[user]\">/n") ;
 ?>
-<nav class="navbar navbar-expand-sm bg-success"> <!-- fixed-top should prevent scrolling but invade bottom part... -->
+<nav class="navbar navbar-expand-sm bg-success XXXfixed-top">
   <div class="container-fluid">
-      <a class="navbar-brand hidden-sm" href="mobile.php?news"><img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="32px" height="32px"></a>
-    <!--div class="collapse navbar-collapse" id="myNavbar"-->
-      <ul class="navbar-nav"><!-- nav-bar left -->
+    <!-- below is to collapse the navbar on small screen and expand it when clicked on -->
+      <!--button type="button" class="btn btn-success" data-bs-toggle="collapse" data-bs-target=".multi-collapse"-->
+        <!--i class="bi bi-list"></i-->
+      <!--/button-->
+      <!--button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".multi-collapse"-->
+        <!--span class="navbar-toggler-icon"></span-->
+      <!--/button-->
+      <a class="navbar-brand multi-collapse" href="mobile.php?news"><img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="32px" height="32px"></a>
+      <ul class="navbar-nav multi-collapse hidden-sm"><!-- nav-bar left -->
         <li class="navbar-item">
           <a class="nav-link text-white" href="mobile.php?news">Home</a>
         </li>
@@ -129,9 +135,10 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
     <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
     <ul class="dropdown-menu">
       <li><a class="dropdown-item" href="mobile_journal.php">Journal système</a></li>
+      <li><a class="dropdown-item" href="gestionMembres.php">Gestion membres <i class="bi bi-box-arrow-up-right"></i></a></li>
       <li><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></li>
     </ul>
-  </li> <!-- dropdown -->
+  </li> <!-- dropdown administration-->
 <?php
 }
 ?>        
@@ -198,7 +205,7 @@ if ($userId <= 0) {
 <?php
 } else {
 ?>  
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown multi-collapse">
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown"><span id="userNameSpan"><?="$userFullName ($userName)"?></span><span class="caret"></span></a>
           <ul class="dropdown-menu">
               <li id="logoutElem">
@@ -212,7 +219,6 @@ if ($userId <= 0) {
 <?php
 }
 ?>
-      </ul><!-- nabvar-right -->
-    </div>
+      </ul><!-- navbar-right -->
   </div>
 </nav>
