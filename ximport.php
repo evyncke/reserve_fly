@@ -16,6 +16,13 @@
 
 */
 
+/*
+TODO:
+- générer les factures sous format PDF, soit via PHP soit via publipostage MS-office 
+  https://faqword.com/index.php/word/19-publipostage/1075-publipostage-directement-vers-fichiers-pdf
+- envoyer les emails
+*/
+
 require_once 'dbi.php' ;
 
 MustBeLoggedIn() ;
@@ -23,9 +30,10 @@ MustBeLoggedIn() ;
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
-if (!(isset($_REQUEST['nextMove']) and is_numeric($_REQUEST['nextMove'])))
-    journalise($userId, "F", "Invalid parameter: nextMove = $nextMove") ;
-$nextMove = $_REQUEST['nextMove'] ;
+if (!isset($_REQUEST['nextMove']))
+    $nextMove = 10000 ;
+else
+    $nextMove = $_REQUEST['nextMove'] ;
 if (!(isset($_REQUEST['nextInvoice']) and is_numeric($_REQUEST['nextInvoice'])))
     journalise($userId, "F", "Invalid parameter: nextInvoice = $nextInvoice") ;
 $nextInvoice = $_REQUEST['nextInvoice'] ;
@@ -74,12 +82,14 @@ class XimportLine {
         $this->tva = $tva ;
         $this->code_tva = $code_tva ;
         $this->x1 = $x1 ;
-        $this->x2 = $this->datelog2ciel($x2) ;
+        if ($x2 != '')
+            $this->x2 = $this->datelog2ciel($x2) ;
+        else 
+            $this->x2 = '' ;
         $this->x3 = $x3 ;
     }
 
     public function __toString() {
-//        print_r($this) ;
         $s = '' ;
         $s .= str_pad($this->mouvement, 5) ; // numéro de mouvement sur 5 chars
         $s .= str_pad($this->journal, 4) ; // Journal sur 4 chars cadrés à gauche
@@ -118,18 +128,20 @@ class XimportLine {
 </head>
 <body>
     <h1>Génération des factures sur base des carnets de vol</h1>
-    <p class="bg-danger">Ceci est en mode test et ne va générer les factures et le fichier de liaison que pour Alain, Bernard, Dominique, Éric, Patrick, et quelques élèves.</p>
+    <p class="bg-danger">Ceci est en mode test et ne va générer les factures et le fichier de liaison que pour Alain, Bernard, Dominique, Éric, Patrick, René, et quelques élèves.</p>
     <p>Le fichier <a href="data/ximport.txt">ximport.txt</a> doit être copié dans le répertoire de liaison comptable.</p>
 <?php
 
 $f = fopen('data/ximport.txt', 'w')
     or journalise($userId, "F", "Cannot open data/ximport.txt for writing") ;
-// Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198
+// Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198, René = 353, Michel Frédéric = 77
 
-$members = [62, 66, 92, 198, 306, 348, 439] ;
+$members = [62, 66, 92, 198, 306, 348, 353, 439] ;
+$members = [66, 348, 353] ;
+
 
 foreach($members as $member) {
-    $folio = new Folio($member, '2023-07-01', '2023-07-31') ;
+    $folio = new Folio($member, '2023-08-01', '2023-08-31') ;
     if ($folio->count == 0) continue ;
     print("<h3>Facture $nextInvoice pour $folio->fname $folio->name</h3>\n") ;
     $total_folio = 0 ;
@@ -171,12 +183,15 @@ foreach($members as $member) {
             $fi_suffix = 0 ;
         $total_folio += $line->cost_plane + $line->cost_fi + $line->cost_taxes ;
     }
-    // Write to the member account
-    $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $line->pilot_code_ciel, "Centr. $line->pilot_code_ciel,1 L deb", $total_folio, 'D', $nextInvoice,
-        '', 0.0, 0.0, '0', $line->date, 0) ;
-    fprintf($f, "$ximportLine\n") ;
+    // Write to the member account if a real invoice
+    if ($total_folio > 0) {
+        $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $line->pilot_code_ciel, "Centr. $line->pilot_code_ciel,1 L deb", $total_folio, 'D', $nextInvoice,
+            '', 0.0, 0.0, '0', '', 0) ;
+        fprintf($f, "$ximportLine\n") ;
+        print("<tr class=\"bg-info\"><td></td><td>Total</td><td colspan=2></td><td>$total_folio</td></tr>\n") ;
+        $nextInvoice++ ;
+    }
     $nextMove++ ;
-    $nextInvoice++ ;
     print("</tbody>\n</table>\n") ;
 }
 
@@ -186,7 +201,7 @@ fclose($f) ;
 <p>Voici les paramètres à modifier dans <i>Ciel Premium Account</i>:
     <ul>
         <li>Numéro de facture suivant: <?=$nextInvoice?></li>
-        <li>Numéro de mouvement suivant: <?=$nextMove?></li>
+        <li>Numéro de mouvement suivant: <?=$nextMove?> (a priori inutile)</li>
     </ul>
 </p>
 </body>
