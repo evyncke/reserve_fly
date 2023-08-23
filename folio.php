@@ -208,20 +208,22 @@ class Folio implements Iterator {
             or journalise($userId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
         $this->row = mysqli_fetch_assoc($this->result) ;
-	if ($pilot == $this->row['l_pilot']) {
-		$this->fname = db2web($this->row['pilot_fname']) ;
-		$this->name = db2web($this->row['pilot_name']) ;
-		$this->code_ciel = $this->row['pilot_code_ciel'] ;
-	} else if ($pilot == $this->row['l_instructor']) {
-		$this->fname = db2web($this->row['instructor_fname']) ;
-		$this->name = db2web($this->row['instructor_name']) ;
-		$this->code_ciel = $this->row['instructor_code_ciel'] ;
-	} else if ($pilot == $this->row['l_share_member']) {
-		$this->fname = db2web($this->row['share_member_fname']) ;
-		$this->name = db2web($this->row['share_member_name']) ;
-		$this->code_ciel = $this->row['share_member_code_ciel'] ;
-	} else
-		journalise($userId, "F", "UserId $pilot is neither pilot $this->row[l_pilot], nor instructor $this->row[l_instructor], nor share member $this->row[l_share_member]") ;
+	if ($this->count > 0) {
+		if ($pilot == $this->row['l_pilot']) {
+			$this->fname = db2web($this->row['pilot_fname']) ;
+			$this->name = db2web($this->row['pilot_name']) ;
+			$this->code_ciel = $this->row['pilot_code_ciel'] ;
+		} else if ($pilot == $this->row['l_instructor']) {
+			$this->fname = db2web($this->row['instructor_fname']) ;
+			$this->name = db2web($this->row['instructor_name']) ;
+			$this->code_ciel = $this->row['instructor_code_ciel'] ;
+		} else if ($pilot == $this->row['l_share_member']) {
+			$this->fname = db2web($this->row['share_member_fname']) ;
+			$this->name = db2web($this->row['share_member_name']) ;
+			$this->code_ciel = $this->row['share_member_code_ciel'] ;
+		} else
+			journalise($userId, "F", "UserId $pilot is neither pilot " . $this->row['l_pilot'] . ", nor instructor " . $this->row['l_instructor'] . ", nor share member " . $this->row['l_share_member']) ;
+	}
     }
 
     function __destruct() {
