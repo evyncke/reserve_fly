@@ -143,7 +143,7 @@ $members = [66, 348, 353] ;
 foreach($members as $member) {
     $folio = new Folio($member, '2023-08-01', '2023-08-31') ;
     if ($folio->count == 0) continue ;
-    print("<h3>Facture $nextInvoice pour $folio->fname $folio->name</h3>\n") ;
+    print("<h3>Facture $nextInvoice pour $folio->fname $folio->name ($folio->code_ciel)</h3>\n") ;
     $total_folio = 0 ;
 ?>
 <table class="table table-striped table-responsive table-hover">
@@ -185,7 +185,7 @@ foreach($members as $member) {
     }
     // Write to the member account if a real invoice
     if ($total_folio > 0) {
-        $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $line->pilot_code_ciel, "Centr. $line->pilot_code_ciel,1 L deb", $total_folio, 'D', $nextInvoice,
+        $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $folio->code_ciel, "Centr. $folio->code_ciel,1 L deb", $total_folio, 'D', $nextInvoice,
             '', 0.0, 0.0, '0', '', 0) ;
         fprintf($f, "$ximportLine\n") ;
         print("<tr class=\"bg-info\"><td></td><td>Total</td><td colspan=2></td><td>$total_folio</td></tr>\n") ;
