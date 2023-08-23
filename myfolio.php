@@ -46,7 +46,6 @@ if (isset($_REQUEST['start']))  {
 	$next_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
 }
 $folio_end->add(new DateInterval('P1M'));
-//$folio_end->sub(new DateInterval('P1D'));
 $folio_end_title->add(new DateInterval('P1M'));
 $folio_end_title->sub(new DateInterval('P1D'));
 $previous_month = $previous_month->sub(new DateInterval('P1M')) ;
@@ -221,8 +220,12 @@ if ($userIsInstructor or $userIsAdmin) {
         <option value=\"$userId\" selected>$userName</option>
         </select><br/><br/>") ;
 }
+if ($previous_month->format('Y-m-d') <= date('Y-m-d') and date('Y-m-d') <= $next_month->format('Y-m-d'))
+	$document_title = 'Folio (estimation de la facture provisoire)' ;
+else
+	$document_title = 'Reconstruction d\'une facture' ;
 ?>
-<h2>Folio (estimation de la facture provisoire) du 
+<h2><?=$document_title?> du 
 	<a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>"><span class="glyphicon glyphicon-backward"></span></a>
 	<?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?>
 	<a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$next_month->format('Y-m-d')?>&user=<?=$userId?>"><span class="glyphicon glyphicon-forward"></span></a>
