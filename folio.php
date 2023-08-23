@@ -16,7 +16,6 @@
 
 */
 class FolioLine{
- //   private $sqlArray ;
     public $date ;
     public $from ;
     public $to ;
@@ -36,20 +35,23 @@ class FolioLine{
     public $item_tax ; // From Ciel Commercial
     public $item_fi ; // From Ciel Commercial
     public $pax_count ;
-    public $share_type ;
-    public $share_member ;
     public $pic_name ;
     public $is_pic ;
     public $instructor_name ;
+    public $instructor_fname ;
     public $instructor_code ;
     public $pilot_name ;
     public $pilot_fname ;
     public $pilot_code ;
     public $pilot_code_ciel ;
+    public $share_type ;
+    public $share_member ;
+    public $share_member_name ;
+    public $share_member_fname ;
+    public $share_member_code_ciel ;
 
     function __construct($row, $userId) {
         global $revenue_fi_minute, $cost_fi_minute, $code_initiation, $revenue_fi_initiation, $tax_per_pax ;
- //       $this->sqlArray = $row ;
 
         $this->date = $row['date'] ;
         $this->from = $row['l_from'] ;
@@ -141,12 +143,28 @@ class FolioLine{
         $this->pax_count = $row['l_pax_count'] ;
         $this->share_type = $row['l_share_type'] ;
         $this->share_member = $row['l_share_member'] ;
+	switch ($this->share_member) {
+	// Should reflect the content of shareCodes.js 
+		case -1: $this->share_member_name = 'Club (Ferry)'; $this->share_member_fname = ''; break ;
+		case -2: $this->share_member_name = 'Club (Autres)'; $this->share_member_fname = ''; break ;
+		case -3: $this->share_member_name = 'Initiation'; $this->share_member_fname = ''; break ;
+		case -4: $this->share_member_name = 'Vol IF'; $this->share_member_fname = ''; break ;
+		case -5: $this->share_member_name = 'Vol membre'; $this->share_member_fname = ''; break ;
+		case -6: $this->share_member_name = 'Vol D.H.F.'; $this->share_member_fname = ''; break ;
+		case -7: $this->share_member_name = 'Club (Vol Président)'; $this->share_member_fname = ''; break ;
+		case -8: $this->share_member_name = 'Club (Mécano)'; $this->share_member_fname = ''; break ;
+		default:
+			$this->share_member_name = db2web($row['share_member_name']) ; 
+			$this->share_member_fname = db2web($row['share_member_fname']) ;
+	}
+        $this->share_member_code_ciel = $row['share_member_code_ciel'] ;
         $this->pilot_name = db2web($row['pilot_name']) ;
         $this->pilot_fname = db2web($row['pilot_fname']) ;
-        $this->pilot_code_ciel = $row['code_ciel'] ;
+        $this->pilot_code_ciel = $row['pilot_code_ciel'] ;
         $this->pilot_code = $row['l_pilot'] ;
         $this->is_pic = $row['l_is_pic'] ;
-        $this->instructor_name = db2web($row['instructor_name']) ;
+        $this->instructor_name = db2web($row['instructor_name']) ; 
+        $this->instructor_fname = db2web($row['instructor_fname']) ;
         $this->instructor_code = $row['l_instructor'] ;
     }
 } ;
@@ -158,6 +176,7 @@ class Folio implements Iterator {
     public $count ;
     public $fname ;
     public $name ;
+    public $code_ciel ;
     private $result ;
     private $row ;
 
@@ -169,7 +188,9 @@ class Folio implements Iterator {
         $this->end_date = $end_date ;
         $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
             l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, 
-            i.last_name as instructor_name, p.last_name as pilot_name, p.first_name as pilot_fname, p.ciel_code400 as code_ciel,
+            i.last_name as instructor_name, i.first_name as instructor_fname, i.ciel_code400 as instructor_code_ciel,
+            p.last_name as pilot_name, p.first_name as pilot_fname, p.ciel_code400 as pilot_code_ciel,
+            m.last_name as share_member_name, m.first_name as share_member_fname, m.ciel_code400 as share_member_code_ciel,
             UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
             l_start, l_end, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute as duration,
             60 * (l_flight_end_hour - l_flight_start_hour) + l_flight_end_minute - l_flight_start_minute as flight_duration,
@@ -177,6 +198,7 @@ class Folio implements Iterator {
             FROM $table_logbook l JOIN $table_planes AS a ON l_plane = a.id
             LEFT JOIN $table_person p ON p.jom_id = l_pilot
             LEFT JOIN $table_person i ON i.jom_id = l_instructor
+            LEFT JOIN $table_person m ON m.jom_id = l_share_member
             WHERE (l_pilot = $pilot OR l_share_member = $pilot or l_instructor = $pilot)
                 AND l_booking IS NOT NULL
                 AND l_start >= '$start_date'
@@ -186,8 +208,20 @@ class Folio implements Iterator {
             or journalise($userId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
         $this->row = mysqli_fetch_assoc($this->result) ;
-        $this->fname = db2web($this->row['pilot_fname']) ;
-        $this->name = db2web($this->row['pilot_name']) ;
+	if ($pilot == $this->row['l_pilot']) {
+		$this->fname = db2web($this->row['pilot_fname']) ;
+		$this->name = db2web($this->row['pilot_name']) ;
+		$this->code_ciel = $this->row['pilot_code_ciel'] ;
+	} else if ($pilot == $this->row['l_instructor']) {
+		$this->fname = db2web($this->row['instructor_fname']) ;
+		$this->name = db2web($this->row['instructor_name']) ;
+		$this->code_ciel = $this->row['instructor_code_ciel'] ;
+	} else if ($pilot == $this->row['l_share_member']) {
+		$this->fname = db2web($this->row['share_member_fname']) ;
+		$this->name = db2web($this->row['share_member_name']) ;
+		$this->code_ciel = $this->row['share_member_code_ciel'] ;
+	} else
+		journalise($userId, "F", "UserId $pilot is neither pilot $this->row[l_pilot], nor instructor $this->row[l_instructor], nor share member $this->row[l_share_member]") ;
     }
 
     function __destruct() {
