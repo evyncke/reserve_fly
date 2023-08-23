@@ -135,17 +135,6 @@ function findMember(a, m) {
 
 function init() {
         var pilotSelect = document.getElementById('pilotSelect') ;
-	// Add names for shared cost members
-        var collection = document.getElementsByClassName("shareCodeClass") ;
-        for (let i = 0; i < collection.length ; i++) {
-                var spanElem = collection[i] ;
-                var member = spanElem.innerText ;
-                memberText = findMember(shareCodes, member) ;
-                if (memberText == null)
-                        memberText = findMember(members, member) ;
-                if (memberText != null)
-                        spanElem.innerText = ' (' + memberText + ')';
-        }
 	// Dropdown selected the pilot
         if (userIsInstructor || userIsAdmin) {
                 // Initiliaze pilotSelect from members.js
@@ -284,7 +273,7 @@ foreach ($folio as $line)	{
 			print("<td class=\"logCell\">$line->instructor_name</td>\n") ;// DC 
 	print("<td class=\"logCell\">$line->pax_count</td>\n") ;
 	if ($line->share_type)
-		print("<td class=\"logCell\">$line->share_type <span class=\"shareCodeClass\">$line->share_member</span></td>\n") ;
+		print("<td class=\"logCell\">$line->share_type ($line->share_member_fname $line->share_member_name)</td>\n") ;
 	else
 		print("<td class=\"logCell\"></td>\n") ;
 
