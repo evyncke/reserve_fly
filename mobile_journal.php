@@ -63,9 +63,14 @@ while ($row = mysqli_fetch_array($result)) {
 		case 'W': $specialClass = ' text-info' ; break ;
 		default: $specialClass = '' ;
 	}
+	$date = $row['j_datetime']	;
+	if (strpos($date, date('Y-m-d')) === 0)
+		$date = substr($date, 11) ; // Don't display today date
+	else 
+		$date = substr($date,0, 10) . '<br/>' . substr($date, 11) ; // Nice break
 	print("<tr>
-		<td class=\"$specialClass\">$row[j_datetime]</td>
-		<td$nameStyle class=\"$specialClass\">" . db2web($row['name']) . "</td>
+		<td class=\"text-nowrap$specialClass\">$date</td>
+		<td$nameStyle class=\"text-nowrap$specialClass\">" . db2web($row['name']) . "</td>
 		<td class=\"d-none d-lg-table-cell$specialClass\">$row[j_address]</td>
 		<td class=\"text-align$specialClass\">" . db2web($row['j_message']) . "</td>
 		<td class=\"text-align d-none d-lg-table-cell$specialClass\">" . db2web($row['j_uri']) . "</td>
