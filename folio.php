@@ -176,6 +176,11 @@ class Folio implements Iterator {
     public $count ;
     public $fname ;
     public $name ;
+    public $email ;
+    public $address ;
+    public $zip_code ;
+    public $city ;
+    public $country ;
     public $code_ciel ;
     private $result ;
     private $row ;
@@ -189,8 +194,11 @@ class Folio implements Iterator {
         $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
             l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, 
             i.last_name as instructor_name, i.first_name as instructor_fname, i.ciel_code400 as instructor_code_ciel,
+            i.email as instructor_email, i.address as instructor_address, i.zipcode as instructor_zip_code, i.country as instructor_country,
             p.last_name as pilot_name, p.first_name as pilot_fname, p.ciel_code400 as pilot_code_ciel,
+            p.email as pilot_email, p.address as pilot_address, p.zipcode as pilot_zip_code, p.country as pilot_country,
             m.last_name as share_member_name, m.first_name as share_member_fname, m.ciel_code400 as share_member_code_ciel,
+            m.email as share_member_email, m.address as share_member_address, m.zipcode as share_member_zip_code, m.country as share_member_country,
             UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
             l_start, l_end, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute as duration,
             60 * (l_flight_end_hour - l_flight_start_hour) + l_flight_end_minute - l_flight_start_minute as flight_duration,
@@ -213,15 +221,30 @@ class Folio implements Iterator {
 			$this->fname = db2web($this->row['pilot_fname']) ;
 			$this->name = db2web($this->row['pilot_name']) ;
 			$this->code_ciel = $this->row['pilot_code_ciel'] ;
+            $this->email = $this->row['pilot_email'] ;
+            $this->address = $this->row['pilot_address'] ;
+            $this->zip_code = $this->row['pilot_zip_code'] ;
+            $this->city = $this->row['pilot_cityl'] ;
+            $this->country = $this->row['pilot_country'] ;
 		} else if ($pilot == $this->row['l_instructor']) {
 			$this->fname = db2web($this->row['instructor_fname']) ;
 			$this->name = db2web($this->row['instructor_name']) ;
 			$this->code_ciel = $this->row['instructor_code_ciel'] ;
-		} else if ($pilot == $this->row['l_share_member']) {
+            $this->email = $this->row['instructor_email'] ;
+            $this->address = $this->row['instructor_address'] ;
+            $this->zip_code = $this->row['instructor_zip_code'] ;
+            $this->city = $this->row['instructor_cityl'] ;
+            $this->country = $this->row['instructor_country'] ;
+        } else if ($pilot == $this->row['l_share_member']) {
 			$this->fname = db2web($this->row['share_member_fname']) ;
 			$this->name = db2web($this->row['share_member_name']) ;
 			$this->code_ciel = $this->row['share_member_code_ciel'] ;
-		} else
+            $this->email = $this->row['share_member_email'] ;
+            $this->address = $this->row['share_member_address'] ;
+            $this->zip_code = $this->row['share_member_zip_code'] ;
+            $this->city = $this->row['share_member_cityl'] ;
+            $this->country = $this->row['share_member_country'] ;
+        } else
 			journalise($userId, "F", "UserId $pilot is neither pilot " . $this->row['l_pilot'] . ", nor instructor " . $this->row['l_instructor'] . ", nor share member " . $this->row['l_share_member']) ;
 	}
     }
