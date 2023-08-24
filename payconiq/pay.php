@@ -59,14 +59,16 @@ function init() {
 </header>
 <body onload="init();">
 <h1>Payer avec Payconiq</h1>
-Payment amount: <?=$amount?> &euro;<br/>
+<p class="lead">Payment amount: <?=$amount?> &euro;<br/>
 Payment description: <?=$description?><br/>
-Payment reference: <?=$reference?><br/>
+Payment reference: <?=$reference?>
+</p>
+<p class="text-muted">
 paymentId: <?=$pcnq->paymentId?><br/>
 expiresAt: <?=$pcnq->response['expiresAt']?><br/>
-
 Cancel URI: <a href="<?=$pcnq->cancelURI?>"><?=$pcnq->cancelURI?></a><br/>
-QR code URI: <?=$pcnq->QRCodeURI?><br/>
+QR code URI: <?=$pcnq->QRCodeURI?>
+</p>
 
 <img src="<?=$pcnq->QRCodeURI?>">
 
