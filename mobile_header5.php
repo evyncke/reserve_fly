@@ -114,17 +114,14 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep this value
   print("<input type=\"hidden\" name=\"user\" value\"$_REQUEST[user]\">/n") ;
 ?>
-<nav class="navbar navbar-expand-md bg-success XXXfixed-top">
+<nav class="navbar navbar-expand-md bg-success"><!-- Add fixed-top w/o destroying the layout -->
   <div class="container-fluid">
-    <!-- below is to collapse the navbar on small screen and expand it when clicked on -->
-      <!--button type="button" class="btn btn-success" data-bs-toggle="collapse" data-bs-target=".multi-collapse"-->
-        <!--i class="bi bi-list"></i-->
-      <!--/button-->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".multi-collapse">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <a class="navbar-brand multi-collapse hidden-md collapse navbar-collapse" href="mobile.php?news"><img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="32px" height="32px"></a>
-      <ul class="navbar-nav multi-collapse collapse navbar-collapse"><!-- nav-bar left -->
+      <!-- below in the <a the navbar-collapse widen the space by adding right margin !!! -->
+      <a class="navbar-brand multi-collapse hidden-md collapse navbar-collapse" href="mobile.php?news" style="max-width: 40px;"><img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="32px" height="32px"></a>
+      <ul class="navbar-nav multi-collapse collapse navbar-collapse"><!-- nav-bar left with most of the dropdown -->
         <li class="navbar-item">
           <a class="nav-link text-white" href="mobile.php?news">Home</a>
         </li>
@@ -195,7 +192,7 @@ if ($userId > 0) {
           </ul>
         </li>
       </ul><!-- navbar left-->
-      <ul class="nav navbar-nav ms-auto">
+      <ul class="nav navbar-nav"><!-- navbar right -->
 <?php
 if ($userId <= 0) {
 ?>
@@ -219,6 +216,6 @@ if ($userId <= 0) {
 <?php
 }
 ?>
-      </ul><!-- navbar-right -->
+      </ul><!-- navbar right -->
   </div>
 </nav>
