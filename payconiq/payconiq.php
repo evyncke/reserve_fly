@@ -24,6 +24,7 @@ class Payconiq {
 	public $callback ;
 	public $paymentId ;
 	public $QRCodeURI ;
+	public $cancelURI ;
 
 	function __construct() {
 		global $pcnq_api_key, $pcnq_merchant_id, $pcnq_endpoint ;
@@ -50,10 +51,12 @@ class Payconiq {
 		]);
 		$this->paymentId = $this->response['paymentId'] ;
 		$this->QRCodeURI = $this->response['_links']['qrcode']['href'] ;
+		$this->cancelURI = $this->response['_links']['cancel']['href'] ;
 
-		mysqli_query($mysqli_link, "INSERT INTO $table_payconiq(payment_id, jom_id, status, created_at, description, reference, amount, response)
+		mysqli_query($mysqli_link, "INSERT INTO $table_payconiq(payment_id, jom_id, status, created_at, description, reference, amount, qr_uri, cancel_uri, response)
 			VALUES('$this->paymentId', $userId, '" . $this->response['status'] . "', '" . $this->response['createdAt'] . "', 
-				'$description', '$reference', $amount, '" . json_encode($this->response) . "')") 
+				'$description', '$reference', $amount, '" . $this->QRCodeURI . "', '" .
+			$this->cancelURI . "', '" . json_encode($this->response) . "')") 
 			or journalise($userId, "F", "Cannot insert into $table_payconiq: " . mysqli_error($mysqli_link)) ;
 	}
 
