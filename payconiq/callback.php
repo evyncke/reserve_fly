@@ -20,8 +20,6 @@ require 'payconiq.php' ;
 
 $pcnq = new Payconiq() ;
 
-journalise(0, "D", "Payconiq callback starting") ;
-
 if ($_SERVER['REQUEST_METHOD'] != 'POST')
     journalise(0, "F", "Wrong method $_SERVER[REQUEST_METHOD] in Payconiq callback") ;
 if ($_SERVER['CONTENT_TYPE'] != 'application/json')
@@ -32,6 +30,4 @@ if ($_SERVER['HTTP_USER_AGENT'] != 'Payconiq Payments/v3')
 $body = file_get_contents('php://input') ;
 
 $pcnq->processCallback($_SERVER['HTTP_SIGNATURE'], $body) ;
-
-journalise(0, "D", "Payconiq callback terminated") ;
 ?>
