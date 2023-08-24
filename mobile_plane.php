@@ -97,7 +97,8 @@ function generateMaintenanceClass($entretien, $compteur) {
 		FROM $table_bookings 
 		JOIN $table_person pi ON pi.jom_id = r_pilot
 		LEFT JOIN $table_person i ON i.jom_id = r_instructor		
-		JOIN $table_planes p ON r_plane = p.id		
+		JOIN $table_planes p ON r_plane = p.id
+		LEFT JOIN $table_flights fl ON r_id = f_booking		
 		WHERE r_cancel_date IS NULL and r_plane = '$plane' AND DATE(r_stop) >= CURDATE()
 		ORDER BY r_start ASC LIMIT 0,10")
 		or die("Cannot retrieve bookings($plane): " . mysqli_error($mysqli_link)) ;
@@ -107,13 +108,15 @@ function generateMaintenanceClass($entretien, $compteur) {
 		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-toggle="tooltip" data-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
 			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
-		$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="danger"' : '' ;
+		$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
+		if ($row['f_type'] != '')
+			$class = ' class="text-warning"' ;
 		if (strpos($row['r_start'], $sql_date) === 0) 
 			$row['r_start'] = substr($row['r_start'], 11) ;
 		if (strpos($row['r_stop'], $sql_date) === 0) 
 			$row['r_stop'] = substr($row['r_stop'], 11) ;
-		print("<tr$class><td>$row[r_start]</td><td>$row[r_stop]</td><td><span class=\"hidden-xs\">" . db2web($row['pfirst_name']) . " </span><b>" . 
-			db2web($row['plast_name']) . "</b>$ptelephone$instructor</td><td>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
+		print("<tr><td$class>$row[r_start]</td><td$class>$row[r_stop]</td><td$class><span class=\"hidden-xs\">" . db2web($row['pfirst_name']) . " </span><b>" . 
+			db2web($row['plast_name']) . "</b>$ptelephone$instructor</td><td$class>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
 	}
 ?>
 </table>
