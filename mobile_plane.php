@@ -121,15 +121,6 @@ function generateMaintenanceClass($entretien, $compteur) {
 ?>
 </table>
 </div><!-- row -->
-
 </div> <!-- container-->
-
-<!-- for the tooltip -->
-<script>
-$(document).ready(function(){
-    $('[data-toggle="tooltip"]').tooltip();   
-});
-</script>
-
 </body>
 </html>
