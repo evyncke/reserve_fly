@@ -80,16 +80,17 @@ class FolioLine{
 	    $this->time_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
 	    $this->time_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
         // Plane cost
+        $this->cost_plane_minute = $row['cout'] ;
         if ($row['l_instructor'] == $userId and $row['l_pilot'] != $userId and $row['l_share_member'] != $userId) // FI only pays the plane rental when they are the pilot
 		    $this->cost_plane = 0 ;
         else
             if ($row['l_share_type'] == 'CP2') {
                 $this->cost_plane = round($row['cout'] * 0.5, 2) * $this->duration ;
+                $this->cost_plane_minute = round($row['cout'] * 0.5, 2) ;
             } else if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] != $userId) {
                 $this->cost_plane = 0 ;
             } else
                 $this->cost_plane = $row['cout'] * $this->duration ;	
-        $this->cost_plane_minute = $row['cout'] ;
         // Vol PIC- Recheck : 
         // Pour le Pilote -> SELF
         // Pour l'Instructeur -> Pilote_name    
