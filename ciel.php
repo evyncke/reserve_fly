@@ -103,7 +103,7 @@ if ($_REQUEST['save_ciel'] == 'true') {
     <tbody>
 <?php
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person JOIN jom_users AS j ON jom_id = j.id
-    WHERE ciel_code400 IS NULL
+    WHERE ciel_code400 IS NULL OR TRUE
     ORDER BY j.registerDate DESC")
     or journalise($userId, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
@@ -111,7 +111,7 @@ while ($row = mysqli_fetch_array($result)) {
     $first_name = db2web($row['first_name']) ;
     $last_name = db2web($row['last_name']) ;
     print("<tr><td>$row[username]</td><td>
-        <input type=\"text\" name=\"ciel$row[jom_id]\"> 
+        <input type=\"text\" name=\"ciel$row[jom_id]\" value=\"$row[ciel_code400]\"> 
         <span class=\"glyphicon glyphicon glyphicon-floppy-saved\" style=\"color: blue;\" title=\"Enregistrer le code Ciel\" onClick=\"document.getElementById('ciel_form').submit();\"></span>
         </td><td>$last_name</td><td>$first_name</td><td>$row[email]</td><td>$row[registerDate]</td></tr>\n") ;
 }
