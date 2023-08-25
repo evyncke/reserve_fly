@@ -37,7 +37,7 @@ function refreshStatus() {
                                 }
 				console.log("New status: " + status_response.status ) ;
 				statusSpan.innerHTML = status_response.status ;
-				if(status_response.status != 'EXPIRED' && status_response.status != 'SUCCEEDED') {
+				if(status_response.status != 'EXPIRED' && status_response.status != 'SUCCEEDED' && status_response.status != 'CANCELLED') {
 					setTimeout(refreshStatus, 2 * 1000) ;
                                         statusSpan.innerHTML = '<div class="spinner-border text-black"></div>' + statusSpan.innerHTML ;
 					// TODO display a right message and possible redirect to the referer
@@ -72,6 +72,9 @@ QR code URI: <?=$pcnq->QRCodeURI?>
 
 <img src="<?=$pcnq->QRCodeURI?>">
 
-<div class="bg-info"><span id="statusSpan"><div class="spinner-border text-info"></div> Waiting for status</span></div>
+<a href="cancel.php?paymentId=<?=$pcnq->paymentId?>">Cancel (open in a new tab please)</a>
+<hr>
+
+<div class="bg-info col-2"><span id="statusSpan"><div class="spinner-border text-info"></div> Waiting for status</span></div>
 </body>
 </html>
