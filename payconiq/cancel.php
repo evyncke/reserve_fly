@@ -32,11 +32,17 @@ if ($error_message != '') {
     $pcnq = new Payconiq() ;
     $payment = $pcnq->loadPayment($paymentId) ;
     if ($payment) {
-        $status['status'] = $pcnq->status ;
-        $status['paymentId'] = $pcnq->paymentId ;
+        if ($pcnq->cancel()) {
+            $status['message'] = "Payment cancelled" ;
+            $status['status'] = 'OK' ;
+        } else
+            $status['errorMessage'] = 'Cannot cancel' ;
     } else
         $status['errorMessage'] = "Cannot find the payment" ;
 }
+
+if (isset($status['errorMessage']))
+    $status['status'] = "NOK" ;
 
 // Let's send the data back
 @header('Content-type: application/json');

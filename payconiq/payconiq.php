@@ -23,6 +23,10 @@ class Payconiq {
 	public $response ;
 	public $callback ;
 	public $paymentId ;
+	public $reference ;
+	public $description ;
+	public $amount ;
+	public $status ;
 	public $QRCodeURI ;
 	public $cancelURI ;
 
@@ -37,7 +41,9 @@ class Payconiq {
 	function receivePayment($amount, $description, $reference, $callbackUrl = NULL) {
 		global $mysqli_link, $table_payconiq, $userId ;
 
-
+		$this->description = $description ;
+		$this->reference = $reference ;
+		$this->amount = $amount ;
 		$this->response = $this->curl('POST', $this->getEndpoint('/payments'), [
 			'Content-Type: application/json',
 			'Cache-Control: no-cache',
@@ -74,11 +80,49 @@ class Payconiq {
 		journalise(0, 'D', "Payconiq callback for paymentId " . $this->callback['paymentId'] . " with status " . $this->callback['status']) ;
 	}
 
+	function loadPayment($id) {
+		global $userId, $mysqli_link, $table_payconiq ;
+
+		$paymentId = mysqli_real_escape_string($mysqli_link, $id) ;
+		$result = mysqli_query($mysqli_link, "SELECT * FROM $table_payconiq WHERE payment_id = '$paymentId'")
+        	or journalise($userId, "E", "Cannot read from $table_payconiq: " . mysqli_error($mysqli_link)) ;
+    	if (!$result) return false ;
+		$row = mysqli_fetch_array($result) ;
+		if (!$row) return false ;
+		$this->status = $row['status'] ;
+		$this->paymentId = $row['payment_id'] ;
+		$this->reference = $row['reference'] ;
+		$this->description = $row['description'] ;
+		$this->amount = $row['amount'] ;
+		$this->QRCodeURI = $row['qr_uri'] ;
+		$this->cancelURI = $row['cancel_uri'] ;
+		return true ;
+	}
+
+	function cancel() {
+		global $userId ;
+
+		if (!isset($this->cancelURI) or $this->cancelURI == '') {
+			journalise($userId, "E", "No cancel URI for payment $this->paymentId") ;
+			return false ;
+		}
+		$response = $this->cURL('DELETE', $this->cancelURI, [
+			'Content-Type: application/json',
+			'Cache-Control: no-cache',
+			'Authorization: Bearer ' . $this->api_key
+		], null) ;
+		// HTTP response code is normally 204, i.e., 'no content'
+		journalise($userId, "I", "Payment of $this->amount reference $this->reference id $this->paymentId is about to be cancelled (using $this->cancelURI)") ;
+		return true ;
+	}
+
 	private function getEndpoint($route = null) {
 		return $this->endpoint . $route;
 	}
 
     private function cURL($method, $url, $headers=[], $parameters=[]) {
+		global $userId ; // For journalise()
+
         $curl = curl_init();
 
         curl_setopt($curl, CURLOPT_URL, $url);
@@ -92,6 +136,9 @@ class Payconiq {
         curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($parameters));
 
         $response = curl_exec($curl);
+		if ($response === false) journalise($userId, "E", "cURL request($method, $url) has failed") ;
+//		$response_code = curl_getinfo($curl, CURLINFO_RESPONSE_CODE) ;
+//		journalise($userId, "D", "cURL($method, $url) response code is $response_code") ;
         $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
         $body = substr($response, $header_size);
         curl_close($curl);
