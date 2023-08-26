@@ -223,28 +223,28 @@ class Folio implements Iterator {
 			$this->name = db2web($this->row['pilot_name']) ;
 			$this->code_ciel = $this->row['pilot_code_ciel'] ;
             $this->email = $this->row['pilot_email'] ;
-            $this->address = $this->row['pilot_address'] ;
+            $this->address = db2web($this->row['pilot_address']) ;
             $this->zip_code = $this->row['pilot_zip_code'] ;
-            $this->city = $this->row['pilot_cityl'] ;
-            $this->country = $this->row['pilot_country'] ;
+            $this->city = db2web($this->row['pilot_cityl']) ;
+            $this->country = db2web($this->row['pilot_country']) ;
 		} else if ($pilot == $this->row['l_instructor']) {
 			$this->fname = db2web($this->row['instructor_fname']) ;
 			$this->name = db2web($this->row['instructor_name']) ;
 			$this->code_ciel = $this->row['instructor_code_ciel'] ;
             $this->email = $this->row['instructor_email'] ;
-            $this->address = $this->row['instructor_address'] ;
+            $this->address = db2web($this->row['instructor_address']) ;
             $this->zip_code = $this->row['instructor_zip_code'] ;
-            $this->city = $this->row['instructor_cityl'] ;
-            $this->country = $this->row['instructor_country'] ;
+            $this->city = db2web($this->row['instructor_cityl']) ;
+            $this->country = db2web($this->row['instructor_country']) ;
         } else if ($pilot == $this->row['l_share_member']) {
 			$this->fname = db2web($this->row['share_member_fname']) ;
 			$this->name = db2web($this->row['share_member_name']) ;
 			$this->code_ciel = $this->row['share_member_code_ciel'] ;
             $this->email = $this->row['share_member_email'] ;
-            $this->address = $this->row['share_member_address'] ;
+            $this->address = db2web($this->row['share_member_address']) ;
             $this->zip_code = $this->row['share_member_zip_code'] ;
-            $this->city = $this->row['share_member_cityl'] ;
-            $this->country = $this->row['share_member_country'] ;
+            $this->city = db2web($this->row['share_member_cityl']) ;
+            $this->country = db2web($this->row['share_member_country']) ;
         } else
 			journalise($userId, "F", "UserId $pilot is neither pilot " . $this->row['l_pilot'] . ", nor instructor " . $this->row['l_instructor'] . ", nor share member " . $this->row['l_share_member']) ;
 	}
