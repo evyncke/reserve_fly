@@ -19,6 +19,7 @@ class FolioLine{
     public $date ;
     public $from ;
     public $to ;
+    public $distance_km ;
     public $compteur_vol ;
     public $duration ;
     public $duration_hh ;
@@ -139,7 +140,11 @@ class FolioLine{
         // Except Local flight
         // And only the pilot pays the taxes
         if (stripos($row['l_from'], 'EB') === 0 and $row['l_from'] != $row['l_to'] and $row['l_pilot'] == $userId) {
-            $this->cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
+            $this->distance_km = $this->distance($row['l_to']) ;
+            if ($this->distance_km <= 500)
+                $this->cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
+            else 
+                $this->cost_taxes = 2 * $row['l_pax_count'] ; // Assuming EU, UK, or CH withinh our flight reach
             $this->item_tax = '402005' ;
         } else {
             $this->cost_taxes = 0 ;
@@ -148,20 +153,20 @@ class FolioLine{
         $this->pax_count = $row['l_pax_count'] ;
         $this->share_type = $row['l_share_type'] ;
         $this->share_member = $row['l_share_member'] ;
-	switch ($this->share_member) {
-	// Should reflect the content of shareCodes.js 
-		case -1: $this->share_member_name = '(Ferry)'; $this->share_member_fname = 'Club'; break ;
-		case -2: $this->share_member_name = '(Autres)'; $this->share_member_fname = 'Club'; break ;
-		case -3: $this->share_member_name = 'Initiation'; $this->share_member_fname = ''; break ;
-		case -4: $this->share_member_name = 'IF'; $this->share_member_fname = 'Vol'; break ;
-		case -5: $this->share_member_name = 'membre'; $this->share_member_fname = 'Vol'; break ;
-		case -6: $this->share_member_name = 'D.H.F.'; $this->share_member_fname = 'Vol'; break ;
-		case -7: $this->share_member_name = '(Vol Président)'; $this->share_member_fname = 'Club'; break ;
-		case -8: $this->share_member_name = '(Mécano)'; $this->share_member_fname = 'Club'; break ;
-		default:
-			$this->share_member_name = db2web($row['share_member_name']) ; 
-			$this->share_member_fname = db2web($row['share_member_fname']) ;
-	}
+        switch ($this->share_member) {
+        // Should reflect the content of shareCodes.js 
+            case -1: $this->share_member_name = '(Ferry)'; $this->share_member_fname = 'Club'; break ;
+            case -2: $this->share_member_name = '(Autres)'; $this->share_member_fname = 'Club'; break ;
+            case -3: $this->share_member_name = 'Initiation'; $this->share_member_fname = ''; break ;
+            case -4: $this->share_member_name = 'IF'; $this->share_member_fname = 'Vol'; break ;
+            case -5: $this->share_member_name = 'membre'; $this->share_member_fname = 'Vol'; break ;
+            case -6: $this->share_member_name = 'D.H.F.'; $this->share_member_fname = 'Vol'; break ;
+            case -7: $this->share_member_name = '(Vol Président)'; $this->share_member_fname = 'Club'; break ;
+            case -8: $this->share_member_name = '(Mécano)'; $this->share_member_fname = 'Club'; break ;
+            default:
+                $this->share_member_name = db2web($row['share_member_name']) ; 
+                $this->share_member_fname = db2web($row['share_member_fname']) ;
+        }
         $this->share_member_code_ciel = $row['share_member_code_ciel'] ;
         $this->pilot_name = db2web($row['pilot_name']) ;
         $this->pilot_fname = db2web($row['pilot_fname']) ;
@@ -171,6 +176,34 @@ class FolioLine{
         $this->instructor_name = db2web($row['instructor_name']) ; 
         $this->instructor_fname = db2web($row['instructor_fname']) ;
         $this->instructor_code = $row['l_instructor'] ;
+    }
+    function distance($apt) {
+        // Return the distance in km from EBBR airport
+        // See https://stackoverflow.com/questions/10053358/measuring-the-distance-between-two-coordinates-in-php
+        // https://eservices.minfin.fgov.be/myminfin-web/pages/public/fisconet/document/d259e472-19d1-4e3a-8d62-120e66049b23#_Toc105562091
+        global $mysqli_link, $userId, $table_airports ;
+
+        $result = mysqli_query($mysqli_link, "SELECT * FROM $table_airports WHERE a_code = '$apt'")
+            or journalise($userId, "F", "Cannot read airport from $table_airports for $apt: " . mysqli_error($mysqli_link)) ;
+        $row = mysqli_fetch_array($result) ;
+        if (! $row) {
+            journalise($userId, "E", "Airport '$apt' is unknown... returning short distance for tax purposes") ;
+            return 50 ;
+        }
+        // convert from degrees to radians
+        $earthRadius = 6371000 ; // in meters 
+        $latFrom = deg2rad(50.90140);
+        $lonFrom = deg2rad(4.48444);
+        $latTo = deg2rad($row['a_latitude']);
+        $lonTo = deg2rad($row['a_longitude']);
+
+        $lonDelta = $lonTo - $lonFrom;
+        $a = pow(cos($latTo) * sin($lonDelta), 2) +
+        pow(cos($latFrom) * sin($latTo) - sin($latFrom) * cos($latTo) * cos($lonDelta), 2);
+        $b = sin($latFrom) * sin($latTo) + cos($latFrom) * cos($latTo) * cos($lonDelta);
+
+        $angle = atan2(sqrt($a), $b);
+        return round($angle * $earthRadius / 1000, 0) ; // return in km
     }
 } ;
 
