@@ -32,24 +32,37 @@ if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
 } else
 	if ($userId != 62) journalise($userId, "I", "Start of myfolio") ;
 
-if (isset($_REQUEST['start']))  {
-	$folio_start = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
-	$folio_end = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
-	$folio_end_title = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
-	$previous_month = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
-	$next_month = new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) ;
-} else {
+$folio_start = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+$folio_end = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+$folio_end_title = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+$previous_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+$next_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+
+if (isset($_REQUEST['previous'])) {
 	$folio_start = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+	$folio_start = $folio_start->sub(new DateInterval('P1M')) ;
 	$folio_end = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+	$folio_end = $folio_end->sub(new DateInterval('P1M')) ;
 	$folio_end_title = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
-	$previous_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+	$folio_end_title = $folio_end_title->sub(new DateInterval('P1M')) ;
 	$next_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+	$previous_month = null ;
+	// Pager active ?
+	$previous_active = " active" ;
+	$current_active = '' ;
+} else {
+	$previous_month = $previous_month->sub(new DateInterval('P1M')) ;
+	$next_month = null ;
+	// Pager active ?
+	$current_active = " active" ;
+	$previous_active = '' ;
 }
+$this_month_pager = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+$previous_month_pager = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+$previous_month_pager = $previous_month_pager->sub(new DateInterval('P1M')) ;
 $folio_end->add(new DateInterval('P1M'));
 $folio_end_title->add(new DateInterval('P1M'));
 $folio_end_title->sub(new DateInterval('P1D'));
-$previous_month = $previous_month->sub(new DateInterval('P1M')) ;
-$next_month = $next_month->add(new DateInterval('P1M')) ;
 
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $userId")
 	or journalise(0, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
@@ -63,52 +76,18 @@ function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_sep
 	if ($n == 0) return '' ;
 	return number_format($n, $decimals, $decimal_separator, $thousand_separator) . '&nbsp;&euro;';
 }
-
-function ShowTableHeader() {
-?>
-<thead>
-<tr>
-<th class="logHeader">Date</th>
-<th class="logHeader" colspan="2">Departure</th>
-<th class="logHeader" colspan="2">Arrival</th>
-<th class="logHeader" colspan="2">Aircraft</th>
-<th class="logHeader" colspan="2">Total time</th>
-<th class="logHeader">Name</th>
-<th class="logHeader">Pax</th>
-<th class="logHeader">Cost</th>
-<th class="logHeader" colspan="4">Cost</th>
-</tr>
-<tr>
-<th class="logLastHeader">(dd/mm/yy)</th>
-<th class="logLastHeader">Place</th>
-<th class="logLastHeader">Time UTC</th>
-<th class="logLastHeader">Place</th>
-<th class="logLastHeader">Time UTC</th>
-<th class="logLastHeader">Model</th>
-<th class="logLastHeader">Registration</th>
-<th class="logLastHeader">hh</th>
-<th class="logLastHeader">mm</th>
-<th class="logLastHeader">PIC</th>
-<th class="logLastHeader">Number</th>
-<th class="logLastHeader">Sharing</th>
-<th class="logLastHeader">Plane</th>
-<th class="logLastHeader">FI<?=($userIsInstructor)? ' &spades' : ''?></th>
-<th class="logLastHeader">Taxes <!--&ddagger;--></th>
-<th class="logLastHeader">Total</th>
-</thead>
-<?php
-}
 ?><!doctype html><html>
 <head>
-<link rel="stylesheet" type="text/css" href="log.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-<link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<!--meta name="viewport" content="width=320"-->
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
-<!-- http://www.w3schools.com/bootstrap/ -->
+<link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
+<!-- Using latest bootstrap 5 -->
 <!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Latest compiled JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 <title>Situation comptable de <?=$userName?> (#<?=$userId?>)</title>
 <script src="members.js"></script>
 <script src="shareCodes.js"></script>
@@ -179,7 +158,7 @@ function selectChanged() {
 </script>
 <!-- End Matomo Code -->
 </head>
-<body onload="init();">
+<body onload="init();" lang="fr">
 <div class="container-fluid">
 <h2>Situation comptable de <?=$userName?> (#<?=$userId?>)</h2>
 <?php
@@ -198,10 +177,10 @@ if ($row) {
 	else
 		$balance = 0 ;
 	if ($balance < 0)
-		$balance = "<span class=\"bg-danger\"> $balance &euro; (vous devez de l'argent au RAPCS ASBL)</span>" ;
+		$balance_text = "<span class=\"text-danger\"> $balance &euro; (vous devez de l'argent au RAPCS ASBL)</span>" ;
 	else
-		$balance = "$balance &euro;" ;
-	print("<p class=\"lead\">Le solde de votre compte en date du $row[bkb_date] est de $balance.</p><p>Ces informations sont mises à jour environ une fois par semaine par nos bénévoles.</p>") ;
+		$balance_text = "$balance &euro;" ;
+	print("<p class=\"lead\">Le solde de votre compte en date du $row[bkb_date] est de $balance_text.</p><p>Ces informations sont mises à jour environ une fois par semaine par nos bénévoles.</p>") ;
 	if ($row['bkb_amount'] > 0) {
 		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
 		$invoice_reason = 'solde' ;
@@ -209,7 +188,6 @@ if ($row) {
 } else 
 	print("<p class=\"lead\">Le solde de votre compte n'est pas disponible.</p>") ;
 
-print("<a href=\"myinvoices.php?user=$userId\" class=\"btn btn-primary\">Factures récentes</a> ") ;
 print("<a href=\"myledger.php?user=$userId\" class=\"btn btn-primary\">Mon compte</a><br/>") ;
 
 if ($userIsInstructor or $userIsAdmin) {
@@ -220,24 +198,66 @@ if ($userIsInstructor or $userIsAdmin) {
         <option value=\"$userId\" selected>$userName</option>
         </select><br/><br/>") ;
 }
-if ($previous_month->format('Y-m-d') <= date('Y-m-d') and date('Y-m-d') <= $next_month->format('Y-m-d'))
+
+if ($previous_month)	
 	$document_title = 'Folio (estimation de la facture provisoire)' ;
 else
 	$document_title = 'Reconstruction d\'une facture' ;
 ?>
-<h2><?=$document_title?> du 
-	<a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$previous_month->format('Y-m-d')?>&user=<?=$userId?>"><span class="glyphicon glyphicon-backward"></span></a>
-	<?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?>
-	<a href="<?=$_SERVER['PHP_SELF']?>?start=<?=$next_month->format('Y-m-d')?>&user=<?=$userId?>"><span class="glyphicon glyphicon-forward"></span></a>
-	</h2>
+<h2><?=$document_title?>  du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?></h2>
 
+<div class="row">
+	<ul class="pagination">
+		<li class="page-item"><a class="page-link" href="<?="mobile_invoices.php?user=$userId"?>"><i class="bi bi-caret-left-fill"></i> Factures précédentes</a></li>
+		<li class="page-item<?=$previous_active?>"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?previous&user=$userId"?>">
+			<i class="bi bi-caret-left-fill"></i> Folio du mois précédent <?=$previous_month_pager->format('M-Y')?></a></li>
+		<li class="page-item<?=$current_active?>"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?user=$userId"?>">
+			<i class="bi bi-caret-left-fill"></i> Folio de ce mois <?=$this_month_pager->format('M-Y')?></a></li>
+	</ul><!-- pagination -->
+</div><!-- row -->
+
+<div class="row">
+<div class="col-sm-12 col-lg-10 col-xl-8">
+<div class="table-responsive">
+<table class="table table-hover table-bordered">
+<thead>
+<tr>
+<th class="text-center">Date</th>
+<th class="text-center" colspan="2">Departure</th>
+<th class="text-center" colspan="2">Arrival</th>
+<th class="text-center" colspan="2">Aircraft</th>
+<th class="text-center" colspan="2">Total time</th>
+<th class="text-center">Name</th>
+<th class="text-center">Pax</th>
+<th class="text-center">Cost</th>
+<th class="text-center" colspan="4">Cost</th>
+</tr>
+<tr>
+<th class="text-center">(dd/mm/yy)</th>
+<th class="text-center">Place</th>
+<th class="text-center">Time UTC</th>
+<th class="text-center">Place</th>
+<th class="text-center">Time UTC</th>
+<th class="text-center">Model</th>
+<th class="text-center">Registration</th>
+<th class="text-center">hh</th>
+<th class="text-center">mm</th>
+<th class="text-center">PIC</th>
+<th class="text-center">Number</th>
+<th class="text-center">Sharing</th>
+<th class="text-center">Plane</th>
+<th class="text-center">FI<?=($userIsInstructor)? ' &spades' : ''?></th>
+<th class="text-center">Taxes <!--&ddagger;--></th>
+<th class="text-center">Total</th>
+</thead>
+<tbody>
 <?php
-$folio = new Folio($userId, $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) 
-	or journalise($originalUserId, "F", "Cannot get access to the folio");
 
-print("<table class=\"logTable\">\n") ;
-ShowTableHeader() ;
-print("<tbody>\n") ;
+if ($balance < 0)
+	$balance_class = "table-danger" ;
+else
+	$balance_class = "table-success" ;
+print("<td colspan=\"15\" class=\"$balance_class text-start\">Solde compte courant:</td><td class=\"$balance_class text-end\">" . numberFormat($balance, 2, ',', ' ') . "</td></tr>\n") ;
 
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
@@ -246,6 +266,8 @@ $cost_fi_total = 0 ;
 $cost_taxes_total = 0 ;
 $cost_grand_total = 0 ;
 $diams_explanation = false ; // Whether to display explanation about flight duration
+$folio = new Folio($userId, $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) 
+	or journalise($originalUserId, "F", "Cannot get access to the folio");
 foreach ($folio as $line)	{
 	$duration_hh = $line->duration_hh ;
 	$duration_mm = $line->duration_mm ;
@@ -257,28 +279,28 @@ foreach ($folio as $line)	{
 	} else
 		$plane_token = '' ;
 	print("<tr>
-		<td class=\"logCell\">$line->date</td>
-		<td class=\"logCell\">$line->from</td>
-		<td class=\"logCell\">$line->time_start</td>
-		<td class=\"logCell\">$line->to</td>
-		<td class=\"logCell\">$line->time_end</td>
-		<td class=\"logCell\">$line->model</td>
-		<td class=\"logCell\">$line->plane $plane_token</td>
-		<td class=\"logCell\">$duration_hh</td>
-		<td class=\"logCell\">$duration_mm</td>\n") ;
+		<td class=\"text-center\">$line->date</td>
+		<td class=\"text-center\">$line->from</td>
+		<td class=\"text-center\">$line->time_start</td>
+		<td class=\"text-center\">$line->to</td>
+		<td class=\"text-center\">$line->time_end</td>
+		<td class=\"text-center\">$line->model</td>
+		<td class=\"text-center\">$line->plane $plane_token</td>
+		<td class=\"text-end\">$duration_hh</td>
+		<td class=\"text-end\">$duration_mm</td>\n") ;
 
 	if ($line->instructor_code != $userId  and  $line->is_pic) { // PIC 
-		print("<td class=\"logCell\">SELF</td>\n") ; //Pilot Point of View. A PIC-Recheck is SELF
+		print("<td class=\"text-center\">SELF</td>\n") ; //Pilot Point of View. A PIC-Recheck is SELF
 	} else  // Dual command
 		if ($userId == $line->instructor_code)
-			print("<td class=\"logCell\">$line->pilot_name</td>\n") ; //Point of view of the Instructor. A PIC Recheck is a DC
+			print("<td class=\"text-center\">$line->pilot_name</td>\n") ; //Point of view of the Instructor. A PIC Recheck is a DC
 		else
-			print("<td class=\"logCell\">$line->instructor_name</td>\n") ;// DC 
-	print("<td class=\"logCell\">$line->pax_count</td>\n") ;
+			print("<td class=\"text-center\">$line->instructor_name</td>\n") ;// DC 
+	print("<td class=\"text-end\">$line->pax_count</td>\n") ;
 	if ($line->share_type)
-		print("<td class=\"logCell\">$line->share_type ($line->share_member_fname $line->share_member_name)</td>\n") ;
+		print("<td class=\"text-center\">$line->share_type ($line->share_member_fname $line->share_member_name)</td>\n") ;
 	else
-		print("<td class=\"logCell\"></td>\n") ;
+		print("<td class=\"text-center\"></td>\n") ;
 
 	$cost_total = $line->cost_plane + $line->cost_fi + $line->cost_taxes ;
 	// Prepare the bottom line for grand total
@@ -291,10 +313,10 @@ foreach ($folio as $line)	{
 	$cost_fi = numberFormat($line->cost_fi, 2, ',', ' ') ;
 	$cost_taxes = numberFormat($line->cost_taxes, 2, ',', ' ') ;
 	$cost_total = numberFormat($cost_total, 2, ',', ' ') ;
-	print("<td class=\"logCellRight\">$cost_plane</td>\n") ;
-	print("<td class=\"logCellRight\">$cost_fi</td>\n") ;
-	print("<td class=\"logCellRight\">$cost_taxes</td>\n") ;
-	print("<td class=\"logCellRight\">$cost_total</td>\n") ;
+	print("<td class=\"text-end\">$cost_plane</td>\n") ;
+	print("<td class=\"text-end\">$cost_fi</td>\n") ;
+	print("<td class=\"text-end\">$cost_taxes</td>\n") ;
+	print("<td class=\"text-end\">$cost_total</td>\n") ;
 	print("</tr>\n") ;
 }
 $duration_total_hour += floor($duration_total_minute / 60) ;
@@ -303,22 +325,30 @@ $cost_plane_total = numberFormat($cost_plane_total, 2, ',', ' ') ;
 $cost_fi_total = numberFormat($cost_fi_total, 2, ',', ' ') ;
 $cost_taxes_total = numberFormat($cost_taxes_total, 2, ',', ' ') ;
 $invoice_total = $cost_grand_total;
-$cost_grand_total = numberFormat($cost_grand_total, 2, ',', ' ') ;
+$cost_grand_total_text = numberFormat($cost_grand_total, 2, ',', ' ') ;
+$final_balance_class = ($balance - $cost_grand_total >= 0) ? "table-warning" : "table-danger" ;
 ?>
-<tr><td colspan="7" class="logTotal">Total</td>
-<td class="logTotal"><?=$duration_total_hour?></td>
-<td class="logTotal"><?=$duration_total_minute?></td>
-<td class="logTotal" colspan="3"></td>
-<td class="logTotalRight"><?=$cost_plane_total?></td>
-<td class="logTotalRight"><?=$cost_fi_total?></td>
-<td class="logTotalRight"><?=$cost_taxes_total?></td>
-<td class="logTotalRight"><?=$cost_grand_total?></td>
+<tr><td colspan="7" class="table-info">Total du folio</td>
+<td class="table-info text-end"><?=$duration_total_hour?></td>
+<td class="table-info text-end"><?=$duration_total_minute?></td>
+<td class="table-info" colspan="3"></td>
+<td class="table-info text-end"><?=$cost_plane_total?></td>
+<td class="table-info text-end"><?=$cost_fi_total?></td>
+<td class="table-info text-end"><?=$cost_taxes_total?></td>
+<td class="table-info text-end"><?=$cost_grand_total_text?></td>
+</tr>
+<tr><td colspan="15" class="<?=$final_balance_class?>">Solde du compte membre avec le folio</td>
+<td class="<?=$final_balance_class?> text-end"> <?= numberFormat($balance - $cost_grand_total, 2, ',' , ' ')?></td>
 </tr>
 </tbody>
 </table>
+</div><!-- table responsive -->
+</div><!-- col -->
+</div><!-- row -->
 <p>
-Sur base des donn&eacute;es que vous avez entr&eacute;es apr&egrave;s les vols dans le
-carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui (<?=date('D, j-m-Y H:i e')?>).
+Sur base des données que vous avez entrées après les vols dans le
+carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui (<?=date('D, j-m-Y H:i e')?>),
+donc il peut y avoir une différence si les coûts par minute ont changé depuis lors.
 Le montant n'inclut aucune note de frais (par exemple carburant), note de crédit, ainsi que d'autres frais (par exemple, cotisations, ou taxes d'atterrissage).
 Les heures sont les heures UTC.
 </p >
@@ -330,8 +360,10 @@ if ($userIsInstructor)
 
 if ($diams_explanation)
 	print("<p><mark>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</mark></p>") ;
+?>
 
-$invoice_reason = 'folio' ;
+<?php
+	$invoice_reason = 'folio' ;
 
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
