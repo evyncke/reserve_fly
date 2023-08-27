@@ -309,6 +309,8 @@ foreach ($folio as $line)	{
 	$cost_fi_total += $line->cost_fi ;
 	$cost_taxes_total += $line->cost_taxes ;
 	$cost_grand_total += $cost_total ;
+	// Explain taxes if not zero
+	$distance_msg = ($line->cost_taxes > 0) ? "<br/>(" . $line->distance_km . " km)" : '' ;
 	// Let's have a nice format
 	$cost_plane = numberFormat($line->cost_plane, 2, ',', ' ') ;
 	$cost_fi = numberFormat($line->cost_fi, 2, ',', ' ') ;
@@ -316,7 +318,7 @@ foreach ($folio as $line)	{
 	$cost_total = numberFormat($cost_total, 2, ',', ' ') ;
 	print("<td class=\"text-end\">$cost_plane</td>\n") ;
 	print("<td class=\"text-end\">$cost_fi</td>\n") ;
-	print("<td class=\"text-end\">$cost_taxes</td>\n") ;
+	print("<td class=\"text-end\">$cost_taxes$distance_msg</td>\n") ;
 	print("<td class=\"text-end\">$cost_total</td>\n") ;
 	print("</tr>\n") ;
 }
