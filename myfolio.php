@@ -257,7 +257,8 @@ if ($balance < 0)
 	$balance_class = "table-danger" ;
 else
 	$balance_class = "table-success" ;
-print("<td colspan=\"15\" class=\"$balance_class text-start\">Solde compte courant:</td><td class=\"$balance_class text-end\">" . numberFormat($balance, 2, ',', ' ') . "</td></tr>\n") ;
+print("<tr><td colspan=\"15\" class=\"$balance_class text-start\">Solde courant du compte membre</td><td class=\"$balance_class text-end\">" . 
+	(($balance == 0) ? '0,00 &euro;' : numberFormat($balance, 2, ',', ' ')) . "</td></tr>\n") ;
 
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
