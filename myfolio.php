@@ -180,15 +180,13 @@ if ($row) {
 		$balance_text = "<span class=\"text-danger\"> $balance &euro; (vous devez de l'argent au RAPCS ASBL)</span>" ;
 	else
 		$balance_text = "$balance &euro;" ;
-	print("<p class=\"lead\">Le solde de votre compte en date du $row[bkb_date] est de $balance_text.</p><p>Ces informations sont mises à jour environ une fois par semaine par nos bénévoles.</p>") ;
 	if ($row['bkb_amount'] > 0) {
 		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
 		$invoice_reason = 'solde' ;
 	}
-} else 
-	print("<p class=\"lead\">Le solde de votre compte n'est pas disponible.</p>") ;
-
-print("<a href=\"myledger.php?user=$userId\" class=\"btn btn-primary\">Mon compte</a><br/>") ;
+} else {
+	$balance = 0 ;
+}
 
 if ($userIsInstructor or $userIsAdmin) {
         print("En tant qu'instructeur/administrateur, vous pouvez consulter les situations comptables des autres membres: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
@@ -203,16 +201,27 @@ if ($previous_month)
 	$document_title = 'Folio (estimation de la facture provisoire)' ;
 else
 	$document_title = 'Reconstruction d\'une facture' ;
+// Display today in the local language in human language
+$fmt = datefmt_create(
+    'fr_BE',
+    IntlDateFormatter::FULL,
+    IntlDateFormatter::FULL,
+    'Europe/Brussels',
+    IntlDateFormatter::GREGORIAN,
+    'MMMM yyyy' // See https://unicode-org.github.io/icu/userguide/format_parse/datetime/ !
+) ;
+$today = datefmt_format($fmt, $displayTimestamp) ;
 ?>
 <h2><?=$document_title?>  du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?></h2>
 
 <div class="row">
 	<ul class="pagination">
-		<li class="page-item"><a class="page-link" href="<?="mobile_invoices.php?user=$userId"?>"><i class="bi bi-caret-left-fill"></i> Factures précédentes</a></li>
+		<li class="page-item"><a class="page-link" href="mobile_ledger.php?user=<?=$userId?>">Opérations comptables</a></li>
+		<li class="page-item"><a class="page-link" href="<?="mobile_invoices.php?user=$userId"?>">Factures précédentes</a></li>
 		<li class="page-item<?=$previous_active?>"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?previous&user=$userId"?>">
-			<i class="bi bi-caret-left-fill"></i> Folio du mois précédent <?=$previous_month_pager->format('M-Y')?></a></li>
+			<i class="bi bi-caret-left-fill"></i>Folio du mois précédent <?=datefmt_format($fmt, $previous_month_pager)?></a></li>
 		<li class="page-item<?=$current_active?>"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?user=$userId"?>">
-			<i class="bi bi-caret-left-fill"></i> Folio de ce mois <?=$this_month_pager->format('M-Y')?></a></li>
+			<i class="bi bi-caret-left-fill"></i>Folio de ce mois <?=datefmt_format($fmt,$this_month_pager)?></a></li>
 	</ul><!-- pagination -->
 </div><!-- row -->
 
@@ -319,7 +328,7 @@ foreach ($folio as $line)	{
 	print("<td class=\"text-end\">$cost_plane</td>\n") ;
 	print("<td class=\"text-end\">$cost_fi</td>\n") ;
 	print("<td class=\"text-end\">$cost_taxes$distance_msg</td>\n") ;
-	print("<td class=\"text-end\">$cost_total</td>\n") ;
+	print("<td class=\"text-end text-danger\">$cost_total</td>\n") ;
 	print("</tr>\n") ;
 }
 $duration_total_hour += floor($duration_total_minute / 60) ;
@@ -330,6 +339,7 @@ $cost_taxes_total = numberFormat($cost_taxes_total, 2, ',', ' ') ;
 $invoice_total = $cost_grand_total;
 $cost_grand_total_text = numberFormat($cost_grand_total, 2, ',', ' ') ;
 $final_balance_class = ($balance - $cost_grand_total >= 0) ? "table-warning" : "table-danger" ;
+$final_balance_message = ($balance - $cost_grand_total >= 0) ? "" : "<br/>(vous devrez donc de l'argent au club à la prochaine facture)" ;
 ?>
 <tr><td colspan="7" class="table-info">Total du folio</td>
 <td class="table-info text-end"><?=$duration_total_hour?></td>
@@ -338,9 +348,9 @@ $final_balance_class = ($balance - $cost_grand_total >= 0) ? "table-warning" : "
 <td class="table-info text-end"><?=$cost_plane_total?></td>
 <td class="table-info text-end"><?=$cost_fi_total?></td>
 <td class="table-info text-end"><?=$cost_taxes_total?></td>
-<td class="table-info text-end"><?=$cost_grand_total_text?></td>
+<td class="table-info text-end text-danger"><?=$cost_grand_total_text?></td>
 </tr>
-<tr><td colspan="15" class="<?=$final_balance_class?>">Solde du compte membre avec le folio</td>
+<tr><td colspan="15" class="<?=$final_balance_class?>">Solde du compte membre en tenant compte de ce folio<?=$final_balance_message?></td>
 <td class="<?=$final_balance_class?> text-end"> <?= numberFormat($balance - $cost_grand_total, 2, ',' , ' ')?></td>
 </tr>
 </tbody>
@@ -348,12 +358,12 @@ $final_balance_class = ($balance - $cost_grand_total >= 0) ? "table-warning" : "
 </div><!-- table responsive -->
 </div><!-- col -->
 </div><!-- row -->
-<p>
-Sur base des données que vous avez entrées après les vols dans le
+<p>Sur base des données que vous avez entrées après les vols dans le
 carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui (<?=date('D, j-m-Y H:i e')?>),
-donc il peut y avoir une différence si les coûts par minute ont changé depuis lors.
-Le montant n'inclut aucune note de frais (par exemple carburant), note de crédit, ainsi que d'autres frais (par exemple, cotisations, ou taxes d'atterrissage).
-Les heures sont les heures UTC.
+donc il peut y avoir une différence si les prix par minute ont changé depuis vos vols.
+Le montant n'inclut aucune note de frais (par exemple carburant), note de crédit, ainsi que d'autres frais (par exemple, cotisations, ou taxes d'atterrissage).</p>
+<p>Les heures sont les heures UTC. </p>
+<p>Ces informations sont mises à jour environ une fois par semaine par nos bénévoles.
 </p >
 <!-- p>&ddagger;: depuis le 1er novembre 2022, le CA a décidé de ne plus faire payer les taxes en avance.</p-->
 <?php
@@ -382,7 +392,7 @@ https://github.com/typpo/quickchart
 <h3>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
 <p>Le QR-code contient votre identifiant au niveau de la comptabilité
 RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
-et pas Payconiq (ce dernier étant payant pour le commerçant).</p>
+et pas encore Payconiq (ce dernier étant payant pour le commerçant).</p>
 <img id="payment_qr_code" width="200" height="200" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>">
 </span id="payment">
 <script>

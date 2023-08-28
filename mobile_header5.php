@@ -112,7 +112,7 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 <body <?=$body_attributes?>>
 <?php
 if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep this value
-  print("<input type=\"hidden\" name=\"user\" value\"$_REQUEST[user]\">/n") ;
+  print("<input type=\"hidden\" name=\"user\" value\"$_REQUEST[user]\">\n") ;
 ?>
 <nav class="navbar navbar-expand-md bg-success"><!-- Add fixed-top w/o destroying the layout -->
   <div class="container-fluid">
