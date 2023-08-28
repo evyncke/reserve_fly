@@ -92,8 +92,8 @@ if ($_REQUEST['save_ciel'] == 'true') {
     <input type="submit" value="Import" class="btn btn-primary" name="submit">
 </form>
 
-<h2>Membres inexistants dans Ciel</h2>
-<p>Liste des membres du club dont le numéro de compte Ciel est inconnu.</p>
+<h2>Code Ciel des membres</h2>
+<p>Liste des membres du club avec leur numéro de compte Ciel.</p>
 <form action="<?=$_SERVER['PHP_SELF']?>" id="ciel_form">
     <input type="hidden" name="save_ciel" value="true">
 <table class="table table-striped table-hover table-responsive">
@@ -137,7 +137,6 @@ alors importer dans <i>Ciel Premium Account</i>.</p>
     <input type="text" class="form-control" id="nextMove" name="nextMove">
 </div>
 -->
-
 <div class="mb-3">
     <label for="nextInvoice" class="form-label">Préfix des factures: (Ex V2308)</label>
     <input type="text" class="form-control" id="prefixInvoice" name="prefixInvoice">

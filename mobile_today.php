@@ -23,9 +23,16 @@ require_once "dbi.php" ;
 require_once 'mobile_header5.php' ;
 
 $displayTimestamp = (isset($_REQUEST['time'])) ? intval($_REQUEST['time']) : time() ;
-
-setlocale(LC_TIME, "fr_BE.utf8");
-$today = date("l j F", $displayTimestamp) ;
+// Display today in the local language in human language
+$fmt = datefmt_create(
+    'fr_BE',
+    IntlDateFormatter::FULL,
+    IntlDateFormatter::FULL,
+    'Europe/Brussels',
+    IntlDateFormatter::GREGORIAN,
+    'EEEE d MMMM yyyy' // See https://unicode-org.github.io/icu/userguide/format_parse/datetime/ !
+) ;
+$today = datefmt_format($fmt, $displayTimestamp) ;
 $sql_date = date('Y-m-d', $displayTimestamp) ;
 
 ?> 
