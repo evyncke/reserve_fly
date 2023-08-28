@@ -26,9 +26,9 @@ MustBeLoggedIn() ;
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
-if (!(isset($_REQUEST['nextMove']) and is_numeric($_REQUEST['nextMove'])))
-    journalise($userId, "F", "Invalid parameter: nextMove = $nextMove") ;
-$nextMove = $_REQUEST['nextMove'] ;
+//if (!(isset($_REQUEST['nextMove']) and is_numeric($_REQUEST['nextMove'])))
+//    journalise($userId, "F", "Invalid parameter: nextMove = $nextMove") ;
+$nextMove = 10001 ;
 if (!(isset($_REQUEST['prefixInvoice'])))
     journalise($userId, "F", "Invalid parameter: prefixInvoice = $prefixInvoice") ;
 $prefixInvoice = $_REQUEST['prefixInvoice'] ;
@@ -132,20 +132,20 @@ function remove_accents($text) {
 	<title>Génération des factures</title>
 </head>
 <body>
-    <h1>(PAT TEST) Génération des factures sur base des carnets de vol</h1>
-    <p class="bg-danger">Ceci est en mode test et ne va générer les factures et le fichier de liaison que pour Alain, Bernard, Dominique, Éric, Patrick, et quelques élèves.</p>
+    <h1>Génération des factures et du fichier XIMPORT.TXT sur base des carnets de vol</h1>
+    <p class="bg-danger">Ceci est en mode test</p>
     <p>Le fichier <a href="data/ximport.txt">ximport.txt</a> doit être copié dans le répertoire de liaison comptable.</p>
 <?php
 // Clean the Invoice folder
 $invoiceFolder="data/PDFInvoices/";
 $invoiceFiles = scandir($invoiceFolder);
 foreach($invoiceFiles as $invoiceFile) {
-	print("InvoiceFile= $invoiceFile</br>");
+	//print("InvoiceFile= $invoiceFile</br>");
 	//if(strpos($invoiceFile,"Invoice_")==false && strpos($invoiceFile,"Invoice_")==0) {
-	if(substr($invoiceFile,0,8)=="Invoice_") {
+	if(substr($invoiceFile,0,strlen($prefixInvoice))==$prefixInvoice) {
 		$filePath=$invoiceFolder.$invoiceFile;
 		if(file_exists($filePath)){
-			print("Deleting:  InvoiceFile= $filePath</br>");
+			//print("Deleting:  InvoiceFile= $filePath</br>");
 			if(unlink($filePath)==FALSE) {
 				print("Fail to delete:  InvoiceFile= $filePath</br>");				
 			}
@@ -159,13 +159,13 @@ $sql = "select u.id as id
 		join $table_person as p on u.id=p.jom_id
 		where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
 		group by user_id";
-print($sql."</br>");
+//print($sql."</br>");
 $result = mysqli_query($mysqli_link, $sql)
 			or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
 $members=array();
 
 
-$f = fopen('data/ximport_pat.txt', 'w')
+$f = fopen('data/ximport.txt', 'w')
     or journalise($userId, "F", "Cannot open data/ximport.txt for writing") ;
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198
@@ -175,7 +175,7 @@ $members = [66, 348, 353, 46, 114, 181, 160, 62, 86] ;
 //foreach($members as $member) {
 while ($row = mysqli_fetch_array($result)) {
 	$member=$row['id'];
-	print("member=$member</br>");
+	//print("member=$member</br>");
 	
 	/*
 	$sql = "select jom_id, ciel_code, ciel_code400, last_name, first_name
@@ -202,7 +202,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$cielCode400=$cielCode;
 	$firstName=$folio->fname;
 	$lastName=$folio->name;
-	print("cielCode=$cielCode $cielCode400</br>");
+	//print("cielCode=$cielCode $cielCode400</br>");
 	
     print("<h3>Facture $nextInvoice pour $firstName $lastName</h3>\n") ;
 	
