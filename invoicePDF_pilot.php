@@ -33,7 +33,6 @@ public $table_max_row;
 public $table_row_count;
 public $date;
 public $invoiceNumber;
-
 	// En-tête
 	function Header() {
 	    // Logo
@@ -143,7 +142,6 @@ public $invoiceNumber;
 	    for($i=0; $i<count($row); $i++)
 	        $this->CellUtf8($this->column_width[$i], 5, $row[$i], 1, 0, $this->column_align[$i]);
 	    $this->Ln();
-
 	}
 	
 	function TableTotal($totalAmount) 

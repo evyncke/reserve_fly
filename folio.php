@@ -19,6 +19,7 @@ class FolioLine{
     public $date ;
     public $from ;
     public $to ;
+    public $distance_km ;
     public $compteur_vol ;
     public $duration ;
     public $duration_hh ;
@@ -107,7 +108,11 @@ class FolioLine{
             if ($row['l_instructor'] != $userId) { // The user is not the FI
                 $this->cost_fi = $row['l_instructor_paid'] * $cost_fi_minute * $this->duration ;
             } else {
-                $this->cost_fi = - $row['l_instructor_paid'] * $revenue_fi_minute * $this->duration ;
+                if ( $row['l_instructor_paid']) 
+                    $this->cost_fi = - $revenue_fi_minute * $this->duration ;
+                else // NoDC
+                    // continue ;
+                    $this->cost_fi = 0 ; // Should go to the next row... via a thrown exception ? 
         } else {
 		    $this->cost_fi = 0 ;
         }
@@ -135,7 +140,11 @@ class FolioLine{
         // Except Local flight
         // And only the pilot pays the taxes
         if (stripos($row['l_from'], 'EB') === 0 and $row['l_from'] != $row['l_to'] and $row['l_pilot'] == $userId) {
-            $this->cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
+            $this->distance_km = $this->distance($row['l_to']) ;
+            if ($this->distance_km <= 500)
+                $this->cost_taxes = $tax_per_pax * $row['l_pax_count'] ;
+            else 
+                $this->cost_taxes = 2 * $row['l_pax_count'] ; // Assuming EU, UK, or CH withinh our flight reach
             $this->item_tax = '402005' ;
         } else {
             $this->cost_taxes = 0 ;
@@ -144,20 +153,25 @@ class FolioLine{
         $this->pax_count = $row['l_pax_count'] ;
         $this->share_type = $row['l_share_type'] ;
         $this->share_member = $row['l_share_member'] ;
-	switch ($this->share_member) {
-	// Should reflect the content of shareCodes.js 
-		case -1: $this->share_member_name = 'Club (Ferry)'; $this->share_member_fname = ''; break ;
-		case -2: $this->share_member_name = 'Club (Autres)'; $this->share_member_fname = ''; break ;
-		case -3: $this->share_member_name = 'Initiation'; $this->share_member_fname = ''; break ;
-		case -4: $this->share_member_name = 'Vol IF'; $this->share_member_fname = ''; break ;
-		case -5: $this->share_member_name = 'Vol membre'; $this->share_member_fname = ''; break ;
-		case -6: $this->share_member_name = 'Vol D.H.F.'; $this->share_member_fname = ''; break ;
-		case -7: $this->share_member_name = 'Club (Vol Président)'; $this->share_member_fname = ''; break ;
-		case -8: $this->share_member_name = 'Club (Mécano)'; $this->share_member_fname = ''; break ;
-		default:
-			$this->share_member_name = db2web($row['share_member_name']) ; 
-			$this->share_member_fname = db2web($row['share_member_fname']) ;
-	}
+        switch ($this->share_member) {
+        // Should reflect the content of shareCodes.js 
+            case -1: $this->share_member_name = '(Ferry)'; $this->share_member_fname = 'Club'; break ;
+            case -2: $this->share_member_name = '(Autres)'; $this->share_member_fname = 'Club'; break ;
+            case -3: $this->share_member_name = 'Initiation'; $this->share_member_fname = ''; break ;
+            case -4: $this->share_member_name = 'IF'; $this->share_member_fname = 'Vol'; break ;
+            case -5: $this->share_member_name = 'membre'; $this->share_member_fname = 'Vol'; break ;
+            case -6: $this->share_member_name = 'D.H.F.'; $this->share_member_fname = 'Vol'; break ;
+            case -7: $this->share_member_name = '(Vol Président)'; $this->share_member_fname = 'Club'; break ;
+            case -8: $this->share_member_name = '(Mécano)'; $this->share_member_fname = 'Club'; break ;
+            default:
+                if (($row['l_share_type'] == 'CP2' or $row['l_share_type'] == 'CP1') and $row['l_share_member'] == $userId) {
+                    $this->share_member_name = db2web($row['pilot_name']) ;
+                    $this->share_member_fname = db2web($row['pilot_fname']) ;
+                } else {
+                    $this->share_member_name = db2web($row['share_member_name']) ; 
+                    $this->share_member_fname = db2web($row['share_member_fname']) ;
+                }
+        }
         $this->share_member_code_ciel = $row['share_member_code_ciel'] ;
         $this->pilot_name = db2web($row['pilot_name']) ;
         $this->pilot_fname = db2web($row['pilot_fname']) ;
@@ -168,10 +182,39 @@ class FolioLine{
         $this->instructor_fname = db2web($row['instructor_fname']) ;
         $this->instructor_code = $row['l_instructor'] ;
     }
+    function distance($apt) {
+        // Return the distance in km from EBBR airport
+        // See https://stackoverflow.com/questions/10053358/measuring-the-distance-between-two-coordinates-in-php
+        // https://eservices.minfin.fgov.be/myminfin-web/pages/public/fisconet/document/d259e472-19d1-4e3a-8d62-120e66049b23#_Toc105562091
+        global $mysqli_link, $userId, $table_airports ;
+
+        $result = mysqli_query($mysqli_link, "SELECT * FROM $table_airports WHERE a_code = '$apt'")
+            or journalise($userId, "F", "Cannot read airport from $table_airports for $apt: " . mysqli_error($mysqli_link)) ;
+        $row = mysqli_fetch_array($result) ;
+        if (! $row) {
+            journalise($userId, "E", "Airport '$apt' is unknown... returning short distance for tax purposes") ;
+            return 50 ;
+        }
+        // convert from degrees to radians
+        $earthRadius = 6371000 ; // in meters 
+        $latFrom = deg2rad(50.90140);
+        $lonFrom = deg2rad(4.48444);
+        $latTo = deg2rad($row['a_latitude']);
+        $lonTo = deg2rad($row['a_longitude']);
+
+        $lonDelta = $lonTo - $lonFrom;
+        $a = pow(cos($latTo) * sin($lonDelta), 2) +
+        pow(cos($latFrom) * sin($latTo) - sin($latFrom) * cos($latTo) * cos($lonDelta), 2);
+        $b = sin($latFrom) * sin($latTo) + cos($latFrom) * cos($latTo) * cos($lonDelta);
+
+        $angle = atan2(sqrt($a), $b);
+        return round($angle * $earthRadius / 1000, 0) ; // return in km
+    }
 } ;
 
 class Folio implements Iterator {
     public $pilot ;
+    public $member ; // Possibly just the same as $pilot but better wording
     public $start_date ;
     public $end_date ;
     public $count ;
@@ -186,20 +229,21 @@ class Folio implements Iterator {
     private $result ;
     private $row ;
 
-    function __construct($pilot, $start_date, $end_date) {
+    function __construct($member, $start_date, $end_date) {
         global $mysqli_link, $table_logbook, $table_planes, $table_planes, $table_person, $userId  ;
 
-        $this->pilot = $pilot ;
+        $this->pilot = $member ;
+        $this->member = $member ;
         $this->start_date = $start_date ;
         $this->end_date = $end_date ;
         $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
             l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, 
             i.last_name as instructor_name, i.first_name as instructor_fname, i.ciel_code400 as instructor_code_ciel,
-            i.email as instructor_email, i.address as instructor_address, i.zipcode as instructor_zip_code, i.country as instructor_country,
+            i.email as instructor_email, i.address as instructor_address, i.zipcode as instructor_zip_code,  i.city as instructor_city, i.country as instructor_country,
             p.last_name as pilot_name, p.first_name as pilot_fname, p.ciel_code400 as pilot_code_ciel,
-            p.email as pilot_email, p.address as pilot_address, p.zipcode as pilot_zip_code, p.country as pilot_country,
+            p.email as pilot_email, p.address as pilot_address, p.zipcode as pilot_zip_code, p.city as pilot_city, p.country as pilot_country,
             m.last_name as share_member_name, m.first_name as share_member_fname, m.ciel_code400 as share_member_code_ciel,
-            m.email as share_member_email, m.address as share_member_address, m.zipcode as share_member_zip_code, m.country as share_member_country,
+            m.email as share_member_email, m.address as share_member_address, m.zipcode as share_member_zip_code, m.city as share_member_city, m.country as share_member_country,
             UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
             l_start, l_end, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute as duration,
             60 * (l_flight_end_hour - l_flight_start_hour) + l_flight_end_minute - l_flight_start_minute as flight_duration,
@@ -208,17 +252,18 @@ class Folio implements Iterator {
             LEFT JOIN $table_person p ON p.jom_id = l_pilot
             LEFT JOIN $table_person i ON i.jom_id = l_instructor
             LEFT JOIN $table_person m ON m.jom_id = l_share_member
-            WHERE (l_pilot = $pilot OR l_share_member = $pilot or l_instructor = $pilot)
+            WHERE (l_pilot = $member OR l_share_member = $member or l_instructor = $member)
                 AND l_booking IS NOT NULL
                 AND l_start >= '$start_date'
                 AND l_start <= '$end_date'
+                AND NOT (l_instructor = $member AND l_instructor_paid = 0)
             ORDER by l.l_start ASC" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
             or journalise($userId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
         $this->row = mysqli_fetch_assoc($this->result) ;
 	if ($this->count > 0) {
-		if ($pilot == $this->row['l_pilot']) {
+		if ($member == $this->row['l_pilot']) {
 			$this->fname = db2web($this->row['pilot_fname']) ;
 			$this->name = db2web($this->row['pilot_name']) ;
 			$this->code_ciel = $this->row['pilot_code_ciel'] ;
@@ -227,7 +272,7 @@ class Folio implements Iterator {
             $this->zip_code = $this->row['pilot_zip_code'] ;
             $this->city = db2web($this->row['pilot_city']) ;
             $this->country = db2web($this->row['pilot_country']) ;
-		} else if ($pilot == $this->row['l_instructor']) {
+		} else if ($member == $this->row['l_instructor']) {
 			$this->fname = db2web($this->row['instructor_fname']) ;
 			$this->name = db2web($this->row['instructor_name']) ;
 			$this->code_ciel = $this->row['instructor_code_ciel'] ;
@@ -236,7 +281,7 @@ class Folio implements Iterator {
             $this->zip_code = $this->row['instructor_zip_code'] ;
             $this->city = db2web($this->row['instructor_city']) ;
             $this->country = db2web($this->row['instructor_country']) ;
-        } else if ($pilot == $this->row['l_share_member']) {
+        } else if ($member == $this->row['l_share_member']) {
 			$this->fname = db2web($this->row['share_member_fname']) ;
 			$this->name = db2web($this->row['share_member_name']) ;
 			$this->code_ciel = $this->row['share_member_code_ciel'] ;
@@ -246,7 +291,7 @@ class Folio implements Iterator {
             $this->city = db2web($this->row['share_member_city']) ;
             $this->country = db2web($this->row['share_member_country']) ;
         } else
-			journalise($userId, "F", "UserId $pilot is neither pilot " . $this->row['l_pilot'] . ", nor instructor " . $this->row['l_instructor'] . ", nor share member " . $this->row['l_share_member']) ;
+			journalise($userId, "F", "UserId $member is neither pilot " . $this->row['l_pilot'] . ", nor instructor " . $this->row['l_instructor'] . ", nor share member " . $this->row['l_share_member']) ;
 	}
     }
 

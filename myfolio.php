@@ -65,8 +65,8 @@ $folio_end_title->add(new DateInterval('P1M'));
 $folio_end_title->sub(new DateInterval('P1D'));
 
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $userId")
-	or journalise(0, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
-$pilot = mysqli_fetch_array($result) or journalise(0, 'F', "Pilote $userId inconnu") ;
+	or journalise($originalUserId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
+$pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 $userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
 $codeCiel = $pilot['ciel_code'] ;
@@ -257,7 +257,8 @@ if ($balance < 0)
 	$balance_class = "table-danger" ;
 else
 	$balance_class = "table-success" ;
-print("<td colspan=\"15\" class=\"$balance_class text-start\">Solde compte courant:</td><td class=\"$balance_class text-end\">" . numberFormat($balance, 2, ',', ' ') . "</td></tr>\n") ;
+print("<tr><td colspan=\"15\" class=\"$balance_class text-start\">Solde courant du compte membre</td><td class=\"$balance_class text-end\">" . 
+	(($balance == 0) ? '0,00 &euro;' : numberFormat($balance, 2, ',', ' ')) . "</td></tr>\n") ;
 
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
@@ -308,6 +309,8 @@ foreach ($folio as $line)	{
 	$cost_fi_total += $line->cost_fi ;
 	$cost_taxes_total += $line->cost_taxes ;
 	$cost_grand_total += $cost_total ;
+	// Explain taxes if not zero
+	$distance_msg = ($line->cost_taxes > 0) ? "<br/>(" . $line->distance_km . " km)" : '' ;
 	// Let's have a nice format
 	$cost_plane = numberFormat($line->cost_plane, 2, ',', ' ') ;
 	$cost_fi = numberFormat($line->cost_fi, 2, ',', ' ') ;
@@ -315,7 +318,7 @@ foreach ($folio as $line)	{
 	$cost_total = numberFormat($cost_total, 2, ',', ' ') ;
 	print("<td class=\"text-end\">$cost_plane</td>\n") ;
 	print("<td class=\"text-end\">$cost_fi</td>\n") ;
-	print("<td class=\"text-end\">$cost_taxes</td>\n") ;
+	print("<td class=\"text-end\">$cost_taxes$distance_msg</td>\n") ;
 	print("<td class=\"text-end\">$cost_total</td>\n") ;
 	print("</tr>\n") ;
 }
@@ -363,7 +366,8 @@ if ($diams_explanation)
 ?>
 
 <?php
-	$invoice_reason = 'folio' ;
+$invoice_reason = 'folio' ;
+$invoice_total = $cost_grand_total - $balance ;
 
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
@@ -399,7 +403,7 @@ function pay(reason, amount) {
 	document.getElementById('payment').style.display = 'block' ;
 	document.getElementById('payment_reason').innerText = reason ;
 	document.getElementById('payment_amount').innerText = amount ;
-	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
+	// Should update to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel + '/' + userLastName ;
 	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
