@@ -102,6 +102,7 @@ class XimportLine {
         return $s ;
     }
 }
+
 function remove_accents($text) {
 	$from = explode(" ",""
 		." À Á Â Ã Ä Å Ç È É Ê Ë Ì Í Î Ï Ñ Ò Ó Ô Õ Ö Ø Ù Ú Û Ü Ý à á â"
