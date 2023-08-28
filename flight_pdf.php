@@ -20,7 +20,7 @@
 
 require_once "dbi.php" ;
 require_once 'facebook.php' ;
-require_once 'fpdf.php';
+require_once 'fpdf186/fpdf.php';
 //require_once 'mem_image.php' ;
 
 if (! ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager))

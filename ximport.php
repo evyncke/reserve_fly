@@ -16,29 +16,23 @@
 
 */
 
-/*
-TODO:
-- générer les factures sous format PDF, soit via PHP soit via publipostage MS-office 
-  https://faqword.com/index.php/word/19-publipostage/1075-publipostage-directement-vers-fichiers-pdf
-- envoyer les emails
-*/
-
 require_once 'dbi.php' ;
+require_once 'facebook.php' ;
+require_once 'invoicePDF_pilot.php';
+require_once 'folio.php' ;
 
 MustBeLoggedIn() ;
 
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
-if (!isset($_REQUEST['nextMove']))
-    $nextMove = 10000 ;
-else
-    $nextMove = $_REQUEST['nextMove'] ;
-if (!(isset($_REQUEST['nextInvoice']) and is_numeric($_REQUEST['nextInvoice'])))
-    journalise($userId, "F", "Invalid parameter: nextInvoice = $nextInvoice") ;
-$nextInvoice = $_REQUEST['nextInvoice'] ;
-
-require_once 'folio.php' ;
+if (!(isset($_REQUEST['nextMove']) and is_numeric($_REQUEST['nextMove'])))
+    journalise($userId, "F", "Invalid parameter: nextMove = $nextMove") ;
+$nextMove = $_REQUEST['nextMove'] ;
+if (!(isset($_REQUEST['prefixInvoice'])))
+    journalise($userId, "F", "Invalid parameter: prefixInvoice = $prefixInvoice") ;
+$prefixInvoice = $_REQUEST['prefixInvoice'] ;
+$invoiceCount = 0;
 
 class XimportLine {
     public $mouvement ;
@@ -82,14 +76,12 @@ class XimportLine {
         $this->tva = $tva ;
         $this->code_tva = $code_tva ;
         $this->x1 = $x1 ;
-        if ($x2 != '')
-            $this->x2 = $this->datelog2ciel($x2) ;
-        else 
-            $this->x2 = '' ;
+        $this->x2 = $this->datelog2ciel($x2) ;
         $this->x3 = $x3 ;
     }
 
     public function __toString() {
+//        print_r($this) ;
         $s = '' ;
         $s .= str_pad($this->mouvement, 5) ; // numéro de mouvement sur 5 chars
         $s .= str_pad($this->journal, 4) ; // Journal sur 4 chars cadrés à gauche
@@ -110,6 +102,18 @@ class XimportLine {
         return $s ;
     }
 }
+function remove_accents($text) {
+	$from = explode(" ",""
+		." À Á Â Ã Ä Å Ç È É Ê Ë Ì Í Î Ï Ñ Ò Ó Ô Õ Ö Ø Ù Ú Û Ü Ý à á â"
+		." ã ä å ç è é ê ë ì í î ï ñ ò ó ô õ ö ø ù ú û ü ý ÿ Ā ā Ă ă Ą"
+		." ą Ć ć Ĉ ĉ Ċ ċ Č č Ď ď Đ đ Ē ē Ĕ ĕ Ė ė Ę ę Ě ě Ĝ ĝ Ğ ğ Ġ ġ Ģ");
+	$to = explode(" ",""
+		." A A A A A A C E E E E I I I I N O O O O O O U U U U Y a a a"
+		." a a a c e e e e i i i i n o o o o o o u u u u y y A a A a A"
+		." a C c C c C c C c D d D d E e E e E e E e E e G g G g G g G");
+	return str_replace( $from, $to, $text);
+}
+
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -127,24 +131,101 @@ class XimportLine {
 	<title>Génération des factures</title>
 </head>
 <body>
-    <h1>Génération des factures sur base des carnets de vol</h1>
-    <p class="bg-danger">Ceci est en mode test et ne va générer les factures et le fichier de liaison que pour Alain, Bernard, Dominique, Éric, Patrick, René, et quelques élèves.</p>
+    <h1>(PAT TEST) Génération des factures sur base des carnets de vol</h1>
+    <p class="bg-danger">Ceci est en mode test et ne va générer les factures et le fichier de liaison que pour Alain, Bernard, Dominique, Éric, Patrick, et quelques élèves.</p>
     <p>Le fichier <a href="data/ximport.txt">ximport.txt</a> doit être copié dans le répertoire de liaison comptable.</p>
 <?php
+// Clean the Invoice folder
+$invoiceFolder="data/PDFInvoices/";
+$invoiceFiles = scandir($invoiceFolder);
+foreach($invoiceFiles as $invoiceFile) {
+	print("InvoiceFile= $invoiceFile</br>");
+	//if(strpos($invoiceFile,"Invoice_")==false && strpos($invoiceFile,"Invoice_")==0) {
+	if(substr($invoiceFile,0,8)=="Invoice_") {
+		$filePath=$invoiceFolder.$invoiceFile;
+		if(file_exists($filePath)){
+			print("Deleting:  InvoiceFile= $filePath</br>");
+			if(unlink($filePath)==FALSE) {
+				print("Fail to delete:  InvoiceFile= $filePath</br>");				
+			}
+		}	
+	}
+}
 
-$f = fopen('data/ximport.txt', 'w')
+
+$sql = "select u.id as id
+		from $table_users as u join $table_user_usergroup_map on u.id=user_id 
+		join $table_person as p on u.id=p.jom_id
+		where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
+		group by user_id";
+print($sql."</br>");
+$result = mysqli_query($mysqli_link, $sql)
+			or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
+$members=array();
+
+
+$f = fopen('data/ximport_pat.txt', 'w')
     or journalise($userId, "F", "Cannot open data/ximport.txt for writing") ;
-// Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198, René = 353, Michel Frédéric = 77
 
-$members = [62, 66, 92, 198, 306, 348, 353, 439] ;
-$members = [66, 348, 353] ;
+// Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198
+//$members = [62, 66, 92, 198, 306, 348, 439] ;
+$members = [66, 348, 353, 46, 114, 181, 160, 62, 86] ;
 
-
-foreach($members as $member) {
+//foreach($members as $member) {
+while ($row = mysqli_fetch_array($result)) {
+	$member=$row['id'];
+	print("member=$member</br>");
+	
+	/*
+	$sql = "select jom_id, ciel_code, ciel_code400, last_name, first_name
+			from $table_person 
+			where jom_id= $member";
+	//print("sql=$sql</br>");
+	$result = mysqli_query($mysqli_link, $sql)
+		or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
+    $row = mysqli_fetch_array($result);
+	$cielCode=$row['ciel_code'];
+	$cielCode400=$row['ciel_code400'];
+	$firstName=db2web($row['first_name']);
+	$lastName=db2web($row['last_name']);
+	//print("cielCode=$cielCode</br>");
+	*/
+	
     $folio = new Folio($member, '2023-08-01', '2023-08-31') ;
     if ($folio->count == 0) continue ;
-    print("<h3>Facture $nextInvoice pour $folio->fname $folio->name ($folio->code_ciel)</h3>\n") ;
+	//("1 $folio->count $folio->pilot  $folio->start_date  $folio->end_date   $folio->count  $folio->fname  $folio->name  $folio->email  $folio->address  $folio->zip_code  $folio->city  $folio->country  $folio->code_ciel  </br>");
+	$invoiceCount++ ;
+	$nextInvoice=$prefixInvoice."-".str_pad($invoiceCount,4,"0",STR_PAD_LEFT);
+	
+	$cielCode=$folio->code_ciel;
+	$cielCode400=$cielCode;
+	$firstName=$folio->fname;
+	$lastName=$folio->name;
+	print("cielCode=$cielCode $cielCode400</br>");
+	
+    print("<h3>Facture $nextInvoice pour $firstName $lastName</h3>\n") ;
+	
+	//print("1 $folio->pilot  $folio->start_date  $folio->end_date   $folio->count  $folio->fname  $folio->name  $folio->email  $folio->address  $folio->zip_code  $folio->city  $folio->country  $folio->code_ciel  </br>");
+    //private $result ;
+    //private $row ;
+	
+	
     $total_folio = 0 ;
+	//PDF
+	$pdf = new InvoicePDF('P','mm','A4');
+	$pdf->SetDate("31-08-2023");
+	$pdf->SetInvoiceNumber($nextInvoice);
+	$pdf->AddPage();
+	$pdf->AliasNbPages();
+	//$pdf->AddDate("31-08-2023");
+	//$pdf->AddInvoiceNumber($nextInvoice);
+	//print("AddAddress($folio->fname.\" \".$folio->name, $folio->address, \"$folio->zip_code $folio->city\", $folio->country)</br>");
+	$pdf->AddAddress($folio->fname." ".$folio->name, $folio->address, "$folio->zip_code $folio->city", $folio->country) ;
+	//$pdf->SetXY(20, 80);
+	$pdf->SetColumnsWidth(array(20, 85, 20, 25, 25),array("C","L","C","R","R")) ;
+	$pdf->TableHeader(array("Référence", "Désignation", "Quantité", "Prix unitaire","Montant")) ; 
+	//print("2 $folio->pilot  $folio->start_date  $folio->end_date   $folio->count  $folio->fname  $folio->name  $folio->email  $folio->address  $folio->zip_code  $folio->city  $folio->country  $folio->code_ciel  </br>");
+	
 ?>
 <table class="table table-striped table-responsive table-hover">
     <thead>
@@ -153,19 +234,63 @@ foreach($members as $member) {
     <tbody>
 <?php
     foreach($folio as $line) {
-        if ($line->cost_plane > 0) {
-            $code_plane = substr($line->plane, 3) ;
-            $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, 700100, "$line->pilot_name $line->pilot_fname", $line->cost_plane, 'C', $nextInvoice,
-                $code_plane, 0.0, 0.0, '0', $line->date, 0) ;
+		
+		if ($line->cost_fi < 0) {
+			// This is a DC flight for a FI. Line skipped. Not to be added in the invoice
+			continue;
+		}
+ 
+		$shareInfo="";
+        $code_plane = substr($line->plane, 3) ;
+		$date=substr($line->date,6,2).substr($line->date,3,2).substr($line->date,0,2).":".substr($line->time_start,0,2).substr($line->time_start,3,2);
+		$DC="";
+		if($line->instructor_name!="") {
+			$DC="DC";
+		}
+		if($line->share_type!="") {
+            switch ($line->share_member) {
+                case -1: $shareInfo=$line->share_type." "."Ferry"; break ; 
+                case -2: $shareInfo=$line->share_type." "."Club"; break ; 
+                case -3: $shareInfo=$line->share_type." "."INIT"; break ; 
+                case -4: $shareInfo=$line->share_type." "."IF"; break ; 
+                case -5: $shareInfo=$line->share_type." "."Membre"; break ; 
+                case -6: $shareInfo=$line->share_type." "."DHF"; break ; 
+                case -7: $shareInfo=$line->share_type." "."Club"; break ; 
+                case -8: $shareInfo=$line->share_type." "."Mecano"; break ; 
+				default: $shareInfo=$line->share_type." ".$line->share_member_name." ".$line-> share_member_fname; break;
+            }
+		}
+		$libelle=$code_plane.$date;
+		if($DC!="") {
+			$libelle=$libelle.".".$DC;
+		}
+		if($shareInfo!="") {
+			$libelle=$libelle.".".$shareInfo;
+		}
+		$picName="PIC ".$line->pic_name;
+		if($line->pic_name=="SELF") $picName="";
+		//$libelle="$line->pilot_name $line->pilot_fname";
+	    if ($line->cost_plane > 0) {
+            $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, 700100, remove_accents($libelle), $line->cost_plane, 'C', $nextInvoice,
+            $code_plane, 0.0, 0.0, '0', $line->date, 0) ;
             fprintf($f, "$ximportLine\n") ;
-            print("<tr><td>$line->item_plane</td><td>$line->plane $line->share_type $line->date</td><td>$line->duration</td><td>$line->cost_plane_minute</td><td>$line->cost_plane</td></tr>\n") ;         
-        }
+		}
+		$costPlaneText=number_format($line->cost_plane,2,",",".")." €";
+		$costPlaneMinuteText=number_format($line->cost_plane_minute,2,",",".")." €";
+		$pdf->TableRow(array($line->item_plane, "$line->date $line->plane $picName $shareInfo",$line->duration, $costPlaneMinuteText, $costPlaneText));		
+        print("<tr><td>$line->item_plane</td><td>$line->date $line->plane $picName $shareInfo</td><td>$line->duration</td><td>$costPlaneMinuteText</td><td>$costPlaneText</td></tr>\n") ;         
+
         // Special line if there are taxes
         if ($line->cost_taxes > 0) {
-            $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, 744103, "$line->pilot_name $line->pilot_fname", $line->cost_taxes, 'C', $nextInvoice,
+			$libelle=$code_plane.$date.".TaxesPass";
+            $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, 744103, remove_accents($libelle), $line->cost_taxes, 'C', $nextInvoice,
                 'TI', 0.0, 0.0, '0', $line->date, 0) ;
-            fprintf($f, "$ximportLine\n") ;           
-            print("<tr><td>$line->item_tax</td><td>Redevance passager(s) $line->date $line->from > $line->to</td><td>$line->pax_count</td><td>$tax_per_pax</td><td>$line->cost_taxes</td></tr>\n") ;         
+            fprintf($f, "$ximportLine\n") ;        
+			$taxPerPax=$line->cost_taxes/$line->pax_count;
+			$taxPerPaxText=number_format($taxPerPax,2,",",".")." €";
+			$costTaxText=number_format($line->cost_taxes,2,",",".")." €";   
+            print("<tr><td>$line->item_tax</td><td>$line->date $line->plane Redevance Pax $line->from > $line->to</td><td>$line->pax_count</td><td>$taxPerPaxText</td><td>$costTaxText</td></tr>\n") ; 
+			$pdf->TableRow(array($line->item_tax, "$line->date $line->plane Redevance Pax $line->from > $line->to", $line->pax_count, $taxPerPaxText, $costTaxText));
         }
         // Special line if there is an instructor
         if ($line->cost_fi > 0) {
@@ -175,33 +300,50 @@ foreach($members as $member) {
                 case  59: $fi_code = 700206 ; $fi_analytique = 'NC' ; break ; // Nicolas Claessen
                 case 118: $fi_code = 700208 ; $fi_analytique = 'EC' ; break ; // David Gaspar, EC pour école ?
             }
-            $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $fi_code, "$line->pilot_name $line->pilot_fname", $line->cost_fi, 'C', $nextInvoice,
+			$DC="DC".$line->instructor_name;
+			$libelle=$code_plane.$date.".".$DC;
+            $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $fi_code, remove_accents($libelle), $line->cost_fi, 'C', $nextInvoice,
                 $fi_analytique, 0.0, 0.0, '0', $line->date, 0) ;
             fprintf($f, "$ximportLine\n") ; 
-            print("<tr><td>$line->item_fi</td><td>$line->plane $line->instructor_name $line->date</td><td>$line->duration</td><td>$cost_fi_minute</td><td>$line->cost_fi</td></tr>\n") ;         
+			
+			$costFIText=number_format($line->cost_fi,2,",",".")." €";
+			$costFIMinText=number_format($cost_fi_minute,2,",",".")." €";   
+            print("<tr><td>$line->item_fi</td><td>$line->date $line->plane DC $line->instructor_name </td><td>$line->duration</td><td>$costFIMinText</td><td>$costFIText</td></tr>\n") ; 
+			  
+			$pdf->TableRow(array($line->item_fi, "$line->date $line->plane DC $line->instructor_name",$line->duration, $costFIMinText, $costFIText));
+			      
         } else 
             $fi_suffix = 0 ;
         $total_folio += $line->cost_plane + $line->cost_fi + $line->cost_taxes ;
     }
-    // Write to the member account if a real invoice
-    if ($total_folio > 0) {
-        $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $folio->code_ciel, "Centr. $folio->code_ciel,1 L deb", $total_folio, 'D', $nextInvoice,
-            '', 0.0, 0.0, '0', '', 0) ;
-        fprintf($f, "$ximportLine\n") ;
-        print("<tr class=\"bg-info\"><td></td><td>Total</td><td colspan=2></td><td>$total_folio</td></tr>\n") ;
-        $nextInvoice++ ;
-    }
+    // Write to the member account
+	$libelle= "Fac.".$nextInvoice." ".$lastName." ".$firstName;
+    $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $cielCode400, remove_accents($libelle) , $total_folio, 'D', $nextInvoice,
+        '', 0.0, 0.0, ' ', '', 0) ;
+    fprintf($f, "$ximportLine\n") ;
+	
+	$totalFolioText=number_format($total_folio,2,",",".")." €";
+	
+    print("<tr><td></td><td></td><td></td><td><b>Total</b></td><td><b>$totalFolioText</b></td></tr>\n") ; 
+	$pdf->TableTotal($totalFolioText);
+	
     $nextMove++ ;
+    //$nextInvoice++ ;
+	
     print("</tbody>\n</table>\n") ;
+	$invoiceFile=$invoiceFolder.$nextInvoice."_".$lastName."_".$firstName.".pdf";
+	$invoiceFile=remove_accents($invoiceFile);
+	$pdf->Output('F', $invoiceFile);
 }
 
 fclose($f) ;
+					
 ?>
 <h2>Paramètres à injecter dans Ciel</h2>
 <p>Voici les paramètres à modifier dans <i>Ciel Premium Account</i>:
     <ul>
         <li>Numéro de facture suivant: <?=$nextInvoice?></li>
-        <li>Numéro de mouvement suivant: <?=$nextMove?> (a priori inutile)</li>
+        <li>Numéro de mouvement suivant: <?=$nextMove?></li>
     </ul>
 </p>
 </body>
