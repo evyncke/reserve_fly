@@ -96,7 +96,7 @@ function ImprovedTableHeader($header) {
 	$this->Ln();
 }
 
-function ImprovedTableRow($row) {
+function ImprovedTableSingleRow($row) {
     // Data
     for($i=0; $i<count($row); $i++)
         $this->CellUtf8($this->column_width[$i], 4, $row[$i], 1, 0, 'C');
@@ -106,7 +106,7 @@ function ImprovedTableRow($row) {
 function ImprovedTableMultiLineRow($line_count, $row) {
     // Data
 	if ($line_count == 1) {
-		ImprovedTableRow($row)  ;
+		$this->ImprovedTableSingleRow($row)  ;
 		return ;
 	}
 	// Emit first line with top lines
@@ -378,7 +378,9 @@ if ($row_flight['f_pilot']) {
 		$result_booking = mysqli_query($mysqli_link, "select upper(id) as id, classe, delai_reservation
 			from $table_planes where ressource = 0
 			order by id") or die("Cannot get all active planes:".mysqli_error($mysqli_link)) ;
-		$check_club = false ;
+		$check_club = new stdClass ;
+		$check_club->result = false ;
+		$check_club->explanation = '' ;
 		$landings_count = 0 ;
 		while ($row_booking = mysqli_fetch_array($result_booking) and !$check_club) {
 			if (planeClassIsMember($row_plane['classe'], $row_booking['classe'])) {
