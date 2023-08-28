@@ -164,8 +164,13 @@ class FolioLine{
             case -7: $this->share_member_name = '(Vol Président)'; $this->share_member_fname = 'Club'; break ;
             case -8: $this->share_member_name = '(Mécano)'; $this->share_member_fname = 'Club'; break ;
             default:
-                $this->share_member_name = db2web($row['share_member_name']) ; 
-                $this->share_member_fname = db2web($row['share_member_fname']) ;
+                if (($row['l_share_type'] == 'CP2' or $row['l_share_type'] == 'CP1') and $row['l_share_member'] == $userId) {
+                    $this->share_member_name = db2web($row['pilot_name']) ;
+                    $this->share_member_fname = db2web($row['pilot_fname']) ;
+                } else {
+                    $this->share_member_name = db2web($row['share_member_name']) ; 
+                    $this->share_member_fname = db2web($row['share_member_fname']) ;
+                }
         }
         $this->share_member_code_ciel = $row['share_member_code_ciel'] ;
         $this->pilot_name = db2web($row['pilot_name']) ;
