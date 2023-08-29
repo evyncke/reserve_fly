@@ -32,18 +32,26 @@ if (! $userIsAdmin && ! $userIsBoardMember)
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<!-- http://www.w3schools.com/bootstrap/ -->
-<!-- Latest compiled and minified CSS -->
-<Xlink rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<Xscript src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script><html>
 <!-- Using latest bootstrap 5 -->
 <!-- Latest compiled and minified CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Use bootstrap icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <!-- Latest compiled JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 <title>Ciel</title>
+<script>
+function toggleCielRows() {
+    rows = document.getElementsByClassName('ciel-row') ;
+    toggle = document.getElementById('hideUnknown') ;
+    for (var i = 0; i < rows.length; i++) {
+        if (rows[i].cells[1].getElementsByTagName('input')[0].value != '') {
+            // un/hide the row
+            rows[i].style.display = toggle.checked ? 'none' : '' ;
+        }    
+    }
+}
+</script>
 </head>
 <body>
     <h1>Gestion Ciel</h1>
@@ -63,9 +71,11 @@ if ($_REQUEST['save_ciel'] == 'true') {
                 $code_400 = '400' . $code ;
             }
             mysqli_query($mysqli_link, "UPDATE $table_person SET ciel_code='$code', ciel_code400='$code_400' where jom_id=$id")
-                or journalise($userId, "F", "Cannot assigne Ciel code" . mysqli_error($mysqli_link)) ;
-            print("Ciel code $code/$code_400 assigné à l'utilisateur $id.<br>\n") ;
-            journalise($userId, "I", "Ciel codes $code/$code_400 assignés à l'utilisateur $id.<br>\n") ;
+                or journalise($userId, "F", "Cannot assign Ciel code" . mysqli_error($mysqli_link)) ;
+            if (mysqli_affected_rows($mysqli_link) > 0) {    
+                print("Ciel code $code/$code_400 assigné à l'utilisateur $id.<br>\n") ;
+                journalise($userId, "I", "Ciel codes $code/$code_400 assignés à l'utilisateur $id.") ;
+            }   
         }
     }   
 }
@@ -100,6 +110,7 @@ if ($_REQUEST['save_ciel'] == 'true') {
 
 <h2>Code Ciel des membres</h2>
 <p>Liste des membres du club avec leur numéro de compte Ciel.</p>
+<p><input type="checkbox" id="hideUnknown" checked onChange="toggleCielRows();"> cacher les comptes Ciel connus.</p>
 <form action="<?=$_SERVER['PHP_SELF']?>" id="ciel_form">
     <input type="hidden" name="save_ciel" value="true">
 <table class="table table-striped table-hover table-responsive">
@@ -116,11 +127,10 @@ while ($row = mysqli_fetch_array($result)) {
     $name = db2web($row['name']) ;
     $first_name = db2web($row['first_name']) ;
     $last_name = db2web($row['last_name']) ;
-    print("<tr><td>$row[username]</td><td>
+    $hidden_style = ($row['ciel_code400'] != '') ? ' style="display: none;"' : '' ;
+    print("<tr class=\"ciel-row\"$hidden_style><td>$row[username]</td><td>
         <input type=\"text\" name=\"ciel$row[jom_id]\" value=\"$row[ciel_code400]\"> 
-        <span class=\"glyphicon glyphicon glyphicon-floppy-saved\" style=\"color: blue;\" title=\"Enregistrer le code Ciel\" onClick=\"document.getElementById('ciel_form').submit();\">
-            <i class=\"bi-check-circle-fill\"></i>
-        </span>
+        <i class=\"bi-check-circle-fill\" style=\"color: blue;\" title=\"Enregistrer le code Ciel\" onClick=\"document.getElementById('ciel_form').submit();\"></i>
         </td><td>$last_name</td><td>$first_name</td><td>$row[email]</td><td>$row[registerDate]</td></tr>\n") ;
 }
 ?>
@@ -132,7 +142,7 @@ while ($row = mysqli_fetch_array($result)) {
 <p>Cette opération va envoyer par email les factures du mois précédent (sur base du folio, 
 c-à-d sur base des carnets de routes des avions) et va générer un fichier <i>ximport.txt</i> qu'il faudra
 alors importer dans <i>Ciel Premium Account</i>.</p>
-<p class="bg-danger">Ceci est en mode test réservé à Eric Vyncke et Patrick</p>
+<p class="bg-danger">Ceci est en mode test réservé à Eric Vyncke et Patrick Reginster.</p>
 
 <div class=""></div>
 <form action="ximport.php">
