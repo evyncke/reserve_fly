@@ -110,7 +110,10 @@ if ($_REQUEST['save_ciel'] == 'true') {
 
 <h2>Code Ciel des membres</h2>
 <p>Liste des membres du club avec leur numéro de compte Ciel.</p>
-<p><input type="checkbox" id="hideUnknown" checked onChange="toggleCielRows();"> cacher les comptes Ciel connus.</p>
+<div class="form-check">
+    <input class="form-check-input" type="checkbox" id="hideUnknown" checked onChange="toggleCielRows();"> 
+    <label class="form-check-label"> Cacher les comptes Ciel connus.</label>
+</div><!-- form-check -->
 <form action="<?=$_SERVER['PHP_SELF']?>" id="ciel_form">
     <input type="hidden" name="save_ciel" value="true">
 <table class="table table-striped table-hover table-responsive">
