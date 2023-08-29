@@ -131,9 +131,9 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
     <ul class="dropdown-menu">
-      <li><a class="dropdown-item" href="mobile_journal.php">Journal système</a></li>
-      <li><a class="dropdown-item" href="gestionMembres.php">Gestion membres <i class="bi bi-box-arrow-up-right"></i></a></li>
-      <li><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></li>
+      <li><i><a class="dropdown-item" href="mobile_journal.php">Journal système</a></i></li>
+      <li><i><a class="dropdown-item" href="gestionMembres.php">Gestion membres <i class="bi bi-box-arrow-up-right"></i></a></i></li>
+      <li><i><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></i></li>
     </ul>
   </li> <!-- dropdown administration-->
 <?php
@@ -168,6 +168,11 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="IntroCarnetVol.php">Encodage compteurs <i class="bi bi-box-arrow-up-right"></i></span></a></li>
             <li><a class="dropdown-item" href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
             <!-- init() in mobile.js will insert all active planes -->
+<?php
+}
+if ($userIsAdmin or $userIsInstructor) {
+?>
+          <li><i><a class="dropdown-item" href="mobile_plane_planning.php">Echéances des avions</a></i></li>
 <?php
 }
 ?>
