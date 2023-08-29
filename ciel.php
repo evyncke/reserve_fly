@@ -126,23 +126,14 @@ c-à-d sur base des carnets de routes des avions) et va générer un fichier <i>
 alors importer dans <i>Ciel Premium Account</i>.</p>
 <p class="bg-danger">Ceci est en mode test réservé à Eric Vyncke et Patrick</p>
 
-<p>Le numéro du prochain mouvement comptable est disponible dans <i>Ciel Premium Account</i> via le menu
-<i>Dossiers -> Options -> Préférences -> Liaison Comptable -> Générations des écritures / Options "Prochain n° de mouvement généré"</i>.</p>
-
 <div class=""></div>
 <form action="ximport.php">
-<!--
 <div class="mb-3">
-    <label for="nextMove" class="form-label">Prochain mouvement comptable:</label>
-    <input type="text" class="form-control" id="nextMove" name="nextMove">
-</div>
--->
-<div class="mb-3">
-    <label for="nextInvoice" class="form-label">Préfix des factures: (Ex V2308)</label>
-    <input type="text" class="form-control" id="prefixInvoice" name="prefixInvoice">
+    <label for="nextInvoice" class="form-label">Préfixe des factures: (exemple V<?=date('ym')?>)</label>
+    <input type="text" class="form-control" id="prefixInvoice" name="prefixInvoice" value="V<?=date('ym')?>">
 </div>
 <div class="mb-3">
-<p> Factures générées dans le folder <a ref="https://www.spa-aviation.be/resa/data/PDFInvoices/">https://www.spa-aviation.be/resa/data/PDFInvoices/</a></p>
+<p>Factures générées dans le folder <a ref="https://www.spa-aviation.be/resa/data/PDFInvoices/">https://www.spa-aviation.be/resa/data/PDFInvoices/</a></p>
 <p>Fichier d'import ciel : <a ref="https://www.spa-aviation.be/resa/data/ximport.txt">ximport.txt</a></p>
 </div>
 
