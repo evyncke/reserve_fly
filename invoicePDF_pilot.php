@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2023 Eric Vyncke - Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public $invoiceNumber;
 	function TableHeader($header) 
 	{
 		$this->column_header=$header;
-		$this->table_max_row=28;
+		$this->table_max_row=26;
 		$this->table_row_count=0;
 		
 		$this->SetXY(15, 80);
@@ -153,6 +153,29 @@ public $invoiceNumber;
         $this->CellUtf8(50, 7, "Total : $totalAmount", 1, 0, 'C', true);
 	    $this->Ln();
 	}
+	
+	function AddQRCode($totalFolio, $communication) 
+	{
+	    //$this->Ln();
+		$x=140;
+		$y=$this->GetY();
+		$l=50;
+		$h=32;
+	    $this->SetXY(150,$y);
+		
+		$url="https://chart.googleapis.com/chart?cht=qr&chs=125x125&&chl=BCD%0A001%0A1%0ASCT%0ACREGBEBB%0ARoyal%20Aero%20Para%20Club%20Spa%0ABE64732038421852%0AEUR".$totalFolio."%0A".$communication."%0A".$communication;
+		//print("url=$url</br>");
+		$url=str_replace(" ","%20",$url);
+		//print("url=$url</br>");
+		$this->Image($url, null, null, 0, 0, 'PNG') ;
+		$this->Rect($x,$y,$l,$h+2);
+		$this->SetFont('Arial','',6);
+		$this->SetXY($x,$y+$h-2);
+		$this->SetTextColor(0,0,255);
+		$this->CellUtf8($l,5,$communication,0,0,'C');
+		$this->SetTextColor(0,0,0);
+	}
+	
 	function AddProlog() 
 	{
 	    // Data
@@ -173,7 +196,9 @@ public $invoiceNumber;
         $this->MulticellUtf8(100, 4, $infoGeneral, 0, 'L',false);
 	    $this->Ln(2);
 		$this->SetFont('Arial','',9);
+		$this->SetTextColor(0,0,255);
         $this->MulticellUtf8(190, 3, $paiementInfo, 0, 'L',false);
+		$this->SetTextColor(0,0,0);
 	    $this->Ln(2);
 		$this->SetFont('Arial','',7);
 		$this->MulticellUtf8(190, 2, $conditionGeneral,0, 'L',false);
