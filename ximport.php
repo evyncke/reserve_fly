@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023 Eric Vyncke - Patrick Reginsterx
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -153,6 +153,8 @@ foreach($invoiceFiles as $invoiceFile) {
 	}
 }
 
+$invoiceDateTime = new DateTime(date('Y-m-d'), new DateTimeZone('UTC'));
+$invoiceDate=date_format($invoiceDateTime,"d-m-Y");
 
 $sql = "select u.id as id
 		from $table_users as u join $table_user_usergroup_map on u.id=user_id 
@@ -174,24 +176,7 @@ $members = [66, 348, 353, 46, 114, 181, 160, 62, 86] ;
 
 //foreach($members as $member) {
 while ($row = mysqli_fetch_array($result)) {
-	$member=$row['id'];
-	//print("member=$member</br>");
-	
-	/*
-	$sql = "select jom_id, ciel_code, ciel_code400, last_name, first_name
-			from $table_person 
-			where jom_id= $member";
-	//print("sql=$sql</br>");
-	$result = mysqli_query($mysqli_link, $sql)
-		or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
-    $row = mysqli_fetch_array($result);
-	$cielCode=$row['ciel_code'];
-	$cielCode400=$row['ciel_code400'];
-	$firstName=db2web($row['first_name']);
-	$lastName=db2web($row['last_name']);
-	//print("cielCode=$cielCode</br>");
-	*/
-	
+	$member=$row['id'];	
     $folio = new Folio($member, '2023-08-01', '2023-08-31') ;
     if ($folio->count == 0) continue ;
 	//("1 $folio->count $folio->pilot  $folio->start_date  $folio->end_date   $folio->count  $folio->fname  $folio->name  $folio->email  $folio->address  $folio->zip_code  $folio->city  $folio->country  $folio->code_ciel  </br>");
@@ -205,28 +190,19 @@ while ($row = mysqli_fetch_array($result)) {
 	//print("cielCode=$cielCode $cielCode400</br>");
 	
     print("<h3>Facture $nextInvoice pour $firstName $lastName</h3>\n") ;
-	
-	//print("1 $folio->pilot  $folio->start_date  $folio->end_date   $folio->count  $folio->fname  $folio->name  $folio->email  $folio->address  $folio->zip_code  $folio->city  $folio->country  $folio->code_ciel  </br>");
-    //private $result ;
-    //private $row ;
-	
-	
+		
     $total_folio = 0 ;
 	//PDF
 	$pdf = new InvoicePDF('P','mm','A4');
-	$pdf->SetDate("31-08-2023");
+	$pdf->SetDate($invoiceDate);
+	//$pdf->SetDate("31-08-2023");
 	$pdf->SetInvoiceNumber($nextInvoice);
 	$pdf->AddPage();
 	$pdf->AliasNbPages();
-	//$pdf->AddDate("31-08-2023");
-	//$pdf->AddInvoiceNumber($nextInvoice);
-	//print("AddAddress($folio->fname.\" \".$folio->name, $folio->address, \"$folio->zip_code $folio->city\", $folio->country)</br>");
 	$pdf->AddAddress($folio->fname." ".$folio->name, $folio->address, "$folio->zip_code $folio->city", $folio->country) ;
 	//$pdf->SetXY(20, 80);
 	$pdf->SetColumnsWidth(array(20, 85, 20, 25, 25),array("C","L","C","R","R")) ;
-	$pdf->TableHeader(array("Référence", "Désignation", "Quantité", "Prix unitaire","Montant")) ; 
-	//print("2 $folio->pilot  $folio->start_date  $folio->end_date   $folio->count  $folio->fname  $folio->name  $folio->email  $folio->address  $folio->zip_code  $folio->city  $folio->country  $folio->code_ciel  </br>");
-	
+	$pdf->TableHeader(array("Référence", "Désignation", "Quantité", "Prix unitaire","Montant")) ; 	
 ?>
 <table class="table table-striped table-responsive table-hover">
     <thead>
@@ -317,19 +293,23 @@ while ($row = mysqli_fetch_array($result)) {
             $fi_suffix = 0 ;
         $total_folio += $line->cost_plane + $line->cost_fi + $line->cost_taxes ;
     }
-    // Write to the member account
-	$libelle= "Fac.".$nextInvoice." ".$lastName." ".$firstName;
-    $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $cielCode400, remove_accents($libelle) , $total_folio, 'D', $nextInvoice,
-        '', 0.0, 0.0, ' ', '', 0) ;
-    fprintf($f, "$ximportLine\n") ;
-	
+	if($total_folio > 0) {
+    	// Write to the member account
+		$libelle= "Fac.".$nextInvoice." ".$lastName." ".$firstName;
+    	$ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $cielCode400, remove_accents($libelle) , $total_folio, 'D', $nextInvoice,
+       	 '', 0.0, 0.0, ' ', '', 0) ;
+    	 fprintf($f, "$ximportLine\n") ;
+	 }
 	$totalFolioText=number_format($total_folio,2,",",".")." €";
 	
     print("<tr><td></td><td></td><td></td><td><b>Total</b></td><td><b>$totalFolioText</b></td></tr>\n") ; 
 	$pdf->TableTotal($totalFolioText);
-	
+	if($total_folio > 0) {
+		$totalFolioText=number_format($total_folio,2,".","");
+		$communication=$nextInvoice." ".$cielCode400." ".$lastName." ".$firstName;
+		$pdf->AddQRCode($totalFolioText,$communication);
+	}
     $nextMove++ ;
-    //$nextInvoice++ ;
 	
     print("</tbody>\n</table>\n") ;
 	$invoiceFile=$invoiceFolder.$nextInvoice."_".$lastName."_".$firstName.".pdf";
