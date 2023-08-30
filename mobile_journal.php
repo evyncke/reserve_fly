@@ -64,7 +64,7 @@ while ($row = mysqli_fetch_array($result)) {
 	switch (strtoupper($row['j_severity'])) {
 		case 'F': $specialClass = ' bg-danger text-bg-danger' ; break ;
 		case 'E': $specialClass = ' bg-warning text-bg-warning' ; break ;
-		case 'W': $specialClass = ' text-info text-bg-info' ; break ;
+		case 'W': $specialClass = ' text-info' ; break ;
 		default: $specialClass = '' ;
 	}
 	$date = $row['j_datetime']	;
