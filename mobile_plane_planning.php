@@ -26,6 +26,11 @@ The "charset" Content-Type parameter MUST be used in MIME transports
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
+if ($userId == 0) {
+	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+	exit ;
+}
+
 require_once 'mobile_header5.php' ;
 if (!($userIsAdmin or $userIsInstructor)) journalise($userId, "F", "Vous devez être admin ou FI pour voir cette page") ;
 
