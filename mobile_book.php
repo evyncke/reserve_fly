@@ -19,7 +19,6 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
@@ -65,20 +64,21 @@ if ($id and is_numeric($id)) {
 	
 $body_attributes = 'onload="init();initBook();"' ; // mobile_header.php will force this into the body tag
 
+$header_postamble = "<script>
+var
+	planeId = " . ((isset($booking)) ? "'$booking[r_plane]'" : "null") . ",
+	pilotId = " . ((isset($booking)) ? $booking['r_pilot'] : $userId) . ",
+	instructorId = " . (($booking['r_instructor'])? $booking['r_instructor'] : -1)  . " ;
+</script>
+<script src=\"instructors.js\"></script>
+<script src=\"pilots.js\"></script>" ;
+
 require_once 'mobile_header5.php' ;
 
 ?> 
-<script>
-var
-	planeId = <?=(isset($booking)) ? "'$booking[r_plane]'" : "null"?>,
-	pilotId = <?=(isset($booking)) ? $booking['r_pilot'] : $userId ?>,
-	instructorId = <?= ($booking['r_instructor'])? $booking['r_instructor'] : -1 ?> ;
-</script>
-<!--script src="planes.js"></script> already loaded by mobile_header.php -->
-<script src="instructors.js"></script>
-<script src="pilots.js"></script>
 
-<div class="container">
+
+<div class="container-fluid">
 
 <!-- Not a real form as mobile.js has the onclick code to submit the form -->
 <input type="hidden" id="departingAirport" value="<?=$booking['r_from']?>">
@@ -168,6 +168,6 @@ if ($booking['r_type'] == BOOKING_MAINTENANCE)
 	print("<br/><div class=\"alert alert-danger\">Cette réservation est une maintenance.</div>") ;
 ?>
 
-</div> <!-- container-->
+</div> <!-- container-fluid-->
 </body>
 </html>

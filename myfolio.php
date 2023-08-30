@@ -64,12 +64,16 @@ $folio_end->add(new DateInterval('P1M'));
 $folio_end_title->add(new DateInterval('P1M'));
 $folio_end_title->sub(new DateInterval('P1D'));
 
-$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $userId")
+$result = mysqli_query($mysqli_link, "SELECT * 
+	FROM $table_person LEFT JOIN $table_blocked on jom_id=b_jom_id
+	WHERE jom_id = $userId")
 	or journalise($originalUserId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
 $pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 $userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
 $codeCiel = $pilot['ciel_code'] ;
+$blocked_reason = db2web($pilot['b_reason']) ;
+$blocked_when = $pilot['b_when'] ;
 mysqli_free_result($result) ;
 
 function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
@@ -86,6 +90,8 @@ function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_sep
 <!-- Using latest bootstrap 5 -->
 <!-- Latest compiled and minified CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <!-- Latest compiled JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 <title>Situation comptable de <?=$userName?> (#<?=$userId?>)</title>
@@ -162,8 +168,8 @@ function selectChanged() {
 <div class="container-fluid">
 <h2>Situation comptable de <?=$userName?> (#<?=$userId?>)</h2>
 <?php
-// Check the bookkeeping balance
 
+// Check the bookkeeping balance
 $result = mysqli_query($mysqli_link, "SELECT *
 		FROM $table_bk_balance JOIN $table_person ON bkb_account = CONCAT('400', ciel_code)
 		WHERE jom_id = $userId
@@ -186,6 +192,17 @@ if ($row) {
 	}
 } else {
 	$balance = 0 ;
+}
+
+// Let's warn the used if he is blocked
+if ($blocked_reason != '') {
+	print("<p class=\"mt-2 p-4 bg-danger text-bg-danger rounded\">$blocked_reason</p>") ;
+	if ($userIsBoardMember and $row['bkb_amount'] > 0) { // Test mode
+		print("<p>EN TEST !!!! Si vous êtes bloqué(e) pour un solde négatif ($row[bkb_amount] &euro;), vous pouvez payer ce solde via 
+			<a href=\"payconiq/pay.php?amount=$row[bkb_amount]&reference=Solde%20$codeCiel&description=Solde%20courant%20$codeCiel&cb=$_SERVER[PHP_SELF]\">
+			l'application mobile payconiq (ou votre app bancaire) <img src=\"payconiq/payconiq_by_Bancontact-logo-app-pos-shadow.png\" width=88 height=88>
+			</a> et votre compte membre sera débloqué endéans quelques secondes.</p>") ;
+	}	
 }
 
 if ($userIsInstructor or $userIsAdmin) {
@@ -221,7 +238,7 @@ $today = datefmt_format($fmt, $displayTimestamp) ;
 		<li class="page-item<?=$previous_active?>"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?previous&user=$userId"?>">
 			<i class="bi bi-caret-left-fill"></i>Folio du mois précédent <?=datefmt_format($fmt, $previous_month_pager)?></a></li>
 		<li class="page-item<?=$current_active?>"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?user=$userId"?>">
-			<i class="bi bi-caret-left-fill"></i>Folio de ce mois <?=datefmt_format($fmt,$this_month_pager)?></a></li>
+			Folio de ce mois <?=datefmt_format($fmt,$this_month_pager)?> <i class="bi bi-caret-right-fill"></i></a></li>
 	</ul><!-- pagination -->
 </div><!-- row -->
 

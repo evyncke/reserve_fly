@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023 Eric Vyncke & Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -32,12 +32,26 @@ if (! $userIsAdmin && ! $userIsBoardMember)
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<!-- http://www.w3schools.com/bootstrap/ -->
+<!-- Using latest bootstrap 5 -->
 <!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script><html>
-	<title>Ciel</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Use bootstrap icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<!-- Latest compiled JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+<title>Ciel</title>
+<script>
+function toggleCielRows() {
+    rows = document.getElementsByClassName('ciel-row') ;
+    toggle = document.getElementById('hideUnknown') ;
+    for (var i = 0; i < rows.length; i++) {
+        if (rows[i].cells[1].getElementsByTagName('input')[0].value != '') {
+            // un/hide the row
+            rows[i].style.display = toggle.checked ? 'none' : '' ;
+        }    
+    }
+}
+</script>
 </head>
 <body>
     <h1>Gestion Ciel</h1>
@@ -57,9 +71,11 @@ if ($_REQUEST['save_ciel'] == 'true') {
                 $code_400 = '400' . $code ;
             }
             mysqli_query($mysqli_link, "UPDATE $table_person SET ciel_code='$code', ciel_code400='$code_400' where jom_id=$id")
-                or journalise($userId, "F", "Cannot assigne Ciel code" . mysqli_error($mysqli_link)) ;
-            print("Ciel code $code/$code_400 assigné à l'utilisateur $id.<br>\n") ;
-            journalise($userId, "I", "Ciel codes $code/$code_400 assignés à l'utilisateur $id.<br>\n") ;
+                or journalise($userId, "F", "Cannot assign Ciel code" . mysqli_error($mysqli_link)) ;
+            if (mysqli_affected_rows($mysqli_link) > 0) {    
+                print("Ciel code $code/$code_400 assigné à l'utilisateur $id.<br>\n") ;
+                journalise($userId, "I", "Ciel codes $code/$code_400 assignés à l'utilisateur $id.") ;
+            }   
         }
     }   
 }
@@ -94,6 +110,10 @@ if ($_REQUEST['save_ciel'] == 'true') {
 
 <h2>Code Ciel des membres</h2>
 <p>Liste des membres du club avec leur numéro de compte Ciel.</p>
+<div class="form-check">
+    <input class="form-check-input" type="checkbox" id="hideUnknown" checked onChange="toggleCielRows();"> 
+    <label class="form-check-label"> Cacher les comptes Ciel connus.</label>
+</div><!-- form-check -->
 <form action="<?=$_SERVER['PHP_SELF']?>" id="ciel_form">
     <input type="hidden" name="save_ciel" value="true">
 <table class="table table-striped table-hover table-responsive">
@@ -110,9 +130,10 @@ while ($row = mysqli_fetch_array($result)) {
     $name = db2web($row['name']) ;
     $first_name = db2web($row['first_name']) ;
     $last_name = db2web($row['last_name']) ;
-    print("<tr><td>$row[username]</td><td>
+    $hidden_style = ($row['ciel_code400'] != '') ? ' style="display: none;"' : '' ;
+    print("<tr class=\"ciel-row\"$hidden_style><td>$row[username]</td><td>
         <input type=\"text\" name=\"ciel$row[jom_id]\" value=\"$row[ciel_code400]\"> 
-        <span class=\"glyphicon glyphicon glyphicon-floppy-saved\" style=\"color: blue;\" title=\"Enregistrer le code Ciel\" onClick=\"document.getElementById('ciel_form').submit();\"></span>
+        <i class=\"bi-check-circle-fill\" style=\"color: blue;\" title=\"Enregistrer le code Ciel\" onClick=\"document.getElementById('ciel_form').submit();\"></i>
         </td><td>$last_name</td><td>$first_name</td><td>$row[email]</td><td>$row[registerDate]</td></tr>\n") ;
 }
 ?>
@@ -124,25 +145,16 @@ while ($row = mysqli_fetch_array($result)) {
 <p>Cette opération va envoyer par email les factures du mois précédent (sur base du folio, 
 c-à-d sur base des carnets de routes des avions) et va générer un fichier <i>ximport.txt</i> qu'il faudra
 alors importer dans <i>Ciel Premium Account</i>.</p>
-<p class="bg-danger">Ceci est en mode test réservé à Eric Vyncke et Patrick</p>
-
-<p>Le numéro du prochain mouvement comptable est disponible dans <i>Ciel Premium Account</i> via le menu
-<i>Dossiers -> Options -> Préférences -> Liaison Comptable -> Générations des écritures / Options "Prochain n° de mouvement généré"</i>.</p>
+<p class="bg-danger">Ceci est en mode test réservé à Eric Vyncke et Patrick Reginster.</p>
 
 <div class=""></div>
 <form action="ximport.php">
-<!--
 <div class="mb-3">
-    <label for="nextMove" class="form-label">Prochain mouvement comptable:</label>
-    <input type="text" class="form-control" id="nextMove" name="nextMove">
-</div>
--->
-<div class="mb-3">
-    <label for="nextInvoice" class="form-label">Préfix des factures: (Ex V2308)</label>
-    <input type="text" class="form-control" id="prefixInvoice" name="prefixInvoice">
+    <label for="nextInvoice" class="form-label">Préfixe des factures: (exemple V<?=date('ym')?>)</label>
+    <input type="text" class="form-control" id="prefixInvoice" name="prefixInvoice" value="V<?=date('ym')?>">
 </div>
 <div class="mb-3">
-<p> Factures générées dans le folder <a ref="https://www.spa-aviation.be/resa/data/PDFInvoices/">https://www.spa-aviation.be/resa/data/PDFInvoices/</a></p>
+<p>Factures générées dans le folder <a ref="https://www.spa-aviation.be/resa/data/PDFInvoices/">https://www.spa-aviation.be/resa/data/PDFInvoices/</a></p>
 <p>Fichier d'import ciel : <a ref="https://www.spa-aviation.be/resa/data/ximport.txt">ximport.txt</a></p>
 </div>
 
