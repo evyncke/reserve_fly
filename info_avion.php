@@ -281,7 +281,7 @@ if ($canview) {
 	$query->join('left', 'jom_users as u on l_pilot = u.id');
 	$query->where("l_plane like '$avion' and l_end_hour is not null and l_end_hour != ''");
         // $query->order("l_end_hour desc, l_end_minute desc") ;
-        $query->order("l_audit_time desc") ;
+        $query->order("l_end desc") ;
         $query->setLimit('1') ; // Only the first row is meaningful
         $db->setQuery($query);
 	if($db->getErrorNum())
