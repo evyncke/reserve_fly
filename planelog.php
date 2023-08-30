@@ -41,13 +41,29 @@ $monthAfterString = $monthAfter->format('Y-m-d') ;
 $monthAfterForTitle = $monthAfterForTitle->add($monthInterval) ;
 $monthAfterForTitle = $monthAfterForTitle->sub(new DateInterval('P1D')) ;
 $monthAfterForTitleString = $monthAfterForTitle->format('Y-m-d') ; // Then Title is 31-01-2023 and not 01-02-2023
-$mounthName=$sinceDate->format('F') ;
+// Display today in the local language in human language
+$fmt = datefmt_create(
+    'fr_BE',
+    IntlDateFormatter::FULL,
+    IntlDateFormatter::FULL,
+    'Europe/Brussels',
+    IntlDateFormatter::GREGORIAN,
+    'MMMM yyyy' // See https://unicode-org.github.io/icu/userguide/format_parse/datetime/ !
+) ;
+$monthName = datefmt_format($fmt, $sinceDate) ;
 
-?><html>
+?><!DOCTYPE html>
+<html>
 <head>
-<link rel="stylesheet" type="text/css" href="log.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
+<!-- Using latest bootstrap 5 -->
+<!-- Latest compiled and minified CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Latest compiled JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Glyphicon equivalent -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <title>Carnet de route <?=$plane?></title>
 <script src="members.js"></script>
 <script src="shareCodes.js"></script>
@@ -110,7 +126,8 @@ function init() {
 <!-- End Matomo Code -->
 </head>
 <body onload="init();">
-<center><h2>Carnet de route de <?=$plane?> du <?=$since?> au <?=$monthAfterForTitleString?></h2></center>
+<div class="container-fluid">
+<h2 class="text-center">Carnet de route de <?=$plane?> du <?=$since?> au <?=$monthAfterForTitleString?></h2>
 <?php
 print("Carnet de route de: <select id=\"planeSelect\" onchange=\"planeChanged(this);\">" ) ;
 $result = mysqli_query($mysqli_link, "select * from $table_planes
@@ -124,56 +141,64 @@ while ($row = mysqli_fetch_array($result)) {
 		$plane_details = $row ;
 }
 print("</select> ") ;
-print("Mois: <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString>&lt;</a><b>&nbsp; $mounthName &nbsp;</b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthAfterString>&gt;</a></br>\n") ;
-//print("Mois: <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString>&lt;</a> $since <a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthAfterString>&gt;</a>\n") ;
 ?>
-<br/>
-<table class="logTable">
+<div class="row">
+	<ul class="pagination">
+		<li class="page-item">
+			<a class="page-link" href="<?="$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString"?>">
+				<i class="bi bi-caret-left-fill"></i>  <?=datefmt_format($fmt, $monthBefore)?>
+			</a></li>
+		<li class="page-item active"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?plane=$plane&since=$since"?>"><?=$monthName?></a></li>
+		<li class="page-item"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?plane=$plane&since=$monthAfterString"?>">
+			<?=datefmt_format($fmt, $monthAfter)?> <i class="bi bi-caret-right-fill"></i></a></li>
+	</ul><!-- pagination -->
+</div><!-- row -->
+<table class="table table-bordered table-hover table-sm">
 <thead>
 <tr>
-<th class="logHeader">Date</th>
-<th class="logHeader">Pilot(s)</th>
-<th class="logHeader" colspan="2">Airports</th>
-<th class="logHeader" colspan="2">Time (UTC)</th>
-<th class="logHeader">Engine time</th>
+<th class="text-center border-bottom-0">Date</th>
+<th class="text-center border-bottom-0">Pilot(s)</th>
+<th class="text-center border-bottom-0" colspan="2">Airports</th>
+<th class="text-center border-bottom-0" colspan="2">Time (UTC)</th>
+<th class="text-center border-bottom-0">Engine time</th>
 <?php 
 if ($plane_details['compteur_vol'] != 0)
-	print("<th class=\"logHeader\">Flight Time</th>\n") ;
+	print("<th class=\"text-center border-bottom-0\">Flight Time</th>\n") ;
 ?>
-<th class="logHeader">Pax/crew</th>
-<th class="logHeader">Type of</th>
-<th class="logHeader" colspan="2">Engine index</th>
+<th class="text-center border-bottom-0">Pax/crew</th>
+<th class="text-center border-bottom-0">Type of</th>
+<th class="text-center border-bottom-0" colspan="2">Engine index</th>
 <?php 
 if ($plane_details['compteur_vol'] != 0)
-	print("<th class=\"logHeader\" colspan=\"2\">Flight index</th>\n") ;
+	print("<th class=\"text-center border-bottom-0\" colspan=\"2\">Flight index</th>\n") ;
 ?>
-<th class="logHeader">Remark</th>
+<th class="text-center border-bottom-0">Remark</th>
 </tr>
 <tr>
-<th class="logLastHeader">(dd/mm/yy)</th>
-<th class="logLastHeader"></th>
-<th class="logLastHeader">Origin</th>
-<th class="logLastHeader">Destination</th>
-<th class="logLastHeader">Takeoff</th>
-<th class="logLastHeader">Landing</th>
-<th class="logLastHeader">minutes</th>
+<th class="text-center border-top-0">(dd/mm/yy)</th>
+<th class="text-center border-top-0"></th>
+<th class="text-center border-top-0">Origin</th>
+<th class="text-center border-top-0">Destination</th>
+<th class="text-center border-top-0">Takeoff</th>
+<th class="text-center border-top-0">Landing</th>
+<th class="text-center border-top-0">minutes</th>
 <?php 
 if ($plane_details['compteur_vol'] != 0)
-	print("<th class=\"logLastHeader\">minutes</th>\n") ;
+	print("<th class=\"text-center border-top-0\">minutes</th>\n") ;
 ?>
-<th class="logLastHeader">Count</th>
-<th class="logLastHeader">flight</th>
-<th class="logLastHeader">Begin</th>
-<th class="logLastHeader">End</th>
+<th class="text-center border-top-0">Count</th>
+<th class="text-center border-top-0">flight</th>
+<th class="text-center border-top-0">Begin</th>
+<th class="text-center border-top-0">End</th>
 <?php 
 if ($plane_details['compteur_vol'] != 0)
-	print("<th class=\"logLastHeader\">Begin</th>\n
-		<th class=\"logLastHeader\">End</th>\n") ;
+	print("<th class=\"text-center border-top-0\">Begin</th>\n
+		<th class=\"text-centerborder-top-0 \">End</th>\n") ;
 ?>
-<th class="logLastHeader">(CP, ...)</th>
+<th class="text-center border-top-0">(CP, ...)</th>
 </tr>
 </thead>
-<tbody>
+<tbody class="table-group-divider">
 <?php
 //print("</br>since=$since ; monthAfterString=$monthAfterString</br>");
 $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, l_start_hour, l_start_minute,
@@ -235,21 +260,21 @@ while ($row = mysqli_fetch_array($result)) {
 				else
 					$missingPilots[] = db2web($row2['last_name']) . ' (' . substr($row2['r_start'], 0, 10) . ') #' . $row2['r_id'] ;
 			}
-			print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Missing entries for $gap minutes..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
+			print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Missing entries for $gap minutes..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
 		} else if ($gap < 0)
-			print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Overlapping / duplicate entries for $gap minutes...</td></tr>\n") ;
+			print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Overlapping / duplicate entries for $gap minutes...</td></tr>\n") ;
 		if ($previous_end_lt > $this_start_lt)
-			print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Overlapping entries (previous end time after next start)...</td></tr>\n") ;
+			print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Overlapping entries (previous end time after next start)...</td></tr>\n") ;
 	}
 	// Emit a red line if previous arrival apt and this departure airport do not match
 	if ($previous_airport and $previous_airport != $row['l_from'])
-		print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Departure airport below($row[l_from]) does not match previous arrival airport ($previous_airport)... taxes are probably invalid.</td></tr>\n") ;
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Departure airport below($row[l_from]) does not match previous arrival airport ($previous_airport)... taxes are probably invalid.</td></tr>\n") ;
 	// Emit a red line if pilot and instructor are the same
 	if ($row['l_pilot'] == $row['l_instructor'])
-		print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">The pilot is the instructor on the line below...</td></tr>\n") ;
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>The pilot is the instructor on the line below...</td></tr>\n") ;
 	// Emit a red line if cost is shared with nobody
 	if (($row['l_share_type'] == 'CP1' or $row['l_share_type'] == 'CP2') and $row['l_share_member'] == 0)
-		print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Shared flight with nobody on the line below...</td></tr>\n") ;
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Shared flight with nobody on the line below...</td></tr>\n") ;
 	$previous_airport = $row['l_to'] ;
 	$previous_end_hour = $row['l_end_hour'] ;
 	$previous_end_minute = $row['l_end_minute'] ;
@@ -267,7 +292,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$l_start = substr($row['l_start'], 11, 5) ;
 	$l_end = substr($row['l_end'], 11, 5) ;
 	$instructor = ($instructor_name != '') ? " /<br/>$instructor_name" : '' ;
-	$bookingLink = ($userIsAdmin) ? " <a href=\"https://www.spa-aviation.be/resa/IntroCarnetVol.php?id=$row[l_booking]\" title=\"Go to booking $row[l_booking]\" target=\"_blank\">&boxbox;</a>" : '' ;
+	$bookingLink = ($userIsAdmin) ? " <a href=\"https://www.spa-aviation.be/resa/IntroCarnetVol.php?id=$row[l_booking]\" title=\"Go to booking $row[l_booking]\" target=\"_blank\"> <i class=\"bi bi-box-arrow-up-right\"></a>" : '' ;
 	if ($row['l_start_minute'] < 10)
 			$row['l_start_minute'] = "0$row[l_start_minute]" ;
 	if ($row['l_end_minute'] < 10)
@@ -278,27 +303,27 @@ while ($row = mysqli_fetch_array($result)) {
 			$row['l_flight_end_minute'] = "0$row[l_flight_end_minute]" ;
 	if ($row['l_share_type'] != '') $row['l_remark'] = '<b>' . $row['l_share_type'] . '<span class="shareCodeClass">' . $row['l_share_member'] . '</span></b> ' . $row['l_remark'] ;
 	print("<tr>
-		<td class=\"logCell\">$row[date]</td>
-		<td class=\"logCell\">$pilot_name$instructor$bookingLink</td>
-		<td class=\"logCell\">$row[l_from]</td>
-		<td class=\"logCell\">$row[l_to]</td>
-		<td class=\"logCell\">$l_start</td>
-		<td class=\"logCell\">$l_end</td>
-		<td class=\"logCell\">$duration</td>\n") ;
+		<td class=\"text-center\">$row[date]</td>
+		<td class=\"text-center\">$pilot_name$instructor$bookingLink</td>
+		<td class=\"text-center\">$row[l_from]</td>
+		<td class=\"text-center\">$row[l_to]</td>
+		<td class=\"text-center\">$l_start</td>
+		<td class=\"text-center\">$l_end</td>
+		<td class=\"text-center\">$duration</td>\n") ;
 		if ($plane_details['compteur_vol'] != 0) {
 			$flight_duration = 60 * ($row['l_flight_end_hour'] - $row['l_flight_start_hour']) + $row['l_flight_end_minute'] - $row['l_flight_start_minute'] ;
 			$flight_total_minute += $flight_duration ;
-			print("<td class=\"logCell\">$flight_duration</td>\n") ;
+			print("<td class=\"text-center\">$flight_duration</td>\n") ;
 		}
-		print("<td class=\"logCell\">$row[l_pax_count]/$row[l_crew_count]</td>
-		<td class=\"logCell\">$row[l_flight_type]</td>
-		<td class=\"logCell\">$row[l_start_hour]:$row[l_start_minute]</td>
-		<td class=\"logCell\">$row[l_end_hour]:$row[l_end_minute]</td>\n") ;
+		print("<td class=\"text-center\">$row[l_pax_count]/$row[l_crew_count]</td>
+		<td class=\"text-center\">$row[l_flight_type]</td>
+		<td class=\"text-center\">$row[l_start_hour]:$row[l_start_minute]</td>
+		<td class=\"text-center\">$row[l_end_hour]:$row[l_end_minute]</td>\n") ;
 	if ($plane_details['compteur_vol'] != 0) {
-		print("<td class=\"logCell\">$row[l_flight_start_hour]:$row[l_flight_start_minute]</td>\n") ;
-		print("<td class=\"logCell\">$row[l_flight_end_hour]:$row[l_flight_end_minute]</td>\n") ;
+		print("<td class=\"text-center\">$row[l_flight_start_hour]:$row[l_flight_start_minute]</td>\n") ;
+		print("<td class=\"text-center\">$row[l_flight_end_hour]:$row[l_flight_end_minute]</td>\n") ;
 	}
-	print("<td class=\"logCell\">$row[l_remark]</td>") ;
+	print("<td class=\"text-start\">$row[l_remark]</td>") ;
 	print("</tr>\n") ;
 }
 
@@ -324,7 +349,7 @@ while ($row2 = mysqli_fetch_array($result2)) {
 		$missingPilots[] = db2web($row2['last_name']) . ' (' . substr($row2['r_start'], 0, 10) . ') #' . $row2['r_id'] ;
 }
 if (count($missingPilots) > 0)
-	print("<tr><td class=\"logCell\" colspan=12 style=\"color: red;\">Missing entries..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
+	print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Missing entries..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
 
 $engine_total_hour = floor($engine_total_minute / 60) ;
 $engine_total_minute = $engine_total_minute % 60 ;
@@ -337,27 +362,23 @@ if ($plane_details['compteur_vol'] != 0) {
 		$flight_total_minute = "0$flight_total_minute" ;
 }
 ?>
-<tr><td colspan="6" class="logTotal">Logged total</td>
-<td class="logTotal"><?="$engine_total_hour:$engine_total_minute"?></td>
+</tbody>
+<tfoot  class="table-group-divider">
+<tr class="table-info"><td colspan="6" class="text-end"><strong>Logged total</strong></td>
+<td class="text-center"><strong><?="$engine_total_hour:$engine_total_minute"?></strong></td>
 <?php
 if ($plane_details['compteur_vol'] != 0) {
-	print("<td class=\"logTotal\">$flight_total_hour:$flight_total_minute</td>") ;
-	print('<td colspan="7" class="logTotal"></td>') ;
+	print("<td class=\"text-center\"><strong>$flight_total_hour:$flight_total_minute</strong></td>") ;
+	print('<td colspan="7" class="text-center"></td>') ;
 } else
-	print('<td colspan="5" class="logTotal"></td>') ;
+	print('<td colspan="5" class="text-center"></td>') ;
 ?>
-</tbody>
+</tfoot>
 </table>
 <br>
-Sur base des donn&eacute;es entr&eacute;es apr&egrave;s les vols dans le
-carnet de route des avions. Heure affich&eacute;e en heure universelle.
-<?php
-$version_php = date ("Y-m-d H:i:s.", filemtime('planelog.php')) ;
-$version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
-?>
-<hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, janvier 2015 - septembre 2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa<br>
-Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
+<p><em>Sur base des donn&eacute;es entr&eacute;es apr&egrave;s les vols dans le
+carnet de route des avions. Heure affich&eacute;e en heure universelle.</em></p>
+</div><!-- container -->
 </body>
 </html>
 
