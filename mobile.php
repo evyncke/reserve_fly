@@ -19,6 +19,14 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
+$header_postamble = '
+<style>
+#bookingTable { 
+	border-style: solid; border-width: 2px; 
+	box-shadow: 3px 3px 10px gray;
+}
+</style>' ;
+
 require_once 'mobile_header5.php' ;
 
 
@@ -158,7 +166,7 @@ if (isset($_REQUEST['news'])) {
 mysqli_free_result($result_news) ;
 }
 ?>
-<div class="page-header">
+<div class="page-header text-center">
 	<h2><?=(isset($_REQUEST['id'])) ? "Mes réservations" : "Ma réservation la plus proche"?></h2>
 </div> <!-- page header -->
 
@@ -166,16 +174,16 @@ mysqli_free_result($result_news) ;
 
 <!-- This div is for cancellation confirmation, not displayed by default -->
 <div class="col-sm-12">
-	<div id="confirmCancellation" style="visibility: hidden; display: none;"><center>
+	<div id="confirmCancellation" style="visibility: hidden; display: none;" class="text-center">
 		<h3>Annulation d'une réservation: <?=$booking['r_plane']?></h3>
 		<br/>
 		<button class="btn btn-danger" onclick="cancelConfirm(<?=$id?>, '<?=$auth?>');">Je confirme l'annulation</button>
 		<br/>
 		<br/>
 		<button class="btn btn-primary btn-default" onclick="abandonCancel();">Ne pas annuler la r&eacute;servation</button>
-	</center></div> <!-- jumbotron -->
+	</div> <!-- confirmCancellation -->
 	
-<table id="bookingTable">
+<table id="bookingTable" class="table table-sm table-secondary col-sm-12 col-md-4 col-lg-3">
 	<tr><td class="bookingLabel">Avion:</td><td class="bookingValue"><?=$booking['r_plane']?></td><tr>
 	<tr><td class="bookingLabel">Début:</td><td class="bookingValue"><?=$booking['r_start']?></td><tr>
 	<tr><td class="bookingLabel">Fin:</td><td class="bookingValue"><?=$booking['r_stop']?></td><tr>
