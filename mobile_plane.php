@@ -69,7 +69,7 @@ function generateMaintenanceClass($entretien, $compteur) {
 	return '' ;
 }
 	$class = generateMaintenanceClass($plane_row['entretien'], $plane_row['compteur']) ;
-	print("<tr$class><td>Dernier compteur atelier<span class=\"hidden-xs\"> ($plane_row[compteur_date])</span></td><td>$plane_row[compteur]</td></tr>\n") ;
+	print("<tr$class><td>Dernier compteur par le club<span class=\"hidden-xs\"> ($plane_row[compteur_date])</span></td><td>$plane_row[compteur]</td></tr>\n") ;
 	$class = generateMaintenanceClass($plane_row['entretien'], $row2['compteur_pilote']) ;
 	print("<tr$class><td>Dernier compteur pilote<span class=\"hidden-xs\"> ($row2[compteur_pilote_date])</span></td><td>$row2[compteur_pilote]</td></tr>\n") ;
 	if ($plane_row['poh'])
