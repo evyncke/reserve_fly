@@ -184,19 +184,19 @@ mysqli_free_result($result_news) ;
 	</div> <!-- confirmCancellation -->
 	
 <table id="bookingTable" class="table table-sm table-secondary col-sm-12 col-md-4 col-lg-3">
-	<tr><td class="bookingLabel">Avion:</td><td class="bookingValue"><?=$booking['r_plane']?></td><tr>
-	<tr><td class="bookingLabel">Début:</td><td class="bookingValue"><?=$booking['r_start']?></td><tr>
-	<tr><td class="bookingLabel">Fin:</td><td class="bookingValue"><?=$booking['r_stop']?></td><tr>
-	<tr><td class="bookingLabel">Pilote:</td><td class="bookingValue"><?=$booking['pilot_name']?></td><tr>
+	<tr><td>Avion:</td><td><?=$booking['r_plane']?></td><tr>
+	<tr><td>Début:</td><td><?=$booking['r_start']?></td><tr>
+	<tr><td>Fin:</td><td><?=$booking['r_stop']?></td><tr>
+	<tr><td>Pilote:</td><td><?=$booking['pilot_name']?></td><tr>
 <?php
 if ($booking['instructor_name'] != '') {
 ?>
-	<tr><td class="bookingLabel">Instructeur:</td><td class="bookingValue"><?=$booking['instructor_name']?></td><tr>
+	<tr><td>Instructeur:</td><td><?=$booking['instructor_name']?></td><tr>
 <?php
 } // end instructor present
 ?>
-	<tr><td class="bookingLabel">Commentaire:</td><td class="bookingValue"><?=$booking['r_comment']?></td><tr>
-	<tr><td class="bookingLabel">Effectu&eacute;e par:</td><td class="bookingValue"><?=$booking['booker_name']?></td><tr>
+	<tr><td>Commentaire:</td><td><?=$booking['r_comment']?></td><tr>
+	<tr><td>Effectu&eacute;e par:</td><td><?=$booking['booker_name']?></td><tr>
 </table>
 </div> <!-- col-->
 
