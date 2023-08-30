@@ -276,7 +276,7 @@ $today = datefmt_format($fmt, $displayTimestamp) ;
 <th class="text-center">Taxes <!--&ddagger;--></th>
 <th class="text-center">Total</th>
 </thead>
-<tbody>
+<tbody class="table-group-divider">
 <?php
 
 if ($balance < 0)
@@ -358,6 +358,8 @@ $cost_grand_total_text = numberFormat($cost_grand_total, 2, ',', ' ') ;
 $final_balance_class = ($balance - $cost_grand_total >= 0) ? "table-warning" : "table-danger" ;
 $final_balance_message = ($balance - $cost_grand_total >= 0) ? "" : "<br/>(vous devrez donc de l'argent au club à la prochaine facture)" ;
 ?>
+</tbody>
+<tfoot  class="table-group-divider">
 <tr><td colspan="7" class="table-info">Total du folio</td>
 <td class="table-info text-end"><?=$duration_total_hour?></td>
 <td class="table-info text-end"><?=$duration_total_minute?></td>
@@ -370,7 +372,7 @@ $final_balance_message = ($balance - $cost_grand_total >= 0) ? "" : "<br/>(vous 
 <tr><td colspan="15" class="<?=$final_balance_class?>">Solde du compte membre en tenant compte de ce folio<?=$final_balance_message?></td>
 <td class="<?=$final_balance_class?> text-end"> <?= numberFormat($balance - $cost_grand_total, 2, ',' , ' ')?></td>
 </tr>
-</tbody>
+</tfoot>
 </table>
 </div><!-- table responsive -->
 </div><!-- col -->
@@ -438,9 +440,6 @@ function pay(reason, amount) {
 
 pay(invoice_reason, invoice_total) ;
 </script>
-<hr>
-<p><small>R&eacute;alisation: Eric Vyncke, 2022-2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
-Versions: PHP=<?=$version_php?></small></p>
 </div><!-- container fluid-->
 </body>
 </html>
