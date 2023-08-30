@@ -18,6 +18,10 @@
 
 ob_start("ob_gzhandler");
 require_once "dbi.php" ;
+if ($userId == 0) {
+	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+	exit ;
+}
 require_once 'mobile_header5.php' ;
 
 if (!$userIsAdmin) journalise($userId, "F", "This admin page is reserved to administrators") ;
@@ -58,9 +62,9 @@ while ($row = mysqli_fetch_array($result)) {
 	$last_id = $row['j_id'] ;
 	$nameStyle = ($row['j_trusted_booker'] == 1) ? ' style="font-weight: bold;"' : '' ;
 	switch (strtoupper($row['j_severity'])) {
-		case 'F': $specialClass = ' bg-danger' ; break ;
-		case 'E': $specialClass = ' bg-warning' ; break ;
-		case 'W': $specialClass = ' text-info' ; break ;
+		case 'F': $specialClass = ' bg-danger text-bg-danger' ; break ;
+		case 'E': $specialClass = ' bg-warning text-bg-warning' ; break ;
+		case 'W': $specialClass = ' text-info text-bg-info' ; break ;
 		default: $specialClass = '' ;
 	}
 	$date = $row['j_datetime']	;
