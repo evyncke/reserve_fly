@@ -36,16 +36,6 @@ header('Link: </resa/mobile.js>;rel=preload;as=script,</resa/swiped-events.js>;r
 <!-- Latest compiled JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 
-<style>
-@viewport {
-	width: device-width; /* largeur du viewport */
-	zoom: 1; /* zoom initial à 1.0  */
-}
-
-#bookingTable { background-color: lightgray; border-style: solid; border-width: 2px; border-radius: 10px; margin-left:auto; margin-right: auto;
-	box-shadow: 3px 3px 10px gray;
-}
-</style>
 <!-- Glyphicon equivalent -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
@@ -114,7 +104,7 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep this value
   print("<input type=\"hidden\" name=\"user\" value\"$_REQUEST[user]\">\n") ;
 ?>
-<nav class="navbar navbar-expand-md bg-success"><!-- Add fixed-top w/o destroying the layout -->
+<nav class="navbar navbar-expand-md bg-success text-bg-success"><!-- Add fixed-top w/o destroying the layout -->
   <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".multi-collapse">
         <span class="navbar-toggler-icon"></span>
