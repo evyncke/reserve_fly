@@ -19,7 +19,7 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-//require_once 'facebook.php' ;
+
 
 $cam = (isset($_REQUEST['cam'])) ? $_REQUEST['cam'] : '' ;
 if (! is_numeric($cam)) die("Invalid camera ID") ;
@@ -31,10 +31,13 @@ require_once 'mobile_header5.php' ;
 
 ?> 
 <div class="container">
+<figure class="figure">
+    <a href="<?=$webcam_uris[$cam]?>">
+    <img class="figure-img img-fluid" src="<?=$webcam_uris[$cam]?>" id="webcamImg">
+    </a>
+</figure>
+</div> <!-- container-->
 
-<a href="<?=$webcam_uris[$cam]?>">
-<img class="img-fluid" src="<?=$webcam_uris[$cam]?>" id="webcamImg">
-</a>
 <script>
 function refreshWebcam() {
 	document.getElementById('webcamImg').src = "<?=$webcam_uris[$cam]?>" + "?random=" + new Date().getTime() ;
@@ -46,7 +49,5 @@ document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER
 document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?cam=' . $next_cam?>' }) ;
 
 </script>
-
-</div> <!-- container-->
 </body>
 </html>
