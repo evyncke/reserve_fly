@@ -17,7 +17,8 @@
 */
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/mobile.js>;rel=preload;as=script,</resa/swiped-events.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
+#header('Link: </resa/mobile.js>;rel=preload;as=script,</resa/swiped-events.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
+header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
 	
 ?><!DOCTYPE html>
 <html lang="fr">
@@ -163,6 +164,7 @@ if ($userId > 0) {
 if ($userIsAdmin or $userIsInstructor) {
 ?>
           <li><i><a class="dropdown-item" href="mobile_plane_planning.php">Echéances des avions</a></i></li>
+          <li><i><a class="dropdown-item" href="mobile_shared_flights.php">Vols en codes partagés</a></i></li>
 <?php
 }
 ?>
