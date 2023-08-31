@@ -120,10 +120,11 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
 	if ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager or $userIsBoardMember) {
 ?>
   <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
+    <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
     <ul class="dropdown-menu">
       <li><i><a class="dropdown-item" href="mobile_journal.php">Journal système</a></i></li>
       <li><i><a class="dropdown-item" href="gestionMembres.php">Gestion membres <i class="bi bi-box-arrow-up-right"></i></a></i></li>
+      <li><i><a class="dropdown-item" href="mobile_tilea.php">Taxe TILEA</a></i></li>
       <li><i><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></i></li>
     </ul>
   </li> <!-- dropdown administration-->
@@ -185,7 +186,7 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_local_flights.php">Vols proches</a></li>
             <li><a class="dropdown-item" href="mobile_metar.php">METAR</a></li>
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam Apron</a></li>
-            <!--li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam Fuel</a></li-->
+            <li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam Fuel</a></li>
           </ul>
         </li>
       </ul><!-- navbar left-->
