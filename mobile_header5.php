@@ -117,7 +117,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
           <a class="nav-link text-white" href="mobile.php?news">Home</a>
         </li>
 <?php
-	if ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager) {
+	if ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager or $userIsBoardMember) {
 ?>
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
@@ -161,7 +161,7 @@ if ($userId > 0) {
             <!-- init() in mobile.js will insert all active planes -->
 <?php
 }
-if ($userIsAdmin or $userIsInstructor) {
+if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
           <li><i><a class="dropdown-item" href="mobile_plane_planning.php">Echéances des avions</a></i></li>
           <li><i><a class="dropdown-item" href="mobile_shared_flights.php">Vols en codes partagés</a></i></li>
