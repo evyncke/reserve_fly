@@ -25,7 +25,7 @@ if ($userId == 0) {
 $header_postamble = '<script src="shareCodes.js"></script>
 <script src="members.js"></script>
 ' ;
-$body_attribute = 'onload="init();initShareCodes();"' ;
+$body_attributes = 'onload="init();initShareCodes();"' ;
 
 require_once 'mobile_header5.php' ;
 
@@ -110,6 +110,7 @@ function initShareCodes() {
 <tr>
 <th class="text-center border-top-0">(dd/mm/yy)</th>
 <th class="text-center border-top-0"></th>
+<th class="text-center border-top-0"></th>
 <th class="text-center border-top-0">Origin</th>
 <th class="text-center border-top-0">Destination</th>
 <th class="text-center border-top-0">Takeoff</th>
@@ -135,7 +136,8 @@ $sql = "select l_plane, date_format(l_start, '%d/%m/%y') as date, l_start, l_end
 	join $table_users p on l_pilot=p.id
 	left join $table_users i on l_instructor = i.id
 	where '$since' <= l_start and l_start < '$monthAfterString'
-		and l_share_type in ('CP1', 'CP2')
+		and l_share_type in ('CP1', 'CP2') and l_share_member <= 0
+		and not exists (select * from $table_flight where f_booking = l.l_booking)
 	order by l_start asc, l_plane asc" ;
 // Before, all entries add a l_booking for the flight club planes...
 //	where l_plane = '$plane' and l_booking is not null
@@ -182,8 +184,8 @@ while ($row = mysqli_fetch_array($result)) {
 </tbody>
 </table>
 <br>
-<p><em>Sur base des donn&eacute;es entr&eacute;es apr&egrave;s les vols dans le
-carnet de route des avions. Heure affich&eacute;e en heure universelle.</em></p>
+<p class="small">Seuls les vols en code partage club et en dehors des vols découvertes et d'initiation sont affichés. Sur base des donn&eacute;es entr&eacute;es apr&egrave;s les vols dans le
+carnet de route des avions. Heure affich&eacute;e en heure universelle.</p>
 </div><!-- container -->
 </body>
 </html>
