@@ -52,7 +52,9 @@ require_once 'mobile_header5.php' ;
 
 <!-- should be hidden on phones -->
 <div class="col-sm-4">
-	<img class="img-fluid hidden-sm" src="<?=$plane_row['photo']?>">
+	<figure class="figure">
+		<img class="figure-img img-fluid hidden-sm" src="<?=$plane_row['photo']?>">
+	</figure>
 </div>
 
 <div class="col-md-8 col-sm-8">
