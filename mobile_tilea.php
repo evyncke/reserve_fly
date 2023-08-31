@@ -95,7 +95,7 @@ $pax_10_eur = 0 ;
 $pax_4_eur = 0 ;
 $pax_2_eur = 0 ;
 while ($row = mysqli_fetch_array($result)) {
-	if (stripos($row['l_from'], 'EB') === 0 and $row['l_from'] != $row['l_to']) {
+    if ($row['l_pax_count'] > 0 and stripos($row['l_from'], 'EB') === 0 and $row['l_from'] != $row['l_to']) {
 		$taxed_flights ++;
 		$distance_km = distance($row['l_to']) ;
 		if ($distance_km <= 500)
@@ -124,7 +124,8 @@ while ($row = mysqli_fetch_array($result)) {
 <table class="table table-bordered table-hover table-sm col-md-4">
 <tbody>
 	<tr><td>Nombre de vols pour lesquels la taxe n'est PAS applicable</td><td><?=$not_taxed_flights?></td></tr>
-	<tr><td>Nombre de vols pour lesquels la taxe est applicable</td><td><?=$taxed_flights?></td></tr>
+	<tr><td>Nombre de vols pour lesquels la taxe est applicable<br/>
+        <span class="text-muted small">(vol non-local au départ de la Belgique avec des passagers à bord)</span></td><td><?=$taxed_flights?></td></tr>
 </tbody>
 </table>
 
@@ -134,7 +135,7 @@ while ($row = mysqli_fetch_array($result)) {
 </thead>
 <tbody class="table-group-divider">
 	<tr><td>Taxe de 10 EUR (<= 500 km depuis EBBR)</td><td><?=$pax_10_eur?></td><td>x 10</td><td><?=(10*$pax_10_eur)?></td></tr>
-	<tr><td>Taxe de 4 EUR (> 500 km depuis EBBR et en dehors EEE/CH/UK, impossible à EBSP)</td><td><?=$pax_4_eur?></td><td>x 4</td><td><?=(4*$pax_4_eur)?></td></tr>
+	<tr><td class="text-muted">Taxe de 4 EUR (> 500 km depuis EBBR et en dehors EEE/CH/UK, impossible à EBSP)</td><td><?=$pax_4_eur?></td><td>x 4</td><td><?=(4*$pax_4_eur)?></td></tr>
 	<tr><td>Taxe de 2 EUR (> 500 km depuis EBBR et dans EEE/CH/UK)</td><td><?=$pax_2_eur?></td><td>x 2</td><td><?=(2*$pax_2_eur)?></td></tr>
 </tbody>
 <tfoot class="table-group-divider">
