@@ -25,7 +25,7 @@ require_once 'flight_header.php' ;
 
 <table class="table table-striped table-responsive col-md-6 col-xs-12">
 <thead>
-<tr><th>Assigné le</th><th>Date vol (LT)</th><th>Pilote</th><th>Type</th><th>Client</th></tr>
+<tr><th>Assigné le</th><th>Date vol (LT)</th><th>Pilote</th><th>Type</th><th>Client</th><th>Date demande</th></tr>
 </thead>
 <tbody>
 <?php
@@ -38,14 +38,15 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	or die("Impossible de lister les assignations: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
 	if ($row['f_date_flown'])
-		$date_vol = "ATD $row[f_date_flown] ($row[r_plane])" ;
+		$date_vol = "<abbr title=\"Actual Time of Departure\">ATD</abbr> $row[f_date_flown] ($row[r_plane])" ;
 	else if ($row['r_start'])
-		$date_vol = "ETD $row[r_start] ($row[r_plane])"  ;
+		$date_vol = "<abbr title=\"Estimated Time of Departure\">ETD</abbr> $row[r_start] ($row[r_plane])"  ;
 	else
 		$date_vol = "à déterminer" ;
 	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-pencil\"></span></a> " ;
 	print("<tr><td>$edit$row[f_date_assigned]</td><td>$date_vol</td><td><b>" . db2web($row['last_name']) . '</b> ' . db2web($row['first_name']) .
-		"</td><td>$row[f_type]</td><td>" . db2web($row['p_fname']) . " <b>" . db2web($row['p_lname']) . "</b></td></tr></form>\n") ;
+		"</td><td>$row[f_type]</td><td>" . db2web($row['p_fname']) . " <b>" . db2web($row['p_lname']) . "</b></td>
+		<td>$row[f_date_created]</td></tr></form>\n") ;
 }
 ?>
 </tbody>

@@ -149,6 +149,7 @@ class FolioLine{
         } else {
             $this->cost_taxes = 0 ;
             $this->item_tax = NULL ;
+            $this->distance_km = NULL ;
         }
         $this->pax_count = $row['l_pax_count'] ;
         $this->share_type = $row['l_share_type'] ;

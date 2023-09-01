@@ -52,7 +52,9 @@ require_once 'mobile_header5.php' ;
 
 <!-- should be hidden on phones -->
 <div class="col-sm-4">
-	<img class="img-fluid hidden-sm" src="<?=$plane_row['photo']?>">
+	<figure class="figure">
+		<img class="figure-img img-fluid hidden-sm" src="<?=$plane_row['photo']?>">
+	</figure>
 </div>
 
 <div class="col-md-8 col-sm-8">
@@ -69,15 +71,16 @@ function generateMaintenanceClass($entretien, $compteur) {
 	return '' ;
 }
 	$class = generateMaintenanceClass($plane_row['entretien'], $plane_row['compteur']) ;
-	print("<tr$class><td>Dernier compteur atelier<span class=\"hidden-xs\"> ($plane_row[compteur_date])</span></td><td>$plane_row[compteur]</td></tr>\n") ;
+	print("<tr$class><td>Dernier compteur par le club<span class=\"hidden-xs\"> ($plane_row[compteur_date])</span></td><td>$plane_row[compteur]</td></tr>\n") ;
 	$class = generateMaintenanceClass($plane_row['entretien'], $row2['compteur_pilote']) ;
 	print("<tr$class><td>Dernier compteur pilote<span class=\"hidden-xs\"> ($row2[compteur_pilote_date])</span></td><td>$row2[compteur_pilote]</td></tr>\n") ;
 	if ($plane_row['poh'])
 		print("<tr><td>POH </td><td><a href=\"$plane_row[poh]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
 	if ($plane_row['checklist'])
 		print("<tr><td>Checklist</td><td><a href=\"$plane_row[checklist]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
-	print("<tr><td>Dernier vol sur FlightAware  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"https://flightaware.com/live/flight/" . strtoupper($plane_row['id']) . "\" target=\"_blank\"><img src=\"fa.ico\" border=\"0\" width=\"24\" height=\"24\"></a></td></tr>\n") ;
-?>
+		print("<tr><td>Dernier vol sur FlightAware  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"https://flightaware.com/live/flight/" . strtoupper($plane_row['id']) . "\" target=\"_blank\"><img src=\"fa.ico\" border=\"0\" width=\"24\" height=\"24\"></a></td></tr>
+		<tr><td>Carnet de routes  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"planelog.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-journal\"></i></a></td></tr>\n") ;
+		?>
 </table>
 </div><!-- col-->
 

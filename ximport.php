@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke - Patrick Reginsterx
+   Copyright 2023 Eric Vyncke - Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 */
 
+$production = false ; // when production is set to true, invoices are inserted in $table_invoices and are shown to end-users
+
 require_once 'dbi.php' ;
-require_once 'facebook.php' ;
 require_once 'invoicePDF_pilot.php';
 require_once 'folio.php' ;
 
@@ -26,12 +27,10 @@ MustBeLoggedIn() ;
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
-//if (!(isset($_REQUEST['nextMove']) and is_numeric($_REQUEST['nextMove'])))
-//    journalise($userId, "F", "Invalid parameter: nextMove = $nextMove") ;
 $nextMove = 10001 ;
 if (!(isset($_REQUEST['prefixInvoice'])))
-    journalise($userId, "F", "Invalid parameter: prefixInvoice = $prefixInvoice") ;
-$prefixInvoice = $_REQUEST['prefixInvoice'] ;
+    journalise($userId, "F", "Missing parameter: prefixInvoice = $prefixInvoice") ;
+$prefixInvoice = trim($_REQUEST['prefixInvoice']) ;
 $invoiceCount = 0;
 
 class XimportLine {
@@ -130,6 +129,26 @@ function remove_accents($text) {
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script><html>
 	<title>Génération des factures</title>
+<!-- Matomo -->
+<script type="text/javascript">
+  var _paq = window._paq = window._paq || [];
+  _paq.push(['setUserId', '<?=$userName?>']);
+  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+  _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
+  _paq.push(['enableHeartBeatTimer']);
+  _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
+  _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//analytics.vyncke.org/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '5']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
 </head>
 <body>
     <h1>Génération des factures et du fichier XIMPORT.TXT sur base des carnets de vol</h1>
@@ -137,6 +156,7 @@ function remove_accents($text) {
     <p>Le fichier <a href="data/ximport.txt">ximport.txt</a> doit être copié dans le répertoire de liaison comptable.</p>
 <?php
 // Clean the Invoice folder
+// TODO probably useless to do in $production mode
 $invoiceFolder="data/PDFInvoices/";
 $invoiceFiles = scandir($invoiceFolder);
 foreach($invoiceFiles as $invoiceFile) {
@@ -154,18 +174,15 @@ foreach($invoiceFiles as $invoiceFile) {
 }
 
 $invoiceDateTime = new DateTime(date('Y-m-d'), new DateTimeZone('UTC'));
-$invoiceDate=date_format($invoiceDateTime,"d-m-Y");
+$invoiceDate = date_format($invoiceDateTime,"d-m-Y");
 
 $sql = "select u.id as id
 		from $table_users as u join $table_user_usergroup_map on u.id=user_id 
 		join $table_person as p on u.id=p.jom_id
 		where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
 		group by user_id";
-//print($sql."</br>");
 $result = mysqli_query($mysqli_link, $sql)
 			or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
-$members=array();
-
 
 $f = fopen('data/ximport.txt', 'w')
     or journalise($userId, "F", "Cannot open data/ximport.txt for writing") ;
@@ -174,12 +191,11 @@ $f = fopen('data/ximport.txt', 'w')
 //$members = [62, 66, 92, 198, 306, 348, 439] ;
 $members = [66, 348, 353, 46, 114, 181, 160, 62, 86] ;
 
-//foreach($members as $member) {
-while ($row = mysqli_fetch_array($result)) {
-	$member=$row['id'];	
+foreach($members as $member) {
+//while ($row = mysqli_fetch_array($result)) {
+//	$member=$row['id'];	
     $folio = new Folio($member, '2023-08-01', '2023-08-31') ;
-    if ($folio->count == 0) continue ;
-	//("1 $folio->count $folio->pilot  $folio->start_date  $folio->end_date   $folio->count  $folio->fname  $folio->name  $folio->email  $folio->address  $folio->zip_code  $folio->city  $folio->country  $folio->code_ciel  </br>");
+    if ($folio->count == 0) continue ; // Skip empty folios
 	$invoiceCount++ ;
 	$nextInvoice=$prefixInvoice."-".str_pad($invoiceCount,4,"0",STR_PAD_LEFT);
 	
@@ -196,7 +212,6 @@ while ($row = mysqli_fetch_array($result)) {
 	//PDF
 	$pdf = new InvoicePDF('P','mm','A4');
 	$pdf->SetDate($invoiceDate);
-	//$pdf->SetDate("31-08-2023");
 	$pdf->SetInvoiceNumber($nextInvoice);
 	$pdf->SetInvoiceCommunication($communication);
 	$pdf->AddPage();
@@ -227,7 +242,7 @@ while ($row = mysqli_fetch_array($result)) {
 			$DC="DC";
 		}
 		if($line->share_type!="") {
-            switch ($line->share_member) {
+            switch ($line->share_member) { // TOOD this part is probably not required as folio class is fixed
                 case -1: $shareInfo=$line->share_type." "."Ferry"; break ; 
                 case -2: $shareInfo=$line->share_type." "."Club"; break ; 
                 case -3: $shareInfo=$line->share_type." "."INIT"; break ; 
@@ -314,20 +329,23 @@ while ($row = mysqli_fetch_array($result)) {
     $nextMove++ ;
 	
     print("</tbody>\n</table>\n") ;
-	$invoiceFile=$invoiceFolder.$nextInvoice."_".$lastName."_".$firstName.".pdf";
-	$invoiceFile=remove_accents($invoiceFile);
-	$pdf->Output('F', $invoiceFile);
+    if ($production) {
+        // Let's generate a filename that is not guessable (so nobody can see others' invoices) but still always the same (to be idempotent)
+        $invoiceFile = "invoices/" . sha1($nextInvoice . $shared_secret) . '.pdf' ;
+        mysqli_query($mysqli_link, "REPLACE 
+            INTO rapcs_bk_invoices(bki_email, bki_date, bki_amount, bki_id, bki_file_name) 
+            VALUES('$folio->email', '$invoiceDate', $total_folio, '$nextInvoice', '$invoiceFile')")
+            or journalise($userId, "E", "Cannot insert into rapcs_bk_invoices: " . mysqli_error($mysqli_link)) ;
+        journalise($userId, "I", "Invoice $$nextInvoice for $folio->email dated $invoiceDate saved as $invoiceFile") ;
+    } else {
+    	$invoiceFile=$invoiceFolder.$nextInvoice."_".$lastName."_".$firstName.".pdf";
+        $invoiceFile=remove_accents($invoiceFile);
+    }
+    $pdf->Output('F', $invoiceFile);
 }
 
 fclose($f) ;
 					
 ?>
-<h2>Paramètres à injecter dans Ciel</h2>
-<p>Voici les paramètres à modifier dans <i>Ciel Premium Account</i>:
-    <ul>
-        <li>Numéro de facture suivant: <?=$nextInvoice?></li>
-        <li>Numéro de mouvement suivant: <?=$nextMove?></li>
-    </ul>
-</p>
 </body>
 </html>

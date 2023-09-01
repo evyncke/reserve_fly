@@ -102,7 +102,7 @@ var
             <li><a href="flight_create.php">Nouveau</a></li>
             <li><a href="flight_list.php?completed=false">Vols prévus</a></li>
             <li><a href="flight_list.php?completed=true">Vols terminés</a></li>
-            <li><a href="flight_list_mine.php">Mes vols à venir</a></li>
+            <li><a href="flight_stats.php">Statistiques mensuelles</a></li>
           </ul><!-- dropdown-menu -->
         </li><!-- dropdown -->
         <li class="dropdown">
@@ -111,6 +111,7 @@ var
             <!--li><a href="mobile.php">Ma prochaine</a></li-->
             <li><a href="flight_pilot_rating.php">Qualifications</a></li>
             <li><a href="flight_pilot_assign.php">Dernières assignations</a></li>
+            <li><a href="flight_list_mine.php">Mes vols à venir</a></li>
           </ul><!-- dropdown-menu -->
         </li><!-- dropdown -->
         <li><a href="flight_help.php">Aide</a></li>
