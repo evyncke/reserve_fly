@@ -33,6 +33,8 @@ public $table_max_row;
 public $table_row_count;
 public $date;
 public $invoiceNumber;
+public $invoiceCommunication;
+
 	// En-tête
 	function Header() {
 	    // Logo
@@ -66,6 +68,11 @@ public $invoiceNumber;
 	function SetInvoiceNumber($invoiceNumber) 
 	{
 		$this->invoiceNumber=$invoiceNumber;
+	}
+	// Set InvoiceCommunication
+	function SetInvoiceCommunication($communication) 
+	{
+		$this->invoiceCommunication=$communication;
 	}
 	
 	// Add Date
@@ -183,7 +190,7 @@ public $invoiceNumber;
 			"CBC IBAN BE64 7320 3842 1852 CREGBEBB"."\n".
 			"Entreprise n° 0406 620 535 RPM Verviers Ecole BE.DTO.118"."\n".
 			"Mobile : +32.473.531374 Mail : finances@spa-aviation.be";
-		$paiementInfo="Veuillez indiquer le numéro de facture dans la communication du virement ou utiliser le QR-code à scanner dans votre app bancaire mobile.";
+		$paiementInfo="Veuillez utiliser la communication suivante avec votre virement \"".$this->invoiceCommunication."\" ou utiliser le QR-code à scanner dans votre app bancaire mobile.";
 		$conditionGeneral=
 			"Conditions générales"."\n"."\n".
 			"Nos factures sont payables au comptant, sauf accord particulier. La réception de la facture sauf contestation notifiée par lettre recommandée endéans les 8 jours entraine de plein droit réception et agréation complète des services et fournitures y mentionnés. Aucune réclamation ne sera admise passé ce délai. Les prix des fournitures sont ceux en vigueur au moment de la facturation. *** Tout retard de paiement, sans qu'il soit nécessaire d'une mise en demeure, entraîne automatiquement l'interdiction de vol sur les avions du club *** une indemnité forfaitaire de retard de 10% du montant de la facture, avec un minimum de 37 € à titre de dommages et intérêts, et un intérêt de retard de 12% l'an à dater de l'envoi de la facture, conformément à l'article 1152 du Code Civil."."\n".
