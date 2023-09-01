@@ -339,8 +339,8 @@ foreach($members as $member) {
         // Let's generate a filename that is not guessable (so nobody can see others' invoices) but still always the same (to be idempotent)
         $invoiceFile = "invoices/" . sha1($nextInvoice . $shared_secret) . '.pdf' ;
         mysqli_query($mysqli_link, "REPLACE 
-            INTO rapcs_bk_invoices(bki_email, bki_date, bki_amount, bki_id, bki_file_name) 
-            VALUES('$folio->email', '$invoiceDateSQL', $total_folio, '$nextInvoice', '$invoiceFile')")
+            INTO rapcs_bk_invoices(bki_email, bki_email_sent, bki_date, bki_amount, bki_id, bki_file_name) 
+            VALUES('$folio->email', NULL, '$invoiceDateSQL', $total_folio, '$nextInvoice', '$invoiceFile')")
             or journalise($userId, "E", "Cannot insert into rapcs_bk_invoices: " . mysqli_error($mysqli_link)) ;
         journalise($userId, "I", "Invoice $nextInvoice for $folio->email dated $invoiceDateSQL saved as $invoiceFile") ;
     } else {
