@@ -177,6 +177,9 @@ if(!$production) {
 
 $invoiceDateTime = new DateTime(date('Y-m-d'), new DateTimeZone('UTC'));
 $invoiceDate = date_format($invoiceDateTime,"d-m-Y");
+$invoiceDateSQLTime = new DateTime(date('Y-m-d'), new DateTimeZone('UTC'));
+$invoiceDateSQL = date_format($invoiceDateSQLTime,"d-m-Y");
+
 $sql = "select u.id as id, last_name
 				from $table_users as u join $table_user_usergroup_map on u.id=user_id 
 				join $table_person as p on u.id=p.jom_id
@@ -335,9 +338,9 @@ foreach($members as $member) {
         $invoiceFile = "invoices/" . sha1($nextInvoice . $shared_secret) . '.pdf' ;
         mysqli_query($mysqli_link, "REPLACE 
             INTO rapcs_bk_invoices(bki_email, bki_date, bki_amount, bki_id, bki_file_name) 
-            VALUES('$folio->email', '$invoiceDate', $total_folio, '$nextInvoice', '$invoiceFile')")
+            VALUES('$folio->email', '$invoiceDateSQL', $total_folio, '$nextInvoice', '$invoiceFile')")
             or journalise($userId, "E", "Cannot insert into rapcs_bk_invoices: " . mysqli_error($mysqli_link)) ;
-        journalise($userId, "I", "Invoice $$nextInvoice for $folio->email dated $invoiceDate saved as $invoiceFile") ;
+        journalise($userId, "I", "Invoice $nextInvoice for $folio->email dated $invoiceDateSQL saved as $invoiceFile") ;
     } else {
     	$invoiceFile=$invoiceFolder.$nextInvoice."_".$lastName."_".$firstName.".pdf";
         $invoiceFile=remove_accents($invoiceFile);
