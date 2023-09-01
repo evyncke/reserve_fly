@@ -188,6 +188,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$firstName=$folio->fname;
 	$lastName=$folio->name;
 	//print("cielCode=$cielCode $cielCode400</br>");
+	$communication=$nextInvoice." ".$cielCode400." ".$lastName." ".$firstName;
 	
     print("<h3>Facture $nextInvoice pour $firstName $lastName</h3>\n") ;
 		
@@ -197,6 +198,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$pdf->SetDate($invoiceDate);
 	//$pdf->SetDate("31-08-2023");
 	$pdf->SetInvoiceNumber($nextInvoice);
+	$pdf->SetInvoiceCommunication($communication);
 	$pdf->AddPage();
 	$pdf->AliasNbPages();
 	$pdf->AddAddress($folio->fname." ".$folio->name, $folio->address, "$folio->zip_code $folio->city", $folio->country) ;
@@ -306,7 +308,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$pdf->TableTotal($totalFolioText);
 	if($total_folio > 0) {
 		$totalFolioText=number_format($total_folio,2,".","");
-		$communication=$nextInvoice." ".$cielCode400." ".$lastName." ".$firstName;
+		//$communication=$nextInvoice." ".$cielCode400." ".$lastName." ".$firstName;
 		$pdf->AddQRCode($totalFolioText,$communication);
 	}
     $nextMove++ ;
