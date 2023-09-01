@@ -53,7 +53,7 @@ if (isset($_REQUEST['id']) and is_numeric($_REQUEST['id']))
 $sql = "SELECT * FROM $table_journal LEFT JOIN $table_users u ON j_jom_id = u.id
 		WHERE j_id <= $start $sql_filter
 		ORDER BY j_id desc
-		LIMIT 0, 50" ;
+		LIMIT 0, 25" ;
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access au journal: " . mysqli_error($mysqli_link)) ;
 $first_id = -1 ;
 while ($row = mysqli_fetch_array($result)) {
@@ -80,7 +80,7 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"text-align d-none d-lg-table-cell$specialClass\">" . db2web($row['j_uri']) . "</td>
 		</tr>\n") ;
 }
-$first_id += 50 ;
+$first_id += 25 ;
 $last_id -= 1 ;
 ?>
 </tbody>
@@ -91,7 +91,7 @@ $last_id -= 1 ;
   <li  class="page-item"><a class="page-link" href="<?="$_SERVER[PHP_SELF]"?>"><i class="bi bi-caret-right-fill"></i><i class="bi bi-caret-right-fill"></i> Dernières entrées</a></li>
 </ul><!-- pagination -->
 </div> <!-- table responsive -->
-Les heures sont les heures locales.<br/>
+Les heures sont en heures locales.<br/>
 </div><!-- container -->
 </body>
 </html>
