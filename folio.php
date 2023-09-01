@@ -256,7 +256,7 @@ class Folio implements Iterator {
             WHERE (l_pilot = $member OR l_share_member = $member or l_instructor = $member)
                 AND l_booking IS NOT NULL
                 AND l_start >= '$start_date'
-                AND l_start <= '$end_date'
+                AND l_start < '$end_date'
                 AND NOT (l_instructor = $member AND l_instructor_paid = 0)
             ORDER by l.l_start ASC" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
