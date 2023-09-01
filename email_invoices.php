@@ -102,7 +102,7 @@ while ($row = mysqli_fetch_array($result)) {
         via ce <a href=\"https://spa-aviation.be/resa/$row[bki_file_name]\">lien</a>. Afin de ne pas gaspiller du papier, vous
         ne recevrez pas de facture sur papier par la poste.</p>" ;
   if ($row['bki_amount'] > 0) {
-    $epcURI = "BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$row[bki_amount]\nFacture $row[bki_id]\nFacture $row[bki_id]" ;
+    $epcURI = "BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$row[bki_amount]\n$row[bki_id] $row[ciel_code400] $row[last_name]\n$row[bki_id] $row[ciel_code400] $row[last_name]" ;
     $qr = "https://chart.googleapis.com/chart?cht=qr&chs=150x150&chld=M&chl=" . urlencode($epcURI) ;
     $email_message .= "<p>Le montant de cette facture est de $row[bki_amount] &euro; payable via notamment par votre app e-banking et le QR-code ci-dessous:<br/>
         <img width=\"150\" height=\"150\" src=\"$qr\">
