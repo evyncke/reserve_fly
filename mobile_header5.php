@@ -17,7 +17,8 @@
 */
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/mobile.js>;rel=preload;as=script,</resa/swiped-events.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
+#header('Link: </resa/mobile.js>;rel=preload;as=script,</resa/swiped-events.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
+header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
 	
 ?><!DOCTYPE html>
 <html lang="fr">
@@ -116,13 +117,14 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
           <a class="nav-link text-white" href="mobile.php?news">Home</a>
         </li>
 <?php
-	if ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager) {
+	if ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager or $userIsBoardMember) {
 ?>
   <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
+    <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
     <ul class="dropdown-menu">
       <li><i><a class="dropdown-item" href="mobile_journal.php">Journal système</a></i></li>
       <li><i><a class="dropdown-item" href="gestionMembres.php">Gestion membres <i class="bi bi-box-arrow-up-right"></i></a></i></li>
+      <li><i><a class="dropdown-item" href="mobile_tilea.php">Taxe TILEA</a></i></li>
       <li><i><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></i></li>
     </ul>
   </li> <!-- dropdown administration-->
@@ -160,9 +162,10 @@ if ($userId > 0) {
             <!-- init() in mobile.js will insert all active planes -->
 <?php
 }
-if ($userIsAdmin or $userIsInstructor) {
+if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
           <li><i><a class="dropdown-item" href="mobile_plane_planning.php">Echéances des avions</a></i></li>
+          <li><i><a class="dropdown-item" href="mobile_shared_flights.php">Vols en codes partagés</a></i></li>
 <?php
 }
 ?>
@@ -183,7 +186,7 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_local_flights.php">Vols proches</a></li>
             <li><a class="dropdown-item" href="mobile_metar.php">METAR</a></li>
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam Apron</a></li>
-            <!--li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam Fuel</a></li-->
+            <li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam Fuel</a></li>
           </ul>
         </li>
       </ul><!-- navbar left-->
