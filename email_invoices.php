@@ -88,8 +88,8 @@ while ($row = mysqli_fetch_array($result)) {
         print("<span style=\"color: red;\">!!! La facture $row[bki_id] pour '$row[bki_email]' n'a pas de correspondance dans $table_person!!!</span><br/>\n") ;
         continue ;
     }
-//    if (!in_array($row['jom_id'], array(62, 66, 92, 306, 348))) {
-   if (!in_array($row['jom_id'], array(62))) {
+    if (!in_array($row['jom_id'], array(62, 66, 92, 348))) {
+//   if (!in_array($row['jom_id'], array(62))) {
         print("<small>Skipping invoice $row[bki_id] for '$row[email]' (" . db2web($row['name']) . ")</small><br/>") ;
         continue ;
   }
@@ -137,10 +137,7 @@ while ($row = mysqli_fetch_array($result)) {
       "\r\n\r\n" .
       "--$delimiteur--\r\n" ;
   $email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
-  if ($test_mode)
-      smtp_mail("eric.vyncke@ulg.ac.be", $email_subject, $email_message, $email_header) ;
-  else
-      @smtp_mail($email_recipients, $email_subject, $email_message, $email_header) ;
+  smtp_mail($email_recipients, $email_subject, $email_message, $email_header) ;
   mysqli_query($mysqli_link, "UPDATE $table_bk_invoices SET bki_email_sent = CURRENT_TIME() WHERE bki_id = '$row[bki_id]'")
     or journalise($userId, "W", "Cannot update invoice sent date in $table_bk_invoices: " . mysqli_error($mysqli_link)) ;
   ob_flush() ; // Keep servers/browers happy
