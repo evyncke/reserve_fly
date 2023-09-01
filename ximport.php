@@ -16,7 +16,7 @@
 
 */
 
-$production = false ; // when production is set to true, invoices are inserted in $table_invoices and are shown to end-users
+$production = true ; // when production is set to true, invoices are inserted in $table_invoices and are shown to end-users
 
 require_once 'dbi.php' ;
 require_once 'invoicePDF_pilot.php';
@@ -156,31 +156,33 @@ function remove_accents($text) {
     <p>Le fichier <a href="data/ximport.txt">ximport.txt</a> doit être copié dans le répertoire de liaison comptable.</p>
 <?php
 // Clean the Invoice folder
-// TODO probably useless to do in $production mode
-$invoiceFolder="data/PDFInvoices/";
-$invoiceFiles = scandir($invoiceFolder);
-foreach($invoiceFiles as $invoiceFile) {
-	//print("InvoiceFile= $invoiceFile</br>");
-	//if(strpos($invoiceFile,"Invoice_")==false && strpos($invoiceFile,"Invoice_")==0) {
-	if(substr($invoiceFile,0,strlen($prefixInvoice))==$prefixInvoice) {
-		$filePath=$invoiceFolder.$invoiceFile;
-		if(file_exists($filePath)){
-			//print("Deleting:  InvoiceFile= $filePath</br>");
-			if(unlink($filePath)==FALSE) {
-				print("Fail to delete:  InvoiceFile= $filePath</br>");				
-			}
-		}	
+if(!$production) {
+	// TODO probably useless to do in $production mode
+	$invoiceFolder="data/PDFInvoices/";
+	$invoiceFiles = scandir($invoiceFolder);
+	foreach($invoiceFiles as $invoiceFile) {
+		//print("InvoiceFile= $invoiceFile</br>");
+		//if(strpos($invoiceFile,"Invoice_")==false && strpos($invoiceFile,"Invoice_")==0) {
+		if(substr($invoiceFile,0,strlen($prefixInvoice))==$prefixInvoice) {
+			$filePath=$invoiceFolder.$invoiceFile;
+			if(file_exists($filePath)){
+				//print("Deleting:  InvoiceFile= $filePath</br>");
+				if(unlink($filePath)==FALSE) {
+					print("Fail to delete:  InvoiceFile= $filePath</br>");				
+				}
+			}	
+		}
 	}
 }
 
 $invoiceDateTime = new DateTime(date('Y-m-d'), new DateTimeZone('UTC'));
 $invoiceDate = date_format($invoiceDateTime,"d-m-Y");
-
-$sql = "select u.id as id
-		from $table_users as u join $table_user_usergroup_map on u.id=user_id 
-		join $table_person as p on u.id=p.jom_id
-		where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
-		group by user_id";
+$sql = "select u.id as id, last_name
+				from $table_users as u join $table_user_usergroup_map on u.id=user_id 
+				join $table_person as p on u.id=p.jom_id
+				where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
+				group by last_name";
+				
 $result = mysqli_query($mysqli_link, $sql)
 			or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
 
@@ -188,13 +190,13 @@ $f = fopen('data/ximport.txt', 'w')
     or journalise($userId, "F", "Cannot open data/ximport.txt for writing") ;
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198
-//$members = [62, 66, 92, 198, 306, 348, 439] ;
-$members = [66, 348, 353, 46, 114, 181, 160, 62, 86] ;
+$members = [62, 66, 348, 92] ;
+//$members = [66, 348, 353, 46, 114, 181, 160, 62, 86, 402] ;
 
 foreach($members as $member) {
 //while ($row = mysqli_fetch_array($result)) {
-//	$member=$row['id'];	
-    $folio = new Folio($member, '2023-08-01', '2023-08-31') ;
+	//$member=$row['id'];	
+    $folio = new Folio($member, '2023-08-01', '2023-09-01') ;
     if ($folio->count == 0) continue ; // Skip empty folios
 	$invoiceCount++ ;
 	$nextInvoice=$prefixInvoice."-".str_pad($invoiceCount,4,"0",STR_PAD_LEFT);
@@ -206,7 +208,7 @@ foreach($members as $member) {
 	//print("cielCode=$cielCode $cielCode400</br>");
 	$communication=$nextInvoice." ".$cielCode400." ".$lastName." ".$firstName;
 	
-    print("<h3>Facture $nextInvoice pour $firstName $lastName</h3>\n") ;
+    print("<h3>Facture $nextInvoice pour $lastName $firstName ($member)</h3>\n") ;
 		
     $total_folio = 0 ;
 	//PDF
@@ -228,7 +230,6 @@ foreach($members as $member) {
     <tbody>
 <?php
     foreach($folio as $line) {
-		
 		if ($line->cost_fi < 0) {
 			// This is a DC flight for a FI. Line skipped. Not to be added in the invoice
 			continue;
