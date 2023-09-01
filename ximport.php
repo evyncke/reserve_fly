@@ -33,6 +33,8 @@ if (!(isset($_REQUEST['prefixInvoice'])))
 $prefixInvoice = trim($_REQUEST['prefixInvoice']) ;
 $invoiceCount = 0;
 
+journalise($userId, "I", "Invoices generation started with prefix $prefixInvoice") ;					
+
 class XimportLine {
     public $mouvement ;
     public $journal ;
@@ -178,7 +180,7 @@ if(!$production) {
 $invoiceDateTime = new DateTime(date('Y-m-d'), new DateTimeZone('UTC'));
 $invoiceDate = date_format($invoiceDateTime,"d-m-Y");
 $invoiceDateSQLTime = new DateTime(date('Y-m-d'), new DateTimeZone('UTC'));
-$invoiceDateSQL = date_format($invoiceDateSQLTime,"d-m-Y");
+$invoiceDateSQL = date_format($invoiceDateSQLTime,"Y-m-d");
 
 $sql = "select u.id as id, last_name
 				from $table_users as u join $table_user_usergroup_map on u.id=user_id 
@@ -349,7 +351,7 @@ foreach($members as $member) {
 }
 
 fclose($f) ;
-					
+journalise($userId, "I", "Successful termination of invoices generation") ;					
 ?>
 </body>
 </html>
