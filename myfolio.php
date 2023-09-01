@@ -139,7 +139,8 @@ function init() {
 }
 
 function selectChanged() {
-        window.location.href = '<?=$_SERVER['PHP_SELF']?>?user=' + document.getElementById('pilotSelect').value ;
+        window.location.href = '<?=$_SERVER['PHP_SELF']?>?user=' + document.getElementById('pilotSelect').value + 
+			'<?= ((isset($_REQUEST['previous'])) ? '&previous' : '')?>' ;
 }
 </script>
 <!-- Matomo -->
