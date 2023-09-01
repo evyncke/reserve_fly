@@ -118,7 +118,7 @@ while ($row = mysqli_fetch_array($result)) {
     <p><em>De convention expresse, quels que soient les divers modes de paiement, acceptation de règlement ou lieu de livraison, 
     seront seuls compétents les Tribunaux de Verviers. Il est stipulé que les conditions générales prévalent sur celles de nos clients.
     </em></p>" ;
-  $email_message .= "<hr><p>Un nouveau système automatique est utilisé pour cette facture, ne pas hésiter à contacter
+  $email_message .= "<hr><p style=\"color: blue; font-size: smaller;\">Un nouveau système automatique est utilisé pour cette facture, ne pas hésiter à contacter
     <a href=\”mailto:finances@spa-aviation.be\">finances@spa-aviation.be</a> si une incohérence est détectée.</p>" ;
   $email_header = "From: $managerName <$smtp_from>\r\n" ;
   $email_header .= "To: $row[full_name] <$row[email]>\r\n" ;
