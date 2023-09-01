@@ -136,7 +136,7 @@ if ($_REQUEST['save_ciel'] == 'true') {
 </div><!-- form-check -->
 <form action="<?=$_SERVER['PHP_SELF']?>" id="ciel_form">
     <input type="hidden" name="save_ciel" value="true">
-<table class="table table-striped table-hover table-responsive">
+<table class="table table-hover table-responsive">
     <thead>
         <tr><th>Nom utilisateur</th><th>Compte Ciel</th><th>Nom</th><th>Prénom</th><th>email</th><th>Date création</th></tr>
     </thead>
@@ -161,8 +161,8 @@ while ($row = mysqli_fetch_array($result)) {
 </table>
 </form>
 
-<h2>!!! TEST !!! Générations des factures</h2>
-<p>Cette opération va envoyer par email les factures du mois précédent (sur base du folio, 
+<h2 class="text-danger">!!! TEST !!! Générations des factures</h2>
+<p>Cette opération va générer les factures (sur base du folio, 
 c-à-d sur base des carnets de routes des avions) et va générer un fichier <i>ximport.txt</i> qu'il faudra
 alors importer dans <i>Ciel Premium Account</i>.</p>
 <p class="bg-danger">Ceci est en mode test réservé à Eric Vyncke et Patrick Reginster.</p>
@@ -174,12 +174,27 @@ alors importer dans <i>Ciel Premium Account</i>.</p>
     <input type="text" class="form-control" id="prefixInvoice" name="prefixInvoice" value="V<?=date('ym')?>">
 </div>
 <div class="mb-3">
-<p>Factures générées dans le folder <a ref="https://www.spa-aviation.be/resa/data/PDFInvoices/">https://www.spa-aviation.be/resa/data/PDFInvoices/</a></p>
+<p>Factures générées dans le folder <a ref="https://www.spa-aviation.be/resa/data/PDFInvoices/">https://www.spa-aviation.be/resa/data/PDFInvoices/</a> (en mode test)</p>
 <p>Fichier d'import ciel : <a ref="https://www.spa-aviation.be/resa/data/ximport.txt">ximport.txt</a></p>
 </div>
-
 <button type="submit" class="btn btn-primary">Générer les factures</button>
-
 </form>
+
+<h2 class="text-danger">!!! TEST !!! Envoi des factures par email</h2>
+<p>Cette opération va envoyer des emails aux membres ayant une facture générée.</p>
+<p class="bg-danger">Ceci est en mode test réservé à Eric Vyncke et Patrick Reginster.</p>
+
+<div class=""></div>
+<form action="email_invoices.php">
+<div class="mb-3">
+    <label for="invoiceDate" class="form-label">Date des factures:</label>
+    <input type="date" class="form-control" id="dateInvoice" name="dateInvoice" value="<?=date('Y-m-d')?>">
+</div>
+<div class="mb-3">
+<button type="submit" class="btn btn-primary">Envoyer les emails</button> (Attention cette opération prend beaucoup de temps, plusieurs minutes)
+</form>
+
+<hr>
+<p class="small">Réalisation: Eric Vyncke & Patrick Reginster, 2023-2023, pour RAPCS, Royal Aéro Para Club de Spa, ASBL</p>
 </body>
 </html>
