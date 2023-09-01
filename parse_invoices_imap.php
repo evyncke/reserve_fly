@@ -108,7 +108,8 @@ function processEmail($overview, $header) {
 			};
 			fclose($f) ;
 			// Let's have SQL parsing the date as "Tue, 29 Mar 2022 18:24:22 +0200"
-			mysqli_query($mysqli_link, "REPLACE INTO rapcs_bk_invoices(bki_email, bki_date, bki_id, bki_file_name) VALUES('$overview->to', DATE(STR_TO_DATE('$overview->date', '%a, %e %b %Y %H:%i:%s')), '$invoiceId', 'invoices/$outFileName')")
+			mysqli_query($mysqli_link, "REPLACE INTO rapcs_bk_invoices(bki_email, bki_email_sent, bki_date, bki_id, bki_file_name) 
+				VALUES('$overview->to', DATE(STR_TO_DATE('$overview->date', '%a, %e %b %Y %H:%i:%s')), DATE(STR_TO_DATE('$overview->date', '%a, %e %b %Y %H:%i:%s')), '$invoiceId', 'invoices/$outFileName')")
 				or journalise($userId, "E", "Cannot insert into rapcs_bk_invoices: " . mysqli_error($mysqli_link)) ;
 			journalise($userId, "I", "Invoice $invoiceId for $overview->to dated $overview->date saved as $outFileName") ;
 		}
