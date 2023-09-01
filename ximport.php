@@ -203,6 +203,8 @@ foreach($members as $member) {
 	$cielCode400=$cielCode;
 	$firstName=$folio->fname;
 	$lastName=$folio->name;
+	//print("cielCode=$cielCode $cielCode400</br>");
+	$communication=$nextInvoice." ".$cielCode400." ".$lastName." ".$firstName;
 	
     print("<h3>Facture $nextInvoice pour $firstName $lastName</h3>\n") ;
 		
@@ -211,6 +213,7 @@ foreach($members as $member) {
 	$pdf = new InvoicePDF('P','mm','A4');
 	$pdf->SetDate($invoiceDate);
 	$pdf->SetInvoiceNumber($nextInvoice);
+	$pdf->SetInvoiceCommunication($communication);
 	$pdf->AddPage();
 	$pdf->AliasNbPages();
 	$pdf->AddAddress($folio->fname." ".$folio->name, $folio->address, "$folio->zip_code $folio->city", $folio->country) ;
@@ -320,7 +323,7 @@ foreach($members as $member) {
 	$pdf->TableTotal($totalFolioText);
 	if($total_folio > 0) {
 		$totalFolioText=number_format($total_folio,2,".","");
-		$communication=$nextInvoice." ".$cielCode400." ".$lastName." ".$firstName;
+		//$communication=$nextInvoice." ".$cielCode400." ".$lastName." ".$firstName;
 		$pdf->AddQRCode($totalFolioText,$communication);
 	}
     $nextMove++ ;
