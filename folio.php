@@ -257,7 +257,7 @@ class Folio implements Iterator {
                 AND l_booking IS NOT NULL
                 AND l_start >= '$start_date'
                 AND l_start < '$end_date'
-                AND NOT (l_instructor = $member AND l_instructor_paid = 0)
+                AND NOT (l_instructor IS NOT NULL AND l_instructor = $member AND l_instructor_paid = 0)
             ORDER by l.l_start ASC" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
             or journalise($userId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
