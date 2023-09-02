@@ -16,7 +16,7 @@
 
 */
 
-$production = true ; // when production is set to true, invoices are inserted in $table_invoices and are shown to end-users
+$production = false ; // when production is set to true, invoices are inserted in $table_invoices and are shown to end-users
 
 require_once 'dbi.php' ;
 require_once 'invoicePDF_pilot.php';
@@ -198,9 +198,9 @@ $f = fopen('data/ximport.txt', 'w')
 $members = [62, 66, 348, 92] ;
 //$members = [66, 348, 353, 46, 114, 181, 160, 62, 86, 402] ;
 
-foreach($members as $member) {
-//while ($row = mysqli_fetch_array($result)) {
-	//$member=$row['id'];	
+//foreach($members as $member) {
+while ($row = mysqli_fetch_array($result)) {
+	$member=$row['id'];	
     $folio = new Folio($member, '2023-08-01', '2023-09-01') ;
     if ($folio->count == 0) continue ; // Skip empty folios
 	$invoiceCount++ ;
