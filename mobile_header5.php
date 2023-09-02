@@ -206,6 +206,7 @@ if ($userId <= 0) {
               <li id="logoutElem">
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
               <li><hr class="dropdown-divider"></hr></li>
+              <a class="dropdown-item" href="myfolio.php">Mon folio <i class="bi bi-box-arrow-up-right"></i></a>
               <a class="dropdown-item" href="mobile_invoices.php">Mes factures</a>
               <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
               </li>
