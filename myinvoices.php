@@ -90,7 +90,8 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('myinvoices.php')) ;
 		<tr><th>Date</th><th>N° pièce</th><th>Type</th><th style="text-align: right;">Montant</th><th>Action</th></tr>
 	</thead>
 <?php
-$sql = "SELECT * FROM $table_person JOIN $table_bk_invoices ON bki_email = email LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
+$sql = "SELECT *, DATE(bki_date) AS bki_date 
+		FROM $table_person JOIN $table_bk_invoices ON bki_email = email LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
         WHERE jom_id = $userId" ;
 
 $result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Erreur systeme a propos de l'access factures: " . mysqli_error($mysqli_link)) ;
@@ -99,8 +100,12 @@ while ($row = mysqli_fetch_array($result)) {
 	// Using the invoice date from the email import as the general ledger is in the future
 	$action = "<a href=\"$row[bki_file_name]\" target=\"_blank\"><span class=\"glyphicon glyphicon-new-window\" title=\"Ouvrir la pièce dans une autre fenêtre\"></span></a>" ;
     print("<tr><td>$row[bki_date]</td><td>$row[bki_id]</td>") ;
-	if ($row['bkl_debit'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td>$action <a href=\"#\"  onClick=\"pay('facture $row[bki_id]', $row[bkl_debit]);\"><span class=\"glyphicon glyphicon-qrcode\" title=\"Payer la facture\"></span></a></td>") ;
-	if ($row['bkl_credit'] != '') print("<td>Note de crédit</td><td  style=\"text-align: right;\">" . (0.0 - $row['bkl_credit']) . " &euro;</td><td>$action</td>") ;
+	if ($row['bkl_debit'] != '') 
+		print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td>$action <a href=\"#\"  onClick=\"pay('facture $row[bki_id]', $row[bkl_debit]);\"><span class=\"glyphicon glyphicon-qrcode\" title=\"Payer la facture\"></span></a></td>") ;
+	else if ($row['bki_amount'] != '') 
+		print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td>$action <a href=\"#\"  onClick=\"pay('facture $row[bki_id]', $row[bki_amount]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
+	else if ($row['bkl_credit'] != '') 
+		print("<td>Note de crédit</td><td  style=\"text-align: right;\">" . (0.0 - $row['bkl_credit']) . " &euro;</td><td>$action</td>") ;
 	print("</tr>\n") ;
     $count ++ ;
 }

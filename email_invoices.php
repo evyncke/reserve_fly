@@ -79,9 +79,9 @@ $dateInvoice = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['dateInvoi
     <p class="bg-danger">Ceci est en mode test.</p>
 <?php
 $result = mysqli_query($mysqli_link, "SELECT *
-    FROM $table_bk_invoices
+    FROM $table_bk_invoices, DATE(bki_date) AS bki_date
         LEFT JOIN $table_person p ON p.email = bki_email
-        WHERE bki_date = '$dateInvoice'")
+        WHERE DATE(bki_date) = '$dateInvoice'")
         or journalise($userID, "F", "Cannot read $table_bk_invoices: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
     if ($row['email'] == '') {
