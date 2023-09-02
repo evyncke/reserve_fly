@@ -27,11 +27,12 @@ MustBeLoggedIn() ;
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
-$nextMove = 10001 ;
 if (!(isset($_REQUEST['prefixInvoice'])))
     journalise($userId, "F", "Missing parameter: prefixInvoice = $prefixInvoice") ;
 $prefixInvoice = trim($_REQUEST['prefixInvoice']) ;
+$nextMove = 10001 ;
 $invoiceCount = 0;
+$invoiceDateCompta = date ('d/m/y') ;
 
 journalise($userId, "I", "Invoices generation started with prefix $prefixInvoice") ;					
 
@@ -271,8 +272,9 @@ while ($row = mysqli_fetch_array($result)) {
 		if($line->pic_name=="SELF") $picName="";
 		//$libelle="$line->pilot_name $line->pilot_fname";
 	    if ($line->cost_plane > 0) {
-            $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, 700100, remove_accents($libelle), $line->cost_plane, 'C', $nextInvoice,
-            $code_plane, 0.0, 0.0, '0', $line->date, 0) ;
+            //$ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, 700100, remove_accents($libelle), $line->cost_plane, 'C', $nextInvoice,
+            $ximportLine = new XimportLine($nextMove, 'VEN', $invoiceDateCompta, '', $nextInvoice, 700100, remove_accents($libelle), $line->cost_plane, 'C', $nextInvoice,
+            $code_plane, 0.0, 0.0, '0', $invoiceDateCompta, 0) ;
             fprintf($f, "$ximportLine\n") ;
 		}
 		$costPlaneText=number_format($line->cost_plane,2,",",".")." €";
@@ -283,8 +285,10 @@ while ($row = mysqli_fetch_array($result)) {
         // Special line if there are taxes
         if ($line->cost_taxes > 0) {
 			$libelle=$code_plane.$date.".TaxesPass";
-            $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, 744103, remove_accents($libelle), $line->cost_taxes, 'C', $nextInvoice,
-                'TI', 0.0, 0.0, '0', $line->date, 0) ;
+            //$ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, 744103, remove_accents($libelle), $line->cost_taxes, 'C', $nextInvoice,
+            //    'TI', 0.0, 0.0, '0', $line->date, 0) ;
+	        $ximportLine = new XimportLine($nextMove, 'VEN', $invoiceDateCompta, '', $nextInvoice, 744103, remove_accents($libelle), $line->cost_taxes, 'C', $nextInvoice,
+	                'TI', 0.0, 0.0, '0', $invoiceDateCompta, 0) ;
             fprintf($f, "$ximportLine\n") ;        
 			$taxPerPax=$line->cost_taxes/$line->pax_count;
 			$taxPerPaxText=number_format($taxPerPax,2,",",".")." €";
@@ -302,8 +306,8 @@ while ($row = mysqli_fetch_array($result)) {
             }
 			$DC="DC".$line->instructor_name;
 			$libelle=$code_plane.$date.".".$DC;
-            $ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $fi_code, remove_accents($libelle), $line->cost_fi, 'C', $nextInvoice,
-                $fi_analytique, 0.0, 0.0, '0', $line->date, 0) ;
+            $ximportLine = new XimportLine($nextMove, 'VEN', $invoiceDateCompta, '', $nextInvoice, $fi_code, remove_accents($libelle), $line->cost_fi, 'C', $nextInvoice,
+                $fi_analytique, 0.0, 0.0, '0', $invoiceDateCompta, 0) ;
             fprintf($f, "$ximportLine\n") ; 
 			
 			$costFIText=number_format($line->cost_fi,2,",",".")." €";
@@ -319,7 +323,7 @@ while ($row = mysqli_fetch_array($result)) {
 	if($total_folio > 0) {
     	// Write to the member account
 		$libelle= "Fac.".$nextInvoice." ".$lastName." ".$firstName;
-    	$ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, $cielCode400, remove_accents($libelle) , $total_folio, 'D', $nextInvoice,
+    	$ximportLine = new XimportLine($nextMove, 'VEN', $invoiceDateCompta, '', $nextInvoice, $cielCode400, remove_accents($libelle) , $total_folio, 'D', $nextInvoice,
        	 '', 0.0, 0.0, ' ', '', 0) ;
     	 fprintf($f, "$ximportLine\n") ;
 	 }
