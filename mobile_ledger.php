@@ -53,7 +53,7 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('myledger.php')) ;
 ?>
 <div class="container-fluid">
 <h2>Grand livre comptable de <?=$userName?> (#<?=$userId?>)</h2>
-<p>Voici une vue comptable de votre compte membre RAPCS (mis à jour chaque semaine par nos bénévoles).</p>
+<p class="lead">Voici une vue comptable de votre compte membre RAPCS (mis à jour chaque semaine par nos bénévoles).</p>
 <p class="small">Accès au folio et aux factures via le menu déroulant en cliquant sur votre nom en haut à droite ou la pagination ci-dessous.</p>
 
 <div class="row">
