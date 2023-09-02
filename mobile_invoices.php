@@ -58,7 +58,7 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('myinvoices.php')) ;
 		<tr><th>Date</th><th>N° pièce</th><th>Type</th><th style="text-align: right;">Montant</th><th>Action</th></tr>
 	</thead>
 <?php
-$sql = "SELECT * 
+$sql = "SELECT *, DATE(bki_date) AS bki_date 
 		FROM $table_person JOIN $table_bk_invoices ON bki_email = email 
 		LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
         WHERE jom_id = $userId" ;
