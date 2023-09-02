@@ -54,7 +54,19 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('myledger.php')) ;
 <div class="container-fluid">
 <h2>Grand livre comptable de <?=$userName?> (#<?=$userId?>)</h2>
 <p>Voici une vue comptable de votre compte membre RAPCS (mis à jour chaque semaine par nos bénévoles).</p>
-<p class="small">Accès au folio et aux factures via le menu déroulant en cliquant sur votre nom en haut à droite.</p>
+<p class="small">Accès au folio et aux factures via le menu déroulant en cliquant sur votre nom en haut à droite ou la pagination ci-dessous.</p>
+
+<div class="row">
+	<ul class="pagination">
+		<li class="page-item active"><a class="page-link" href="mobile_ledger.php?user=<?=$userId?>">Opérations comptables</a></li>
+		<li class="page-item"><a class="page-link" href="<?="mobile_invoices.php?user=$userId"?>">Factures récentes</a></li>
+		<li class="page-item"><a class="page-link" href="<?="myfolio.php?previous&user=$userId"?>">
+			<i class="bi bi-caret-left-fill"></i>Folio du mois précédent <!--?=datefmt_format($fmt, $previous_month_pager)?--></a></li>
+		<li class="page-item"><a class="page-link" href="<?="myfolio.php?user=$userId"?>">
+			Folio de ce mois <!--?=datefmt_format($fmt,$this_month_pager)?--> <i class="bi bi-caret-right-fill"></i></a></li>
+	</ul><!-- pagination -->
+</div><!-- row -->
+
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">
 <div class="table-responsive">
