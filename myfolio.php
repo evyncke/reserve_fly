@@ -235,7 +235,7 @@ $today = datefmt_format($fmt, $displayTimestamp) ;
 <div class="row">
 	<ul class="pagination">
 		<li class="page-item"><a class="page-link" href="mobile_ledger.php?user=<?=$userId?>">Opérations comptables</a></li>
-		<li class="page-item"><a class="page-link" href="<?="mobile_invoices.php?user=$userId"?>">Factures précédentes</a></li>
+		<li class="page-item"><a class="page-link" href="<?="mobile_invoices.php?user=$userId"?>">Factures récentes</a></li>
 		<li class="page-item<?=$previous_active?>"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?previous&user=$userId"?>">
 			<i class="bi bi-caret-left-fill"></i>Folio du mois précédent <?=datefmt_format($fmt, $previous_month_pager)?></a></li>
 		<li class="page-item<?=$current_active?>"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?user=$userId"?>">
