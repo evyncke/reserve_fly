@@ -50,6 +50,7 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('myinvoices.php')) ;
 ?><div class="container-fluid">
 <h2>Factures récentes de <?=$userName?></h2>
 <p class="lead">Voici quelques pièces comptables récentes (mises à jour une fois par semaine environ par nos bénévoles).</p>
+<p class="small">Accès au folio et opérations comptables via le menu déroulant en cliquant sur votre nom en haut à droite.</p>
 <div class="row">
 <div class="col-sm-12 col-md-6 col-lg-4">
 <div class="table-responsive">
