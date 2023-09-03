@@ -82,8 +82,10 @@ while ($row = mysqli_fetch_array($result)) {
 	// Using the invoice date from the email import as the general ledger is in the future
 	$action = "<a href=\"$row[bki_file_name]\" target=\"_blank\"> <i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a>" ;
     print("<tr><td>$row[bki_date]</td><td>$row[bki_id]</td>") ;
-	if ($row['bkl_debit'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td>$action <a href=\"#\"  onClick=\"pay('facture $row[bki_id]', $row[bkl_debit]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
-	else if ($row['bki_amount'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td>$action <a href=\"#\"  onClick=\"pay('facture $row[bki_id]', $row[bki_amount]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
+	if ($row['bkl_debit'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td>$action <a href=\"#\"  
+		onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bkl_debit]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
+	else if ($row['bki_amount'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td>$action <a href=\"#\" 
+		 onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bki_amount]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
 	else if ($row['bkl_credit'] != '') print("<td>Note de crédit</td><td  style=\"text-align: right;\">" . (0.0 - $row['bkl_credit']) . " &euro;</td><td>$action</td>") ;
 	print("</tr>\n") ;
     $count ++ ;
@@ -121,7 +123,7 @@ function pay(reason, amount) {
 	document.getElementById('payment_amount').innerText = amount ;
 	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
-	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel + '/' + userLastName ;
+	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + "\n" + reason ;
 	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 }
 

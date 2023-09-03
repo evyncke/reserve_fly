@@ -98,12 +98,17 @@ $result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "
 $count = 0 ;
 while ($row = mysqli_fetch_array($result)) {
 	// Using the invoice date from the email import as the general ledger is in the future
-	$action = "<a href=\"$row[bki_file_name]\" target=\"_blank\"><span class=\"glyphicon glyphicon-new-window\" title=\"Ouvrir la pièce dans une autre fenêtre\"></span></a>" ;
+	$action = "<a href=\"$row[bki_file_name]\" target=\"_blank\">
+		<span class=\"glyphicon glyphicon-new-window\" title=\"Ouvrir la pièce dans une autre fenêtre\"></span>
+		<i class=\"bi bi-file-earmark-pdf-fill\" title=\"Ouvrir la pièce dans une autre fenêtre\"></i>
+		</a>" ;
     print("<tr><td>$row[bki_date]</td><td>$row[bki_id]</td>") ;
 	if ($row['bkl_debit'] != '') 
-		print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td>$action <a href=\"#\"  onClick=\"pay('facture $row[bki_id]', $row[bkl_debit]);\"><span class=\"glyphicon glyphicon-qrcode\" title=\"Payer la facture\"></span></a></td>") ;
+		print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td>$action <a href=\"#\"  
+			onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bkl_debit]);\"><span class=\"glyphicon glyphicon-qrcode\" title=\"Payer la facture\"></span></a></td>") ;
 	else if ($row['bki_amount'] != '') 
-		print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td>$action <a href=\"#\"  onClick=\"pay('facture $row[bki_id]', $row[bki_amount]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
+		print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td>$action <a href=\"#\"  
+			onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bki_amount]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
 	else if ($row['bkl_credit'] != '') 
 		print("<td>Note de crédit</td><td  style=\"text-align: right;\">" . (0.0 - $row['bkl_credit']) . " &euro;</td><td>$action</td>") ;
 	print("</tr>\n") ;
