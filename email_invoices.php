@@ -101,10 +101,11 @@ while ($row = mysqli_fetch_array($result)) {
         continue ;
     }
 //   if (!in_array($row['jom_id'], array(62, 66, 92, 306, 348))) {
-   if (!in_array($row['jom_id'], array(62))) {
-        print("<small>Skipping invoice $row[bki_id] for '$row[email]' (" . db2web($row['name']) . ")</small><br/>") ;
-        continue ;
-  }
+//   if (!in_array($row['jom_id'], array(62))) {
+//        print("<small>Skipping invoice $row[bki_id] for '$row[email]' (" . db2web($row['name']) . ")</small><br/>") ;
+//        continue ;
+//
+//  }
   print("Processing invoice $row[bki_id] for $row[email] (" . db2web($row['name']) . ") $row[bki_amount] &euro;<br/>") ;
 
   $row['first_name'] = db2web($row['first_name']) ;
