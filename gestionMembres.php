@@ -1,8 +1,9 @@
 <?php
 require_once 'dbi.php';
 
-if (! $userIsAdmin && ! $userIsBoardMember && !$userIsInstructor) journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
-// ob_start("ob_gzhandler"); // Enable gzip compression over HTTP
+if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor and $userId != 306) // 306 = Bernard Penders) 
+	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
+ob_start("ob_gzhandler"); // Enable gzip compression over HTTP
 
 ?><!DOCTYPE html>
 <html lang="fr">
@@ -718,7 +719,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 </div>
 <?php
 if(abs($cielCount-161)>15) {
-	print("<p style='color: red;'><b>La table ne semble pas correct. Il semble manquer des comptes! A vérifier.</b></p>");
+	print("<p style='color: red;'><b>La table ne semble pas correcte. Il semble manquer des comptes! A vérifier.</b></p>");
 }
 ?>
 </body>
