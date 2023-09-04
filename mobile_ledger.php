@@ -48,7 +48,6 @@ function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_sep
 	if ($n == 0) return '' ;
 	return number_format($n, $decimals, $decimal_separator, $thousand_separator) . '&nbsp;&euro;';
 }
-
 print("<div class=\"container-fluid\">") ;
 
 if ($userIsInstructor or $userIsAdmin) {

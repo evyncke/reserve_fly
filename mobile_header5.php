@@ -63,7 +63,6 @@ var
 		bookingTypeMaintenance = <?= BOOKING_MAINTENANCE ?>,
 		bookingTypeCustomer = <?= BOOKING_CUSTOMER ?> ,
 		bookingTypeOnHold = <?= BOOKING_ON_HOLD ?> ;
-
 function pilotSelectChanged() {
         window.location.href = '<?=$_SERVER['PHP_SELF']?>?user=' + document.getElementById('pilotSelect').value + 
 			'<?= ((isset($_REQUEST['previous'])) ? '&previous' : '')?>' ;
