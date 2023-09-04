@@ -369,4 +369,25 @@ function init() {
 		option.innerHTML = '<a class="dropdown-item" href="mobile_plane.php?plane=' + planes[plane].name + '">' + planes[plane].name;
 		planesDropdown.appendChild(option) ;
 	}
+
+	var pilotSelect = document.getElementById('pilotSelect') ;
+	if (pilotSelect) {
+	// Dropdown selected the pilot
+		if (userIsInstructor || userIsAdmin) {
+				// Initiliaze pilotSelect from members.js
+				for (var member = 0; member < members.length; member++) {
+						var option = document.createElement("option");
+						if (members[member].last_name == '')
+								option.innerHTML = members[member].name ;
+						else
+								option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
+						if (members[member].student) {  // Add a student icon
+								option.innerHTML += ' &#x1f4da;' ;
+						}
+						option.value = members[member].id ;
+						pilotSelect.add(option) ;
+				}
+		}
+		pilotSelect.value = selectedUserId ;
+	}
 }

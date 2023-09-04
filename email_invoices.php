@@ -30,6 +30,13 @@ $mime_preferences = array(
 $managerName = "Finances du RAPCS" ;
 $smtp_from = "finances@spa-aviation.be" ;
 
+// Direct use of OVH servers (default setting is to use Eric Vyncke's own server)
+// This may cause spam rejection due to poor OVH email reputation
+$smtp_host = 'ssl0.ovh.net' ;
+$smtp_port = 587 ;
+$smtp_user = $finances_smtp_user ;
+$smtp_password = $finances_smtp_password ;
+
 MustBeLoggedIn() ;
 
 if (! $userIsAdmin && ! $userIsBoardMember)
@@ -78,18 +85,23 @@ $dateInvoice = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['dateInvoi
     <h1>Envoi des factures du <?=$dateInvoice?> par email</h1>
     <p class="bg-danger">Ceci est en mode test.</p>
 <?php
-$result = mysqli_query($mysqli_link, "SELECT *
-    FROM $table_bk_invoices, DATE(bki_date) AS bki_date
+$result = mysqli_query($mysqli_link, "SELECT *, DATE(bki_date) AS bki_date
+    FROM $table_bk_invoices
         LEFT JOIN $table_person p ON p.email = bki_email
-        WHERE DATE(bki_date) = '$dateInvoice'")
+        WHERE DATE(bki_date) = '$dateInvoice'
+        ORDER BY bki_id ASC")
         or journalise($userID, "F", "Cannot read $table_bk_invoices: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
+    if ($row['bki_email_sent'] != '' and $row['jom_id'] != 62) {
+        print("<small>Already sent on $row[bki_email_sent], skipping invoice $row[bki_id] for '$row[email]' (" . db2web($row['name']) . ")</small><br/>") ;
+        continue ;
+    }
     if ($row['email'] == '') {
         print("<span style=\"color: red;\">!!! La facture $row[bki_id] pour '$row[bki_email]' n'a pas de correspondance dans $table_person!!!</span><br/>\n") ;
         continue ;
     }
-    if (!in_array($row['jom_id'], array(62, 66, 92, 348))) {
-//   if (!in_array($row['jom_id'], array(62))) {
+//   if (!in_array($row['jom_id'], array(62, 66, 92, 306, 348))) {
+   if (!in_array($row['jom_id'], array(62))) {
         print("<small>Skipping invoice $row[bki_id] for '$row[email]' (" . db2web($row['name']) . ")</small><br/>") ;
         continue ;
   }

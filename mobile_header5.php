@@ -49,6 +49,7 @@ var
 		nowTimestamp = <?=time()?>,
 		utcOffset = Number(<?=date('Z')/3600?>),
 		userId = <?=$userId?>,
+    selectedUserId = <?=(isset($_REQUEST['user'])) ? $_REQUEST['user'] : $userId?> ;
 		userName = '<?=$userName?>',
 		userFullName = '<?=$userFullName?>',
 		userIsPilot = <?= ($userIsPilot) ? 'true' : 'false' ?>,
@@ -62,10 +63,14 @@ var
 		bookingTypeMaintenance = <?= BOOKING_MAINTENANCE ?>,
 		bookingTypeCustomer = <?= BOOKING_CUSTOMER ?> ,
 		bookingTypeOnHold = <?= BOOKING_ON_HOLD ?> ;
-
+function pilotSelectChanged() {
+        window.location.href = '<?=$_SERVER['PHP_SELF']?>?user=' + document.getElementById('pilotSelect').value + 
+			'<?= ((isset($_REQUEST['previous'])) ? '&previous' : '')?>' ;
+}
 </script>
 <script src="mobile.js"></script>
 <script src="planes.js"></script>
+<script src="members.js"></script> <!-- TODO load only if pilotSelect is active -->
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];

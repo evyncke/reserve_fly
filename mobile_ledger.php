@@ -48,24 +48,32 @@ function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_sep
 	if ($n == 0) return '' ;
 	return number_format($n, $decimals, $decimal_separator, $thousand_separator) . '&nbsp;&euro;';
 }
+print("<div class=\"container-fluid\">") ;
 
-$version_php = date ("Y-m-d H:i:s.", filemtime('myledger.php')) ;
+if ($userIsInstructor or $userIsAdmin) {
+        print("<p>En tant qu'instructeur/administrateur, vous pouvez consulter les situations comptables des autres membres: <select id=\"pilotSelect\" onchange=\"pilotSelectChanged();\">" ) ;
+        print("</select></p>") ;
+}
 ?>
-<div class="container-fluid">
-<h2>Grand livre comptable de <?=$userName?> (#<?=$userId?>)</h2>
-<p>Voici une vue comptable de votre compte membre RAPCS (mis à jour chaque semaine par nos bénévoles).</p>
-<p class="small">Accès au folio et aux factures via le menu déroulant en cliquant sur votre nom en haut à droite ou la pagination ci-dessous.</p>
+<h2>Grand livre comptable de <?=$userName?></h2>
+<p class="lead">Voici une vue comptable de votre compte membre RAPCS (mis à jour chaque semaine par nos bénévoles).</p>
+<p class="small">Accès au folio et aux factures via le menu déroulant en cliquant sur votre nom en haut à droite ou les onglets ci-dessous.</p>
 
-<div class="row">
-	<ul class="pagination">
-		<li class="page-item active"><a class="page-link" href="mobile_ledger.php?user=<?=$userId?>">Opérations comptables</a></li>
-		<li class="page-item"><a class="page-link" href="<?="mobile_invoices.php?user=$userId"?>">Factures récentes</a></li>
-		<li class="page-item"><a class="page-link" href="<?="myfolio.php?previous&user=$userId"?>">
-			<i class="bi bi-caret-left-fill"></i>Folio du mois précédent <!--?=datefmt_format($fmt, $previous_month_pager)?--></a></li>
-		<li class="page-item"><a class="page-link" href="<?="myfolio.php?user=$userId"?>">
-			Folio de ce mois <!--?=datefmt_format($fmt,$this_month_pager)?--> <i class="bi bi-caret-right-fill"></i></a></li>
-	</ul><!-- pagination -->
-</div><!-- row -->
+<!-- using tabs -->
+<ul class="nav nav-tabs">
+	<li class="nav-item">
+  		<a class="nav-link active" aria-current="page" href="mobile_ledger.php?user=<?=$userId?>">Opérations comptables</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" aria-current="page" href="<?="mobile_invoices.php?user=$userId"?>">Factures récentes</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" aria-current="page" href="<?="myfolio.php?previous&user=$userId"?>">Folio du mois précédent</a>
+  	</li>
+	  <li class="nav-item">
+		<a class="nav-link" aria-current="page" href="<?="myfolio.php?user=$userId"?>">Folio de ce mois</a>
+  	</li>
+</ul> <!-- tabs -->
 
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">

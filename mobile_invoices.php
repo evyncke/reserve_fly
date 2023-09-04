@@ -46,22 +46,33 @@ function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_sep
 	if ($n == 0) return '' ;
 	return substr('        ' + number_format($n, $decimals, $decimal_separator, $thousand_separator) . '&nbsp;&euro;', -10, 10);
 }
-$version_php = date ("Y-m-d H:i:s.", filemtime('myinvoices.php')) ;
-?><div class="container-fluid">
+
+print("<div class=\"container-fluid\">") ;
+
+if ($userIsInstructor or $userIsAdmin) {
+        print("<p>En tant qu'instructeur/administrateur, vous pouvez consulter les situations comptables des autres membres: <select id=\"pilotSelect\" onchange=\"pilotSelectChanged();\">" ) ;
+        print("</select></p>") ;
+}
+?>
 <h2>Factures récentes de <?=$userName?></h2>
 <p class="lead">Voici quelques pièces comptables récentes (mises à jour une fois par semaine environ par nos bénévoles).</p>
-<p class="small">Accès au folio et opérations comptables via le menu déroulant en cliquant sur votre nom en haut à droite ou via la pagination ci-dessous.</p>
+<p class="small">Accès au folio et opérations comptables via le menu déroulant en cliquant sur votre nom en haut à droite ou via les onglets ci-dessous.</p>
 
-<div class="row">
-	<ul class="pagination">
-		<li class="page-item"><a class="page-link" href="mobile_ledger.php?user=<?=$userId?>">Opérations comptables</a></li>
-		<li class="page-item active"><a class="page-link" href="<?="mobile_invoices.php?user=$userId"?>">Factures récentes</a></li>
-		<li class="page-item"><a class="page-link" href="<?="myfolio.php?previous&user=$userId"?>">
-			<i class="bi bi-caret-left-fill"></i>Folio du mois précédent <!--?=datefmt_format($fmt, $previous_month_pager)?--></a></li>
-		<li class="page-item"><a class="page-link" href="<?="myfolio.php?user=$userId"?>">
-			Folio de ce mois <!--?=datefmt_format($fmt,$this_month_pager)?--> <i class="bi bi-caret-right-fill"></i></a></li>
-	</ul><!-- pagination -->
-</div><!-- row -->
+<!-- using tabs -->
+<ul class="nav nav-tabs">
+	<li class="nav-item">
+  		<a class="nav-link" aria-current="page" href="mobile_ledger.php?user=<?=$userId?>">Opérations comptables</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link active" aria-current="page" href="<?="mobile_invoices.php?user=$userId"?>">Factures récentes</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" aria-current="page" href="<?="myfolio.php?previous&user=$userId"?>">Folio du mois précédent</a>
+  	</li>
+	  <li class="nav-item">
+		<a class="nav-link" aria-current="page" href="<?="myfolio.php?user=$userId"?>">Folio de ce mois</a>
+  	</li>
+</ul> <!-- tabs -->
 
 <div class="row">
 <div class="col-sm-12 col-md-6 col-lg-4">
@@ -82,8 +93,10 @@ while ($row = mysqli_fetch_array($result)) {
 	// Using the invoice date from the email import as the general ledger is in the future
 	$action = "<a href=\"$row[bki_file_name]\" target=\"_blank\"> <i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a>" ;
     print("<tr><td>$row[bki_date]</td><td>$row[bki_id]</td>") ;
-	if ($row['bkl_debit'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td>$action <a href=\"#\"  onClick=\"pay('facture $row[bki_id]', $row[bkl_debit]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
-	else if ($row['bki_amount'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td>$action <a href=\"#\"  onClick=\"pay('facture $row[bki_id]', $row[bki_amount]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
+	if ($row['bkl_debit'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td>$action <a href=\"#\"  
+		onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bkl_debit]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
+	else if ($row['bki_amount'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td>$action <a href=\"#\" 
+		 onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bki_amount]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
 	else if ($row['bkl_credit'] != '') print("<td>Note de crédit</td><td  style=\"text-align: right;\">" . (0.0 - $row['bkl_credit']) . " &euro;</td><td>$action</td>") ;
 	print("</tr>\n") ;
     $count ++ ;
@@ -121,7 +134,7 @@ function pay(reason, amount) {
 	document.getElementById('payment_amount').innerText = amount ;
 	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
-	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel + '/' + userLastName ;
+	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + "\n" + reason ;
 	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 }
 

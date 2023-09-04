@@ -167,7 +167,7 @@ function selectChanged() {
 </head>
 <body onload="init();" lang="fr">
 <div class="container-fluid">
-<h2>Situation comptable de <?=$userName?> (#<?=$userId?>)</h2>
+<h2>Situation comptable de <?=$userName?></h2>
 <?php
 
 // Check the bookkeeping balance
@@ -231,17 +231,26 @@ $fmt = datefmt_create(
 $today = datefmt_format($fmt, $displayTimestamp) ;
 ?>
 <h2><?=$document_title?>  du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?></h2>
+<p class="lead">Voici un folio (estimation de vos factures de vos vols).</p>
+<p class="small">Accès au folio et opérations comptables via les onglets ci-dessous.</p>
 
-<div class="row">
-	<ul class="pagination">
-		<li class="page-item"><a class="page-link" href="mobile_ledger.php?user=<?=$userId?>">Opérations comptables</a></li>
-		<li class="page-item"><a class="page-link" href="<?="mobile_invoices.php?user=$userId"?>">Factures récentes</a></li>
-		<li class="page-item<?=$previous_active?>"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?previous&user=$userId"?>">
-			<i class="bi bi-caret-left-fill"></i>Folio du mois précédent <?=datefmt_format($fmt, $previous_month_pager)?></a></li>
-		<li class="page-item<?=$current_active?>"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?user=$userId"?>">
-			Folio de ce mois <?=datefmt_format($fmt,$this_month_pager)?> <i class="bi bi-caret-right-fill"></i></a></li>
-	</ul><!-- pagination -->
-</div><!-- row -->
+<!-- using tabs -->
+<ul class="nav nav-tabs">
+	<li class="nav-item">
+  		<a class="nav-link" aria-current="page" href="mobile_ledger.php?user=<?=$userId?>">Opérations comptables</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" aria-current="page" href="<?="mobile_invoices.php?user=$userId"?>">Factures récentes</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link<?=$previous_active?>" aria-current="page" href="<?="myfolio.php?previous&user=$userId"?>">Folio du mois précédent
+			<br/><?=datefmt_format($fmt, $previous_month_pager)?></a>
+  	</li>
+	  <li class="nav-item">
+		<a class="nav-link<?=$current_active?>" aria-current="page" href="<?="myfolio.php?user=$userId"?>">Folio de ce mois
+			<br/><?=datefmt_format($fmt,$this_month_pager)?></a>
+  	</li>
+</ul> <!-- tabs -->
 
 <div class="row">
 <div class="col-sm-12 col-lg-10 col-xl-8">
