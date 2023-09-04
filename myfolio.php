@@ -233,7 +233,7 @@ $today = datefmt_format($fmt, $displayTimestamp) ;
 <h2><?=$document_title?>  du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?></h2>
 
 <p class="lead">Voici un folio (estimation de vos factures de vos vols).</p>
-<p class="small">Accès au folio et opérations comptables via les tabs ci-dessous.</p>
+<p class="small">Accès au folio et opérations comptables via les onglets ci-dessous.</p>
 
 <!-- using tabs -->
 <ul class="nav nav-tabs">

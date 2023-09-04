@@ -56,7 +56,7 @@ if ($userIsInstructor or $userIsAdmin) {
 ?>
 <h2>Factures récentes de <?=$userName?></h2>
 <p class="lead">Voici quelques pièces comptables récentes (mises à jour une fois par semaine environ par nos bénévoles).</p>
-<p class="small">Accès au folio et opérations comptables via le menu déroulant en cliquant sur votre nom en haut à droite ou via les tabs ci-dessous.</p>
+<p class="small">Accès au folio et opérations comptables via le menu déroulant en cliquant sur votre nom en haut à droite ou via les onglets ci-dessous.</p>
 
 <!-- using tabs -->
 <ul class="nav nav-tabs">

@@ -58,7 +58,7 @@ if ($userIsInstructor or $userIsAdmin) {
 ?>
 <h2>Grand livre comptable de <?=$userName?></h2>
 <p class="lead">Voici une vue comptable de votre compte membre RAPCS (mis à jour chaque semaine par nos bénévoles).</p>
-<p class="small">Accès au folio et aux factures via le menu déroulant en cliquant sur votre nom en haut à droite ou les tabs ci-dessous.</p>
+<p class="small">Accès au folio et aux factures via le menu déroulant en cliquant sur votre nom en haut à droite ou les onglets ci-dessous.</p>
 
 <!-- using tabs -->
 <ul class="nav nav-tabs">
