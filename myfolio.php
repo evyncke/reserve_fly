@@ -251,6 +251,7 @@ $today = datefmt_format($fmt, $displayTimestamp) ;
 			<br/><?=datefmt_format($fmt,$this_month_pager)?></a>
   	</li>
 </ul> <!-- tabs -->
+<br/>
 
 <div class="row">
 <div class="col-sm-12 col-lg-10 col-xl-8">
