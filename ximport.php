@@ -16,7 +16,7 @@
 
 */
 
-$production = true ; // when production is set to true, invoices are inserted in $table_invoices and are shown to end-users
+$production = false ; // when production is set to true, invoices are inserted in $table_invoices and are shown to end-users
 
 require_once 'dbi.php' ;
 require_once 'invoicePDF_pilot.php';
@@ -183,7 +183,7 @@ $invoiceDate = date_format($invoiceDateTime,"d-m-Y");
 $invoiceDateSQLTime = new DateTime(date('Y-m-d'), new DateTimeZone('UTC'));
 $invoiceDateSQL = date_format($invoiceDateSQLTime,"Y-m-d");
 
-$sql = "select u.id as id, last_name
+$sql = "select u.id as id, last_name, bce
 				from $table_users as u join $table_user_usergroup_map on u.id=user_id 
 				join $table_person as p on u.id=p.jom_id
 				where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
@@ -202,6 +202,7 @@ $members = [62, 66, 348, 92] ;
 //foreach($members as $member) {
 while ($row = mysqli_fetch_array($result)) {
 	$member=$row['id'];	
+	$bce=$row['bce'];
     $folio = new Folio($member, '2023-08-01', '2023-09-01') ;
     if ($folio->count == 0) continue ; // Skip empty folios
 	$invoiceCount++ ;
@@ -224,7 +225,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$pdf->SetInvoiceCommunication($communication);
 	$pdf->AddPage();
 	$pdf->AliasNbPages();
-	$pdf->AddAddress($folio->fname." ".$folio->name, $folio->address, "$folio->zip_code $folio->city", $folio->country) ;
+	$pdf->AddAddress($folio->fname." ".$folio->name, $folio->address, "$folio->zip_code $folio->city", $folio->country, $bce) ;
 	//$pdf->SetXY(20, 80);
 	$pdf->SetColumnsWidth(array(20, 85, 20, 25, 25),array("C","L","C","R","R")) ;
 	$pdf->TableHeader(array("Référence", "Désignation", "Quantité", "Prix unitaire","Montant")) ; 	
