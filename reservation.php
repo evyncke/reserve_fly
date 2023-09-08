@@ -435,8 +435,8 @@ if ($userId == 0) {
 		order by b.r_start desc limit 5") or die("Cannot select unlogged flights: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_num_rows($result) > 0) {
 		$missing_entries = mysqli_num_rows($result) ;
-		print("<p style=\"color: red;\">Vous avez une ou plusieurs r&eacute;servations sans entr&eacute;es dans les carnets de routes des avions, pour la bonne
-			gestion de notre flotte, veuillez compl&eacute;ter les carnets <b>(cela sera obligatoire pour effectuer une r&eacute;servation d&egrave;s le 1er septembre 2022)</b>.:<ul>\n") ;
+		print("<p style=\"color: red;\">Vous avez une ou plusieurs r&eacute;servations sans entr&eacute;es dans les carnets de routes des avions, il est obligatoire de compl&eacute;ter
+			ces carnets sous peine de frais administratifs en fin de mois.</p><ul>") ;
 		while ($row = mysqli_fetch_array($result)) {
 			print("<li>$row[r_start]: <a href=\"IntroCarnetVol.php?id=$row[r_id]\">remplir le carnet de routes de $row[r_plane] ou annuler la r&eacute;servation</a>;") ;
 			if ($userIsInstructor) print(" <img src=\"gtk-delete.png\" onclick=\"javascript:document.getElementById('reasonTextArea').value='Old booking';cancelOldBooking($row[r_id]);\">" ) ;
@@ -695,6 +695,6 @@ Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, ex&
 		data-share="false" data-width="450" data-show-faces="true">
 </div>
 </center>
-<div id="waitingDiv"><img src="spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();"></div>
+<div id="waitingDiv"><img src="spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();" width="256" height="256"></div>
 </body>
 </html>

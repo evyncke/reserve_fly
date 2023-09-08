@@ -176,18 +176,26 @@ function refreshPlanningTableHeader() {
 var waitingCount = 0 ;
 
 function displayWaiting() {
+	console.log("displayWaiting(), waitingCount = " + waitingCount) ;
 	if (waitingCount++ == 0) {
+		console.log('display Spinner') ;
 		document.getElementById('waitingDiv').style.visibility = 'visible' ;
-		document.getElementById('waitingDiv').style.display = 'block' ;
+		document.getElementById('waitingDiv').style.display = 'block' ; // Possibly useless
 		document.getElementById('waitingDiv').style.position = 'absolute' ; 
 		document.getElementById('waitingDiv').style.top = browserHeight / 2 - 128; 
 		document.getElementById('waitingDiv').style.left = browserWidth / 2 - 128; 
+		document.getElementById('waitingDiv').style.zIndex = 99 ; // Should be high enough ....
+		console.log('zIndex: ' + document.getElementById('waitingDiv').style.zIndex) ;
 	}
 }
 
 function hideWaiting() {
+	console.log("hideWaiting(), waitingCount = " + waitingCount) ;
 	if (--waitingCount == 0) {
+		console.log('hide Spinner') ;
 		document.getElementById('waitingDiv').style.visibility = 'hidden' ;
+		document.getElementById('waitingDiv').style.zIndex = -99 ; // Should be low enough ....
+		console.log('zIndex: ' + document.getElementById('waitingDiv').style.zIndex) ;
 	}
 }
 
