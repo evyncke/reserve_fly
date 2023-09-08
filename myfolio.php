@@ -406,8 +406,8 @@ if ($diams_explanation)
 ?>
 
 <?php
-$invoice_reason = 'folio' ;
-$invoice_total = $cost_grand_total - $balance ;
+$invoice_reason = 'solde après folio' ;
+$invoice_total = round($cost_grand_total - $balance, 2) ;
 
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
@@ -445,7 +445,7 @@ function pay(reason, amount) {
 	document.getElementById('payment_amount').innerText = amount ;
 	// Should update to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
-	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel + '/' + userLastName ;
+	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " " + compteCiel + "\n" + reason + " " + compteCiel + '/' + userLastName ;
 	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 }
 
