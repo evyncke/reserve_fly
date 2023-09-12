@@ -550,7 +550,8 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 
 // The subquery should retrieve the max date for this specific user...but it burns time
 	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
-		ciel_code, block, bkb_amount, b_reason, u.email as email, group_concat(group_id) as groups, sum(distinct bkl_debit) as invoice_total
+		ciel_code, block, bkb_amount, b_reason, u.email as email, group_concat(group_id) as groups, sum(distinct bkl_debit) as invoice_total,
+		datediff(current_date(), b_when) as days_blocked
 			from $table_users as u join $table_user_usergroup_map on u.id=user_id 
 			join $table_person as p on u.id=p.jom_id
 			left join $table_bk_balance on ciel_code400=bkb_account
@@ -685,8 +686,9 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			print("<td></td>");
 		}
 		if($blocked==2) {
-			print("<td style='text-align: center;font-size: 17px;color: green;'>
-			<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Unblock','$nom $prenom','$personid','$solde')\">&#x26D4;<span class='tooltiptext'>Click pour DEBLOQUER</span></a></td>");
+			print("<td style='text-align: center;font-size: 17px;color: red;'>
+			<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Unblock','$nom $prenom','$personid','$solde')\">&#x26D4;<span class='tooltiptext'>Click pour DEBLOQUER</span>
+				<span class=\"badge text-primary\">$row[days_blocked]</span></a></td>");
 		}
 		else if($blocked==1){
 			print("<td style='text-align: center;font-size: 15px;color: red;'>&#10060;</td>");		
