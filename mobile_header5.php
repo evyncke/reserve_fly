@@ -25,6 +25,15 @@ header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <meta charset="utf-8">
+<!-- Facebook Open graph data -->
+<meta property="og:url"           content="https://www.spa-aviation.be/resa/mobile.php" />
+<meta property="og:type"          content="website" />
+<meta property="og:title"         content="Royal Aero Para Club de Spa ASBL" />
+<meta property="og:description"   content="Page réservée aux membres RAPCS" />
+<meta property="og:image"         content="https://www.spa-aviation.be/logo_rapcs_256x256.png" />
+<meta property="og:image:width"	  content="256" />
+<meta property="og:image:height"  content="256" />
+<meta property="og:image:type"    content="image/png" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
@@ -214,6 +223,7 @@ if ($userId <= 0) {
               <a class="dropdown-item" href="myfolio.php">Mon folio <i class="bi bi-box-arrow-up-right"></i></a>
               <a class="dropdown-item" href="mobile_invoices.php">Mes factures</a>
               <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
+              <a class="dropdown-item" href="mobile_groups.php">Mes groupes</a>
               </li>
           </ul>
         </li> <!-- dropdown -->
