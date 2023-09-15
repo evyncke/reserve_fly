@@ -41,6 +41,15 @@ if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
 <!-- Load the MAP BOX scripts & CSS -->
 <script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
 <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
+
+<!-- Using latest bootstrap 5 -->
+<!-- Latest compiled and minified CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Latest compiled JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Glyphicon equivalent -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <!-- Reusing bootstrap icons -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
 
@@ -93,14 +102,9 @@ var
 </div> <!-- container -->
 
 <div id='flightInfo' style='display: none; position: absolute; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.7;'></div>
-<?php
-$version_php = date ("Y-m-d H:i:s.", filemtime('fleet_map.php')) ;
-$version_js = date ("Y-m-d H:i:s.", filemtime('fleet_map.js')) ;
-$version_ajax = date ("Y-m-d H:i:s.", filemtime('get_tracks.php')) ;
-?>
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021 - août 2021, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, mars 2021 - septembre 2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
 Données via Flight Aware (avec maximum 15 minutes de délai), via quelques récepteurs ADS-B / MLAT (avec maximum 10 secondes de délai), via Open Sky, et via glidernet.org (planeurs FLARM et intégration SafeSky et un délai d'une minute).</br>
-Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, AJAX=<?=$version_ajax?></div>
+</div>
 </body>
 </html>

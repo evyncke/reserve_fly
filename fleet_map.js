@@ -140,6 +140,10 @@ function insertTrackPoints (flights) {
 			geometry : {type : 'LineString', coordinates : [] } } ;
 		currentFeature.properties.title = flight ;
 		currentFeature.properties.comment = "Plane: " + thisFlight.plane + '</br>First seen: ' + thisFlight.first + ' UTC</br>Last seen: ' + thisFlight.last + ' UTC';
+		if (thisFlight.last_altitude)
+			currentFeature.properties.comment += '<br>Altitude: ' + thisFlight.last_altitude + ' ft' ;
+		if (thisFlight.last_velocity)
+			currentFeature.properties.comment += '<br>Ground speed: ' + thisFlight.last_velocity + ' kts' ;
 		currentFeature.properties.color = planeColor ;
 		currentFeature.geometry.coordinates = [] ;
 
@@ -167,6 +171,19 @@ function insertTrackPoints (flights) {
 		} else {
 			// Add this flight to the collection
 			flightFeatureCollection.push(currentFeature) ;
+			// Adding current position
+			currentPositionFeature = {type : 'Feature',
+				properties : {title : '',comment : '', color: ''},
+				geometry : {type : 'LineString', coordinates : [] } } ;
+			currentPositionFeature.properties.title = flight ;
+			currentPositionFeature.properties.comment = currentFeature.properties.comment ;
+			currentPositionFeature.geometry.type = 'Point' ;
+			currentPositionFeature.properties.icon = 'airfield' ;
+			currentPositionFeature.properties['marker-symbol'] = 'airfield' ;
+			currentPositionFeature.properties['marker-size'] = 'medium' ;
+			currentPositionFeature.properties['marker-color'] = currentFeature.properties.color ;
+			currentPositionFeature.geometry.coordinates = ([parseFloat(thisTrack[trackPosition][0]), parseFloat(thisTrack[trackPosition][1])]) ;
+			locationFeatureCollection.push(currentPositionFeature) ;
 		}
 	}
 
