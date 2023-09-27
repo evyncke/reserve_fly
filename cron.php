@@ -678,16 +678,24 @@ mysqli_query($mysqli_link, "DELETE FROM $table_journal WHERE j_datetime < DATE_S
 mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_journal")
 	or journalise(0, "E", "Cannot optimize $table_journal: " . mysqli_error($mysqli_link)) ;
 
-mysqli_query($mysqli_link, "DELETE FROM $table_local_tracks WHERE lt_timestamp < DATE_SUB(CONVERT_TZ(NOW(), 'Europe/Paris', 'UTC'), INTERVAL 15 MINUTE)")
+mysqli_query($mysqli_link, "DELETE FROM $table_local_tracks WHERE lt_timestamp < DATE_SUB(CONVERT_TZ(NOW(), 'Europe/Paris', 'UTC'), INTERVAL 30 MINUTE)")
 	or journalise(0, "E", "Cannot purge old entries in $table_local_tracks: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_local_tracks")
 	or journalise(0, "E", "Cannot optimize $table_local_tracks: " . mysqli_error($mysqli_link)) ;
 		
-mysqli_query($mysqli_link, "DELETE FROM $table_tracks WHERE t_time < DATE_SUB(NOW(), INTERVAL 1 MONTH)")
+mysqli_query($mysqli_link, "DELETE FROM $table_tracks WHERE t_time < DATE_SUB(NOW(), INTERVAL 1 WEEK)")
 	or journalise(0, "E", "Cannot purge old entries in $table_tracks: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_tracks")
 	or journalise(0, "E", "Cannot optimize $table_tracks: " . mysqli_error($mysqli_link)) ;
-		
+
+// Get some system parameters
+
+$result = mysqli_query($mysqli_link, "SELECT round(SUM(data_length + index_length) / 1024 / 1024, 0) 
+	FROM information_schema.TABLES where table_schema = 'spaaviation';") 
+	or journalise(0, "E", "Cannot get DB size: " . mysqli_error($mysqli_link)) ;
+$row = mysqli_fetch_row($result) ;
+$db_size = $row[0] ;
+
 $load = sys_getloadavg(); 
 // TODO also use http://php.net/manual/fr/function.getrusage.php
 
@@ -748,6 +756,6 @@ if (time() + 3600 >= airport_opening_local_time($year, $month, $day) and time() 
 }
 
 print(date('Y-m-d H:i:s').": End of CRON.\n") ;
-journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2].") ;
+journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2], DB size $db_size.") ;
 ?>
 </pre>
