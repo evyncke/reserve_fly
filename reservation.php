@@ -695,6 +695,6 @@ Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, ex&
 		data-share="false" data-width="450" data-show-faces="true">
 </div>
 </center>
-<div id="waitingDiv"><img src="spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();" width="256" height="256"></div>
+<div id="waitingDiv">PLEASE WAIT<img src="spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();" width="256" height="256"></div>
 </body>
 </html>

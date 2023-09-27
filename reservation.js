@@ -175,17 +175,22 @@ function refreshPlanningTableHeader() {
 
 var waitingCount = 0 ;
 
+// Specific CSS exist for this ID
+
 function displayWaiting() {
 	console.log("displayWaiting(), waitingCount = " + waitingCount) ;
 	if (waitingCount++ == 0) {
-		console.log('display Spinner') ;
+		console.log('display Spinner, visibility before: ' + document.getElementById('waitingDiv').style.visibility) ;
 		document.getElementById('waitingDiv').style.visibility = 'visible' ;
+		console.log('display Spinner, visibility after: ' + document.getElementById('waitingDiv').style.visibility) ;
 		document.getElementById('waitingDiv').style.display = 'block' ; // Possibly useless
+		document.getElementById('waitingDiv').style.opacity = 1 ; // Possibly useless as it is 0.4 in the CSS
 		document.getElementById('waitingDiv').style.position = 'absolute' ; 
 		document.getElementById('waitingDiv').style.top = browserHeight / 2 - 128; 
 		document.getElementById('waitingDiv').style.left = browserWidth / 2 - 128; 
-		document.getElementById('waitingDiv').style.zIndex = 99 ; // Should be high enough ....
-		console.log('zIndex: ' + document.getElementById('waitingDiv').style.zIndex) ;
+		console.log('zIndex before: ' + document.getElementById('waitingDiv').style.zIndex) ;
+		document.getElementById('waitingDiv').style.zIndex = 99 ; // Should be high enough .... it is 4 in the CSS
+		console.log('zIndex after: ' + document.getElementById('waitingDiv').style.zIndex) ;
 	}
 }
 
@@ -848,6 +853,7 @@ function clearBookingDetails() {
 function cancelBooking(bookingIsForFlying) {
 	var XHR=new XMLHttpRequest();
 	
+	console.log('cancelBooking() start') ;
 	displayWaiting() ;
 	var reason = document.getElementById("reasonTextArea").value ;
 	if (reason == '') {
@@ -857,6 +863,7 @@ function cancelBooking(bookingIsForFlying) {
 		reason.innerHTML = "<b>Suivi de la demande d'annulation. A envoyer à eric@vyncke.org si cela ne fonctionne pas.</b><br/>" ;
 		reason.innerHTML += "readyState: " + XHR.readyState + "<br/>" ;
 		if(XHR.readyState  == 4) {
+			console.log("in cancelBooking(), XHR call back") ;
 			hideWaiting() ;
 			reason.innerHTML += "status: " + XHR.status + "<br/>" ;
 			if(XHR.status  == 200) {
@@ -969,10 +976,9 @@ function cancelAgendaItem() {
 }
 
 function modifyBooking(id) {
+	console.log('modifyBooking() start') ;
 	displayWaiting() ;
 	console.log('modifyBooking(' + id + ') currentlyDisplayedBooking=' + currentlyDisplayedBooking + ', bookingFromID()=' + bookingFromID(currentlyDisplayedBooking) + ', loggingFromID()=' + loggingFromID(currentlyDisplayedBooking)) ;
-	console.log('allBookings:') ;
-	console.log(allBookings) ;
 	if (allBookings[bookingFromID(currentlyDisplayedBooking)][loggingFromID(currentlyDisplayedBooking)].ressource == 0) {
 		var plane = document.getElementById("planeSelect").value ;
 		var pilotId = document.getElementById("pilotSelect").value ;
@@ -1017,6 +1023,7 @@ function modifyBooking(id) {
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
 		if(XHR.readyState  == 4) {
+			console.log('callback in modifyBooking()') ;
 			hideWaiting() ;
 			if(XHR.status  == 200) {
 				try {
@@ -1138,6 +1145,9 @@ function confirmBooking(bookingIsForFlying) {
 	var plane = (document.getElementById("flightInfo1Span").style.display == 'none') ?
 		 document.getElementById("ressourceSelect").value : document.getElementById("planeSelect").value ;
 	var bookingStart = document.getElementById("startYearSelect").value ;
+
+	var d = new Date(); var text = d.toTimeString();
+	console.log('confirmBooking() start, ' + text) ;
 	bookingStart += '-' + document.getElementById("startMonthSelect").value ;
 	bookingStart += '-' + document.getElementById("startDaySelect").value ;
 	bookingStart += ' ' + document.getElementById("startHourSelect").value ;
@@ -1181,11 +1191,15 @@ function confirmBooking(bookingIsForFlying) {
 		alert("Vous devez entrer une estimation de la durée du vol") ;
 		return ;
 	}
+	d = new Date(); text = d.toTimeString(); console.log('start displayWaiting(): ' + text) ;
 	displayWaiting() ;
+	d = new Date(); text = d.toTimeString(); console.log('after displayWAiting(): ' + text) ;
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
 		if(XHR.readyState  == 4) {
-			hideWaiting() ;
+			var d = new Date(); text = d.toTimeString(); console.log('start hideWaiting(): ' + text) ;
+			hideWaiting() ; 
+			d = new Date(); text = d.toTimeString(); console.log('after hideWAiting(): ' + text) ;
 			if(XHR.status  == 200) {
 				try {
 					var response = eval('(' + XHR.responseText.trim() + ')') ;
