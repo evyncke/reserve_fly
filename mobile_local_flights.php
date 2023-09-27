@@ -23,8 +23,6 @@ require_once "dbi.php" ;
 if (false and $userId <= 0)
 	die("Vous devez &ecirc;tre connect&eacute; pour visualiser les vols de la journée.") ;
 
-if ($userId != 62) journalise($userId, 'I', "Mobile local flights map displayed") ;
-
 $zoom_level = 10 ;
 $local_longitude_bound /= 2.0 ;
 $local_latitude_bound /= 2.0 ;

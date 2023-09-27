@@ -29,8 +29,7 @@ if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
 	if ($userId != 62) journalise($userId, "I", "Start of myfolio, setting user to $_REQUEST[user]") ;
 	$userId = $_REQUEST['user'] ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
-} else
-	if ($userId != 62) journalise($userId, "I", "Start of myfolio") ;
+}
 
 $folio_start = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
 $folio_end = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
