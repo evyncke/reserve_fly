@@ -700,26 +700,26 @@ $load = sys_getloadavg();
 // TODO also use http://php.net/manual/fr/function.getrusage.php
 
 // Clean-up Joomla session table (growing for ever...)
-$hour = intval(date('H')) ;
-//if ($hour == 3) { // Only run it at 3 AM, TODO use from_unixtime(time) to only delete 'old anonymous'
-	print(date('Y-m-d H:i:s').": purging old anonymous sessions.\n") ;
-	mysqli_query($mysqli_link, "DELETE FROM $table_session WHERE userid = 0")
-		or journalise(0, "E", "Cannot purge anonymous entries in $table_session: " . mysqli_error($mysqli_link)) ;
-	mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_session")
-		or journalise(0, "E", "Cannot optimize $table_session: " . mysqli_error($mysqli_link)) ;
-	mysqli_query($mysqli_link, "DELETE FROM jom_action_logs WHERE log_date < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
-		or journalise(0, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
-	mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_action_logs")
-		or journalise(0, "E", "Cannot optimize jom_action_logs: " . mysqli_error($mysqli_link)) ;
-	mysqli_query($mysqli_link, "DELETE FROM jom_redirect_links WHERE published = 0")
-		or journalise(0, "E", "Cannot purge unpublished entries in jom_redirect_links: " . mysqli_error($mysqli_link)) ;
-	mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_redirect_links")
-		or journalise(0, "E", "Cannot optimize jom_action_logs: " . mysqli_error($mysqli_link)) ;
-	mysqli_query($mysqli_link, "DELETE FROM jom_ucm_history WHERE save_date < DATE_SUB(NOW(), INTERVAL 24 MONTH)")
-		or journalise(0, "E", "Cannot purge old revisions in jom_ucm_history: " . mysqli_error($mysqli_link)) ;
-	mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_ucm_history")
-		or journalise(0, "E", "Cannot optimize jom_ucm_history: " . mysqli_error($mysqli_link)) ;
-//}
+print(date('Y-m-d H:i:s').": purging datebase.\n") ;
+mysqli_query($mysqli_link, "DELETE FROM $table_session WHERE userid = 0")
+	or journalise(0, "E", "Cannot purge anonymous entries in $table_session: " . mysqli_error($mysqli_link)) ;
+mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_session")
+	or journalise(0, "E", "Cannot optimize $table_session: " . mysqli_error($mysqli_link)) ;
+mysqli_query($mysqli_link, "DELETE FROM jom_action_logs WHERE log_date < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
+	or journalise(0, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
+mysqli_query($mysqli_link, "DELETE FROM jom_action_logs 
+		WHERE message_language_key = 'PLG_ACTIONLOG_JOOMLA_USER_LOGIN_FAILED' AND log_date < DATE_SUB(NOW(), INTERVAL 1 WEEK)") // Be more aggressive in case of dictionnary attacks
+	or journalise(0, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
+mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_action_logs")
+	or journalise(0, "E", "Cannot optimize jom_action_logs: " . mysqli_error($mysqli_link)) ;
+mysqli_query($mysqli_link, "DELETE FROM jom_redirect_links WHERE published = 0")
+	or journalise(0, "E", "Cannot purge unpublished entries in jom_redirect_links: " . mysqli_error($mysqli_link)) ;
+mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_redirect_links")
+	or journalise(0, "E", "Cannot optimize jom_redirect_links: " . mysqli_error($mysqli_link)) ;
+mysqli_query($mysqli_link, "DELETE FROM jom_ucm_history WHERE save_date < DATE_SUB(NOW(), INTERVAL 36 MONTH)")
+	or journalise(0, "E", "Cannot purge old revisions in jom_ucm_history: " . mysqli_error($mysqli_link)) ;
+mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_ucm_history")
+	or journalise(0, "E", "Cannot optimize jom_ucm_history: " . mysqli_error($mysqli_link)) ;
 
 // Historique des METAR (move to the end as vyncke.org tends to be too slow and cause a mySql disconnect
 print(date('Y-m-d H:i:s').": building METAR history.\n") ;
