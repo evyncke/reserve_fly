@@ -75,10 +75,12 @@ $blocked_reason = db2web($pilot['b_reason']) ;
 $blocked_when = $pilot['b_when'] ;
 mysqli_free_result($result) ;
 
-function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
-	if ($n == 0) return '' ;
+function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ', $empty_if_null = TRUE) {
+	if ($n == 0) 
+		return ($empty_if_null) ? '' : '0,0&nbsp;&euro;' ;
 	return number_format($n, $decimals, $decimal_separator, $thousand_separator) . '&nbsp;&euro;';
 }
+
 ?><!doctype html><html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
@@ -294,7 +296,7 @@ if ($balance < 0)
 else
 	$balance_class = "table-success" ;
 print("<tr><td colspan=\"15\" class=\"$balance_class text-start\">Solde courant du compte membre</td><td class=\"$balance_class text-end\">" . 
-	(($balance == 0) ? '0,00 &euro;' : numberFormat($balance, 2, ',', ' ')) . "</td></tr>\n") ;
+	numberFormat($balance, 2, ',', ' ', FALSE) . "</td></tr>\n") ;
 
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
@@ -364,7 +366,7 @@ $cost_plane_total = numberFormat($cost_plane_total, 2, ',', ' ') ;
 $cost_fi_total = numberFormat($cost_fi_total, 2, ',', ' ') ;
 $cost_taxes_total = numberFormat($cost_taxes_total, 2, ',', ' ') ;
 $invoice_total = $cost_grand_total;
-$cost_grand_total_text = numberFormat($cost_grand_total, 2, ',', ' ') ;
+$cost_grand_total_text = numberFormat($cost_grand_total, 2, ',', ' ', FALSE) ;
 $final_balance_class = ($balance - $cost_grand_total >= 0) ? "table-warning" : "table-danger" ;
 $final_balance_message = ($balance - $cost_grand_total >= 0) ? "" : "<br/>(vous devrez donc de l'argent au club à la prochaine facture)" ;
 ?>
@@ -380,7 +382,7 @@ $final_balance_message = ($balance - $cost_grand_total >= 0) ? "" : "<br/>(vous 
 <td class="table-info text-end text-danger"><?=$cost_grand_total_text?></td>
 </tr>
 <tr><td colspan="15" class="<?=$final_balance_class?>">Solde du compte membre en tenant compte de ce folio<?=$final_balance_message?></td>
-<td class="<?=$final_balance_class?> text-end"> <?= numberFormat($balance - $cost_grand_total, 2, ',' , ' ')?></td>
+<td class="<?=$final_balance_class?> text-end"> <?= numberFormat($balance - $cost_grand_total, 2, ',' , ' ', FALSE)?></td>
 </tr>
 </tfoot>
 </table>
