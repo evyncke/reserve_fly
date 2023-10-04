@@ -16,7 +16,7 @@
 
 */
 
-$production = false ; // when production is set to true, invoices are inserted in $table_invoices and are shown to end-users
+$production = true ; // when production is set to true, invoices are inserted in $table_invoices and are shown to end-users
 
 require_once 'dbi.php' ;
 require_once 'invoicePDF_pilot.php';
@@ -34,7 +34,7 @@ $nextMove = 10001 ;
 $invoiceCount = 0;
 $invoiceDateCompta = date ('d/m/y') ;
 
-journalise($userId, "I", "Invoices generation started with prefix $prefixInvoice") ;					
+journalise($userId, "I", "Invoices generation started with prefix $prefixInvoice, production=$production") ;					
 
 class XimportLine {
     public $mouvement ;
