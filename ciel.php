@@ -170,12 +170,12 @@ alors importer dans <i>Ciel Premium Account</i>.</p>
 <div class=""></div>
 <form action="ximport.php">
 <div class="mb-3">
-    <label for="nextInvoice" class="form-label">Préfixe des factures: (exemple V<?=date('ym')?>)</label>
-    <input type="text" class="form-control" id="prefixInvoice" name="prefixInvoice" value="V<?=date('ym')?>">
+    <label for="nextInvoice" class="form-label">Préfixe des factures: (exemple V<?=date('ym', time() - 7 * 24 * 60 * 60)?>)</label>
+    <input type="text" class="form-control" id="prefixInvoice" name="prefixInvoice" value="V<?=date('ym', time() - 7 * 24 * 60 * 60)?>">
 </div>
 <div class="mb-3">
-<p>Factures générées dans le folder <a ref="https://www.spa-aviation.be/resa/data/PDFInvoices/">https://www.spa-aviation.be/resa/data/PDFInvoices/</a> (en mode test)</p>
-<p>Fichier d'import ciel : <a ref="https://www.spa-aviation.be/resa/data/ximport.txt">ximport.txt</a></p>
+<p>Factures générées dans le folder <a href="https://www.spa-aviation.be/resa/data/PDFInvoices/">https://www.spa-aviation.be/resa/data/PDFInvoices/</a> (en mode test)</p>
+<p>Fichier d'import ciel : <a href="https://www.spa-aviation.be/resa/data/ximport.txt">ximport.txt</a></p>
 </div>
 <button type="submit" class="btn btn-primary">Générer les factures</button>
 </form>
