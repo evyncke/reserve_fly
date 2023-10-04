@@ -16,8 +16,6 @@
 
 */
 
-$production = false ; // when production is set to true, invoices are inserted in $table_invoices and are shown to end-users
-
 require_once 'dbi.php' ;
 // SMTP email debuging & optimization
 $smtp_info['debug'] = True;
@@ -101,11 +99,10 @@ while ($row = mysqli_fetch_array($result)) {
         continue ;
     }
 //   if (!in_array($row['jom_id'], array(62, 66, 92, 306, 348))) {
-//   if (!in_array($row['jom_id'], array(62))) {
+//    if (!in_array($row['jom_id'], array(62))) {
 //        print("<small>Skipping invoice $row[bki_id] for '$row[email]' (" . db2web($row['name']) . ")</small><br/>") ;
 //        continue ;
-//
-//  }
+//    }
   print("Processing invoice $row[bki_id] for $row[email] (" . db2web($row['name']) . ") $row[bki_amount] &euro;<br/>") ;
 
   $row['first_name'] = db2web($row['first_name']) ;
@@ -120,6 +117,9 @@ while ($row = mysqli_fetch_array($result)) {
     $email_message .= "<p>Le montant de cette facture est de $row[bki_amount] &euro; payable via notamment par votre app e-banking et le QR-code ci-dessous:<br/>
         <img width=\"150\" height=\"150\" src=\"$qr\">
         </p>" ;
+    $email_message .= "<p>Si votre compte est suffisamment approvisionné, cette facture sera appliquée contre vos avances. 
+      Merci de consulter votre <a href=\"https://www.spa-aviation.be/resa/myfolio.php\">folio du mois</a> 
+      sur le site pour alimenter votre compte en suffisance. </p>\n" ;
   }
   $email_message .= "<center><p>Meilleures salutations,<br/>Royal Aéro Para Club de Spa asbl</p></center>\n" ;
   $email_message .= "<p><em>Nos factures sont payables au grand comptant, sauf accord particulier. La réception de la facture sauf contestation notifiée par lettre recommandée 
