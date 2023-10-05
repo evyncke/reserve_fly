@@ -187,7 +187,7 @@ $sql = "select u.id as id, last_name, bce
 				from $table_users as u join $table_user_usergroup_map on u.id=user_id 
 				join $table_person as p on u.id=p.jom_id
 				where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
-				group by last_name";
+				group by id";
 				
 $result = mysqli_query($mysqli_link, $sql)
 			or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
