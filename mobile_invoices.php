@@ -85,7 +85,8 @@ if ($userIsInstructor or $userIsAdmin) {
 $sql = "SELECT *, DATE(bki_date) AS bki_date 
 		FROM $table_person JOIN $table_bk_invoices ON bki_email = email 
 		LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
-        WHERE jom_id = $userId" ;
+        WHERE jom_id = $userId
+		ORDER BY bki_date" ;
 
 $result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Erreur systeme a propos de l'access factures: " . mysqli_error($mysqli_link)) ;
 $count = 0 ;
