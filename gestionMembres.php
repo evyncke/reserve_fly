@@ -439,15 +439,14 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 				if($row) {
 					//print("Unblock person $personids[$i]</br>\n");
 					//print("delete from $table_blocked where b_jom_id=$personid</br>\n");
-					$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
 					mysqli_query($mysqli_link, "delete from $table_blocked where b_jom_id=$personid") 
 						or journalise($userId, 'F', "Cannot delete: " . mysqli_error($mysqli_link)) ;
 					if (mysqli_affected_rows($mysqli_link) > 0) {
 						$insert_message = "Table blocked  mis &agrave; jour" ;
-						journalise($userId, 'I', "Table_blocked entry deleted for person $personid (done at $audit_time).") ;
+						journalise($userId, 'I', "$table_blocked entry deleted for person $personid.") ;
 					} else {
-						$insert_message = "Impossible d'effacer la ligne dans la table_blocked" ;
-						journalise($userId, 'E', "Error (" . mysqli_error($mysqli_link). ") while deleting person entry for person $personid (done at $audit_time).") ;
+						$insert_message = "Impossible d'effacer la ligne dans la $table_blocked" ;
+						journalise($userId, 'E', "Error (" . mysqli_error($mysqli_link). ") while deleting person entry for person $personid.") ;
 					}			
 					print("<b>Le membre $personid a été débloqué</b></br>");
 					journalise($userId, "I", "Member $personid is now unblocked") ;
