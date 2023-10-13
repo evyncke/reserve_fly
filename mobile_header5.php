@@ -215,7 +215,7 @@ if ($userId <= 0) {
 } else {
 ?>  
         <li class="nav-item dropdown multi-collapse collapse navbar-collapse">
-          <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown"><span id="userNameSpan"><?="$userFullName ($userName)"?></span><span class="caret"></span></a>
+          <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-person"></i> <span id="userNameSpan"><?="$userFullName ($userName)"?></span><span class="caret"></span></a>
           <ul class="dropdown-menu">
               <li id="logoutElem">
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
