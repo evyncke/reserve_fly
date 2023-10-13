@@ -42,7 +42,8 @@ if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
     );
     if ($result_login) {
         header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
-        journalise(0, "I", "Connection of $_REQUEST[username] from $callback") ;
+        $joomla_user = JFactory::getUser() ;
+        journalise($joomla_user, "I", "Connection of $_REQUEST[username]/$joomla_user from $callback") ;
         exit ;
     } else {
         $connect_msg = "Utilisateur inconnu ou mauvais mot de passe." ;
