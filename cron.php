@@ -200,20 +200,13 @@ while ($row = mysqli_fetch_array($result)) {
 		"que du nombre de passagers est devenu <b>OBLIGATOIRE</b> apr&egrave;s chaque vol.<p>" .
 		"Cette d&eacute;marche est indispensable pour une gestion efficace de la flotte (planification de la maintenance des avions, " .
 		"aide &agrave; la facturation des heures de vol, ...).</p>" .
-		"<p>Merci d’entrer ces données en utilisant ce lien : <a href=\"https://www.spa-aviation.be/resa/IntroCarnetVol.php?id=$booking_id\">encoder les index</a>.</p>" .
+		"<p>Merci d’entrer ces données en utilisant ce lien : " . 
+		"<a href=\"https://www.spa-aviation.be/resa/IntroCarnetVol.php?id=$booking_id&auth=$auth\">encoder les index</a>.</p>" .
 		"<p>Dans le cas contraire, le système vous bloquera et il ne vous sera plus possible d'effectuer votre prochaine r&eacute;servation.</p>" .
 		"<p>Merci pour votre compréhension et votre collaboration.</p>" .
 		"<p>Le conseil d'administration</p>" .
 		"<hr><p>Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] \n" .
-		"avec $row[full_name] en tant que pilote.</p>\n" ;
-	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
-	$email_message .= "<p>Il est conseill&eacute; d'utiliser la nouvelle page pour <a href=\"https://www.spa-aviation.be/resa/IntroCarnetVol.php?id=$booking_id\">encoder les compteurs</a>.</p>" ;
-	$email_message .= "<p>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation ou l'annuler a posteriori via ce lien (qui fonctionne toujours) \n"  .
-		"<a href=\"https://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> \n" .
-		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu \n" .
-		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle \n" .
-		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures.</p>\n" .
-		"<p>Merci pour votre compr&eacute;hension et votre collaboration.</p>" .
+		"avec $row[full_name] en tant que pilote.</p>\n" .
 		"<hr><p>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!</p>\n" ;
 	$email_message .= allBookings($row['r_plane'], $today, $row['r_pilot']) ;
 	if ($test_mode) $email_message .= "<hr><p><font color=red><B>Ceci est une version de test</b></font>.</p>" ;
@@ -371,6 +364,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$email_header .= "To: $row[name] <$row[email]>\r\n" ;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 		if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
+		$email_header .= "Bcc: eric.vyncke@ulg.ac.be\r\n" ; // Test 2023-10-16 to see the email content
 		$email_header .= "X-Comment: joomla user is $row[jom_id]\r\n" ;
 		if ($test_mode)
 			smtp_mail("eric.vyncke@ulg.ac.be", $email_subject, $email_message, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
