@@ -31,20 +31,26 @@ if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
 	if (! is_numeric($userId)) die("Invalid user ID") ;
 }
 
-$folio_start = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
-$folio_end = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
-$folio_end_title = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
-$previous_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
-$next_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+// Check whether the user has specified a start date...
+if (isset($_REQUEST['start']))
+	$first_date = $_REQUEST['start'] ; // No need to escape to prevent SQL injection as it is only used in DateTime methods
+else
+	$first_date = date('Y-m-01') ;
+
+$folio_start = new DateTime($first_date, new DateTimeZone('UTC')) ;
+$folio_end = new DateTime($first_date, new DateTimeZone('UTC')) ;
+$folio_end_title = new DateTime($first_date, new DateTimeZone('UTC')) ;
+$previous_month = new DateTime($first_date, new DateTimeZone('UTC')) ;
+$next_month = new DateTime($first_date, new DateTimeZone('UTC')) ;
 
 if (isset($_REQUEST['previous'])) {
-	$folio_start = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+	$folio_start = new DateTime($first_date, new DateTimeZone('UTC')) ;
 	$folio_start = $folio_start->sub(new DateInterval('P1M')) ;
-	$folio_end = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+	$folio_end = new DateTime($first_date, new DateTimeZone('UTC')) ;
 	$folio_end = $folio_end->sub(new DateInterval('P1M')) ;
-	$folio_end_title = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+	$folio_end_title = new DateTime($first_date, new DateTimeZone('UTC')) ;
 	$folio_end_title = $folio_end_title->sub(new DateInterval('P1M')) ;
-	$next_month = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+	$next_month = new DateTime($first_date, new DateTimeZone('UTC')) ;
 	$previous_month = null ;
 	// Pager active ?
 	$previous_active = " active" ;
@@ -56,8 +62,8 @@ if (isset($_REQUEST['previous'])) {
 	$current_active = " active" ;
 	$previous_active = '' ;
 }
-$this_month_pager = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
-$previous_month_pager = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+$this_month_pager = new DateTime($first_date, new DateTimeZone('UTC')) ;
+$previous_month_pager = new DateTime($first_date, new DateTimeZone('UTC')) ;
 $previous_month_pager = $previous_month_pager->sub(new DateInterval('P1M')) ;
 $folio_end->add(new DateInterval('P1M'));
 $folio_end_title->add(new DateInterval('P1M'));
