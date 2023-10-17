@@ -87,6 +87,36 @@ function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_sep
 	return number_format($n, $decimals, $decimal_separator, $thousand_separator) . '&nbsp;&euro;';
 }
 
+// Is a CSV file request ?
+if (isset($_REQUEST['csv']) and $_REQUEST['csv'] != '') {
+	header('Content-Type: text/csv');
+	header('Content-Disposition: attachment;filename="folio-' . $folio_start->format('Y-m-d') . '.csv"');
+	header('Cache-Control: max-age=0');
+
+	print("Date;From;Start;To;End;Model;Plane;Hours;Minutes;PIC;Pax;\"Cost Sharing\";\"Plane Cost\";\"FI Cost\";\"Tax Cost\"\n") ;
+
+	$folio = new Folio($userId, $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) 
+		or journalise($originalUserId, "F", "Cannot get access to the folio");
+	foreach ($folio as $line)	{
+		print("$line->date;$line->from;$line->time_start;$line->to;$line->time_end;$line->model;$line->plane;$line->duration_hh;$line->duration_mm;") ;
+		if ($line->instructor_code != $userId  and  $line->is_pic) { // PIC 
+			print("SELF;") ; //Pilot Point of View. A PIC-Recheck is SELF
+		} else  // Dual command
+			if ($userId == $line->instructor_code)
+				print("\"$line->pilot_name\";") ; //Point of view of the Instructor. A PIC Recheck is a DC
+			else
+				print("\"$line->instructor_name\";") ;// DC 
+		print("$line->pax_count;") ;
+		if ($line->share_type)
+			print("\"$line->share_type ($line->share_member_fname $line->share_member_name)\";") ;
+		else
+			print(";") ;
+		print(number_format($line->cost_plane, 2, ',', '') . ";" . 
+			number_format($line->cost_fi, 2, ',', '') . ";" . 
+			number_format($line->cost_tax, 2, ',', '') . "\n") ;
+	}
+	exit ;
+} // CSV output
 ?><!doctype html><html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
@@ -378,7 +408,7 @@ $final_balance_message = ($balance - $cost_grand_total >= 0) ? "" : "<br/>(vous 
 ?>
 </tbody>
 <tfoot  class="table-group-divider">
-<tr><td colspan="7" class="table-info">Total du folio</td>
+<tr><td colspan="7" class="table-info">Total du folio <a href="myfolio.php?csv=true&<?=$_SERVER['QUERY_STRING']?>"><i class="bi bi-filetype-csv" title="Télécharger au format CSV"></i></a></td>
 <td class="table-info text-end"><?=$duration_total_hour?></td>
 <td class="table-info text-end"><?=$duration_total_minute?></td>
 <td class="table-info" colspan="3"></td>
