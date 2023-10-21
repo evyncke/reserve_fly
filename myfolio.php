@@ -25,7 +25,7 @@ MustBeLoggedIn() ;
 
 $originalUserId = $userId ;
 
-if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
+if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember or $userIsInstructor)) {
 	if ($userId != 62) journalise($userId, "I", "Start of myfolio, setting user to $_REQUEST[user]") ;
 	$userId = $_REQUEST['user'] ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
@@ -243,7 +243,7 @@ if ($blocked_reason != '') {
 	}	
 }
 
-if ($userIsInstructor or $userIsAdmin) {
+if ($userIsInstructor or $userIsAdmin or $userIsBoardMember) {
         print("En tant qu'instructeur/administrateur, vous pouvez consulter les situations comptables des autres membres: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
         print("</select><br/><br/>") ;
 } else { // ($userIsInstructor or $userIsAdmin)
