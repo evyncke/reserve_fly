@@ -24,6 +24,13 @@ if ($userId == 0) {
 }
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
+
+if (isset($_REQUEST['fi']) and is_numeric($_REQUEST['fi']) and $_REQUEST['fi'] != '') {
+    $fi = $_REQUEST['fi'] ;
+} else {
+    $fi = NULL ;
+}
+
 ?>
 
 <h2>Liste des élèves en cours de formation</h2>
@@ -38,7 +45,7 @@ require_once 'dto.class.php' ;
 
 <?php
     $dto = new DTO() ;
-    $students = $dto->Students() ;
+    $students = $dto->Students($fi) ;
     foreach($students as $student) {
 //        var_dump($student) ;
         print("<tr><td>$student->lastName</td><td>$student->firstName</td><td>$student->firstFlight<br/>$student->lastFlight

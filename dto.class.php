@@ -19,9 +19,9 @@
 require_once('dbi.php') ;
 
 class DTO {
-    function Students() {
+    function Students($fi) {
         global $joomla_student_group ;
-        return new DTOMembers($joomla_student_group) ;
+        return new DTOMembers($joomla_student_group, $fi) ;
     }
 
     function FIs() {
@@ -75,19 +75,24 @@ class Student extends DTOMember {
 class DTOMembers implements Iterator {
     public $group ;
     public $count ;
+    public $fi ; // SHould perhaps be private... a little ugle anyway
     private $result ;
     private $row ;
 
-    function __construct ($group) {
+    function __construct ($group, $fi = NULL) {
         global $mysqli_link, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
 
         $this->group = $group ; // FI, TKI, Student, ...
+        if ($fi)
+            $fi_condition = "AND l_instructor = $fi " ;
+        else 
+            $fi_condition = '' ;
         $sql = "SELECT *, MIN(l_start) AS first_flight, MAX(l_end) AS last_flight 
                 FROM $table_person 
                     JOIN $table_user_usergroup_map ON jom_id = user_id 
                     LEFT JOIN $table_dto_flight ON df_student = jom_id
                     LEFT JOIN $table_logbook ON df_flight_log = l_id
-                WHERE group_id = $this->group
+                WHERE group_id = $this->group $fi_condition
                 GROUP BY jom_id
                 ORDER BY last_name, first_name" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
