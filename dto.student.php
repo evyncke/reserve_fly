@@ -28,27 +28,29 @@ require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 
 if (isset($_REQUEST['student']) and is_numeric($_REQUEST['student']) and $_REQUEST['student'] != '') {
-    $student = $_REQUEST['student'] ;
+    $student_id = $_REQUEST['student'] ;
+    $student = new Student() ;
+    $student->getById($student_id) ;
 } else {
     journalise($userId, 'F', "Invalid parameter student=$_REQUEST[student].") ;
 }
 
 ?>
 
-<h2>Liste des vols de #<?=$student?></h2>
+<h2>Liste des vols de <?=$student->lastName?> <?=$student->firstName?></h2>
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<th>Vol</th><th>Date</th>
+<th>Vol</th><th>Date</th><th>Avion</th><th>Instructeur</th>
 </thead>
 <tbody>
 
 <?php
-    $flights = new Flights($student) ;
+    $flights = new Flights($student_id) ;
     foreach($flights as $flight) {
-        print("<tr><td>$flight->flightId</td><td>$flight->date</td></tr>\n") ;
+        print("<tr><td>$flight->flightId</td><td>$flight->date</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
     }
 ?>
 </tbody>

@@ -37,18 +37,30 @@ class DTOMember {
     public $email ;
     public $mobilePhone ;
 
-    function __construct($row) {
-        $this->firstName = db2web($row['first_name']) ;
-        $this->lastName = db2web($row['last_name']) ;
-        $this->jom_id = $row['jom_id'] ;
-        $this->email = $row['email'] ;
-        $this->mobilePhone = $row['cell_phone'] ;
+    function __construct($row = NULL) {
+        if ($row) {
+            $this->firstName = db2web($row['first_name']) ;
+            $this->lastName = db2web($row['last_name']) ;
+            $this->jom_id = $row['jom_id'] ;
+            $this->email = $row['email'] ;
+            $this->mobilePhone = $row['cell_phone'] ;
+        }
+    }
+
+    function getById($jom_id) {
+        global $mysqli_link, $table_person, $userId ;
+
+        $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $jom_id")
+            or journalise($userId, "F", "Cannot read from $table_person for $jom_id: " . mysqli_error($mysqli_link)) ;
+        $row = mysqli_fetch_array($result) ;
+        if (! $row) return NULL ;
+        $this->__construct($row) ;
     }
 }
 
 class FI extends DTOMember {
 
-    function __construct($row) {
+    function __construct($row = NULL) {
         parent::__construct($row) ;     
     }
 }
@@ -61,14 +73,16 @@ class Student extends DTOMember {
     public $firstFlight ;
     public $lastFlight ;
 
-    function __construct($row) {
+    function __construct($row = NULL) {
         parent::__construct($row) ; 
-        $this->firstFlight = $row['first_flight'] ;
-        $this->lastFlight = $row['last_flight'] ;   
+        if ($row) {
+            $this->firstFlight = $row['first_flight'] ;
+            $this->lastFlight = $row['last_flight'] ;   
+        }
     }
 
     function Flights() {
-
+        return new Flights($this->jom_id) ;
     }
 }
 
