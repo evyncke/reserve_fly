@@ -135,22 +135,57 @@ class DTOMembers implements Iterator {
 
 class Flight {
     public $student ;
+    public $flightId ;
     public $FI ;
+    public $date ;
+    public $plane ;
+    public $fiLastName ;
+    public $fiFirstName ;
     public $weather ;
     public $remark ;
     public $who ;
     public $when ;
     public $sessionGrading ;
 
+    function __construct($row) {
+        $this->student = $row['df_student'] ;
+        $this->flightId = $row['df_student_flight'] ;
+        $this->FI = $row['l_instructor'] ;
+        $this->date = $row['l_start'] ;
+        $this->plane = $row['l_plane'] ;
+        $this->fiFirstName = db2web($row['fi_first_name']) ;
+        $this->fiLastName = db2web($row['fi_last_name']) ;
+        $this->weather = db2web($row['df_weather']) ;
+        $this->remark = db2web($row['df_remark']) ;
+        $this->who = $row['df_who'] ;
+        $this->when = $row['df_when'] ;
+        if ($row['df_session_grade'] == '')
+            $this->sessionGrading = NULL ;
+        else
+            $this->sessionGrading = $row['df_session_grade'] ;
+    }
 }
 
 class Flights implements Iterator {
     public $studentId ;
+    public $count ;
     private $result ;
     private $row ;
 
     function __construct ($studentId) {
+        global $mysqli_link, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
+
         $this->studentId = $studentId ; 
+        $sql = "SELECT *, p.last_name as fi_last_name, p.first_name as fi_first_name
+            FROM $table_dto_flight
+                JOIN $table_logbook ON df_flight_log = l_id
+                LEFT JOIN $table_person p ON l_instructor = jom_id
+            WHERE df_student = $this->studentId
+            ORDER BY df_student_flight" ;
+        $this->result = mysqli_query($mysqli_link, $sql) 
+                or journalise($userId, "F", "Erreur systeme a propos de l'access aux vols école de $this->studentId: " . mysqli_error($mysqli_link)) ;
+        $this->count = mysqli_num_rows($this->result) ;
+        $this->row = mysqli_fetch_assoc($this->result) ;
     }
 
     function __destruct() {
@@ -162,7 +197,7 @@ class Flights implements Iterator {
     }
     
     public function key() {
-        return $this->row['l_id'];
+        return $this->row['df_id'];
     }
     
     public function next():void {
