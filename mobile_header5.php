@@ -149,7 +149,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Ecole<span class="caret"></span></a>
     <ul class="dropdown-menu">
-      <li><i><a class="dropdown-item" href="dto.my_students.php">Mes élèves</a></i></li>
+      <li><i><a class="dropdown-item" href="dto.students.php?fi=$userId">Mes élèves</a></i></li>
       <li><i><a class="dropdown-item" href="dto.my_flights.php">Mon dernier vol</a></i></li>
       <li><i><a class="dropdown-item" href="dto.students.php">Liste des élèves</a></i></li>
       <li><i><a class="dropdown-item" href="dto.exercices.php">Liste des exercices</a></i></li>
