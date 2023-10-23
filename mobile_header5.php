@@ -237,6 +237,10 @@ if ($userId <= 0) {
               <a class="dropdown-item" href="mobile_invoices.php">Mes factures</a>
               <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
               <a class="dropdown-item" href="mobile_groups.php">Mes groupes</a>
+<?php
+  if ($userIsStudent)
+      print("<a class=\"dropdown-item\" href=\"dto.student.php?student=$userId\">Ma progression</a>") ;
+?>
               </li>
           </ul>
         </li> <!-- dropdown -->
