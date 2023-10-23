@@ -51,13 +51,15 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
     $dc_minutes = 0 ;
     $solo_minutes = 0 ;
     $xcountry_minutes = 0 ;
+    $total_minutes = 0 ;
     foreach($flights as $flight) {
-        print("<tr><td>$flight->flightId</td><td>$flight->date</td><td>$flight->flightDuration</td><td>$flight->flightType</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
+        print("<tr><td><a href=\"dto.flight.php?flight=$flight->id\">$flight->flightId</a></td><td>$flight->date</td><td>$flight->flightDuration</td><td>$flight->flightType</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
         switch ($flight->flightType) {
             case 'DC': $dc_minutes += $flight->flightDuration ; break ;
             case 'solo': $solo_minutes += $flight->flightDuration ; break ;
             case 'XCountry': $xcountry_minutes += $flight->flightDuration ; break ;
         }
+        $total_minutes += $flight->flightDuration ;
     }
 ?>
 </tbody>
@@ -67,11 +69,23 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
 </div><!-- row --> 
 <div class="row">
 <h2>Évolution</h2>
+<?php
+// Let's convert minutes into hours
+$dc_hours = intdiv($dc_minutes, 60) ;
+$dc_minutes = $dc_minutes % 60 ;
+$solo_hours = intdiv($solo_minutes, 60) ;
+$solo_minutes = $solo_minutes % 60 ;
+$xcountry_hours = intdiv($xcountry_minutes, 60) ;
+$xcountry_minutes = $xcountry_minutes % 60 ;
+$total_hours = intdiv($total_minutes, 60) ;
+$total_minutes = $total_minutes % 60 ;
+?>
 <p><ul>
     <li>Nombre de vols: <?=$flights->count?></li>
-    <li>Minutes en DC: <?=$dc_minutes?> minutes</li>
-    <li>Minutes en solo: <?=$solo_minutes?> minutes</li>
-    <li>Minutes en x-country: <?=$xcountry_minutes?> minutes</li>
+    <li>DC: <?="$dc_hours H $dc_minutes min"?></li>
+    <li>Solo: <?="$solo_hours H $solo_minutes min"?></li>
+    <li>X-country: <?="$xcountry_hours H $xcountry_minutes min"?></li>
+    <li>Total: <?="$total_hours H $total_minutes min"?></li>
     </li>
 </ul>
 </div><!-- row -->

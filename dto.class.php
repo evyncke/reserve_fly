@@ -148,6 +148,7 @@ class DTOMembers implements Iterator {
 }
 
 class Flight {
+    public $id ;
     public $student ;
     public $flightId ;
     public $FI ;
@@ -164,6 +165,7 @@ class Flight {
     public $sessionGrading ;
 
     function __construct($row) {
+        $this->id = $row['df_id'] ;
         $this->student = $row['df_student'] ;
         $this->flightId = $row['df_student_flight'] ;
         $this->FI = $row['l_instructor'] ;
@@ -216,6 +218,60 @@ class Flights implements Iterator {
     
     public function key() {
         return $this->row['df_id'];
+    }
+    
+    public function next():void {
+        $this->row = mysqli_fetch_assoc($this->result) ;
+    }
+    
+    public function rewind():void {
+        mysqli_data_seek($this->result, 0) ;
+        $this->row = mysqli_fetch_assoc($this->result) ;
+    }
+    
+    public function valid():bool {
+        return $this->row != false;
+    }
+}
+
+class Exercice {
+    public $reference ;
+    public $description ;
+    public $id ;
+
+    function __construct($row) {
+        $this->id = $row['de_id'] ;
+        $this->reference = $row['de_ref'] ;
+        $this->description = db2web($row['de_description']) ; // Even if only in English for now...
+    }
+}
+class Exercices implements Iterator {
+    public $count ;
+    private $result ;
+    private $row ;
+
+    function __construct () {
+        global $mysqli_link, $table_dto_exercice, $userId ;
+
+        $sql = "SELECT *
+            FROM $table_dto_exercice
+            ORDER BY de_id" ;
+        $this->result = mysqli_query($mysqli_link, $sql) 
+                or journalise($userId, "F", "Erreur systeme a propos de l'access aux exercices école: " . mysqli_error($mysqli_link)) ;
+        $this->count = mysqli_num_rows($this->result) ;
+        $this->row = mysqli_fetch_assoc($this->result) ;
+    }
+
+    function __destruct() {
+        mysqli_free_result($this->result) ;
+    }
+
+    public function current() {
+        return new Exercice($this->row);
+    }
+    
+    public function key() {
+        return $this->row['de_id'];
     }
     
     public function next():void {
