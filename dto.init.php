@@ -19,8 +19,14 @@ while ($row = mysqli_fetch_array($result)) {
         $this_flight = 1 ;
     } else
         $this_flight ++ ;
-    mysqli_query($mysqli_link, "INSERT INTO $table_dto_flight(df_student, df_student_flight, df_flight_log, df_who, df_when)
-            VALUES ($row[l_pilot], $this_flight, $row[l_id], $row[l_audit_who], '$row[l_audit_time]')")
+    if ($row['from'] != $row['to'])
+        $type = 'Xcountry' ;
+    else if ($row['l_instructor'] == '')
+        $type = 'solo' ;
+    else
+        $type = 'DC' ;
+    mysqli_query($mysqli_link, "INSERT INTO $table_dto_flight(df_student, df_student_flight, df_flight_log, df_type, df_who, df_when)
+            VALUES ($row[l_pilot], $this_flight, $row[l_id], '$type', $row[l_audit_who], '$row[l_audit_time]')")
         or die("Cannot create flight: " . mysqli_error($mysqli_link)) ;
 }
 ?>

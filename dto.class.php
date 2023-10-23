@@ -155,6 +155,8 @@ class Flight {
     public $plane ;
     public $fiLastName ;
     public $fiFirstName ;
+    public $flightType ;
+    public $flightDuration ;
     public $weather ;
     public $remark ;
     public $who ;
@@ -169,6 +171,8 @@ class Flight {
         $this->plane = $row['l_plane'] ;
         $this->fiFirstName = db2web($row['fi_first_name']) ;
         $this->fiLastName = db2web($row['fi_last_name']) ;
+        $this->flightType = $row['df_type'] ;
+        $this->flightDuration = $row['duration'] ;
         $this->weather = db2web($row['df_weather']) ;
         $this->remark = db2web($row['df_remark']) ;
         $this->who = $row['df_who'] ;
@@ -190,7 +194,7 @@ class Flights implements Iterator {
         global $mysqli_link, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
 
         $this->studentId = $studentId ; 
-        $sql = "SELECT *, p.last_name as fi_last_name, p.first_name as fi_first_name
+        $sql = "SELECT *, p.last_name AS fi_last_name, p.first_name AS fi_first_name, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration
             FROM $table_dto_flight
                 JOIN $table_logbook ON df_flight_log = l_id
                 LEFT JOIN $table_person p ON l_instructor = jom_id

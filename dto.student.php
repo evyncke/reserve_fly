@@ -22,8 +22,6 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
-if (! ($userIsAdmin or $userIsInstructor))
-    journalise($userId, "F", "Vous devez être adminstrateur ou instructeur pour voir cette page.") ;
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 
@@ -34,7 +32,8 @@ if (isset($_REQUEST['student']) and is_numeric($_REQUEST['student']) and $_REQUE
 } else {
     journalise($userId, 'F', "Invalid parameter student=$_REQUEST[student].") ;
 }
-
+if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
+    journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
 ?>
 
 <h2>Liste des vols de <?=$student->lastName?> <?=$student->firstName?></h2>
@@ -43,14 +42,22 @@ if (isset($_REQUEST['student']) and is_numeric($_REQUEST['student']) and $_REQUE
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<th>Vol</th><th>Date</th><th>Avion</th><th>Instructeur</th>
+<th>Vol</th><th>Date</th><th>Durée</th><th>Type</th><th>Avion</th><th>Instructeur</th>
 </thead>
 <tbody>
 
 <?php
     $flights = new Flights($student_id) ;
+    $dc_minutes = 0 ;
+    $solo_minutes = 0 ;
+    $xcountry_minutes = 0 ;
     foreach($flights as $flight) {
-        print("<tr><td>$flight->flightId</td><td>$flight->date</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
+        print("<tr><td>$flight->flightId</td><td>$flight->date</td><td>$flight->flightDuration</td><td>$flight->flightType</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
+        switch ($flight->flightType) {
+            case 'DC': $dc_minutes += $flight->flightDuration ; break ;
+            case 'solo': $solo_minutes += $flight->flightDuration ; break ;
+            case 'XCountry': $xcountry_minutes += $flight->flightDuration ; break ;
+        }
     }
 ?>
 </tbody>
@@ -58,5 +65,15 @@ if (isset($_REQUEST['student']) and is_numeric($_REQUEST['student']) and $_REQUE
 </div><!-- table responsive -->
 </div><!-- col -->
 </div><!-- row --> 
+<div class="row">
+<h2>Évolution</h2>
+<p><ul>
+    <li>Nombre de vols: <?=$flights->count?></li>
+    <li>Minutes en DC: <?=$dc_minutes?> minutes</li>
+    <li>Minutes en solo: <?=$solo_minutes?> minutes</li>
+    <li>Minutes en x-country: <?=$xcountry_minutes?> minutes</li>
+    </li>
+</ul>
+</div><!-- row -->
 </body>
 </html>
