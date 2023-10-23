@@ -154,6 +154,8 @@ class Flight {
     public $FI ;
     public $date ;
     public $plane ;
+    public $studentLastName ;
+    public $studentFirstName ;
     public $fiLastName ;
     public $fiFirstName ;
     public $flightType ;
@@ -164,9 +166,13 @@ class Flight {
     public $when ;
     public $sessionGrading ;
 
-    function __construct($row) {
+    function __construct($row = NULL) {
+        if (!$row)
+            return ;
         $this->id = $row['df_id'] ;
         $this->student = $row['df_student'] ;
+        $this->studentFirstName = db2web($row['s_first_name']) ;
+        $this->studentLastName = db2web($row['s_last_name']) ;
         $this->flightId = $row['df_student_flight'] ;
         $this->FI = $row['l_instructor'] ;
         $this->date = $row['l_start'] ;
@@ -184,6 +190,24 @@ class Flight {
         else
             $this->sessionGrading = $row['df_session_grade'] ;
     }
+
+    function getById($id) {
+        global $mysqli_link, $table_dto_flight, $table_logbook, $table_person, $userId ;
+
+        $result = mysqli_query($mysqli_link, "SELECT *, 
+                    s.last_name AS s_last_name, s.first_name AS s_first_name, 
+                    fi.last_name AS fi_last_name, fi.first_name AS fi_first_name, 
+                    60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration 
+                FROM $table_dto_flight 
+                    JOIN $table_person s ON df_student = s.jom_id
+                    JOIN $table_logbook ON df_flight_log = l_id
+                    LEFT JOIN $table_person p ON l_instructor = p.jom_id
+                WHERE df_id = $id")
+            or journalise($userId, "F", "Cannot read from $table_dto_flight for $id: " . mysqli_error($mysqli_link)) ;
+        $row = mysqli_fetch_array($result) ;
+        if (! $row) return NULL ;
+        $this->__construct($row) ;
+    }
 }
 
 class Flights implements Iterator {
@@ -196,10 +220,14 @@ class Flights implements Iterator {
         global $mysqli_link, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
 
         $this->studentId = $studentId ; 
-        $sql = "SELECT *, p.last_name AS fi_last_name, p.first_name AS fi_first_name, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration
+        $sql = "SELECT *, 
+                s.last_name AS s_last_name, s.first_name AS s_first_name, 
+                fi.last_name AS fi_last_name, fi.first_name AS fi_first_name, 
+                60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration
             FROM $table_dto_flight
+                JOIN $table_person s ON df_student = s.jom_id
                 JOIN $table_logbook ON df_flight_log = l_id
-                LEFT JOIN $table_person p ON l_instructor = jom_id
+                LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
             WHERE df_student = $this->studentId
             ORDER BY df_student_flight" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
