@@ -53,7 +53,7 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
     $xcountry_minutes = 0 ;
     $total_minutes = 0 ;
     foreach($flights as $flight) {
-        print("<tr><td><a href=\"dto.flight.php?flight=$flight->id\">$flight->flightId</a></td><td>$flight->date</td><td>$flight->flightDuration</td><td>$flight->flightType</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
+        print("<tr><td>$flight->flightId <a href=\"dto.flight.php?flight=$flight->id\"><i class=\"bi bi-pencil-fill\"></i></a></td><td>$flight->date</td><td>$flight->flightDuration</td><td>$flight->flightType</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
         switch ($flight->flightType) {
             case 'DC': $dc_minutes += $flight->flightDuration ; break ;
             case 'solo': $solo_minutes += $flight->flightDuration ; break ;
