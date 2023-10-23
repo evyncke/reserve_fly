@@ -401,9 +401,10 @@ class StudentExercices implements Iterator {
             $flightCondition = '' ;
         $sql = "SELECT *
             FROM $table_dto_exercice 
-                LEFT JOIN $table_dto_student_exercice ON dse_exercice = de_ref
-                LEFT JOIN $table_dto_flight ON dse_flight = df_id AND df_student = $student $flightCondition
+                LEFT JOIN $table_dto_flight ON  df_student = $student $flightCondition
+                LEFT JOIN $table_dto_student_exercice ON dse_flight = df_id AND dse_exercice = de_ref
             ORDER BY de_id" ;
+        // print("<hr><pre>$sql</pre><hr>") ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur systeme a propos de l'access aux exercices école: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
