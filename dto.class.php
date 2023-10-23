@@ -154,6 +154,7 @@ class Flight {
     public $FI ;
     public $date ;
     public $plane ;
+    public $planeModel ;
     public $studentLastName ;
     public $studentFirstName ;
     public $fiLastName ;
@@ -177,6 +178,7 @@ class Flight {
         $this->FI = $row['l_instructor'] ;
         $this->date = $row['l_start'] ;
         $this->plane = $row['l_plane'] ;
+        $this->planeModel = $row['l_model'] ;
         $this->fiFirstName = db2web($row['fi_first_name']) ;
         $this->fiLastName = db2web($row['fi_last_name']) ;
         $this->flightType = $row['df_type'] ;
@@ -201,9 +203,9 @@ class Flight {
                 FROM $table_dto_flight 
                     JOIN $table_person s ON df_student = s.jom_id
                     JOIN $table_logbook ON df_flight_log = l_id
-                    LEFT JOIN $table_person p ON l_instructor = p.jom_id
+                    LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
                 WHERE df_id = $id")
-            or journalise($userId, "F", "Cannot read from $table_dto_flight for $id: " . mysqli_error($mysqli_link)) ;
+            or journalise($userId, "F", "Cannot read from $table_dto_flight for flight $id: " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
         if (! $row) return NULL ;
         $this->__construct($row) ;
