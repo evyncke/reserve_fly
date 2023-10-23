@@ -68,7 +68,7 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
 </div><!-- col -->
 </div><!-- row --> 
 <div class="row">
-<h2>Évolution</h2>
+<h2>Résumé</h2>
 <?php
 // Let's convert minutes into hours
 $dc_hours = intdiv($dc_minutes, 60) ;
