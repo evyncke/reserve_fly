@@ -210,6 +210,19 @@ class Flight {
         if (! $row) return NULL ;
         $this->__construct($row) ;
     }
+
+    function save() {
+        global $mysqli_link, $userId, $table_dto_flight ;
+
+        $remark = web2db(mysqli_real_escape_string($mysqli_link, $this->remark)) ;
+        $weather = web2db(mysqli_real_escape_string($mysqli_link, $this->weather)) ;
+
+        mysqli_query($mysqli_link, "UPDATE $table_dto_flight 
+            SET df_remark = '$remark', df_weather = '$weather', df_type = '$this->flightType',
+                df_who = $userId, df_when = CURRENT_TIMESTAMP()
+            WHERE df_id = $this->id")
+            or journalise($userId, "F", "Cannot update flight $this->id: " . mysqli_error($mysqli_link)) ;
+    }
 }
 
 class Flights implements Iterator {
@@ -275,6 +288,7 @@ class Exercice {
         $this->description = db2web($row['de_description']) ; // Even if only in English for now...
     }
 }
+
 class Exercices implements Iterator {
     public $count ;
     private $result ;
@@ -298,6 +312,110 @@ class Exercices implements Iterator {
 
     public function current() {
         return new Exercice($this->row);
+    }
+    
+    public function key() {
+        return $this->row['de_id'];
+    }
+    
+    public function next():void {
+        $this->row = mysqli_fetch_assoc($this->result) ;
+    }
+    
+    public function rewind():void {
+        mysqli_data_seek($this->result, 0) ;
+        $this->row = mysqli_fetch_assoc($this->result) ;
+    }
+    
+    public function valid():bool {
+        return $this->row != false;
+    }
+}
+
+class StudentExercice {
+    public $id ;
+    public $studentId ;
+    public $studentFlight ;
+    public $reference ;
+    public $description ;
+    public $grade ;
+
+    function __construct($row = NULL) {
+        if (! $row) return ;
+        $this->id = $row['dse_flight'] ;
+        $this->studentId = $row['df_student'] ;
+        $this->studentFlight = $row['dse_student_flight'] ;
+        $this->reference = $row['de_ref'] ;
+        $this->description = db2web($row['de_description']) ; // Even if only English for now
+        $this->grade = [] ;
+        if (strpos($row['dse_grade'], 'demo') !== false)
+            $this->grade['demo'] = 'demo' ;
+        if (strpos($row['dse_grade'], 'trained') !== false)
+            $this->grade['trained'] = 'trained' ;
+        if (strpos($row['dse_grade'], 'acquired') !== false)
+            $this->grade['acquired'] = 'acquired' ;
+    }
+
+    function getByFlightExercice($flightId, $exerciceId) {
+        global $mysqli_link, $table_dto_student_exercice, $table_dto_flight, $table_dto_exercice, $userId ;
+
+        $result = mysqli_query($mysqli_link, "SELECT *
+                FROM $table_dto_student_exercice 
+                    JOIN $table_dto_flight ON dse_flight=df_id
+                    JOIN $table_dto_exercice ON de_ref=dse_exercice
+                WHERE dse_flight=$flightId AND dse_exercice='$exerciceId'")
+            or journalise($userId, "F", "Cannot read from $table_dto_student_exercice for flight $flightId/$exerciceId: " . mysqli_error($mysqli_link)) ;
+        $row = mysqli_fetch_array($result) ;
+        if (! $row) { // Make a dummy exercice as it can be modified later
+            // Fetch the exercice itself
+            $result = mysqli_query($mysqli_link, "SELECT * FROM $table_dto_exercice WHERE de_ref='$exerciceId'")
+                or journalise($userId, "F", "Cannot fetch exercise in getByFlightExercice($flightId, $exerciceId): " . mysqli_error($mysqli_link)) ;
+            $row = mysqli_fetch_array($result) ;
+            $row['dse_flight'] = $flightId ;
+            $row['dse_grade'] = '' ;
+        } ;
+        $this->__construct($row) ;
+    }
+
+    function save() {
+        global $mysqli_link, $userId, $table_dto_student_exercice ;
+
+        $grade = implode(',', $this->grade) ;
+        mysqli_query($mysqli_link, "REPLACE INTO $table_dto_student_exercice(dse_flight, dse_exercice, dse_grade, dse_who, dse_when)
+            VALUES($this->id, '" . mysqli_real_escape_string($mysqli_link, $this->reference) . "', '$grade', $userId, SYSDATE())")
+            or journalise($userId, "F", "Cannot update $table_dto_student_exercice for flight $this->id exercice $this->reference: " . mysqli_error($mysqli_link)) ;
+    }
+}
+
+class StudentExercices implements Iterator {
+    public $count ;
+    private $result ;
+    private $row ;
+
+    function __construct ($student, $flight = NULL) {
+        global $mysqli_link, $table_dto_exercice, $table_dto_student_exercice, $table_dto_flight, $userId ;
+
+        if ($flight)
+            $flightCondition = "AND df_id = $flight" ;
+        else
+            $flightCondition = '' ;
+        $sql = "SELECT *
+            FROM $table_dto_exercice 
+                LEFT JOIN $table_dto_student_exercice ON dse_exercice = de_ref
+                LEFT JOIN $table_dto_flight ON dse_flight = df_id AND df_student = $student $flightCondition
+            ORDER BY de_id" ;
+        $this->result = mysqli_query($mysqli_link, $sql) 
+                or journalise($userId, "F", "Erreur systeme a propos de l'access aux exercices école: " . mysqli_error($mysqli_link)) ;
+        $this->count = mysqli_num_rows($this->result) ;
+        $this->row = mysqli_fetch_assoc($this->result) ;
+    }
+
+    function __destruct() {
+        mysqli_free_result($this->result) ;
+    }
+
+    public function current() {
+        return new StudentExercice($this->row);
     }
     
     public function key() {
