@@ -94,7 +94,7 @@ class DTOMembers implements Iterator {
     private $row ;
 
     function __construct ($group, $fi = NULL) {
-        global $mysqli_link, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
+        global $mysqli_link, $table_users, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
 
         $this->group = $group ; // FI, TKI, Student, ...
         if ($fi)
@@ -103,10 +103,11 @@ class DTOMembers implements Iterator {
             $fi_condition = '' ;
         $sql = "SELECT *, MIN(l_start) AS first_flight, MAX(l_end) AS last_flight 
                 FROM $table_person 
+                    JOIN $table_users AS u ON u.id = jom_id
                     JOIN $table_user_usergroup_map ON jom_id = user_id 
                     LEFT JOIN $table_dto_flight ON df_student = jom_id
                     LEFT JOIN $table_logbook ON df_flight_log = l_id
-                WHERE group_id = $this->group $fi_condition
+                WHERE group_id = $this->group AND block = 0 $fi_condition
                 GROUP BY jom_id
                 ORDER BY last_name, first_name" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
@@ -344,7 +345,7 @@ class StudentExercice {
         if (! $row) return ;
         $this->id = $row['dse_flight'] ;
         $this->studentId = $row['df_student'] ;
-        $this->studentFlight = $row['dse_student_flight'] ;
+        $this->studentFlight = $row['df_student_flight'] ;
         $this->reference = $row['de_ref'] ;
         $this->description = db2web($row['de_description']) ; // Even if only English for now
         $this->grade = [] ;
@@ -396,14 +397,18 @@ class StudentExercices implements Iterator {
         global $mysqli_link, $table_dto_exercice, $table_dto_student_exercice, $table_dto_flight, $userId ;
 
         if ($flight)
-            $flightCondition = "AND df_id = $flight" ;
-        else
-            $flightCondition = '' ;
-        $sql = "SELECT *
+            $sql = "SELECT *
             FROM $table_dto_exercice 
-                LEFT JOIN $table_dto_flight ON  df_student = $student $flightCondition
+                LEFT JOIN $table_dto_flight ON df_student = $student AND df_id = $flight
                 LEFT JOIN $table_dto_student_exercice ON dse_flight = df_id AND dse_exercice = de_ref
             ORDER BY de_id" ;
+        else
+            $sql = "SELECT dse_flight, df_student, df_student_flight, de_ref, de_description, GROUP_CONCAT(dse_grade) AS grade
+                FROM $table_dto_exercice 
+                    LEFT JOIN $table_dto_flight ON df_student = $student
+                    LEFT JOIN $table_dto_student_exercice ON dse_flight = df_id AND dse_exercice = de_ref
+                GROUP BY de_id
+                ORDER BY de_id" ;
         // print("<hr><pre>$sql</pre><hr>") ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur systeme a propos de l'access aux exercices école: " . mysqli_error($mysqli_link)) ;
