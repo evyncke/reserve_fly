@@ -49,14 +49,15 @@ if (isset($_REQUEST['fi']) and is_numeric($_REQUEST['fi']) and $_REQUEST['fi'] !
     $dto = new DTO() ;
     $students = $dto->Students($fi) ;
     foreach($students as $student) {
+        $blocked = ($student->blocked) ? ' <i class="bi bi-sign-stop-fill text-danger" title="This member is blocked"></i>' : '' ;
         print("<tr>
             <td>
-                <a href=\"dto.student.php?student=$student->jom_id\">$student->lastName
-                    <i class=\"bi bi-eyeglasses\"></i></a>
-                    <a href=\"mailto:$student->email\"><i class=\"bi bi-envelope-fill\"></i></a>
-                    <a href=\"tel:$student->mobilePhone\"><i class=\"bi bi-telephone-fill\"></i></a>
+                <a href=\"dto.student.php?student=$student->jom_id\" title=\"Display all flights\">$student->lastName
+                    <i class=\"bi bi-binoculars-fill\"></i></a>$blocked
+                    <a href=\"mailto:$student->email\"><i class=\"bi bi-envelope-fill\" title=\"Send email\"></i></a>
+                    <a href=\"tel:$student->mobilePhone\"><i class=\"bi bi-telephone-fill\" title=\"Call on mobile\"></i></a>
             </td>
-            <td>$student->firstName</td><td>$student->firstFlight <span class=\"badge bg-primary\">$student->countFlights</span><br/>$student->lastFlight
+            <td>$student->firstName</td><td>$student->firstFlight <span class=\"badge bg-primary\" title=\"Number of flights\">$student->countFlights</span><br/>$student->lastFlight
             <td class=\"d-none d-md-table-cell\"><a href=\"mailto:$student->email\">$student->email</a></td>
             <td class=\"d-none d-md-table-cell\"><a href=\"tel:$student->mobilePhone\">$student->mobilePhone</a></td>
             </tr>\n") ;
