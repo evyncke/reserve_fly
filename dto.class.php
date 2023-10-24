@@ -248,7 +248,7 @@ class Flight {
         if ($this->id) { // Already in the DB, let's update it
             mysqli_query($mysqli_link, "UPDATE $table_dto_flight 
                 SET df_remark = '$remark', df_weather = '$weather', df_type = '$this->flightType',
-                    df_flight_log = $this->flightLog, df_student = $this->student
+                    df_flight_log = $this->flightLog, df_student = $this->student,
                     df_who = $userId, df_when = CURRENT_TIMESTAMP()
                 WHERE df_id = $this->id")
                 or journalise($userId, "F", "Cannot update flight $this->id: " . mysqli_error($mysqli_link)) ;
@@ -418,7 +418,7 @@ class StudentExercice {
                 or journalise($userId, "F", "Cannot fetch exercise in getByFlightExercice($flightId, $exerciceId): " . mysqli_error($mysqli_link)) ;
             $row = mysqli_fetch_array($result) ;
             $row['dse_flight'] = $flightId ;
-            $row['grade'] = [] ;
+            $row['grade'] = '' ;
         } ;
         $this->__construct($row) ;
     }
