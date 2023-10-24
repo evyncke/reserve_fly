@@ -268,6 +268,7 @@ class Flight {
                     $userId, CURRENT_TIMESTAMP())")
                 or journalise($userId, "F", "Cannot insert new flight: " . mysqli_error($mysqli_link)) ;
         }
+        return mysqli_insert_id($mysqli_link) ;
     }
 }
 
