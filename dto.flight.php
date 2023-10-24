@@ -25,13 +25,20 @@ if ($userId == 0) {
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 
-if (isset($_REQUEST['flight']) and is_numeric($_REQUEST['flight']) and $_REQUEST['flight'] != '') {
+// Check if the request is for the last_flight (last_flight is set) of one fi (fi has a value)
+if (isset($_REQUEST['last']) and isset($_REQUEST['fi']) and $_REQUEST['fi'] != '' and is_numeric($_REQUEST['fi'])) {
+                $fi = $_REQUEST['fi'] ;
+    $flight = new Flight() ;
+    $flight->getLastByFi($fi) ;
+    if (! $flight->id) journalise($userId, "F", "No flight found for FI=$fi") ;
+} else if (isset($_REQUEST['flight']) and is_numeric($_REQUEST['flight']) and $_REQUEST['flight'] != '') {
     $flight_id = $_REQUEST['flight'] ;
     $flight = new Flight() ;
     $flight->getById($flight_id) ;
 } else {
-    journalise($userId, 'F', "Invalid parameter flight=$_REQUEST[flight].") ;
+    journalise($userId, 'F', "Invalid or missing parameter flight=$_REQUEST[flight].") ;
 }
+
 if (! ($userIsAdmin or $userIsInstructor or $userId == $flight->student))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
 
