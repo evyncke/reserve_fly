@@ -36,6 +36,7 @@ class DTOMember {
     public $jom_id ;
     public $email ;
     public $mobilePhone ;
+    public $blocked ;
 
     function __construct($row = NULL) {
         if ($row) {
@@ -44,6 +45,7 @@ class DTOMember {
             $this->jom_id = $row['jom_id'] ;
             $this->email = $row['email'] ;
             $this->mobilePhone = $row['cell_phone'] ;
+            $this->blocked = ($row['b_reason'] != '') ;
         }
     }
 
@@ -96,7 +98,7 @@ class DTOMembers implements Iterator {
     private $row ;
 
     function __construct ($group, $fi = NULL) {
-        global $mysqli_link, $table_users, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
+        global $mysqli_link, $table_users, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $table_blocked, $userId ;
 
         $this->group = $group ; // FI, TKI, Student, ...
         if ($fi)
@@ -109,6 +111,7 @@ class DTOMembers implements Iterator {
                     JOIN $table_user_usergroup_map ON jom_id = user_id 
                     LEFT JOIN $table_dto_flight ON df_student = jom_id
                     LEFT JOIN $table_logbook ON df_flight_log = l_id
+                    LEFT JOIN $table_blocked ON b_jom_id = jom_id
                 WHERE group_id = $this->group AND block = 0 $fi_condition
                 GROUP BY jom_id
                 ORDER BY last_name, first_name" ;
@@ -158,6 +161,7 @@ class Flight {
     public $date ;
     public $plane ;
     public $planeModel ;
+    public $flightLog ;
     public $studentLastName ;
     public $studentFirstName ;
     public $fiLastName ;
@@ -179,9 +183,10 @@ class Flight {
         $this->studentLastName = db2web($row['s_last_name']) ;
         $this->flightId = $row['df_student_flight'] ;
         $this->FI = $row['l_instructor'] ;
-        $this->date = $row['l_start'] ;
+        $this->date = $row['date'] ;
         $this->plane = $row['l_plane'] ;
         $this->planeModel = $row['l_model'] ;
+        $this->flightLog = $row['df_flight_log'] ;
         $this->fiFirstName = db2web($row['fi_first_name']) ;
         $this->fiLastName = db2web($row['fi_last_name']) ;
         $this->flightType = $row['df_type'] ;
@@ -199,7 +204,7 @@ class Flight {
     function getById($id) {
         global $mysqli_link, $table_dto_flight, $table_logbook, $table_person, $userId ;
 
-        $result = mysqli_query($mysqli_link, "SELECT *, 
+        $result = mysqli_query($mysqli_link, "SELECT *, DATE(l_start) AS date,
                     s.last_name AS s_last_name, s.first_name AS s_first_name, 
                     fi.last_name AS fi_last_name, fi.first_name AS fi_first_name, 
                     60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration 
@@ -214,17 +219,55 @@ class Flight {
         $this->__construct($row) ;
     }
 
+    function getLastByFi($fi) {
+        global $mysqli_link, $table_dto_flight, $table_logbook, $table_person, $userId ;
+
+        $result = mysqli_query($mysqli_link, "SELECT *, DATE(l_start) AS date,
+                    s.last_name AS s_last_name, s.first_name AS s_first_name, 
+                    fi.last_name AS fi_last_name, fi.first_name AS fi_first_name, 
+                    60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration 
+                FROM $table_dto_flight 
+                    JOIN $table_person s ON df_student = s.jom_id
+                    JOIN $table_logbook ON df_flight_log = l_id
+                    LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
+                WHERE l_instructor = $fi
+                ORDER BY l_start DESC
+                LIMIT 1")
+            or journalise($userId, "F", "Cannot read from $table_dto_flight for fi $fi: " . mysqli_error($mysqli_link)) ;
+        $row = mysqli_fetch_array($result) ;
+        if (! $row) return NULL ;
+        $this->__construct($row) ;
+    }
+
     function save() {
         global $mysqli_link, $userId, $table_dto_flight ;
 
         $remark = web2db(mysqli_real_escape_string($mysqli_link, $this->remark)) ;
         $weather = web2db(mysqli_real_escape_string($mysqli_link, $this->weather)) ;
 
-        mysqli_query($mysqli_link, "UPDATE $table_dto_flight 
-            SET df_remark = '$remark', df_weather = '$weather', df_type = '$this->flightType',
-                df_who = $userId, df_when = CURRENT_TIMESTAMP()
-            WHERE df_id = $this->id")
-            or journalise($userId, "F", "Cannot update flight $this->id: " . mysqli_error($mysqli_link)) ;
+        if ($this->id) { // Already in the DB, let's update it
+            mysqli_query($mysqli_link, "UPDATE $table_dto_flight 
+                SET df_remark = '$remark', df_weather = '$weather', df_type = '$this->flightType',
+                    df_flight_log = $this->flightLog, df_student = $this->student
+                    df_who = $userId, df_when = CURRENT_TIMESTAMP()
+                WHERE df_id = $this->id")
+                or journalise($userId, "F", "Cannot update flight $this->id: " . mysqli_error($mysqli_link)) ;
+        } else { // Not yet in the DB, let's create it
+            // Need to find next student flight id...
+            if (!$this->student or !$this->flightLog) journalise($userId, "F", "Cannot save a flight without student and flightLog") ;
+            $result = mysqli_query($mysqli_link, "SELECT MAX(df_student_flight) AS last_id, COUNT(*) AS count
+                FROM $table_dto_flight WHERE df_student=$this->student") ;
+            $row = mysqli_fetch_array($result) ;
+            if ($row['count'] == 0)
+                $this->flightId = 1 ;
+            else 
+                $this->flightId = 1 + $row['last_id'] ;
+            mysqli_query($mysqli_link, "INSERT INTO $table_dto_flight(df_remark, df_weather, df_type, df_flight_log, df_student, df_student_flight, df_who, df_when)
+                VALUES('$remark', '$weather', '$this->flightType',
+                    $this->flightLog, $this->student, $this->flightId,
+                    $userId, CURRENT_TIMESTAMP())")
+                or journalise($userId, "F", "Cannot insert new flight: " . mysqli_error($mysqli_link)) ;
+        }
     }
 }
 
@@ -238,7 +281,7 @@ class Flights implements Iterator {
         global $mysqli_link, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
 
         $this->studentId = $studentId ; 
-        $sql = "SELECT *, 
+        $sql = "SELECT *, DATE(l_start) AS date,
                 s.last_name AS s_last_name, s.first_name AS s_first_name, 
                 fi.last_name AS fi_last_name, fi.first_name AS fi_first_name, 
                 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration
@@ -362,7 +405,7 @@ class StudentExercice {
     function getByFlightExercice($flightId, $exerciceId) {
         global $mysqli_link, $table_dto_student_exercice, $table_dto_flight, $table_dto_exercice, $userId ;
 
-        $result = mysqli_query($mysqli_link, "SELECT *
+        $result = mysqli_query($mysqli_link, "SELECT *, dse_grade AS grade
                 FROM $table_dto_student_exercice 
                     JOIN $table_dto_flight ON dse_flight=df_id
                     JOIN $table_dto_exercice ON de_ref=dse_exercice
@@ -375,7 +418,7 @@ class StudentExercice {
                 or journalise($userId, "F", "Cannot fetch exercise in getByFlightExercice($flightId, $exerciceId): " . mysqli_error($mysqli_link)) ;
             $row = mysqli_fetch_array($result) ;
             $row['dse_flight'] = $flightId ;
-            $row['grade'] = '' ;
+            $row['grade'] = [] ;
         } ;
         $this->__construct($row) ;
     }
@@ -383,9 +426,9 @@ class StudentExercice {
     function save() {
         global $mysqli_link, $userId, $table_dto_student_exercice ;
 
-        $grade = implode(',', $this->grade) ;
+        $imploded_grade = implode(',', $this->grade) ;
         mysqli_query($mysqli_link, "REPLACE INTO $table_dto_student_exercice(dse_flight, dse_exercice, dse_grade, dse_who, dse_when)
-            VALUES($this->id, '" . mysqli_real_escape_string($mysqli_link, $this->reference) . "', '$grade', $userId, SYSDATE())")
+            VALUES($this->id, '" . mysqli_real_escape_string($mysqli_link, $this->reference) . "', '$imploded_grade', $userId, SYSDATE())")
             or journalise($userId, "F", "Cannot update $table_dto_student_exercice for flight $this->id exercice $this->reference: " . mysqli_error($mysqli_link)) ;
     }
 }
