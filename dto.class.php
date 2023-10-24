@@ -349,11 +349,11 @@ class StudentExercice {
         $this->reference = $row['de_ref'] ;
         $this->description = db2web($row['de_description']) ; // Even if only English for now
         $this->grade = [] ;
-        if (strpos($row['dse_grade'], 'demo') !== false)
+        if (strpos($row['grade'], 'demo') !== false)
             $this->grade['demo'] = 'demo' ;
-        if (strpos($row['dse_grade'], 'trained') !== false)
+        if (strpos($row['grade'], 'trained') !== false)
             $this->grade['trained'] = 'trained' ;
-        if (strpos($row['dse_grade'], 'acquired') !== false)
+        if (strpos($row['grade'], 'acquired') !== false)
             $this->grade['acquired'] = 'acquired' ;
     }
 
@@ -373,7 +373,7 @@ class StudentExercice {
                 or journalise($userId, "F", "Cannot fetch exercise in getByFlightExercice($flightId, $exerciceId): " . mysqli_error($mysqli_link)) ;
             $row = mysqli_fetch_array($result) ;
             $row['dse_flight'] = $flightId ;
-            $row['dse_grade'] = '' ;
+            $row['grade'] = '' ;
         } ;
         $this->__construct($row) ;
     }
@@ -397,7 +397,7 @@ class StudentExercices implements Iterator {
         global $mysqli_link, $table_dto_exercice, $table_dto_student_exercice, $table_dto_flight, $userId ;
 
         if ($flight)
-            $sql = "SELECT *
+            $sql = "SELECT *, dse_grade AS grade
             FROM $table_dto_exercice 
                 LEFT JOIN $table_dto_flight ON df_student = $student AND df_id = $flight
                 LEFT JOIN $table_dto_student_exercice ON dse_flight = df_id AND dse_exercice = de_ref
