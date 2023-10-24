@@ -36,13 +36,28 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
 ?>
 
-<h2>Liste des vols de <?=$student->lastName?> <?=$student->firstName?></h2>
+<h2>Details for <?=$student->lastName?> <?=$student->firstName?></h2>
+
+<ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item">
+  		<a class="nav-link active" role="presentation" data-bs-toggle="tab" data-bs-target="#summary" aria-current="page" href="#summary">Summary</a>
+	</li><li class="nav-item">
+  		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#flights" aria-current="page" href="#flights">Flights</a>
+	</li>
+    <li class="nav-item">
+  		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#exercices" aria-current="page" href="#exercices">Exercices</a>
+	</li>
+</ul>
+
+<div class="tab-content">
+
+<div class="tab-pane fade" id="flights" role="tabpanel">
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<th>Vol</th><th>Date</th><th>Durée</th><th>Type</th><th>Avion</th><th>Instructeur</th>
+<th>Flight#</th><th>Date</th><th>Duration</th><th>Type</th><th>Plane</th><th>Instructor</th>
 </thead>
 <tbody>
 
@@ -53,7 +68,9 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
     $xcountry_minutes = 0 ;
     $total_minutes = 0 ;
     foreach($flights as $flight) {
-        print("<tr><td>$flight->flightId <a href=\"dto.flight.php?flight=$flight->id\"><i class=\"bi bi-pencil-fill\"></i></a></td><td>$flight->date</td><td>$flight->flightDuration</td><td>$flight->flightType</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
+        print("<tr><td>$flight->flightId <a href=\"dto.flight.php?flight=$flight->id\">
+            <i class=\"bi bi-pencil-fill\" data-bs-toggle=\"tooltip\" title=\"See/edit the student flight report\"></i></a></td><td>$flight->date</td>
+            <td>$flight->flightDuration</td><td>$flight->flightType</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
         // Sum up the duration
         switch ($flight->flightType) {
             case 'DC': $dc_minutes += $flight->flightDuration ; break ;
@@ -68,8 +85,9 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
 </div><!-- table responsive -->
 </div><!-- col -->
 </div><!-- row --> 
-<div class="row">
-<h2>Résumé</h2>
+</div><!-- tab-pane--> 
+
+<div class="tab-pane fade show active" id="summary" role="tabpanel">
 <?php
 // Let's convert minutes into hours
 $dc_hours = intdiv($dc_minutes, 60) ;
@@ -89,9 +107,14 @@ $total_minutes = $total_minutes % 60 ;
     <li>Total: <?="$total_hours H $total_minutes min"?></li>
     </li>
 </ul>
-</div><!-- row -->
-<h2>Exercices</h2>
+</p>
+</div><!-- tab-pane --> 
+
+<div class="tab-pane fade" id="exercices" role="tabpanel">
 <div class="row">
+    <p>The table below shows the aggregated evaluation for all exercices. It is read-only, to modify the evaluation of an exercices,
+        the FI must go to an individual flight report and change it there.
+    </p>
 <div class="col-sm-12 col-md-9 col-lg-7">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
@@ -127,5 +150,9 @@ foreach($exercices as $exercice) {
 </div><!-- table responsive -->
 </div><!-- col -->
 </div><!-- row --> 
+
+</div><!-- tab-pane -->
+
+</div><!-- tab-content -->
 </body>
 </html>
