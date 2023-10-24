@@ -37,11 +37,11 @@ if (isset($_REQUEST['fi']) and is_numeric($_REQUEST['fi']) and $_REQUEST['fi'] !
 
 <h2>Liste des élèves en cours de formation</h2>
 <div class="row">
-<div class="col-sm-12 col-md-9 col-lg-7">
+<div class="col-sm-12 col-md-12 col-lg-7">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<th>Nom</th><th>Prénom</th><th>Premier/dernier vol</th><th>Email</th><th>Mobile</th>
+<th>Nom</th><th>Prénom</th><th>Premier/dernier vol</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th>
 </thead>
 <tbody>
 
@@ -49,10 +49,17 @@ if (isset($_REQUEST['fi']) and is_numeric($_REQUEST['fi']) and $_REQUEST['fi'] !
     $dto = new DTO() ;
     $students = $dto->Students($fi) ;
     foreach($students as $student) {
-//        var_dump($student) ;
-        print("<tr><td><a href=\"dto.student.php?student=$student->jom_id\">$student->lastName</a></td><td>$student->firstName</td><td>$student->firstFlight<br/>$student->lastFlight
-            <td><a href=\"mailto:$student->email\">$student->email</a></td>
-            <td><a href=\"tel:$student->mobilePhone\">$student->mobilePhone</a></td></tr>\n") ;
+        print("<tr>
+            <td>
+                <a href=\"dto.student.php?student=$student->jom_id\">$student->lastName
+                    <i class=\"bi bi-eyeglasses\"></i></a>
+                    <a href=\"mailto:$student->email\"><i class=\"bi bi-envelope-fill\"></i></a>
+                    <a href=\"tel:$student->mobilePhone\"><i class=\"bi bi-telephone-fill\"></i></a>
+            </td>
+            <td>$student->firstName</td><td>$student->firstFlight <span class=\"badge bg-primary\">$student->countFlights</span><br/>$student->lastFlight
+            <td class=\"d-none d-md-table-cell\"><a href=\"mailto:$student->email\">$student->email</a></td>
+            <td class=\"d-none d-md-table-cell\"><a href=\"tel:$student->mobilePhone\">$student->mobilePhone</a></td>
+            </tr>\n") ;
     }
 ?>
 </tbody>

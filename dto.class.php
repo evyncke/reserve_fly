@@ -72,12 +72,14 @@ class TKI extends DTOMember {
 class Student extends DTOMember {
     public $firstFlight ;
     public $lastFlight ;
+    public $countFlights ;
 
     function __construct($row = NULL) {
         parent::__construct($row) ; 
         if ($row) {
             $this->firstFlight = $row['first_flight'] ;
-            $this->lastFlight = $row['last_flight'] ;   
+            $this->lastFlight = $row['last_flight'] ;  
+            $this->countFlights = $row['count_flights'] ; 
         }
     }
 
@@ -101,7 +103,7 @@ class DTOMembers implements Iterator {
             $fi_condition = "AND l_instructor = $fi " ;
         else 
             $fi_condition = '' ;
-        $sql = "SELECT *, MIN(l_start) AS first_flight, MAX(l_end) AS last_flight 
+        $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(*) AS count_flights 
                 FROM $table_person 
                     JOIN $table_users AS u ON u.id = jom_id
                     JOIN $table_user_usergroup_map ON jom_id = user_id 
