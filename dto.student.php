@@ -54,6 +54,7 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
     $total_minutes = 0 ;
     foreach($flights as $flight) {
         print("<tr><td>$flight->flightId <a href=\"dto.flight.php?flight=$flight->id\"><i class=\"bi bi-pencil-fill\"></i></a></td><td>$flight->date</td><td>$flight->flightDuration</td><td>$flight->flightType</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
+        // Sum up the duration
         switch ($flight->flightType) {
             case 'DC': $dc_minutes += $flight->flightDuration ; break ;
             case 'solo': $solo_minutes += $flight->flightDuration ; break ;
@@ -89,5 +90,42 @@ $total_minutes = $total_minutes % 60 ;
     </li>
 </ul>
 </div><!-- row -->
+<h2>Exercices</h2>
+<div class="row">
+<div class="col-sm-12 col-md-9 col-lg-7">
+<div class="table-responsive">
+<table class="table table-striped table-hover">
+<thead>
+<tr><th>Ref</th><th>Description</th><th>Demo</th><th>Trained</th><th>Acquired</th></tr>
+</thead>
+<tbody>
+<?php
+// Let's display the aggregated exercises
+$exercices = new StudentExercices($student_id) ;
+foreach($exercices as $exercice) {
+    ?>
+    <tr><td><?=$exercice->reference?></td>
+    <td><?=$exercice->description?></td>
+    <td><div class="form-check form-switch">
+       <input class="form-check-input" type="checkbox" value="yes" 
+           <?=(($exercice->grade['demo'] == 'demo') ? 'checked' : '')?> disabled>
+       </div></td>
+   <td><div class="form-check form-switch">
+       <input class="form-check-input" type="checkbox" value="yes" 
+           <?=(($exercice->grade['trained'] == 'trained') ? 'checked' : '')?> disabled>
+       </div></td>
+   <td><div class="form-check form-switch">
+       <input class="form-check-input" type="checkbox" value="yes" 
+           <?=(($exercice->grade['acquired'] == 'acquired') ? 'checked' : '')?> disabled>
+       </div></td>
+   </tr>
+<?php
+}
+?>
+</tbody>
+</table>
+</div><!-- table responsive -->
+</div><!-- col -->
+</div><!-- row --> 
 </body>
 </html>
