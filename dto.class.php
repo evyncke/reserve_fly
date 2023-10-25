@@ -36,7 +36,12 @@ class DTOMember {
     public $jom_id ;
     public $email ;
     public $mobilePhone ;
+    public $address ;
+    public $zipCode ;
+    public $city ;
+    public $country ;
     public $blocked ;
+    public $blockedMessage ;
 
     function __construct($row = NULL) {
         if ($row) {
@@ -45,14 +50,22 @@ class DTOMember {
             $this->jom_id = $row['jom_id'] ;
             $this->email = $row['email'] ;
             $this->mobilePhone = $row['cell_phone'] ;
+            $this->address = db2web($row['address']) ;
+            $this->zipCode = $row['zipcode'] ;
+            $this->city = db2web($row['city']) ;
+            $this->country = db2web($row['country']) ;
             $this->blocked = ($row['b_reason'] != '') ;
+            $this->blockedMessage = db2web($row['b_reason']) ;
         }
     }
 
     function getById($jom_id) {
-        global $mysqli_link, $table_person, $userId ;
+        global $mysqli_link, $table_blocked, $table_person, $userId ;
 
-        $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $jom_id")
+        $result = mysqli_query($mysqli_link, "SELECT * 
+                FROM $table_person
+                LEFT JOIN $table_blocked ON b_jom_id = jom_id 
+                WHERE jom_id = $jom_id")
             or journalise($userId, "F", "Cannot read from $table_person for $jom_id: " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
         if (! $row) return NULL ;
