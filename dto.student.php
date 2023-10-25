@@ -112,7 +112,7 @@ $total_minutes = $total_minutes % 60 ;
 
 <div class="tab-pane fade" id="exercices" role="tabpanel">
 <div class="row">
-    <p>The table below shows the aggregated evaluation for all exercices. It is read-only, to modify the evaluation of an exercices,
+    <p>The table below shows the aggregated evaluation for all exercices. It is read-only, to modify the evaluation of an exercice,
         the FI must go to an individual flight report and change it there.
     </p>
 <div class="col-sm-12 col-md-9 col-lg-7">
@@ -125,25 +125,41 @@ $total_minutes = $total_minutes % 60 ;
 <?php
 // Let's display the aggregated exercises
 $exercices = new StudentExercices($student_id) ;
-foreach($exercices as $exercice) {
-    ?>
-    <tr><td><?=$exercice->reference?></td>
-    <td><?=$exercice->description?></td>
-    <td><div class="form-check form-switch">
-       <input class="form-check-input" type="checkbox" value="yes" 
-           <?=(($exercice->grade['demo'] == 'demo') ? 'checked' : '')?> disabled>
-       </div></td>
-   <td><div class="form-check form-switch">
-       <input class="form-check-input" type="checkbox" value="yes" 
-           <?=(($exercice->grade['trained'] == 'trained') ? 'checked' : '')?> disabled>
-       </div></td>
-   <td><div class="form-check form-switch">
-       <input class="form-check-input" type="checkbox" value="yes" 
-           <?=(($exercice->grade['acquired'] == 'acquired') ? 'checked' : '')?> disabled>
-       </div></td>
-   </tr>
+foreach ($exercices as $exercice) {
+    if ($exercice->grading) { // Multiple choice
+?>
+ <tr><td><?=$exercice->reference?></td>
+ <td><?=$exercice->description?></td>
+ <td><div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" value="yes" disabled
+            onChange="gradeChanged(this, '<?=$exercice->reference?>', 'demo')"
+        <?=(($exercice->grade['demo'] == 'demo') ? 'checked' : '')?>>
+    </div></td>
+<td><div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" value="yes" disabled
+            onChange="gradeChanged(this, '<?=$exercice->reference?>', 'trained')"
+        <?=(($exercice->grade['trained'] == 'trained') ? 'checked' : '')?>>
+    </div></td>
+<td><div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" value="yes" disabled
+            onChange="gradeChanged(this, '<?=$exercice->reference?>', 'acquired')"
+        <?=(($exercice->grade['acquired'] == 'acquired') ? 'checked' : '')?>>
+    </div></td>
+</tr>
 <?php
-}
+    } else { // Single choice
+?>
+ <tr><td><b><?=$exercice->reference?></b></td>
+ <td><b><?=$exercice->description?></b></td>
+ <td colspan="3"><div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" value="yes" disabled
+            onChange="gradeChanged(this, '<?=$exercice->reference?>', 'yes')"
+        <?=(($exercice->grade['yes'] == 'yes') ? 'checked' : '')?>> <b>Successful</b>
+    </div></td>
+ </tr>
+<?php
+    } // Grading
+} // Foreach
 ?>
 </tbody>
 </table>

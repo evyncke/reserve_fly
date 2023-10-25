@@ -29,20 +29,23 @@ if (! ($userIsAdmin or $userIsInstructor))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
 ?>
 
-<h2>Liste des exercices</h2>
+<h2>Exercices List</h2>
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<th>Référence</th><th>Description</th>
+<tr><th>Reference</th><th>Description</th><th>Type of Checks</th></tr>
 </thead>
 <tbody>
 
 <?php
     $exercices = new Exercices() ;
     foreach($exercices as $exercice) {
-        print("<tr><td>$exercice->reference</td><td>$exercice->description</td></tr>\n") ;
+        if ($exercice->grading)
+            print("<tr><td>$exercice->reference</td><td>$exercice->description</td><td>Multiple choices: demo, trained, acquired</td></tr>\n") ;
+        else
+            print("<tr><td><b>$exercice->reference</b></td><td><b>$exercice->description</b></td><td>Check box: yes/no</td></tr>\n") ;
     }
 ?>
 </tbody>

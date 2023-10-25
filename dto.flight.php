@@ -68,6 +68,7 @@ if ($action == 'header') {
         case 'demo': $grade = 'demo' ; break ;
         case 'trained': $grade = 'trained' ; break ;
         case 'acquired': $grade = 'acquired' ; break ;
+        case 'yes': $grade = 'yes' ; break ;
         default: journalise($userId, "F", "Wrong value for grade=$_REQUEST[grade]") ;
     }
     switch ($_REQUEST['value']) {
@@ -139,6 +140,7 @@ function gradeChanged(object, reference, grade) {
 <?php
     $exercices = new StudentExercices($flight->student, $flight_id) ;
     foreach ($exercices as $exercice) {
+        if ($exercice->grading) { // Multiple choice
 ?>
      <tr><td><?=$exercice->reference?></td>
      <td><?=$exercice->description?></td>
@@ -159,6 +161,18 @@ function gradeChanged(object, reference, grade) {
         </div></td>
     </tr>
 <?php
+        } else { // Single choice
+?>
+     <tr><td><b><?=$exercice->reference?></b></td>
+     <td><b><?=$exercice->description?></b></td>
+     <td colspan="3"><div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" value="yes" 
+                onChange="gradeChanged(this, '<?=$exercice->reference?>', 'yes')"
+            <?=(($exercice->grade['yes'] == 'yes') ? 'checked' : '')?>> <b>Successful</b>
+        </div></td>
+     </tr>
+<?php
+        } // Grading
     } // Foreach
 ?>
 </tbody>

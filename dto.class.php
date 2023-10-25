@@ -329,12 +329,14 @@ class Flights implements Iterator {
 class Exercice {
     public $reference ;
     public $description ;
+    public $grading ;
     public $id ;
 
     function __construct($row) {
         $this->id = $row['de_id'] ;
         $this->reference = $row['de_ref'] ;
         $this->description = db2web($row['de_description']) ; // Even if only in English for now...
+        $this->grading = ($row['de_grading'] != 0) ;
     }
 }
 
@@ -388,6 +390,7 @@ class StudentExercice {
     public $reference ;
     public $description ;
     public $grade ;
+    public $grading ;
 
     function __construct($row = NULL) {
         if (! $row) return ;
@@ -403,7 +406,10 @@ class StudentExercice {
             $this->grade['trained'] = 'trained' ;
         if (strpos($row['grade'], 'acquired') !== false)
             $this->grade['acquired'] = 'acquired' ;
-    }
+        if ($row['grade'] == 'yes') // For the single check-box, it is not a real SET
+            $this->grade['yes'] = 'yes' ;
+        $this->grading = ($row['de_grading'] != 0) ;
+     }
 
     function getByFlightExercice($flightId, $exerciceId) {
         global $mysqli_link, $table_dto_student_exercice, $table_dto_flight, $table_dto_exercice, $userId ;
@@ -451,7 +457,7 @@ class StudentExercices implements Iterator {
                 LEFT JOIN $table_dto_student_exercice ON dse_flight = df_id AND dse_exercice = de_ref
             ORDER BY de_id" ;
         else
-            $sql = "SELECT dse_flight, df_student, df_student_flight, de_ref, de_description, GROUP_CONCAT(dse_grade) AS grade
+            $sql = "SELECT dse_flight, df_student, df_student_flight, de_ref, de_description, de_grading, GROUP_CONCAT(dse_grade) AS grade
                 FROM $table_dto_exercice 
                     LEFT JOIN $table_dto_flight ON df_student = $student
                     LEFT JOIN $table_dto_student_exercice ON dse_flight = df_id AND dse_exercice = de_ref
