@@ -29,4 +29,5 @@ while ($row = mysqli_fetch_array($result)) {
             VALUES ($row[l_pilot], $this_flight, $row[l_id], '$type', 'satisfactory', $row[l_audit_who], '$row[l_audit_time]')")
         or die("Cannot create flight: " . mysqli_error($mysqli_link)) ;
 }
+journalise($userId, "W", "All school flights reset") ;
 ?>
