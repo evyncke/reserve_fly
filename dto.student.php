@@ -41,7 +41,8 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
 <ul class="nav nav-tabs" role="tablist">
     <li class="nav-item">
   		<a class="nav-link active" role="presentation" data-bs-toggle="tab" data-bs-target="#summary" aria-current="page" href="#summary">Summary</a>
-	</li><li class="nav-item">
+	</li>
+    <li class="nav-item">
   		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#flights" aria-current="page" href="#flights">Flights</a>
 	</li>
     <li class="nav-item">
@@ -68,7 +69,12 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
     $xcountry_minutes = 0 ;
     $total_minutes = 0 ;
     foreach($flights as $flight) {
-        print("<tr><td>$flight->flightId <a href=\"dto.flight.php?flight=$flight->id\">
+        switch ($flight->sessionGrade) {
+            case 'unsatisfactory': $session_grade_message = '<i class="bi bi-hand-thumbs-down-fill text-danger" title="Unsatisfactory flight"></i>' ; break ; 
+            case 'verygood': $session_grade_message = '<i class="bi bi-hand-thumbs-up-fill text-success" title="Very good flight"></i>' ; break ; 
+            default: $session_grade_message = '' ;
+        }
+        print("<tr><td>$flight->flightId  $session_grade_message <a href=\"dto.flight.php?flight=$flight->id\">
             <i class=\"bi bi-pencil-fill\" data-bs-toggle=\"tooltip\" title=\"See/edit the student flight report\"></i></a></td><td>$flight->date</td>
             <td>$flight->flightDuration</td><td>$flight->flightType</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
         // Sum up the duration
@@ -99,15 +105,35 @@ $xcountry_minutes = $xcountry_minutes % 60 ;
 $total_hours = intdiv($total_minutes, 60) ;
 $total_minutes = $total_minutes % 60 ;
 ?>
+<div class="row">
+<div class="col-sm-12 col-md-4">
 <p><ul>
-    <li>Nombre de vols: <?=$flights->count?></li>
+    <li>Flight count: <?=$flights->count?></li>
     <li>DC: <?="$dc_hours H $dc_minutes min"?></li>
     <li>Solo: <?="$solo_hours H $solo_minutes min"?></li>
     <li>X-country: <?="$xcountry_hours H $xcountry_minutes min"?></li>
     <li>Total: <?="$total_hours H $total_minutes min"?></li>
-    </li>
 </ul>
 </p>
+</div><!-- col -->
+<div class="col-sm-12 col-md-4">
+<p>Placeholder for email, phone, postal address, picture.</p>
+<?php
+if ($student->blocked)
+    print("<p class=\"mt-2 p-4 bg-danger text-bg-danger rounded\">$student->blockedMessage</p>") ;
+?>
+<p><ul>
+<li>Email: <a href="mailto:<?=$student->email?>"  title="Send email"><?=$student->email?> <i class="bi bi-envelope-fill"></i></a></li>
+<li>Mobile Phone: <a href="phone:<?=$student->mobilePhone?>"  title="Call mobile phone"><?=$student->mobilePhone?> <i class="bi bi-telephone-fill"></i></a></li>
+</ul>
+</p>
+<p>
+    <?=$student->address?><br/>
+    <?="$student->zipCode $student->city"?><br/>
+    <?="$student->country"?>
+</p>
+</div><!-- col -->
+</div><!-- row -->
 </div><!-- tab-pane --> 
 
 <div class="tab-pane fade" id="exercices" role="tabpanel">
