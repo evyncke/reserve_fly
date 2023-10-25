@@ -25,8 +25,8 @@ while ($row = mysqli_fetch_array($result)) {
         $type = 'solo' ;
     else
         $type = 'DC' ;
-    mysqli_query($mysqli_link, "INSERT INTO $table_dto_flight(df_student, df_student_flight, df_flight_log, df_type, df_who, df_when)
-            VALUES ($row[l_pilot], $this_flight, $row[l_id], '$type', $row[l_audit_who], '$row[l_audit_time]')")
+    mysqli_query($mysqli_link, "INSERT INTO $table_dto_flight(df_student, df_student_flight, df_flight_log, df_type, df_session_grade, df_who, df_when)
+            VALUES ($row[l_pilot], $this_flight, $row[l_id], '$type', 'satisfactory', $row[l_audit_who], '$row[l_audit_time]')")
         or die("Cannot create flight: " . mysqli_error($mysqli_link)) ;
 }
 ?>
