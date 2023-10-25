@@ -52,6 +52,7 @@ if ($action == 'header') {
     $flight->remark = $_REQUEST['remark'] ;
     $flight->weather = $_REQUEST['weather'] ;
     $flight->flightType = $_REQUEST['type'] ;
+    $flight->sessionGrade = $_REQUEST['grading'] ;
     $flight->save() ;
 } else if ($action == 'exercice') {
     if (!isset($_REQUEST['exercice']))
@@ -109,6 +110,13 @@ function gradeChanged(object, reference, grade) {
 <tr><td>Flight Duration</td><td><?="$flight->flightDuration"?> minutes</td></tr>
 <tr><td>Weather</td><td><input class="form-control" type="text" name="weather" size="80" value="<?="$flight->weather"?>"></td></tr>
 <tr><td>Remark</td><td><input class="form-control" type="text" name="remark" size="80" value="<?="$flight->remark"?>"></td></tr>
+<tr><td>Session Grading</td><td>
+    <select class="form-select" name="grading">
+        <option value="unsatisfactory"<?=($flight->sessionGrade == 'unsatisfactory') ? 'selected' : ''?>>Unsatisfactory</option>
+        <option value="satisfactory"<?=($flight->sessionGrade == 'satisfactory') ? 'selected' : ''?>>Satisfactory</option>
+        <option value="verygood"<?=($flight->sessionGrade == 'verygood') ? 'selected' : ''?>>Very Good</option>
+    </select>    
+</td></tr>
 </tbody>
 </table>
 </div><!-- table-responsive-->

@@ -172,7 +172,7 @@ class Flight {
     public $remark ;
     public $who ;
     public $when ;
-    public $sessionGrading ;
+    public $sessionGrade ;
 
     function __construct($row = NULL) {
         if (!$row)
@@ -193,12 +193,12 @@ class Flight {
         $this->flightDuration = $row['duration'] ;
         $this->weather = db2web($row['df_weather']) ;
         $this->remark = db2web($row['df_remark']) ;
+        if ($row['df_session_grade'] == '')
+            $this->sessionGrade = NULL ;
+        else
+            $this->sessionGrade = $row['df_session_grade'] ;
         $this->who = $row['df_who'] ;
         $this->when = $row['df_when'] ;
-        if ($row['df_session_grade'] == '')
-            $this->sessionGrading = NULL ;
-        else
-            $this->sessionGrading = $row['df_session_grade'] ;
     }
 
     function getById($id) {
@@ -249,6 +249,7 @@ class Flight {
             mysqli_query($mysqli_link, "UPDATE $table_dto_flight 
                 SET df_remark = '$remark', df_weather = '$weather', df_type = '$this->flightType',
                     df_flight_log = $this->flightLog, df_student = $this->student,
+                    df_session_grade = '$this->sessionGrade',
                     df_who = $userId, df_when = CURRENT_TIMESTAMP()
                 WHERE df_id = $this->id")
                 or journalise($userId, "F", "Cannot update flight $this->id: " . mysqli_error($mysqli_link)) ;
@@ -262,9 +263,10 @@ class Flight {
                 $this->flightId = 1 ;
             else 
                 $this->flightId = 1 + $row['last_id'] ;
-            mysqli_query($mysqli_link, "INSERT INTO $table_dto_flight(df_remark, df_weather, df_type, df_flight_log, df_student, df_student_flight, df_who, df_when)
+            mysqli_query($mysqli_link, "INSERT INTO $table_dto_flight(df_remark, df_weather, df_type, df_flight_log, df_student, df_student_flight, df_session_grade, 
+                    df_who, df_when)
                 VALUES('$remark', '$weather', '$this->flightType',
-                    $this->flightLog, $this->student, $this->flightId,
+                    $this->flightLog, $this->student, $this->flightId, '$this->sessionGrade',
                     $userId, CURRENT_TIMESTAMP())")
                 or journalise($userId, "F", "Cannot insert new flight: " . mysqli_error($mysqli_link)) ;
         }
