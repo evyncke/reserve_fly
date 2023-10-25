@@ -54,6 +54,7 @@ if ($action == 'header') {
     $flight->flightType = $_REQUEST['type'] ;
     $flight->sessionGrade = $_REQUEST['grading'] ;
     $flight->save() ;
+    journalise($userId, "I", "Flight #$flight_id for $flight->studentLastName updated.") ;
 } else if ($action == 'exercice') {
     if (!isset($_REQUEST['exercice']))
         journalise($userId, "F", "Missing parameter exercice") ;
