@@ -19,21 +19,26 @@
 // TODO
 // - add first and last name
 // - ensure consistency of email in rapcs_person and jom_user
+ob_start("ob_gzhandler");
 require_once "dbi.php" ;
-
-MustBeLoggedIn() ;
-
+if ($userId == 0) {
+	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+	exit ;
+}
 if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	$displayed_id = $_REQUEST['displayed_id'] ;
-	if (! is_numeric($displayed_id)) die("Numero d'utilisateur invalide: $displayed_id") ;
+	if (! is_numeric($displayed_id)) journalise($userId, "F", "Numero d'utilisateur invalide: $displayed_id") ;
 	$read_only = ! ($userIsAdmin or $userIsInstructor or $displayed_id == $userId) ;
 	if ($displayed_id != $userId)
 		mysqli_query($mysqli_link, "update jom_kunena_users set uhits = uhits + 1 where userid = $displayed_id")
-			or die("Erreur systeme lors de la mise a jour de jom_kunena_users (uhits): " . mysqli_error($mysqli_link)) ;
+			or journalise($userId, "E", "Erreur systeme lors de la mise a jour de jom_kunena_users (uhits): " . mysqli_error($mysqli_link)) ;
 } else {
 	$displayed_id = $userId ;
 	$read_only = false ;
 }
+$body_attributes = "onload=\"initProfile($displayed_id);\"" ;
+$header_postamble = '<script data-cfasync="true" src="profile.js"></script>' ;
+require_once 'mobile_header5.php' ;
 
 $change_profile_message = '' ;
 
@@ -242,85 +247,32 @@ $me['city'] = db2web($me['city']) ;
 foreach($me as $key => $value)
 	$me[$key] = htmlspecialchars($value, ENT_QUOTES) ;
 
-?><html>
-<head>
-<!-- TODO trim the CSS -->
-<link rel="stylesheet" type="text/css" href="profile.css">
-<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-<link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<meta charset="utf-8">
-<!--meta name="viewport" content="width=320"-->
-<meta name="viewport" content="width=device-width, initial-scale=1"><!-- Using latest bootstrap 5 -->
-<!-- Latest compiled and minified CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Latest compiled JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Glyphicon equivalent -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-<title>Profil de <?=$me['name']?></title>
-<script>
-const
-	// preset Javascript constant fill with the right data from db.php PHP variables
-	userFullName = '<?=$userFullName?>' ;
-	userName = '<?=$userName?>' ;
-	userId = <?=$userId?> ;
-	userIsPilot = <?=($userIsPilot)? 'true' : 'false'?> ;
-	userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?> ;
-	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ;
-	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ;
-
-</script>
-<!--- cacheable data -->
-<script data-cfasync="true" src="profile.js"></script>
-<script data-cfasync="true" src="members.js"></script>
-<!-- Matomo -->
-<script type="text/javascript">
-  var _paq = window._paq = window._paq || [];
-  _paq.push(['setUserId', '<?=$userName?>']);
-  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
-  _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
-  _paq.push(['enableHeartBeatTimer']);
-  _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
-  _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
-  _paq.push(['trackPageView']);
-  _paq.push(['enableLinkTracking']);
-  (function() {
-    var u="//analytics.vyncke.org/";
-    _paq.push(['setTrackerUrl', u+'matomo.php']);
-    _paq.push(['setSiteId', '5']);
-    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-    g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
-  })();
-</script>
-<!-- End Matomo Code -->
-</head>
-<body onload="initProfile(<?=$displayed_id?>);">
-
+?>
 <div class="container-fluid">
 <div class="row">
 <h3>Données de contact de <?=$me['name']?></h3>
 </div><!-- row -->
 
+<form>
 <div class="row">
-	<div class="form-group">
-		<label class="control-label col-sm-6 col-md-3" for="pilotSelect">En tant que membre, vous pouvez choisir le membre à afficher:</label>
-		<div class="col-sm-6 col-md-3">
+		<label for="pilotSelect" class="col-form-label col-sm-6 col-md-4 col-lg-3">En tant que membre, vous pouvez choisir le membre à afficher:</label>
+		<div class="col-sm-6 col-md-3 col-lg-2">
 			<select id="pilotSelect" name="displayed_id" class="form-select" onchange="pilotChange('<?=$_SERVER['PHP_SELF']?>', this);">
 			</select>
 		</div> <!-- col -->
-	</div> <!-- form-group -->
-	<div class="col-sm-12 col-md-3">
+	<div class="col-sm-12 col-md-5">
 		Ajouter <?=$me['name']?> à mes contacts: 
-		<a href="vcard.php?id=<?=$displayed_id?>" title="Télécharge VCF"><i class="bi bi-cloud-download"></i></a> 
+		<a href="vcard.php?id=<?=$displayed_id?>" title="Télécharge carte de visite VCF"><i class="bi bi-cloud-download"></i></a> 
 		<a href="vcard.php?id=<?=$displayed_id?>&qr=yes" title="Affiche un QR code"><i class="bi bi-qr-code"></i></a> 
  	</div> <!--- col -->
 </div> <!--- row -->
+</form>
 
 <div class="row">
 <div class="col-12">
 <?php
 print($change_profile_message) ; // Display any error message
-$read_only_attribute = ($read_only) ? ' readonly' : '' ;
+$read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 ?>
 </div> <!-- col -->
 </div> <!-- row -->
@@ -342,116 +294,113 @@ $read_only_attribute = ($read_only) ? ' readonly' : '' ;
 	<li class="nav-item">
   		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#social_network" aria-current="page" href="#social_network">Réseaux sociaux</a>
 	</li>
-	<li class="nav-item">
-  		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#groups" aria-current="page" href="#groups">Groupes</a>
-	</li>
 </ul>
 
 <div class="tab-content">
 
 <div id="main" class="tab-pane fade show active" role="tabpanel">
 
-<form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
+<form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="Xform-horizontal">
 <input type="hidden" name="action" value="profile">
 <input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
-<div class="form-group">
-	<label class="control-label col-sm-4 col-md-2">Nom d'utilisateur:</label>
+<div class="row mb-3">
+	<label for="usernameId" class="col-form-label col-sm-4 col-md-2 col-lg-1">Nom d'utilisateur:</label>
 	<div class="col-sm-4">
-		<input type="text" class="form-control" name="username" value="<?=$me['username']?>" readonly>
+		<input type="text" class="form-control" id="usernameId" name="username" value="<?=$me['username']?>" readonly disabled>
 		<span class="input-group-addon">(contacter webmaster@spa-aviation.be pour changer)</span>
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-	<label class="control-label col-sm-4 col-md-2">Nom complet:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+	<label for="nameId" class="col-form-label col-sm-4 col-md-2 col-lg-1">Nom complet:</label>
 	<div class="col-sm-4">
 		 <!-- p class="form-control-static">email@example.com</p -->
-		<input type="text" class="form-control" name="name" value="<?=$me['name']?>" readonly>
+		<input type="text" class="form-control" name="name" id="nameId" value="<?=$me['name']?>" readonly disabled>
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-	<label class="control-label col-sm-4 col-md-2">Pr&eacute;nom:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+	<label for="first_nameId" class="col-form-label col-sm-4 col-md-2 col-lg-1">Prénom:</label>
 	<div class="col-sm-4">
-		<input type="text" class="form-control" name="first_name" value="<?=$me['first_name']?>" autocomplete="given-name" <?=$read_only_attribute?>>
+		<input type="text" class="form-control" name="first_name" id="first_nameId" value="<?=$me['first_name']?>" autocomplete="given-name" <?=$read_only_attribute?>>
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-	<label class="control-label col-sm-4 col-md-2">Nom:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+	<label class="col-form-label col-sm-4 col-md-2 col-lg-1">Nom:</label>
 	<div class="col-sm-4">
 			<input type="text" class="form-control" name="last_name" value="<?=$me['last_name']?>" autocomplete="family-name" <?=$read_only_attribute?>>
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-        <label class="control-label col-sm-4 col-md-2">Adresse e-mail:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Adresse e-mail:</label>
         <div class="col-sm-4">
 	       	<div class="input-group">
                 <input type="email" class="form-control" name="email" value="<?=$me['email']?>" autocomplete="email" <?=$read_only_attribute?>>
                 <span class="input-group-addon">(obligatoire)</span>
             </div><!-- input group -->
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-        <label class="control-label col-sm-4 col-md-2">T&eacute;l&eacute;phone mobile:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Téléphone mobile:</label>
         <div class="col-sm-4">
 	       	<div class="input-group">
                 <input type="tel" class="form-control" name="cell_phone" value="<?=$me['cell_phone']?>" autocomplete="mobile tel" <?=$read_only_attribute?>>
                 <span class="input-group-addon">(obligatoire)</span>
             </div><!-- input group -->
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-        <label class="control-label col-sm-4 col-md-2">T&eacute;l&eacute;phone priv&eacute;:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Téléphone priv&eacute;:</label>
         <div class="col-sm-4">
                 <input type="tel" class="form-control" name="home_phone" value="<?=$me['home_phone']?>" autocomplete="home tel" <?=$read_only_attribute?>>
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-        <label class="control-label col-sm-4 col-md-2">T&eacute;l&eacute;phone travail:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Téléphone travail:</label>
         <div class="col-sm-4">
                 <input type="tel" class="form-control" name="work_phone" value="<?=$me['work_phone']?>" autocomplete="work tel" <?=$read_only_attribute?>>
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-        <label class="control-label col-sm-4 col-md-2">Ville:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Commune:</label>
         <div class="col-sm-4">
         	<div class="input-group">
                 <input type="text" class="form-control" name="city" value="<?=$me['city']?>" autocomplete="address-level2" <?=$read_only_attribute?>>
                 <span class="input-group-addon">(optionnel)</span>
             </div><!-- input group -->
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-        <label class="control-label col-sm-4 col-md-2">Pays:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Pays:</label>
         <div class="col-sm-4">
         	<div class="input-group">
                 <input type="text" class="form-control" name="country" value="<?=$me['country']?>" autocomplete="country" <?=$read_only_attribute?>>
                 <span class="input-group-addon">(optionnel)</span>
             </div><!-- input group -->
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-        <label class="control-label col-sm-4 col-md-2">Date de naissance:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Date de naissance:</label>
         <div class="col-sm-4">
         	<div class="input-group">
                 <input type="date" class="form-control" name="birthdate" placeholder="AAAA-MM-JJ" value="<?=$me['birthdate']?>" autocomplete="bday" <?=$read_only_attribute?>>
                 <span class="input-group-addon">(optionnel)</span>
             </div><!-- input group -->
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-        <label class="control-label col-sm-4 col-md-2">Genre:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Genre:</label>
         <div class="col-sm-4">
         	<div class="input-group">
 				<select class="form-control" name="sex" <?=$read_only_attribute?>>
 					<option value="0" <?=($me['sex'] == 0) ? 'selected':''?>>Inconnu</option>
 					<option value="1" <?=($me['sex'] == 1) ? 'selected':''?>>Masculin</option>
-					<option value="2" <?=($me['sex'] == 2) ? 'selected':''?>>F&eacute;minin</option>
+					<option value="2" <?=($me['sex'] == 2) ? 'selected':''?>>Féminin</option>
 				</select>
                 <span class="input-group-addon">(optionnel)</span>
             </div><!-- input group -->
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-        <label class="control-label col-sm-4 col-md-2">Heures de vol:</label>
+</div> <!-- row -->
+<div class="row mb-3">
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Heures de vol:</label>
         <div class="col-sm-4">
         	<div class="input-group">
 				<select class="form-control" name="hide_flight" <?=$read_only_attribute?>>
@@ -461,57 +410,61 @@ $read_only_attribute = ($read_only) ? ' readonly' : '' ;
                 <span class="input-group-addon">(optionnel)</span>
             </div><!-- input group -->
 	</div> <!-- col -->
-</div> <!-- form-group -->
+</div> <!-- row -->
 
 <?php
 if (! $read_only) {
-	print('<div class="form-group"><button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Enregistrer les changements</button></div>') ;
+	print('<div class="row"><button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Enregistrer les changements</button></div>') ;
 }
 ?>
 </form>
 </div> <!-- id=main -->
 
 <div id="log" class="tab-pane fade" role="tabpanel">
-<div class="row">
+<div class="row mb-5">
+    <div class="col">
 	Configuration initiale de votre carnet de vols. Vous pouvez aussi <a href="mylog.php">visualiser votre carnet de vols</a> sur base des entrées
 	dans les carnets de routes des avions RAPCS et autres.
+    </div><!-- col -->
 </div> <!-- row -->
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
 <input type="hidden" name="action" value="log">
 <input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
-<div class="form-group">
-	<label class="control-label col-sm-4 col-md-2">Minutes de vol en tant que PIC:</label>
-	<div class="col-sm-4">
+<div class="row mb-3">
+	<label class="col-form-label col-sm-4 col-md-2">Minutes de vol en tant que PIC:</label>
+	<div class="col-sm-4 col-md-1">
 		<input type="text" class="form-control" name="pic_minutes" value="<?=$me['pic_minutes']?>">
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-	<label class="control-label col-sm-4 col-md-2">Minutes de vol en dual command:</label>
-	<div class="col-sm-4">
+</div> <!-- row -->
+<div class="row mb-3">
+	<label class="col-form-label col-sm-4 col-md-2">Minutes de vol en dual command:</label>
+	<div class="col-sm-4 col-md-1">
 		<input type="text" class="form-control" name="dc_minutes" value="<?=$me['dc_minutes']?>">
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-	<label class="control-label col-sm-4 col-md-2">Minutes de vol en tant qu'instructeur:</label>
-	<div class="col-sm-4">
+</div> <!-- row -->
+<div class="row mb-3">
+	<label class="col-form-label col-sm-4 col-md-2">Minutes de vol en tant qu'instructeur:</label>
+	<div class="col-sm-4 col-md-1">
 		<input type="text" class="form-control" name="fi_minutes" value="<?=$me['fi_minutes']?>">
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-	<label class="control-label col-sm-4 col-md-2">Atterrissage de jour:</label>
-	<div class="col-sm-4">
+</div> <!-- row -->
+<div class="row mb-3">
+	<label class="col-form-label col-sm-4 col-md-2">Atterrissage(s) de jour:</label>
+	<div class="col-sm-4 col-md-1">
 		<input type="text" class="form-control" name="day_landings" value="<?=$me['day_landings']?>">
 	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-	<label class="control-label col-sm-4 col-md-2">Atterrissage de nuit:</label>
-	<div class="col-sm-4">
+</div> <!-- row -->
+<div class="row mb-3">
+	<label class="col-form-label col-sm-4 col-md-2">Atterrissage(s) de nuit:</label>
+	<div class="col-sm-4 col-md-1">
 		<input type="text" class="form-control" name="night_landings" value="<?=$me['night_landings']?>">
 	</div> <!-- col -->
-</div> <!-- form-group -->
+</div> <!-- row -->
 <?php
 if (! $read_only) {
-	print('<div class="form-group"><button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Enregistrer les changements</button></div>') ;
+	print('<div class="row mb-3">
+        <button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Enregistrer les changements
+        </button></div>') ;
 }
 ?>
 </form>
@@ -595,31 +548,6 @@ if (! $read_only) {
 </form>
 </div> <!-- row -->
 </div> <!-- id=social_network -->
-
-<div id="groups" class="tab-pane fade" role="tabpanel">
-<div class="row">
-<?
-if ($displayed_id == $userId)
-	print("Vous faites partie des groupes: ") ;
-else
-	print("Ce membre fait partie des groupes: ") ;
-$joomla_groups = array() ;
-$result = mysqli_query($mysqli_link, "select group_id from $table_user_usergroup_map where user_id = $displayed_id")
-	or journalise($userId, "F", "Cannot access groups: " . mysqli_error($mysqli_link)) ;
-while ($row = mysqli_fetch_array($result)) 
-	$joomla_groups[$row['group_id']] = true ;
-$groupes = array() ;
-if (array_key_exists($joomla_member_group, $joomla_groups)) $groupes[] = "Membre" ;
-if (array_key_exists($joomla_pilot_group, $joomla_groups)) $groupes[] = "Pilote" ;
-if (array_key_exists($joomla_student_group, $joomla_groups)) $groupes[] = "&Eacute;l&egrave;ve" ;
-if (array_key_exists($joomla_mechanic_group, $joomla_groups)) $groupes[] = "M&eacute;cano" ;
-if (array_key_exists($joomla_instructor_group, $joomla_groups)) $groupes[] = "Instructeur" ;
-if (array_key_exists($joomla_board_group, $joomla_groups)) $groupes[] = "membre du Conseil d'Administration" ;
-if (array_key_exists($joomla_admin_group, $joomla_groups) || array_key_exists($joomla_sysadmin_group, $joomla_groups) || array_key_exists($joomla_superuser_group, $joomla_groups)) $groupes[] = "Administrateur syst&egrave;me" ;
-print("<i>" . implode(', ', $groupes) . "</i>. <br/>Vous ne pouvez pas changer vous-m&ecirc;mes vos groupes, c'est li&eacute; &agrave; au type d'inscription.") ;
-?>
-</div> <!-- row -->
-</div> <!-- id=groups -->
 
 <div id="validity" class="tab-pane fade">
 

@@ -17,7 +17,6 @@
 */
 
 # HTTP/2 push of CSS via header()
-#header('Link: </resa/mobile.js>;rel=preload;as=script,</resa/swiped-events.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
 header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
 	
 ?><!DOCTYPE html>
@@ -42,12 +41,12 @@ header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white
 
 <!-- Using latest bootstrap 5 -->
 <!-- Latest compiled and minified CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <!-- Latest compiled JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Glyphicon equivalent -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 <!-- Allow the swipe events on phones & tablets -->
 <!-- TODO should only be loaded when required -->
@@ -237,6 +236,7 @@ if ($userId <= 0) {
               <a class="dropdown-item" href="mobile_invoices.php">Mes factures</a>
               <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
               <a class="dropdown-item" href="mobile_groups.php">Mes groupes</a>
+              <a class="dropdown-item" href="mobile_profile.php">Mon profil</a>
 <?php
   if ($userIsStudent)
       print("<a class=\"dropdown-item\" href=\"dto.student.php?student=$userId\">Ma progression</a>") ;

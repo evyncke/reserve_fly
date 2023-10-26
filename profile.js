@@ -25,7 +25,7 @@ function prefillDropdownMenus(selectId, valuesArray, selectedValue) {
         }
 }
 
-function init(pilotDisplayed) {
+function initProfile(pilotDisplayed) {
 // Prefill the select drop-down
         prefillDropdownMenus('pilotSelect', members, pilotDisplayed) ;
 }
