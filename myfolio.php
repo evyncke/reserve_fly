@@ -327,12 +327,14 @@ $today = datefmt_format($fmt, $displayTimestamp) ;
 <tbody class="table-group-divider">
 <?php
 
-if ($balance < 0)
-	$balance_class = "table-danger" ;
-else
-	$balance_class = "table-success" ;
-print("<tr><td colspan=\"15\" class=\"$balance_class text-start\">Solde courant du compte membre</td><td class=\"$balance_class text-end\">" . 
-	numberFormat($balance, 2, ',', ' ', FALSE) . "</td></tr>\n") ;
+if (!isset($_REQUEST['previous'])) {
+	if ($balance < 0)
+		$balance_class = "table-danger" ;
+	else
+		$balance_class = "table-success" ;
+	print("<tr><td colspan=\"15\" class=\"$balance_class text-start\">Solde courant du compte membre</td><td class=\"$balance_class text-end\">" . 
+		numberFormat($balance, 2, ',', ' ', FALSE) . "</td></tr>\n") ;
+}
 
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
@@ -417,9 +419,15 @@ $final_balance_message = ($balance - $cost_grand_total >= 0) ? "" : "<br/>(vous 
 <td class="table-info text-end"><?=$cost_taxes_total?></td>
 <td class="table-info text-end text-danger"><?=$cost_grand_total_text?></td>
 </tr>
+<?php
+if (!isset($_REQUEST['previous'])) {
+?>
 <tr><td colspan="15" class="<?=$final_balance_class?>">Solde du compte membre en tenant compte de ce folio<?=$final_balance_message?></td>
 <td class="<?=$final_balance_class?> text-end"> <?= numberFormat($balance - $cost_grand_total, 2, ',' , ' ', FALSE)?></td>
 </tr>
+<?php
+}
+?>
 </tfoot>
 </table>
 </div><!-- table responsive -->
