@@ -41,7 +41,7 @@ if (isset($_REQUEST['fi']) and is_numeric($_REQUEST['fi']) and $_REQUEST['fi'] !
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<th>Nom</th><th>Prénom</th><th>Premier/dernier vol</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th>
+<th>Elèves</th><th>Premier/dernier vols</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th>
 </thead>
 <tbody>
 
@@ -52,12 +52,12 @@ if (isset($_REQUEST['fi']) and is_numeric($_REQUEST['fi']) and $_REQUEST['fi'] !
         $blocked = ($student->blocked) ? ' <i class="bi bi-sign-stop-fill text-danger" title="This member is blocked"></i>' : '' ;
         print("<tr>
             <td>
-                <a href=\"dto.student.php?student=$student->jom_id\" title=\"Display all flights\">$student->lastName
-                    <i class=\"bi bi-binoculars-fill\"></i></a>$blocked
+                <a href=\"dto.student.php?student=$student->jom_id\" title=\"Display all flights\">$student->lastName $student->firstName<i class=\"bi bi-binoculars-fill\"></i></a>
+                    $blocked
                     <a href=\"mailto:$student->email\"><i class=\"bi bi-envelope-fill\" title=\"Send email\"></i></a>
                     <a href=\"tel:$student->mobilePhone\"><i class=\"bi bi-telephone-fill\" title=\"Call on mobile\"></i></a>
             </td>
-            <td>$student->firstName</td><td>$student->firstFlight <span class=\"badge bg-primary\" title=\"Number of flights\">$student->countFlights</span><br/>$student->lastFlight
+            <td>$student->firstFlight <span class=\"badge bg-primary\" title=\"Number of flights\">$student->countFlights</span><br/>$student->lastFlight
             <td class=\"d-none d-md-table-cell\"><a href=\"mailto:$student->email\">$student->email</a></td>
             <td class=\"d-none d-md-table-cell\"><a href=\"tel:$student->mobilePhone\">$student->mobilePhone</a></td>
             </tr>\n") ;
