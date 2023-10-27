@@ -41,7 +41,7 @@ if (isset($_REQUEST['fi']) and is_numeric($_REQUEST['fi']) and $_REQUEST['fi'] !
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<th>Elèves</th><th>Premier/dernier vols</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th>
+<th>Elèves</th><th>Premier/dernier vols</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th></tr>
 </thead>
 <tbody>
 
