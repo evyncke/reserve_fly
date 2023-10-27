@@ -17,8 +17,8 @@
 */
 
 // TODO
-// - add first and last name
 // - ensure consistency of email in rapcs_person and jom_user
+
 ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 if ($userId == 0) {
@@ -45,12 +45,16 @@ $change_profile_message = '' ;
 // Fetch all information about the user
 $result = mysqli_query($mysqli_link, "select *,u.username as username,u.email as email, date(p.birthdate) as birthdate
 	from $table_person p join $table_users u on p.jom_id = u.id left join jom_kunena_users k on k.userid=u.id
-	where u.id = $displayed_id") or die("Erreur interne: " . mysqli_error($mysqli_link)) ;
-$me = mysqli_fetch_array($result) or die("Utilisateur inconnu") ;
+	where u.id = $displayed_id") or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
+$me = mysqli_fetch_array($result) or journalise($userId, "F", "Utilisateur inconnu") ;
 $me['name'] = db2web($me['name']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
+$me['address'] = db2web($me['address']) ; 
+$me['zipcode'] = db2web($me['zipcode']) ; 
 $me['city'] = db2web($me['city']) ; 
+$me['country'] = db2web($me['country']) ;
+
 // Be paranoid
 foreach($me as $key => $value)
 	$me[$key] = htmlspecialchars($value, ENT_QUOTES) ;
@@ -200,6 +204,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 	if ((strlen($email) == 0) or ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
 		journalise($userId, 'F', "Adresse email invalide pour $me[username]/$displayed_id: $email") ;
 	}
+	$address = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['address']))) ;
+	$zipcode = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['zipcode']))) ;
 	$city = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['city']))) ;
 	$country = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['country'])) ;
 	$birthdate = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['birthdate'])) ;
@@ -214,7 +220,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 //		die("Le nom et/ou le pr&eacute;nom sont invalides. Changements refus&eacute;s.") ;
 //	}
 	mysqli_query($mysqli_link, "update $table_person set home_phone='$home_phone', work_phone='$work_phone', cell_phone='$cell_phone',
-		city='$city', country='$country', birthdate='$birthdate', sex=$sex, email='$email',
+		address='$address', zipcode='$zipcode', city='$city', country='$country', birthdate='$birthdate', sex=$sex, email='$email',
 		first_name='$first_name', last_name='$last_name', hide_flight_time=$hide_flight where jom_id = $displayed_id")
 		or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_person: " . mysqli_error($mysqli_link)) ;
 	$affected_rows = mysqli_affected_rows($mysqli_link) ;
@@ -242,7 +248,11 @@ $me = mysqli_fetch_array($result) or die("Utilisateur inconnu") ;
 $me['name'] = db2web($me['name']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
+$me['address'] = db2web($me['address']) ; 
+$me['zipcode'] = db2web($me['zipcode']) ; 
 $me['city'] = db2web($me['city']) ; 
+$me['country'] = db2web($me['country']) ;
+
 // Be paranoid
 foreach($me as $key => $value)
 	$me[$key] = htmlspecialchars($value, ENT_QUOTES) ;
@@ -304,81 +314,94 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 <input type="hidden" name="action" value="profile">
 <input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
 <div class="row mb-3">
-	<label for="usernameId" class="col-form-label col-sm-4 col-md-2 col-lg-1">Nom d'utilisateur:</label>
+	<label for="usernameId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Nom d'utilisateur:</label>
 	<div class="col-sm-4">
 		<input type="text" class="form-control" id="usernameId" name="username" value="<?=$me['username']?>" readonly disabled>
 		<span class="input-group-addon">(contacter webmaster@spa-aviation.be pour changer)</span>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="nameId" class="col-form-label col-sm-4 col-md-2 col-lg-1">Nom complet:</label>
+	<label for="nameId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Nom complet:</label>
 	<div class="col-sm-4">
-		 <!-- p class="form-control-static">email@example.com</p -->
 		<input type="text" class="form-control" name="name" id="nameId" value="<?=$me['name']?>" readonly disabled>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="first_nameId" class="col-form-label col-sm-4 col-md-2 col-lg-1">Prénom:</label>
+	<label for="first_nameId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Prénom:</label>
 	<div class="col-sm-4">
 		<input type="text" class="form-control" name="first_name" id="first_nameId" value="<?=$me['first_name']?>" autocomplete="given-name" <?=$read_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label class="col-form-label col-sm-4 col-md-2 col-lg-1">Nom:</label>
+	<label for="last_nameId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Nom:</label>
 	<div class="col-sm-4">
-			<input type="text" class="form-control" name="last_name" value="<?=$me['last_name']?>" autocomplete="family-name" <?=$read_only_attribute?>>
+			<input type="text" class="form-control" name="last_name" id="last_nameId" value="<?=$me['last_name']?>" autocomplete="family-name" <?=$read_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Adresse e-mail:</label>
+        <label for="emailId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Adresse e-mail:</label>
         <div class="col-sm-4">
 	       	<div class="input-group">
-                <input type="email" class="form-control" name="email" value="<?=$me['email']?>" autocomplete="email" <?=$read_only_attribute?>>
+                <input type="email" class="form-control" name="email" id="emailId" value="<?=$me['email']?>" autocomplete="email" <?=$read_only_attribute?>>
                 <span class="input-group-addon">(obligatoire)</span>
             </div><!-- input group -->
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Téléphone mobile:</label>
+        <label for="cell_phoneId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Téléphone mobile:</label>
         <div class="col-sm-4">
 	       	<div class="input-group">
-                <input type="tel" class="form-control" name="cell_phone" value="<?=$me['cell_phone']?>" autocomplete="mobile tel" <?=$read_only_attribute?>>
+                <input type="tel" class="form-control" name="cell_phone" id="cell_phoneId" value="<?=$me['cell_phone']?>" autocomplete="mobile tel" <?=$read_only_attribute?>>
                 <span class="input-group-addon">(obligatoire)</span>
             </div><!-- input group -->
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Téléphone priv&eacute;:</label>
+        <label for="home_phoneId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Téléphone priv&eacute;:</label>
         <div class="col-sm-4">
-                <input type="tel" class="form-control" name="home_phone" value="<?=$me['home_phone']?>" autocomplete="home tel" <?=$read_only_attribute?>>
+                <input type="tel" class="form-control" name="home_phone" id="home_phoneId" value="<?=$me['home_phone']?>" autocomplete="home tel" <?=$read_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Téléphone travail:</label>
+        <label for="work_phoneId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Téléphone travail:</label>
         <div class="col-sm-4">
-                <input type="tel" class="form-control" name="work_phone" value="<?=$me['work_phone']?>" autocomplete="work tel" <?=$read_only_attribute?>>
+                <input type="tel" class="form-control" name="work_phone" id="work_phoneId" value="<?=$me['work_phone']?>" autocomplete="work tel" <?=$read_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Commune:</label>
+        <label for="addressId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Rue:</label>
         <div class="col-sm-4">
         	<div class="input-group">
-                <input type="text" class="form-control" name="city" value="<?=$me['city']?>" autocomplete="address-level2" <?=$read_only_attribute?>>
-                <span class="input-group-addon">(optionnel)</span>
+                <input type="text" class="form-control" name="address" id="addressId" value="<?=$me['address']?>" autocomplete="street-address" <?=$read_only_attribute?>>
             </div><!-- input group -->
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Pays:</label>
+        <label for="zipcodeId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Code postal:</label>
         <div class="col-sm-4">
         	<div class="input-group">
-                <input type="text" class="form-control" name="country" value="<?=$me['country']?>" autocomplete="country" <?=$read_only_attribute?>>
-                <span class="input-group-addon">(optionnel)</span>
+                <input type="text" class="form-control" name="zipcode" id="zipcodeId" value="<?=$me['zipcode']?>" autocomplete="postal-code" <?=$read_only_attribute?>>
             </div><!-- input group -->
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Date de naissance:</label>
+        <label for="cityId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Commune:</label>
+        <div class="col-sm-4">
+        	<div class="input-group">
+                <input type="text" class="form-control" name="city" id="cityId" value="<?=$me['city']?>" autocomplete="address-level2" <?=$read_only_attribute?>>
+            </div><!-- input group -->
+	</div> <!-- col -->
+</div> <!-- row -->
+<div for="countryId" class="row mb-3">
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Pays:</label>
+        <div class="col-sm-4">
+        	<div class="input-group">
+                <input type="text" class="form-control" name="country" id="countryId" value="<?=$me['country']?>" autocomplete="country-name" <?=$read_only_attribute?>>
+            </div><!-- input group -->
+	</div> <!-- col -->
+</div> <!-- row -->
+<div class="row mb-3">
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Date de naissance:</label>
         <div class="col-sm-4">
         	<div class="input-group">
                 <input type="date" class="form-control" name="birthdate" placeholder="AAAA-MM-JJ" value="<?=$me['birthdate']?>" autocomplete="bday" <?=$read_only_attribute?>>
@@ -387,7 +410,7 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Genre:</label>
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Genre:</label>
         <div class="col-sm-4">
         	<div class="input-group">
 				<select class="form-control" name="sex" <?=$read_only_attribute?>>
@@ -400,7 +423,7 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-1">Heures de vol:</label>
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Heures de vol:</label>
         <div class="col-sm-4">
         	<div class="input-group">
 				<select class="form-control" name="hide_flight" <?=$read_only_attribute?>>
@@ -488,7 +511,7 @@ if (! $read_only) {
 			<input type="file" name="photoFile" class="form-control col-sm-6 col-md-2"/>
 		</div> <!-- form-group -->
 		<div class="form-group"-->
-			<button type="submit" class="form-control col-sm-4 col-md-2 btn btn-primary">Mettre &agrave; jour la photo</button>
+			<button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Mettre &agrave; jour la photo</button>
 		</div> <!-- form-group -->
 	</form>
 	<p>Vous pouvez aussi utiliser le site gratuit <a href="https://gravatar.com/">Gravatar</a> pour y mettre votre photo et la lier ainsi à votre adresse email ' . $me['email'] . '.</p>
@@ -513,33 +536,25 @@ $twitter_img = ($me['twitter'] != '') ? "<a href=\"https://www.twitter.com/$me[t
 ?>
 <input type="hidden" name="action" value="social">
 <input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
-<div class="form-group">
-	<label class="control-label col-sm-2 col-md-1">Facebook <?=$facebook_img?>:</label>
-	<div class="col-sm-4 col-md-2">
-		<input type="text" class="form-control" name="facebook" value="<?=$me['facebook']?>" <?=$read_only_attribute?>>
-		<span class="help-block">Ce qui suit https://www.facebook.com/ sur votre page personelle.</span>
-	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-	<label class="control-label col-sm-2 col-md-1">LinkedIn <?=$linkedin_img?>:</label>
-	<div class="col-sm-4 col-md-2">
-		<input type="text" class="form-control" name="linkedin" value="<?=$me['linkedin']?>" <?=$read_only_attribute?>>
-		<span class="help-block">Ce qui suit https://www.linkedin.com/in/ sur votre profil.</span>
-	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-	<label class="control-label col-sm-2 col-md-1">Skype <?=$skype_img?>:</label>
-	<div class="col-sm-4 col-md-2">
-		<input type="text" class="form-control" name="skype" value="<?=$me['skype']?>" <?=$read_only_attribute?>>
-	</div> <!-- col -->
-</div> <!-- form-group -->
-<div class="form-group">
-	<label class="control-label col-sm-2 col-md-1">Twitter <?=$twitter_img?>:</label>
-	<div class="col-sm-4 col-md-2">
-		<input type="text" class="form-control" name="twitter" value="<?=$me['twitter']?>" <?=$read_only_attribute?>>
-		<span class="help-block">Ce qui suit https://www.twitter.com/ sur votre page personelle.</span>
-	</div> <!-- col -->
-</div> <!-- form-group -->
+<div class="input-group mb-3">
+	<label for="facebookId" class="col-form-label col-sm-2 col-md-1">Facebook <?=$facebook_img?>:</label>
+	<span class="input-group-text">https://www.facebook.com/</span>
+	<input type="text" class="form-control" name="facebook" id="facebookId" value="<?=$me['facebook']?>" placeholder="Ce qui suit https://www.facebook.com/ sur votre page personelle" <?=$read_only_attribute?>>
+</div> <!-- input-group -->
+<div class="input-group mb-3">
+	<label for="linkedinId" class="col-form-label col-sm-2 col-md-1">LinkedIn <?=$linkedin_img?>:</label>
+	<span class="input-group-text">https://www.linkedin.com/in/</span>
+	<input type="text" class="form-control" name="linkedin" id="linkedinId" value="<?=$me['linkedin']?>" placeholder="Ce qui suit https://www.linkedin.com/in/ sur votre profil"<?=$read_only_attribute?>>
+</div> <!-- input-group -->
+<div class="input-group mb-3">
+	<label for="skypeId" class="col-form-label col-sm-2 col-md-1">Skype <?=$skype_img?>:</label>
+	<input type="text" class="form-control" name="skype" id="skypeId" value="<?=$me['skype']?>" <?=$read_only_attribute?>>
+</div> <!-- input-group -->
+<div class="input-group mb-3">
+	<label for="twitterId" class="col-form-label col-sm-2 col-md-1">Twitter <?=$twitter_img?>:</label>
+	<span class="input-group-text">@</span>
+	<input type="text" class="form-control" name="twitter" id="twitterId" value="<?=$me['twitter']?>" <?=$read_only_attribute?>>
+</div> <!-- input-group -->
 <?php
 if (! $read_only) {
 	print('<div class="form-group"><button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Enregistrer les changements</button></div>') ;
@@ -628,7 +643,7 @@ if ($userId == $displayed_id) {
 	</label>
 </div> <!-- checkbox -->
 <div class="row col-sd-offset-2">
-	<button type="submit" class="btn btn-primary" id="submitButton" disabled>Enregistrer les changements</button>
+	<button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary" id="submitButton" disabled>Enregistrer les changements</button>
 </div> <!-- row -->
 <?php
 } // if ($userId == $displayed_id)

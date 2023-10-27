@@ -409,12 +409,12 @@ if ($userId == 0) {
 		print("<div class=\"validityBox\">Il manque votre num&eacute;ro de GSM/mobile, impossible de r&eacute;server. Veuillez cliquer sur le bouton 'Mon Profil'.</div>") ;
 		$userNoFlight = true ;
 	}
-	print('<input type="button" value="Mon profil" onclick="javascript:document.location.href=\'profile.php\';"> ') ;
+	print('<input type="button" style="background-color: green; color: white;" value="Mon profil" onclick="javascript:document.location.href=\'mobile_profile.php\';"> ') ;
 	print('<input type="button" value="Mon carnet de vol" onclick="javascript:document.location.href=\'mylog.php\';"> ') ;
 	print('<input type="button" value="Carte de mes vols" onclick="javascript:document.location.href=\'mymap.php\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;" value="Nouveau site mobile (beta)" onclick="javascript:document.location.href=\'mobile.php?news\';"> ') ;
 	print('<input type="button" value="Folio du mois" onclick="javascript:document.location.href=\'myfolio.php\';"> ') ;
-	if ($userIsAdmin) print('<input type="button" value="Journal des opérations" onclick="javascript:document.location.href=\'mobile_journal.php\';"> ') ;
+	if ($userIsAdmin) print('<input style="background-color: green; color: white;" type="button" value="Journal des opérations" onclick="javascript:document.location.href=\'mobile_journal.php\';"> ') ;
 	if ($userIsAdmin || $userIsMechanic) print('<input type="button" value="Echéances des maintenances" onclick="javascript:document.location.href=\'plane_planning.php\';"> ') ;
 	print('<input type="button" value="No log" style="background-color: yellow; visibility: hidden;" id="logButton" onclick="javascript:toggleLogDisplay();"> ') ;
 	print("<a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">lier &agrave; mon calendrier (iCal)</a>") ;
