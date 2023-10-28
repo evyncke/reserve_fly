@@ -184,6 +184,13 @@ if ($userId > 0) {
 ?>
             <!--li><a href="mobile_logbook.php">Mon carnet de routes</a></li-->
             <li><a class="dropdown-item" href="IntroCarnetVol.php">Encodage compteurs <i class="bi bi-box-arrow-up-right"></i></span></a></li>
+<?php
+      if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
+?>
+            <li><i><a class="dropdown-item" href="mobile_incidents.php">Incidents</a></i></li>
+<?php
+      }
+?>
             <li><a class="dropdown-item" href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
             <!-- init() in mobile.js will insert all active planes -->
 <?php
