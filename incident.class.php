@@ -122,6 +122,7 @@ class IncidentEvents implements Iterator {
 class Incident {
     public $id ;
     public $plane ;
+    public $importance ;
     public $lastDate ;
     public $lastWho ;
     public $lastFirstName ;
@@ -133,6 +134,7 @@ class Incident {
         if ($row) {
             $this->id = $row['i_id'] ;
             $this->plane = $row['i_plane'] ;
+            $this->importance = db2web($row['i_importance']) ;
             $this->lastDate = $row['last_when'] ;
             $this->lastWho = $row['last_who'] ;
             $this->lastFirstName = db2web($row['last_first_name']) ;
@@ -145,14 +147,15 @@ class Incident {
     function save() {
         global $mysqli_link, $table_incident, $userId ;
 
+        $importance = web2db($this->importance) ;
         if ($this->id) {
-            mysqli_query($mysqli_link, "REPLACE INTO $table_incident(i_id, i_plane)
-                VALUES($this->id, '$this->plane')")
+            mysqli_query($mysqli_link, "REPLACE INTO $table_incident(i_id, i_plane, i_importance)
+                VALUES($this->id, '$this->plane', '$importance')")
                 or journalise($userId, "F", "Cannot replace into $table_incident: " . mysqli_error($mysqli_link)) ;
             return $this->id ;
         } else {
-            mysqli_query($mysqli_link, "INSERT INTO $table_incident(i_plane)
-                VALUES('$this->plane')")
+            mysqli_query($mysqli_link, "INSERT INTO $table_incident(i_plane, i_importance)
+                VALUES('$this->plane', '$importance')")
                 or journalise($userId, "F", "Cannot insert into $table_incident: " . mysqli_error($mysqli_link)) ;
             $this->id = mysqli_insert_id($mysqli_link) ;
             return $this->id ;

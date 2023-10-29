@@ -44,7 +44,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 ?>
 <p class="lead text-danger mb-5">En cours de développement, ne pas utiliser.</p>
 
-<h2>Créer un nouvel incident</h2>
+<h2>Ajouter un nouvel incident</h2>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
@@ -55,13 +55,20 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label class="col-form-label col-sm-4 col-md-2">Remarque:</label>
+	<label class="col-form-label col-sm-4 col-md-2">Description:</label>
 	<div class="col-sm-12 col-md-6">
-		<input type="text" class="form-control" name="remark">
+		<input type="text" class="form-control" name="remark" placeholder="Description courte de l'incident">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <button type="submit" name="action" value="create" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Ajouter l'incident
+	<label class="col-form-label col-sm-4 col-md-2">Importance/urgence:</label>
+	<div class="col-sm-12 col-md-6">
+		<input type="text" class="form-control" name="remark" placeholder="Peut être laissé vide, sinon, 'important', 'pas urgent', 'bloquant', ...">
+	</div> <!-- col -->
+</div> <!-- row -->
+<div class="row mb-3">
+        <button type="submit" name="action" value="create" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary" >
+            Ajouter l'incident
         </button></div>
 </form>
 </div><!-- row -->
@@ -73,18 +80,20 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<th>#Incident</th><th>Avion</th><th>Dernier Statut</th><th>Description</th><th>Date</th><th>Par</th></tr>
+<tr><th>#Incident</th><th>Avion</th><th>Importance/Urgence</th><th class="align-center" colspan="4">Dernier Statut</th></tr>
+<tr><th></th><th></th><th></th><th>Statut</th><th>Description</th><th>Date</th><th>Par</th></tr>
 </thead>
 <tbody>
 
 <?php
-    $incidents = new Incidents($fi) ;
+    $incidents = new Incidents($plane) ;
     foreach($incidents as $incident) {
         print("<tr>
             <td>
                 <a href=\"mobile_incident.php?student=$incident->id\" title=\"Edit incident\">$incident->id<i class=\"bi bi-pen-fill\"></i></a>
             </td>
             <td><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a></td>
+            <td>$incident->importance</td>
             <td>$incident->lastStatus</td>
             <td>$incident->lastText</td>
             <td>$incident->lastDate</td>
