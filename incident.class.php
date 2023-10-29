@@ -26,16 +26,24 @@ class IncidentEvent {
     public $whoLastName ;
     public $text ;
     public $status ;
+    public $statusFrench ;
 
     function __construct($row = NULL) {
         if ($row) {
             $this->eventId = $row['ih_id'] ;
             $this->incident = new Incident($row) ;
             $this->date = $row['ih_when'] ;
-            $this->whoFirstName = $row['first_name'] ;
-            $this->whoLastName = $row['last_name'] ;
+            $this->whoFirstName = db2web($row['first_name']) ;
+            $this->whoLastName = db2web($row['last_name']) ;
             $this->text = db2web($row['ih_text']) ;
             $this->status = $row['ih_status'] ;
+            switch($this->status) {
+                case 'opened': $this->statusFrench = 'Ouvert' ; break ;
+                case 'inprogress': $this->statusFrench = 'En progrès' ; break ;
+                case 'closed': $this->statusFrench = 'Clôturé' ; break ;
+                case 'rejected': $this->statusFrench = 'Rejeté' ; break ;
+                default: $this->statusFrench = $this->status ;
+            }
         }
     }
 
@@ -59,7 +67,7 @@ class IncidentEvent {
         if ($this->eventId) {
             journalise($userId, "F", "Saving an existing incident event is not allowed.") ;
         } else {
-            $remark = web2db($this->text) ;
+            $remark = mysqli_real_escape_string($mysqli_link, web2db($this->text)) ;
             $id = $this->incident->id ;
             mysqli_query($mysqli_link, "INSERT INTO $table_incident_history(ih_incident, ih_text, ih_status, ih_who, ih_when)
                 VALUES($id, '$remark','$this->status', $userId, CURRENT_TIMESTAMP())")
@@ -85,7 +93,8 @@ class IncidentEvents implements Iterator {
             FROM $table_incident_history
             JOIN $table_incident ON ih_incident = i_id
             JOIN $table_person ON ih_who = jom_id 
-            WHERE ih_id = $incidentId" ;
+            WHERE i_id = $incidentId
+            ORDER BY ih_when DESC" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur systeme a propos de l'access aux événements liés à l'incident $this->incidentId: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
@@ -128,6 +137,7 @@ class Incident {
     public $lastFirstName ;
     public $lastLastName ;
     public $lastStatus;
+    public $lastStatusFrench ;
     public $lastText ;
 
     function __construct($row = NULL) {
@@ -140,14 +150,38 @@ class Incident {
             $this->lastFirstName = db2web($row['last_first_name']) ;
             $this->lastLastName = db2web($row['last_last_name']) ;
             $this->lastStatus = $row['last_status'] ;
+            switch($this->lastS tatus) {
+                case 'opened': $this->lastStatusFrench = 'Ouvert' ; break ;
+                case 'inprogress': $this->lastStatusFrench = 'En progrès' ; break ;
+                case 'closed': $this->lastStatusFrench = 'Clôturé' ; break ;
+                case 'rejected': $this->lastStatusFrench = 'Rejeté' ; break ;
+                default: $this->lastStatusFrench = $this->lastStatus ;
+            }
             $this->lastText = db2web($row['last_text']) ;
         }
+    }
+
+    function getById($id) {
+        global $userId, $mysqli_link, $table_incident, $table_incident_history, $table_person ;
+
+        $sql = "SELECT *, 
+                le.ih_when AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
+            FROM $table_incident AS i
+            JOIN $table_incident_history AS le ON le.ih_incident = i.i_id
+            JOIN $table_person AS lep ON lep.jom_id = le.ih_who
+            WHERE i.i_id = $id AND
+                le.ih_id = (SELECT MAX(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id)" ;
+        $result = mysqli_query($mysqli_link, $sql)
+            or  journalise($userId, "F", "Cannot retrieve indcident by id ($id): " . mysqli_error($mysqli_link)) ;
+        $row = mysqli_fetch_array($result) ;
+        if (! $row) return NULL ;
+        $this->__construct($row) ;
     }
 
     function save() {
         global $mysqli_link, $table_incident, $userId ;
 
-        $importance = web2db($this->importance) ;
+        $importance = mysqli_real_escape_string($mysqli_link, web2db($this->importance)) ;
         if ($this->id) {
             mysqli_query($mysqli_link, "REPLACE INTO $table_incident(i_id, i_plane, i_importance)
                 VALUES($this->id, '$this->plane', '$importance')")

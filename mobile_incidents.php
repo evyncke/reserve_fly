@@ -92,11 +92,11 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     foreach($incidents as $incident) {
         print("<tr>
             <td>
-                <a href=\"mobile_incident.php?student=$incident->id\" title=\"Edit incident\">$incident->id<i class=\"bi bi-pen-fill\"></i></a>
+                <a href=\"mobile_incident.php?incident=$incident->id\" title=\"Edit incident\">$incident->id<i class=\"bi bi-pen-fill\"></i></a>
             </td>
             <td><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a></td>
             <td>$incident->importance</td>
-            <td>$incident->lastStatus</td>
+            <td>$incident->lastStatusFrench</td>
             <td>$incident->lastText</td>
             <td>$incident->lastDate</td>
             <td><b>$incident->lastLastName</b> $incident->lastFirstName</td>
@@ -108,7 +108,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </div><!-- table responsive -->
 </div><!-- col -->
 </div><!-- row --> 
-<p class="fw-light">Cliquer sur une numéro d'incident (ou sur l'icône <i class="bi bi-pen-fill"></i>) pour consulter/modifier l'historique de cet incident, y compris changer le statut.
-Un click sur un avion, afficher uniquement les incidents de cet avion.</p>
+<p class="fw-light">Cliquer sur un numéro d'incident (ou sur l'icône <i class="bi bi-pen-fill"></i>) pour consulter/modifier l'historique de cet incident, y compris changer le statut.
+Cliquer sur un avion, pour afficher uniquement les incidents de cet avion.</p>
 </body>
 </html>
