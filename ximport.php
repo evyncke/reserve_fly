@@ -13,9 +13,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
 */
-
 $production = true ; // when production is set to true, invoices are inserted in $table_invoices and are shown to end-users
 
 require_once 'dbi.php' ;
