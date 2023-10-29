@@ -33,15 +33,13 @@ if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '') {
 
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     $incident = new Incident() ;
-    $incident->plane = $_REQUEST['plane'] ;
+    $incident->plane = strtoupper($_REQUEST['plane']) ;
     $incident->save() ;
     $event = new IncidentEvent() ;
-    $event->incident = $incident->id ;
+    $event->incident = $incident ;
     $event->status = 'opened' ;
     $event->text = $_REQUEST['remark'] ;
     $event->save() ;
-    $incident->lastEvent = $event->eventId ;
-    $incident->save() ; // Two DB access... the reason why 3rd normal form is better
 }
 ?>
 <p class="lead text-danger mb-5">En cours de développement, ne pas utiliser.</p>
@@ -86,7 +84,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
             <td>
                 <a href=\"mobile_incident.php?student=$incident->id\" title=\"Edit incident\">$incident->id<i class=\"bi bi-pen-fill\"></i></a>
             </td>
-            <td><a href=\"mobile_incident.php?plane=$incident->plane\">$incident->plane</a></td>
+            <td><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a></td>
             <td>$incident->lastStatus</td>
             <td>$incident->lastText</td>
             <td>$incident->lastDate</td>

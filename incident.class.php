@@ -60,8 +60,9 @@ class IncidentEvent {
             journalise($userId, "F", "Saving an existing incident event is not allowed.") ;
         } else {
             $remark = web2db($this->text) ;
-            mysqli_query($mysqli_link, "INSERT INTO $table_incident_history(ih_text, ih_status, ih_who, ih_when)
-                VALUES('$remark','$this->status', $userId, CURRENT_TIMESTAMP())")
+            $id = $this->incident->id ;
+            mysqli_query($mysqli_link, "INSERT INTO $table_incident_history(ih_incident, ih_text, ih_status, ih_who, ih_when)
+                VALUES($id, '$remark','$this->status', $userId, CURRENT_TIMESTAMP())")
                 or journalise($userId, "F", "Cannot insert into $table_incident_history: " . mysqli_error($mysqli_link)) ;
             $this->eventId = mysqli_insert_id($mysqli_link) ;
             return $this->eventId ;
@@ -121,7 +122,6 @@ class IncidentEvents implements Iterator {
 class Incident {
     public $id ;
     public $plane ;
-    public $lastEvent ;
     public $lastDate ;
     public $lastWho ;
     public $lastFirstName ;
@@ -133,13 +133,12 @@ class Incident {
         if ($row) {
             $this->id = $row['i_id'] ;
             $this->plane = $row['i_plane'] ;
-            $this->lastEvent = $row['i_last_event'] ;
-            $this->lastDate = $row['ih_when'] ;
-            $this->lastWho = $row['ih_who'] ;
-            $this->lastFirstName = db2web($row['first_name']) ;
-            $this->lastLastName = db2web($row['last_name']) ;
-            $this->lastStatus = $row['ih_status'] ;
-            $this->lastText = db2web($row['ih_text']) ;
+            $this->lastDate = $row['last_when'] ;
+            $this->lastWho = $row['last_who'] ;
+            $this->lastFirstName = db2web($row['last_first_name']) ;
+            $this->lastLastName = db2web($row['last_last_name']) ;
+            $this->lastStatus = $row['last_status'] ;
+            $this->lastText = db2web($row['last_text']) ;
         }
     }
 
@@ -147,14 +146,15 @@ class Incident {
         global $mysqli_link, $table_incident, $userId ;
 
         if ($this->id) {
-            mysqli_query($mysqli_link, "REPLACE INTO $table_incident(i_id, i_plane, i_last_event)
-                VALUES($this->id, '$this->plane', $this->lastEvent)")
+            mysqli_query($mysqli_link, "REPLACE INTO $table_incident(i_id, i_plane)
+                VALUES($this->id, '$this->plane')")
                 or journalise($userId, "F", "Cannot replace into $table_incident: " . mysqli_error($mysqli_link)) ;
+            return $this->id ;
         } else {
             mysqli_query($mysqli_link, "INSERT INTO $table_incident(i_plane)
                 VALUES('$this->plane')")
                 or journalise($userId, "F", "Cannot insert into $table_incident: " . mysqli_error($mysqli_link)) ;
-            $this->id= mysqli_insert_id($mysqli_link) ;
+            $this->id = mysqli_insert_id($mysqli_link) ;
             return $this->id ;
         } 
     }
@@ -174,12 +174,14 @@ class Incidents implements Iterator {
         else 
             $planeCondition = " AND i_plane = '$plane'" ;
         $this->plane = $plane ;
-        $sql = "SELECT *
-            FROM $table_incident
-            JOIN $table_incident_history ON i_last_event = ih_id
-            JOIN $table_person ON jom_id = ih_who
-            WHERE 1 $planeCondition
-            ORDER BY ih_when DESC" ;
+        $sql = "SELECT *, 
+                le.ih_when AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
+            FROM $table_incident AS i
+            JOIN $table_incident_history AS le ON le.ih_incident = i.i_id
+            JOIN $table_person AS lep ON lep.jom_id = le.ih_who
+            WHERE le.ih_id = (SELECT MAX(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id)
+                $planeCondition
+            ORDER BY le.ih_when DESC" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur systeme à propos de l'access aux incidents $table_incident pour l'avion $this->plane: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
