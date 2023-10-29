@@ -82,8 +82,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<tr><th>#Incident</th><th>Avion</th><th>Importance/Urgence</th><th class="text-center" colspan="4">Dernier Statut</th></tr>
-<tr><th></th><th></th><th></th><th>Statut</th><th>Description</th><th>Date</th><th>Par</th></tr>
+<tr><th>#Incident</th><th>Avion</th><th>Importance/Urgence</th><th class="text-center" colspan="3">Ouverture</th><th class="text-center" colspan="4">Dernier Statut</th></tr>
+<tr><th></th><th></th><th></th><th>Date</th><th>Description</th><th>Par</th><th>Statut</th><th>Description</th><th>Date</th><th>Par</th></tr>
 </thead>
 <tbody>
 
@@ -96,6 +96,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
             </td>
             <td><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a></td>
             <td>$incident->importance</td>
+            <td>$incident->firstDate<span class=\"badge bg-primary\">$incident->daysPending</span></td>   
+            <td>$incident->firstText</td>   
+            <td><b>$incident->firstLastName</b> $incident->firstFirstName</td>
             <td>$incident->lastStatusFrench</td>
             <td>$incident->lastText</td>
             <td>$incident->lastDate</td>
@@ -109,6 +112,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </div><!-- col -->
 </div><!-- row --> 
 <p class="fw-light">Cliquer sur un numéro d'incident (ou sur l'icône <i class="bi bi-pen-fill"></i>) pour consulter/modifier l'historique de cet incident, y compris changer le statut.
-Cliquer sur un avion, pour afficher uniquement les incidents de cet avion.</p>
+Cliquer sur un avion, pour afficher uniquement les incidents de cet avion. <span class="badge bg-primary">9</span> indique le nombre de jours depuis
+l'ouverture de l'incident.</p>
 </body>
 </html>

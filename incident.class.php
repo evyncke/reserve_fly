@@ -132,19 +132,40 @@ class Incident {
     public $id ;
     public $plane ;
     public $importance ;
+    public $firstDate ;
+    public $firstWho ;
+    public $firstFirstName ;
+    public $firstLastName ;
+    public $firstStatus;
+    public $firstStatusFrench ;
+    public $firstText ;
     public $lastDate ;
     public $lastWho ;
     public $lastFirstName ;
     public $lastLastName ;
-    public $lastStatus;
+    public $lastStatus; // Somehow useless as all first states are 'opened'....
     public $lastStatusFrench ;
     public $lastText ;
+    public $daysPending ;
 
     function __construct($row = NULL) {
         if ($row) {
             $this->id = $row['i_id'] ;
             $this->plane = $row['i_plane'] ;
             $this->importance = db2web($row['i_importance']) ;
+            $this->firstDate = $row['first_when'] ;
+            $this->firstWho = $row['first_who'] ;
+            $this->firstFirstName = db2web($row['first_first_name']) ;
+            $this->firstLastName = db2web($row['first_last_name']) ;
+            $this->firstStatus = $row['first_status'] ;
+            switch($this->firstStatus) {
+                case 'opened': $this->firstStatusFrench = 'Ouvert' ; break ;
+                case 'inprogress': $this->firstStatusFrench = 'En progrès' ; break ;
+                case 'closed': $this->firstStatusFrench = 'Clôturé' ; break ;
+                case 'rejected': $this->firstStatusFrench = 'Rejeté' ; break ;
+                default: $this->lastStatusFrench = $this->firstStatus ;
+            }
+            $this->firstText = db2web($row['first_text']) ;
             $this->lastDate = $row['last_when'] ;
             $this->lastWho = $row['last_who'] ;
             $this->lastFirstName = db2web($row['last_first_name']) ;
@@ -158,18 +179,23 @@ class Incident {
                 default: $this->lastStatusFrench = $this->lastStatus ;
             }
             $this->lastText = db2web($row['last_text']) ;
+            $this->daysPending = $row['days_pending'] ;
         }
     }
 
     function getById($id) {
         global $userId, $mysqli_link, $table_incident, $table_incident_history, $table_person ;
 
-        $sql = "SELECT *, 
+        $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending,
+                fe.ih_when AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
                 le.ih_when AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
             FROM $table_incident AS i
+            JOIN $table_incident_history AS fe ON fe.ih_incident = i.i_id
+            JOIN $table_person AS fep ON fep.jom_id = fe.ih_who
             JOIN $table_incident_history AS le ON le.ih_incident = i.i_id
             JOIN $table_person AS lep ON lep.jom_id = le.ih_who
             WHERE i.i_id = $id AND
+                fe.ih_id = (SELECT MIN(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id) AND
                 le.ih_id = (SELECT MAX(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id)" ;
         $result = mysqli_query($mysqli_link, $sql)
             or  journalise($userId, "F", "Cannot retrieve indcident by id ($id): " . mysqli_error($mysqli_link)) ;
@@ -211,14 +237,19 @@ class Incidents implements Iterator {
         else 
             $planeCondition = " AND i_plane = '$plane'" ;
         $this->plane = $plane ;
-        $sql = "SELECT *, 
+        $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending,
+                fe.ih_when AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
                 le.ih_when AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
             FROM $table_incident AS i
+            JOIN $table_incident_history AS fe ON fe.ih_incident = i.i_id
+            JOIN $table_person AS fep ON fep.jom_id = fe.ih_who
             JOIN $table_incident_history AS le ON le.ih_incident = i.i_id
             JOIN $table_person AS lep ON lep.jom_id = le.ih_who
-            WHERE le.ih_id = (SELECT MAX(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id)
+            WHERE
+                fe.ih_id = (SELECT MIN(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id) AND
+                le.ih_id = (SELECT MAX(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id)
                 $planeCondition
-            ORDER BY le.ih_when DESC" ;
+            ORDER BY fe.ih_when DESC" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur systeme à propos de l'access aux incidents $table_incident pour l'avion $this->plane: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
