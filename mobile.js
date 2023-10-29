@@ -364,10 +364,12 @@ function initBook() { // Only used by mobile_book
 function init() {
 	// Fill in the Planes dropdown menu with the content of planes.js
 	var planesDropdown = document.getElementById('planesDropdown') ;
-	for (var plane = 0; plane < planes.length; plane++) {
-		var option = document.createElement('li');
-		option.innerHTML = '<a class="dropdown-item" href="mobile_plane.php?plane=' + planes[plane].name + '">' + planes[plane].name;
-		planesDropdown.appendChild(option) ;
+	if (planesDropdown) {
+		for (var plane = 0; plane < planes.length; plane++) {
+			var option = document.createElement('li');
+			option.innerHTML = '<a class="dropdown-item" href="mobile_plane.php?plane=' + planes[plane].name + '">' + planes[plane].name;
+			planesDropdown.appendChild(option) ;
+		}
 	}
 
 	var pilotSelect = document.getElementById('pilotSelect') ;

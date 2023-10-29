@@ -22,11 +22,12 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
+$body_attributes = "onLoad=\"prefillDropdownMenus('plane', planes, 'none') ;\"";
 require_once 'mobile_header5.php' ;
 require_once 'incident.class.php' ;
 
 if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '') {
-    $plane = trim($_REQUEST['plane']) ;
+    $plane = strtoupper(trim($_REQUEST['plane'])) ;
 } else {
     $plane = NULL ;
 }
@@ -34,6 +35,7 @@ if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '') {
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     $incident = new Incident() ;
     $incident->plane = strtoupper($_REQUEST['plane']) ;
+    $incident->importance = strtoupper($_REQUEST['importance']) ;
     $incident->save() ;
     $event = new IncidentEvent() ;
     $event->incident = $incident ;
@@ -49,9 +51,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
 <div class="row mb-3">
-	<label class="col-form-label col-sm-4 col-md-2">Avion:</label>
-	<div class="col-sm-4 col-md-1"> <!-- should be a drop-down -->
-		<input type="text" class="form-control" name="plane">
+	<label for="planeSelect" class="col-form-label col-sm-4 col-md-2">Avion:</label>
+	<div class="col-sm-4 col-md-1">
+        <select id="planeSelect" class="form-select" name="plane"></select>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
@@ -63,7 +65,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <div class="row mb-3">
 	<label class="col-form-label col-sm-4 col-md-2">Importance/urgence:</label>
 	<div class="col-sm-12 col-md-6">
-		<input type="text" class="form-control" name="remark" placeholder="Peut être laissé vide, sinon, 'important', 'pas urgent', 'bloquant', ...">
+		<input type="text" class="form-control" name="importance" placeholder="Peut être laissé vide, sinon, 'important', 'pas urgent', 'bloquant', ...">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
@@ -73,14 +75,14 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </form>
 </div><!-- row -->
 
-<h2>Liste des incidents</h2>
+<h2>Liste des incidents <?=$plane?></h2>
 
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-7">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<tr><th>#Incident</th><th>Avion</th><th>Importance/Urgence</th><th class="align-center" colspan="4">Dernier Statut</th></tr>
+<tr><th>#Incident</th><th>Avion</th><th>Importance/Urgence</th><th class="text-center" colspan="4">Dernier Statut</th></tr>
 <tr><th></th><th></th><th></th><th>Statut</th><th>Description</th><th>Date</th><th>Par</th></tr>
 </thead>
 <tbody>
@@ -97,7 +99,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
             <td>$incident->lastStatus</td>
             <td>$incident->lastText</td>
             <td>$incident->lastDate</td>
-            <td>$incident->lastLastName $incident->lastFirstName</td>
+            <td><b>$incident->lastLastName</b> $incident->lastFirstName</td>
             </tr>\n") ;
     }
 ?>
@@ -106,5 +108,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </div><!-- table responsive -->
 </div><!-- col -->
 </div><!-- row --> 
+<p class="fw-light">Cliquer sur une numéro d'incident (ou sur l'icône <i class="bi bi-pen-fill"></i>) pour consulter/modifier l'historique de cet incident, y compris changer le statut.
+Un click sur un avion, afficher uniquement les incidents de cet avion.</p>
 </body>
 </html>
