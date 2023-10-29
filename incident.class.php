@@ -150,7 +150,7 @@ class Incident {
             $this->lastFirstName = db2web($row['last_first_name']) ;
             $this->lastLastName = db2web($row['last_last_name']) ;
             $this->lastStatus = $row['last_status'] ;
-            switch($this->lastS tatus) {
+            switch($this->lastStatus) {
                 case 'opened': $this->lastStatusFrench = 'Ouvert' ; break ;
                 case 'inprogress': $this->lastStatusFrench = 'En progrès' ; break ;
                 case 'closed': $this->lastStatusFrench = 'Clôturé' ; break ;
