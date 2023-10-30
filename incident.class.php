@@ -132,6 +132,7 @@ class Incident {
     public $id ;
     public $plane ;
     public $importance ;
+    public $firstId ;
     public $firstDate ;
     public $firstWho ;
     public $firstFirstName ;
@@ -139,6 +140,7 @@ class Incident {
     public $firstStatus;
     public $firstStatusFrench ;
     public $firstText ;
+    public $lastId ;
     public $lastDate ;
     public $lastWho ;
     public $lastFirstName ;
@@ -151,8 +153,9 @@ class Incident {
     function __construct($row = NULL) {
         if ($row) {
             $this->id = $row['i_id'] ;
-            $this->plane = $row['i_plane'] ;
+            $this->plane = strtoupper($row['i_plane']) ;
             $this->importance = db2web($row['i_importance']) ;
+            $this->firstId = $row['first_id'] ;
             $this->firstDate = $row['first_when'] ;
             $this->firstWho = $row['first_who'] ;
             $this->firstFirstName = db2web($row['first_first_name']) ;
@@ -166,6 +169,7 @@ class Incident {
                 default: $this->lastStatusFrench = $this->firstStatus ;
             }
             $this->firstText = db2web($row['first_text']) ;
+            $this->lastId = $row['last_id'] ;
             $this->lastDate = $row['last_when'] ;
             $this->lastWho = $row['last_who'] ;
             $this->lastFirstName = db2web($row['last_first_name']) ;
@@ -187,8 +191,8 @@ class Incident {
         global $userId, $mysqli_link, $table_incident, $table_incident_history, $table_person ;
 
         $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending,
-                fe.ih_when AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
-                le.ih_when AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
+                fe.ih_id AS first_id, fe.ih_when AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
+                le.ih_id AS last_id, le.ih_when AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
             FROM $table_incident AS i
             JOIN $table_incident_history AS fe ON fe.ih_incident = i.i_id
             JOIN $table_person AS fep ON fep.jom_id = fe.ih_who
@@ -239,8 +243,8 @@ class Incidents implements Iterator {
             $planeCondition = " AND i_plane = '$plane'" ;
         $this->plane = $plane ;
         $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending,
-                fe.ih_when AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
-                le.ih_when AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
+                fe.ih_id AS first_id, DATE(fe.ih_when) AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
+                le.ih_id AS last_id, DATE(le.ih_when) AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
             FROM $table_incident AS i
             JOIN $table_incident_history AS fe ON fe.ih_incident = i.i_id
             JOIN $table_person AS fep ON fep.jom_id = fe.ih_who
