@@ -34,6 +34,7 @@ if (isset($_REQUEST['last']) and isset($_REQUEST['fi']) and $_REQUEST['fi'] != '
         journalise($userId, "E", "No flight found for FI=$fi") ;
         die("No flight found for FI=$fi") ;
     }
+    $flight_id = $flight->id ;
 } else if (isset($_REQUEST['flight']) and is_numeric($_REQUEST['flight']) and $_REQUEST['flight'] != '') {
     $flight_id = $_REQUEST['flight'] ;
     $flight = new Flight() ;
@@ -100,7 +101,7 @@ function gradeChanged(object, reference, grade) {
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">
 <form method="GET" action="<?=$_SERVER['PHP_SELF']?>">
-<input type="hidden" name="flight" value="<?=$flight_id?>">
+<input type="hidden" name="flight" value="<?=$flight->id?>">
 <input type="hidden" name="action" value="header">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
