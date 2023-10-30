@@ -449,8 +449,10 @@ class StudentExercice {
         global $mysqli_link, $userId, $table_dto_student_exercice ;
 
         $imploded_grade = implode(',', $this->grade) ;
-        mysqli_query($mysqli_link, "REPLACE INTO $table_dto_student_exercice(dse_flight, dse_exercice, dse_grade, dse_who, dse_when)
-            VALUES($this->id, '" . mysqli_real_escape_string($mysqli_link, $this->reference) . "', '$imploded_grade', $userId, SYSDATE())")
+        mysqli_query($mysqli_link, "INSERT INTO $table_dto_student_exercice(dse_flight, dse_exercice, dse_grade, dse_who, dse_when)
+            VALUES($this->id, '" . mysqli_real_escape_string($mysqli_link, $this->reference) . "', '$imploded_grade', $userId, SYSDATE())
+            ON DUPLICATE KEY UPDATE dse_flight=$this->id, dse_exercice='" . mysqli_real_escape_string($mysqli_link, $this->reference) . "',
+                dse_grade='$imploded_grade', dse_who=$userId, dse_when=SYSDATE()")
             or journalise($userId, "F", "Cannot update $table_dto_student_exercice for flight $this->id exercice $this->reference: " . mysqli_error($mysqli_link)) ;
     }
 }
