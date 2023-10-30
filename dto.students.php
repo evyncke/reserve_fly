@@ -43,7 +43,7 @@ if (isset($_REQUEST['fi']) and is_numeric($_REQUEST['fi']) and $_REQUEST['fi'] !
 <thead>
 <th>Elèves</th><th>Premier/dernier vols</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th></tr>
 </thead>
-<tbody>
+<tbody class="table-group-divider">
 
 <?php
     $dto = new DTO() ;

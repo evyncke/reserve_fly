@@ -60,7 +60,7 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
 <thead>
 <th>Flight#</th><th>Date</th><th>Duration</th><th>Type</th><th>Plane</th><th>Instructor</th>
 </thead>
-<tbody>
+<tbody class="table-group-divider">
 
 <?php
     $flights = new Flights($student_id) ;
