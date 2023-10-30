@@ -454,7 +454,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 				'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
 				'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
 //			or die("(1)Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link). " Vol déjà introduit") ;
-			or die("<p style=\"color: red;\"><b>Impossible d'ajouter le segment dans le logbook:Vol déjà introduit.</br>Erreur SQL=" . mysqli_error($mysqli_link)."</br>9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.</br>Faite un Back avec votre Browser et corrigé l'heure de départ.</b></p>") ;		
+			or journalise($userId, 'F', "<p style=\"color: red;\"><b>Impossible d'ajouter le segment dans le logbook:Vol déjà introduit.</br>Erreur SQL=" . mysqli_error($mysqli_link)."</br>9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.</br>Faite un Back avec votre Browser et corrigé l'heure de départ.</b></p>") ;		
 
 /*			
 			
@@ -476,21 +476,30 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
    else {
 		// Edit a  segment
 	    //print("Edit a segment $cdv_logbookid </br>");
-		mysqli_query($mysqli_link, "replace into $table_logbook(l_id, l_plane, l_model, l_booking, l_from, l_to,
-				l_start_hour, l_start_minute, l_end_hour, l_end_minute, l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
-				l_start, l_end, l_flight_type, l_remark, l_pax_count, l_crew_count, l_pilot, l_is_pic, l_instructor, l_instructor_paid, l_day_landing, l_night_landing, 
-				l_share_type, l_share_member, l_audit_who, l_audit_ip, l_audit_time)
-				values ('$cdv_logbookid', '$planeId', '$planeModel', $bookingidPage, '$fromAirport', '$toAirport',
-				$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute, $flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
-				'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
-			'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
-			or 
-				die("(2)Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link)) ;		
-		$l_id = mysqli_insert_id($mysqli_link) ; 
+//		mysqli_query($mysqli_link, "replace into $table_logbook(l_id, l_plane, l_model, l_booking, l_from, l_to,
+//				l_start_hour, l_start_minute, l_end_hour, l_end_minute, l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
+//				l_start, l_end, l_flight_type, l_remark, l_pax_count, l_crew_count, l_pilot, l_is_pic, l_instructor, l_instructor_paid, l_day_landing, l_night_landing, 
+//				l_share_type, l_share_member, l_audit_who, l_audit_ip, l_audit_time)
+//				values ('$cdv_logbookid', '$planeId', '$planeModel', $bookingidPage, '$fromAirport', '$toAirport',
+//				$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute, $flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
+//			'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
+		// As l_id is a foreign key, let's use an UPDATE rather than a REPLACE
+		mysqli_query($mysqli_link, "UPDATE $table_logbook
+			SET l_plane='$planeId', l_model='$planeModel', l_booking=$bookingidPage, l_from='$fromAirport', l_to='$toAirport',
+				l_start_hour=$engineStartHour, l_start_minute=$engineStartMinute, l_end_hour=$engineEndHour, l_end_minute=$engineEndMinute, 
+				l_flight_start_hour=$flightStartHour, l_flight_start_minute=$flightStartMinute, l_flight_end_hour=$flightEndHour, l_flight_end_minute=$flightEndMinute,
+				l_start='$startDayTime', l_end='$endDayTime', l_flight_type='$flightType', l_remark=$remark, l_pax_count=$paxCount, l_crew_count=$crewCount, 
+				l_pilot=$pilotId, l_is_pic= $isPICFunction, l_instructor=$instructorId, l_instructor_paid=$isInstructorPaid, l_day_landing=$dayLandings, l_night_landing=$nightLandings, 
+				l_share_type='$shareType', l_share_member= $shareMember, l_audit_who=$userId, l_audit_ip='" . getClientAddress() . "', l_audit_time=sysdate()
+				WHERE l_id=$cdv_logbookid")
+		or 
+				journalise($userId, "F", "(2) l_audit_who=$userId, l_audit_ip='" . getClientAddress() . "', l_audit_time=sysdate() Impossible de mettre à jour le logbook: " . mysqli_error($mysqli_link)) ;		
+//		$l_id = mysqli_insert_id($mysqli_link) ; 
+		$l_id = $cdv_logbookid ;
 
-	    journalise($userId, "I", "Logbook entry replaced for $planeId, engine from $engineStartHour: $engineStartMinute to $engineEndHour:$engineEndMinute flight $startDayTime@$fromAirport to $endDayTime@$toAirport");	
+	    journalise($userId, "I", "Logbook entry updated for $planeId, engine from $engineStartHour: $engineStartMinute to $engineEndHour:$engineEndMinute flight $startDayTime@$fromAirport to $endDayTime@$toAirport");	
 		
-		// Table resume du vol edite
+		// Table resume du vol édité
 	    print('<p></p><center><table width=100%" border-spacing="0px"><tbody>
 	   <tr><td style="background-color: LightSalmon; text-align: center;" colspan="8">Un vol édité: Résumé (Heure UTC)</td></tr>
 	   <tr><td>Avion</td><td>Pilote</td><td>De</td><td>Heure</td><td>A</td><td>Heure</td><td>Durée</td></tr>') ;		
