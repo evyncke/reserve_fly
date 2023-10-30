@@ -141,14 +141,16 @@ if ($result) {
 	$response['error'] .= "Cannot check booking ($start ... $stop):" . mysqli_error($mysqli_link) . "<br/>" ;
 
 if ($response['error'] == '') {
-	$sql = "REPLACE INTO $table_bookings(r_id, r_plane, r_start, r_stop, r_duration, r_pilot, r_instructor, r_comment, r_crew_wanted, r_pax_wanted,
-			r_from, r_via1, r_via2, r_to, r_type, r_date, r_address, r_who, r_sequence)
-		VALUES($id, '$plane', '$start', '$end', $duration, $pilot_id, $instructor_id, '$comment_db', $crew_wanted, $pax_wanted,
-			'$from_apt', '$via1_apt', '$via2_apt', '$to_apt', $booking_type, sysdate(), '" . getClientAddress() . "', $userId, " . ($booking['r_sequence'] +1) . ")" ;
+	$sql = "UPDATE $table_bookings
+			SET r_plane='$plane', r_start='$start', r_stop='$end', r_duration=$duration, r_pilot=$pilot_id, r_instructor=$instructor_id,
+				r_comment='$comment_db', r_crew_wanted=$crew_wanted, r_pax_wanted=$pax_wanted,
+				r_from='$from_apt', r_via1='$via1_apt', r_via2='$via2_apt', r_to='$to_apt', r_type= $booking_type,
+				r_date=sysdate(), r_address='" . getClientAddress() . "', r_who=$userId, r_sequence=" . ($booking['r_sequence'] +1) . "
+			WHERE r_id=$id" ;
 	$response['sql'] = $sql ; // Danger zone as the SQL string is not UTF-8...
 	$result = mysqli_query($mysqli_link, $sql) ;
 
-	if ($result and mysqli_affected_rows($mysqli_link) == 2) { // a REPLACE is actually a DELETE followed by INSERT
+	if ($result and mysqli_affected_rows($mysqli_link) == 1) { // Nothing has changed
 		$booking_id = $id ;
 		$result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $pilot_id") ;
 		$pilot = mysqli_fetch_array($result) ;
@@ -239,8 +241,9 @@ if ($response['error'] == '') {
 			journalise($userId, 'W', "Modification of maintenance booking #$booking_id by $booker[name] ($modif_log)") ;
 		else
 			journalise($userId, 'W', "Modification of booking #$booking_id for $pilot[name] by $booker[name] ($modif_log)") ;
-	} else
-		$response['error'] .= "Un probl&egrave;me technique s'est produite... modification non effectu&eacute;e..." . mysqli_error($mysqli_link) . "<br/>" ;
+	} else {
+		$response['error'] .= "Reservation pas mise a jour... " . mysqli_affected_rows($mysqli_link) ;
+		journalise($userId, "D", "Reservation pas mise a jour... " . mysqli_affected_rows($mysqli_link)) ;}
 }
 
 // Let's send the data back

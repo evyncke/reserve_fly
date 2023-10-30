@@ -209,9 +209,10 @@ class Incident {
 
         $importance = mysqli_real_escape_string($mysqli_link, web2db($this->importance)) ;
         if ($this->id) {
-            mysqli_query($mysqli_link, "REPLACE INTO $table_incident(i_id, i_plane, i_importance)
-                VALUES($this->id, '$this->plane', '$importance')")
-                or journalise($userId, "F", "Cannot replace into $table_incident: " . mysqli_error($mysqli_link)) ;
+            mysqli_query($mysqli_link, "UPDATE $table_incident
+                SET i_plane = '$this->plane', i_importance = '$importance'
+                    WHERE i_id=$this->id")
+                or journalise($userId, "F", "Cannot update $table_incident: " . mysqli_error($mysqli_link)) ;
             return $this->id ;
         } else {
             mysqli_query($mysqli_link, "INSERT INTO $table_incident(i_plane, i_importance)
