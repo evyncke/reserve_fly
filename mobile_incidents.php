@@ -44,7 +44,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     $event->save() ;
 }
 ?>
-<p class="lead text-danger mb-5">En cours de développement, ne pas utiliser.</p>
+<p class="lead text-danger mb-5">En cours de développement, ne pas utiliser en dehors de tests par les gestionnaires de flotte, FIs, informaticiens. 
+Les informations sont fantaisistes et inventées (souvent par Éric).</p>
 
 <h2>Ajouter un nouvel incident</h2>
 
@@ -64,8 +65,14 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </div> <!-- row -->
 <div class="row mb-3">
 	<label class="col-form-label col-sm-4 col-md-2">Importance/urgence:</label>
-	<div class="col-sm-12 col-md-6">
-		<input type="text" class="form-control" name="importance" placeholder="Peut être laissé vide, sinon, 'important', 'pas urgent', 'bloquant', ...">
+	<div class="col-sm-2 col-md-1">
+        <select name="importance" class="form-select">
+            <option value="mineure">mineure</option>
+            <option value="majeure">majeure</option>
+            <option value="urgent">urgent</option>
+            <option value="U/S">U/S</option>
+            <option value="" selected>-- inconnue --</option>
+        </select>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
@@ -78,14 +85,14 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <h2>Liste des incidents <?=$plane?></h2>
 
 <div class="row">
-<div class="col-sm-12 col-md-12 col-lg-7">
+<div class="col-sm-12 col-md-12 col-lg-12">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<tr><th>#Incident</th><th>Avion</th><th>Importance/Urgence</th><th class="text-center" colspan="3">Ouverture</th><th class="text-center" colspan="4">Dernier Statut</th></tr>
-<tr><th></th><th></th><th></th><th>Date</th><th>Description</th><th>Par</th><th>Statut</th><th>Description</th><th>Date</th><th>Par</th></tr>
+<tr><th class="text-center" colspan="6">Rapport</th><th class="text-center border-start" colspan="4">Suivi</th></tr>
+<tr><th>#Incident</th><th>Avion</th><th>Importance/Urgence</th><th>Date</th><th>Description</th><th>Par</th><th class="border-start">Statut</th><th>Action</th><th>Date</th><th>Par</th></tr>
 </thead>
-<tbody>
+<tbody class="table-group-divider">
 
 <?php
     $incidents = new Incidents($plane) ;
@@ -96,10 +103,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
             </td>
             <td><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a></td>
             <td>$incident->importance</td>
-            <td>$incident->firstDate<span class=\"badge bg-primary\">$incident->daysPending</span></td>   
+            <td>$incident->firstDate&nbsp;&nbsp;<span class=\"badge bg-primary\">$incident->daysPending</span></td>   
             <td>$incident->firstText</td>   
-            <td><b>$incident->firstLastName</b> $incident->firstFirstName</td>
-            <td>$incident->lastStatusFrench</td>
+            <td><b>$incident->firstLastName</b> $incident->firstFirstName</td>\n") ;
+        if ($incident->firstId == $incident->lastId)
+            print("<td class=\"border-start\" colspan=\"4\"></td></tr>\n") ;
+        else 
+            print("<td class=\"border-start\">$incident->lastStatusFrench</td>
             <td>$incident->lastText</td>
             <td>$incident->lastDate</td>
             <td><b>$incident->lastLastName</b> $incident->lastFirstName</td>

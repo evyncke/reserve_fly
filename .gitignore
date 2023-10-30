@@ -55,3 +55,6 @@ action_reservation.php
 Grand*Livre*.txt
 ressources.js
 factu/
+htaccess-resa
+htaccess-root
+.gitignore

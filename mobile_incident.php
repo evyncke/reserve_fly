@@ -47,9 +47,15 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
     $event->save() ;
 }
 ?>
-<p class="lead text-danger mb-5">En cours de développement, ne pas utiliser.</p>
+<p class="lead text-danger mb-5">En cours de développement, ne pas utiliser en dehors de tests par les gestionnaires de flotte, FIs, informaticiens. 
+Les informations sont fantaisistes et inventées (souvent par Éric).</p>
 
+<?php
+if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
+?>
 <h2>Ajouter un nouveau status/observation</h2>
+
+<p class="lead">Cette fonction n'est disponible que pour les mécanos, les FIs, et les administrateurs.</p>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
@@ -78,6 +84,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
 </form>
 </div><!-- row -->
 
+<?php
+} // if ($userIsBoardMember or $userIsInstructor or $userIsMechanic)
+?>
 <h2>Historique de l'incident #<?=$incident_id?> (<?=$incident->plane?>)</h2>
 
 <div class="row">
@@ -87,7 +96,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
 <thead>
 <tr><th>Date</th><th>Statut</th><th>Description</th><th>Nom</th></tr>
 </thead>
-<tbody>
+<tbody class="table-group-divider">
 
 <?php
     $events = new IncidentEvents($incident_id) ;
