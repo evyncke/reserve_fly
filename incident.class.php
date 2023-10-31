@@ -39,6 +39,7 @@ class IncidentEvent {
             $this->status = $row['ih_status'] ;
             switch($this->status) {
                 case 'opened': $this->statusFrench = 'Ouvert' ; break ;
+                case 'accepted': $this->statusFrench = 'Accepté' ; break ;
                 case 'inprogress': $this->statusFrench = 'En progrès' ; break ;
                 case 'closed': $this->statusFrench = 'Clôturé' ; break ;
                 case 'rejected': $this->statusFrench = 'Rejeté' ; break ;
@@ -163,6 +164,7 @@ class Incident {
             $this->firstStatus = $row['first_status'] ;
             switch($this->firstStatus) {
                 case 'opened': $this->firstStatusFrench = 'Ouvert' ; break ;
+                case 'accepted': $this->firstStatusFrench = 'Accepté' ; break ;
                 case 'inprogress': $this->firstStatusFrench = 'En progrès' ; break ;
                 case 'closed': $this->firstStatusFrench = 'Clôturé' ; break ;
                 case 'rejected': $this->firstStatusFrench = 'Rejeté' ; break ;
@@ -177,6 +179,7 @@ class Incident {
             $this->lastStatus = $row['last_status'] ;
             switch($this->lastStatus) {
                 case 'opened': $this->lastStatusFrench = 'Ouvert' ; break ;
+                case 'accepted': $this->lastStatusFrench = 'Accepté' ; break ;
                 case 'inprogress': $this->lastStatusFrench = 'En progrès' ; break ;
                 case 'closed': $this->lastStatusFrench = 'Clôturé' ; break ;
                 case 'rejected': $this->lastStatusFrench = 'Rejeté' ; break ;
@@ -240,7 +243,11 @@ class Incidents implements Iterator {
         if ($plane == NULL) 
             $planeCondition = '' ;
         else 
-            $planeCondition = " AND i_plane = '$plane'" ;
+            $planeCondition = " AND i_plane = '$plane' " ;
+        if ($status == NULL)
+            $statusCondition = '' ;
+        else
+            $statusCondition = " AND le.ih_status IN ('" . implode("','", $status) . "') " ;
         $this->plane = $plane ;
         $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending,
                 fe.ih_id AS first_id, DATE(fe.ih_when) AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
@@ -253,7 +260,7 @@ class Incidents implements Iterator {
             WHERE
                 fe.ih_id = (SELECT MIN(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id) AND
                 le.ih_id = (SELECT MAX(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id)
-                $planeCondition
+                $planeCondition $statusCondition
             ORDER BY fe.ih_when DESC" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur systeme à propos de l'access aux incidents $table_incident pour l'avion $this->plane: " . mysqli_error($mysqli_link)) ;

@@ -32,6 +32,11 @@ if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '') {
     $plane = NULL ;
 }
 
+if (isset($_REQUEST['closed']) and $_REQUEST['closed'] != '')
+    $closed = " checked" ;
+else
+    $closed = NULL ;
+
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     $incident = new Incident() ;
     $incident->plane = strtoupper($_REQUEST['plane']) ;
@@ -85,6 +90,12 @@ Les informations sont fantaisistes et inventées (souvent par Éric).</p>
 <h2>Liste des incidents <?=$plane?></h2>
 
 <div class="row">
+    <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
+        <label><input type="checkbox" name="closed"<?=$closed?> onchange="this.form.submit();"> Inclure les incidents terminés</label>
+    </form>
+</div><!-- row -->
+
+<div class="row">
 <div class="col-sm-12 col-md-12 col-lg-12">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
@@ -95,7 +106,10 @@ Les informations sont fantaisistes et inventées (souvent par Éric).</p>
 <tbody class="table-group-divider">
 
 <?php
-    $incidents = new Incidents($plane) ;
+    if ($closed == NULL)
+        $incidents = new Incidents($plane, ['opened', 'accepted', 'inprogress']) ;
+    else
+        $incidents = new Incidents($plane) ;
     foreach($incidents as $incident) {
         print("<tr>
             <td>
