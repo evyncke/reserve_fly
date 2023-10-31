@@ -129,7 +129,7 @@ function gradeChanged(object, reference, grade) {
 </tbody>
 </table>
 </div><!-- table-responsive-->
-<button type="submit" class="btn btn-primary">Save the above changes</button>
+<button type="submit" class="btn btn-primary d-print-none">Save the above changes</button>
 </form>
 </div><!-- col --> 
 </div><!-- row -->

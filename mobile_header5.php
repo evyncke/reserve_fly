@@ -17,7 +17,7 @@
 */
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
+header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image') ;
 	
 ?><!DOCTYPE html>
 <html lang="fr">
@@ -118,7 +118,20 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep this value
   print("<input type=\"hidden\" name=\"user\" value\"$_REQUEST[user]\">\n") ;
 ?>
-<nav class="navbar navbar-expand-md bg-success text-bg-success"><!-- Add fixed-top w/o destroying the layout -->
+<div class="d-none d-print-block"><!-- Show a header on printed documents -->
+<div class="row"> 
+<div class="col-sm-3">
+    <img class="img-fluid" src="https://www.spa-aviation.be/logo_rapcs_256x256.png">
+  </div><!-- col -->
+  <div class="col-sm-9">
+    <h2>Royal Aéro Para Club de Spa ASBL</h2>
+    <p class="fw-light">This page was printed by <?="$userFullName ($userName)"?> on <?=date('l jS \o\f F Y')?>.</p>
+    <p class="fw-light">URL: <?="https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"?></p>
+  </div><!-- col -->
+  <hr>
+</div><!-- row -->
+</div><!-- print only -->
+<nav class="navbar navbar-expand-md bg-success text-bg-success d-print-none"><!-- do not print the menu... Add fixed-top w/o destroying the layout -->
   <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".multi-collapse">
         <span class="navbar-toggler-icon"></span>
