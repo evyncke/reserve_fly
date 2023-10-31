@@ -65,6 +65,7 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 	<div class="col-sm-4 col-md-1">
         <select id="statusSelect" class="form-select" name="status">
             <option value="opened" <?=($incident->lastStatus == 'opened') ? 'selected':''?>>Ouvert</option>
+            <option value="accepted" <?=($incident->lastStatus == 'accepted') ? 'selected':''?>>Accepté</option>
             <option value="inprogress" <?=($incident->lastStatus == 'inprogress') ? 'selected':''?>>En progrès</option>
             <option value="closed" <?=($incident->lastStatus == 'closed') ? 'selected':''?>>Clôturé</option>
             <option value="rejected" <?=($incident->lastStatus == 'rejected') ? 'selected':''?>>Rejeté</option>
