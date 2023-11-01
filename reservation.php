@@ -415,7 +415,7 @@ if ($userId == 0) {
 	print('<input type="button" style="background-color: green; color: white;" value="Nouveau site mobile (beta)" onclick="javascript:document.location.href=\'mobile.php?news\';"> ') ;
 	print('<input type="button" value="Folio du mois" onclick="javascript:document.location.href=\'myfolio.php\';"> ') ;
 	if ($userIsAdmin) print('<input style="background-color: green; color: white;" type="button" value="Journal des opérations" onclick="javascript:document.location.href=\'mobile_journal.php\';"> ') ;
-	if ($userIsAdmin || $userIsMechanic) print('<input type="button" value="Echéances des maintenances" onclick="javascript:document.location.href=\'plane_planning.php\';"> ') ;
+	if ($userIsAdmin || $userIsMechanic) print('<input type="button" value="Echéances des maintenances" style="background-color: green; color: white;" onclick="javascript:document.location.href=\'plane_planning.php\';"> ') ;
 	print('<input type="button" value="No log" style="background-color: yellow; visibility: hidden;" id="logButton" onclick="javascript:toggleLogDisplay();"> ') ;
 	print("<a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">lier &agrave; mon calendrier (iCal)</a>") ;
 	// Display any validity message from above
