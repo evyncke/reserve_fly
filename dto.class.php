@@ -524,7 +524,6 @@ class StudentDocument {
     public $id ;
     public $studentId ;
     public $originalFilename ;
-    public $originalExtension ;
     public $originalMIMEType ;
     public $hashedFilename ;
     public $size ;
@@ -538,10 +537,7 @@ class StudentDocument {
         $this->id = $row['da_id'] ;
         $this->studentId = $row['da_student'] ;
         $this->originalFilename = db2web($row['da_original_filename']) ; 
-        $this->originalExtension = $row['da_original_extension'] ;
-        switch($this->originalExtension) {
-            default: $this->originalMIMEType = "application/octet-stream" ;
-        }
+        $this->originalMIMEType = $row['da_original_type'] ;
         $this->hashedFilename = $row['da_hashed_filename'] ;
         $this->size = $row['da_file_size'] ;
         $this->when = $row['da_when'] ;
@@ -550,19 +546,43 @@ class StudentDocument {
         $this->whoLastName = db2web($row['last_name']) ;
      }
 
-     function save() {
+    function getByHashedFilename($f) {
+        global $mysqli_link, $table_dto_attachment, $table_person, $userId ;
+
+        $sql = "SELECT *
+                FROM $table_dto_attachment 
+                    JOIN $table_person ON jom_id = da_who
+                WHERE da_hashed_filename='$f'
+                ORDER BY da_id" ;
+        $result = mysqli_query($mysqli_link, $sql) 
+                or journalise($userId, "F", "Erreur systeme a propos de l'access aux documents via $f: " . mysqli_error($mysqli_link)) ;
+        $row = mysqli_fetch_array($result) ;
+        $this->__construct($row) ;
+    }
+
+    function save() {
         global $mysqli_link, $userId, $table_dto_attachment ;
 
         if ($this->id)
             journalise($userId, "F", "Cannot save an existing document") ;
         $originalFilename = mysqli_real_escape_string($mysqli_link, web2db($this->originalFilename)) ;
-        $originalExtension = mysqli_real_escape_string($mysqli_link, web2db($this->originalExtension)) ;
         $originalMIMEType = mysqli_real_escape_string($mysqli_link, web2db($this->originalMIMEType)) ;
         mysqli_query($mysqli_link, "INSERT INTO $table_dto_attachment(da_student, da_original_filename, da_original_type, 
                 da_file_size, da_hashed_filename, da_who, da_when)
             VALUES($this->studentId, '$originalFilename', '$originalMIMEType',
                 $this->size, '$this->hashedFilename', $userId, SYSDATE())")
             or journalise($userId, "F", "Cannot update $table_dto_attachment for student $this->studentId $this->originalFilename: " . mysqli_error($mysqli_link)) ;
+    }
+
+    function delete() {
+        global $mysqli_link, $userId, $table_dto_attachment ;
+
+        if ($this->id) {
+            mysqli_query($mysqli_link, "DELETE FROM $table_dto_attachment WHERE da_id = $this->id")
+                or journalise($userId, "E", "Cannot remove entry for $this->id ($this->originalFilename):" . mysqli_error($mysqli_link)) ;
+            unlink("dto_files/$this->hashedFilename") ;
+            journalise($userId, "I", "File $this->originalFilename ($this->id for $this->studentId) deleted") ;
+        }
     }
 }
 

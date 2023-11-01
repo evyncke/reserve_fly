@@ -227,7 +227,7 @@ foreach ($exercices as $exercice) {
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<tr><th>Filename</th><th>Size</th><th>Date</th><th>Uploaded by</th></tr>
+<tr><th>Filename</th><th class="d-none d-lg-table-cell">Size</th><th class="d-none d-lg-table-cell">Date</th><th class="d-none d-lg-table-cell">Uploaded by</th></tr>
 </thead>
 <tbody class="table-group-divider">
 <?php
@@ -236,12 +236,13 @@ foreach ($documents as $document) {
 ?>
 <tr>
     <td><?=$document->originalFilename?>
-        <a href="dto_files/<?=$document->hashedFilename?>"><i class="bi bi-file-earmark-arrow-down-fill"></i></a>
+        <a href="dto_files/<?=$document->hashedFilename?>" download="<?=$document->originalFilename?>" type="<?=$document->originalMIMEType?>">
+        <i class="bi bi-file-earmark-arrow-down-fill"></i></a>
         <!-- should also use the dto.file.php to have the right MIME type and filename -->
-        <a href="dto.file.php?action=delete&file=<?=$document->id?>"><i class="bi bi-trash3-fill"></i></a></td>
-    <td><?=$document->size?></td>
-    <td><?=$document->when?></td>
-    <td><?="<b>$document->whoLastName</b> $document->whoFirstName"?></td>
+        <a href="dto.file.php?action=delete&file=<?=$document->hashedFilename?>" rel="noopener" target="_blank"><i class="bi bi-trash3-fill text-danger"></i></a></td>
+    <td class="d-none d-lg-table-cell"><?=$document->size?></td>
+    <td class="d-none d-lg-table-cell"><?=$document->when?></td>
+    <td class="d-none d-lg-table-cell"><?="<b>$document->whoLastName</b> $document->whoFirstName"?></td>
 </tr>
 <?php
 } // Foreach
