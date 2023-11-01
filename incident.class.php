@@ -244,11 +244,11 @@ class Incidents implements Iterator {
             $planeCondition = '' ;
         else 
             $planeCondition = " AND i_plane = '$plane' " ;
+        $this->plane = $plane ;
         if ($status == NULL)
             $statusCondition = '' ;
         else
             $statusCondition = " AND le.ih_status IN ('" . implode("','", $status) . "') " ;
-        $this->plane = $plane ;
         $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending,
                 fe.ih_id AS first_id, DATE(fe.ih_when) AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
                 le.ih_id AS last_id, DATE(le.ih_when) AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name

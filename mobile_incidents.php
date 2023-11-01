@@ -52,12 +52,12 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <p class="lead text-danger mb-5">En cours de développement, ne pas utiliser en dehors de tests par les gestionnaires de flotte, FIs, informaticiens. 
 Les informations sont fantaisistes et inventées (souvent par Éric).</p>
 
-<h2>Ajouter un nouvel incident</h2>
+<h2>Add a techlog entry for <?=$plane?></h2>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
 <div class="row mb-3">
-	<label for="planeSelect" class="col-form-label col-sm-4 col-md-2">Avion:</label>
+	<label for="planeSelect" class="col-form-label col-sm-4 col-md-2">Plane:</label>
 	<div class="col-sm-4 col-md-1">
         <select id="planeSelect" class="form-select" name="plane"></select>
 	</div> <!-- col -->
@@ -65,33 +65,34 @@ Les informations sont fantaisistes et inventées (souvent par Éric).</p>
 <div class="row mb-3">
 	<label class="col-form-label col-sm-4 col-md-2">Description:</label>
 	<div class="col-sm-12 col-md-6">
-		<input type="text" class="form-control" name="remark" placeholder="Description courte de l'incident">
+		<input type="text" class="form-control" name="remark" placeholder="Short description of the techlog entry">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label class="col-form-label col-sm-4 col-md-2">Importance/urgence:</label>
+	<label class="col-form-label col-sm-4 col-md-2">Importance/urgency:</label>
 	<div class="col-sm-2 col-md-1">
         <select name="importance" class="form-select">
-            <option value="mineure">mineure</option>
-            <option value="majeure">majeure</option>
+            <option value="mineure">minor</option>
+            <option value="majeure">major</option>
             <option value="urgent">urgent</option>
             <option value="U/S">U/S</option>
-            <option value="" selected>-- inconnue --</option>
+            <option value="" selected>-- unknown --</option>
         </select>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
         <button type="submit" name="action" value="create" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary" >
-            Ajouter l'incident
+            Add techlog entry
         </button></div>
 </form>
 </div><!-- row -->
 
-<h2>Liste des incidents <?=$plane?></h2>
+<h2>Tech log for <?=$plane?></h2>
 
 <div class="row">
     <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
-        <label><input type="checkbox" name="closed"<?=$closed?> onchange="this.form.submit();"> Inclure les incidents terminés</label>
+        <input type="hidden" name="plane" value="<?=$plane?>">
+        <label><input type="checkbox" name="closed"<?=$closed?> onchange="this.form.submit();"> Include closed entries</label>
     </form>
 </div><!-- row -->
 
@@ -100,8 +101,8 @@ Les informations sont fantaisistes et inventées (souvent par Éric).</p>
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<tr><th class="text-center" colspan="6">Rapport</th><th class="text-center border-start" colspan="4">Suivi</th></tr>
-<tr><th>#Incident</th><th>Avion</th><th>Importance/Urgence</th><th>Date</th><th>Description</th><th>Par</th><th class="border-start">Statut</th><th>Action</th><th>Date</th><th>Par</th></tr>
+<tr><th class="text-center" colspan="6">Report</th><th class="text-center border-start" colspan="4">Follow-up</th></tr>
+<tr><th>#Entry</th><th>Plane</th><th>Importance/Urgency</th><th>Date</th><th>Description</th><th>By</th><th class="border-start">Status</th><th>Action</th><th>Date</th><th>By</th></tr>
 </thead>
 <tbody class="table-group-divider">
 

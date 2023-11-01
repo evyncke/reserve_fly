@@ -53,7 +53,7 @@ Les informations sont fantaisistes et inventées (souvent par Éric).</p>
 <?php
 if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 ?>
-<h2>Ajouter un nouveau status/observation</h2>
+<h2>Add a new entry in the tech log</h2>
 
 <p class="lead">Cette fonction n'est disponible que pour les mécanos, les FIs, et les administrateurs.</p>
 
@@ -61,7 +61,7 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
 <input type="hidden" name="incident" value="<?=$incident_id?>">
 <div class="row mb-3">
-	<label for="statusSelect" class="col-form-label col-sm-4 col-md-2">Nouveau statut:</label>
+	<label for="statusSelect" class="col-form-label col-sm-4 col-md-2">New status:</label>
 	<div class="col-sm-4 col-md-1">
         <select id="statusSelect" class="form-select" name="status">
             <option value="opened" <?=($incident->lastStatus == 'opened') ? 'selected':''?>>Ouvert</option>
@@ -75,12 +75,12 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 <div class="row mb-3">
 	<label class="col-form-label col-sm-4 col-md-2">Description:</label>
 	<div class="col-sm-12 col-md-6">
-		<input type="text" class="form-control" name="remark" placeholder="Description courte de l'action/question/réponse">
+		<input type="text" class="form-control" name="remark" placeholder="Short description of the action/question/answer">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
         <button type="submit" name="action" value="add" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary" >
-            Modifier l'incident
+            Modify techlog entry
         </button></div>
 </form>
 </div><!-- row -->
@@ -88,14 +88,14 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 <?php
 } // if ($userIsBoardMember or $userIsInstructor or $userIsMechanic)
 ?>
-<h2>Historique de l'incident #<?=$incident_id?> (<?=$incident->plane?>)</h2>
+<h2>History of tech long entry#<?=$incident_id?> (<?=$incident->plane?>)</h2>
 
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-7">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<tr><th>Date</th><th>Statut</th><th>Description</th><th>Nom</th></tr>
+<tr><th>Date</th><th>Status</th><th>Description</th><th>By</th></tr>
 </thead>
 <tbody class="table-group-divider">
 

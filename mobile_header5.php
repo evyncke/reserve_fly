@@ -200,7 +200,7 @@ if ($userId > 0) {
 <?php
       if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
-            <li><i><a class="dropdown-item" href="mobile_incidents.php">Incidents</a></i></li>
+            <li><i><a class="dropdown-item" href="mobile_incidents.php">Tech Log</a></i></li>
 <?php
       }
 ?>
