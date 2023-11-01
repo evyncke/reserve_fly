@@ -184,6 +184,8 @@ class Flight {
     public $weather ;
     public $remark ;
     public $who ;
+    public $whoFirstName ;
+    public $whoLastName ;
     public $when ;
     public $sessionGrade ;
 
@@ -211,6 +213,8 @@ class Flight {
         else
             $this->sessionGrade = $row['df_session_grade'] ;
         $this->who = $row['df_who'] ;
+        $this->whoFirstName = db2web($row['who_first_name']) ;
+        $this->whoLastName = db2web($row['who_last_name']) ;
         $this->when = $row['df_when'] ;
     }
 
@@ -219,12 +223,14 @@ class Flight {
 
         $result = mysqli_query($mysqli_link, "SELECT *, DATE(l_start) AS date,
                     s.last_name AS s_last_name, s.first_name AS s_first_name, 
-                    fi.last_name AS fi_last_name, fi.first_name AS fi_first_name, 
+                    fi.last_name AS fi_last_name, fi.first_name AS fi_first_name,
+                    who.last_name AS who_last_name, who.first_name AS who_first_name,
                     60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration 
                 FROM $table_dto_flight 
                     JOIN $table_person s ON df_student = s.jom_id
                     JOIN $table_logbook ON df_flight_log = l_id
                     LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
+                    LEFT JOIN $table_person who ON df_who = who.jom_id
                 WHERE df_id = $id")
             or journalise($userId, "F", "Cannot read from $table_dto_flight for flight $id: " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
@@ -238,11 +244,13 @@ class Flight {
         $result = mysqli_query($mysqli_link, "SELECT *, DATE(l_start) AS date,
                     s.last_name AS s_last_name, s.first_name AS s_first_name, 
                     fi.last_name AS fi_last_name, fi.first_name AS fi_first_name, 
+                    who.last_name AS who_last_name, who.first_name AS who_first_name,
                     60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration 
                 FROM $table_dto_flight 
                     JOIN $table_person s ON df_student = s.jom_id
                     JOIN $table_logbook ON df_flight_log = l_id
                     LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
+                    LEFT JOIN $table_person who ON df_who = who.jom_id
                 WHERE l_instructor = $fi
                 ORDER BY l_start DESC
                 LIMIT 1")
@@ -298,13 +306,15 @@ class Flights implements Iterator {
 
         $this->studentId = $studentId ; 
         $sql = "SELECT *, DATE(l_start) AS date,
-                s.last_name AS s_last_name, s.first_name AS s_first_name, 
-                fi.last_name AS fi_last_name, fi.first_name AS fi_first_name, 
+                s.last_name AS s_last_name, s.first_name AS s_first_name,
+                fi.last_name AS fi_last_name, fi.first_name AS fi_first_name,
+                who.last_name AS who_last_name, who.first_name AS who_first_name,
                 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration
             FROM $table_dto_flight
                 JOIN $table_person s ON df_student = s.jom_id
                 JOIN $table_logbook ON df_flight_log = l_id
                 LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
+                LEFT JOIN $table_person who ON df_who = who.jom_id
             WHERE df_student = $this->studentId
             ORDER BY df_student_flight" ;
         $this->result = mysqli_query($mysqli_link, $sql) 

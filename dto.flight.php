@@ -129,6 +129,7 @@ function gradeChanged(object, reference, grade) {
 </tbody>
 </table>
 </div><!-- table-responsive-->
+<p class="font-ligher fst-italic">Last modified by <?="$flight->whoLastName $flight->whoFirstName"?> on <?=$flight->when?>.</p>
 <button type="submit" class="btn btn-primary d-print-none">Save the above changes</button>
 </form>
 </div><!-- col --> 
