@@ -52,6 +52,7 @@ if (isset($_POST['action']) and $_POST['action'] == 'upload') {
     $document->size = $_FILES['file']['size'] ;
     $document->studentId = $student_id ;
     $document->save() ;
+    journalise($userId, "I", "File $document->originalFilename uploaded") ;
 }
 ?>
 
