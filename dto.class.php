@@ -488,7 +488,6 @@ class StudentExercices implements Iterator {
                     LEFT JOIN $table_dto_student_exercice ON dse_flight = df_id AND dse_exercice = de_ref
                 GROUP BY de_id
                 ORDER BY de_id" ;
-        // print("<hr><pre>$sql</pre><hr>") ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur systeme a propos de l'access aux exercices école: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
@@ -505,6 +504,97 @@ class StudentExercices implements Iterator {
     
     public function key() {
         return $this->row['de_id'];
+    }
+    
+    public function next():void {
+        $this->row = mysqli_fetch_assoc($this->result) ;
+    }
+    
+    public function rewind():void {
+        mysqli_data_seek($this->result, 0) ;
+        $this->row = mysqli_fetch_assoc($this->result) ;
+    }
+    
+    public function valid():bool {
+        return $this->row != false;
+    }
+}
+
+class StudentDocument {
+    public $id ;
+    public $studentId ;
+    public $originalFilename ;
+    public $originalExtension ;
+    public $originalMIMEType ;
+    public $hashedFilename ;
+    public $size ;
+    public $when ;
+    public $who ;
+    public $whoFirstName ;
+    public $whoLastName ;
+
+    function __construct($row = NULL) {
+        if (! $row) return ;
+        $this->id = $row['da_id'] ;
+        $this->studentId = $row['da_student'] ;
+        $this->originalFilename = db2web($row['da_original_filename']) ; 
+        $this->originalExtension = $row['da_original_extension'] ;
+        switch($this->originalExtension) {
+            default: $this->originalMIMEType = "application/octet-stream" ;
+        }
+        $this->hashedFilename = $row['da_hashed_filename'] ;
+        $this->size = $row['da_file_size'] ;
+        $this->when = $row['da_when'] ;
+        $this->who = $row['da_who'] ;
+        $this->whoFirstName = db2web($row['first_name']) ;
+        $this->whoLastName = db2web($row['last_name']) ;
+     }
+
+     function save() {
+        global $mysqli_link, $userId, $table_dto_attachment ;
+
+        if ($this->id)
+            journalise($userId, "F", "Cannot save an existing document") ;
+        $originalFilename = mysqli_real_escape_string($mysqli_link, web2db($this->originalFilename)) ;
+        $originalExtension = mysqli_real_escape_string($mysqli_link, web2db($this->originalExtension)) ;
+        $originalMIMEType = mysqli_real_escape_string($mysqli_link, web2db($this->originalMIMEType)) ;
+        mysqli_query($mysqli_link, "INSERT INTO $table_dto_attachment(da_student, da_original_filename, da_original_type, 
+                da_file_size, da_hashed_filename, da_who, da_when)
+            VALUES($this->studentId, '$originalFilename', '$originalMIMEType',
+                $this->size, '$this->hashedFilename', $userId, SYSDATE())")
+            or journalise($userId, "F", "Cannot update $table_dto_attachment for student $this->studentId $this->originalFilename: " . mysqli_error($mysqli_link)) ;
+    }
+}
+
+class StudentDocuments implements Iterator {
+    public $count ;
+    private $result ;
+    private $row ;
+
+    function __construct ($student) {
+        global $mysqli_link, $table_dto_attachment, $table_person, $userId ;
+
+        $sql = "SELECT *
+                FROM $table_dto_attachment 
+                    JOIN $table_person ON jom_id = da_who
+                WHERE da_student = $student
+                ORDER BY da_id" ;
+        $this->result = mysqli_query($mysqli_link, $sql) 
+                or journalise($userId, "F", "Erreur systeme a propos de l'access aux documents: " . mysqli_error($mysqli_link)) ;
+        $this->count = mysqli_num_rows($this->result) ;
+        $this->row = mysqli_fetch_assoc($this->result) ;
+    }
+
+    function __destruct() {
+        mysqli_free_result($this->result) ;
+    }
+
+    public function current() {
+        return new StudentDocument($this->row);
+    }
+    
+    public function key() {
+        return $this->row['da_id'];
     }
     
     public function next():void {

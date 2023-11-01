@@ -34,6 +34,25 @@ if (isset($_REQUEST['student']) and is_numeric($_REQUEST['student']) and $_REQUE
 }
 if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
+
+if (isset($_POST['action']) and $_POST['action'] == 'upload') {
+    if (!isset($_FILES['file']) or !isset($_FILES['file']['name']) or $_FILES['file']['size'] == 0)
+        die('Please select a file. <button onclick="window.history.back();">Try again</button>') ;
+    $source_file = $_FILES['file']['tmp_name'] ;
+    $path_info = pathinfo($_FILES['file']['name']) ;
+    $extension = $path_info['extension'] ;
+    $hashed_filename = sha1($source_file . $shared_secret) . ".$extension";
+    if (!move_uploaded_file($source_file, "dto_files/$hashed_filename")) {
+        journalise($userId, 'E', "Unable to move to dto_files/$hash_filename: $source_file") ;
+    }
+    $document = new StudentDocument() ;
+    $document->hashedFilename = $hashed_filename ;
+    $document->originalFilename = $_FILES['file']['name'] ;
+    $document->originalMIMEType = $_FILES['file']['type'] ;
+    $document->size = $_FILES['file']['size'] ;
+    $document->studentId = $student_id ;
+    $document->save() ;
+}
 ?>
 
 <h2>Details for <?=$student->lastName?> <?=$student->firstName?></h2>
@@ -41,6 +60,9 @@ if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
 <ul class="nav nav-tabs" role="tablist">
     <li class="nav-item">
   		<a class="nav-link active" role="presentation" data-bs-toggle="tab" data-bs-target="#summary" aria-current="page" href="#summary">Summary</a>
+	</li>
+    <li class="nav-item">
+  		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#documents" aria-current="page" href="#documents">Documents</a>
 	</li>
     <li class="nav-item">
   		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#flights" aria-current="page" href="#flights">Flights</a>
@@ -194,6 +216,54 @@ foreach ($exercices as $exercice) {
 </div><!-- row --> 
 
 </div><!-- tab-pane -->
+
+<div class="tab-pane fade" id="documents" role="tabpanel">
+
+<div class="row">
+    <p>Here are all documents linked to this student.
+    </p>
+<div class="col-sm-12 col-md-9 col-lg-7">
+<div class="table-responsive">
+<table class="table table-striped table-hover">
+<thead>
+<tr><th>Filename</th><th>Size</th><th>Date</th><th>Uploaded by</th></tr>
+</thead>
+<tbody class="table-group-divider">
+<?php
+$documents = new StudentDocuments($student_id) ;
+foreach ($documents as $document) {
+?>
+<tr>
+    <td><?=$document->originalFilename?>
+        <a href="dto_files/<?=$document->hashedFilename?>"><i class="bi bi-file-earmark-arrow-down-fill"></i></a>
+        <!-- should also use the dto.file.php to have the right MIME type and filename -->
+        <a href="dto.file.php?action=delete&file=<?=$document->id?>"><i class="bi bi-trash3-fill"></i></a></td>
+    <td><?=$document->size?></td>
+    <td><?=$document->when?></td>
+    <td><?="<b>$document->whoLastName</b> $document->whoFirstName"?></td>
+</tr>
+<?php
+} // Foreach
+?>
+</tbody>
+</table>
+</div><!-- table responsive -->
+</div><!-- col -->
+</div><!-- row --> 
+
+<div class="row">
+    <hr>
+<form method="POST" action="<?=$_SERVER['PHP_SELF']?>" enctype="multipart/form-data" role="form" class="form-inline">
+<input type="hidden" name="student" value="<?=$student->jom_id?>">
+<input type="hidden" name="action" value="upload">
+<div class="mb-3">
+  <label for="file" class="form-label">Add a new document</label>
+  <input class="form-control" type="file" id="file" name="file">
+</div>
+<button class="btn btn-primary" type="submit">Upload the file</button>
+</form>
+</div><!-- row --> 
+</div><!-- tab-pane --> 
 
 </div><!-- tab-content -->
 </body>
