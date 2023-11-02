@@ -201,7 +201,7 @@ $members = [62, 66, 348, 92] ;
 while ($row = mysqli_fetch_array($result)) {
 	$member=$row['id'];	
 	$bce=$row['bce'];
-    $folio = new Folio($member, '2023-09-01', '2023-10-01') ;
+    $folio = new Folio($member, '2023-10-01', '2023-11-01') ;
     if ($folio->count == 0) continue ; // Skip empty folios
 	$invoiceCount++ ;
 	$nextInvoice=$prefixInvoice."-".str_pad($invoiceCount,4,"0",STR_PAD_LEFT);
