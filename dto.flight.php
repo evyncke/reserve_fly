@@ -97,7 +97,8 @@ function gradeChanged(object, reference, grade) {
     window.location.href = "https://www.spa-aviation.be/resa/dto.flight.php?flight=<?=$flight->id?>&action=exercice&exercice=" + reference + "&grade=" + grade + "&value=" + value;
 }
 </script>
-<h2>Flight N° <?=$flight->flightId?> of <?=$flight->studentLastName?> <?=$flight->studentFirstName?></h2>
+<h2>Flight N° <?=$flight->flightId?> of <?=$flight->studentLastName?> <?=$flight->studentFirstName?>
+    <a href="dto.student.php?student=<?=$flight->student?>"><i class="bi bi-folder"></i></a></h2>
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">
 <form method="GET" action="<?=$_SERVER['PHP_SELF']?>">
