@@ -209,7 +209,7 @@ class Flight {
         $this->weather = db2web($row['df_weather']) ;
         $this->remark = db2web($row['df_remark']) ;
         if ($row['df_session_grade'] == '')
-            $this->sessionGrade = NULL ;
+            $this->sessionGrade = 'satisfactory' ;
         else
             $this->sessionGrade = $row['df_session_grade'] ;
         $this->who = $row['df_who'] ;
