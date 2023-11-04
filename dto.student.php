@@ -32,8 +32,11 @@ if (isset($_REQUEST['student']) and is_numeric($_REQUEST['student']) and $_REQUE
 } else {
     journalise($userId, 'F', "Invalid parameter student=$_REQUEST[student].") ;
 }
-if (! ($userIsAdmin or $userIsInstructor or $userId == $student))
+if (! ($userIsAdmin or $userIsInstructor or $userId == $student_id))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
+
+if ($userId == $student_id)
+	journalise($userId, "I", "Student looking his/her flights") ;
 
 if (isset($_POST['action']) and $_POST['action'] == 'upload') {
     if (!isset($_FILES['file']) or !isset($_FILES['file']['name']) or $_FILES['file']['size'] == 0)
