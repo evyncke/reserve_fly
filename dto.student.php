@@ -206,7 +206,8 @@ foreach ($exercices as $exercice) {
  <td colspan="3"><div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" value="yes" disabled
             onChange="gradeChanged(this, '<?=$exercice->reference?>', 'yes')"
-        <?=(($exercice->grade['yes'] == 'yes') ? 'checked' : '')?>> <b>Successful</b>
+        <?=(($exercice->grade['yes'] == 'yes') ? 'checked' : '')?>> 
+        <?=(($exercice->grade['yes'] == 'yes') ? '<b>Successful</b>' : 'Sucessful')?>
     </div></td>
  </tr>
 <?php
