@@ -301,9 +301,10 @@ class Flights implements Iterator {
     private $result ;
     private $row ;
 
-    function __construct ($studentId) {
+    function __construct ($studentId = NULL) {
         global $mysqli_link, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
 
+        if (!$studentId) return ;
         $this->studentId = $studentId ; 
         $sql = "SELECT *, DATE(l_start) AS date,
                 s.last_name AS s_last_name, s.first_name AS s_first_name,
@@ -319,6 +320,29 @@ class Flights implements Iterator {
             ORDER BY df_student_flight" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur systeme a propos de l'access aux vols école de $this->studentId: " . mysqli_error($mysqli_link)) ;
+        $this->count = mysqli_num_rows($this->result) ;
+        $this->row = mysqli_fetch_assoc($this->result) ;
+    }
+
+    function getUnprocessedByFI($fiId) {
+        global $mysqli_link, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
+
+        $this->studentId = NULL; 
+        if ($this->result) mysqli_free_result($this->result) ;
+        $sql = "SELECT *, DATE(l_start) AS date,
+                s.last_name AS s_last_name, s.first_name AS s_first_name,
+                fi.last_name AS fi_last_name, fi.first_name AS fi_first_name,
+                who.last_name AS who_last_name, who.first_name AS who_first_name,
+                60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration
+            FROM $table_dto_flight
+                JOIN $table_person s ON df_student = s.jom_id
+                JOIN $table_logbook ON df_flight_log = l_id
+                LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
+                LEFT JOIN $table_person who ON df_who = who.jom_id
+            WHERE l_instructor = $fiId AND df_when == l_audit_time
+            ORDER BY df_when DESC" ;
+        $this->result = mysqli_query($mysqli_link, $sql) 
+                or journalise($userId, "F", "Erreur systeme a propos de l'access aux vols école via l'instructeur $fiId: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
         $this->row = mysqli_fetch_assoc($this->result) ;
     }
