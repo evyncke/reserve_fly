@@ -16,6 +16,8 @@
 
 */
 require_once 'dbi.php';
+require_once 'dto.class.php';
+
 if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year 
 	// TODO only send it when not received
 	setcookie('trusted_booker', 1, time() + 365 * 24 * 60 * 60, '/', '', true, true) ;
@@ -34,7 +36,11 @@ if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year
 	
 <?php
 require_once 'IntroCarnetVol_tools.php' ;
-// print("</script></br>DEBUG 001</br><script>");
+//---------------------------------------------------------------------------
+// Initialiation of default variables
+// Define all variables used by the javascript
+//---------------------------------------------------------------------------
+
 // Define all variables used by the javascript
 print("var default_editflag=0;\n");
 print("var default_segment=0;\n");
@@ -125,8 +131,10 @@ print("var default_pilot=$userId;\n");
   <h1 style="text-align: center;">Introduction vol</h1>
 
 <?php
-
+  
+//---------------------------------------------------------------------------
 // For FI (or when the trusted_booker cookie is set), display all existing reservations of today w/o any log entries
+//---------------------------------------------------------------------------
 
 $trustedBooker = (isset($_COOKIE['trusted_booker']) and $_COOKIE['trusted_booker'] == 1) ;
 $trustedBookerMsg = ($trustedBooker) ? " Ce browser est trusted." : "" ;
@@ -160,8 +168,11 @@ if ($userIsAdmin or $userIsInstructor) {
 		print("</table></center><p></p>\n") ;
 	}
 }
+
 //---------------------------------------------------------------------------
-// Manage previous and next booking
+// Management of previous and next booking
+// Find the previous/next booking
+//---------------------------------------------------------------------------
 
 // Find the previous/next booking
 // Retrieve the booking
@@ -223,8 +234,16 @@ print('</table>');
 
 //-----------------------------------------------------------------------------------------------------
 // Do we need to delete a segment in the logbook?
+//-----------------------------------------------------------------------------------------------------
+
 if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 	$logid=$_REQUEST['logid'];
+	
+	// Remove a DTO flight associated to this logid
+	//print("before RemoveDTOFlight: logid=$logid</br>");
+	RemoveDTOFlight($logid);
+		
+	// Remove the entry in the LogBook
 	$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
 	mysqli_query($mysqli_link, "delete from $table_logbook where l_id=$logid and l_audit_time='$audit_time'") or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
@@ -238,7 +257,16 @@ if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 
 //-----------------------------------------------------------------------------------------------------
 // Do we need to delete a reservation in booking table?
+// 1. Delete all segments associated to this bookingid
+// 2. Delete the entry in the bookings table
+//-----------------------------------------------------------------------------------------------------
+
 if (isset($_REQUEST['bookingtable']) and $_REQUEST['bookingtable'] == '1') {
+	
+	// Delete all DTO flights associated to this bookingid
+	// All DTO flight associated to all segments behing this bookingid
+	RemoveAllDTOFlightBehindBooking($bookingid);
+	
 	// Delete all segments associated to this bookingid
 	mysqli_query($mysqli_link, "delete from $table_logbook where l_booking=$bookingid") or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
@@ -262,6 +290,7 @@ if (isset($_REQUEST['bookingtable']) and $_REQUEST['bookingtable'] == '1') {
 
 //-----------------------------------------------------------------------------------------------------
 // Summary of the Reservation
+//-----------------------------------------------------------------------------------------------------
 print('<p></p>');
 if($bookingid) {
 	$result=mysqli_query($mysqli_link,"SELECT r_id, r_plane, r_type, r_from, r_to, r_start, r_stop, r_pilot, p.last_name as pilotName, i.last_name as instructorName
@@ -305,6 +334,7 @@ if($bookingid) {
 
 //---------------------------------------------------------------------------
 // Manage l'enregistrement du vol introduit dans la form.
+//---------------------------------------------------------------------------
 
 if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	// TODO sanitize all fields to prevent SQL injection
@@ -419,7 +449,10 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		$engineEndMinute=strval(intval($engineEndMinute)*6);
 	}
 	if($bookingid == 0){
+		// -----------------------------------------
 		// Vol sans reservation: Creation d'une entrée dans la table des bookings
+		// =====================
+		// -------------------------------------------
 		// Special time handling as bookings are in local time
 		$dt = new DateTime($startDayTime, new DateTimeZone('UTC'));
 		$dt->setTimezone(new DateTimeZone($default_timezone));
@@ -443,7 +476,10 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	}
 	
 	if($cdv_logbookid==0) {
+		// -----------------------------------------
 		// Insert a new segment
+		// =====================
+		// -------------------------------------------
 		//print("Insert a segment</br>");
 		mysqli_query($mysqli_link, "insert into $table_logbook(l_plane, l_model, l_booking, l_from, l_to,
 				l_start_hour, l_start_minute, l_end_hour, l_end_minute, l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
@@ -454,16 +490,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 				'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
 				'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
 //			or die("(1)Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link). " Vol déjà introduit") ;
-			or journalise($userId, 'F', "<p style=\"color: red;\"><b>Impossible d'ajouter le segment dans le logbook:Vol déjà introduit.</br>Erreur SQL=" . mysqli_error($mysqli_link)."</br>9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.</br>Faite un Back avec votre Browser et corrigé l'heure de départ.</b></p>") ;		
-
-/*			
-			
-			{
-				print("<script>alert(\"Impossible d'introduire ce vol dans le logbook.\\n9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.\\nFaite un Back avec votre Browser et corrigé l'heure de départ.\");</script>");
-				die("<p style=\"color: red;\"><b>Impossible d'ajouter le segment dans le logbook:Vol déjà introduit.</br>Erreur SQL=" . mysqli_error($mysqli_link)."</br>9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.</br>Faite un Back avec votre Browser et corrigé l'heure de départ.</b></p>") ;		
-			}
-	*/		
+			or journalise($userId, 'F', "<p style=\"color: red;\"><b>Impossible d'ajouter le segment dans le logbook:Vol déjà introduit.</br>Erreur SQL=" . mysqli_error($mysqli_link)."</br>9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.</br>Faite un Back avec votre Browser et corrigé l'heure de départ.</b></p>") ;			
 		$l_id = mysqli_insert_id($mysqli_link) ; 
+		$logid=$l_id;
 	
 	    journalise($userId, "I", "New Logbook entry added for $planeId, engine from $engineStartHour: $engineStartMinute to $engineEndHour:$engineEndMinute flight $startDayTime@$fromAirport to $endDayTime@$toAirport");
 		
@@ -474,7 +503,10 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		   
    }
    else {
+		// -----------------------------------------
 		// Edit a  segment
+		// ===============
+		// -------------------------------------------
 	    //print("Edit a segment $cdv_logbookid </br>");
 //		mysqli_query($mysqli_link, "replace into $table_logbook(l_id, l_plane, l_model, l_booking, l_from, l_to,
 //				l_start_hour, l_start_minute, l_end_hour, l_end_minute, l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
@@ -483,6 +515,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 //				values ('$cdv_logbookid', '$planeId', '$planeModel', $bookingidPage, '$fromAirport', '$toAirport',
 //				$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute, $flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
 //			'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
+	
 		// As l_id is a foreign key, let's use an UPDATE rather than a REPLACE
 		mysqli_query($mysqli_link, "UPDATE $table_logbook
 			SET l_plane='$planeId', l_model='$planeModel', l_booking=$bookingidPage, l_from='$fromAirport', l_to='$toAirport',
@@ -499,6 +532,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 
 	    journalise($userId, "I", "Logbook entry updated for $planeId, engine from $engineStartHour: $engineStartMinute to $engineEndHour:$engineEndMinute flight $startDayTime@$fromAirport to $endDayTime@$toAirport");	
 		
+				
 		// Table resume du vol édité
 	    print('<p></p><center><table width=100%" border-spacing="0px"><tbody>
 	   <tr><td style="background-color: LightSalmon; text-align: center;" colspan="8">Un vol édité: Résumé (Heure UTC)</td></tr>
@@ -517,9 +551,39 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	print("<td>$cdv_heure_arrivee</td>");
 	print("<td>$cdv_duree</td>");
 	print("</tbody></table></center>");
+	
+	//----------------------------------------------------
+	// Associate the flight with a DTO fligth
+	// Only if pilot is a student
+	//----------------------------------------------------
+	//print("</br>Check if the pilot is a student pilotId=$pilotId </br>");
+	//print("SELECT user_id FROM $table_user_usergroup_map WHERE user_id = '$pilotId' and group_id='$joomla_student_group';</br>");
+	// Look in the $table_user_usergroup_map if the pilot is a student
+	$studentResult=mysqli_query($mysqli_link,"SELECT user_id FROM $table_user_usergroup_map WHERE user_id = '$pilotId' and group_id='$joomla_student_group';") or die("Impossible de retrouver le user_id dans table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
+	if ($studentResult->num_rows != 0) {
+		//print("C'est aussi un eleve logid=$logid</br>");
+		//print("Creating  also Flight</br>");
+		// Create a flight in the DTO table rapcs_dto_flight
+		$flight = new Flight() ;
+		$flight->flightLog = $logid;
+		$flight->student= $pilotId;
+		if($isPICFunction) {
+			$flight->flightType="Solo";
+		}
+		else {
+			$flight->flightType="DC";			
+		}
+		$flight->save();
+		//print("FlightLog saved</br>");
+	}
+	else {
+		//print("Ce n'est pas un eleve</br");
+	}
 }
 
+	//----------------------------------------------------
 	// Associate the flight with an IF or an INIT flight
+	//----------------------------------------------------
     //print("cdv_flightreferenceid=$cdv_flightreferenceid;numeroVol=$numeroVol;shareType=$shareType;shareMember=$shareMember</br>");	
 	if($numeroVol!="" && $shareType=="CP1" && ($shareMember==-3 ||$shareMember==-4 || $shareMember==-6)) {
 		//print("Associate the flight with an IF or an INIT flight</br>");	
@@ -548,6 +612,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 
 //-----------------------------------------------------------------------------------------------------
 // display any previous entries related to this booking
+//-----------------------------------------------------------------------------------------------------
 
 print('<p></p>');
 if($bookingid) {
@@ -609,6 +674,10 @@ if($bookingid) {
 			$remark=GetFullRemarks($row['l_share_type'],$row['l_share_member'], $row['l_remark'], $instructorPaid );
 			$toAirport=$row['l_to'];
 			
+			// retrieve the Flight Id from the LogId
+			$dtoFlightId=GetDTOFlightIdFromLogId($logid);
+			//print("dtoFlightId=$dtoFlightId</br>");
+			
 			print("<tr style='text-align: center;'>
 				<td>$aSegment ($logid)</td>
 				<td>$row[l_plane]</td>
@@ -624,7 +693,11 @@ if($bookingid) {
 				<td>$remark</td>
 				<td><button type=\"button\" value=\"Del\" onclick=\"redirectLogbookDelete('$_SERVER[PHP_SELF]',$bookingid,$logid,'$auth','$row[l_audit_time]');\">&#128465; Effacer</button>&nbsp;
 				
-				<button type=\"button\" value=\"Edit\" onclick=\"window.location.href='$_SERVER[PHP_SELF]?edit=1&id=$bookingid&logid=$logid';\">&#9998; Editer</button>
+				<button type=\"button\" value=\"Edit\" onclick=\"window.location.href='$_SERVER[PHP_SELF]?edit=1&id=$bookingid&logid=$logid';\">&#9998; Editer</button>");
+				if($dtoFlightId>0) {
+					print("&nbsp;<button type=\"button\" value=\"DTO\" onclick=\"window.location.href='https://www.spa-aviation.be//resa/dto.flight.php?flight=$dtoFlightId';\">DTO</button>");
+				}
+				print("
 				</td>
 				</tr>\n") ;
 		}
@@ -806,7 +879,7 @@ else {
 		//printf("r_start=$row[r_start]</br>");
 	}
 	else {
-		print("</br>1111 SELECT f_id, f_reference FROM $table_flight WHERE f_id = $bookingid</br>");
+		//print("</br>1111 SELECT f_id, f_reference FROM $table_flight WHERE f_id = $bookingid</br>");
 		print("var default_plane=\"\";\n");
 		print("var default_instructor=0;\n");
 		print("var default_date_heure_depart=\"\";\n");

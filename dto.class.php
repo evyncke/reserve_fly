@@ -654,4 +654,48 @@ class StudentDocuments implements Iterator {
         return $this->row != false;
     }
 }
+
+// Remove a Flight from the LogId
+function RemoveDTOFlight($logid) {
+	global $mysqli_link, $userId, $table_dto_flight, $table_dto_student_exercice;
+	
+	// retrieve the FlightId associated to the logId
+	$flightId=GetDTOFlightIdFromLogId($logid);
+		
+	if($flightId > 0) {
+		// Remove all entries in the table_dto_strudent_exercice
+		mysqli_query($mysqli_link, "delete from $table_dto_student_exercice where dse_flight=$flightId") or die("Cannot delete from table_dto_strudent_exercice: " . mysqli_error($mysqli_link)) ;
+		
+		mysqli_query($mysqli_link, "delete from $table_dto_flight where df_flight_log=$logid") or die("Cannot delete from table_dto_flight: " . mysqli_error($mysqli_link)) ;
+		if (mysqli_affected_rows($mysqli_link) > 0) {
+			$insert_message = "DTO Flight mis &agrave; jour" ;
+			journalise($userId, 'I', "table_dto_flight entry deleted for LogId $logid (done at $audit_time).") ;
+		}
+	}
+}
+
+// Remove all Flight associated to a BookId
+function RemoveAllDTOFlightBehindBooking($bookingid) {
+	global $mysqli_link, $table_logbook ;
+	$result = mysqli_query($mysqli_link, "select l_id
+			from $table_logbook where l_booking = $bookingid")
+		or die("Impossible de lire les entrees pour reservation $bookingid: " . mysqli_error($mysqli_link)) ;
+
+	while ($row = mysqli_fetch_array($result)) {
+			$logid=$row['l_id'];
+			GetDTOFlightIdFromLogId($logid);
+	}
+}
+
+// Returns FlightId from the LogId
+function GetDTOFlightIdFromLogId($logid) {
+
+	global $mysqli_link, $userId, $table_dto_flight ;
+	$result=mysqli_query($mysqli_link,"SELECT df_id from $table_dto_flight where df_flight_log=$logid") or die("Cannot get df_id from table_dto_flight: " . mysqli_error($mysqli_link)) ;
+    $row = mysqli_fetch_array($result) ;
+	if($row!=NULL) {
+		return $row['df_id'];	
+	}
+	return 0;
+}
 ?>
