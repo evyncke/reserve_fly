@@ -63,7 +63,7 @@ $monthName = datefmt_format($fmt, $sinceDate) ;
 
 <table class="table table-striped table-responsive col-md-6 col-xs-12">
 <thead>
-<tr><th></th><th>Vols découvertes</th><th>Vols d'initiations</th></tr>
+<tr><th></th><th>Vols découvertes (IF)</th><th>Vols d'initiations (INIT)</th></tr>
 </thead>
 <?php
 $result = mysqli_query($mysqli_link, "SELECT *, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute as duration,
@@ -72,7 +72,8 @@ $result = mysqli_query($mysqli_link, "SELECT *, 60 * (l_end_hour - l_start_hour)
 		JOIN $table_logbook AS l ON f_booking = l.l_booking
 		LEFT JOIN $table_flights_ledger ON fl_flight = f_id
 	WHERE '$since' <= l_start AND l_start < '$monthAfterString'
-	GROUP BY f_id") 
+	GROUP BY f_id
+	ORDER BY l_start") 
 	or die("Impossible de lister les vols: " . mysqli_error($mysqli_link));
 $count_if = 0 ; $count_init = 0 ;
 $minutes_if = 0 ; $minutes_init = 0 ;
@@ -86,6 +87,8 @@ while ($row = mysqli_fetch_array($result)) {
 		case 'I': $count_init++ ;
 			$minutes_init += $row['duration'] ;
 			$revenue_init += $row['revenue'] ;
+			// var_dump($row) ;
+			print("$row[l_start] $row[f_reference]  $row[l_plane] <br/>\n") ;
 			break ;
 		default:
 			journalise($userId, "E", "Flight $row[f_id] has an invalid type $row[f_type]") ;
