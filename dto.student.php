@@ -147,6 +147,8 @@ $total_minutes = $total_minutes % 60 ;
 <?php
 if ($student->blocked)
     print("<p class=\"mt-2 p-4 bg-danger text-bg-danger rounded\">$student->blockedMessage</p>") ;
+if (! $student->isStudent())
+    print("<p class=\"mt-2 p-4 bg-warning text-bg-warning rounded\">$student->lastName $student->firstName is no more registered as a student.</p>") ;
 ?>
 <p><ul>
 <li>Email: <a href="mailto:<?=$student->email?>"  title="Send email"><?=$student->email?> <i class="bi bi-envelope-fill"></i></a></li>
