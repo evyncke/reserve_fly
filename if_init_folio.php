@@ -220,7 +220,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 			JOIN $table_logbook AS l ON f.f_booking = l.l_booking
 			JOIN $table_flights_ledger ON f_id = fl_flight
 			WHERE true $filterType $filter $date_filter 
-			GROUP BY f_reference, l_id
+			GROUP BY f_reference, f_id
 			ORDER BY f_date_flown") 
 			or journalise($userId, "F", "Impossible de lister les vols: " . mysqli_error($mysqli_link));
 		
