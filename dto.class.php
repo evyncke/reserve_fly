@@ -76,6 +76,7 @@ class DTOMember {
     }
 
     function isStudent() {
+        // TODO: oversimplistic... should explode on ',' then look if exit in array
         global $joomla_student_group ;
 
         return strpos($this->groupMembership, $joomla_student_group) !== FALSE ;
@@ -348,8 +349,9 @@ class Flights implements Iterator {
                 JOIN $table_logbook ON df_flight_log = l_id
                 LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
                 LEFT JOIN $table_person who ON df_who = who.jom_id
-            WHERE l_instructor = $fiId AND df_when == l_audit_time
+            WHERE l_instructor = $fiId AND df_when = l_audit_time
             ORDER BY df_when DESC" ;
+ //           print("<hr><pref>$sql</pre><hr>") ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur systeme a propos de l'access aux vols école via l'instructeur $fiId: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;

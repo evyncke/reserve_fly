@@ -165,7 +165,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
   if ($userIsInstructor) {
 ?>
       <li><i><a class="dropdown-item" href="dto.students.php?fi=<?=$userId?>">Mes élèves</a></i></li>
-      <li><i><a class="dropdown-item" href="dto.flight.php?last&fi=<?=$userId?>">Mon dernier vol</a></i></li>
+      <li><i><a class="dropdown-item" href="dto.flights.php?fi=<?=$userId?>">Mes derniers vols</a></i></li>
 <?php
 }
 ?>

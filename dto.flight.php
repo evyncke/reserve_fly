@@ -25,17 +25,7 @@ if ($userId == 0) {
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 
-// Check if the request is for the last_flight (last_flight is set) of one fi (fi has a value)
-if (isset($_REQUEST['last']) and isset($_REQUEST['fi']) and $_REQUEST['fi'] != '' and is_numeric($_REQUEST['fi'])) {
-                $fi = $_REQUEST['fi'] ;
-    $flight = new Flight() ;
-    $flight->getLastByFi($fi) ;
-    if (! $flight->id) {
-        journalise($userId, "E", "No flight found for FI=$fi") ;
-        die("No flight found for FI=$fi") ;
-    }
-    $flight_id = $flight->id ;
-} else if (isset($_REQUEST['flight']) and is_numeric($_REQUEST['flight']) and $_REQUEST['flight'] != '') {
+if (isset($_REQUEST['flight']) and is_numeric($_REQUEST['flight']) and $_REQUEST['flight'] != '') {
     $flight_id = $_REQUEST['flight'] ;
     $flight = new Flight() ;
     $flight->getById($flight_id) ;
