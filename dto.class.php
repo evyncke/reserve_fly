@@ -42,6 +42,7 @@ class DTOMember {
     public $country ;
     public $blocked ;
     public $blockedMessage ;
+    public $groupMembership ;
 
     function __construct($row = NULL) {
         if ($row) {
@@ -56,20 +57,28 @@ class DTOMember {
             $this->country = db2web($row['country']) ;
             $this->blocked = ($row['b_reason'] != '') ;
             $this->blockedMessage = db2web($row['b_reason']) ;
+            $this->groupMembership = $row['group_ids'] ;
         }
     }
 
     function getById($jom_id) {
-        global $mysqli_link, $table_blocked, $table_person, $userId ;
+        global $mysqli_link, $table_blocked, $table_person, $table_user_usergroup_map, $userId ;
 
-        $result = mysqli_query($mysqli_link, "SELECT * 
+        $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(group_id) AS group_ids 
                 FROM $table_person
-                LEFT JOIN $table_blocked ON b_jom_id = jom_id 
+                LEFT JOIN $table_blocked ON b_jom_id = jom_id
+                JOIN $table_user_usergroup_map ON jom_id = user_id  
                 WHERE jom_id = $jom_id")
             or journalise($userId, "F", "Cannot read from $table_person for $jom_id: " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
         if (! $row) return NULL ;
         $this->__construct($row) ;
+    }
+
+    function isStudent() {
+        global $joomla_student_group ;
+
+        return strpos($this->groupMembership, $joomla_student_group) !== FALSE ;
     }
 }
 
@@ -118,7 +127,7 @@ class DTOMembers implements Iterator {
             $fi_condition = "AND l_instructor = $fi " ;
         else 
             $fi_condition = '' ;
-        $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(*) AS count_flights 
+        $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(*) AS count_flights, GROUP_CONCAT(group_id) AS group_ids 
                 FROM $table_person 
                     JOIN $table_users AS u ON u.id = jom_id
                     JOIN $table_user_usergroup_map ON jom_id = user_id 
@@ -669,7 +678,7 @@ function RemoveDTOFlight($logid) {
 		mysqli_query($mysqli_link, "delete from $table_dto_flight where df_flight_log=$logid") or die("Cannot delete from table_dto_flight: " . mysqli_error($mysqli_link)) ;
 		if (mysqli_affected_rows($mysqli_link) > 0) {
 			$insert_message = "DTO Flight mis &agrave; jour" ;
-			journalise($userId, 'I', "table_dto_flight entry deleted for LogId $logid (done at $audit_time).") ;
+			journalise($userId, 'I', "table_dto_flight entry deleted for LogId $logid.") ;
 		}
 	}
 }
