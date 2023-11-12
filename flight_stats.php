@@ -87,8 +87,6 @@ while ($row = mysqli_fetch_array($result)) {
 		case 'I': $count_init++ ;
 			$minutes_init += $row['duration'] ;
 			$revenue_init += $row['revenue'] ;
-			// var_dump($row) ;
-			print("$row[l_start] $row[f_reference]  $row[l_plane] <br/>\n") ;
 			break ;
 		default:
 			journalise($userId, "E", "Flight $row[f_id] has an invalid type $row[f_type]") ;
