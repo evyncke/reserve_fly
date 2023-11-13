@@ -95,7 +95,7 @@ $all_ifs = [] ;
 while ($row = mysqli_fetch_array($result)) {
 	$tr = "<tr><td>$row[date]</td>
 		<td>$row[f_reference] <a href=\"flight_create.php?flight_id=$row[f_id]\" title=\"Go to flight $row[f_reference]\" target=\"_blank\">&boxbox;</a></td>
-		<td>$row[l_plane]</td><td>" . 
+		<td>$row[l_plane] <a href=\"planelog.php?plane=$row[l_plane]&since=$since\" title=\"Go to plane log\" target=\"_blank\">&boxbox;</a></td><td>" . 
 		db2web("<b>$row[last_name]</b> $row[first_name]") .
 		"</td><td>$row[revenue] &euro;</td><td>$row[duration] min</td></tr>\n" ;
 	switch ($row['f_type']) {
