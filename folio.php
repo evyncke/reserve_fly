@@ -233,7 +233,7 @@ class Folio implements Iterator {
     private $row ;
 
     function __construct($member, $start_date, $end_date) {
-        global $mysqli_link, $table_logbook, $table_planes, $table_planes, $table_person, $userId  ;
+        global $mysqli_link, $table_logbook, $table_planes, $table_planes, $table_person, $table_company, $table_company_member, $userId  ;
 
         $this->pilot = $member ;
         $this->member = $member ;
@@ -247,14 +247,18 @@ class Folio implements Iterator {
             p.email as pilot_email, p.address as pilot_address, p.zipcode as pilot_zip_code, p.city as pilot_city, p.country as pilot_country,
             m.last_name as share_member_name, m.first_name as share_member_fname, m.ciel_code400 as share_member_code_ciel,
             m.email as share_member_email, m.address as share_member_address, m.zipcode as share_member_zip_code, m.city as share_member_city, m.country as share_member_country,
+            c.c_name as company_name, c.c_bce as bce,
+            c.c_address as company_address, c.c_zipcode as company_zip_code, c.c_city as company_city, c.c_country as company_country,
             UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
             l_start, l_end, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute as duration,
             60 * (l_flight_end_hour - l_flight_start_hour) + l_flight_end_minute - l_flight_start_minute as flight_duration,
             l_share_type, l_share_member, cout, l_pax_count
             FROM $table_logbook l JOIN $table_planes AS a ON l_plane = a.id
-            LEFT JOIN $table_person p ON p.jom_id = l_pilot
-            LEFT JOIN $table_person i ON i.jom_id = l_instructor
-            LEFT JOIN $table_person m ON m.jom_id = l_share_member
+            LEFT JOIN $table_person AS p ON p.jom_id = l_pilot
+            LEFT JOIN $table_person AS i ON i.jom_id = l_instructor
+            LEFT JOIN $table_person AS m ON m.jom_id = l_share_member
+            LEFT JOIN $table_company_member AS cm ON cm.cm_member = l_pilot
+            JOIN $table_company AS c ON c.c_id = cm.cm_company
             WHERE (l_pilot = $member OR l_share_member = $member or l_instructor = $member)
                 AND l_booking IS NOT NULL
                 AND l_start >= '$start_date'
@@ -265,7 +269,46 @@ class Folio implements Iterator {
             or journalise($userId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
         $this->row = mysqli_fetch_assoc($this->result) ;
-    }
+        if ($this->count > 0) {
+            if ($member == $this->row['l_pilot']) {
+                $this->fname = db2web($this->row['pilot_fname']) ;
+                $this->name = db2web($this->row['pilot_name']) ;
+                $this->code_ciel = $this->row['pilot_code_ciel'] ;
+                $this->email = $this->row['pilot_email'] ;
+                $this->address = db2web($this->row['pilot_address']) ;
+                $this->zip_code = $this->row['pilot_zip_code'] ;
+                $this->city = db2web($this->row['pilot_city']) ;
+                $this->country = db2web($this->row['pilot_country']) ;
+            } else if ($member == $this->row['l_instructor']) {
+                $this->fname = db2web($this->row['instructor_fname']) ;
+                $this->name = db2web($this->row['instructor_name']) ;
+                $this->code_ciel = $this->row['instructor_code_ciel'] ;
+                $this->email = $this->row['instructor_email'] ;
+                $this->address = db2web($this->row['instructor_address']) ;
+                $this->zip_code = $this->row['instructor_zip_code'] ;
+                $this->city = db2web($this->row['instructor_city']) ;
+                $this->country = db2web($this->row['instructor_country']) ;
+            } else if ($member == $this->row['l_share_member']) {
+                $this->fname = db2web($this->row['share_member_fname']) ;
+                $this->name = db2web($this->row['share_member_name']) ;
+                $this->code_ciel = $this->row['share_member_code_ciel'] ;
+                $this->email = $this->row['share_member_email'] ;
+                $this->address = db2web($this->row['share_member_address']) ;
+                $this->zip_code = $this->row['share_member_zip_code'] ;
+                $this->city = db2web($this->row['share_member_city']) ;
+                $this->country = db2web($this->row['share_member_country']) ;
+            } else
+                journalise($userId, "F", "UserId $member is neither pilot " . $this->row['l_pilot'] . ", nor instructor " . $this->row['l_instructor'] . ", nor share member " . $this->row['l_share_member']) ;
+        if ($this->row['company_name'] != '') {
+            $this->company = db2web($this->row['company_name']) ;
+            $this->bce = db2web($this->row['bce']) ;
+            $this->address = db2web($this->row['company_address']) ;
+            $this->zip_code = $this->row['company_zip_code'] ;
+            $this->city = db2web($this->row['company_city']) ;
+            $this->country = db2web($this->row['company_country']) ;
+        }
+        } // $this->count > 0  
+    } // __contruct
 
     function __destruct() {
         mysqli_free_result($this->result) ;
