@@ -4,7 +4,7 @@
 </div><!-- row -->
 
 <div class="row">
-	<span class="copyright">R&eacute;alisation: Eric Vyncke, avril 2018 - septembre 2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL</span><br/>
+	<span class="copyright">R&eacute;alisation: Eric Vyncke, avril 2018 - novembre 2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL</span><br/>
 	<span class="copyright">Open source code at <a href="https://github.com/evyncke/reserve_fly">github</a>.</span>
 </div><!-- row -->
 

@@ -61,6 +61,15 @@ $monthName = datefmt_format($fmt, $sinceDate) ;
 	</ul><!-- pagination -->
 </div><!-- row -->
 
+<ul class="nav nav-tabs">
+	<li class="active in"><a  data-toggle="tab" href="#summary">Résumé</a></li>
+	<li><a data-toggle="tab" href="#initFlights">Vols initiations</a></li>
+	<li><a data-toggle="tab" href="#ifFlights">Vols découvertes</a></li>
+</ul>
+
+<div class="tab-content">
+<div id="summary" class="tab-pane fade active in">
+
 <table class="table table-striped table-responsive col-md-6 col-xs-12">
 <thead>
 <tr><th></th><th>Vols découvertes (IF)</th><th>Vols d'initiations (INIT)</th></tr>
@@ -84,7 +93,9 @@ $revenue_if = 0 ; $revenue_init = 0 ;
 $all_inits = [] ;
 $all_ifs = [] ;
 while ($row = mysqli_fetch_array($result)) {
-	$tr = "<tr><td>$row[date]</td><td>$row[f_reference]</td><td>$row[l_plane]</td><td>" . 
+	$tr = "<tr><td>$row[date]</td>
+		<td>$row[f_reference] <a href=\"flight_create.php?flight_id=$row[f_id]\" title=\"Go to flight $row[f_reference]\" target=\"_blank\">&boxbox;</a></td>
+		<td>$row[l_plane]</td><td>" . 
 		db2web("<b>$row[last_name]</b> $row[first_name]") .
 		"</td><td>$row[revenue] &euro;</td><td>$row[duration] min</td></tr>\n" ;
 	switch ($row['f_type']) {
@@ -109,6 +120,9 @@ while ($row = mysqli_fetch_array($result)) {
 <tr><td>Chiffre d'affaires</td><td><?=$revenue_if?> &euro;</td><td><?=$revenue_init?> &euro;</td></tr>
 </tbody>
 </table>
+</div><!-- id=summary-->
+
+<div id="initFlights" class="tab-pane fade">
 <h2>Vols d'initiations (INIT)</h2>
 <table class="table table-striped table-responsive col-md-6 col-xs-12">
 	<thead>
@@ -121,6 +135,9 @@ while ($row = mysqli_fetch_array($result)) {
 ?>
 	</tbody>
 </table>
+</div><!-- id=initFlights-->
+
+<div id="ifFlights" class="tab-pane fade">
 <h2>Vols découvertes (IF)</h2>
 <table class="table table-striped table-responsive col-md-6 col-xs-12">
 	<thead>
@@ -133,6 +150,8 @@ while ($row = mysqli_fetch_array($result)) {
 ?>
 	</tbody>
 </table>
+</div><!-- id=ifFlights-->
+</div><!-- tab-content--> 
 <?php
 require_once 'flight_trailer.php' ;
 ?>
