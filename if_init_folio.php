@@ -214,11 +214,11 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 	$filter = ' AND f_date_flown IS NOT NULL' ;
 	$date_filter = " AND f_date_flown >= '" . $since . "' AND f_date_flown <= '" . $monthAfterString. "'";
 
-	$result = mysqli_query($mysqli_link, "SELECT DISTINCT f_reference, f_date_flown, first_name, last_name, l_plane, f_id, fl_reference, sum(fl_amount) as prix 
+	$result = mysqli_query($mysqli_link, "SELECT DISTINCT f_reference, f_date_flown, first_name, last_name, r_plane, f_id, fl_reference, sum(fl_amount) as prix 
 			FROM $table_flight AS f  
+			JOIN $table_bookings AS b ON f.f_booking = b.r_id
 			JOIN $table_person ON f.f_pilot = jom_id
-			JOIN $table_logbook AS l ON f.f_booking = l.l_booking
-			JOIN $table_flights_ledger ON f_id = fl_flight
+			LEFT JOIN $table_flights_ledger ON f_id = fl_flight
 			WHERE true $filterType $filter $date_filter 
 			GROUP BY f_reference, f_id
 			ORDER BY f_date_flown") 
@@ -229,7 +229,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 			$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
 			$date=$row['f_date_flown'];
 			$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
-			$plane=$row['l_plane'];
+			$plane=$row['r_plane'];
 			$pilote=db2web($row['first_name'])." ".db2web($row['last_name']) ;
 			$montant=$row['prix'];
 			$montantTotal+=$montant;
