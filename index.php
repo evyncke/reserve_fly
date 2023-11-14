@@ -1,6 +1,6 @@
 <?php      
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2023 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ require_once "Mobile_Detect.php";
 $detect = new Mobile_Detect;
 
 if (($_SERVER['SERVER_NAME'] == 'm.ebsp.be') or ($_SERVER['SERVER_NAME'] == 'm.spa-aviation.be')) 
-	header('Location: https://resa.spa-aviation.be/mobile.php');      
+	header('Location: https://www.spa-aviation.be/resa/mobile.php?news');      
+else if ($_SERVER['SERVER_NAME'] == 'my.spa-aviation.be') 
+    header('Location: https://www.spa-aviation.be/index.php/fr/homepage');      
 else if (($_SERVER['SERVER_NAME'] == 'resa.spa-aviation.be') or ($_SERVER['SERVER_NAME'] == 'resa.ebsp.be'))
 	if ($detect->isMobile())
-		header('Location: https://resa.spa-aviation.be/mobile.php');      
+		header('Location: https://www.spa-aviation.be/resa/mobile.php?news');      
 	else
 		header('Location: https://www.spa-aviation.be/resa/reservation.php');      
 else
-	header('Location: reservation.php');      
+	header('Location: https://www.spa-aviation.be/resa/reservation.php');      
 ?>
