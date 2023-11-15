@@ -67,10 +67,10 @@ if ($userIsInstructor or $userIsAdmin) {
 		<a class="nav-link active" aria-current="page" href="<?="mobile_invoices.php?user=$userId"?>">Factures récentes</a>
 	</li>
 	<li class="nav-item">
-		<a class="nav-link" aria-current="page" href="<?="myfolio.php?previous&user=$userId"?>">Folio du mois précédent</a>
+		<a class="nav-link" aria-current="page" href="<?="mobile_folio.php?previous&user=$userId"?>">Folio du mois précédent</a>
   	</li>
 	  <li class="nav-item">
-		<a class="nav-link" aria-current="page" href="<?="myfolio.php?user=$userId"?>">Folio de ce mois</a>
+		<a class="nav-link" aria-current="page" href="<?="mobile_folio.php?user=$userId"?>">Folio de ce mois</a>
   	</li>
 </ul> <!-- tabs -->
 
