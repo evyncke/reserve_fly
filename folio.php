@@ -258,7 +258,7 @@ class Folio implements Iterator {
             LEFT JOIN $table_person AS i ON i.jom_id = l_instructor
             LEFT JOIN $table_person AS m ON m.jom_id = l_share_member
             LEFT JOIN $table_company_member AS cm ON cm.cm_member = l_pilot
-            JOIN $table_company AS c ON c.c_id = cm.cm_company
+            LEFT JOIN $table_company AS c ON c.c_id = cm.cm_company
             WHERE (l_pilot = $member OR l_share_member = $member or l_instructor = $member)
                 AND l_booking IS NOT NULL
                 AND l_start >= '$start_date'
