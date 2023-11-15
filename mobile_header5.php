@@ -258,9 +258,11 @@ if ($userId <= 0) {
               <li id="logoutElem">
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
               <li><hr class="dropdown-divider"></hr></li>
-              <a class="dropdown-item" href="myfolio.php">Mon folio <i class="bi bi-box-arrow-up-right"></i></a>
+              <li><h6 class="dropdown-header">Situation comptable</h6></li>
+              <a class="dropdown-item" href="mobile_folio.php">Mon folio</i></a>
               <a class="dropdown-item" href="mobile_invoices.php">Mes factures</a>
               <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
+              <li><h6 class="dropdown-header">Données personnelles</h6></li>
               <a class="dropdown-item" href="mobile_groups.php">Mes groupes</a>
               <a class="dropdown-item" href="mobile_profile.php">Mon profil</a>
 <?php
