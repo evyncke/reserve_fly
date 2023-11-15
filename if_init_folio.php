@@ -301,11 +301,11 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 </tbody>
 </table>
 <?php
-$version_php = date ("Y-m-d H:i:s.", filemtime('planelog.php')) ;
+$version_php = date ("Y-m-d H:i:s.", filemtime('if_init_folio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 ?>
 <hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, janvier 2015 - mai 2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa<br>
+<div class="copyright">Réalisation: Patrick Reginster et Eric Vyncke, janvier 2015 - november 2023, pour RAPCS, Royal Aéro Para Club de Spa<br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
 </body>
 </html>
