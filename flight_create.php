@@ -172,7 +172,8 @@ if ($modify) {
 
 if ($delete) {
 	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
-	$result = mysqli_query($mysqli_link, "UPDATE $table_flight SET f_date_cancelled = SYSDATE(), f_who_cancelled = $userId WHERE f_id = $flight_id")
+	$result = mysqli_query($mysqli_link, "UPDATE $table_flight SET f_date_cancelled = SYSDATE(), f_who_cancelled = $userId, f_booking=NULL, f_pilot=NULL 
+		WHERE f_id = $flight_id")
 		or journalise($userId, "F", "Cannot cancel flight $flight_id: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "W", "Flight $flight_id cancelled") ;
 }
