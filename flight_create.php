@@ -724,7 +724,7 @@ else
 </div><!-- row -->
 <?php
 function show_reservation($date, $header) {
-	global $mysqli_link, $table_bookings, $table_person, $table_planes, $row_flight, $userId ;
+	global $mysqli_link, $table_bookings, $table_person, $table_planes, $table_flight, $row_flight, $userId ;
 	print("<div class=\"row\">
 		<h4 class=\"text-center\">$header: $date</h4>
 		</div><!-- row -->\n" ) ;
@@ -733,11 +733,12 @@ function show_reservation($date, $header) {
 		<tr><th>De</th><th>A</th><th>Avion</th><th>Pilote</th><th>Commentaire</th><th>Action</th></tr>\n") ;
 	$sql_date = date('Y-m-d') ;
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.cell_phone as icell_phone, i.jom_id as iid,
-		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.cell_phone as pcell_phone, pi.jom_id as pid
+		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.cell_phone as pcell_phone, pi.jom_id as pid, f.f_reference as reference
 		FROM $table_bookings 
 		JOIN $table_person pi ON pi.jom_id = r_pilot
 		LEFT JOIN $table_person i ON i.jom_id = r_instructor		
-		JOIN $table_planes p ON r_plane = p.id		
+		JOIN $table_planes p ON r_plane = p.id	
+		LEFT JOIN $table_flight f ON f_booking = r_id	
 		WHERE r_cancel_date IS NULL AND ressource = 0 AND actif = 1 AND DATE(r_start) <= '$date' AND '$date' <= DATE(r_stop)
 		ORDER BY r_start ASC")
 		or journalise($userId, "F", "Cannot retrieve bookings(: " . mysqli_error($mysqli_link)) ;
@@ -761,6 +762,8 @@ function show_reservation($date, $header) {
 			print("<td></td></tr>\n") ;
 		else if ($row_flight['f_booking'] == $row['r_id']) // Is the flight already linked to this existing booking ?
 			print("<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&unlink_from=$row[r_id]\"><span class=\"glyphicon glyphicon-scissors\" style=\"color: red;\" title=\"Découpler cette réservation de ce vol\"></span></a></td></tr>\n") ;
+		else if ($row['f_reference'] != '')
+			print("<td><span class=\"glyphicon glyphicon-link\" style=\"color: pink;\" title=\"Cette réservation est déjà associée à un vol\"></span></td></tr>\n") ;
 		else // Flight is not linked yet to a booking
 			print("<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&link_to=$row[r_id]\"><span class=\"glyphicon glyphicon-link\" title=\"Lier cette réservation à ce vol\"></span></a></td></tr>\n") ;
 	}
