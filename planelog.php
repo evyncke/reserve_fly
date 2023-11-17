@@ -271,6 +271,9 @@ while ($row = mysqli_fetch_array($result)) {
 	// Emit a red line if pilot and instructor are the same
 	if ($row['l_pilot'] == $row['l_instructor'])
 		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>The pilot is the instructor on the line below...</td></tr>\n") ;
+	// Emit a red line instructor is 'other FI'
+	if ($row['l_instructor'] == -1)
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>The FI is 'other FI' on the line below...</td></tr>\n") ;
 	// Emit a red line if cost is shared with nobody
 	if (($row['l_share_type'] == 'CP1' or $row['l_share_type'] == 'CP2') and $row['l_share_member'] == 0)
 		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Shared flight with nobody on the line below...</td></tr>\n") ;
@@ -286,7 +289,10 @@ while ($row = mysqli_fetch_array($result)) {
 	$engine_total_minute += $duration ;
 	// Handling character sets...
 	$pilot_name = db2web($row['pilot_name']) ;
-	$instructor_name = db2web($row['instructor_name']) ;
+	if ($row['l_instructor'] == -1)
+		$instructor_name = "Autre FI" ;
+	else
+		$instructor_name = db2web($row['instructor_name']) ;
 	// Time in $table_logbook is already in UTC
 	$l_start = substr($row['l_start'], 11, 5) ;
 	$l_end = substr($row['l_end'], 11, 5) ;
