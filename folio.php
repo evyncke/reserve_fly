@@ -104,7 +104,7 @@ class FolioLine{
             else
                 $this->pic_name = db2web($row['instructor_name']) ;// DC 
         // Instructor cost
-        if ($row['l_instructor'])
+        if ($row['l_instructor'] and $row['l_instructor'] > 0)
             if ($row['l_instructor'] != $userId) { // The user is not the FI
                 $this->cost_fi = $row['l_instructor_paid'] * $cost_fi_minute * $this->duration ;
             } else {
