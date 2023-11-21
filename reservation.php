@@ -133,7 +133,8 @@ ob_flush() ; // Attempt to push as much as HTML to the browser
 $result = mysqli_query($mysqli_link, "SELECT upper(id) as id, classe, compteur, compteur_vol, compteur_vol_valeur, compteur_date, entretien, photo, sous_controle, delai_reservation, commentaire, actif, compteur_vol
 	FROM $table_planes
 	WHERE actif > 0 AND ressource = 0
-	ORDER BY model ASC, id ASC") or die("Cannot get all active planes:".mysqli_error($mysqli_link)) ;
+	ORDER BY model ASC, id ASC") or die("Cannot get all active planes:".mysqli_error($mysqli_link)) 
+	or journalise($userId, "F", "Cannot get plane info: " . mysqli_error($mysqli_link));
 $first = true ;
 while ($row = mysqli_fetch_array($result)) {
 	if ($first)
@@ -143,11 +144,14 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['compteur_vol']) $row['compteur'] = ($row['compteur_vol_valeur'] != '') ? $row['compteur_vol_valeur'] : 'null' ;
 	// Get the engine time from the last entry in the pilot log book
 	$index_column = ($row['compteur_vol'] == 0) ? 'l_end_hour' : 'l_flight_end_hour' ;
-	$result2 = mysqli_query($mysqli_link, "select $index_column as compteur_pilote, l_end as compteur_pilote_date, concat(first_name, ' ', last_name) as compteur_pilote_nom, email, name 
-		from $table_logbook  l join $table_bookings r on l_booking = r_id join $table_person p on jom_id = if(l_audit_who <= 0, if(l_instructor is null, l_pilot, l_instructor), l_audit_who)
-		where l_plane = '$row[id]' and l_booking is not null and l_end_hour > 0
-		order by compteur_pilote_date desc limit 0,1")
-		or die("Cannot get pilote engine time:" . mysqli_error($mysqli_link)) ;
+	$result2 = mysqli_query($mysqli_link, "SELECT $index_column as compteur_pilote, l_end as compteur_pilote_date, concat(first_name, ' ', last_name) as compteur_pilote_nom, email, name 
+		FROM $table_logbook  l 
+			JOIN $table_bookings r ON l_booking = r_id 
+			JOIN $table_person p ON jom_id = if(l_audit_who <= 0, if(l_instructor is null, l_pilot, l_instructor), l_audit_who)
+		WHERE l_plane = '$row[id]' AND l_booking IS NOT NULL AND l_end_hour > 0
+		ORDER BY l_start DESC
+		LIMIT 0,1")
+		or journalise($userId, "F", "Cannot get pilote engine time:" . mysqli_error($mysqli_link)) ;
 	$row2 = mysqli_fetch_array($result2) ;
 	if (! $row2 or $row2['compteur_pilote']  == '') {
 		$row2['compteur_pilote'] = 'null' ;
