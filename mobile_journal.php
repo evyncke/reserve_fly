@@ -24,7 +24,8 @@ if ($userId == 0) {
 }
 require_once 'mobile_header5.php' ;
 
-if (!$userIsAdmin) journalise($userId, "F", "This admin page is reserved to administrators") ;
+if (!($userIsAdmin or $userIsBoardMember))
+	journalise($userId, "F", "This admin page is reserved to administrators") ;
 
 ?><div class="container-fluid">
 <h2>Journal système</h2>
