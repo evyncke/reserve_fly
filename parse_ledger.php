@@ -176,6 +176,9 @@ foreach ($balances as $client => $balance)
 
 // Souci général: trouver une clé unique... ni le numéro de mouvement, ni le numéro de pièce sont uniques
 print("<h2>Analyse de toutes les lignes du grand livre client</h2>\n") ;
+/* Start transaction */
+mysqli_begin_transaction($mysqli_link)
+	or journalise($userId, "E", "Cannot begin transaction: " . mysqli_error($mysqli_link));
 mysqli_query($mysqli_link, "DELETE FROM $table_bk_ledger WHERE bkl_year = $ledger_year")
 	or journalise($userId, "F", "Cannot erase content of $table_bk_ledger for year $$ledger_year: " . mysqli_error($mysqli_link)) ;
 
@@ -209,6 +212,8 @@ foreach($lines as $line) {
 			print('Cannot parse this ledger line: <span style="color: red;">' . db2web($line) . "</span><br/>\n") ;
 	}
 }
+mysqli_commit($mysqli_link)
+	or journalise($userId, "F", "Cannot commit transaction: " . mysqli_error($mysqli_link));
 journalise($userId, "I", "Grand Livre parsed") ;
 
 // Clean-up temporary file
