@@ -88,7 +88,9 @@ function gradeChanged(object, reference, grade) {
 }
 </script>
 <h2>Flight N° <?=$flight->flightId?> of <?=$flight->studentLastName?> <?=$flight->studentFirstName?>
-    <a href="dto.student.php?student=<?=$flight->student?>"><i class="bi bi-folder"></i></a></h2>
+    <a href="dto.student.php?student=<?=$flight->student?>"><i class="bi bi-folder"></i></a>
+    <i class="bi bi-printer link-primary" onclick="window.print()"></i>
+</h2>
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">
 <form method="GET" action="<?=$_SERVER['PHP_SELF']?>">
