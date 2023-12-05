@@ -43,9 +43,13 @@ require_once 'mobile_header5.php' ;
 $change_profile_message = '' ;
 
 // Fetch all information about the user
-$result = mysqli_query($mysqli_link, "select *,u.username as username,u.email as email, date(p.birthdate) as birthdate
-	from $table_person p join $table_users u on p.jom_id = u.id left join jom_kunena_users k on k.userid=u.id
-	where u.id = $displayed_id") or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
+$result = mysqli_query($mysqli_link, "SELECT *,u.username as username,u.email as email, date(p.birthdate) as birthdate
+	FROM $table_person p 
+		JOIN $table_users u on p.jom_id = u.id 
+		LEFT JOIN jom_kunena_users k on k.userid=u.id
+		LEFT JOIN $table_company_member AS cm ON cm.cm_member = $displayed_id
+        LEFT JOIN $table_company AS c ON c.c_id = cm.cm_company
+	WHERE u.id = $displayed_id") or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) or journalise($userId, "F", "Utilisateur inconnu") ;
 $me['name'] = db2web($me['name']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
@@ -54,6 +58,12 @@ $me['address'] = db2web($me['address']) ;
 $me['zipcode'] = db2web($me['zipcode']) ; 
 $me['city'] = db2web($me['city']) ; 
 $me['country'] = db2web($me['country']) ;
+$me['company_name'] = db2web($me['c_name']) ; 
+$me['company_address'] = db2web($me['c_address']) ; 
+$me['company_zipcode'] = db2web($me['c_zipcode']) ; 
+$me['company_city'] = db2web($me['c_city']) ; 
+$me['company_country'] = db2web($me['c_country']) ;
+$me['company_bce'] = db2web($me['c_bce']) ;
 
 // Be paranoid
 foreach($me as $key => $value)
@@ -241,9 +251,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 }
 
 // Fetch AGAIN all information about the user since they may have been modified by the above...
-$result = mysqli_query($mysqli_link, "select *,u.username as username,u.email as email, date(p.birthdate) as birthdate
-	from $table_person p join $table_users u on p.jom_id = u.id left join jom_kunena_users k on k.userid=u.id
-	where u.id = $displayed_id") or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
+$result = mysqli_query($mysqli_link, "SELECT *,u.username as username,u.email as email, date(p.birthdate) as birthdate
+	FROM $table_person p 
+		JOIN $table_users u on p.jom_id = u.id 
+		LEFT JOIN jom_kunena_users k on k.userid=u.id
+		LEFT JOIN $table_company_member AS cm ON cm.cm_member = $displayed_id
+        LEFT JOIN $table_company AS c ON c.c_id = cm.cm_company
+	WHERE u.id = $displayed_id") or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) or die("Utilisateur inconnu") ;
 $me['name'] = db2web($me['name']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
@@ -252,6 +266,12 @@ $me['address'] = db2web($me['address']) ;
 $me['zipcode'] = db2web($me['zipcode']) ; 
 $me['city'] = db2web($me['city']) ; 
 $me['country'] = db2web($me['country']) ;
+$me['company_name'] = db2web($me['c_name']) ; 
+$me['company_address'] = db2web($me['c_address']) ; 
+$me['company_zipcode'] = db2web($me['c_zipcode']) ; 
+$me['company_city'] = db2web($me['c_city']) ; 
+$me['company_country'] = db2web($me['c_country']) ;
+$me['company_bce'] = db2web($me['c_bce']) ;
 
 // Be paranoid
 foreach($me as $key => $value)
@@ -303,6 +323,9 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 	</li>
 	<li class="nav-item">
   		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#social_network" aria-current="page" href="#social_network">Réseaux sociaux</a>
+	</li>
+	<li class="nav-item">
+  		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#company" aria-current="page" href="#company">Facturation</a>
 	</li>
 </ul>
 
@@ -562,6 +585,32 @@ if (! $read_only) {
 ?>
 </form>
 </div> <!-- row -->
+</div> <!-- id=social_network -->
+
+<div id="company" class="tab-pane fade" role="tabpanel">
+<div class="row">
+<?php
+	if ($me['company_name'] == '')
+		print("<p>Aucune société n'est associée à votre compte membre. Les factures seront donc envoyées à votre nom et adresse personnelle.</p>") ;
+	else {
+?>
+	<p>Les factures seront établies au nom de:
+		<ul>
+		<li><b>Nom de la société:</b> <?=$me['company_name']?></li>
+		<li><b>Adresse:</b> <?=$me['company_address']?></li>
+		<li><b>Ville:</b>  <?=$me['company_zipcode']?> <?=$me['company_city']?></li>
+		<li><b>Pays:</b> <?=$me['company_country']?></li>
+		<li><b>Code Entreprise (BCE):</b> <?=$me['company_bce']?></li>
+	</ul>
+	</p>
+<?php
+	} // company_name != ''
+?>
+</div> <!-- row -->
+<div class="row">
+	<hr>
+	<p>Pour changer ces données, veuillez contacter par email: <a href="mailto:eric.vyncke@spa-aviation.be">eric.vyncke@spa-aviation.be</a>.</p>
+</div>
 </div> <!-- id=social_network -->
 
 <div id="validity" class="tab-pane fade">
