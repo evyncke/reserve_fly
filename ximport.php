@@ -201,9 +201,8 @@ $members = [62, 66, 348, 92] ;
 while ($row = mysqli_fetch_array($result)) {
 	$member=$row['id'];	
 	$bce=$row['bce'];
-    $folio = new Folio($member, '2023-10-01', '2023-11-01') ;
+    $folio = new Folio($member, '2023-11-01', '2023-12-01') ;
     if ($folio->count == 0) continue ; // Skip empty folios
-	$invoiceCount++ ;
 	$nextInvoice=$prefixInvoice."-".str_pad($invoiceCount,4,"0",STR_PAD_LEFT);
 	
 	$cielCode=$folio->code_ciel;
@@ -223,7 +222,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$pdf->SetInvoiceCommunication($communication);
 	$pdf->AddPage();
 	$pdf->AliasNbPages();
-	$pdf->AddAddress($folio->fname." ".$folio->name, $folio->address, "$folio->zip_code $folio->city", $folio->country, $bce) ;
+	$pdf->AddAddress("$folio->fname $folio->name", $folio->company, $folio->address, "$folio->zip_code $folio->city", $folio->country, $bce) ;
 	//$pdf->SetXY(20, 80);
 	$pdf->SetColumnsWidth(array(20, 85, 20, 25, 25),array("C","L","C","R","R")) ;
 	$pdf->TableHeader(array("Référence", "Désignation", "Quantité", "Prix unitaire","Montant")) ; 	
@@ -232,7 +231,7 @@ while ($row = mysqli_fetch_array($result)) {
     <thead>
         <tr><th>Référence</th><th>Désignation</th><th>Quantité</th><th>Prix unitaire</th><th>Montant</th></tr>
     </thead>
-    <tbody>
+    <tbody class="table-divider">
 <?php
     foreach($folio as $line) {
 		if ($line->cost_fi < 0) {
@@ -271,7 +270,6 @@ while ($row = mysqli_fetch_array($result)) {
 		if($line->pic_name=="SELF") $picName="";
 		//$libelle="$line->pilot_name $line->pilot_fname";
 	    if ($line->cost_plane > 0) {
-            //$ximportLine = new XimportLine($nextMove, 'VEN', $line->date, '', $nextInvoice, 700100, remove_accents($libelle), $line->cost_plane, 'C', $nextInvoice,
             $ximportLine = new XimportLine($nextMove, 'VEN', $invoiceDateCompta, '', $nextInvoice, 700100, remove_accents($libelle), $line->cost_plane, 'C', $nextInvoice,
             $code_plane, 0.0, 0.0, '0', $invoiceDateCompta, 0) ;
             fprintf($f, "$ximportLine\n") ;
@@ -329,33 +327,36 @@ while ($row = mysqli_fetch_array($result)) {
 	$totalFolioText=number_format($total_folio,2,",",".")." €";
 	
     print("<tr><td></td><td></td><td></td><td><b>Total</b></td><td><b>$totalFolioText</b></td></tr>\n") ; 
-	$pdf->TableTotal($totalFolioText);
+    print("</tbody>\n</table>\n") ;
+    $pdf->TableTotal($totalFolioText);
 	if($total_folio > 0) {
 		$totalFolioText=number_format($total_folio,2,".","");
 		//$communication=$nextInvoice." ".$cielCode400." ".$lastName." ".$firstName;
 		$pdf->AddQRCode($totalFolioText,$communication);
-	}
-    $nextMove++ ;
-	
-    print("</tbody>\n</table>\n") ;
-    if ($production) {
-        // Let's generate a filename that is not guessable (so nobody can see others' invoices) but still always the same (to be idempotent)
-        $invoiceFile = "invoices/" . sha1($nextInvoice . $shared_secret) . '.pdf' ;
-        // TODO should use NOW() rather than $invoiceDateSQL
-        mysqli_query($mysqli_link, "REPLACE 
-            INTO rapcs_bk_invoices(bki_email, bki_email_sent, bki_date, bki_amount, bki_id, bki_file_name) 
-            VALUES('$folio->email', NULL, '$invoiceDateSQL', $total_folio, '$nextInvoice', '$invoiceFile')")
-            or journalise($userId, "E", "Cannot insert into rapcs_bk_invoices: " . mysqli_error($mysqli_link)) ;
-        journalise($userId, "I", "Invoice $nextInvoice for $folio->email dated $invoiceDateSQL saved as $invoiceFile") ;
-    } else {
-    	$invoiceFile=$invoiceFolder.$nextInvoice."_".$lastName."_".$firstName.".pdf";
-        $invoiceFile=remove_accents($invoiceFile);
+        if ($production) {
+            // Let's generate a filename that is not guessable (so nobody can see others' invoices) but still always the same (to be idempotent)
+            $invoiceFile = "invoices/" . sha1($nextInvoice . $shared_secret) . '.pdf' ;
+            // TODO should use NOW() rather than $invoiceDateSQL
+            mysqli_query($mysqli_link, "REPLACE 
+                INTO rapcs_bk_invoices(bki_email, bki_email_sent, bki_date, bki_amount, bki_id, bki_file_name) 
+                VALUES('$folio->email', NULL, '$invoiceDateSQL', $total_folio, '$nextInvoice', '$invoiceFile')")
+                or journalise($userId, "E", "Cannot insert into rapcs_bk_invoices: " . mysqli_error($mysqli_link)) ;
+            journalise($userId, "I", "Invoice $nextInvoice for $folio->email dated $invoiceDateSQL saved as $invoiceFile") ;
+        } else {
+            $invoiceFile=$invoiceFolder.$nextInvoice."_".$lastName."_".$firstName.".pdf";
+            $invoiceFile=remove_accents($invoiceFile);
+        }
+        $pdf->Output('F', $invoiceFile);
+        print("<p>Le PDF de la facture est: <a href=\"$invoiceFile\">$invoiceFile</a>.</p>\n") ;
+        $invoiceCount++ ; // Increments only when an invoice is actually generated
+    } else { // total_folio == 0
+        print("<p>Montant de la facture nul, aucun PDF généré. Numéro $nextInvoice peut être ré-utilisé.</p>\n") ;
     }
-    $pdf->Output('F', $invoiceFile);
+    $nextMove++ ;
 }
 
 fclose($f) ;
-journalise($userId, "I", "Successful termination of invoices generation") ;					
+journalise($userId, "I", "Successful generation of $invoiceCount invoices.") ;					
 ?>
 </body>
 </html>
