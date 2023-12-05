@@ -92,10 +92,15 @@ public $invoiceCommunication;
 		$this->MulticellUtf8(35, 5, "Facture Numéro\n".$this->invoiceNumber, 1, 'C', false);
 	}
 	// Add Invoice Number
-	function AddAddress($name, $address, $city, $country, $bce) 
+	function AddAddress($name, $company, $address, $city, $country, $bce) 
 	{
 	    // Positionnement à 10 cm 
-		$text=web2db($name."\n".$address."\n".$city."\n".$country."\n"."\n".$bce);
+		if($company == '') {
+			$text=web2db($name."\n".$address."\n".$city."\n".$country."\n");
+		}
+		else {		
+			$text=web2db($name."\n".$company."\n".$address."\n".$city."\n".$country."\n".$bce);			
+		}
 	    $this->SetXY(100,35);
 	    $this->SetFont('Arial','',13);
 		$this->Multicell(90, 7, $text, 1, 'L', false);
