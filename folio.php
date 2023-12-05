@@ -239,6 +239,7 @@ class Folio implements Iterator {
         $this->member = $member ;
         $this->start_date = $start_date ;
         $this->end_date = $end_date ;
+        // TODO rather than retrieving the names for pilots, fis, shared cost, let's use $member directly...
         $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
             l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, 
             i.last_name as instructor_name, i.first_name as instructor_fname, i.ciel_code400 as instructor_code_ciel,
@@ -257,7 +258,7 @@ class Folio implements Iterator {
             LEFT JOIN $table_person AS p ON p.jom_id = l_pilot
             LEFT JOIN $table_person AS i ON i.jom_id = l_instructor
             LEFT JOIN $table_person AS m ON m.jom_id = l_share_member
-            LEFT JOIN $table_company_member AS cm ON cm.cm_member = l_pilot
+            LEFT JOIN $table_company_member AS cm ON cm.cm_member = $member
             LEFT JOIN $table_company AS c ON c.c_id = cm.cm_company
             WHERE (l_pilot = $member OR l_share_member = $member or l_instructor = $member)
                 AND l_booking IS NOT NULL

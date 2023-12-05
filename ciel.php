@@ -20,7 +20,7 @@ require_once 'dbi.php' ;
 
 MustBeLoggedIn() ;
 
-if (! $userIsAdmin && ! $userIsBoardMember)
+if (! $userIsAdmin && ! $userIsBoardMember && $userId != 306) // Bernard Penders
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
 ?><!DOCTYPE html>
@@ -140,7 +140,7 @@ if ($_REQUEST['save_ciel'] == 'true') {
     <thead>
         <tr><th>Nom utilisateur</th><th>Compte Ciel</th><th>Nom</th><th>Prénom</th><th>email</th><th>Date création</th></tr>
     </thead>
-    <tbody>
+    <tbody class="table-group-divider">
 <?php
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person JOIN jom_users AS j ON jom_id = j.id
     WHERE ciel_code400 IS NULL OR TRUE
@@ -155,6 +155,40 @@ while ($row = mysqli_fetch_array($result)) {
         <input type=\"text\" name=\"ciel$row[jom_id]\" value=\"$row[ciel_code400]\"> 
         <i class=\"bi-check-circle-fill\" style=\"color: blue;\" title=\"Enregistrer le code Ciel\" onClick=\"document.getElementById('ciel_form').submit();\"></i>
         </td><td>$last_name</td><td>$first_name</td><td>$row[email]</td><td>$row[registerDate]</td></tr>\n") ;
+}
+?>
+</tbody>
+</table>
+</form>
+
+<h2>Sociétés des membres</h2>
+<p>Liste des membres du club ayant une entreprise à laquelle facturer.</p>
+
+<form action="<?=$_SERVER['PHP_SELF']?>" id="company_form">
+    <input type="hidden" name="save_company" value="true">
+<table class="table table-hover table-responsive">
+    <thead>
+        <tr><th>Nom, prénom <i>(Code ciel)</i></th><th>Entreprise</th><th>Code BCE</th><th>Adresse</th><th>Code postal</th><th>Ville</th><th>Pays</th></tr>
+    </thead>
+    <tbody class="table-group-divider">
+<?php
+$result = mysqli_query($mysqli_link, "SELECT * 
+    FROM $table_person
+        LEFT JOIN $table_company_member ON jom_id = cm_member
+        JOIN $table_company ON cm_company = c_id
+    ORDER BY last_name, first_name DESC")
+    or journalise($userId, "F", "Cannot read companies: " . mysqli_error($mysqli_link)) ;
+while ($row = mysqli_fetch_array($result)) {
+    $name = db2web($row['c_name']) ;
+    $address = db2web($row['c_address']) ;
+    $city = db2web($row['c_city']) ;
+    $country = db2web($row['c_country']) ;
+    $first_name = db2web($row['first_name']) ;
+    $last_name = db2web($row['last_name']) ;
+    print("<tr class=\"ciel-row\">
+        <td><b>$last_name</b>, $first_name <i>($row[ciel_code400])</i></td>
+        <td>$name</td><td>$row[c_bce]</td><td>$address</td><td>$row[c_zipcode]</td><td>$city</td><td>$country</td>
+        </tr>\n") ;
 }
 ?>
 </tbody>
@@ -181,7 +215,9 @@ alors importer dans <i>Ciel Premium Account</i>.</p>
 </form>
 
 <h2 class="text-danger">!!! TEST !!! Envoi des factures par email</h2>
-<p>Cette opération va envoyer des emails aux membres ayant une facture générée.</p>
+<p>Cette opération va envoyer des emails aux membres ayant une facture générée par l'opération ci-dessus. Il est possible (voire parfois nécessaire)
+    d'effectuer plusieurs fois cette opération.
+</p>
 <p class="bg-danger">Ceci est en mode test réservé à Eric Vyncke et Patrick Reginster.</p>
 
 <div class=""></div>

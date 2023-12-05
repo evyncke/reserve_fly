@@ -392,4 +392,10 @@ function init() {
 		}
 		pilotSelect.value = selectedUserId ;
 	}
+
+	// Replace the generic HTML title but a more specific one based on the 2nd <h2> tag (the first one is used by the banner)
+	var h2Tag = document.getElementsByTagName('h2')[1] ;
+	titleString = h2Tag.innerText ;
+	if (titleString)
+		document.title = titleString ;
 }
