@@ -175,32 +175,24 @@ function refreshPlanningTableHeader() {
 
 var waitingCount = 0 ;
 
-// Specific CSS exist for this ID
+// When adding text to the innerHTML, it usually doesn't render on the screen until the Javascript is completed, which is done only after the in-line AJAX
 
 function displayWaiting() {
-	console.log("displayWaiting(), waitingCount = " + waitingCount) ;
 	if (waitingCount++ == 0) {
-		console.log('display Spinner, visibility before: ' + document.getElementById('waitingDiv').style.visibility) ;
 		document.getElementById('waitingDiv').style.visibility = 'visible' ;
-		console.log('display Spinner, visibility after: ' + document.getElementById('waitingDiv').style.visibility) ;
 		document.getElementById('waitingDiv').style.display = 'block' ; // Possibly useless
-		document.getElementById('waitingDiv').style.opacity = 1 ; // Possibly useless as it is 0.4 in the CSS
+		document.getElementById('waitingDiv').style.opacity = 0.4 ; // Possibly useless as it is 0.4 in the CSS
 		document.getElementById('waitingDiv').style.position = 'absolute' ; 
 		document.getElementById('waitingDiv').style.top = browserHeight / 2 - 128; 
 		document.getElementById('waitingDiv').style.left = browserWidth / 2 - 128; 
-		console.log('zIndex before: ' + document.getElementById('waitingDiv').style.zIndex) ;
 		document.getElementById('waitingDiv').style.zIndex = 99 ; // Should be high enough .... it is 4 in the CSS
-		console.log('zIndex after: ' + document.getElementById('waitingDiv').style.zIndex) ;
 	}
 }
 
 function hideWaiting() {
-	console.log("hideWaiting(), waitingCount = " + waitingCount) ;
 	if (--waitingCount == 0) {
-		console.log('hide Spinner') ;
 		document.getElementById('waitingDiv').style.visibility = 'hidden' ;
 		document.getElementById('waitingDiv').style.zIndex = -99 ; // Should be low enough ....
-		console.log('zIndex: ' + document.getElementById('waitingDiv').style.zIndex) ;
 	}
 }
 
@@ -257,15 +249,14 @@ function toggleInstructorAgenda() {
 function myLog(msg) {
 	var currentDate = new Date();
 	var timeString = currentDate.getHours() + ':' + currentDate.getMinutes() + ":" + currentDate.getSeconds() + '.' + currentDate.getMilliseconds() + ': ' ;
-
 	// userId == 62 pour Eric Vyncke
+	// 66 pour Patrick Reginster
 	// userId == 46 pour Benoit Mendes
-	// userId == 67 pour Pierre-François Lefebvre
-	// userId == 115 pour J Ph Delhez
-//	if (userId == 62 || userId == 46) {
-//	if (userId == 67 || userId == 62) {
+//	if (userId == 62) {
+		//	if (userId == 67 || userId == 62) {
 	if (false) {
-i//	if (userId == 62) { // Eric Vyncke
+//	if (userId == 62) { // Eric Vyncke
+		console.log(msg) ;
 		document.getElementById('logButton').style.visibility = 'visible' ;
 		var logDiv = document.getElementById('logDiv') ;
 		if (document.getElementById('logButton').value == 'No log')
@@ -324,16 +315,12 @@ function displayMETAR() {
 	var elem = document.getElementById('reservationDetails') ;
 	
 	timeNow = new Date().getTime() ; // in msec
-//	console.log("Start of displayMETAR(), timeNow=" + timeNow + ", metarTime=" + metarTime) ;
-//	console.trace() ;
 	if (metarTime < 0) { // Another request is pending
-//		console.log("End of displayMETAR() aborting as another request is pending") ;
 		return ;
 	}
 	if (timeNow < metarTime + 1000 * 60) { // Allow the caching for 1 minute
 		elem.innerHTML = metarHTML ;
 		elem.style.backgroundColor = metarBackgroundColor ;
-//		console.log("End of displayMETAR() re-using cache") ;
 		return ;
 	}
 // TODO as this is asynchronous...
@@ -341,11 +328,10 @@ function displayMETAR() {
 	var XHR=new XMLHttpRequest();
 //	XHR.timeout = 2000 ; // 2000 msec, cannot set time on synchronous requests
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
-				console.log("displayMETAR() call-back") ;
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var metar_response = eval('(' + XHR.responseText.trim() + ')') ;
+					var metar_response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -430,10 +416,8 @@ function displayMETAR() {
 	var requestUrl = 'metar/' + defaultMetarStation ;
 	XHR.open("GET", requestUrl, true) ;
 	metarTime = -1 ; // Used as a flag to signal a request is pending
-//	XHR.open("GET", requestUrl, false) ; // We need to be have a synchronous request else METAR competes with detailed booking information :-(
 	// TODO try/catch to handle exceptions
 	XHR.send(null) ;
-//	console.log("End of displayMETAR()") ;
 }
 
 function airportChanged(elem) {
@@ -444,10 +428,10 @@ function airportChanged(elem) {
 return ; // Waiting for the AJAX service to be added and finding a way to display/use the information...
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -455,8 +439,7 @@ return ; // Waiting for the AJAX service to be added and finding a way to displa
 		}
 	}
 	XHR.open("GET", "get_airports.php?code=" + code, true) ;
-        XHR.send(null) ;
-
+    XHR.send(null) ;
 }
 
 function showPilotDetails(id) {
@@ -660,14 +643,16 @@ function bumpPlanningBy(n) {
 	refreshPlanningTable() ;
 }
 
-function refreshEphemerides() {
+function refreshEphemerides(blockingCall) {
 	displayWaiting() ;
 	var XHR=new XMLHttpRequest();
+	if (blockingCall === undefined)
+		blockingCall = true ;
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					hideWaiting() ;
 					return ;
@@ -713,7 +698,7 @@ function refreshEphemerides() {
 	// Cannot use an asynchronous call as the night painting in the planning section requires to have the right ephemerides...
 	// TODO or should we redo the painting of the planning section in the callback?
 	try {
-		XHR.open("GET", "get_ephemerides/" + planningYear + '/' + planningMonth + '/' + planningDay, false) ;
+		XHR.open("GET", "get_ephemerides/" + planningYear + '/' + planningMonth + '/' + planningDay, blockingCall) ;
 		XHR.send(null) ;
 	} catch(err) {
 		myLog('Cannot open() or send() in refreshEphemerides()...') ;
@@ -850,25 +835,29 @@ function clearBookingDetails() {
 	document.getElementById('webcamURI').href = webcamUris[nowMinute % webcamUris.length] ;
 }
 
+// TODO follow https://www.includehelp.com/ajax/show-loading-animation-while-processing-ajax-request.aspx
+// And display/hide spinner from within the AJAX FSM using 
+// AsynchronousBoolean: If supplied, it should be set to true. If set to false, then the browser will wait until the return string is received.
 function cancelBooking(bookingIsForFlying) {
 	var XHR=new XMLHttpRequest();
 	
-	console.log('cancelBooking() start') ;
-	displayWaiting() ;
 	var reason = document.getElementById("reasonTextArea").value ;
 	if (reason == '') {
+		reason = 'unspecified' ;
 	}
 	XHR.onreadystatechange = function() {
-		var reason = document.getElementById("reasonTextArea").value ; //Using it for logging...
-		reason.innerHTML = "<b>Suivi de la demande d'annulation. A envoyer à eric@vyncke.org si cela ne fonctionne pas.</b><br/>" ;
-		reason.innerHTML += "readyState: " + XHR.readyState + "<br/>" ;
-		if(XHR.readyState  == 4) {
-			console.log("in cancelBooking(), XHR call back") ;
+		document.getElementById("cancelBookingDivLog").innerHTML = "En communication avec le serveur..." ;
+		if (this.readyState  == 1) { // First of 4 steps, start waiting, TODO should probably be moved outside
+			document.getElementById("bookingMessageDiv").style.top = document.getElementById('bookingDiv').style.top ;
+			document.getElementById("bookingMessageDiv").style.left = document.getElementById('bookingDiv').style.left ;
+			document.getElementById("bookingMessageDiv").style.visibility = 'visible' ;
+			displayWaiting() ;
+		} else if (this.readyState  == 4) { // Final stage: reply is received
+			document.getElementById("cancelBookingDivLog").innerHTML = "" ;
 			hideWaiting() ;
-			reason.innerHTML += "status: " + XHR.status + "<br/>" ;
-			if(XHR.status  == 200) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					alert("Impossible d'analyser la réponse d'annulation, contactez eric@vyncke.org") ;
 					return ;
@@ -880,23 +869,17 @@ function cancelBooking(bookingIsForFlying) {
 					document.getElementById("bookingMessage").innerHTML = response.message ;
 					document.getElementById("bookingMessage").className = null ;
 				}
-				document.getElementById("bookingMessageDiv").style.top = document.getElementById('bookingDiv').style.top ;
-				document.getElementById("bookingMessageDiv").style.left = document.getElementById('bookingDiv').style.left ;
-				document.getElementById("bookingMessageDiv").style.visibility = 'visible' ;
+				// Now, let's refresh the screen to display the new planning
+				hideCancelBookingDetails() ;
 				refreshPlanningTable() ;
 			} else {
-				alert("La requête d'annulation a échoué (statut " + XHR.statusText + ") contactez eric@vyncke.org") ;
+				alert("La requête d'annulation a échoué (statut " + this.statusText + ") contactez eric@vyncke.org") ;
 			}
 		}
 	}
-	reason.innerHTML = "<b>Suivi de la demande d'annulation. A envoyer à eric@vyncke.org si cela ne fonctionne pas.</b><br/>" ;
 	var requestUrl = "cancel_booking.php?id=" + currentlyDisplayedBooking + '&reason=' + reason;
-	XHR.open("GET", requestUrl, false) ;
-	reason.innerHTML += "open()<br/>" ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
-	reason.innerHTML += "send()<br/>" ;
-	// Now, let's refresh the screen to display the new planning
-	hideCancelBookingDetails() ;
 }
 
 function confirmCancelBooking() {
@@ -920,11 +903,11 @@ function cancelOldBooking(bookingId) {
 	var XHR=new XMLHttpRequest();
 	displayWaiting() ;
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
+		if(this.readyState  == 4) {
 			hideWaiting() ;
-			if(XHR.status  == 200) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -937,7 +920,7 @@ function cancelOldBooking(bookingId) {
 		}
 	}
 	var requestUrl = "cancel_booking.php?id=" + bookingId ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 }
 
@@ -946,11 +929,11 @@ function cancelAgendaItem() {
 	var XHR=new XMLHttpRequest();
 	displayWaiting() ;
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
+		if(this.readyState  == 4) {
 			hideWaiting() ;
-			if(XHR.status  == 200) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -969,16 +952,16 @@ function cancelAgendaItem() {
 		}
 	}
 	var requestUrl = "cancel_fi_agenda.php?id=" + currentlyDisplayedAgendaItem ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 	// Now, let's refresh the screen to display the new planning
 	hideEditAgendaItemDetails() ;
 }
 
 function modifyBooking(id) {
-	console.log('modifyBooking() start') ;
+//	console.log('modifyBooking() start') ;
 	displayWaiting() ;
-	console.log('modifyBooking(' + id + ') currentlyDisplayedBooking=' + currentlyDisplayedBooking + ', bookingFromID()=' + bookingFromID(currentlyDisplayedBooking) + ', loggingFromID()=' + loggingFromID(currentlyDisplayedBooking)) ;
+//	console.log('modifyBooking(' + id + ') currentlyDisplayedBooking=' + currentlyDisplayedBooking + ', bookingFromID()=' + bookingFromID(currentlyDisplayedBooking) + ', loggingFromID()=' + loggingFromID(currentlyDisplayedBooking)) ;
 	if (allBookings[bookingFromID(currentlyDisplayedBooking)][loggingFromID(currentlyDisplayedBooking)].ressource == 0) {
 		var plane = document.getElementById("planeSelect").value ;
 		var pilotId = document.getElementById("pilotSelect").value ;
@@ -1022,12 +1005,12 @@ function modifyBooking(id) {
 	var comment = document.getElementById("commentTextArea").value ;
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
+		if(this.readyState  == 4) {
 			console.log('callback in modifyBooking()') ;
 			hideWaiting() ;
-			if(XHR.status  == 200) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -1050,7 +1033,7 @@ function modifyBooking(id) {
 		'&comment=' + comment + '&crewWanted=' + crewWanted + '&paxWanted=' + paxWanted + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
 		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
 		'&duration=' + flightDuration ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 	// Now, let's refresh the screen to display the new booking
 	hideEditBookingDetails() ;
@@ -1077,11 +1060,11 @@ function modifyAgendaItem(id) {
 		itemCallType = -1 ;
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
+		if(this.readyState  == 4) {
 			hideWaiting() ;
-			if(XHR.status  == 200) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -1102,8 +1085,7 @@ function modifyAgendaItem(id) {
 	var requestUrl = "modify_fi_agenda.php?item=" + currentlyDisplayedAgendaItem + '&fi=' + instructorId +
 		'&callType=' + itemCallType + '&studentOnly=' + itemStudentOnly +
 		'&start=' + itemStart + '&end=' + itemEnd + '&comment=' + comment ;
-console.log(requestUrl) ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 	// Now, let's refresh the screen to display the new booking
 	hideEditAgendaItemDetails() ;
@@ -1147,7 +1129,6 @@ function confirmBooking(bookingIsForFlying) {
 	var bookingStart = document.getElementById("startYearSelect").value ;
 
 	var d = new Date(); var text = d.toTimeString();
-	console.log('confirmBooking() start, ' + text) ;
 	bookingStart += '-' + document.getElementById("startMonthSelect").value ;
 	bookingStart += '-' + document.getElementById("startDaySelect").value ;
 	bookingStart += ' ' + document.getElementById("startHourSelect").value ;
@@ -1191,18 +1172,16 @@ function confirmBooking(bookingIsForFlying) {
 		alert("Vous devez entrer une estimation de la durée du vol") ;
 		return ;
 	}
-	d = new Date(); text = d.toTimeString(); console.log('start displayWaiting(): ' + text) ;
+//	d = new Date(); text = d.toTimeString(); console.log('start displayWaiting(): ' + text) ;
 	displayWaiting() ;
-	d = new Date(); text = d.toTimeString(); console.log('after displayWAiting(): ' + text) ;
+//	d = new Date(); text = d.toTimeString(); console.log('after displayWAiting(): ' + text) ;
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			var d = new Date(); text = d.toTimeString(); console.log('start hideWaiting(): ' + text) ;
+		if(this.readyState  == 4) {
 			hideWaiting() ; 
-			d = new Date(); text = d.toTimeString(); console.log('after hideWAiting(): ' + text) ;
-			if(XHR.status  == 200) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -1234,7 +1213,7 @@ function confirmBooking(bookingIsForFlying) {
 		'&type=' + bookingType + '&comment=' + comment + '&crewWanted=' + crewWanted + '&paxWanted=' + paxWanted + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
 		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
 		'&duration=' + flightDuration ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 	// Now, let's refresh the screen to display the new booking
 	hideEditBookingDetails() ;
@@ -1262,11 +1241,11 @@ function confirmAgendaItem() {
 	var XHR=new XMLHttpRequest();
 
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
+		if(this.readyState  == 4) {
 			hideWaiting() ;
-			if(XHR.status  == 200) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -1286,7 +1265,7 @@ function confirmAgendaItem() {
 	}
 	var requestUrl = "create_fi_agenda.php?fi=" + instructorId + '&start=' + itemStart + '&end=' + itemEnd +
 		'&callType=' + itemCallType + '&studentOnly=' + itemStudentOnly + '&comment=' + comment ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 	// Now, let's refresh the screen to display the new booking
 	hideEditAgendaItemDetails() ;
@@ -1463,7 +1442,6 @@ function editAgendaItemDetails(event) {
 // TODO when selecting another plane, then refresh the planeComment
 function newBookingDetails(event) {
 	var ressourceType ;
-	console.log('Start of newBookingDetails()') ;
 	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
 	document.getElementById('bookingTitle').innerHTML = "Nouvelle r&eacute;servation" ; 
 	// Pre-set the form fields based on the clicked cell, format: plane-tail-number/row/year/month/day/hour/minute
@@ -1826,10 +1804,10 @@ function refreshPlanePlanningRow(rowIndex, plane, displayDay, displayMonth, disp
 	(function (plane) { // Introducing a javascript closure per http://stackoverflow.com/questions/24773307/sending-post-request-in-for-loop?lq=1
 		var XHR = new XMLHttpRequest();
 		XHR.onreadystatechange = function() {
-			if(XHR.readyState  == 4) {
-				if(XHR.status  == 200) {
+			if(this.readyState  == 4) {
+				if(this.status  == 200) {
 					try {
-						var bookings = eval('(' + convertCharset(XHR.responseText.trim()) + ')') ;
+						var bookings = eval('(' + convertCharset(this.responseText.trim()) + ')') ;
 					} catch(err) {
 						hideWaiting() ;
 						return ;
@@ -1914,10 +1892,10 @@ function refreshInstructorPlanningRow(rowIndex, instructor, displayDay, displayM
 	(function (instructor) { // Introducing a javascript closure per http://stackoverflow.com/questions/24773307/sending-post-request-in-for-loop?lq=1
 		var XHR = new XMLHttpRequest();
 		XHR.onreadystatechange = function() {
-			if(XHR.readyState  == 4) {
-				if(XHR.status  == 200) {
+			if(this.readyState  == 4) {
+				if(this.status  == 200) {
 					try {
-						var agenda = eval('(' + convertCharset(XHR.responseText.trim()) + ')') ;
+						var agenda = eval('(' + convertCharset(this.responseText.trim()) + ')') ;
 						// Sort it based on duration longuest first
 						agenda.sort(function(a, b) { return b.duration - a.duration ;}) ;
 					} catch(err) {
@@ -2060,10 +2038,6 @@ function presentationByDay(event) {
 
 function init() {
 	myLog("start init(), userId=" + userId + ", userName=" + userName + ', ' + navigator.userAgent) ;
-	if (userIsPilot) console.log("userIsPilot") ;
-	if (userIsInstructor) console.log("userIsInstructor") ;
-	if (userIsAdmin) console.log("userIsAdmin") ;
-	if (userIsMechanic) console.log("userIsMechanic") ;
 	document.onkeydown = function(evt) {
 		evt = evt || window.event;
 		if (evt.keyCode == 27) {
@@ -2077,10 +2051,10 @@ function init() {
 //	document.onclick = function(event) {
 //			hideEditBookingDetails() ;
 //		}
+	refreshEphemerides(false) ; // Only way to get airport open/close time needed for the rest, so, let's avoid asynchronous AJAX
 	displayClock() ;
 	refreshWebcam() ;
 	setTimeout(refreshTimestamp, 1000 * 60) ; // Refresh every 60 seconds
-	refreshEphemerides() ;
 	if (planes.length == 0 || pilots.length == 0 || instructors.length <= 1) {
 		console.log("Planes.js or pilots.js or instructors.js has a length of 0") ;
 		alert("Erreur lors du chargement des avions, pilotes et instructeurs.\nPrevenez eric@vyncke.org et essayez de faire un refresh ou un autre browser.") ;
@@ -2140,14 +2114,15 @@ function init() {
 	myLog('in init(): calling initPlanningTable()') ;
 	planningByPlane = false ; // By default, let's start in one single day mode with one line per plane
 	initPlanningTable() ;
+	myLog('in init(): returning from initPlanningTable()') ;
 	hideBookingMessage() ;
 	hidePilotDetails() ;
 	// Display/Hide instructors agenda
     var spanDisplayAgenda = document.getElementById('toggleInstructorAgendaSpan') ;
 	if (userIsStudent || userIsInstructor)
-                spanDisplayAgenda.innerHTML = '+' + spanDisplayAgenda.innerHTML.substr(1) ;
+                spanDisplayAgenda.innerHTML = '+' + spanDisplayAgenda.innerHTML.substring(1) ;
 	else
-                spanDisplayAgenda.innerHTML = '-' + spanDisplayAgenda.innerHTML.substr(1) ;
+                spanDisplayAgenda.innerHTML = '-' + spanDisplayAgenda.innerHTML.substring(1) ;
 	toggleInstructorAgenda() ;
 	planningDate = document.getElementById('planningDate') ;
 	// Overwrite the global datepickr prototype
@@ -2155,6 +2130,6 @@ function init() {
 	datepickr('#calendarIcon', { altInput: document.getElementById('planningDate'), dateFormat: 'd/m/Y'});
 	myLog('in init(): calling refreshPlanningTable()') ;
 	refreshPlanningTable() ;
-	myLog('end of refreshPlanningTable()') ;
+	myLog('in init(): returning from refreshPlanningTable()') ;
 	myLog('end init()') ;
 }
