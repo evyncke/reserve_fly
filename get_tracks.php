@@ -54,7 +54,8 @@ function pilot($plane, $start, $end) {
 // Handle the specific case where only the latest flight location is requested
 if ($latest) {
 	$sql = "SELECT *, last_seen as t_time, last_longitude as t_longitude, last_latitude as t_latitude
-		FROM $table_planes" ;
+		FROM $table_planes
+		WHERE ressource = 0 AND actif = 1" ;
 } else {// SQL filters
 	$sql_filter  = array() ;
 	if ($plane) $sql_filters[] = "id = '$plane'" ;
