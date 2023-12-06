@@ -631,7 +631,7 @@ if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin) {
 <!-- end of div for the plane/ressource booking window-->
 <!-- div to display the cancel booking window -->
 <div id="cancelBookingDiv">
-<center><h3 id="cancelBookingTitle">Confirmer l'annulation d'une r&eacute;servation</h3></center>
+<center><h3 id="cancelBookingTitle">Confirmer l'annulation d'une réservation</h3></center>
 <span style="vertical-align: top;">
 Raison de l'annulation (obligatoire):<br/>
 <textarea id="reasonTextArea" rows=4 cols=40 oninput="javascript:cancelReasonChanged();" onchange="javascript:cancelReasonChanged();"></textarea>
@@ -654,11 +654,12 @@ if ($userIsInstructor) {
 <button id="confirmCancelBookingButton" onclick="javascript:cancelBooking(true);">Confirmer l'annulation</button>
 <button onclick="javascript:hideCancelBookingDetails();">Fermer la fen&ecirc;tre</button>
 </center>
+<div id="cancelBookingDivLog"></div>
 </div>
 <!-- end of div for the cancel booking window-->
 <!-- div to display the agenda item window (create, modify, cancel) -->
 <div id="agendaItemDiv">
-<center><h3 id="agendaItemTitle">Disponibilit&eacute;s</h3></center>
+<center><h3 id="agendaItemTitle">Disponibilités</h3></center>
 Instructeur: <select id="agendaItemInstructorSelect"> </select><br/>
 D&eacute;but: <input type='date' id="agendaItemDateStart"> <select id="agendaItemStartHourSelect"><?=$all_hour_options?></select> : <select id="agendaItemStartMinuteSelect"><?=$all_minute_options?></select><br/>
 Fin: <input type='date' id="agendaItemDateEnd"> <select id="agendaItemEndHourSelect"><?=$all_hour_options?></select> : <select id="agendaItemEndMinuteSelect"><?=$all_minute_options?></select><br/>
