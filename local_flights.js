@@ -210,12 +210,12 @@ function insertTrackPoints(flights) {
 function getTrackPoints() {
 	var XHR = new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
-					console.log("Cannot eval: " + XHR.responseText.trim()) ;
+					console.log("Cannot eval: " + this.responseText.trim()) ;
 					return ;
 				}
 				insertTrackPoints(response) ;
@@ -259,12 +259,12 @@ function insertAirports(airports) {
 function getAirports(ajaxURL) {
 	var XHR = new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
-					console.log("Cannot eval: " + XHR.responseText.trim()) ;
+					console.log("Cannot eval: " + this.responseText.trim()) ;
 					return ;
 				}
 				insertAirports(response) ;
