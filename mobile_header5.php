@@ -143,7 +143,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
           <a class="nav-link text-white" href="mobile.php?news">Home</a>
         </li>
 <?php
-	if ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager or $userIsBoardMember) {
+if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
