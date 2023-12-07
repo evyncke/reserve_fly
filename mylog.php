@@ -171,7 +171,8 @@ function ShowEntryRow($action, $line, $id) {
 	print("<td colspan=\"6\" class=\"logCell\">... calcul&eacute; automatiquement...</td>\n") ;
 	print("</tr>\n") ;
 }
-?><html>
+?><!DOCTYPE html>
+<html lang="fr">
 <head>
 <link rel="stylesheet" type="text/css" href="log.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
