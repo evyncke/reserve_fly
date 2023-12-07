@@ -124,7 +124,7 @@ Les informations sont fantaisistes et inventées (souvent par Éric).</p>
         if ($incident->firstId == $incident->lastId)
             print("<td class=\"border-start\" colspan=\"4\"></td></tr>\n") ;
         else 
-            print("<td class=\"border-start\">$incident->lastStatusFrench</td>
+            print("<td class=\"border-start\">$incident->lastStatus</td>
             <td>$incident->lastText</td>
             <td>$incident->lastDate</td>
             <td><b>$incident->lastLastName</b> $incident->lastFirstName</td>

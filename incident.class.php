@@ -133,6 +133,7 @@ class Incident {
     public $id ;
     public $plane ;
     public $importance ;
+    public $importanceFrench ;
     public $firstId ;
     public $firstDate ;
     public $firstWho ;
@@ -155,7 +156,13 @@ class Incident {
         if ($row) {
             $this->id = $row['i_id'] ;
             $this->plane = strtoupper($row['i_plane']) ;
-            $this->importance = db2web($row['i_importance']) ;
+            $this->importanceFrench = db2web($row['i_importance']) ;
+            switch($row['i_importance']) {
+                case 'mineure': $this->importance = 'minor' ; break ;
+                case 'majeure': $this->importance = 'major' ; break ;
+                case '': $this->importance = 'unknown' ; break ;
+                default: $this->importance = db2web($row['i_importance']) ;
+            }
             $this->firstId = $row['first_id'] ;
             $this->firstDate = $row['first_when'] ;
             $this->firstWho = $row['first_who'] ;
