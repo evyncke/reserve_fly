@@ -25,6 +25,8 @@ $station = (isset($_REQUEST['station'])) ? trim(strtoupper($_REQUEST['station'])
 ?> 
 <div class="container">
 
+<h2>METAR à <?=$station?></h2>
+
 <div class="row">
 	<div id="metarMessage" class="col-sm-10 col-md-8 bg-muted">... fetching data over the Internet ...
 	</div> <!-- col -->

@@ -29,6 +29,8 @@ function myDateGetHoursMinutes(d) {
 
 function displayMETAR(station) {
 	var XHR=new XMLHttpRequest();
+
+	document.getElementById('metarMessage').innerHTML = '<em>... fetching data over the Internet ...</em>' ;
 	XHR.onreadystatechange = function() {
 		if(this.readyState  == 4) {
 			if(this.status  == 200) {
