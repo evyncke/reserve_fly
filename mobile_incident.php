@@ -103,7 +103,7 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
     foreach($events as $event) {
         print("<tr>
             <td>$event->date</td>
-            <td>$event->statusFrench</td>
+            <td>$event->status</td>
             <td>$event->text</td>
             <td><b>$event->whoLastName</b> $event->whoFirstName</td>
             </tr>\n") ;

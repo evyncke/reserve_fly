@@ -1,4 +1,7 @@
 <?php
+// Failing on https://www.spa-aviation.be/resa/mobile_incidents.php?plane=OO-ALE&remark=Passengers+headset+bolt+on+the+jack+is+loose.+Gave+the+bolt+and+ring+to+Ren%C3%A9+V.&importance=mineure&action=create
+// apparently because of +AND+ triggering a Web Application Firewall rule...
+// Passengers headset bolt on the jack is loose. Gave the bolt and ring to René V
 /*
    Copyright 2023 Eric Vyncke
 
@@ -49,13 +52,12 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     $event->save() ;
 }
 ?>
-<p class="lead text-danger mb-5">En cours de développement, ne pas utiliser en dehors de tests par les gestionnaires de flotte, FIs, informaticiens. 
-Les informations sont fantaisistes et inventées (souvent par Éric).</p>
+<p class="lead text-danger mb-5">Under development, do not use yet beside tests by developpers, fleet managers, FIs. Data is just dumb fantasies often invented by Eric.</p>
 
 <h2>Add a techlog entry for <?=$plane?></h2>
 
 <div class="row">
-<form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
+<form action="<?=$_SERVER['PHP_SELF']?>" method="POST" role="form" class="form-horizontal">
 <div class="row mb-3">
 	<label for="planeSelect" class="col-form-label col-sm-4 col-md-2">Plane:</label>
 	<div class="col-sm-4 col-md-1">

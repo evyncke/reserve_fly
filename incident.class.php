@@ -156,8 +156,8 @@ class Incident {
         if ($row) {
             $this->id = $row['i_id'] ;
             $this->plane = strtoupper($row['i_plane']) ;
-            $this->importanceFrench = db2web($row['i_importance']) ;
-            switch($row['i_importance']) {
+            $this->importanceFrench = db2web(strtolower($row['i_importance'])) ;
+            switch(strtolower($row['i_importance'])) {
                 case 'mineure': $this->importance = 'minor' ; break ;
                 case 'majeure': $this->importance = 'major' ; break ;
                 case '': $this->importance = 'unknown' ; break ;
@@ -168,8 +168,8 @@ class Incident {
             $this->firstWho = $row['first_who'] ;
             $this->firstFirstName = db2web($row['first_first_name']) ;
             $this->firstLastName = db2web($row['first_last_name']) ;
-            $this->firstStatus = $row['first_status'] ;
-            switch($this->firstStatus) {
+            $this->firstStatus = strtolower($row['first_status']) ;
+            switch(strtolower($this->firstStatus)) {
                 case 'opened': $this->firstStatusFrench = 'Ouvert' ; break ;
                 case 'accepted': $this->firstStatusFrench = 'Accepté' ; break ;
                 case 'inprogress': $this->firstStatusFrench = 'En progrès' ; break ;
