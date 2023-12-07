@@ -19,8 +19,6 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
-
 require_once 'mobile_header5.php' ;
 
 $station = (isset($_REQUEST['station'])) ? trim(strtoupper($_REQUEST['station'])) : $default_metar_station ;
