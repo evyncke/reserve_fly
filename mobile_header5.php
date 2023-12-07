@@ -159,7 +159,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
 	if ($userIsAdmin or $userIsInstructor) {
 ?>
   <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Ecole<span class="caret"></span></a>
+    <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">École<span class="caret"></span></a>
     <ul class="dropdown-menu">
 <?php
   if ($userIsInstructor) {
