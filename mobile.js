@@ -53,6 +53,7 @@ function displayMETAR(station) {
 					else
 						elem.style.backgroundColor = 'lightGray' ;
 					elem.innerHTML = '<b>' + response.METAR + '</b>' ;
+					document.getElementById('sourceId').innerText = response.source ;
 					if (station == 'EBSP') {
 						elem.innerHTML += '<br/>Density altitude at ' + response.station + ': ' +
 							response.density_altitude + ' ft, elevation: ' + response.elevation + ' ft';
@@ -401,3 +402,10 @@ function init() {
 	if (titleString)
 		document.title = titleString ;
 }
+
+// TODO
+// When HTTP parameter "kiosk" is set, then start a JS timer to change the pages in a round robin with different display time
+// Today reservations, 30 sec
+// Local flights, 1 minute
+// METAR, 20 sec
+// News, 10 sec
