@@ -63,15 +63,15 @@ Les informations sont fantaisistes et inventées (souvent par Éric).</p>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label class="col-form-label col-sm-4 col-md-2">Description:</label>
+	<label for="remarkId" class="col-form-label col-sm-4 col-md-2">Description:</label>
 	<div class="col-sm-12 col-md-6">
-		<input type="text" class="form-control" name="remark" placeholder="Short description of the techlog entry">
+		<input type="text" class="form-control" name="remark" id="remarkId" placeholder="Short description of the techlog entry">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label class="col-form-label col-sm-4 col-md-2">Importance/urgency:</label>
+	<label for="importanceId" class="col-form-label col-sm-4 col-md-2">Importance/urgency:</label>
 	<div class="col-sm-2 col-md-1">
-        <select name="importance" class="form-select">
+        <select name="importance" id="importanceId" class="form-select">
             <option value="mineure">minor</option>
             <option value="majeure">major</option>
             <option value="urgent">urgent</option>
