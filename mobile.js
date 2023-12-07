@@ -30,11 +30,11 @@ function myDateGetHoursMinutes(d) {
 function displayMETAR(station) {
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				var elem = document.getElementById('metarMessage') ;
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -108,10 +108,10 @@ function displayMETAR(station) {
 function refreshEphemerides(planningYear, planningMonth, planningDay) {
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -179,10 +179,10 @@ function modifyClick(id, auth) {
 function cancelConfirm(id, auth) {
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -195,7 +195,7 @@ function cancelConfirm(id, auth) {
 		}
 	}
 	var requestUrl = "cancel_booking.php?id=" + id + "&auth=" + auth + "&reason=mobile" ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 
 }
@@ -256,10 +256,10 @@ if (false) {
 	}
 }
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -286,7 +286,7 @@ if (false) {
 		'&type=' + bookingType + '&comment=' + comment + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
 		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
 		'&duration=' + flightDuration ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 }
 
@@ -307,10 +307,10 @@ function modifyBooking(id, auth) {
 
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -331,7 +331,7 @@ function modifyBooking(id, auth) {
 		'&comment=' + comment + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
 		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
 		'&duration=' + flightDuration ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 }
 

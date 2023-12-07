@@ -1,4 +1,4 @@
-//   Copyright 2014-2021 Eric Vyncke
+//   Copyright 2014-2023 Eric Vyncke
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ function loggingFromID(id) {
 		var elems = id.split('-') ;
 		return elems[1] ;
 	} else {
-		console.log('loggingFromID(' + id + ') has no hyphen') ;
+		console.log('loggingFromID("' + id + '") has no hyphen') ;
 		return 0 ;
 	}
 }
@@ -183,8 +183,8 @@ function displayWaiting() {
 		document.getElementById('waitingDiv').style.display = 'block' ; // Possibly useless
 		document.getElementById('waitingDiv').style.opacity = 0.4 ; // Possibly useless as it is 0.4 in the CSS
 		document.getElementById('waitingDiv').style.position = 'absolute' ; 
-		document.getElementById('waitingDiv').style.top = browserHeight / 2 - 128; 
-		document.getElementById('waitingDiv').style.left = browserWidth / 2 - 128; 
+		document.getElementById('waitingDiv').style.top = (browserHeight / 2 - 128) + 'px'; 
+		document.getElementById('waitingDiv').style.left = (browserWidth / 2 - 128) + 'px'; 
 		document.getElementById('waitingDiv').style.zIndex = 99 ; // Should be high enough .... it is 4 in the CSS
 	}
 }
@@ -444,8 +444,8 @@ return ; // Waiting for the AJAX service to be added and finding a way to displa
 
 function showPilotDetails(id) {
 	document.getElementById("pilotDetailsDiv").style.visibility = 'visible' ;
-	document.getElementById("pilotDetailsDiv").style.top = 300 ;
-	document.getElementById("pilotDetailsDiv").style.left = 300 ;
+	document.getElementById("pilotDetailsDiv").style.top = '300px' ;
+	document.getElementById("pilotDetailsDiv").style.left = '300px' ;
 	var span = document.getElementById("pilotDetailsSpan") ;
 	// Reset the picture in the div
 	document.getElementById("pilotDetailsImage").src = '' ;
@@ -1287,11 +1287,12 @@ function showDivDetails(div, event) {
 	thisDiv.style.display = 'block' ;
 	// Move the form near the mouse click
 	thisDiv.style.position = 'absolute' ; 
-	thisDiv.style.top = event.clientY + 10; 
-	if (thisDiv.getBoundingClientRect().bottom > browserHeight) thisDiv.style.top = event.clientY - 300 ;
-	thisDiv.style.left = event.clientX + 10 ; 
+	thisDiv.style.top = (event.clientY + 10) + 'px' ; 
+	if (thisDiv.getBoundingClientRect().bottom > browserHeight)
+		thisDiv.style.top = (event.clientY - 300) + 'px' ;
+	thisDiv.style.left = (event.clientX + 10) + 'px' ; 
 	if (thisDiv.getBoundingClientRect().right > browserWidth) 
-		thisDiv.style.left = event.clientX - 400 ;
+		thisDiv.style.left = (event.clientX - 400) + 'px' ;
 	thisDiv.style.ZIndex = '10' ; 
 }
 
@@ -1442,8 +1443,9 @@ function editAgendaItemDetails(event) {
 // TODO when selecting another plane, then refresh the planeComment
 function newBookingDetails(event) {
 	var ressourceType ;
+
 	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
-	document.getElementById('bookingTitle').innerHTML = "Nouvelle r&eacute;servation" ; 
+	document.getElementById('bookingTitle').innerHTML = "Nouvelle réservation" ;
 	// Pre-set the form fields based on the clicked cell, format: plane-tail-number/row/year/month/day/hour/minute
 	cellDetails = event.target.id.split('/') ;
 	// Replace webcam by plane photo and in the same loop, add any plane/ressource comment as well remember which kind of ressource
