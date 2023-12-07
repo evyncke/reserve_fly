@@ -32,6 +32,11 @@ $station = (isset($_REQUEST['station'])) ? trim(strtoupper($_REQUEST['station'])
 	</div> <!-- col -->
 </div> <!-- row -->
 
+<div class="row d-sm-none d-md-block">
+	<footer class="blockquote-footer">Source <cite title="Source du METAR" id="sourceId"></cite></footer>
+</div> <!-- row -->
+
+<div class="row">
 <form class="form-inline" action="<?=$_SERVER['PHP_SELF']?>" method="GET">
 	<div class="form-group">
 		<label class="control-label col-xs-4 col-md-4" for="stationMETARInput">Station METAR:</label>
@@ -46,6 +51,7 @@ $station = (isset($_REQUEST['station'])) ? trim(strtoupper($_REQUEST['station'])
    		</div>
 	</div><!-- formgroup-->
 </form>
+</div> <!-- row -->
 
 <script>
 	displayMETAR('<?=$station?>') ;
