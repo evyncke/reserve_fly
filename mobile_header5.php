@@ -59,7 +59,7 @@ var
 		nowTimestamp = <?=time()?>,
 		utcOffset = Number(<?=date('Z')/3600?>),
 		userId = <?=$userId?>,
-    selectedUserId = <?=(isset($_REQUEST['user'])) ? $_REQUEST['user'] : $userId?> ;
+    selectedUserId = <?=(isset($_REQUEST['user']) and $_REQUEST['user'] != '') ? $_REQUEST['user'] : $userId?> ;
 		userName = '<?=$userName?>',
 		userFullName = '<?=$userFullName?>',
 		userIsPilot = <?= ($userIsPilot) ? 'true' : 'false' ?>,
@@ -213,6 +213,7 @@ if ($userId > 0) {
       }
 ?>
             <li><a class="dropdown-item" href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
+            <li><a class="dropdown-item" href="mobile_fleet_map.php?latest">Dernières localisations</a></li>
             <!-- init() in mobile.js will insert all active planes -->
 <?php
 }

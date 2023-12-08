@@ -27,21 +27,21 @@ if ($userId == 0) {
 
 if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
 
+$latest = (isset($_REQUEST['latest'])) ? '?latest=y' : '' ;
+
 $header_postamble = "<!-- Load the MAP BOX scripts & CSS -->
 <script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
 <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
 <script type='text/javascript' src='fleet_map.js'></script>
 " ;
-$body_attributes = "onload=\"init();initFleet($apt_longitude, $apt_latitude, '$mapbox_token', 'get_tracks.php?');\"" ;
+$body_attributes = "onload=\"init();initFleet($apt_longitude, $apt_latitude, '$mapbox_token', 'get_tracks.php$latest');\"" ;
 
 require_once 'mobile_header5.php' ;
 ?> 
-
-
 <div class="container-fluid">
 
 <div class="page-header">
-<h3>Vols de nos avions ces dernières 24 heures</h3>
+<h2><?=($latest)? "Dernières positions connues de nos avions" :"Vols de nos avions ces dernières 24 heures"?></h2>
 </div> <!-- row -->
 
 <div class="row">

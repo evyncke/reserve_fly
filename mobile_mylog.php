@@ -28,13 +28,17 @@ $body_attributes=' onload="initMyLog();init();" ' ;
 
 require_once 'mobile_header5.php' ;
 
-if ($_REQUEST['owner'] != '' && is_numeric($_REQUEST['owner']) && ($userIsAdmin || $userIsInstructor)) {
-	$owner = $_REQUEST['owner'] ;
-	$owner_name = "membre $owner" ;
+if (isset($_REQUEST['user']) && $_REQUEST['user'] != '' && is_numeric($_REQUEST['user']) && ($userIsAdmin || $userIsInstructor)) {
+	$owner = $_REQUEST['user'] ;
 } else {
 	$owner = $userId ;
-	$owner_name = $userFullName ;
 }
+
+$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $owner")
+	or journalise($userId, "F", "Cannot read user data:" . mysqli_error($mysqli_link)) ;
+$row_owner = mysqli_fetch_array($result) or journalise($userId, "F", "User $owner not found");
+$owner_name = db2web("$row_owner[last_name], $row_owner[first_name]") ;
+mysqli_free_result($result) ;
 
 $sql_filter = [] ;
 
@@ -52,27 +56,8 @@ if (isset($_REQUEST['period']) and $_REQUEST['period'] != 'always') {
 	$date_from_sql = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'Y-m-d') ;	
 } else {
 	$period = 'always' ; 
-	$date_from = '17/12/1903' ; // All flights should be done after this date, Wright brothers ;-)
+	$date_from = '17/12/1903 (1er vol des frères Wright)' ; // All flights should be done after this date, Wright brothers ;-)
 	$date_from_sql = '1903-12-17' ; // All flights should be done after this date, Wright brothers ;-)
-}
-
-if (isset($_REQUEST['items'])) {
-	$items = $_REQUEST['items'] ;
-	switch ($items) {
-		case '12': $items = 12 ; break ;
-		case '24': $items = 24 ; break ;
-		case '50': $items = 50 ; break ;
-		case '100': $items = 100 ; break ;
-		default: $items = 12 ;
-	}
-} else {
-	$items = 12 ;
-}
-
-if (isset($_REQUEST['page']) and is_numeric($_REQUEST['page'])) {
-	$page = $_REQUEST['page'] ;
-} else {
-	$page = 9999 ;
 }
 
 // $sql_filters = implode(' and ', $sql_filter) ;
@@ -212,7 +197,7 @@ function saveButton(action, owner, id) {
 }
 
 function selectChanged() {
-	window.location.href = '<?=$_SERVER['PHP_SELF']?>?owner=' + document.getElementById('pilotSelect').value + '&period=' + document.getElementById('periodSelect').value  ;
+	window.location.href = '<?=$_SERVER['PHP_SELF']?>?user=' + document.getElementById('pilotSelect').value + '&period=' + document.getElementById('periodSelect').value  ;
 }
 
 function initMyLog() {
@@ -221,13 +206,18 @@ function initMyLog() {
 		var tailNumber = planes[i].id.replace('-', '').toUpperCase() ;
 		clubPlanes.push(tailNumber) ;
 	}
-
+	prefillDropdownMenus('periodName', [{id: 'always', name: 'depuis toujours'},
+		{id: '2y', name: '2 ans'},
+		{id: '1y', name: '1 an'},
+		{id: '3m', name: '3 mois'},
+		{id: '1m', name: '1 mois'},
+	], '<?=$period?>') ;
 }
 </script>
 <!--body onload="init();"-->
 <div class="container-fluid">
 
-<h2>Carnet de vol de <?=$owner_name?> depuis <?=$date_from?></h2>
+<h2>Carnet de vols de <?=$owner_name?> depuis le <?=$date_from?></h2>
 <?php
 // Actions first
 if (isset($_REQUEST['action'])) {
@@ -320,22 +310,18 @@ switch ($_REQUEST['action']) {
 if (isset($error_message))
 	print("<span class=\"logError\">$error_message</span><br/>") ;
 }
+?>
 
-
-print("Période: <select id=\"periodSelect\" onchange=\"selectChanged();\">
-	<option value=\"always\">depuis toujours</option>
-	<option value=\"2y\">2 ans</option>
-	<option value=\"1y\">1 an</option>
-	<option value=\"3m\">3 mois</option>
-	<option value=\"1m\">1 mois</option>
+Période: <select id="periodSelect" name="periodName" onchange="selectChanged();">
+	<option value="always">depuis toujours</option>
+	<option value="2y">2 ans</option>
+	<option value="1y">1 an</option>
+	<option value="3m">3 mois</option>
+	<option value="1m">1 mois</option>
 </select>
-<br/>") ;
+<br/>
 
-$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $owner")
-	or journalise($userId, "F", "Cannot read user data:" . mysqli_error($mysqli_link)) ;
-$row_owner = mysqli_fetch_array($result) or journalise($userId, "F", "User $owner not found");
-mysqli_free_result($result) ;
-
+<?php
 $sql = "select l_id, date_format(l_start, '%d/%m/%y') as date, date_format(l_start, '%Y-%m-%d') as date_sql,
 	l_model, l_plane, l_pilot, l_is_pic, l_instructor, p.last_name as instructor_name,
 	upper(l_from) as l_from, upper(l_to) as l_to, 
@@ -348,10 +334,6 @@ $sql = "select l_id, date_format(l_start, '%d/%m/%y') as date, date_format(l_sta
 	order by l.l_start asc" ;
 $result = mysqli_query($mysqli_link, $sql) or journalise($userId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
 $rows_count = mysqli_num_rows($result) ;
-if ($rows_count === FALSE) die("Cannot count rows (owner = $owner, $sql): " . mysqli_error($mysqli_link));
-$page_count = ceil($rows_count / $items) ;
-if ($page > $page_count -1) $page = $page_count -1 ;
-if ($page < 0) $page = 0 ;
 
 if ($userIsInstructor or $userIsAdmin) {
 	print("En tant qu'instructeur/administrateur, vous pouvez consulter les carnets de vol des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
@@ -394,10 +376,6 @@ while ($row = mysqli_fetch_array($result)) {
 		$duration = explode(':', $row['duration_rollover']) ; // Looking like 01:33:00 (in case of over rolling the 24:00:00 mark)
 	else
 		$duration = explode(':', $row['duration']) ; // Looking like 01:33:00
-	// Check whether this line should be displayed based on $date_from vs. $row[date], $page*$items vs $line_count only if $period is 'always'
-//	if ($period == 'always')
-//		$visible = $page*$items <= $line_count and $line_count < ($page+1)*$items ;
-//	else // $period is not 'always'
 	$visible = $row['date_sql'] >= $date_from_sql ;
 	$duration_grand_total_hour += $duration[0] ;
 	$duration_grand_total_minute += $duration[1] ;
