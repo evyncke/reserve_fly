@@ -48,6 +48,8 @@ require_once 'mobile_header5.php' ;
 ?> 
 <div class="container-fluid">
 
+<h2><?=$plane?></h2>
+
 <div class="row">
 
 <!-- should be hidden on phones -->
