@@ -97,7 +97,10 @@ function generateMaintenanceClass($entretien, $compteur) {
 
 <div class="row">
 <table class="col-sm-12 table table-responsive table-striped">
+	<thead>
 	<tr><th>De</th><th>A</th><th>Pilote</th><th>Commentaire</th></tr>
+</thead>
+<tbody class="table-group-divider">
 <?php
 	$sql_date = date('Y-m-d') ;
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.cell_phone as icell_phone, i.jom_id as iid,
@@ -127,6 +130,7 @@ function generateMaintenanceClass($entretien, $compteur) {
 			db2web($row['plast_name']) . "</b>$ptelephone$instructor</td><td$class>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
 	}
 ?>
+</tbody>
 </table>
 </div><!-- row -->
 </div> <!-- container-->
