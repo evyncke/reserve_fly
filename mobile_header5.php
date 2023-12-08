@@ -16,6 +16,8 @@
 
 */
 
+ob_start("ob_gzhandler");
+
 # HTTP/2 push of CSS via header()
 header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image') ;
 	
@@ -257,6 +259,7 @@ if ($userId <= 0) {
           <ul class="dropdown-menu">
               <li id="logoutElem">
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
+              <a class="dropdown-item" href="mobile_mylog.php">Mon carnet de vols</a>
               <li><hr class="dropdown-divider"></hr></li>
               <li><h6 class="dropdown-header">Situation comptable</h6></li>
               <a class="dropdown-item" href="mobile_folio.php">Mon folio</i></a>
