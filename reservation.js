@@ -175,24 +175,18 @@ function refreshPlanningTableHeader() {
 
 var waitingCount = 0 ;
 
-// When adding text to the innerHTML, it usually doesn't render on the screen until the Javascript is completed, which is done only after the in-line AJAX
-
 function displayWaiting() {
 	if (waitingCount++ == 0) {
 		document.getElementById('waitingDiv').style.visibility = 'visible' ;
 		document.getElementById('waitingDiv').style.display = 'block' ; // Possibly useless
-		document.getElementById('waitingDiv').style.opacity = 0.4 ; // Possibly useless as it is 0.4 in the CSS
-		document.getElementById('waitingDiv').style.position = 'absolute' ; 
 		document.getElementById('waitingDiv').style.top = (browserHeight / 2 - 128) + 'px'; 
 		document.getElementById('waitingDiv').style.left = (browserWidth / 2 - 128) + 'px'; 
-		document.getElementById('waitingDiv').style.zIndex = 99 ; // Should be high enough .... it is 4 in the CSS
 	}
 }
 
 function hideWaiting() {
 	if (--waitingCount == 0) {
 		document.getElementById('waitingDiv').style.visibility = 'hidden' ;
-		document.getElementById('waitingDiv').style.zIndex = -99 ; // Should be low enough ....
 	}
 }
 

@@ -635,6 +635,6 @@ $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 Open Source code: <a href="https://github.com/evyncke/reserve_fly">on github</a><br/>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, ex&eacute;cut&eacute en <?=$execution_time?> sec</div>
 <br/>
-<div id="waitingDiv">PLEASE WAIT<img src="spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();" width="256" height="256"></div>
+<div id="waitingDiv">Connecting to the server, please wait...<img src="spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();" width="256px" height="256px"></div>
 </body>
 </html>
