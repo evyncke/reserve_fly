@@ -21,15 +21,14 @@ ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 require_once 'mobile_header5.php' ;
 
-$station = (isset($_REQUEST['station'])) ? trim(strtoupper($_REQUEST['station'])) : $default_metar_station ;
+$station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(strtoupper($_REQUEST['station'])) : $default_metar_station ;
 ?> 
 <div class="container">
 
-<h2>METAR à <?=$station?></h2>
+<h2><?=$station?> METAR</h2>
 
 <div class="row">
-	<div id="metarMessage" class="col-sm-10 col-md-8 bg-muted">... fetching data over the Internet ...
-	</div> <!-- col -->
+	<div id="metarMessage" class="col-sm-10 col-md-8 bg-muted">... fetching data over the Internet ...</div> 
 </div> <!-- row -->
 
 <div class="row d-sm-none d-md-block">
