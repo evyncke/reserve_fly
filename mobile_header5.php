@@ -133,7 +133,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
   <hr>
 </div><!-- row -->
 </div><!-- print only -->
-<nav class="navbar navbar-expand-md bg-success text-bg-success d-print-none"><!-- do not print the menu... Add fixed-top w/o destroying the layout -->
+<nav class="navbar navbar-expand-md bg-success text-bg-success d-print-none" id="navBarId"><!-- do not print the menu... Add fixed-top w/o destroying the layout -->
   <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".multi-collapse">
         <span class="navbar-toggler-icon"></span>
@@ -279,6 +279,9 @@ if ($userId <= 0) {
 <?php
 }
 ?>
+        <li class="navbar-item">
+          <a class="nav-link text-white" href="mobile_metar.php?kiosk" title="Lancer un kiosque des pages publiques"><i class="bi bi-arrow-repeat"></i></a>
+        </li>
       </ul><!-- navbar right -->
   </div>
 </nav>

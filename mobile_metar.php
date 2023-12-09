@@ -35,6 +35,8 @@ $station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(s
 	<footer class="blockquote-footer">Source <cite title="Source du METAR" id="sourceId"></cite></footer>
 </div> <!-- row -->
 
+<?php if ($userId > 0) {
+?>
 <div class="row">
 <form class="form-inline" action="<?=$_SERVER['PHP_SELF']?>" method="GET">
 	<div class="form-group">
@@ -51,7 +53,9 @@ $station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(s
 	</div><!-- formgroup-->
 </form>
 </div> <!-- row -->
-
+<?php
+} // $userId > 0
+?>
 <script>
 	displayMETAR('<?=$station?>') ;
 </script>

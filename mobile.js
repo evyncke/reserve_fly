@@ -398,14 +398,40 @@ function init() {
 
 	// Replace the generic HTML title but a more specific one based on the 2nd <h2> tag (the first one is used by the banner)
 	var h2Tag = document.getElementsByTagName('h2')[1] ;
-	titleString = h2Tag.innerText ;
-	if (titleString)
-		document.title = titleString ;
+	if (h2Tag) {
+		var titleString = h2Tag.innerText ;
+		if (titleString)
+			document.title = titleString ;
+	}
+	if (window.location.search.search('kiosk') >= 0) {
+		// Hide the main Navbar
+		var elem = document.getElementById('navBarId') ;
+		if (elem)
+			elem.style.display = 'none' ;
+		// TODO the duration is not the display time of the current page but how long the previous one is displayed
+		var kioskURIs = [ { path: 'mobile_metar.php', duration: 10},
+			{ path: 'mobile_fleet_map.php', duration: 20},
+			{ path: 'mobile_ephemerides.php', duration: 5},
+			{ path: 'mobile_today.php', duration: 20},
+			{ path: 'mobile_local_flights.php', duration: 20},
+			{ path: 'mobile_webcam.php?cam=0', duration: 5}
+		] ;
+		var thisPath = window.location.pathname.substring(window.location.pathname.lastIndexOf('/')+1) ; // Extract the script name
+		for (var i = 0; i < kioskURIs.length; i++) {
+			if (kioskURIs[i].path == thisPath) { // TODO Should only check the pathname and not the query string
+				if (i + 1 == kioskURIs.length)
+					i = 0 ;
+				else
+					i = i + 1 ;
+				setTimeout(function () { 
+					if (kioskURIs[i].path.includes('?'))
+						window.location.href = kioskURIs[i].path + '&kiosk' ;
+					else
+						window.location.href = kioskURIs[i].path + '?kiosk' ; 
+				},
+					kioskURIs[i].duration * 1000) ;
+				break ;
+			}
+		}
+	}
 }
-
-// TODO
-// When HTTP parameter "kiosk" is set, then start a JS timer to change the pages in a round robin with different display time
-// Today reservations, 30 sec
-// Local flights, 1 minute
-// METAR, 20 sec
-// News, 10 sec

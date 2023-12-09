@@ -311,15 +311,13 @@ if (isset($error_message))
 	print("<span class=\"logError\">$error_message</span><br/>") ;
 }
 ?>
-
-Période: <select id="periodSelect" name="periodName" onchange="selectChanged();">
-	<option value="always">depuis toujours</option>
-	<option value="2y">2 ans</option>
-	<option value="1y">1 an</option>
-	<option value="3m">3 mois</option>
-	<option value="1m">1 mois</option>
+<div class="row mb-3">
+<label for="periodSelect" class="col-xs-2 col-md-1 col-form-label text-end">Période:</label>
+<div class="col-xs-2 col-md-1">
+<select id="periodSelect" class="form-control" name="periodName" onchange="selectChanged();">
 </select>
-<br/>
+</div><!-- col -->
+</div><!-- row -->
 
 <?php
 $sql = "select l_id, date_format(l_start, '%d/%m/%y') as date, date_format(l_start, '%Y-%m-%d') as date_sql,

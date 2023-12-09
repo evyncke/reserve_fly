@@ -20,9 +20,6 @@ ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
 
-if (false and $userId <= 0)
-	die("Vous devez &ecirc;tre connect&eacute; pour visualiser les vols de la journée.") ;
-
 $zoom_level = 10 ;
 $local_longitude_bound /= 2.0 ;
 $local_latitude_bound /= 2.0 ;
@@ -36,7 +33,6 @@ $body_attributes = "onload=\"init();initLocalFlights($apt_longitude, $local_long
 
 require_once 'mobile_header5.php' ;
 ?> 
-
 
 <div class="container-fluid">
 
