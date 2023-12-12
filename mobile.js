@@ -412,7 +412,7 @@ function init() {
 		var kioskURIs = [ { path: 'mobile_metar.php', duration: 10},
 			{ path: 'mobile_fleet_map.php', duration: 20},
 			{ path: 'mobile_ephemerides.php', duration: 5},
-			{ path: 'mobile_today.php', duration: 20},
+			{ path: 'mobile_dept_board.php', duration: 20},
 			{ path: 'mobile_local_flights.php', duration: 20},
 			{ path: 'mobile_webcam.php?cam=0', duration: 5}
 		] ;

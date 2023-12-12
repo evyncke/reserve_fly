@@ -240,6 +240,7 @@ if ($userId > 0) {
 ?>
             <li><a class="dropdown-item" href="mobile_local_flights.php">Vols proches</a></li>
             <li><a class="dropdown-item" href="mobile_metar.php">METAR</a></li>
+            <li><a class="dropdown-item" href="mobile_dept_board.php?cam=0">Départs</a></li> 
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam Apron</a></li>
             <!--li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam Fuel</a></li-->
           </ul>
