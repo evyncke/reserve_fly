@@ -73,9 +73,9 @@ $sql_date = date('Y-m-d') ;
 // Dynamic flip departure board https://codepen.io/tomgiddings/pen/yLyExxo
 // Using https://codepen.io/chonz0/pen/NGRbWj for now
 
-function boardPrint($s, $width, $margin) {
+function boardPrint($s, $width, $margin, $color = "#fff") {
     for ($i = 0; $i < $width; $i++)
-        print('<div class="pane">' . strtoupper($s[$i]) . '</div>') ;
+        print('<div class="pane" style="color: ' . $color . ';">' . strtoupper($s[$i]) . '</div>') ;
     // TODO insert white space rather blank character for the padding ?
     while ($i < $width) {
         $i++ ;
@@ -86,6 +86,16 @@ function boardPrint($s, $width, $margin) {
     }
 }
 ?> 
+<script>
+  	if (window.location.search.search('kiosk') >= 0) {
+    } else {
+        setTimeout(function () { 
+            window.location.href = '<?=$_SERVER['PHP_SELF']?>' ;
+        },
+        5 * 60000) ; // Refresh time in minutes
+    }
+</script>
+
 <div class="container-fluid">
 
 <div class="page-header">
@@ -134,7 +144,7 @@ function boardPrint($s, $width, $margin) {
         print('<div class="row">') ;
         boardPrint($time, 4, 1) ;
         boardPrint($plane, 5, 1) ;
-        boardPrint($name, 10, 1) ;
+        boardPrint($name, 10, 1, "yellow") ;
         boardPrint($description, 10, 1) ;
         print("<br/>") ;
         print('</div>') ;
