@@ -32,13 +32,13 @@ $header_postamble = '<style>
     background: #222;
     text-align: center;
     line-height: 1;
-    font-size: 50px; 
+    font-size: 3vw; 
     color: #fff;
     font-family: monospace;
     box-shadow: 
                 0px .02em 0 #ccc,
                 0px .05em 0 #000;
-    text-shadow: -1px -2px 2px rgba(0,0,0,1);
+    text-shadow: -.01em -.02em .02em rgba(0,0,0,1);
     z-index: 50;
 }
 .pane:after {
@@ -59,7 +59,7 @@ $header_postamble = '<style>
     display: inline-block;
     margin: 0 auto;
     position: relative;
-    background: #222;
+    background: black;
     z-index: 50;
 }
 </style>
@@ -102,7 +102,8 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
 <h2>Departures</h2>
 </div> <!-- page-header -->
 
-<div style="background: #222;">
+<div style="background: black; margin: 0 auto;">
+<br/>
 <?php
     $sql = "SELECT *, i.last_name as ilast_name, i.jom_id as iid,
         pi.last_name as plast_name, pi.jom_id as pid,
@@ -147,10 +148,10 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
         boardPrint($name, 10, 1, "yellow") ;
         boardPrint($description, 10, 1) ;
         print("<br/>") ;
-        print('</div>') ;
+        print('</div><!--row-->') ;
 	}
 ?>
-</div><!-- row -->
+<br/>
 </div><!-- black background -->
 </div> <!-- container-->
 
