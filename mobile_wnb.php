@@ -83,7 +83,7 @@ while ($row = mysqli_fetch_array($result)) {
         $cgFwd = $row['cgwarnfwd'] ;
     } else {
         $readonly = ($row['weigth'] > 0) ? ' readonly' : 'onkeyup="processWnB();"' ;
-        print("<td><input type=\"text\" id=\"w_$row[order]\" class=\"text-end\" value=\"$row[weight]\" $readonly>") ;
+        print("<td><input type=\"text\" id=\"w_$row[order]\" class=\"text-end\" value=\"$row[weight]\" style=\"width: 50%;\" $readonly>") ;
         if ($row['fuel'] == 'true') {
             print("&nbsp;l</td>") ;
             $weight_lbs = round($row['weight'] * $row['fuelwt'], 1) ;
@@ -114,7 +114,7 @@ while ($row = mysqli_fetch_array($result)) {
 <div class="mt-4 p-5 bg-danger text-bg-danger rounded" style="visibility: hidden; display: none;" id="warningsDiv">
 </div>
 
-<div id="chart_div" style="width: 50vw; height: 30vw;"></div>
+<div id="chart_div" style="width: 100vw; height: 50vw;"></div>
 
 </div><!-- container -->
 
