@@ -223,12 +223,8 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
           <li><i><a class="dropdown-item" href="mobile_shared_flights.php">Vols en codes partagés</a></i></li>
 <?php
 }
-if ($userId == 62 or $userIsAdmin or $userIsInstructor) {
 ?>
             <li><a class="dropdown-item" href="mobile_wnb.php">Masse et centrage</a></li>
-<?php
-}
-?>
           </ul>
         </li>
         <li class="nav-item dropdown">

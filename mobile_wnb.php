@@ -32,7 +32,7 @@ $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.
         gChartLoaded = true ;
         drawChart() ;
     }
-    google.charts.load('current', {'packages':['corechart']});
+    google.charts.load('current', {packages:['corechart', 'line']});
     google.charts.setOnLoadCallback(markGChartLoaded);
 </script>" ;
 
@@ -40,7 +40,7 @@ require_once 'mobile_header5.php' ;
 ?>
 <div class="container-fluid">
 <h2>Devis masse et centrage</h2>
-<p class="bg-danger">Ceci est en mode test: ne pas s'y fier (visible uniquement par admin & FI).</p>
+<p class="bg-warning text-bg-warning">Ceci est un outil informatique, le pilote doit toujours vérifier le POH ainsi que le certificat W&B officiel de l'avion.</p>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form" class="form-horizontal">
@@ -84,11 +84,11 @@ while ($row = mysqli_fetch_array($result)) {
         $readonly = ($row['weigth'] > 0) ? ' readonly' : 'onkeyup="processWnB();"' ;
         print("<td><input type=\text\" id=\"w_$row[order]\" class=\"text-end\" value=\"$row[weight]\" $readonly>") ;
         if ($row['fuel'] == 'true') {
-            print(" l</td>") ;
+            print("&nbsp;l</td>") ;
             $weight_lbs = round($row['weight'] * $row['fuelwt'], 1) ;
             $density[$row['order']] = $row['fuelwt'] ;
         } else {
-            print(" kg</td>") ;
+            print("&nbsp;kg</td>") ;
             $weight_lbs = round($row['weight'] * 2.20462, 1) ;
             $density[$row['order']] = 2.20462 ;
         }
@@ -106,7 +106,7 @@ while ($row = mysqli_fetch_array($result)) {
 </tfoot>
 </table>
 
-<div class="mt-4 p-5 bg-danger text-bg-danger rounded" style="visibility: hidden;" id="warningsDiv">
+<div class="mt-4 p-5 bg-danger text-bg-danger rounded" style="visibility: hidden; display: none;" id="warningsDiv">
 </div>
 
 <div id="chart_div" style="width: 750px; height: 500px;"></div>
@@ -126,6 +126,7 @@ function processWnB() {
     totalWeight = 0.0 ;
     totalMoment = 0.0 ;
     document.getElementById('warningsDiv').style.visibility = 'hidden' ;
+    document.getElementById('warningsDiv').style.display = 'none' ;
     for (var i = 1; i <= rowCount ; i++) { // Unusual loop by order start at 1 in the SQL table...
        var elem = document.getElementById('w_' + i) ;
         if (elem) {
@@ -145,15 +146,18 @@ function processWnB() {
     document.getElementById('warningsDiv').innerHTML = '' ;
     if (totalWeight > maxWeight) {
         document.getElementById('warningsDiv').innerHTML += "Total weight, " + Math.round(totalWeight) + " pounds, exceeds the maximum weight of " + maxWeight + " pounds.<br/>" ;
-        document.getElementById('warningsDiv').style.visibility = 'visible' ;
+        document.getElementById('warningsDiv').style.visibility = 'visible' ; 
+        document.getElementById('warningsDiv').style.display = 'block' ;
     }
     if (cgFwd > totalArm) {
         document.getElementById('warningsDiv').innerHTML += "Global arm, " + totalArm.toFixed(2) + " in, is below the minimum Fwd moment of " + cgFwd + " in.<br/>" ;
         document.getElementById('warningsDiv').style.visibility = 'visible' ;
+        document.getElementById('warningsDiv').style.display = 'block' ;
     }
     if (totalArm > cgAft) {
         document.getElementById('warningsDiv').innerHTML += "Global arm, " + totalArm.toFixed(2) + " in, is beyond the maximum Aft moment of " + cgAft + " in.<br/>" ;
         document.getElementById('warningsDiv').style.visibility = 'visible' ;
+        document.getElementById('warningsDiv').style.display = 'block' ;
     }
     if (gChartLoaded) {
         drawChart() ;
@@ -165,8 +169,11 @@ function processWnB() {
 var data ;
 
 function drawChart() {
-    data = google.visualization.arrayToDataTable([
-        ['Arm', 'Enveloppe', 'Plane'],
+    data = new google.visualization.DataTable() ;
+    data.addColumn('number', 'Weight');
+    data.addColumn('number', 'CG Envelope');
+    data.addColumn('number', 'Takeoff');
+    data.addRows([
 <?php
 $result = mysqli_query($mysqli_link, "SELECT *
     FROM tp_aircraft AS a
@@ -187,13 +194,13 @@ while ($row = mysqli_fetch_array($result)) {
     if ($row['arm'] > $minArmValue) $maxArmValue = $row['arm'] ;
     if ($row['weight'] < $minWeightValue) $minWeightValue = $row['weight'] ;
     if ($row['weight'] > $minWeightValue) $maxWeightValue = $row['weight'] ;
-    print("\t[$row[arm], $row[weight], 0],\n") ;
+    print("\t[$row[arm], $row[weight], null],\n") ;
 }
 // Finish by going back to first point
-print("\t[$firstArm, $firstWeight, 0]\n") ;
+print("\t[$firstArm, $firstWeight, null]\n") ;
 ?>
         ]);
-        console.log('drawChart() starting') ;
+        data.addRow([parseFloat(document.getElementById('arm_total').innerText), null, parseFloat(document.getElementById('wlb_total').innerText)]) ;
         var options = {
           title: 'Flight envelope',
           hAxis: {title: 'Inches From Reference Datum', minValue: <?=$minArmValue?>, maxValue: <?=$maxArmValue?>},
@@ -205,7 +212,7 @@ print("\t[$firstArm, $firstWeight, 0]\n") ;
           legend: 'Flight envelope'
         };
 
-        var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
         chart.draw(data, options);
       }
 
