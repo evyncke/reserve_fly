@@ -60,7 +60,7 @@ if ($plane == '') {
 ?>
 <table class="table table-stripped table-bordered">
 <thead>
-<tr><th>Item</th><th>Weight</th><th class="text-end">Weight (pound)</th><th class="text-end">Arm (inch)</th><th class="text-end">Moment (inch-pound)</th></tr>
+<tr><th>Item</th><th>Weight</th><th class="text-end d-none d-md-table-cell">Weight (pound)</th><th class="text-end d-none d-md-table-cell">Arm (inch)</th><th class="text-end d-none d-md-table-cell">Moment (inch-pound)</th></tr>
 </thead>
 <tbody class="table-divider">
 <?php
@@ -75,7 +75,7 @@ $density = array() ;
 while ($row = mysqli_fetch_array($result)) {
     print("<tr><td>$row[item]</td>") ;
     if ($row['emptyweight'] == 'true') {
-        print("<td>" . round($row['weight'] / 2.20462) . "&nbsp;kg</td><td class=\"text-end\"><span id=\"wlb_$row[order]\">$row[weight]</span></td>") ;
+        print("<td>" . round($row['weight'] / 2.20462) . "&nbsp;kg</td><td class=\"text-end d-none d-md-table-cell\"><span id=\"wlb_$row[order]\">$row[weight]</span></td>") ;
         $weight_lbs = $row['weight'] ;
         $density[$row['order']] = 1.0 ; // Empty weight is in pounds
         // Save some aircraft-related values
@@ -94,10 +94,10 @@ while ($row = mysqli_fetch_array($result)) {
             $weight_lbs = round($row['weight'] * 2.20462, 1) ;
             $density[$row['order']] = 2.20462 ;
         }
-        print("<td  class=\"text-end\"><span id=\"wlb_$row[order]\">$weight_lbs</span></td>") ;
+        print("<td  class=\"text-end d-none d-md-table-cell\"><span id=\"wlb_$row[order]\">$weight_lbs</span></td>") ;
     }
-    print("<td class=\"text-end\"><span id=\"arm_$row[order]\">$row[arm]</span></td>") ;
-    print("<td class=\"text-end\"><span id=\"moment_$row[order]\">" . round($weight_lbs * $row['arm'], 1) . "</span></td>") ;
+    print("<td class=\"text-end d-none d-md-table-cell\"><span id=\"arm_$row[order]\">$row[arm]</span></td>") ;
+    print("<td class=\"text-end d-none d-md-table-cell\"><span id=\"moment_$row[order]\">" . round($weight_lbs * $row['arm'], 1) . "</span></td>") ;
     print("</tr>\n") ;
     $rowCount ++ ;
 }
@@ -107,9 +107,9 @@ while ($row = mysqli_fetch_array($result)) {
     <tr>
         <th class="table-info text-start">Totals at take-off</th>
         <td class="table-info text-start"><span id="w_total"></span>&nbsp;kg</td>
-        <td class="table-info text-end"><span id="wlb_total"></span></td>
-        <td class="table-info text-end"><span id="arm_total"></span></td>
-        <td class="table-info text-end"><span id="moment_total"></span></td>
+        <td class="table-info text-end d-none d-md-table-cell"><span id="wlb_total"></span></td>
+        <td class="table-info text-end d-none d-md-table-cell"><span id="arm_total"></span></td>
+        <td class="table-info text-end d-none d-md-table-cell"><span id="moment_total"></span></td>
     </tr>
 </tfoot>
 </table>
