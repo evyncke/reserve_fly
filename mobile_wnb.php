@@ -64,7 +64,7 @@ if ($plane == '') {
 </thead>
 <tbody class="table-divider">
 <?php
-// Should use some  d-none d-lg-block or similar...
+// Should use some  d-none d-md-block or similar...
 $result = mysqli_query($mysqli_link, "SELECT *
     FROM tp_aircraft AS a JOIN tp_aircraft_weights AS w ON a.id = w.tailnumber
     WHERE a.tailnumber = '$plane'
@@ -104,18 +104,20 @@ while ($row = mysqli_fetch_array($result)) {
 ?>
 </tbody>
 <tfoot class="table-divider">
-    <tr><th class="table-info text-start">Totals at take-off</th>
+    <tr>
+        <th class="table-info text-start">Totals at take-off</th>
         <td class="table-info text-start"><span id="w_total"></span>&nbsp;kg</td>
         <td class="table-info text-end"><span id="wlb_total"></span></td>
         <td class="table-info text-end"><span id="arm_total"></span></td>
-        <td class="table-info text-end"><span id="moment_total"></span></td></tr>
+        <td class="table-info text-end"><span id="moment_total"></span></td>
+    </tr>
 </tfoot>
 </table>
 
-<div class="mt-4 p-5 bg-danger text-bg-danger rounded" style="visibility: hidden; display: none;" id="warningsDiv">
+<div class="mt-2 p-2 bg-danger text-bg-danger rounded" style="visibility: hidden; display: none;" id="warningsDiv">
 </div>
 
-<div id="chart_div" class="d-print-inline-flex" style="width: 80%; Xwidth: 100vw; height: 50vw;"></div>
+<div id="chart_div" style="width: 80%; Xwidth: 100vw; height: 50vw;"></div>
 
 </div><!-- container -->
 
