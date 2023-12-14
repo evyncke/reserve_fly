@@ -42,7 +42,7 @@ header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white
 <title>Mobile RAPCS ASBL</title>
 
 <!-- Using latest bootstrap 5 -->
-<!-- Latest compiled and minified CSS -->
+<!-- Latest compiled and minified CSS add media="screen" would reserve it only for screen and not printers -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <!-- Latest compiled JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
