@@ -214,8 +214,7 @@ if ($userId > 0) {
 ?>
             <li><a class="dropdown-item" href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
             <li><a class="dropdown-item" href="mobile_fleet_map.php?latest">Dernières localisations</a></li>
-            <!-- init() in mobile.js will insert all active planes -->
-<?php
+            <li><a class="dropdown-item" href="mobile_wnb.php">Masse et centrage</a></li><?php
 }
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
@@ -224,8 +223,8 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 <?php
 }
 ?>
-            <li><a class="dropdown-item" href="mobile_wnb.php">Masse et centrage</a></li>
-          </ul>
+            <!-- init() in mobile.js will insert all active planes -->
+            </ul>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Aéroport<span class="caret"></span></a>
