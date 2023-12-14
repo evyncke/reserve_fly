@@ -59,10 +59,11 @@ if ($plane == '') {
 ?>
 <table class="table table-stripped table-bordered">
 <thead>
-<tr><th>Item</th><th>Weight</th><th class="text-end">Weight (lbs)</th><th class="text-end">Arm (inch)</th><th class="text-end">Moment (inch-pound)</th></tr>
+<tr><th>Item</th><th>Weight</th><th class="text-end">Weight (pound)</th><th class="text-end">Arm (inch)</th><th class="text-end">Moment (inch-pound)</th></tr>
 </thead>
 <tbody class="table-divider">
 <?php
+// Should use some  d-none d-lg-block or similar...
 $result = mysqli_query($mysqli_link, "SELECT *
     FROM tp_aircraft AS a JOIN tp_aircraft_weights AS w ON a.id = w.tailnumber
     WHERE a.tailnumber = '$plane'
@@ -73,7 +74,7 @@ $density = array() ;
 while ($row = mysqli_fetch_array($result)) {
     print("<tr><td>$row[item]</td>") ;
     if ($row['emptyweight'] == 'true') {
-        print("<td></td><td  class=\"text-end\"><span id=\"wlb_$row[order]\">$row[weight]</span></td>") ;
+        print("<td>" . round($row['weight'] / 2.20462) . "&nbsp;kg</td><td class=\"text-end\"><span id=\"wlb_$row[order]\">$row[weight]</span></td>") ;
         $weight_lbs = $row['weight'] ;
         $density[$row['order']] = 1.0 ; // Empty weight is in pounds
         // Save some aircraft-related values
@@ -82,7 +83,7 @@ while ($row = mysqli_fetch_array($result)) {
         $cgFwd = $row['cgwarnfwd'] ;
     } else {
         $readonly = ($row['weigth'] > 0) ? ' readonly' : 'onkeyup="processWnB();"' ;
-        print("<td><input type=\text\" id=\"w_$row[order]\" class=\"text-end\" value=\"$row[weight]\" $readonly>") ;
+        print("<td><input type=\"text\" id=\"w_$row[order]\" class=\"text-end\" value=\"$row[weight]\" $readonly>") ;
         if ($row['fuel'] == 'true') {
             print("&nbsp;l</td>") ;
             $weight_lbs = round($row['weight'] * $row['fuelwt'], 1) ;
@@ -102,14 +103,18 @@ while ($row = mysqli_fetch_array($result)) {
 ?>
 </tbody>
 <tfoot class="table-divider">
- <tr><th colspan="2" class="table-info text-end">Totals at take-off</th><td class="table-info text-end"><span id="wlb_total"></span></td><td class="table-info text-end"><span id="arm_total"></span></td><td class="table-info text-end"><span id="moment_total"></span></td></tr>
+    <tr><th class="table-info text-start">Totals at take-off</th>
+        <td class="table-info text-start"><span id="w_total"></span>&nbsp;kg</td>
+        <td class="table-info text-end"><span id="wlb_total"></span></td>
+        <td class="table-info text-end"><span id="arm_total"></span></td>
+        <td class="table-info text-end"><span id="moment_total"></span></td></tr>
 </tfoot>
 </table>
 
 <div class="mt-4 p-5 bg-danger text-bg-danger rounded" style="visibility: hidden; display: none;" id="warningsDiv">
 </div>
 
-<div id="chart_div" style="width: 750px; height: 500px;"></div>
+<div id="chart_div" style="width: 50vw; height: 30vw;"></div>
 
 </div><!-- container -->
 
@@ -133,6 +138,7 @@ function processWnB() {
             var weight = parseFloat(elem.value) * density[i];
             document.getElementById('wlb_' + i).innerText = weight.toFixed(2) ;
         }
+        if (! document.getElementById('wlb_' + i)) continue ;
         totalWeight += parseFloat(document.getElementById('wlb_' + i).innerText) ;
         document.getElementById('arm_' + i).innerText = parseFloat(document.getElementById('arm_' + i).innerText).toFixed(2) ;
         var moment = parseFloat(document.getElementById('wlb_' + i).innerText) * parseFloat(document.getElementById('arm_' + i).innerText) ;
@@ -140,6 +146,7 @@ function processWnB() {
         totalMoment += moment ;
     }
     totalArm = totalMoment / totalWeight ;
+    document.getElementById('w_total').innerText = (totalWeight / 2.20462).toFixed(2) ;
     document.getElementById('wlb_total').innerText = totalWeight.toFixed(2) ;
     document.getElementById('arm_total').innerText = totalArm.toFixed(2) ;
     document.getElementById('moment_total').innerText = totalMoment.toFixed(2) ;
