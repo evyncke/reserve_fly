@@ -34,7 +34,8 @@ $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.
     }
     google.charts.load('current', {packages:['corechart', 'line']});
     google.charts.setOnLoadCallback(markGChartLoaded);
-</script>" ;
+</script>
+" ;
 
 require_once 'mobile_header5.php' ;
 ?>
@@ -114,7 +115,7 @@ while ($row = mysqli_fetch_array($result)) {
 <div class="mt-4 p-5 bg-danger text-bg-danger rounded" style="visibility: hidden; display: none;" id="warningsDiv">
 </div>
 
-<div id="chart_div" style="width: 100vw; height: 50vw;"></div>
+<div id="chart_div" class="d-print-inline-flex" style="width: 80%; Xwidth: 100vw; height: 50vw;"></div>
 
 </div><!-- container -->
 
@@ -173,7 +174,7 @@ function processWnB() {
 
 // https://developers.google.com/chart/interactive/docs/gallery/scatterchart
 // https://stackoverflow.com/questions/42891409/draw-a-line-on-google-charts-scatterchart
-var data ;
+var data, chart, options ;
 
 function drawChart() {
     data = new google.visualization.DataTable() ;
@@ -208,7 +209,7 @@ print("\t[$firstArm, $firstWeight, null]\n") ;
 ?>
         ]);
         data.addRow([parseFloat(document.getElementById('arm_total').innerText), null, parseFloat(document.getElementById('wlb_total').innerText)]) ;
-        var options = {
+        options = {
           title: 'Flight envelope',
           hAxis: {title: 'Inches From Reference Datum', minValue: <?=$minArmValue?>, maxValue: <?=$maxArmValue?>},
           vAxis: {title: 'Weight (pounds)', minValue: <?=$minWeightValue?>, maxValue: <?=$maxWeightValue?>},
@@ -219,11 +220,36 @@ print("\t[$firstArm, $firstWeight, null]\n") ;
           legend: 'Flight envelope'
         };
 
-        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        chart = new google.visualization.LineChart(document.getElementById('chart_div'));
         chart.draw(data, options);
       }
 
 processWnB() ;
+
+window.addEventListener('beforeprint', (event) => {
+    var printOptions = {
+        width: 1000,
+        height: 600,
+          title: 'Flight envelope',
+          hAxis: {title: 'Inches From Reference Datum', minValue: <?=$minArmValue?>, maxValue: <?=$maxArmValue?>},
+          vAxis: {title: 'Weight (pounds)', minValue: <?=$minWeightValue?>, maxValue: <?=$maxWeightValue?>},
+          series: {
+            0: {lineWidth: 5, pointSize: 0} ,
+            1: {lineWidth: 0, pointSize: 15}
+          },
+          legend: 'Flight envelope'
+        };
+  console.log('before print') ; // assumed to reset the dimension for google charts...
+  chart.clearChart();
+  chart.draw(data, printOptions);
+});
+
+window.addEventListener('afterprint', (event) => {
+    console.log("after print") ;
+    chart.clearChart();
+    chart.draw(data, options);
+});
+
 </script>
 
 </body>
