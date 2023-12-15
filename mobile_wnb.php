@@ -40,14 +40,14 @@ $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.
 require_once 'mobile_header5.php' ;
 ?>
 <div class="container-fluid">
-<h2>Devis masse et centrage</h2>
+<h2>Devis masse et centrage <?=$plane?></h2>
 <p class="bg-warning text-bg-warning">Ceci est un outil informatique, le pilote doit toujours vérifier le POH ainsi que le certificat W&B officiel de l'avion.</p>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form" class="form-horizontal">
 <div class="row mb-3">
 	<label for="planeSelect" class="col-form-label col-sm-4 col-md-2">Plane:</label>
-	<div class="col-sm-4 col-md-1">
+	<div class="col-sm-4 col-md-2">
         <select id="planeSelect" class="form-select" name="plane" onchange="document.location.href='<?=$_SERVER['PHP_SELF']?>?plane=' + this.value ;"></select>
 	</div> <!-- col -->
 </div> <!-- row -->
@@ -58,9 +58,9 @@ if ($plane == '') {
     exit ;
 }
 ?>
-<table class="table table-stripped table-bordered">
+<table class="table table-striped table-hover table-bordered w-auto">
 <thead>
-<tr><th>Item</th><th>Weight</th><th class="text-end d-none d-md-table-cell">Weight (pound)</th><th class="text-end d-none d-md-table-cell">Arm (inch)</th><th class="text-end d-none d-md-table-cell">Moment (inch-pound)</th></tr>
+<tr ><th class="text-end">Item</th><th>Weight</th><th class="text-end d-none d-md-table-cell">Weight (pound)</th><th class="text-end d-none d-md-table-cell">Arm (inch)</th><th class="text-end d-none d-md-table-cell">Moment (inch-pound)</th></tr>
 </thead>
 <tbody class="table-divider">
 <?php
@@ -73,7 +73,7 @@ $result = mysqli_query($mysqli_link, "SELECT *
 $rowCount = 0 ;
 $density = array() ;
 while ($row = mysqli_fetch_array($result)) {
-    print("<tr><td>$row[item]</td>") ;
+    print("<tr><td class=\"text-end\">$row[item]</td>") ;
     if ($row['emptyweight'] == 'true') {
         print("<td>" . round($row['weight'] / 2.20462) . "&nbsp;kg</td><td class=\"text-end d-none d-md-table-cell\"><span id=\"wlb_$row[order]\">$row[weight]</span></td>") ;
         $weight_lbs = $row['weight'] ;
@@ -117,7 +117,10 @@ while ($row = mysqli_fetch_array($result)) {
 <div class="mt-2 p-2 bg-danger text-bg-danger rounded" style="visibility: hidden; display: none;" id="warningsDiv">
 </div>
 
-<div id="chart_div" style="width: 80%; Xwidth: 100vw; height: 50vw;"></div>
+<!-- should try to use fixed aspect ration with CSS: aspect-ration: 4 / 3 or padding-top: 75% to replace the height setting 
+using aspect-ratio makes printing over two pages... 
+using padding-top also prints over 2 pages and makes the display ultra small-->
+<div id="chart_div" style="width: 80%; height: 50vw;"></div>
 
 </div><!-- container -->
 
@@ -214,7 +217,10 @@ print("\t[$firstArm, $firstWeight, null]\n") ;
         options = {
           title: 'Flight envelope',
           hAxis: {title: 'Inches From Reference Datum', minValue: <?=$minArmValue?>, maxValue: <?=$maxArmValue?>},
-          vAxis: {title: 'Weight (pounds)', minValue: <?=$minWeightValue?>, maxValue: <?=$maxWeightValue?>},
+          vAxes: {
+            0: { title: 'Weight (pound)', minValue: <?=$minWeightValue?>, maxValue: <?=$maxWeightValue?>},
+            1: { title: 'Weight (kg)', minValue: <?=round($minWeightValue/2.20462)?>, maxValue: <?=round($maxWeightValue/2.20462)?>}
+          },
           series: {
             0: {lineWidth: 5, pointSize: 0} ,
             1: {lineWidth: 0, pointSize: 15}
