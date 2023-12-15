@@ -334,17 +334,17 @@ $result = mysqli_query($mysqli_link, $sql) or journalise($userId, "F", "Erreur s
 $rows_count = mysqli_num_rows($result) ;
 
 if ($userIsInstructor or $userIsAdmin) {
-	print("En tant qu'instructeur/administrateur, vous pouvez consulter les carnets de vol des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
-	print("</select><br/><br/>") ;
+	print("<p class=\"d-print-none\">En tant qu'instructeur/administrateur, vous pouvez consulter les carnets de vol des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
+	print("</select></p>") ;
 } else { // ($userIsInstructor or $userIsAdmin)
 	print("Carnet de vol de: <select id=\"pilotSelect\" onchange=\"selectChanged();\">
 	<option value=\"owner\" selected>$userFullName</option>
 	</select><br/><br/>") ;
 }
 
-print("<p>Cette table reprend tous vos vols y compris des vols en dehors des avions de notre aéroclub. Utilisez uniquement la page <a href=\"IntroCarnetVol.php\">IntroCarnetVol.php</a> 
+print("<p class=\"d-print-none\">Cette table reprend tous vos vols y compris des vols en dehors des avions de notre aéroclub. Utilisez uniquement la page <a href=\"IntroCarnetVol.php\">IntroCarnetVol.php</a> 
 	pour entrer des vols sur les avions de l'aéroclub.</p>") ;
-print("<table class=\"table table-responsive table-striped table-bordered\">\n") ;
+print("<table class=\"table table-responsive table-striped table-bordered w-auto\">\n") ;
 ShowTableHeader() ;
 print("<tbody claass=\"table-group-divider\">\n") ;
 
@@ -471,7 +471,7 @@ $fi_grand_total_minute = $fi_grand_total_minute % 60 ;
 ?>
 </tbody>
 <tfoot class="table-group-divider">
-<tr><td colspan="8" class="bg-info">Table Total</td>
+<tr><td colspan="8" class="bg-info">Table Total (for this period)</td>
 <td class="bg-info"><?=$duration_total_hour?></td>
 <td class="bg-info"><?=$duration_total_minute?></td>
 <td class="bg-info"></td>
@@ -484,7 +484,7 @@ $fi_grand_total_minute = $fi_grand_total_minute % 60 ;
 <td class="bg-info"><?=$fi_total_hour?></td>
 <td class="bg-info"><?=$fi_total_minute?></td>
 </tr>
-<tr><td  class="bg-info"colspan="8">Grand Total</td>
+<tr><td  class="bg-info"colspan="8">Grand Total (all known flights)</td>
 <td class="bg-info"><?=$duration_grand_total_hour?></td>
 <td class="bg-info"><?=$duration_grand_total_minute?></td>
 <td class="bg-info"></td>
