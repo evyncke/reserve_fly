@@ -102,7 +102,7 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
 <h2>Departures</h2>
 </div> <!-- page-header -->
 
-<div style="background: black; margin: 0 auto;">
+<div style="background: black; margin: -10px; padding: -15px;">
 <br/>
 <?php
     $sql = "SELECT *, i.last_name as ilast_name, i.jom_id as iid,
