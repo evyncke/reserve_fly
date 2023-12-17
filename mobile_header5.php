@@ -120,13 +120,17 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep this value
   print("<input type=\"hidden\" name=\"user\" value\"$_REQUEST[user]\">\n") ;
 ?>
-<div class="d-none d-print-block"><!-- Show a header on printed documents -->
+<div class="d-none d-print-block"><!-- Show a header on printed documents TODO use js to have the current print date and not the first display date-->
 <div class="row"> 
 <div class="col-sm-3">
     <img class="img-fluid" src="https://www.spa-aviation.be/logo_rapcs_256x256.png">
   </div><!-- col -->
   <div class="col-sm-9">
     <h2>Royal Aéro Para Club de Spa ASBL</h2>
+    <p class="fw-light">N° entreprise: BE 0406 620 535  E-mail: info@spa-aviation.be<br/>
+      Aérodrome de la Spa-La Sauvenière (ICAO: EBSP)<br/>
+      Rue de la Sauvenière, 122<br/>
+      B-4900 SPA</p>
     <p class="fw-light">This page was printed by <?="$userFullName ($userName)"?> on <?=date('l jS \o\f F Y')?>.</p>
     <p class="fw-light">URL: <?="https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"?></p>
   </div><!-- col -->
