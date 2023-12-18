@@ -265,6 +265,12 @@ if ($delete_pax) {
 if ($link_to) {
 	if (! is_numeric($link_to))
 		die("Numéro de réservation invalide $link_to") ;
+	// Unlink any previous link... (mainly set booking type back to pilot on any previous booking)
+	mysqli_query($mysqli_link, "UPDATE $table_bookings, $table_flight 
+		SET r_type = " . BOOKING_PILOT . "
+		WHERE r_id = f_booking AND f_id=$flight_id") 
+		or journalise($userId, "E", "Cannot unmark previous booking as customer flight: " . mysqli_error($mysqli_link)) ;
+	// Do the actual job
 	mysqli_query($mysqli_link, "UPDATE $table_flight, $table_bookings
 			SET f_booking=$link_to, f_date_linked=SYSDATE(), f_who_linked = $userId, f_pilot = r_pilot, r_type = " . BOOKING_CUSTOMER . "
 			WHERE f_id=$flight_id AND r_id = $link_to")
