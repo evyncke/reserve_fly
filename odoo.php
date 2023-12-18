@@ -74,8 +74,13 @@ exit ;
 			'mobile',
 			'commercial_company_name')))) ;
 	$response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
+	if ($response->faultCode()) {
+		print("Error...\n") ;
+		print("Code: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
+        	htmlentities($response->faultString()));
+		exit ;
+	}
 	$result = $response->value() ;
-
 
 print("\nCustomers\n") ;
 foreach($result as $client) {
@@ -93,28 +98,43 @@ foreach($result as $client) {
 #	print("$model[name]: $model[model]\n") ;
 #}
 
-exit ;
 # Display all booking moves, including invoices
-$result = $models->execute_kw($db, $uid, $password, 'account.move', 'search_read', array(array(array('move_type','=','out_invoice'))), array()) ;
-print("\nAccounting moves (including invoices)\n") ;
+
+$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'account.move', 'search_read', array(array(array('move_type','=','out_invoice'))), array())) ;
+$response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
+if ($response->faultCode()) {
+	print("Error...\n") ;
+	print("Code: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
+		htmlentities($response->faultString()));
+	exit ;
+}
+$result = $response->value() ;
+print("\nAccounting moves (restricted to out_invoices)\n") ;
 foreach($result as $account) {
-	# if ($account['id'] == 3) var_dump($account) ;
 	print("$account[id]: $account[sequence_prefix] $account[sequence_number], $account[activity_state], $account[name], $account[ref],
 	$account[state],$account[type_name], " . $account['journal_id'][1] . ", " .
 	$account['company_id'][1] . ", $account[amount_total], $account[display_name],
 	$account[access_url], $account[access_token], $account[move_type],\n") ;
-	var_dump($account['invoice_line_ids']) ;
 }
 
 # Display the products
 # Alas, the fields MUST be listed...
-$result = $models->execute_kw($db, $uid, $password, 'product.product', 'search_read', array(),
-	 array('fields' => array('id', 'name', 'detailed_type', 'lst_price', 'standard_price', 'default_code', 'categ_id', 'property_account_income_id'))) ;
-print("\nProducts\n") ;
+
+$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'product.product', 'search_read', array(), 
+	array('fields' => array('id', 'name', 'detailed_type', 'lst_price', 'standard_price', 'default_code', 'categ_id', 'property_account_income_id')))) ;
+$response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
+if ($response->faultCode()) {
+	print("Error...\n") ;
+	print("Code: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
+		htmlentities($response->faultString()));
+	exit ;
+}
+$result = $response->value() ;
+	 
+ print("\nProducts\n") ;
 foreach($result as $product) {
-#	var_dump($product) ;
 	print("id: $product[id], name: $product[name], detailed_type: $product[detailed_type], default_code: $product[default_code],
-	prices: $product[lst_price] / $product[standard_price] => $product[property_account_income_id]\n") ;
+	prices: $product[lst_price] / $product[standard_price] => " . (($product['property_account_income_id']) ? $product['property_account_income_id'][1] : '') . "\n") ;
 }
 
 # To send an invoice:
