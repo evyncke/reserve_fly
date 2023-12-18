@@ -131,7 +131,7 @@ if ($response->faultCode()) {
 }
 $result = $response->value() ;
 	 
- print("\nProducts\n") ;
+print("\nProducts\n") ;
 foreach($result as $product) {
 	print("id: $product[id], name: $product[name], detailed_type: $product[detailed_type], default_code: $product[default_code],
 	prices: $product[lst_price] / $product[standard_price] => " . (($product['property_account_income_id']) ? $product['property_account_income_id'][1] : '') . "\n") ;
@@ -144,7 +144,7 @@ foreach($result as $product) {
 # parameters:
 # - partner_id (id from res.partner)
 # - ref: free text as the invoice reference
-# - type: 'out_invoice'
+# - move_type: 'out_invoice'
 # - invoice_line_ids: for the invoice lines ;-), each line is an array of 3 elements ?
 #	1st and 2nd are simply 0
 #	3rd one is {
@@ -152,6 +152,37 @@ foreach($result as $product) {
 #		'quantity': xyz (integer)
 #		'price_unit': xyz (float)
 
+# exit ;
+
+print("\nCreating invoice\n") ;
+
+$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'account.move', 'create',
+	array(array('partner_id' => 853,
+		'ref' => 'Test invoice generated from PHP',
+		'move_type' => 'out_invoice',
+		'invoice_origin' => 'Spa Aviation Bookings',
+		'invoice_line_ids' => array(
+			array(0, 0,
+					array(
+						'name' => 'Some aeronautical item',
+						'product_id' => 3,
+						'quantity' => 30,
+						'price_unit' => 0.4
+					)
+			)
+		)
+		)))
+) ;
+$response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
+if ($response->faultCode()) {
+	print("Error...\n") ;
+	print("Code: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
+		htmlentities($response->faultString()));
+	exit ;
+}
+$result = $response->value() ;
+var_dump($result) ;
+print("Invoide result: $result\n") ;
 
 ?>
 </pre>
