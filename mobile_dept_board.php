@@ -25,7 +25,6 @@ $header_postamble = '<style>
     width: 1em;
     height: 1em;
     display: inline-block;
-    margin: 0 auto;
     border-radius: .05em;
     border: .01em solid #444;
     position: relative;
@@ -57,7 +56,6 @@ $header_postamble = '<style>
 .space {
     width: 1em;
     display: inline-block;
-    margin: 0 auto;
     position: relative;
     background: black;
     z-index: 50;
@@ -105,7 +103,7 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
 <h2>Departures</h2>
 </div> <!-- page-header -->
 
-<div style="background: black; margin: -10px; padding: -15px;">
+<div style="background: black;">
 <br/>
 <?php
     $sql = "SELECT *, i.last_name as ilast_name, i.jom_id as iid,
@@ -145,7 +143,7 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
 		// Display time only
 		$time = substr($row['r_start'], 11, 2) .  substr($row['r_start'], 14, 2);  
         $plane = substr($row['r_plane'], 0, 2) . substr($row['r_plane'], 3, 3) ;
-        print('<div class="row">') ;
+        print('<div class="row mx-0 px-0 flex-nowrap">') ; // Set boostrap margin/padding left-right to 0 to align board characters with the black backgound div
         boardPrint($time, 4, 1) ;
         boardPrint($plane, 5, 1) ;
         boardPrint($name, 10, 1, "yellow") ;
