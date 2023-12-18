@@ -24,7 +24,7 @@ if ($userId == 0) {
 }
 
 $plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['plane'])) : '' ;
-$body_attributes = "onload=\"init(); prefillDropdownMenus('plane', planes, '$plane');\"" ;
+$body_attributes = "style=\"height: 100%; min-height: 100%; width:100%;\" onload=\"init(); prefillDropdownMenus('plane', planes, '$plane');\"" ;
 $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>
 <script type=\"text/javascript\">
     var gChartLoaded = false ;
@@ -40,6 +40,9 @@ $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.
 require_once 'mobile_header5.php' ;
 ?>
 <div class="container-fluid">
+<!--div class="container-fluid" style="height: 100%!important;overflow:auto;top:0;bottom:0;left:0;right:0;position:fixed;"-->
+<!--div class="container-fluid" style="height: 100%!important;"-->
+<!--div class="container vh-90" style="height: 80vh!important;width: 100vw!important;bottom:0!important;left:0!important;right:0!important;"-->
 <h2>Devis masse et centrage <?=$plane?></h2>
 <p class="bg-warning text-bg-warning">Ceci est un outil informatique, le pilote doit toujours vérifier le POH ainsi que le certificat W&B officiel de l'avion.</p>
 
@@ -84,7 +87,7 @@ while ($row = mysqli_fetch_array($result)) {
         $cgFwd = $row['cgwarnfwd'] ;
     } else {
         $readonly = ($row['weigth'] > 0) ? ' readonly' : 'onkeyup="processWnB();"' ;
-        print("<td><input type=\"text\" id=\"w_$row[order]\" class=\"text-end\" value=\"$row[weight]\" style=\"width: 50%;\" $readonly>") ;
+        print("<td><input type=\"number\" id=\"w_$row[order]\" class=\"text-end\" value=\"$row[weight]\" style=\"width: 50%;\" $readonly>") ;
         if ($row['fuel'] == 'true') {
             print("&nbsp;l</td>") ;
             $weight_lbs = round($row['weight'] * $row['fuelwt'], 1) ;
@@ -120,10 +123,8 @@ while ($row = mysqli_fetch_array($result)) {
 <!-- should try to use fixed aspect ration with CSS: aspect-ration: 4 / 3 or padding-top: 75% to replace the height setting 
 using aspect-ratio makes printing over two pages... 
 using padding-top also prints over 2 pages and makes the display ultra small-->
-<div id="chart_div" style="width: 80%; height: 50vw;"></div>
-
-</div><!-- container -->
-
+<div id="chart_div" style="width: 80vw; height: 50vw; margin: auto;"></div>
+</div><!-- container-fluid -->
 <script type="text/javascript">
     var rowCount = <?=$rowCount?>, maxWeight = <?=$maxWeight?>, cgAft = <?=$cgAft?>, cgFwd = <?=$cgFwd?>, density = [] ;
 <?php
@@ -235,30 +236,30 @@ print("\t[$firstArm, $firstWeight, null]\n") ;
 processWnB() ;
 
 window.addEventListener('beforeprint', (event) => {
+// TODO It would be better to change dynamically the 'options' rather than having 2 sets
     var printOptions = {
         width: 1000,
         height: 600,
-          title: 'Flight envelope',
+        title: 'Flight envelope',
           hAxis: {title: 'Inches From Reference Datum', minValue: <?=$minArmValue?>, maxValue: <?=$maxArmValue?>},
-          vAxis: {title: 'Weight (pounds)', minValue: <?=$minWeightValue?>, maxValue: <?=$maxWeightValue?>},
+          vAxes: {
+            0: { title: 'Weight (pound)', minValue: <?=$minWeightValue?>, maxValue: <?=$maxWeightValue?>},
+            1: { title: 'Weight (kg)', minValue: <?=round($minWeightValue/2.20462)?>, maxValue: <?=round($maxWeightValue/2.20462)?>}
+          },
           series: {
             0: {lineWidth: 5, pointSize: 0} ,
             1: {lineWidth: 0, pointSize: 15}
           },
           legend: 'Flight envelope'
         };
-  console.log('before print') ; // assumed to reset the dimension for google charts...
   chart.clearChart();
   chart.draw(data, printOptions);
 });
 
 window.addEventListener('afterprint', (event) => {
-    console.log("after print") ;
     chart.clearChart();
     chart.draw(data, options);
 });
-
 </script>
-
 </body>
 </html>
