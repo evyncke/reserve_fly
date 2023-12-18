@@ -285,7 +285,7 @@ if ($userId <= 0) {
 }
 ?>
         <li class="navbar-item">
-          <a class="nav-link text-white" href="mobile_metar.php?kiosk" title="Lancer un kiosque des pages publiques"><i class="bi bi-arrow-repeat"></i></a>
+          <a class="nav-link text-white" href="mobile_metar.php?kiosk" title="Lancer un kiosque des pages publiques"><i class="bi bi-play-fill"></i></a>
         </li>
       </ul><!-- navbar right -->
   </div>
