@@ -94,7 +94,7 @@ if ($error_message != '') {
 						$flight_reference = $prefix . $type . sprintf("%03d", $customer_row['f_id']) ;
 					} else
 						$flight_reference = db2web($customer_row['f_reference']) ;
-					$booking['comment'] = $booking['comment'] . "\n (Vol $type_vol $flight_reference pour $customer_row[p_fname] $customer_row[p_lname])." ;
+					$booking['comment'] = $booking['comment'] . "\n (Vol $type_vol $flight_reference pour $booking[customerName])." ;
 				} else
 					journalise($userId, "W", "Impossible de trouver le client pour la réservation $row[r_id].") ;
 			}
