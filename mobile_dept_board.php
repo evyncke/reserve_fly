@@ -86,10 +86,13 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
     }
 }
 ?> 
-<script>
+<script type="text/javascript">
   	if (window.location.search.search('kiosk') >= 0) {
+        console.log("Kiosk mode, no need to refresh") ;
     } else {
+        console.log("Non kiosk mode, setting a auto-refresh") ;
         setTimeout(function () { 
+            console.log("Non kiosk mode, time to refresh") ;
             window.location.href = '<?=$_SERVER['PHP_SELF']?>' ;
         },
         5 * 60000) ; // Refresh time in minutes
