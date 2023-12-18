@@ -84,7 +84,7 @@ if ($error_message != '') {
 					or journalise($userId, "E", "Cannot retrieve customer details: " . mysqli_error($mysqli_link)) ;
 				$customer_row = mysqli_fetch_array($customer_result) ;
 				mysqli_free_result($customer_result) ;
-				if ($customer_row)
+				if ($customer_row) {
 					$booking['customerName'] = db2web($customer_row['p_fname']) . ' ' . db2web($customer_row['p_lname']) ;
 					$booking['customerPhone'] = "$customer_row[p_tel]" ;
 					$type_vol = ($customer_row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
@@ -95,6 +95,8 @@ if ($error_message != '') {
 					} else
 						$flight_reference = db2web($customer_row['f_reference']) ;
 					$booking['comment'] = $booking['comment'] . "\n (Vol $type_vol $flight_reference pour $customer_row[p_fname] $customer_row[p_lname])." ;
+				} else
+					journalise($userId, "W", "Impossible de trouver le client pour la réservation $row[r_id].") ;
 			}
 			if ($row['log_from'])
 				$booking['from'] = $row['log_from'] ;
