@@ -57,13 +57,6 @@ exit ;
 	}
 	$models = new PhpXmlRpc\Client("https://$odoo_host/xmlrpc/2/object");
 	$models->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
-	$params = array(new PhpXmlRpc\Value($odoo_db), 
-		new PhpXmlRpc\Value($uid), 
-		new PhpXmlRpc\Value($odoo_password),
-		new PhpXmlRpc\Value('res.partner'),
-		new PhpXmlRpc\Value('search_read'),
-		new PhpXmlRpc\Value(array(), 'array'),
-		new PhpXmlRpc\Value(array(), 'array')) ;
 	$encoder = new PhpXmlRpc\Encoder() ;
 	$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'res.partner', 'search_read', array(), array('fields'=>array('id', 
 			'name',
@@ -98,9 +91,12 @@ foreach($result as $client) {
 #	print("$model[name]: $model[model]\n") ;
 #}
 
-# Display all booking moves, including invoices
-
-$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'account.move', 'search_read', array(array(array('move_type','=','out_invoice'))), array())) ;
+# Display all out_invoices accounting moves
+print("\nAccounting moves (restricted to out_invoices)\n") ;
+$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'account.move', 'search_read', array(array(array('move_type','=','out_invoice'))), 
+	array('fields' => array('id', 'sequence_prefix', 'sequence_number', 'activity_state', 'name', 'ref',
+		'state', 'type_name', 'journal_id', 'company_id', 'amount_total', 'display_name',
+		'access_url', 'access_token', 'move_type')))) ;
 $response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
 if ($response->faultCode()) {
 	print("Error...\n") ;
@@ -109,7 +105,6 @@ if ($response->faultCode()) {
 	exit ;
 }
 $result = $response->value() ;
-print("\nAccounting moves (restricted to out_invoices)\n") ;
 foreach($result as $account) {
 	print("$account[id]: $account[sequence_prefix] $account[sequence_number], $account[activity_state], $account[name], $account[ref],
 	$account[state],$account[type_name], " . $account['journal_id'][1] . ", " .
@@ -152,7 +147,7 @@ foreach($result as $product) {
 #		'quantity': xyz (integer)
 #		'price_unit': xyz (float)
 
-# exit ;
+exit ;
 
 print("\nCreating invoice\n") ;
 
@@ -182,7 +177,7 @@ if ($response->faultCode()) {
 }
 $result = $response->value() ;
 var_dump($result) ;
-print("Invoide result: $result\n") ;
+print("Invoicing result: $result\n") ;
 
 ?>
 </pre>
