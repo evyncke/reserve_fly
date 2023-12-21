@@ -473,7 +473,7 @@ if (! $read_only) {
 
 <div id="log" class="tab-pane fade" role="tabpanel">
 <div class="row">
-	Configuration initiale de votre carnet de vols. Vous pouvez aussi <a href="mylog.php">visualiser votre carnet de vols</a> sur base des entrées
+	Configuration initiale de votre carnet de vols. Vous pouvez aussi <a href="mobile_mylog.php">visualiser votre carnet de vols</a> sur base des entrées
 	dans les carnets de routes des avions RAPCS et autres.
 </div> <!-- row -->
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">

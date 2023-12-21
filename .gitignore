@@ -2,6 +2,7 @@ invoices/
 facebook-sdk-*/
 font/*
 PHPExcel/
+vendor/
 PHPExcel.php
 Mobile_Detect.php
 .htaccess
@@ -58,3 +59,4 @@ factu/
 htaccess-resa
 htaccess-root
 .gitignore
+composer.lock

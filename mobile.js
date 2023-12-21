@@ -29,12 +29,14 @@ function myDateGetHoursMinutes(d) {
 
 function displayMETAR(station) {
 	var XHR=new XMLHttpRequest();
+
+	document.getElementById('metarMessage').innerHTML = '<em>... fetching data over the Internet ...</em>' ;
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				var elem = document.getElementById('metarMessage') ;
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -51,6 +53,7 @@ function displayMETAR(station) {
 					else
 						elem.style.backgroundColor = 'lightGray' ;
 					elem.innerHTML = '<b>' + response.METAR + '</b>' ;
+					document.getElementById('sourceId').innerText = response.source ;
 					if (station == 'EBSP') {
 						elem.innerHTML += '<br/>Density altitude at ' + response.station + ': ' +
 							response.density_altitude + ' ft, elevation: ' + response.elevation + ' ft';
@@ -108,10 +111,10 @@ function displayMETAR(station) {
 function refreshEphemerides(planningYear, planningMonth, planningDay) {
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -179,10 +182,10 @@ function modifyClick(id, auth) {
 function cancelConfirm(id, auth) {
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -195,7 +198,7 @@ function cancelConfirm(id, auth) {
 		}
 	}
 	var requestUrl = "cancel_booking.php?id=" + id + "&auth=" + auth + "&reason=mobile" ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 
 }
@@ -256,10 +259,10 @@ if (false) {
 	}
 }
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -286,7 +289,7 @@ if (false) {
 		'&type=' + bookingType + '&comment=' + comment + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
 		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
 		'&duration=' + flightDuration ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 }
 
@@ -307,10 +310,10 @@ function modifyBooking(id, auth) {
 
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
-		if(XHR.readyState  == 4) {
-			if(XHR.status  == 200) {
+		if(this.readyState  == 4) {
+			if(this.status  == 200) {
 				try {
-					var response = eval('(' + XHR.responseText.trim() + ')') ;
+					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
@@ -331,7 +334,7 @@ function modifyBooking(id, auth) {
 		'&comment=' + comment + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
 		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
 		'&duration=' + flightDuration ;
-	XHR.open("GET", requestUrl, false) ;
+	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 }
 
@@ -395,7 +398,40 @@ function init() {
 
 	// Replace the generic HTML title but a more specific one based on the 2nd <h2> tag (the first one is used by the banner)
 	var h2Tag = document.getElementsByTagName('h2')[1] ;
-	titleString = h2Tag.innerText ;
-	if (titleString)
-		document.title = titleString ;
+	if (h2Tag) {
+		var titleString = h2Tag.innerText ;
+		if (titleString)
+			document.title = titleString ;
+	}
+	if (window.location.search.search('kiosk') >= 0) {
+		// Hide the main Navbar
+		var elem = document.getElementById('navBarId') ;
+		if (elem)
+			elem.style.display = 'none' ;
+		// TODO the duration is not the display time of the current page but how long the previous one is displayed
+		var kioskURIs = [ { path: 'mobile_metar.php', duration: 10},
+			{ path: 'mobile_fleet_map.php', duration: 20},
+			{ path: 'mobile_ephemerides.php', duration: 5},
+			{ path: 'mobile_dept_board.php', duration: 20},
+			{ path: 'mobile_local_flights.php', duration: 20},
+			{ path: 'mobile_webcam.php?cam=0', duration: 5}
+		] ;
+		var thisPath = window.location.pathname.substring(window.location.pathname.lastIndexOf('/')+1) ; // Extract the script name
+		for (var i = 0; i < kioskURIs.length; i++) {
+			if (kioskURIs[i].path == thisPath) { // TODO Should only check the pathname and not the query string
+				if (i + 1 == kioskURIs.length)
+					i = 0 ;
+				else
+					i = i + 1 ;
+				setTimeout(function () { 
+					if (kioskURIs[i].path.includes('?'))
+						window.location.href = kioskURIs[i].path + '&kiosk' ;
+					else
+						window.location.href = kioskURIs[i].path + '?kiosk' ; 
+				},
+					kioskURIs[i].duration * 1000) ;
+				break ;
+			}
+		}
+	}
 }

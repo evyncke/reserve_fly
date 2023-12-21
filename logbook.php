@@ -612,7 +612,7 @@ if ($auth != '') {
 }
 ?>
 <div class="col-xs-6 col-sm-4 text-center">
-	<form action="mylog.php">
+	<form action="mobile_mylog.php">
 	<input type="hidden" name="id" value="<?=$id?>">
 	<input type="hidden" name="auth" value="<?=$auth?>">
 	<input type="submit" class="btn btn-info center" value="Mon carnet de vols" style="margin-left: auto; margin-right: auto;">

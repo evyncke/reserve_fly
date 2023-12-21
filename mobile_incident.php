@@ -47,15 +47,14 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
     $event->save() ;
 }
 ?>
-<p class="lead text-danger mb-5">En cours de développement, ne pas utiliser en dehors de tests par les gestionnaires de flotte, FIs, informaticiens. 
-Les informations sont fantaisistes et inventées (souvent par Éric).</p>
+<p class="lead text-danger mb-5">Under development, do not use yet beside tests by developpers, fleet managers, FIs. Data is just dumb fantasies often invented by Eric.</p>
 
 <?php
 if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 ?>
 <h2>Add a new entry in the tech log</h2>
 
-<p class="lead">Cette fonction n'est disponible que pour les mécanos, les FIs, et les administrateurs.</p>
+<p class="lead">This function is only availanle to fleet managers, mechanics, and FIs.</p>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
@@ -64,18 +63,18 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 	<label for="statusSelect" class="col-form-label col-sm-4 col-md-2">New status:</label>
 	<div class="col-sm-4 col-md-1">
         <select id="statusSelect" class="form-select" name="status">
-            <option value="opened" <?=($incident->lastStatus == 'opened') ? 'selected':''?>>Ouvert</option>
-            <option value="accepted" <?=($incident->lastStatus == 'accepted') ? 'selected':''?>>Accepté</option>
-            <option value="inprogress" <?=($incident->lastStatus == 'inprogress') ? 'selected':''?>>En progrès</option>
-            <option value="closed" <?=($incident->lastStatus == 'closed') ? 'selected':''?>>Clôturé</option>
-            <option value="rejected" <?=($incident->lastStatus == 'rejected') ? 'selected':''?>>Rejeté</option>
+            <option value="opened" <?=($incident->lastStatus == 'opened') ? 'selected':''?>>Opened</option>
+            <option value="accepted" <?=($incident->lastStatus == 'accepted') ? 'selected':''?>>Accepted</option>
+            <option value="inprogress" <?=($incident->lastStatus == 'inprogress') ? 'selected':''?>>In progress</option>
+            <option value="closed" <?=($incident->lastStatus == 'closed') ? 'selected':''?>>Closed</option>
+            <option value="rejected" <?=($incident->lastStatus == 'rejected') ? 'selected':''?>>Rejected</option>
         </select>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label class="col-form-label col-sm-4 col-md-2">Description:</label>
+	<label for="remarkId" class="col-form-label col-sm-4 col-md-2">Description:</label>
 	<div class="col-sm-12 col-md-6">
-		<input type="text" class="form-control" name="remark" placeholder="Short description of the action/question/answer">
+		<input type="text" class="form-control" name="remark" id="remarkId" placeholder="Short description of the action/question/answer">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
@@ -104,7 +103,7 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
     foreach($events as $event) {
         print("<tr>
             <td>$event->date</td>
-            <td>$event->statusFrench</td>
+            <td>$event->status</td>
             <td>$event->text</td>
             <td><b>$event->whoLastName</b> $event->whoFirstName</td>
             </tr>\n") ;

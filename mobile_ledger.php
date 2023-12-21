@@ -99,7 +99,7 @@ while ($row = mysqli_fetch_array($result)) {
 		case 'F06': $journal = 'BNP Fortis' ; break ;
 		case 'F08': $journal = 'CBC' ; break ;
 		case 'OD':
-		case 'OPD': $journal = 'Operations diverses' ; break ;
+		case 'OPD': $journal = 'Opérations diverses' ; break ;
 		case 'V':
 		case 'VEN': $journal = 'Facture' ; break ;
 		case 'VNC': $journal = 'Note de crédit' ; break ;

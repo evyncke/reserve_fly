@@ -1134,7 +1134,7 @@ print("<button type=\"button\" value=\"Fill\" onclick=\"window.location.href='$_
 </table>
 <p></p>
 <p><center><input class="button" type="button" value="Mon Folio" onclick="javascript:document.location.href='../../resa/myfolio.php';"></input></center>
-<center><input class="button" type="button" value="Mon carnet de vol" onclick="javascript:document.location.href='../../resa/mylog.php';"></input></center>
+<center><input class="button" type="button" value="Mon carnet de vol" onclick="javascript:document.location.href='../../resa/mobile_mylog.php';"></input></center>
 <center><input class="button" type="button" value="Retour à la page de réservation" onclick="javascript:document.location.href='https://www.spa-aviation.be/index.php/fr/resa-full/reserver';"></input></center></p>
 <p></p>
 <p></p>

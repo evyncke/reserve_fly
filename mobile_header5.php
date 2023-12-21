@@ -16,6 +16,8 @@
 
 */
 
+ob_start("ob_gzhandler");
+
 # HTTP/2 push of CSS via header()
 header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image') ;
 	
@@ -40,7 +42,7 @@ header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white
 <title>Mobile RAPCS ASBL</title>
 
 <!-- Using latest bootstrap 5 -->
-<!-- Latest compiled and minified CSS -->
+<!-- Latest compiled and minified CSS add media="screen" would reserve it only for screen and not printers -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <!-- Latest compiled JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -57,7 +59,7 @@ var
 		nowTimestamp = <?=time()?>,
 		utcOffset = Number(<?=date('Z')/3600?>),
 		userId = <?=$userId?>,
-    selectedUserId = <?=(isset($_REQUEST['user'])) ? $_REQUEST['user'] : $userId?> ;
+    selectedUserId = <?=(isset($_REQUEST['user']) and $_REQUEST['user'] != '') ? $_REQUEST['user'] : $userId?> ;
 		userName = '<?=$userName?>',
 		userFullName = '<?=$userFullName?>',
 		userIsPilot = <?= ($userIsPilot) ? 'true' : 'false' ?>,
@@ -118,20 +120,24 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep this value
   print("<input type=\"hidden\" name=\"user\" value\"$_REQUEST[user]\">\n") ;
 ?>
-<div class="d-none d-print-block"><!-- Show a header on printed documents -->
+<div class="d-none d-print-block"><!-- Show a header on printed documents TODO use js to have the current print date and not the first display date-->
 <div class="row"> 
 <div class="col-sm-3">
     <img class="img-fluid" src="https://www.spa-aviation.be/logo_rapcs_256x256.png">
   </div><!-- col -->
   <div class="col-sm-9">
     <h2>Royal Aéro Para Club de Spa ASBL</h2>
+    <p class="fw-light">N° entreprise: BE 0406 620 535  E-mail: info@spa-aviation.be<br/>
+      Aérodrome de la Spa-La Sauvenière (ICAO: EBSP)<br/>
+      Rue de la Sauvenière, 122<br/>
+      B-4900 SPA</p>
     <p class="fw-light">This page was printed by <?="$userFullName ($userName)"?> on <?=date('l jS \o\f F Y')?>.</p>
     <p class="fw-light">URL: <?="https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"?></p>
   </div><!-- col -->
   <hr>
 </div><!-- row -->
 </div><!-- print only -->
-<nav class="navbar navbar-expand-md bg-success text-bg-success d-print-none"><!-- do not print the menu... Add fixed-top w/o destroying the layout -->
+<nav class="navbar navbar-expand-md bg-success text-bg-success d-print-none" id="navBarId"><!-- do not print the menu... Add fixed-top w/o destroying the layout -->
   <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".multi-collapse">
         <span class="navbar-toggler-icon"></span>
@@ -143,7 +149,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
           <a class="nav-link text-white" href="mobile.php?news">Home</a>
         </li>
 <?php
-	if ($userIsAdmin or $userIsInstructor or $userIsFlightPilot or $userIsFlightManager or $userIsBoardMember) {
+if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
@@ -159,7 +165,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
 	if ($userIsAdmin or $userIsInstructor) {
 ?>
   <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Ecole<span class="caret"></span></a>
+    <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">École<span class="caret"></span></a>
     <ul class="dropdown-menu">
 <?php
   if ($userIsInstructor) {
@@ -211,8 +217,8 @@ if ($userId > 0) {
       }
 ?>
             <li><a class="dropdown-item" href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
-            <!-- init() in mobile.js will insert all active planes -->
-<?php
+            <li><a class="dropdown-item" href="mobile_fleet_map.php?latest">Dernières localisations</a></li>
+            <li><a class="dropdown-item" href="mobile_wnb.php">Masse et centrage</a></li><?php
 }
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
@@ -221,7 +227,8 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 <?php
 }
 ?>
-          </ul>
+            <!-- init() in mobile.js will insert all active planes -->
+            </ul>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Aéroport<span class="caret"></span></a>
@@ -237,6 +244,7 @@ if ($userId > 0) {
 ?>
             <li><a class="dropdown-item" href="mobile_local_flights.php">Vols proches</a></li>
             <li><a class="dropdown-item" href="mobile_metar.php">METAR</a></li>
+            <li><a class="dropdown-item" href="mobile_dept_board.php?cam=0">Départs</a></li> 
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam Apron</a></li>
             <!--li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam Fuel</a></li-->
           </ul>
@@ -257,6 +265,7 @@ if ($userId <= 0) {
           <ul class="dropdown-menu">
               <li id="logoutElem">
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
+              <a class="dropdown-item" href="mobile_mylog.php">Mon carnet de vols</a>
               <li><hr class="dropdown-divider"></hr></li>
               <li><h6 class="dropdown-header">Situation comptable</h6></li>
               <a class="dropdown-item" href="mobile_folio.php">Mon folio</i></a>
@@ -275,6 +284,9 @@ if ($userId <= 0) {
 <?php
 }
 ?>
+        <li class="navbar-item">
+          <a class="nav-link text-white" href="mobile_metar.php?kiosk" title="Lancer un kiosque des pages publiques"><i class="bi bi-play-fill"></i></a>
+        </li>
       </ul><!-- navbar right -->
   </div>
 </nav>

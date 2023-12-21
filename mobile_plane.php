@@ -48,6 +48,8 @@ require_once 'mobile_header5.php' ;
 ?> 
 <div class="container-fluid">
 
+<h2><?=$plane?></h2>
+
 <div class="row">
 
 <!-- should be hidden on phones -->
@@ -80,7 +82,8 @@ function generateMaintenanceClass($entretien, $compteur) {
 	if ($plane_row['checklist'])
 		print("<tr><td>Checklist</td><td><a href=\"$plane_row[checklist]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
 	print("<tr><td>Dernier vol sur FlightAware  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"https://flightaware.com/live/flight/" . strtoupper($plane_row['id']) . "\" target=\"_blank\"><img src=\"fa.ico\" border=\"0\" width=\"24\" height=\"24\"></a></td></tr>
-		<tr><td>Carnet de routes  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"planelog.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-journal\"></i></a></td></tr>\n") ;
+	<tr><td>Carnet de routes  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"planelog.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-journal\"></i></a></td></tr>
+	<tr><td>Masse et centrage</i></td><td><a href=\"mobile_wnb.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-rulers\"></i></a></td></tr>\n") ;
 	if ($userIsAdmin or $userIsBoardMember)
 		print("<tr><td><i>Incidents en cours (en test, ne pas s'y fier)	</i></td><td><a href=\"mobile_incidents.php?plane=$plane\"><i class=\"bi bi-card-checklist\"></i></a></td></tr>\n") ;
 ?>
@@ -95,7 +98,10 @@ function generateMaintenanceClass($entretien, $compteur) {
 
 <div class="row">
 <table class="col-sm-12 table table-responsive table-striped">
+	<thead>
 	<tr><th>De</th><th>A</th><th>Pilote</th><th>Commentaire</th></tr>
+</thead>
+<tbody class="table-group-divider">
 <?php
 	$sql_date = date('Y-m-d') ;
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.cell_phone as icell_phone, i.jom_id as iid,
@@ -125,6 +131,7 @@ function generateMaintenanceClass($entretien, $compteur) {
 			db2web($row['plast_name']) . "</b>$ptelephone$instructor</td><td$class>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
 	}
 ?>
+</tbody>
 </table>
 </div><!-- row -->
 </div> <!-- container-->

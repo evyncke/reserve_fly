@@ -39,7 +39,7 @@ $sql_date = date('Y-m-d', $displayTimestamp) ;
 <div class="container-fluid">
 
 <div class="page-header">
-<h3>Réservations des avions</h3>
+<h2>Réservations des avions</h2>
 <?php
 if ($userId > 0) { // Only members can see all bookings
 ?>

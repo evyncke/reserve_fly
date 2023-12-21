@@ -19,15 +19,26 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
+if ($userId == 0) {
+	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+	exit ;
+}
 
-if ($_REQUEST['owner'] != '' && is_numeric($_REQUEST['owner']) && ($userIsAdmin || $userIsInstructor)) {
-	$owner = $_REQUEST['owner'] ;
-	$owner_name = "membre $owner" ;
+$body_attributes=' onload="initMyLog();init();" ' ;
+
+require_once 'mobile_header5.php' ;
+
+if (isset($_REQUEST['user']) && $_REQUEST['user'] != '' && is_numeric($_REQUEST['user']) && ($userIsAdmin || $userIsInstructor)) {
+	$owner = $_REQUEST['user'] ;
 } else {
 	$owner = $userId ;
-	$owner_name = $userFullName ;
 }
+
+$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $owner")
+	or journalise($userId, "F", "Cannot read user data:" . mysqli_error($mysqli_link)) ;
+$row_owner = mysqli_fetch_array($result) or journalise($userId, "F", "User $owner not found");
+$owner_name = db2web("$row_owner[last_name], $row_owner[first_name]") ;
+mysqli_free_result($result) ;
 
 $sql_filter = [] ;
 
@@ -45,34 +56,14 @@ if (isset($_REQUEST['period']) and $_REQUEST['period'] != 'always') {
 	$date_from_sql = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'Y-m-d') ;	
 } else {
 	$period = 'always' ; 
-	$date_from = '17/12/1903' ; // All flights should be done after this date, Wright brothers ;-)
+	$date_from = '17/12/1903 (1er vol des frères Wright)' ; // All flights should be done after this date, Wright brothers ;-)
 	$date_from_sql = '1903-12-17' ; // All flights should be done after this date, Wright brothers ;-)
-}
-
-if (isset($_REQUEST['items'])) {
-	$items = $_REQUEST['items'] ;
-	switch ($items) {
-		case '12': $items = 12 ; break ;
-		case '24': $items = 24 ; break ;
-		case '50': $items = 50 ; break ;
-		case '100': $items = 100 ; break ;
-		default: $items = 12 ;
-	}
-} else {
-	$items = 12 ;
-}
-
-if (isset($_REQUEST['page']) and is_numeric($_REQUEST['page'])) {
-	$page = $_REQUEST['page'] ;
-} else {
-	$page = 9999 ;
 }
 
 // $sql_filters = implode(' and ', $sql_filter) ;
 // if ($sql_filters != '') $sql_filters = " and $sql_filters" ;
 
 // TODO
-// - HTML5 header
 // - if admin then allow the choice of pilot
 // - allow adding previous flight hours (or outside of RAPCS) at the top?
 // - allow adding any other entries manually (at the bottom?)
@@ -81,32 +72,32 @@ function ShowTableHeader() {
 ?>
 <thead>
 <tr>
-<th class="logHeader">Action</th>
-<th class="logHeader">Date</th>
-<th class="logHeader" colspan="2">Departure</th>
-<th class="logHeader" colspan="2">Arrival</th>
-<th class="logHeader" colspan="2">Aircraft</th>
-<th class="logHeader" colspan="2">Total time</th>
-<th class="logHeader">Name</th>
-<th class="logHeader" colspan="2">Landings</th>
-<th class="logHeader" colspan="6">Pilot function time</th>
+<th>Action</th>
+<th>Date</th>
+<th class="text-center" colspan="2">Departure</th>
+<th class="text-center" colspan="2">Arrival</th>
+<th class="text-center" colspan="2">Aircraft</th>
+<th class="text-center" colspan="2">Total time</th>
+<th >Name</th>
+<th class="text-center" colspan="2">Landings</th>
+<th class="text-center" colspan="6">Pilot function time</th>
 </tr>
 <tr>
-<th class="logLastHeader"></th>
-<th class="logLastHeader">(dd/mm/yy)</th>
-<th class="logLastHeader">Place</th>
-<th class="logLastHeader">Time UTC</th>
-<th class="logLastHeader">Place</th>
-<th class="logLastHeader">Time UTC</th>
-<th class="logLastHeader">Model</th>
-<th class="logLastHeader">Registration</th>
-<th class="logLastHeader" colspan="2">of flight</th>
-<th class="logLastHeader">PIC</th>
-<th class="logLastHeader">Day</th>
-<th class="logLastHeader">Night</th>
-<th class="logLastHeader" colspan="2">PIC</th>
-<th class="logLastHeader" colspan="2">Dual</th>
-<th class="logLastHeader" colspan="2">Instructor</th>
+<th></th>
+<th>(dd/mm/yy)</th>
+<th>Place</th>
+<th>Time UTC</th>
+<th>Place</th>
+<th>Time UTC</th>
+<th>Model</th>
+<th>Registration</th>
+<th class="text-center" colspan="2">of flight</th>
+<th>PIC</th>
+<th>Day</th>
+<th>Night</th>
+<th class="text-center" colspan="2">PIC</th>
+<th class="text-center" colspan="2">Dual</th>
+<th class="text-center" colspan="2">Instructor</th>
 </thead>
 <?php
 }
@@ -117,9 +108,9 @@ function ShowEntryCell($line, $action, $dom_id, $col_name, $default_value, $inpu
 	$value = (isset($line[$col_name])) ? $line[$col_name] : $default_value ;
 	$min_max = ($input_type == 'number') ? ' min="0" max="99" ' : '' ;
 	if ($input_type != 'fi') 
-		print("<td><input type=\"$input_type\" class=\"logCellEntry\" id=\"$dom_id" . ucfirst($action). "\" value=\"$value\" size=\"$size\"$min_max></td>\n") ;
+		print("<td><input type=\"$input_type\" id=\"$dom_id" . ucfirst($action). "\" value=\"$value\" size=\"$size\"$min_max></td>\n") ;
 	else {
-		print("<td><select class=\"logCellEntry\" id=\"$dom_id" . ucfirst($action). "\">\n") ;
+		print("<td><select id=\"$dom_id" . ucfirst($action). "\">\n") ;
 		print("<option value=\"0\"" . (($default_value == '0') ? ' selected' : '') . ">SELF</option>\n") ;
 		$result = mysqli_query($mysqli_link, "select jom_id, last_name from $table_person join jom_user_usergroup_map on jom_id = user_id
 			where group_id = $joomla_instructor_group
@@ -155,8 +146,7 @@ function ShowEntryRow($action, $line, $id) {
 	}
 	print("<tr>
 	<td>
-		<img src=\"gtk-save.png\" border=\"0\" width=\"15\" height=\"15\" onclick=\"saveButton('$action', $owner, $id);\">
-	</td>\n") ;
+	<i class=\"bi bi-plus-circle-fill text-primary\" onclick=\"saveButton('$action', $owner, $id);\"></i></td>\n") ;
 	ShowEntryCell($line, $action, 'date', 'date', date('Y-m-d'), 'date', 8) ; // Default to today
 	ShowEntryCell($line, $action, 'from', 'l_from', '', 'text', 4) ;
 	ShowEntryCell($line, $action, 'startTime', 'start', $l_start, 'time', 5) ;
@@ -164,33 +154,16 @@ function ShowEntryRow($action, $line, $id) {
 	ShowEntryCell($line, $action, 'endTime', 'end', $l_end, 'time', 5) ;
 	ShowEntryCell($line, $action, 'model', 'l_model', '', 'text', 5) ;
 	ShowEntryCell($line, $action, 'plane', 'l_plane', '', 'text', 7) ;
-	print("<td colspan=\"2\" class=\"logCell\">... auto...</td>\n") ;
+	print("<td colspan=\"2\">... auto...</td>\n") ;
 	ShowEntryCell($line, $action, 'pic', 'pic', $pic, 'fi', 10) ;
 	ShowEntryCell($line, $action, 'dayLanding', 'l_day_landing', '1', 'number', 2) ;
 	ShowEntryCell($line, $action, 'nightLanding', 'l_night_landing', '0', 'number', 2) ;
-	print("<td colspan=\"6\" class=\"logCell\">... calcul&eacute; automatiquement...</td>\n") ;
+	print("<td colspan=\"6\">... calculé automatiquement...</td>\n") ;
 	print("</tr>\n") ;
 }
-?><!DOCTYPE html>
-<html lang="fr">
-<head>
-<link rel="stylesheet" type="text/css" href="log.css">
-<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-<link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<title>Mon carnet de vol</title>
-<script src="members.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<script src="planes.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
+?>
 <script>
 var
-	// preset Javascript constants filled with the right data from db.php PHP variables
-	userFullName = '<?=$userFullName?>' ;
-	userName = '<?=$userName?>' ;
-	userId = <?=$userId?> ;
-	userIsPilot = <?=($userIsPilot)? 'true' : 'false'?> ;
-	userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?> ;
-	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ;
-	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ;
-	page = <?=$page?> ;
 	clubPlanes = [] ; // The list of club tail numbers as they cannot be entered by this page
 
 function valueOfField(suffix, name) {
@@ -224,64 +197,27 @@ function saveButton(action, owner, id) {
 }
 
 function selectChanged() {
-	window.location.href = '<?=$_SERVER['PHP_SELF']?>?owner=' + document.getElementById('pilotSelect').value + '&period=' + document.getElementById('periodSelect').value  ;
+	window.location.href = '<?=$_SERVER['PHP_SELF']?>?user=' + document.getElementById('pilotSelect').value + '&period=' + document.getElementById('periodSelect').value  ;
 }
 
-function init() {
-	var pilotSelect = document.getElementById('pilotSelect') ;
-	if (pilotSelect) pilotSelect.value = <?=$owner?> ;
-	var periodSelect = document.getElementById('periodSelect') ;
-	if (periodSelect) periodSelect.value = '<?=$period?>' ;
-	var itemsSelect = document.getElementById('itemsSelect') ;
-	if (itemsSelect) itemsSelect.value = '<?=$items?>' ;
-	if (userIsInstructor || userIsAdmin) {
-		// Initiliaze pilotSelect from members.js
-	       for (var member = 0; member < members.length; member++) {
-			var option = document.createElement("option");
-			if (members[member].last_name == '')
-				option.innerHTML = members[member].name ;
-			else
-				option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
-			if (members[member].student) {  // Add a student icon
-				option.innerHTML += ' &#x1f4da;' ;
-			}
-			option.value = members[member].id ;
-			document.getElementById('pilotSelect').add(option) ;
-		}
-	}
-	pilotSelect.value = <?=$owner?> ;
+function initMyLog() {
 	// Prepare a list of club tail numbers as they cannot be entered by this page
 	for (var i = 0; i < planes.length; i++) {
 		var tailNumber = planes[i].id.replace('-', '').toUpperCase() ;
 		clubPlanes.push(tailNumber) ;
 	}
-
+	prefillDropdownMenus('periodName', [{id: 'always', name: 'depuis toujours'},
+		{id: '2y', name: '2 ans'},
+		{id: '1y', name: '1 an'},
+		{id: '3m', name: '3 mois'},
+		{id: '1m', name: '1 mois'},
+	], '<?=$period?>') ;
 }
 </script>
-<!-- Matomo -->
-<script type="text/javascript">
-  var _paq = window._paq = window._paq || [];
-  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-  _paq.push(['setUserId', '<?=$userName?>']);
-  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
-  _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
-  _paq.push(['enableHeartBeatTimer']);
-  _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
-  _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
-  _paq.push(['trackPageView']);
-  _paq.push(['enableLinkTracking']);
-  (function() {
-    var u="//analytics.vyncke.org/";
-    _paq.push(['setTrackerUrl', u+'matomo.php']);
-    _paq.push(['setSiteId', '5']);
-    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-    g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
-  })();
-</script>
-<!-- End Matomo Code -->
-</head>
-<body onload="init();">
-<center><h2>Carnet de vol de <?=$owner_name?> depuis <?=$date_from?></h2></center>
+<!--body onload="init();"-->
+<div class="container-fluid">
+
+<h2>Carnet de vols de <?=$owner_name?> depuis le <?=$date_from?></h2>
 <?php
 // Actions first
 if (isset($_REQUEST['action'])) {
@@ -307,7 +243,7 @@ switch ($_REQUEST['action']) {
 			or $error_message = "Erreur interne: " . mysqli_error($mysqli_link) ;
 		$line = mysqli_fetch_array($result) ;
 		if ($line) {
-			print("Vous pouvez apporter les changements sur la ligne ci-dessous. Remarque: le carnet de route de l'avion n'est pas mis &agrave; jour.
+			print("Vous pouvez apporter les changements sur la ligne ci-dessous. Remarque: le carnet de route de l'avion n'est pas mis à jour.
 				<table class=\"logTable\">\n") ;
 			ShowTableHeader() ;
 			print("<tbody>\n") ;
@@ -369,33 +305,21 @@ switch ($_REQUEST['action']) {
 				journalise($userId, 'I', "Modified pilot logbook entry: $l_from, $l_start, $l_to, $l_end, $l_plane/$l_model") ;
 		}
 		break ;
-	default: $error_message = "Action pas encore impl&eacute;ment&eacute;e." ;
+	default: $error_message = "Action pas encore implémentée." ;
 }
 if (isset($error_message))
 	print("<span class=\"logError\">$error_message</span><br/>") ;
 }
+?>
+<div class="row mb-3">
+<label for="periodSelect" class="col-xs-2 col-md-1 col-form-label text-end">Période:</label>
+<div class="col-xs-2 col-md-1">
+<select id="periodSelect" class="form-control" name="periodName" onchange="selectChanged();">
+</select>
+</div><!-- col -->
+</div><!-- row -->
 
-
-print("P&eacute;riode: <select id=\"periodSelect\" onchange=\"selectChanged();\">
-	<option value=\"always\">depuis toujours</option>
-	<option value=\"2y\">2 ans</option>
-	<option value=\"1y\">1 an</option>
-	<option value=\"3m\">3 mois</option>
-	<option value=\"1m\">1 mois</option>
-</select><!--
-<select id=\"itemsSelect\" onchange=\"selectChanged();\">
-	<option value=\"12\">12</option>
-	<option value=\"24\">24</option>
-	<option value=\"50\">50</option>
-	<option value=\"100\">100</option>
-</select> lignes/page-->.
-<br/>") ;
-
-$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $owner")
-	or journalise($userId, "F", "Cannot read user data:" . mysqli_error($mysqli_link)) ;
-$row_owner = mysqli_fetch_array($result) or journalise($userId, "F", "User $owner not found");
-mysqli_free_result($result) ;
-
+<?php
 $sql = "select l_id, date_format(l_start, '%d/%m/%y') as date, date_format(l_start, '%Y-%m-%d') as date_sql,
 	l_model, l_plane, l_pilot, l_is_pic, l_instructor, p.last_name as instructor_name,
 	upper(l_from) as l_from, upper(l_to) as l_to, 
@@ -408,25 +332,21 @@ $sql = "select l_id, date_format(l_start, '%d/%m/%y') as date, date_format(l_sta
 	order by l.l_start asc" ;
 $result = mysqli_query($mysqli_link, $sql) or journalise($userId, "F", "Erreur systeme a propos de l'access au carnet de route: " . mysqli_error($mysqli_link)) ;
 $rows_count = mysqli_num_rows($result) ;
-if ($rows_count === FALSE) die("Cannot count rows (owner = $owner, $sql): " . mysqli_error($mysqli_link));
-$page_count = ceil($rows_count / $items) ;
-if ($page > $page_count -1) $page = $page_count -1 ;
-if ($page < 0) $page = 0 ;
 
 if ($userIsInstructor or $userIsAdmin) {
-	print("En tant qu'instructeur/administrateur, vous pouvez consulter les carnets de vol des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
-	print("</select><br/><br/>") ;
+	print("<p class=\"d-print-none\">En tant qu'instructeur/administrateur, vous pouvez consulter les carnets de vol des autres pilotes: <select id=\"pilotSelect\" onchange=\"selectChanged();\">" ) ;
+	print("</select></p>") ;
 } else { // ($userIsInstructor or $userIsAdmin)
 	print("Carnet de vol de: <select id=\"pilotSelect\" onchange=\"selectChanged();\">
 	<option value=\"owner\" selected>$userFullName</option>
 	</select><br/><br/>") ;
 }
 
-print("<p>Cette table reprend tous vos vols y compris des vols en dehors des avions de notre aéroclub. Utilisez la page <a href=\"IntroCarnetVol.php\">IntroCarnetVol.php</a> 
+print("<p class=\"d-print-none\">Cette table reprend tous vos vols y compris des vols en dehors des avions de notre aéroclub. Utilisez uniquement la page <a href=\"IntroCarnetVol.php\">IntroCarnetVol.php</a> 
 	pour entrer des vols sur les avions de l'aéroclub.</p>") ;
-print("<table class=\"logTable\">\n") ;
+print("<table class=\"table table-responsive table-striped table-bordered w-auto\">\n") ;
 ShowTableHeader() ;
-print("<tbody>\n") ;
+print("<tbody claass=\"table-group-divider\">\n") ;
 
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
@@ -454,10 +374,6 @@ while ($row = mysqli_fetch_array($result)) {
 		$duration = explode(':', $row['duration_rollover']) ; // Looking like 01:33:00 (in case of over rolling the 24:00:00 mark)
 	else
 		$duration = explode(':', $row['duration']) ; // Looking like 01:33:00
-	// Check whether this line should be displayed based on $date_from vs. $row[date], $page*$items vs $line_count only if $period is 'always'
-//	if ($period == 'always')
-//		$visible = $page*$items <= $line_count and $line_count < ($page+1)*$items ;
-//	else // $period is not 'always'
 	$visible = $row['date_sql'] >= $date_from_sql ;
 	$duration_grand_total_hour += $duration[0] ;
 	$duration_grand_total_minute += $duration[1] ;
@@ -486,8 +402,8 @@ while ($row = mysqli_fetch_array($result)) {
 		if ($row['l_instructor'] < 0) $row['instructor_name'] = 'Autre FI' ;
 		print("<tr>
 			<td class=\"logCell\">
-				<a href=\"$_SERVER[PHP_SELF]?action=edit&id=$row[l_id]&owner=$owner\"><img src=\"gtk-edit.png\" border=\"0\" width=\"15\" height=\"15\"></a>
-				<a href=\"$_SERVER[PHP_SELF]?action=delete&id=$row[l_id]&owner=$owner\"><img src=\"gtk-delete.png\" border=\"0\" width=\"15\" height=\"15\"></a>
+				<a href=\"$_SERVER[PHP_SELF]?action=edit&id=$row[l_id]&owner=$owner\" title=\"Modifier cette ligne\"><i class=\"bi bi-pencil-fill\"></i></a>
+				<a href=\"$_SERVER[PHP_SELF]?action=delete&id=$row[l_id]&owner=$owner\" title=\"Effacer cette ligne\"><i class=\"bi bi-trash-fill\"></i></a>
 			</td>
 			<td class=\"logCell\">$row[date]</td>
 			<td class=\"logCell\">$row[l_from]</td>
@@ -553,53 +469,46 @@ $dual_grand_total_minute = $dual_grand_total_minute % 60 ;
 $fi_grand_total_hour += floor($fi_grand_total_minute / 60) ;
 $fi_grand_total_minute = $fi_grand_total_minute % 60 ;
 ?>
-<tr><td colspan="8" class="logTotal">Table Total</td>
-<td class="logTotal"><?=$duration_total_hour?></td>
-<td class="logTotal"><?=$duration_total_minute?></td>
-<td class="logTotal"></td>
-<td class="logTotal"><?=$day_landing_total?></td>
-<td class="logTotal"><?=$night_landing_total?></td>
-<td class="logTotal"><?=$pic_total_hour?></td>
-<td class="logTotal"><?=$pic_total_minute?></td>
-<td class="logTotal"><?=$dual_total_hour?></td>
-<td class="logTotal"><?=$dual_total_minute?></td>
-<td class="logTotal"><?=$fi_total_hour?></td>
-<td class="logTotal"><?=$fi_total_minute?></td>
+</tbody>
+<tfoot class="table-group-divider">
+<tr><td colspan="8" class="bg-info">Table Total (for this period)</td>
+<td class="bg-info"><?=$duration_total_hour?></td>
+<td class="bg-info"><?=$duration_total_minute?></td>
+<td class="bg-info"></td>
+<td class="bg-info"><?=$day_landing_total?></td>
+<td class="bg-info"><?=$night_landing_total?></td>
+<td class="bg-info"><?=$pic_total_hour?></td>
+<td class="bg-info"><?=$pic_total_minute?></td>
+<td class="bg-info"><?=$dual_total_hour?></td>
+<td class="bg-info"><?=$dual_total_minute?></td>
+<td class="bg-info"><?=$fi_total_hour?></td>
+<td class="bg-info"><?=$fi_total_minute?></td>
 </tr>
-<tr><td colspan="8" class="logTotal">Grand Total</td>
-<td class="logTotal"><?=$duration_grand_total_hour?></td>
-<td class="logTotal"><?=$duration_grand_total_minute?></td>
-<td class="logTotal"></td>
-<td class="logTotal"><?=$day_grand_landing_total?></td>
-<td class="logTotal"><?=$night_grand_landing_total?></td>
-<td class="logTotal"><?=$pic_grand_total_hour?></td>
-<td class="logTotal"><?=$pic_grand_total_minute?></td>
-<td class="logTotal"><?=$dual_grand_total_hour?></td>
-<td class="logTotal"><?=$dual_grand_total_minute?></td>
-<td class="logTotal"><?=$fi_grand_total_hour?></td>
-<td class="logTotal"><?=$fi_grand_total_minute?></td>
+<tr><td  class="bg-info"colspan="8">Grand Total (all known flights)</td>
+<td class="bg-info"><?=$duration_grand_total_hour?></td>
+<td class="bg-info"><?=$duration_grand_total_minute?></td>
+<td class="bg-info"></td>
+<td class="bg-info"><?=$day_grand_landing_total?></td>
+<td class="bg-info"><?=$night_grand_landing_total?></td>
+<td class="bg-info"><?=$pic_grand_total_hour?></td>
+<td class="bg-info"><?=$pic_grand_total_minute?></td>
+<td class="bg-info"><?=$dual_grand_total_hour?></td>
+<td class="bg-info"><?=$dual_grand_total_minute?></td>
+<td class="bg-info"><?=$fi_grand_total_hour?></td>
+<td class="bg-info"><?=$fi_grand_total_minute?></td>
 </tr>
 
-</tbody>
+</tfoot>
 </table>
 <br/>
 <div style="border-style: inset;background-color: AntiqueWhite;">
-Sur base des donn&eacute;es que vous avez entr&eacute;es apr&egrave;s les vols dans le
-carnet de route des avions (&agrave; pr&eacute;f&eacute;rer pour avoir les heures moteur) ou celles que vous avez entr&eacute;e via la derni&egrave;re ligne de la
+Sur base des données que vous avez entrées après les vols dans le
+carnet de route des avions (à préférer pour avoir les heures moteur) ou celles que vous avez entrées via la dernière ligne de la
 table.
-Soit <?=$line_count?> par vous-m&ecirc;me.
+Soit <?=$line_count?> par vous-même.
 Les heures sont les heures UTC.</div>
 <br/>
-<a href="<?="$_SERVER[PHP_SELF]?owner=$owner&period=$period&items=$items&page=0"?>"><img width="64" height="64" border="1" src="gtk_media_forward_rtl.png"></a>
-<a href="<?="$_SERVER[PHP_SELF]?owner=$owner&period=$period&items=$items&page=".($page-1)?>"><img width="64" height="64" border="1" src="gtk_media_play_rtl.png"></a>
-<a href="<?="$_SERVER[PHP_SELF]?owner=$owner&period=$period&items=$items&page=".($page+1)?>"><img width="64" height="64" border="1" src="gtk_media_play_ltr.png"></a>
-<a href="<?="$_SERVER[PHP_SELF]?owner=$owner&period=$period&items=$items&page=99999"?>"><img width="64" height="64" border="1" src="gtk_media_forward_ltr.png"></a>
-<?php
-$version_php = date ("Y-m-d H:i:s.", filemtime('mylog.php')) ;
-$version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
-?>
-<hr>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, janvier 2015 - janvier 2023 pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
-Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
+
+</div> <!-- container-->
 </body>
 </html>

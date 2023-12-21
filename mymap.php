@@ -69,7 +69,6 @@ if ($sql_filters != '') $sql_filters = "where $sql_filters" ;
 ?>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="log.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <!-- Load the MAP BOX scripts & CSS -->
@@ -238,9 +237,6 @@ function mapAddLayers() {
 	// Click on airports
 //	map.on('click', 'airports', function (e) {
 //        map.flyTo({center: e.features[0].geometry.coordinates});
-//		console.log("Click on " + e.features[0].properties.title + ' ' + e.features[0].properties.comment);
-//		console.log(e.features[0].properties.title);
-//		console.log(e.features[0].properties.comment);
 //		console.log(e) ;
 //    });
 }
@@ -338,7 +334,6 @@ pour des vols sur des avions hors RAPCS).
 </div>
 <br/>
 <?php
-$version_php = date ("Y-m-d H:i:s.", filemtime('mylog.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
 ?>
 <?php if (isset($_REQUEST['auth'])) print('</div>') ; ?>

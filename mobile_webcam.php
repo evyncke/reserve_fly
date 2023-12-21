@@ -21,7 +21,7 @@ ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 
 
-$cam = (isset($_REQUEST['cam'])) ? $_REQUEST['cam'] : '' ;
+$cam = (isset($_REQUEST['cam'])) ? $_REQUEST['cam'] : 0 ;
 if (! is_numeric($cam)) die("Invalid camera ID") ;
 if ($cam >= count($webcam_uris)) die("Invalid camera ID") ;
 $previous_cam = ($cam-1 < 0) ? count($webcam_uris) - 1 : $cam - 1 ;

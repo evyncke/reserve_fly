@@ -19,19 +19,25 @@
 ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
-
 require_once 'mobile_header5.php' ;
 
-$station = (isset($_REQUEST['station'])) ? trim(strtoupper($_REQUEST['station'])) : $default_metar_station ;
+$station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(strtoupper($_REQUEST['station'])) : $default_metar_station ;
 ?> 
 <div class="container">
 
+<h2><?=$station?> METAR</h2>
+
 <div class="row">
-	<div id="metarMessage" class="col-sm-10 col-md-8 bg-muted">... fetching data over the Internet ...
-	</div> <!-- col -->
+	<div id="metarMessage" class="col-sm-10 col-md-8 bg-muted">... fetching data over the Internet ...</div> 
 </div> <!-- row -->
 
+<div class="row d-sm-none d-md-block">
+	<footer class="blockquote-footer">Source <cite title="Source du METAR" id="sourceId"></cite></footer>
+</div> <!-- row -->
+
+<?php if ($userId > 0) {
+?>
+<div class="row">
 <form class="form-inline" action="<?=$_SERVER['PHP_SELF']?>" method="GET">
 	<div class="form-group">
 		<label class="control-label col-xs-4 col-md-4" for="stationMETARInput">Station METAR:</label>
@@ -46,7 +52,10 @@ $station = (isset($_REQUEST['station'])) ? trim(strtoupper($_REQUEST['station'])
    		</div>
 	</div><!-- formgroup-->
 </form>
-
+</div> <!-- row -->
+<?php
+} // $userId > 0
+?>
 <script>
 	displayMETAR('<?=$station?>') ;
 </script>

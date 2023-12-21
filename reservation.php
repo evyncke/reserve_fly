@@ -23,6 +23,7 @@ ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
 header('Link: </resa/reservation.css>;rel=preload;as=style, </resa/datepickr.css>;rel=preload;as=style,</resa/reservation.js>;rel=preload;as=script,</resa/datepickr.js>;rel=preload;as=script') ;
+header('Link: </resa/gtk_media_play_rtl.png>;rel=preload;as=image, </resa/spinner.gif>;rel=preload;as=image,</resa/fa.ico>;rel=preload;as=image,</resa/members.js>;rel=preload;as=script') ;
 
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
 require_once "dbi.php" ;
@@ -69,7 +70,9 @@ while ($row = mysqli_fetch_array($result)) {
 		$validity_msg .= "<span class=\"validityWarning\">Votre $row[name] ne sera plus valable le $row[expire_date]; il vous sera alors impossible de r&eacute;server un avion.</span><br/>" ;
 }
 
-?><!--DOCTYPE html-->
+// Enabling below DOCTYPE has a major impact on the rendering... larger fonts, JS COM requires 'px' units for positioning, ... 
+// Possibly because it forces HTML 5 ?
+?><!DOCTYPE html>
 <html lang="fr">
 <head>
 <?
@@ -286,71 +289,8 @@ function imgStalled() {
 <!-- End Matomo Code -->
 </head>
 <body onload="init();">
-<div id="fb-root"></div>
-<script>
-window.fbAsyncInit = function() {
-        FB.init({
-                appId      : '<?=$fb_app_id?>',
-                xfbml      : true,
-                cookie  : true,
-                status : true,
-                version    : 'v2.8'
-        });
-        FB.Event.subscribe('auth.statusChange', statusChangeCallback) ;
-        FB.AppEvents.logPageView();
-};
 
-//Asynchronous load of Facebook SDK
-(function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s); js.id = id;
-        js.src = "//connect.facebook.net/en_US/sdk.js";
-        fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));
-
-function checkLoginState() {
-        FB.getLoginStatus(function(response) {
-                statusChangeCallback(response);
-        });
-}
-
-// This is called with the results from from FB.getLoginStatus().
-function statusChangeCallback(response) {
-        console.log('Facebook statusChangeCallback() with response being:');
-        console.log(response);
-        if (response.status === 'connected') {
-        	// authResponse: {accessToken: "EAAPNZCUXiyGMBAMJmcWO372uoGw9ZBWVHD53CD7TZAkEW7E50…XSpxYhYplRSH3BhLIQxLOYjIR28WZCNKwzZCSlgBbTfWgZDZD", userID: "10154716346282833", expiresIn: 5720, signedRequest: "qApsBkagFg2S4StwnDNIs13uGyzfDoraOQ0Bhz9QOc4.eyJhbG…yMzA2ODAsInVzZXJfaWQiOiIxMDE1NDcxNjM0NjI4MjgzMyJ9"}, status: "connected"
-                console.log('Everything is fine: connected to our app') ;
-                FBaccessToken = response.authResponse.accessToken ;
-                FB.api("/me", function (response) {
-                        if (response && !response.error) {
-                        	// Only two items id (=fbuid) and name 'Eric Vyncke'
-                                document.getElementById("helloFBUser").innerHTML = 'Bon retour ' + response.name + '<br/>' + document.getElementById("helloFBUser").innerHTML;
-                                document.getElementById("helloFBUser").style.display = 'block' ;
-                        }
-                }) ;
-			var allFbuis = document.getElementsByClassName("fbuid") ;
-			// It seems that we need to do it in reverse order...
-			for (var i = allFbuis.length - 1; i >= 0; i--) {
-				var fbuid = allFbuis[i].getAttribute("fbuid") ;
-				(function (allFbuis, i, fbuid) { // Wrapper to keep allFbuis & i
-					FB.api("/" + fbuid, function (response) {
-						if (response && !response.error) {  // Again this dummy closure thing where i has disappeared but allFbuis is still there !!!
-							// One way would be to parse again all tag with class fbuid and change them...
-							allFbuis[i].innerHTML = response.name;
-						}
-					}) ;
-				}) (allFbuis, i, fbuid) ;
-			}
-		} // if (response.status === 'connected') E.g. status = "unknown" and authResponse = NULL
-		console.log('end of Facebook statusChangeCallback') ;
-		console.log('fb_log: ' + '<?=nl2br($fb_log)?>') ;
-}
-
-</script>
-
-<h2>R&eacute;servation des avions</font></h2>
+<h2>Réservation des avions</h2>
 <div id="logDiv" style="visibility: collapse; background-color: yellow;"></div>
 <span id="noScript" style="color: red; font-size: x-large;">Pour avoir acc&egrave;s &agrave; la r&eacute;servation, <b>javascript</b> doit &ecirc;tre activ&eacute;. 
 Ce n'est pas le cas avec votre navigateur Internet.</span>
@@ -414,7 +354,7 @@ if ($userId == 0) {
 		$userNoFlight = true ;
 	}
 	print('<input type="button" style="background-color: green; color: white;" value="Mon profil" onclick="javascript:document.location.href=\'mobile_profile.php\';"> ') ;
-	print('<input type="button" value="Mon carnet de vol" onclick="javascript:document.location.href=\'mylog.php\';"> ') ;
+	print('<input type="button" style="background-color: green; color: white;"value="Mon carnet de vol" onclick="javascript:document.location.href=\'mobile_mylog.php\';"> ') ;
 	print('<input type="button" value="Carte de mes vols" onclick="javascript:document.location.href=\'mymap.php\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;" value="Nouveau site mobile (beta)" onclick="javascript:document.location.href=\'mobile.php?news\';"> ') ;
 	print('<input type="button" value="Folio du mois" onclick="javascript:document.location.href=\'myfolio.php\';"> ') ;
@@ -631,7 +571,7 @@ if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin) {
 <!-- end of div for the plane/ressource booking window-->
 <!-- div to display the cancel booking window -->
 <div id="cancelBookingDiv">
-<center><h3 id="cancelBookingTitle">Confirmer l'annulation d'une r&eacute;servation</h3></center>
+<center><h3 id="cancelBookingTitle">Confirmer l'annulation d'une réservation</h3></center>
 <span style="vertical-align: top;">
 Raison de l'annulation (obligatoire):<br/>
 <textarea id="reasonTextArea" rows=4 cols=40 oninput="javascript:cancelReasonChanged();" onchange="javascript:cancelReasonChanged();"></textarea>
@@ -654,11 +594,12 @@ if ($userIsInstructor) {
 <button id="confirmCancelBookingButton" onclick="javascript:cancelBooking(true);">Confirmer l'annulation</button>
 <button onclick="javascript:hideCancelBookingDetails();">Fermer la fen&ecirc;tre</button>
 </center>
+<div id="cancelBookingDivLog"></div>
 </div>
 <!-- end of div for the cancel booking window-->
 <!-- div to display the agenda item window (create, modify, cancel) -->
 <div id="agendaItemDiv">
-<center><h3 id="agendaItemTitle">Disponibilit&eacute;s</h3></center>
+<center><h3 id="agendaItemTitle">Disponibilités</h3></center>
 Instructeur: <select id="agendaItemInstructorSelect"> </select><br/>
 D&eacute;but: <input type='date' id="agendaItemDateStart"> <select id="agendaItemStartHourSelect"><?=$all_hour_options?></select> : <select id="agendaItemStartMinuteSelect"><?=$all_minute_options?></select><br/>
 Fin: <input type='date' id="agendaItemDateEnd"> <select id="agendaItemEndHourSelect"><?=$all_hour_options?></select> : <select id="agendaItemEndMinuteSelect"><?=$all_minute_options?></select><br/>
@@ -694,11 +635,6 @@ $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 Open Source code: <a href="https://github.com/evyncke/reserve_fly">on github</a><br/>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, ex&eacute;cut&eacute en <?=$execution_time?> sec</div>
 <br/>
-<center>
-	<div class="fb-like" data-action="like" data-href="https://www.spa-aviation.be/resa/reservation.php" 
-		data-share="false" data-width="450" data-show-faces="true">
-</div>
-</center>
-<div id="waitingDiv">PLEASE WAIT<img src="spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();" width="256" height="256"></div>
+<div id="waitingDiv">Connecting to the server, please wait...<img src="spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();" width="256px" height="256px"></div>
 </body>
 </html>
