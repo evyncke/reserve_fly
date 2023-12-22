@@ -265,6 +265,11 @@ window.addEventListener('afterprint', (event) => {
     chart.clearChart();
     chart.draw(data, options);
 });
+
+window.addEventListener("resize", (event) => {
+    chart.clearChart();
+    chart.draw(data, options);
+}) ;
 </script>
 </body>
 </html>

@@ -158,10 +158,21 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><i><a class="dropdown-item" href="gestionMembres.php">Gestion membres <i class="bi bi-box-arrow-up-right"></i></a></i></li>
       <li><i><a class="dropdown-item" href="mobile_tilea.php">Taxe TILEA</a></i></li>
       <li><i><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></i></li>
+<?php
+  if ($userId == 62 or $userId == 66 or $userId == 92 or $userId == 348 or $userId == 306) { // Odoo users
+?>
+      <li><h6 class="dropdown-header">Intégration Odoo (test limité)</h6></li>
+      <li><a class="dropdown-item" href="https://<?=$odoo_host?>/">Connexion <i class="bi bi-box-arrow-up-right"></i></a></li>
+      <li><i><a class="dropdown-item" href="odoo_config.php">Configuration</a></i></li>
+      <li><i><a class="dropdown-item" href="odoo_customers.php">Clients</a></i></li>
+      <li><i><a class="dropdown-item" href="odoo_gen_invoices.php">Génère les factures</a></i></li>
+<?php    
+  }// Odoo users
+?> 
     </ul>
   </li> <!-- dropdown administration-->
 <?php
-}
+} // $userIsAdmin or $userIsInstructor or $userIsBoardMember
 	if ($userIsAdmin or $userIsInstructor) {
 ?>
   <li class="nav-item dropdown">
