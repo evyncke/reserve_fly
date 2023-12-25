@@ -28,7 +28,8 @@ require_once 'mobile_header5.php' ;
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
 ?>
 <h2>Liste de nos membres et leurs configurations Odoo</h2>
-<p>Les informations venant du site réservation/Joomle et d'Odoo sont croisées par l'adresse email de nos membres actifs. La vue Odoo 
+<p>Les informations venant du site réservation/Joomle et d'Odoo sont croisées par l'adresse email de nos membres actifs, 
+    le compte Odoo est associé au compte du site réservation si ce compte Odoo n'était pas lié. La vue Odoo 
     est disponible: <a href="https://<?=$odoo_host?>/web?debug=1#action=286&model=res.partner&view_type=kanban&cids=1&menu_id=127">ici</a>.
 </p>
 <?php
@@ -56,7 +57,7 @@ $encoder = new PhpXmlRpc\Encoder() ;
 
 // Let's get all Odoo customers
 $params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'res.partner', 'search_read', array(), 
-    array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id',
+    array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id', 'total_due',
         'street', 'street2', 'zip', 'city', 'country_id', 
         'complete_name', 'email', 'mobile', 'commercial_company_name')))) ;
 $response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
@@ -80,14 +81,14 @@ $result = mysqli_query($mysqli_link, "SELECT *
 ?>
 <table class="table table-striped table-hover table-bordered">
     <thead>
-        <tr><th colspan="3">Joomla (site réservations)</th><th>Jointure</th><th colspan="3">Odoo</th></tr>
-        <tr><th>Nom</th><th>Joomla ID</th><th>Compte Client</th><tH>Email</tH><th>Compte Client</th><th>Rue</th><th>Zip/City</th></tr>
+        <tr><th colspan="3" class="text-center">Joomla (site réservations)</th><th>Jointure</th><th colspan="4" class="text-center">Odoo</th></tr>
+        <tr><th>Nom</th><th>Joomla ID</th><th>Compte Client</th><th>Email</tH><th>Compte Client</th><th>Solde</th><th>Rue</th><th>Zip/City</th></tr>
     </thead>
     <tbody>
 <?php
 while ($row = mysqli_fetch_array($result)) {
-    $email = $row['email'] ;
-    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "</td><td>$row[jom_id]</td><td>$row[ciel_code400]</td><td>$email</td>") ;
+    $email = strtolower($row['email']) ;
+    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "</td><td>$row[jom_id]</td><td>$row[ciel_code400]</td><td>$row[email]</td>") ;
     if (isset($odoo_customers[$email])) {
         $odoo_customer = $odoo_customers[$email] ;
         $property_account_receivable_id = $odoo_customer['property_account_receivable_id'][1] ;
@@ -97,7 +98,7 @@ while ($row = mysqli_fetch_array($result)) {
             $msg = "<em>Updated</em>" ;
         } else
             $msg = '' ;
-        print("<td>$msg $property_account_receivable_id</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[zip] $odoo_customer[city]</td>") ;
+        print("<td>$msg $property_account_receivable_id</td><td>$odoo_customer[total_due]</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[zip] $odoo_customer[city]</td>") ;
     }
     print("</tr>\n") ;
 }
