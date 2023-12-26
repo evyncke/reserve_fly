@@ -19,8 +19,8 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require __DIR__ . '/vendor/autoload.php' ;
 
 class OdooClient {
-    private $common ;
-    private $models ;
+    public $common ; // Should probably be private
+    public $models ; // Should probably be private
     public $uid ;
     public $encoder ;
     public $host ;
@@ -55,6 +55,13 @@ class OdooClient {
         $this->models->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
     }
 
+    # Search one model based on $filters (to select some rows) and $display (returned values)
+    # Examples:
+    # $result = $odooClient->SearchRead('res.partner', array(), 
+    #    array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id', 'total_due',
+    #    'street', 'street2', 'zip', 'city', 'country_id', 
+    #   'complete_name', 'email', 'mobile', 'commercial_company_name'))) ;
+    # $result = $odooClient->SearchRead('account.account', array(array(array('account_type', '=', 'asset_receivable'))), array()) ; 
     function SearchRead($model, $filters, $display) {
         global $userId ;
 
