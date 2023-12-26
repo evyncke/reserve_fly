@@ -3,81 +3,80 @@
 <?php
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require_once('dbi.php') ;
+require_once('odoo.class.php') ;
 print("<pre>\n") ;
-require __DIR__ . '/vendor/autoload.php' ;
 print("Library loaded\n") ;
 
-// Alas, OVH does not allow XMLRPC library...
-// Should go via https://github.com/gggeek/phpxmlrpc/blob/master/doc/manual/phpxmlrpc_manual.adoc#client ?
+$odoo_host = 'rapcs2.odoo.com' ;
+$odoo_password = '3a6b53d48867453eedcd274ccc3bdfb887b08071' ;
+$odoo_db = 'rapcs2' ;
 
-/* This was the RIPCORD use, a little simple
-if (false) {
-	# Let's connect via the common end-point using rip cord
-	$ripcord = new Ripcord\Ripcord ;
-	print("Ripcord created\n") ;
-	$common = $ripcord::client("https://$host/xmlrpc/2/common");
-	print("Common client set\n") ;
-//	$version = $common->version();
-//	print("Running $version[server_serie]\n") ;
-	$uid = $common->authenticate($db, $username, $password, array());
-	print("Connected: uid='$uid'\n") ;
-exit ;
-	# Getting models & keys is somehow easy with debugging enabled via the URL (the ?debug=1 before the #)
-	# https://rapcs-test.odoo.com/web?debug=1#id=9&cids=1&menu_id=369&action=286&model=res.partner&view_type=form
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
-	$models = $ripcord::client("https://$host/xmlrpc/2/object");
+$common = $odooClient->common;
+$models = $odooClient->models ;
+$uid = $odooClient->uid ;
+$encoder = $odooClient->encoder ;
+print("Connect with UID: $uid\n") ;
 
-	$result = $models->execute_kw($db, $uid, $password, 'res.partner', 'search_read', array(),
-	array('fields'=>array('id', 
-'name',
-'vat',
-'property_account_receivable_id',
-'complete_name',
-'email',
-'mobile',
-'commercial_company_name')));
-*/
-	$common = new PhpXmlRpc\Client("https://$odoo_host/xmlrpc/2/common");
-	$common->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
-	$response = $common->send(new PhpXmlRpc\Request('version', array()));
-	$val = $response->value() ;
-	print("Version: $val[server_serie]\n") ;
-	$params = array(new PhpXmlRpc\Value($odoo_db), 
-		new PhpXmlRpc\Value($odoo_username), 
-		new PhpXmlRpc\Value($odoo_password),
-		new PhpXmlRpc\Value(array(), 'array')) ;
-	$response = $common->send(new PhpXmlRpc\Request('authenticate', $params)) ;
-	if (!$response->faultCode()) {
-		print("Connect with UID: " . $response->value() . "\n") ;
-		$uid = $response->value() ;
-	} else {
-		print("Error...\n") ;
-		print("Code: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
-        	htmlentities($response->faultString()));
+if (true) {
+#Account #427: FX Engineering, 400FX, 400FX FX Engineering, asset_receivable, asset, 400 Customers, 400 Customers
+#Account #426: Reginster Patrick, 400REGP, 400REGP Reginster Patrick, asset_receivable, asset, 400 Customers, 400 Customers
+$result = $odooClient->SearchRead('account.account', array(array(array('account_type', '=', 'asset_receivable'))), array()) ; 
+
+print("\nAccounts (account_type == asset_receivable)\n") ;
+foreach($result as $account) {
+	print("Account #$account[id]: $account[name], $account[code], $account[display_name], $account[account_type], $account[internal_group], " . 
+		$account['group_id'][1] . ", " . $account['group_id'][1] . "\n") ;
+	if ($account['display_name'] == '400REGP REGINSTER Patrick') {
+		$account_id = $account['id'] ;
+		print("Found it: $account_id\n") ;
 	}
-	$models = new PhpXmlRpc\Client("https://$odoo_host/xmlrpc/2/object");
-	$models->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
-	$encoder = new PhpXmlRpc\Encoder() ;
-	$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'res.partner', 'search_read', array(), array('fields'=>array('id', 
-			'name',
-			'vat',
-			'property_account_receivable_id',
-			'complete_name',
-			'email',
-			'mobile',
-			'commercial_company_name')))) ;
-	$response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
-	if ($response->faultCode()) {
-		print("Error...\n") ;
-		print("Code: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
-        	htmlentities($response->faultString()));
-		exit ;
-	}
-	$result = $response->value() ;
+}
+}
+
+# Test de modification d'un client
+# in partner.py
+#     property_account_receivable_id = fields.Many2one('account.account', company_dependent=True,
+# string="Account Receivable",
+# domain="[('account_type', '=', 'asset_receivable'), ('deprecated', '=', False)]",
+# help="This account will be used instead of the default one as the receivable account for the current partner",
+# required=True)
+#
+# https://www.odoo.com/documentation/16.0/developer/reference/backend/orm.html#reference-orm-model
+
+$account_name = '400REGP Reginster Patrick' ;
+$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'res.partner', 'write', 
+	array(
+		array(2186), 
+		array('property_account_receivable_id' => $account_id)
+	))) ;
+$response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
+if ($response->faultCode()) {
+	print("Error...\n") ;
+	print("Code: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
+		htmlentities($response->faultString()));
+	exit ;
+}
+
+// print("\nZoom sur customer\n") ;
+// $result = $odooClient->SearchRead('res.partner', array(array(array('id', '=', 2186))), array()) ; 
+// var_dump($result) ;
+
+# Client #998: Borauke Maxime, , , maxborauke@outlook.fr, 400000 Membres 
+$result = $odooClient->SearchRead('res.partner', array(), array('fields'=>array('id', 
+	'name',
+	'vat',
+	'property_account_receivable_id',
+	'complete_name',
+	'email',
+	'mobile',
+	'commercial_company_name'))) ; 
+
 
 print("\nCustomers\n") ;
 foreach($result as $client) {
-	print("Client #$client[id]: $client[complete_name], $client[commercial_company_name], $client[vat], $client[email], " . 
+	print("Client #$client[id]: $client[complete_name], $client[commercial_company_name], $client[vat], $client[email], $client[mobile], " . 
 		$client['property_account_receivable_id'][1] . " \n") ;
 }
 
@@ -93,18 +92,10 @@ foreach($result as $client) {
 
 # Display all out_invoices accounting moves
 print("\nAccounting moves (restricted to out_invoices)\n") ;
-$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'account.move', 'search_read', array(array(array('move_type','=','out_invoice'))), 
+$result = $odooClient->SearchRead('account.move', array(array(array('move_type','=','out_invoice'))), 
 	array('fields' => array('id', 'sequence_prefix', 'sequence_number', 'activity_state', 'name', 'ref',
 		'state', 'type_name', 'journal_id', 'company_id', 'amount_total', 'display_name',
-		'access_url', 'access_token', 'move_type')))) ;
-$response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
-if ($response->faultCode()) {
-	print("Error...\n") ;
-	print("Code: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
-		htmlentities($response->faultString()));
-	exit ;
-}
-$result = $response->value() ;
+		'access_url', 'access_token', 'move_type'))) ;
 foreach($result as $account) {
 	print("$account[id]: $account[sequence_prefix] $account[sequence_number], $account[activity_state], $account[name], $account[ref],
 	$account[state],$account[type_name], " . $account['journal_id'][1] . ", " .
@@ -125,6 +116,7 @@ if ($response->faultCode()) {
 	exit ;
 }
 $result = $response->value() ;
+$result = $odooClient->SearchRead('product.product', array(), array('fields' => array('id', 'name', 'detailed_type', 'lst_price', 'standard_price', 'default_code', 'categ_id', 'property_account_income_id'))) ;
 	 
 print("\nProducts\n") ;
 foreach($result as $product) {
@@ -152,19 +144,28 @@ exit ;
 print("\nCreating invoice\n") ;
 
 $params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'account.move', 'create',
-	array(array('partner_id' => 853,
+	array(array('partner_id' => 728,
 		'ref' => 'Test invoice generated from PHP',
 		'move_type' => 'out_invoice',
 		'invoice_origin' => 'Spa Aviation Bookings',
 		'invoice_line_ids' => array(
 			array(0, 0,
 					array(
-						'name' => 'Some aeronautical item',
+						'name' => 'Vol Benoît du 32 décembre',
 						'product_id' => 3,
-						'quantity' => 30,
+						'quantity' => 60,
 						'price_unit' => 0.4
 					)
-			)
+					),
+			array(0, 0,
+				array(
+					'name' => 'Vol OO-FMX du 32 décembre',
+					'product_id' => 2,
+					'quantity' => 60,
+					'price_unit' => 2.5
+				)
+		)
+
 		)
 		)))
 ) ;
