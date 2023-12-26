@@ -33,39 +33,15 @@ if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($us
     est disponible: <a href="https://<?=$odoo_host?>/web?debug=1#action=286&model=res.partner&view_type=kanban&cids=1&menu_id=127">ici</a>.
 </p>
 <?php
-ini_set('display_errors', 1) ; // extensive error reporting for debugging
-require __DIR__ . '/vendor/autoload.php' ;
+require_once 'odoo.class.php' ;
 
-// Should probably move to a library / class
-$common = new PhpXmlRpc\Client("https://$odoo_host/xmlrpc/2/common");
-$common->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
-$params = array(new PhpXmlRpc\Value($odoo_db), 
-    new PhpXmlRpc\Value($odoo_username), 
-    new PhpXmlRpc\Value($odoo_password),
-    new PhpXmlRpc\Value(array(), 'array')) ;
-$response = $common->send(new PhpXmlRpc\Request('authenticate', $params)) ;
-if (!$response->faultCode()) {
-    $uid = $response->value() ;
-    journalise($userId, "D", "Connected to Odoo $odoo_host as $odoo_username with UID $uid") ;
-} else {
-    journalise($userId, "F", "Cannot connect to Odoo $odoo_host as $odoo_username: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
-        htmlentities($response->faultString()));
-}
-$models = new PhpXmlRpc\Client("https://$odoo_host/xmlrpc/2/object");
-$models->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
-$encoder = new PhpXmlRpc\Encoder() ;
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
 // Let's get all Odoo customers
-$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'res.partner', 'search_read', array(), 
+$result = $odooClient->SearchRead('res.partner', array(), 
     array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id', 'total_due',
         'street', 'street2', 'zip', 'city', 'country_id', 
-        'complete_name', 'email', 'mobile', 'commercial_company_name')))) ;
-$response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
-if ($response->faultCode()) {
-    journalise($userId, "F", "Cannot list all Odoo customers in $odoo_host: " . 
-        htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
-}
-$result = $response->value() ;
+        'complete_name', 'email', 'mobile', 'commercial_company_name'))) ;
 $odoo_customers = array() ;
 foreach($result as $client) {
     $email =  strtolower($client['email']) ;
