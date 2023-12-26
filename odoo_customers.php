@@ -53,7 +53,7 @@ $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_passwor
 // Let's get all Odoo customers
 $result = $odooClient->SearchRead('res.partner', array(), 
     array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id', 'total_due',
-        'street', 'street2', 'zip', 'city', 'country_id', 
+        'street', 'street2', 'zip', 'city', 'country_id', 'category_id',
         'complete_name', 'email', 'phone', 'mobile', 'commercial_company_name'))) ;
 $odoo_customers = array() ;
 foreach($result as $client) {
@@ -83,10 +83,32 @@ function GetOdooAccount($code, $fullName) {
         return 158 ; // Harcoded default 400000 in RAPCS2.odoo.com
 }
 
+function GetOdooCategory($role) {
+    global $odooClient ;
+
+    $result = $odooClient->SearchRead('res.partner.category', array(array(
+		array('name', '=', $role))), 
+	array()) ; 
+    if (count($result) > 0)
+    	return $result[0]['id'] ;
+    // Category does not exist... Need to create one
+    $id = $odooClient->Create('res.partner.category', array(
+        'name' => $role, 'display_name' => $role)) ;
+    if ($id > 0)
+        return $id ;
+}
+
+$fi_tag = GetOdooCategory('FI') ;
+$student_tag = GetOdooCategory('Student') ;
+$pilot_tag = GetOdooCategory('Pilot') ;
+$member_tag = GetOdooCategory('Member') ;
+
 // Let's look at all our members
-$result = mysqli_query($mysqli_link, "SELECT * 
+$result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS groups 
     FROM $table_person AS p JOIN $table_users AS u ON u.id = p.jom_id
+        LEFT JOIN $table_user_usergroup_map m ON u.id = m.user_id
     WHERE jom_id IS NOT NULL AND u.block = 0
+    GROUP BY jom_id
     ORDER BY last_name, first_name") 
     or journalise($userId, "F", "Cannot list all members: " . mysqli_error($mysqli_link)) ;
 ?>
@@ -103,8 +125,10 @@ while ($row = mysqli_fetch_array($result)) {
     if (isset($odoo_customers[$email])) {
         $odoo_customer = $odoo_customers[$email] ;
         $property_account_receivable_id = strtok($odoo_customer['property_account_receivable_id'][1], ' ') ;
+        $groups = explode(',', $row['groups']) ;
         if ($account == "ciel") { // Master is Ciel
             $updates = array() ; 
+            // TODO should also copy first_name and last_name in complete_name ?    
             if ($odoo_customer['street'] != db2web($row['address']))
                 $updates['street'] = db2web($row['address']) ;
             if ($odoo_customer['zip'] != db2web($row['zipcode']))
@@ -118,6 +142,17 @@ while ($row = mysqli_fetch_array($result)) {
             if ($row['ciel_code400'] != '' and $property_account_receivable_id  != $row['ciel_code400']) {
                 $updates['property_account_receivable_id'] = GetOdooAccount($row['ciel_code400'], db2web("$row[last_name] $row[first_name]")) ;
             }
+            $tags = array() ;
+            if (in_array($joomla_instructor_group, $groups))
+                $tags[] = $fi_tag ;
+            if (in_array($joomla_pilot_group, $groups))
+                $tags[] = $pilot_tag ;
+            if (in_array($joomla_student_group, $groups))
+                $tags[] = $student_tag ;
+            if (in_array($joomla_member_group, $groups))
+                $tags[] = $member_tag ;
+            if (count(array_diff($tags, $odoo_customer['category_id'])) > 0) // Compare arrays of Odoo and Ciel tags/groups
+                $updates['category_id'] = $tags ;
             if (count($updates) > 0) { // There were some changes, let's update the Odoo record
                 $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
                 $msg = '<em>Odoo updated</em> ' ;
