@@ -162,10 +162,10 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
   if ($userId == 62 or $userId == 66 or $userId == 92 or $userId == 348 or $userId == 306) { // Odoo users
 ?>
       <li><h6 class="dropdown-header">Intégration Odoo (test limité)</h6></li>
-      <li><a class="dropdown-item" href="https://<?=$odoo_host?>/">Connexion <i class="bi bi-box-arrow-up-right"></i></a></li>
+      <li><a class="dropdown-item" href="https://<?=$odoo_host?>/">Connexion au site Odoo <i class="bi bi-box-arrow-up-right"></i></a></li>
       <li><i><a class="dropdown-item" href="odoo_config.php">Configuration</a></i></li>
       <li><i><a class="dropdown-item" href="odoo_customers.php">Clients</a></i></li>
-      <li><i><a class="dropdown-item" href="odoo_gen_invoices.php">Génère les factures</a></i></li>
+      <li><i><a class="dropdown-item" href="odoo_gen_invoices.php">Génération des factures</a></i></li>
 <?php    
   }// Odoo users
 ?> 
