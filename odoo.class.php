@@ -55,17 +55,19 @@ class OdooClient {
         $this->models->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
     }
 
-    # Search one model based on $filters (to select some rows) and $display (returned values)
+    # Search one model based on $domain_filter (to select some rows) and $display (returned values)
     # Examples:
     # $result = $odooClient->SearchRead('res.partner', array(), 
     #    array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id', 'total_due',
     #    'street', 'street2', 'zip', 'city', 'country_id', 
     #   'complete_name', 'email', 'mobile', 'commercial_company_name'))) ;
     # $result = $odooClient->SearchRead('account.account', array(array(array('account_type', '=', 'asset_receivable'))), array()) ; 
-    function SearchRead($model, $filters, $display) {
+    #
+    # Could also contain: array('offset'=>10, 'limit'=>5)
+    function SearchRead($model, $domain_filter, $display) {
         global $userId ;
 
-        $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'search_read', $filters, $display)) ;
+        $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'search_read', $domain_filter, $display)) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
             journalise($userId, "F", "Cannot search_read in Odoo model $model @ $this->host: " . 
@@ -87,6 +89,21 @@ class OdooClient {
                 htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
         }
         return $response->value() ;
+    }
+
+    # Get all fields from a model
+    # Example:
+    # var_dump($odooClient->GetFields('account.move')) ;
+    function GetFields($model, $keys = array('string', 'help', 'type')) {
+        global $userId ;
+        
+        $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'fields_get', array(), array('attributes' => $keys))) ;
+        $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
+        if ($response->faultCode()) {
+            journalise($userId, "F", "Cannot get all fields of Odoo model $model @ $this->host: " . 
+                htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
+        }
+        return $response->value();
     }
 }
 ?>
