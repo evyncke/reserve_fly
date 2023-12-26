@@ -26,6 +26,7 @@ if ($userId == 0) {
 require_once 'mobile_header5.php' ;
 
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
+$account = (isset($_REQUEST['account'])) ? $_REQUEST['account'] : '' ;
 ?>
 <h2>Liste de nos membres et leurs configurations Odoo@<?=$odoo_host?></h2>
 <p>Les informations venant du site réservation/Joomle et d'Odoo sont croisées par l'adresse email de nos membres actifs, 
@@ -33,19 +34,53 @@ if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($us
     est disponible: <a href="https://<?=$odoo_host?>/web?debug=1#action=286&model=res.partner&view_type=kanban&cids=1&menu_id=127">ici</a>.
 </p>
 <?php
-require_once 'odoo.class.php' ;
+if ($account == 'ciel') {
+?>
+<p>Copie des données du site réservation vers Odoo... Cela inclut l'adresse, les numéros de téléphone ainsi que le compte client.</p>
+<?php
+} else { # ($account == 'odoo') 
+?>
+<form method="get" action="<?=$_SERVER['PHP_SELF']?>">
+<input type="hidden" name="account" value="ciel">
+<button type="submit" class="btn btn-primary">Copier comptes ciel vers Odoo</button>
+</form>
+<?php
+} # ($account == 'odoo') 
 
+require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
 // Let's get all Odoo customers
 $result = $odooClient->SearchRead('res.partner', array(), 
     array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id', 'total_due',
         'street', 'street2', 'zip', 'city', 'country_id', 
-        'complete_name', 'email', 'mobile', 'commercial_company_name'))) ;
+        'complete_name', 'email', 'phone', 'mobile', 'commercial_company_name'))) ;
 $odoo_customers = array() ;
 foreach($result as $client) {
     $email =  strtolower($client['email']) ;
     $odoo_customers[$email] = $client ; // Let's build a dict indexed by the email addresses
+}
+
+function GetOdooAccount($code, $fullName) {
+    global $odooClient ;
+
+    $result = $odooClient->SearchRead('account.account', array(array(
+		array('account_type', '=', 'asset_receivable'),
+		array('code', '=', $code))), 
+	array()) ; 
+    if (count($result) > 0)
+    	return $result[0]['id'] ;
+    // Customer account does not exist... Need to create one
+    $id = $odooClient->Create('account.account', array(
+        'name' => $fullName,
+        'account_type' => 'asset_receivable',
+        'internal_group' => 'asset',
+        'code' => $code,
+        'name' => "$code $fullName")) ;
+    if ($id > 0)
+        return $id ;
+    else
+        return 158 ; // Harcoded default 400000 in RAPCS2.odoo.com
 }
 
 // Let's look at all our members
@@ -57,8 +92,8 @@ $result = mysqli_query($mysqli_link, "SELECT *
 ?>
 <table class="table table-striped table-hover table-bordered">
     <thead>
-        <tr><th colspan="3" class="text-center">Joomla (site réservations)</th><th>Jointure</th><th colspan="4" class="text-center">Odoo</th></tr>
-        <tr><th>Nom</th><th>Joomla ID</th><th>Compte Client</th><th>Email</tH><th>Compte Client</th><th>Solde</th><th>Rue</th><th>Zip/City</th></tr>
+        <tr><th colspan="3" class="text-center">Joomla (site réservations)</th><th>Jointure</th><th colspan="5" class="text-center">Odoo</th></tr>
+        <tr><th>Nom</th><th>Joomla ID</th><th>Compte Client</th><th>Email</tH><th>Odoo ID</th><th>Compte Client</th><th>Solde</th><th>Rue</th><th>Zip/City</th></tr>
     </thead>
     <tbody>
 <?php
@@ -67,14 +102,36 @@ while ($row = mysqli_fetch_array($result)) {
     print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "</td><td>$row[jom_id]</td><td>$row[ciel_code400]</td><td>$row[email]</td>") ;
     if (isset($odoo_customers[$email])) {
         $odoo_customer = $odoo_customers[$email] ;
-        $property_account_receivable_id = $odoo_customer['property_account_receivable_id'][1] ;
-        if ($row['odoo_id'] != $odoo_customer['id']) {
-            mysqli_query($mysqli_link, "UPDATE $table_person SET odoo_id = $odoo_customer[id] WHERE jom_id = $row[jom_id]") 
-                or journalise($userId, "E", "Cannot set Odoo customer for user #$row[jom_id]") ;
-            $msg = "<em>Odoo_id updated</em>" ;
-        } else
-            $msg = '' ;
-        print("<td>$msg $property_account_receivable_id</td><td>$odoo_customer[total_due]</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[zip] $odoo_customer[city]</td>") ;
+        $property_account_receivable_id = strtok($odoo_customer['property_account_receivable_id'][1], ' ') ;
+        if ($account == "ciel") { // Master is Ciel
+            $updates = array() ; 
+            if ($odoo_customer['street'] != db2web($row['address']))
+                $updates['street'] = db2web($row['address']) ;
+            if ($odoo_customer['zip'] != db2web($row['zipcode']))
+                $updates['zip'] = db2web($row['zipcode']) ;
+            if ($odoo_customer['city'] != db2web($row['city']))
+                $updates['city'] = db2web($row['city']) ;
+            if ($odoo_customer['phone'] != db2web($row['home_phone']))
+                $updates['phone'] = db2web($row['home_phone']) ;
+            if ($odoo_customer['mobile'] != db2web($row['cell_phone']))
+                $updates['mobile'] = db2web($row['cell_phone']) ;
+            if ($row['ciel_code400'] != '' and $property_account_receivable_id  != $row['ciel_code400']) {
+                $updates['property_account_receivable_id'] = GetOdooAccount($row['ciel_code400'], db2web("$row[last_name] $row[first_name]")) ;
+            }
+            if (count($updates) > 0) { // There were some changes, let's update the Odoo record
+                $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
+                $msg = '<em>Odoo updated</em> ' ;
+            } else 
+                $msg = '' ;
+        } else { // Master is Odoo
+            if ($row['odoo_id'] != $odoo_customer['id']) {
+                mysqli_query($mysqli_link, "UPDATE $table_person SET odoo_id = $odoo_customer[id] WHERE jom_id = $row[jom_id]") 
+                    or journalise($userId, "E", "Cannot set Odoo customer for user #$row[jom_id]") ;
+                $msg = "<em>Odoo_id updated</em>" ;
+            } else
+                $msg = '' ;
+        }
+        print("<td>$msg$odoo_customer[id]</td><td>$property_account_receivable_id</td><td>$odoo_customer[total_due]</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[zip] $odoo_customer[city]</td>") ;
     }
     print("</tr>\n") ;
 }

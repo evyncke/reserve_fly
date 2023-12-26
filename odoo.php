@@ -7,10 +7,6 @@ require_once('odoo.class.php') ;
 print("<pre>\n") ;
 print("Library loaded\n") ;
 
-$odoo_host = 'rapcs2.odoo.com' ;
-$odoo_password = '3a6b53d48867453eedcd274ccc3bdfb887b08071' ;
-$odoo_db = 'rapcs2' ;
-
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
 # For dirty attempts...
@@ -23,16 +19,36 @@ print("Connect with UID: $uid\n") ;
 
 #Account #427: FX Engineering, 400FX, 400FX FX Engineering, asset_receivable, asset, 400 Customers, 400 Customers
 #Account #426: Reginster Patrick, 400REGP, 400REGP Reginster Patrick, asset_receivable, asset, 400 Customers, 400 Customers
-$result = $odooClient->SearchRead('account.account', array(array(array('account_type', '=', 'asset_receivable'))), array()) ; 
+$result = $odooClient->SearchRead('account.account', array(array(
+		array('account_type', '=', 'asset_receivable'),
+		array('code', '=', '400REGP'))), 
+	array()) ; 
+print("\nSearching for Patrick...\n") ;
+foreach($result as $account) {
+	print("Account #$account[id]: $account[name], $account[code], $account[display_name], $account[account_type], $account[internal_group], " . 
+		$account['group_id'][1] . "\n") ;
+	$account_id = $account['id'] ;
+}
 
+$result = $odooClient->SearchRead('account.account', array(array(
+	array('account_type', '=', 'asset_receivable'),
+	array('code', '=', '400REGP'))), 
+array()) ; 
+print("\nSearching for Patrick...\n") ;
+foreach($result as $account) {
+print("Account #$account[id]: $account[name], $account[code], $account[display_name], $account[account_type], $account[internal_group], " . 
+	$account['group_id'][1] . "\n") ;
+$account_id = $account['id'] ;
+var_dump($account) ;
+}
+
+if (true) {
+$result = $odooClient->SearchRead('account.account', array(array(array('account_type', '=', 'asset_receivable'))), array()) ; 
 print("\nAccounts (account_type == asset_receivable)\n") ;
 foreach($result as $account) {
 	print("Account #$account[id]: $account[name], $account[code], $account[display_name], $account[account_type], $account[internal_group], " . 
-		$account['group_id'][1] . ", " . $account['group_id'][1] . "\n") ;
-	if ($account['display_name'] == '400REGP REGINSTER Patrick') {
-		$account_id = $account['id'] ;
-		print("Found it: $account_id\n") ;
-	}
+		$account['group_id'][1] . "\n") ;
+}
 }
 
 # Test de modification d'un client
@@ -45,7 +61,7 @@ foreach($result as $account) {
 #
 # https://www.odoo.com/documentation/16.0/developer/reference/backend/orm.html#reference-orm-model
 
-$response = $odooClient->Update('res.partner', array(2186, 2058), array('property_account_receivable_id' => $account_id)) ;
+# $response = $odooClient->Update('res.partner', array(2186, 2188, 2058), array('property_account_receivable_id' => $account_id)) ;
 
 // print("\nZoom sur customer\n") ;
 // $result = $odooClient->SearchRead('res.partner', array(array(array('id', '=', 2186))), array()) ; 
@@ -86,10 +102,12 @@ $result = $odooClient->SearchRead('account.move', array(array(array('move_type',
 		'access_url', 'access_token', 'move_type'))) ;
 foreach($result as $account) {
 	print("$account[id]: $account[sequence_prefix] $account[sequence_number], $account[activity_state], $account[name], $account[ref],
-	$account[state],$account[type_name], " . $account['journal_id'][1] . ", " .
-	$account['company_id'][1] . ", $account[amount_total], $account[display_name],
-	$account[access_url], $account[access_token], $account[move_type],\n") ;
+		$account[state],$account[type_name], " . $account['journal_id'][1] . ", " .
+		$account['company_id'][1] . ", $account[amount_total], $account[display_name],
+		$account[access_url], $account[access_token], $account[move_type],\n") ;
 }
+
+# var_dump($odooClient->GetFields('account.move')) ;
 
 # Display the products
 # Alas, the fields MUST be listed...
@@ -99,9 +117,10 @@ $result = $odooClient->SearchRead('product.product', array(), array('fields' => 
 print("\nProducts\n") ;
 foreach($result as $product) {
 	print("id: $product[id], name: $product[name], detailed_type: $product[detailed_type], default_code: $product[default_code],
-	prices: $product[lst_price] / $product[standard_price] => " . (($product['property_account_income_id']) ? $product['property_account_income_id'][1] : '') . "\n") ;
+		prices: $product[lst_price] / $product[standard_price] => " . (($product['property_account_income_id']) ? $product['property_account_income_id'][1] : '') . "\n") ;
 }
 
+# var_dump($odooClient->GetFields('product.product')) ;
 # To send an invoice:
 # https://www.odoo.com/fr_FR/forum/aide-1/create-a-customer-invoice-using-the-api-how-to-demo-this-via-a-scheduled-action-206177
 # model is: account.move
