@@ -27,7 +27,7 @@ require_once 'mobile_header5.php' ;
 
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
 ?>
-<h2>Liste de nos membres et leurs configurations Odoo</h2>
+<h2>Liste de nos membres et leurs configurations Odoo@<?=$odoo_host?></h2>
 <p>Les informations venant du site réservation/Joomle et d'Odoo sont croisées par l'adresse email de nos membres actifs, 
     le compte Odoo est associé au compte du site réservation si ce compte Odoo n'était pas lié. La vue Odoo 
     est disponible: <a href="https://<?=$odoo_host?>/web?debug=1#action=286&model=res.partner&view_type=kanban&cids=1&menu_id=127">ici</a>.
@@ -71,7 +71,7 @@ while ($row = mysqli_fetch_array($result)) {
         if ($row['odoo_id'] != $odoo_customer['id']) {
             mysqli_query($mysqli_link, "UPDATE $table_person SET odoo_id = $odoo_customer[id] WHERE jom_id = $row[jom_id]") 
                 or journalise($userId, "E", "Cannot set Odoo customer for user #$row[jom_id]") ;
-            $msg = "<em>Updated</em>" ;
+            $msg = "<em>Odoo_id updated</em>" ;
         } else
             $msg = '' ;
         print("<td>$msg $property_account_receivable_id</td><td>$odoo_customer[total_due]</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[zip] $odoo_customer[city]</td>") ;
