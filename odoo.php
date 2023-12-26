@@ -13,13 +13,14 @@ $odoo_db = 'rapcs2' ;
 
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
+# For dirty attempts...
 $common = $odooClient->common;
 $models = $odooClient->models ;
 $uid = $odooClient->uid ;
 $encoder = $odooClient->encoder ;
+
 print("Connect with UID: $uid\n") ;
 
-if (true) {
 #Account #427: FX Engineering, 400FX, 400FX FX Engineering, asset_receivable, asset, 400 Customers, 400 Customers
 #Account #426: Reginster Patrick, 400REGP, 400REGP Reginster Patrick, asset_receivable, asset, 400 Customers, 400 Customers
 $result = $odooClient->SearchRead('account.account', array(array(array('account_type', '=', 'asset_receivable'))), array()) ; 
@@ -33,7 +34,6 @@ foreach($result as $account) {
 		print("Found it: $account_id\n") ;
 	}
 }
-}
 
 # Test de modification d'un client
 # in partner.py
@@ -45,19 +45,7 @@ foreach($result as $account) {
 #
 # https://www.odoo.com/documentation/16.0/developer/reference/backend/orm.html#reference-orm-model
 
-$account_name = '400REGP Reginster Patrick' ;
-$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'res.partner', 'write', 
-	array(
-		array(2186), 
-		array('property_account_receivable_id' => $account_id)
-	))) ;
-$response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
-if ($response->faultCode()) {
-	print("Error...\n") ;
-	print("Code: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
-		htmlentities($response->faultString()));
-	exit ;
-}
+$response = $odooClient->Update('res.partner', array(2186, 2058), array('property_account_receivable_id' => $account_id)) ;
 
 // print("\nZoom sur customer\n") ;
 // $result = $odooClient->SearchRead('res.partner', array(array(array('id', '=', 2186))), array()) ; 
@@ -106,16 +94,6 @@ foreach($result as $account) {
 # Display the products
 # Alas, the fields MUST be listed...
 
-$params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'product.product', 'search_read', array(), 
-	array('fields' => array('id', 'name', 'detailed_type', 'lst_price', 'standard_price', 'default_code', 'categ_id', 'property_account_income_id')))) ;
-$response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
-if ($response->faultCode()) {
-	print("Error...\n") ;
-	print("Code: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
-		htmlentities($response->faultString()));
-	exit ;
-}
-$result = $response->value() ;
 $result = $odooClient->SearchRead('product.product', array(), array('fields' => array('id', 'name', 'detailed_type', 'lst_price', 'standard_price', 'default_code', 'categ_id', 'property_account_income_id'))) ;
 	 
 print("\nProducts\n") ;

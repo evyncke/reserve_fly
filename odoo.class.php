@@ -73,5 +73,20 @@ class OdooClient {
         }
         return $response->value() ;
     }
+
+    # Updating existing $model rows whose ids are in $ids with mapping $mapping
+    # Example:
+    # $response = $odooClient->Update('res.partner', array(2186, 2058), array('property_account_receivable_id' => $account_id)) ;
+    function Update($model, $ids, $mapping) {
+        global $userId ;
+
+        $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'write', array($ids, $mapping))) ;
+        $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
+        if ($response->faultCode()) {
+            journalise($userId, "F", "Cannot write in Odoo model $model @ $this->host: " . 
+                htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
+        }
+        return $response->value() ;
+    }
 }
 ?>
