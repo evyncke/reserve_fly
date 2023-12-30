@@ -38,14 +38,14 @@ if ($account == 'ciel') {
 ?>
 <p>Copie des données du site réservation vers Odoo... Cela inclut l'adresse, les numéros de téléphone ainsi que le compte client.</p>
 <?php
-} else { # ($account == 'odoo') 
+} else { # ($account == 'ciel') 
 ?>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="account" value="ciel">
 <button type="submit" class="btn btn-primary">Copier comptes ciel vers Odoo</button>
 </form>
 <?php
-} # ($account == 'odoo') 
+} # ($account == 'ciel') 
 
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
@@ -63,45 +63,57 @@ foreach($result as $client) {
 
 function GetOdooAccount($code, $fullName) {
     global $odooClient ;
+    static $cache = array() ;
 
+    if (isset($cache[$code])) return $cache[$code] ;
     $result = $odooClient->SearchRead('account.account', array(array(
 		array('account_type', '=', 'asset_receivable'),
 		array('code', '=', $code))), 
 	array()) ; 
-    if (count($result) > 0)
+    if (count($result) > 0) {
+        $cache[$code] = $result[0]['id'] ;
     	return $result[0]['id'] ;
+    }
     // Customer account does not exist... Need to create one
     $id = $odooClient->Create('account.account', array(
         'name' => $fullName,
         'account_type' => 'asset_receivable',
         'internal_group' => 'asset',
         'code' => $code,
-        'name' => "$code $fullName")) ;
-    if ($id > 0)
+        'name' => "$fullName")) ;
+    if ($id > 0) {
+        $cache[$code] = $id ;
         return $id ;
-    else
+    } else
         return 158 ; // Harcoded default 400000 in RAPCS2.odoo.com
 }
 
 function GetOdooCategory($role) {
     global $odooClient ;
+    static $cache = array() ;
 
+    if (isset($cache[$role])) return $cache[$role] ;
     $result = $odooClient->SearchRead('res.partner.category', array(array(
 		array('name', '=', $role))), 
 	array()) ; 
-    if (count($result) > 0)
+    if (count($result) > 0) {
+        $cache[$role] = $result[0]['id'] ;
     	return $result[0]['id'] ;
+    }
     // Category does not exist... Need to create one
     $id = $odooClient->Create('res.partner.category', array(
         'name' => $role, 'display_name' => $role)) ;
-    if ($id > 0)
+    if ($id > 0) {
+        $cache[$role] = $id ;
         return $id ;
+    }
 }
 
 $fi_tag = GetOdooCategory('FI') ;
 $student_tag = GetOdooCategory('Student') ;
 $pilot_tag = GetOdooCategory('Pilot') ;
 $member_tag = GetOdooCategory('Member') ;
+$board_member_tag = GetOdooCategory('Board Member') ;
 
 // Let's look at all our members
 $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS groups 
@@ -125,6 +137,7 @@ while ($row = mysqli_fetch_array($result)) {
     if (isset($odoo_customers[$email])) {
         $odoo_customer = $odoo_customers[$email] ;
         $property_account_receivable_id = strtok($odoo_customer['property_account_receivable_id'][1], ' ') ;
+        $db_name = db2web("$row[last_name] $row[first_name]") ;
         $groups = explode(',', $row['groups']) ;
         if ($account == "ciel") { // Master is Ciel
             $updates = array() ; 
@@ -139,9 +152,20 @@ while ($row = mysqli_fetch_array($result)) {
                 $updates['phone'] = db2web($row['home_phone']) ;
             if ($odoo_customer['mobile'] != db2web($row['cell_phone']))
                 $updates['mobile'] = db2web($row['cell_phone']) ;
-            if ($row['ciel_code400'] != '' and $property_account_receivable_id  != $row['ciel_code400']) {
-                $updates['property_account_receivable_id'] = GetOdooAccount($row['ciel_code400'], db2web("$row[last_name] $row[first_name]")) ;
+            if ($odoo_customer['name'] != $db_name)
+                $updates['name'] = $db_name ;
+            if ($odoo_customer['complete_name'] != $db_name)
+                $updates['complete_name'] = $db_name ;
+            // Code below is to copy from Ciel to Odoo
+            // Disabled based on Dominique Collette's feedback over WhatsApp on 2023-12-27    
+            //if ($row['ciel_code400'] != '' and $property_account_receivable_id  != $row['ciel_code400']) {
+            //    $updates['property_account_receivable_id'] = GetOdooAccount($row['ciel_code400'], db2web("$row[last_name] $row[first_name]")) ;
+            //}
+            // Code below is to ensure that all members are using the same 400000 account
+            if ($property_account_receivable_id  != '400100') {
+                $updates['property_account_receivable_id'] = GetOdooAccount('400100', db2web("$row[last_name] $row[first_name]")) ;
             }
+            // TODO for FI, should do property_account_payable_id based on the code ? 400xxx to 700xxx ?
             $tags = array() ;
             if (in_array($joomla_instructor_group, $groups))
                 $tags[] = $fi_tag ;
@@ -151,6 +175,8 @@ while ($row = mysqli_fetch_array($result)) {
                 $tags[] = $student_tag ;
             if (in_array($joomla_member_group, $groups))
                 $tags[] = $member_tag ;
+            if (in_array($joomla_board_group, $groups))
+                $tags[] = $board_member_tag ;
             if (count(array_diff($tags, $odoo_customer['category_id'])) > 0) // Compare arrays of Odoo and Ciel tags/groups
                 $updates['category_id'] = $tags ;
             if (count($updates) > 0) { // There were some changes, let's update the Odoo record
