@@ -166,7 +166,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><i><a class="dropdown-item" href="odoo_config.php">Configuration</a></i></li>
       <li><i><a class="dropdown-item" href="odoo_customers.php">Clients</a></i></li>
       <li><i><a class="dropdown-item" href="odoo_gen_invoices.php">Génération des factures</a></i></li>
-      <li><i><a class="dropdown-item" href="odoo_model.php">Analyse d'un modèle</a></i></li>
+      <li><i><a class="dropdown-item" href="odoo_model.php">Exploration des modèles</a></i></li>
 <?php    
   }// Odoo users
 ?> 
