@@ -30,7 +30,7 @@ if (! $userIsAdmin && ! $userIsBoardMember)
 
 ?>
 
-<h2>Génération des factures dans Odoo sur base des carnets de vol</h2>
+<h2>Génération des factures dans Odoo sur base des carnets de vol@<?=$odoo_host?></h2>
 <?php
 if (! isset($_REQUEST['confirm'])) {
 ?>

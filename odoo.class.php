@@ -91,10 +91,30 @@ class OdooClient {
         return $response->value() ;
     }
 
+    # Create a new row in $model  with mapping $mapping
+    # Example:
+    #  $odooClient->Create('account.account', array(
+    # 'name' => $fullName,
+    #    'account_type' => 'asset_receivable',
+    #    'internal_group' => 'asset',
+    #    'code' => $code,
+    #    'name' => "$code $fullName")) ;
+    function Create($model, $mapping) {
+        global $userId ;
+
+        $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'create', array($mapping))) ;
+        $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
+        if ($response->faultCode()) {
+            journalise($userId, "F", "Cannot create in Odoo model $model @ $this->host: " . 
+                htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
+        }
+        return $response->value() ;
+    }
+
     # Get all fields from a model
     # Example:
     # var_dump($odooClient->GetFields('account.move')) ;
-    function GetFields($model, $keys = array('string', 'help', 'type')) {
+    function GetFields($model, $keys = array('string', 'help', 'type', 'description')) {
         global $userId ;
         
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'fields_get', array(), array('attributes' => $keys))) ;
