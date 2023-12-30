@@ -114,7 +114,7 @@ class OdooClient {
     # Get all fields from a model
     # Example:
     # var_dump($odooClient->GetFields('account.move')) ;
-    function GetFields($model, $keys = array('string', 'help', 'type')) {
+    function GetFields($model, $keys = array('string', 'help', 'type', 'description')) {
         global $userId ;
         
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'fields_get', array(), array('attributes' => $keys))) ;
