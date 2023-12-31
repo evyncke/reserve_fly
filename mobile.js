@@ -374,6 +374,15 @@ function init() {
 			planesDropdown.appendChild(option) ;
 		}
 	}
+	// same for allPlanes
+	var allPlanesDropdown = document.getElementById('allPlanesDropdown') ;
+	if (allPlanesDropdown) {
+		for (var plane = 0; plane < allPlanes.length; plane++) {
+			var option = document.createElement('li');
+			option.innerHTML = '<a class="dropdown-item" href="mobile_plane.php?plane=' + allPlanes[plane].name + '">' + allPlanes[plane].name;
+			allPlanesDropdown.appendChild(option) ;
+		}
+	}
 
 	var pilotSelect = document.getElementById('pilotSelect') ;
 	if (pilotSelect) {
