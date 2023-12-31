@@ -434,6 +434,27 @@ else {
 	fclose($f) ;
 }
 
+$f = fopen("allPlanes.js", "w") ;
+if (! $f) journalise(0, "E", "Cannot open allPlanes.js for writing") ;
+else {
+	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
+	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
+	fwrite($f, '// Last update: ' . date('Y-m-d H:i:s') . "\n") ;
+	fwrite($f,"var allPlanes = [ ") ;
+	$first = true ;
+	$result = mysqli_query($mysqli_link, "select upper(id) from $table_planes where ressource = 0 order by id")
+		or journalise(0, "E", "Cannot read allPlanes: " . mysqli_error($mysqli_link)) ;
+	while ($row = mysqli_fetch_array($result)) {
+		if ($first)
+			$first = false ;
+		else
+			fwrite($f, ",\n\t") ;
+		fwrite($f, "{ id: \"$row[0]\", name: \"$row[0]\"}") ;
+	}
+	fwrite($f, "\n]; \n") ;
+	fclose($f) ;
+}
+
 $f = fopen("ressources.js", "w") ;
 if (! $f) journalise(0, "E", "Cannot open ressources.js for writing") ;
 else {

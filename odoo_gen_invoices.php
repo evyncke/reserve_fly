@@ -24,12 +24,11 @@ if ($userId == 0) {
 
 require_once 'mobile_header5.php' ;
 require_once 'folio.php' ;
+ini_set('display_errors', 1) ; // extensive error reporting for debugging
 
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
-
 ?>
-
 <h2>Génération des factures dans Odoo sur base des carnets de vol@<?=$odoo_host?></h2>
 <?php
 if (! isset($_REQUEST['confirm'])) {
@@ -43,31 +42,31 @@ if (! isset($_REQUEST['confirm'])) {
 } // (! isset($_REQUEST['confirm']))
 journalise($userId, "I", "Odoo invoices generation started ") ;			
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
-require __DIR__ . '/vendor/autoload.php' ;
+require_once 'odoo.class.php' ;
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+# For dirty attempts...
+$common = $odooClient->common;
+$models = $odooClient->models ;
+$uid = $odooClient->uid ;
+$encoder = $odooClient->encoder ;
 
-// Should probably move to a library / class
-$common = new PhpXmlRpc\Client("https://$odoo_host/xmlrpc/2/common");
-$common->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
-$params = array(new PhpXmlRpc\Value($odoo_db), 
-    new PhpXmlRpc\Value($odoo_username), 
-    new PhpXmlRpc\Value($odoo_password),
-    new PhpXmlRpc\Value(array(), 'array')) ;
-$response = $common->send(new PhpXmlRpc\Request('authenticate', $params)) ;
-if (!$response->faultCode()) {
-    $uid = $response->value() ;
-    journalise($userId, "D", "Connected to Odoo $odoo_host as $odoo_username with UID $uid") ;
-} else {
-    journalise($userId, "F", "Cannot connect to Odoo $odoo_host as $odoo_username: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
-        htmlentities($response->faultString()));
-}
-$models = new PhpXmlRpc\Client("https://$odoo_host/xmlrpc/2/object");
-$models->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
-$encoder = new PhpXmlRpc\Encoder() ;
+# Analytic accounts and products are harcoded
+$plane_analytic = array('OO-ALD' => 46, 'OO-ALE' => 47, 'OO-APV' => 48, 'OO-FMX' => 49, 'OO-JRB' => 50, 'OO-SPQ' => 51, 'PH-AML' => 52) ;
+$plane_product_id = 3 ;
+$tax_product_id = 20; // Hard coded TILEA taxes
+$fi_analytic = array(46 => 41, // Benoît Mendes
+    50 => 44, // Luc Wynand
+    59 => 45, // Nicolas Claessen
+    118 => 43) ; // David Gaspar
+$fi_product_id = array(46 => 4, // Benoît Mendes
+    50 => 4, // Luc Wynand
+    59 => 4, // Nicolas Claessen
+    118 => 4) ; // David Gaspar
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198
 if (false) {
     $jom_ids = "62, 66, 348, 92";
-    $jom_ids = "62, 66" ;
+//    $jom_ids = "62, 66" ;
     $sql = "SELECT u.id AS id, last_name, first_name, odoo_id
         FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
         JOIN $table_person AS p ON u.id=p.jom_id
@@ -98,13 +97,14 @@ while ($row = mysqli_fetch_array($result_members)) {
 		}
 		$shareInfo="";
         $code_plane = substr($line->plane, 3) ;
+        $plane = $line->plane ;
 		$date=substr($line->date,6,2).substr($line->date,3,2).substr($line->date,0,2).":".substr($line->time_start,0,2).substr($line->time_start,3,2);
 		$DC="";
 		if($line->instructor_name!="") {
 			$DC="DC";
 		}
 		if($line->share_type!="") {
-            switch ($line->share_member) { // TOOD this part is probably not required as folio class is fixed
+            switch ($line->share_member) { // TODO this part is probably not required as folio class is fixed
                 case -1: $shareInfo=$line->share_type." "."Ferry"; break ; 
                 case -2: $shareInfo=$line->share_type." "."Club"; break ; 
                 case -3: $shareInfo=$line->share_type." "."INIT"; break ; 
@@ -129,9 +129,10 @@ while ($row = mysqli_fetch_array($result_members)) {
             $invoice_lines[] = array(0, 0,
 				array(
 					'name' => "$libelle $line->date $line->plane $shareInfo",
-					'product_id' => 8, // Hard coded plane rental
+					'product_id' => $plane_product_id, 
 					'quantity' => $line->duration,
-					'price_unit' => $line->cost_plane_minute
+					'price_unit' => $line->cost_plane_minute,
+                    'analytic_distribution' => array($plane_analytic[$plane] => 100)
 				)) ;
 		}
         // Special line if there are taxes
@@ -139,26 +140,21 @@ while ($row = mysqli_fetch_array($result_members)) {
 			$taxPerPax=$line->cost_taxes/$line->pax_count;
             $invoice_lines[] = array(0, 0,
 				array(
-					'name' => "$line->date $line->plane Redevance Pax $line->from > $line->to",
-					'product_id' => 9,
+					'name' => "$libelle $line->date $line->plane Redevance Pax $line->from > $line->to",
+					'product_id' => $tax_product_id,
 					'quantity' => $line->pax_count,
 					'price_unit' => $taxPerPax
 				)) ;
         }
         // Special line if there is an instructor
         if ($line->cost_fi > 0) {
-            switch ($line->instructor_code) {
-                case  46: $odoo_product = 3 ; $fi_code = 700202 ; $fi_analytique = 'EC' ; break ; // Benoît Mendes, EC pour école ?
-                case  50: $odoo_product = 5 ; $fi_code = 700205 ; $fi_analytique = 'WL' ; break ; // Luc Wynand
-                case  59: $odoo_product = 6 ; $fi_code = 700206 ; $fi_analytique = 'NC' ; break ; // Nicolas Claessen
-                case 118: $odoo_product = 7 ; $fi_code = 700208 ; $fi_analytique = 'EC' ; break ; // David Gaspar, EC pour école ?
-            }
             $invoice_lines[] = array(0, 0,
 				array(
-					'name' => "$line->date $line->plane DC $line->instructor_name",
-					'product_id' => $odoo_product,
+					'name' => "$libelle $line->date $line->plane DC $line->instructor_name",
+					'product_id' => $fi_product_id[$line->instructor_code],
 					'quantity' => $line->duration,
-					'price_unit' => "$cost_fi_minute" // Forcing string format
+					'price_unit' => "$cost_fi_minute", // Forcing string format
+                    'analytic_distribution' => array($fi_analytic[$line->instructor_code] => 100)
 				)) ;
         } 
     }
@@ -166,9 +162,10 @@ while ($row = mysqli_fetch_array($result_members)) {
 	if ($total_folio > 0) {
         $params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'account.move', 'create',
 	        array(array('partner_id' => intval($row['odoo_id']), // Must be of INT type else Odoo does not accept
+            // Add invoice_due_date ?
                 'ref' => 'Test invoice generated from PHP',
                 'move_type' => 'out_invoice',
-                'invoice_origin' => 'Spa Aviation Bookings',
+                'invoice_origin' => 'Carnets de vols',
                 'invoice_line_ids' => $invoice_lines)))) ;
         $response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {

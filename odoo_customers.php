@@ -181,18 +181,20 @@ while ($row = mysqli_fetch_array($result)) {
                 $updates['category_id'] = $tags ;
             if (count($updates) > 0) { // There were some changes, let's update the Odoo record
                 $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
-                $msg = '<em>Odoo updated</em> ' ;
+                $msg = '<span class="text-warning">Odoo updated</span> ' ;
             } else 
                 $msg = '' ;
         } else { // Master is Odoo
             if ($row['odoo_id'] != $odoo_customer['id']) {
                 mysqli_query($mysqli_link, "UPDATE $table_person SET odoo_id = $odoo_customer[id] WHERE jom_id = $row[jom_id]") 
                     or journalise($userId, "E", "Cannot set Odoo customer for user #$row[jom_id]") ;
-                $msg = "<em>Odoo_id updated</em>" ;
+                $msg = '<span class="text-warning">Odoo_id updated</span>' ;
             } else
                 $msg = '' ;
         }
-        print("<td>$msg$odoo_customer[id]</td><td>$property_account_receivable_id</td><td>$odoo_customer[total_due]</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[zip] $odoo_customer[city]</td>") ;
+        print("<td>$msg$odoo_customer[id]</td><td>$property_account_receivable_id</td><td" . 
+            (($odoo_customer['total_due'] > 0) ? ' class="text-danger"' : '') .
+             ">$odoo_customer[total_due]</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[zip] $odoo_customer[city]</td>") ;
     }
     print("</tr>\n") ;
 }

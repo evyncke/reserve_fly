@@ -130,7 +130,7 @@ function init() {
 <?php
 print("Carnet de route de: <select id=\"planeSelect\" onchange=\"planeChanged(this);\">" ) ;
 $result = mysqli_query($mysqli_link, "select * from $table_planes
-	where actif != 0 and ressource = 0
+	where ressource = 0
 	order by id") ;
 $plane_details = array() ;
 while ($row = mysqli_fetch_array($result)) {
