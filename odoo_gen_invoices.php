@@ -44,11 +44,8 @@ journalise($userId, "I", "Odoo invoices generation started ") ;
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-# For dirty attempts...
-$common = $odooClient->common;
-$models = $odooClient->models ;
-$uid = $odooClient->uid ;
-$encoder = $odooClient->encoder ;
+
+$invoice_date_due = date("Y-m-d", strtotime("+1 week")) ;
 
 # Analytic accounts and products are harcoded
 $plane_analytic = array('OO-ALD' => 46, 'OO-ALE' => 47, 'OO-APV' => 48, 'OO-FMX' => 49, 'OO-JRB' => 50, 'OO-SPQ' => 51, 'PH-AML' => 52) ;
@@ -160,22 +157,14 @@ while ($row = mysqli_fetch_array($result_members)) {
     }
     $total_folio += $line->cost_plane + $line->cost_fi + $line->cost_taxes ;
 	if ($total_folio > 0) {
-        $params = $encoder->encode(array($odoo_db, $uid, $odoo_password, 'account.move', 'create',
-	        array(array('partner_id' => intval($row['odoo_id']), // Must be of INT type else Odoo does not accept
-            // Add invoice_due_date ?
-                'ref' => 'Test invoice generated from PHP',
-                'move_type' => 'out_invoice',
-                'invoice_origin' => 'Carnets de vols',
-                'invoice_line_ids' => $invoice_lines)))) ;
-        $response = $models->send(new PhpXmlRpc\Request('execute_kw', $params));
-        if ($response->faultCode()) {
-                print("Error...\n") ;
-                print("Code: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
-                    htmlentities($response->faultString()));
-                exit ;
-        }
-        $result = $response->value() ;
-        print("Invoicing result for $row[odoo_id] $total_folio &euro;: $result<br/>\n") ;
+        $params =  array(array('partner_id' => intval($row['odoo_id']), // Must be of INT type else Odoo does not accept
+                    'ref' => 'Test invoice generated from PHP',
+                    'move_type' => 'out_invoice',
+                    'invoice_date_due' => $invoice_date_due,
+                    'invoice_origin' => 'Carnets de vols',
+                    'invoice_line_ids' => $invoice_lines)) ;
+        $result = $odooClient->Create('account.move', $params) ;
+        print("Invoicing result for $row[odoo_id] $total_folio &euro;: " . implode(', ', $result) . "<br/>\n") ;
         $invoiceCount++ ;
 	}
 }
