@@ -48,17 +48,25 @@ $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_passwor
 $invoice_date_due = date("Y-m-d", strtotime("+1 week")) ;
 
 # Analytic accounts and products are harcoded
-$plane_analytic = array('OO-ALD' => 46, 'OO-ALE' => 47, 'OO-APV' => 48, 'OO-FMX' => 49, 'OO-JRB' => 50, 'OO-SPQ' => 51, 'PH-AML' => 52) ;
 $plane_product_id = 13 ;
 $tax_product_id = 20; // Hard coded TILEA taxes
-$fi_analytic = array(46 => 41, // Benoît Mendes
-    50 => 44, // Luc Wynand
-    59 => 45, // Nicolas Claessen
-    118 => 43) ; // David Gaspar
+// Before there was one product per FI, now all the same but let's keep the code here
 $fi_product_id = array(46 => 14, // Benoît Mendes
     50 => 14, // Luc Wynand
     59 => 14, // Nicolas Claessen
     118 => 14) ; // David Gaspar
+// Plane analytic accounts could be dynamically built (like in odoo_customers.php) as the 'name' property is set to the call sign
+    $plane_analytic = array('OO-ALD' => 46, 
+    'OO-ALE' => 47, 
+    'OO-APV' => 48, 
+    'OO-FMX' => 49, 
+    'OO-JRB' => 50, 
+    'OO-SPQ' => 51, 
+    'PH-AML' => 52) ;
+$fi_analytic = array(46 => 41, // Benoît Mendes
+    50 => 44, // Luc Wynand
+    59 => 45, // Nicolas Claessen
+    118 => 43) ; // David Gaspar
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198
 if (false) {
@@ -145,7 +153,7 @@ while ($row = mysqli_fetch_array($result_members)) {
         }
         // Special line if there is an instructor
         if ($line->cost_fi > 0) {
-            $invoice_lines[] = array(0, 0,
+            $invoice_lines[] = array(0, 0, // See https://www.odoo.com/documentation/16.0/developer/reference/backend/orm.html#relational-fields for the 0, 0
 				array(
 					'name' => "$libelle $line->date $line->plane DC $line->instructor_name",
 					'product_id' => $fi_product_id[$line->instructor_code],
