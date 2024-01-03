@@ -59,7 +59,7 @@ $invoice_date_due = $_REQUEST['dueDate'] ;
 $non_nav_membership_product = 24 ;
 $nav_membership_product = 25 ;
 $non_nav_membership_price = 70.0 ;
-$nav_membership_price = 225.0 ;
+$nav_membership_price = 185.0 ;
 $membership_analytic_account = 42  ;
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198, René 353
@@ -87,29 +87,31 @@ while ($row = mysqli_fetch_array($result_members)) {
     $groups = explode(',', $row['groups']) ;
     print("Processing " . db2web("#$member (odoo=$row[odoo_id]): $row[last_name] $row[first_name]") . " in Joomla groups $row[groups]...<br/\n" );
     $invoice_lines = array() ;
-    // Check whether student/pilot for membership dues
-    if (in_array($joomla_student_group, $groups) or in_array($joomla_pilot_group, $groups)) {
-        $membership_product_id = $nav_membership_product ;
-        $membership_price = $nav_membership_price ;
-        $libelle = "Cotisation membre naviguant" ;
-        print("$libelle<br/>") ;
-    } else {
-        $membership_product_id = $non_nav_membership_product ;
-        $membership_price = $non_nav_membership_price ;
-        $libelle = "Cotisation pour membre non-naviguant" ;
-        print("$libelle<br/>") ;
-    }
     $invoice_lines[] = array(0, 0,
         array(
-            'name' => "$libelle pour l'année $membership_year",
-            'product_id' => $membership_product_id, 
+            'name' => "Cotisation club pour l'année $membership_year",
+            'product_id' => $non_nav_membership_product, 
             'quantity' => 1,
-            'price_unit' => $membership_price,
+            'price_unit' => $non_nav_membership_price,
             'analytic_distribution' => array($membership_analytic_account => 100)
     )) ;
+    $membership_price = $non_nav_membership_price ;
+    // Check whether student/pilot for membership dues
+    if (in_array($joomla_student_group, $groups) or in_array($joomla_pilot_group, $groups)) {
+        $invoice_lines[] = array(0, 0,
+            array(
+                'name' => "Cotisation membre naviguant pour l'année $membership_year",
+                'product_id' => $nav_membership_product, 
+                'quantity' => 1,
+                'price_unit' => $nav_membership_price,
+                'analytic_distribution' => array($membership_analytic_account => 100)
+            )) ;
+            $membership_price += $nav_membership_price ;
+    }
     $params =  array(array('partner_id' => intval($row['odoo_id']), // Must be of INT type else Odoo does not accept
                     'ref' => 'Test membership invoice generated from PHP',
                     'move_type' => 'out_invoice',
+                    'invoice_date' => $invoice_date,
                     'invoice_date_due' => $invoice_date_due,
                     'invoice_origin' => 'Liste des membres',
                     'invoice_line_ids' => $invoice_lines)) ;
