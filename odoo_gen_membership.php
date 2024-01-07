@@ -65,7 +65,7 @@ $membership_analytic_account = 42  ;
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198, René 353
 if (true) {
     $jom_ids = "62, 66, 348, 92, 353, 439";
-//    $jom_ids = "62, 66" ;
+    $jom_ids = "62, 66" ;
     $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS groups
         FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
         JOIN $table_person AS p ON u.id=p.jom_id
@@ -109,6 +109,8 @@ while ($row = mysqli_fetch_array($result_members)) {
             $membership_price += $nav_membership_price ;
     }
     $params =  array(array('partner_id' => intval($row['odoo_id']), // Must be of INT type else Odoo does not accept
+    // Should the state set to 'posted' rather than 'draft' which is the default it seems?
+    //                'state' => 'posted', // Returns Vous ne pouvez pas créer une écriture déjà dans l'état comptabilisé. Veuillez créer un brouillon d'écriture et l'enregistrer après.
                     'ref' => 'Test membership invoice generated from PHP',
                     'move_type' => 'out_invoice',
                     'invoice_date' => $invoice_date,
