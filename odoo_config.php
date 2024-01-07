@@ -16,6 +16,10 @@
 
 */
 
+if (isset($_GET['odoo']) and $_GET['odoo'] != '') {
+    setcookie('odoo', strtolower($_GET['odoo'])) ;
+    $_COOKIE['odoo'] = strtolower($_GET['odoo']) ;
+}
 ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 if ($userId == 0) {
@@ -28,7 +32,7 @@ require_once 'mobile_header5.php' ;
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
 ?>
 <h2>Configuration de la base de données Odoo@<?=$odoo_host?></h2>
-<p>Sur base du fichier <mark>dbi.php</mark> (modifiable par Éric ou Patrick).
+<p>Sur base du fichier <mark>dbi.php</mark> (modifiable par Éric ou Patrick) et du cookie 'odoo' (<b><?=$_COOKIE['odoo']?></b>).
 <ul>
     <li>Hostname: <b><a href="https://  <?=$odoo_host?>"><?=$odoo_host?></a></b></li>
     <li>Data base: <b><?=$odoo_db?></b></li>
@@ -36,5 +40,12 @@ if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($us
     <li>Password: <b><?=$odoo_password?></b></li>
 </ul>
 </p>
+<p>Autre bases de données disponibles:
+    <ul>
+    <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=default">par défaut</a>;</li>
+    <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=rapcs">rapcs.odoo.com</a>;</li>
+    <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=rapcs2">rapcs2.odoo.com</a>;</li>
+    <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=spa-aviation">spa-aviation.odoo.com</a>;</li>
+    </ul>
 </body>
 </html>
