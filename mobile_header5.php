@@ -165,7 +165,8 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><a class="dropdown-item" href="https://<?=$odoo_host?>/">Connexion au site Odoo <i class="bi bi-box-arrow-up-right"></i></a></li>
       <li><i><a class="dropdown-item" href="odoo_config.php">Configuration</a></i></li>
       <li><i><a class="dropdown-item" href="odoo_customers.php">Clients</a></i></li>
-      <li><i><a class="dropdown-item" href="odoo_gen_invoices.php">Génération des factures</a></i></li>
+      <li><i><a class="dropdown-item" href="odoo_gen_invoices.php">Génération des factures vols membres</a></i></li>
+      <li><i><a class="dropdown-item" href="odoo_gen_membership.php">Génération des factures cotisations</a></i></li>
       <li><i><a class="dropdown-item" href="odoo_model.php">Exploration des modèles</a></i></li>
 <?php    
   }// Odoo users

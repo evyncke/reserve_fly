@@ -42,7 +42,7 @@ if ($account == 'ciel') {
 ?>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="account" value="ciel">
-<button type="submit" class="btn btn-primary">Copier comptes ciel vers Odoo</button>
+<button type="submit" class="btn btn-primary">Copier les infos de ciel/réservation vers Odoo</button>
 </form>
 <?php
 } # ($account == 'ciel') 

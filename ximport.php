@@ -31,6 +31,7 @@ $prefixInvoice = trim($_REQUEST['prefixInvoice']) ;
 $nextMove = 10001 ;
 $invoiceCount = 0;
 $invoiceDateCompta = date ('d/m/y') ;
+$invoiceDateCompta = '31/12/23' ; // HARDCODED BEFORE ODOO
 
 journalise($userId, "I", "Invoices generation started with prefix $prefixInvoice, production=$production") ;					
 
@@ -178,8 +179,10 @@ if(!$production) {
 
 $invoiceDateTime = new DateTime(date('Y-m-d'), new DateTimeZone('UTC'));
 $invoiceDate = date_format($invoiceDateTime,"d-m-Y");
+$invoiceDate = '31-12-2023' ; ; // HARDCODED BEFORE ODOO
 $invoiceDateSQLTime = new DateTime(date('Y-m-d'), new DateTimeZone('UTC'));
 $invoiceDateSQL = date_format($invoiceDateSQLTime,"Y-m-d");
+$invoiceDateSQL = '2023-12-31' ; ; // HARDCODED BEFORE ODOO
 
 $sql = "select u.id as id, last_name, bce
 				from $table_users as u join $table_user_usergroup_map on u.id=user_id 
@@ -201,7 +204,7 @@ $members = [62, 66, 348, 92] ;
 while ($row = mysqli_fetch_array($result)) {
 	$member=$row['id'];	
 	$bce=$row['bce'];
-    $folio = new Folio($member, '2023-11-01', '2023-12-01') ;
+    $folio = new Folio($member, '2023-12-01', '2024-01-01') ;
     if ($folio->count == 0) continue ; // Skip empty folios
 	$nextInvoice=$prefixInvoice."-".str_pad($invoiceCount,4,"0",STR_PAD_LEFT);
 	
