@@ -24,9 +24,31 @@ if ($userId == 0) {
 }
 
 require_once 'mobile_header5.php' ;
+require_once 'odoo.class.php' ;
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
 $account = (isset($_REQUEST['account'])) ? $_REQUEST['account'] : '' ;
+$create = (isset($_REQUEST['create']) and is_numeric($_REQUEST['create'])) ? $_REQUEST['create'] : '' ;
+
+// Let's create a Odoo partner/client on request
+if ($create) {
+    $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $create")
+        or journalise($userId, "F", "Cannot read $table_person for #$create: " . mysqli_error($mysqli_link)) ;
+    $row = mysqli_fetch_array($result) 
+        or journalise($userId, "F", "User $create not found") ;
+    $id = $odooClient->Create('res.partner', array(
+        'name' => db2web("$row[last_name] $row[first_name]"),
+        'complete_name' => db2web("$row[last_name] $row[first_name]"),
+        'property_account_receivable_id' => GetOdooAccount('400100', db2web("$row[last_name] $row[first_name]")) ,
+        'street' => db2web($row['address']),
+        'zip' => db2web($row['zipcode']),
+        'city' => db2web($row['city']),
+        'email' => db2web($row['email']),
+        'phone' => db2web($row['home_phone']),
+        'mobile' => db2web($row['cell_phone'])
+    )) ;
+}
 ?>
 <h2>Liste de nos membres et leurs configurations Odoo@<?=$odoo_host?></h2>
 <p>Les informations venant du site réservation/Joomle et d'Odoo sont croisées par l'adresse email de nos membres actifs, 
@@ -36,7 +58,7 @@ $account = (isset($_REQUEST['account'])) ? $_REQUEST['account'] : '' ;
 <?php
 if ($account == 'ciel') {
 ?>
-<p>Copie des données du site réservation vers Odoo... Cela inclut l'adresse, les numéros de téléphone ainsi que le compte client.</p>
+<p>Copie des données du site réservation vers Odoo... Cela inclut l'adresse, les numéros de téléphone, nom et prénom.</p>
 <?php
 } else { # ($account == 'ciel') 
 ?>
@@ -47,8 +69,6 @@ if ($account == 'ciel') {
 <?php
 } # ($account == 'ciel') 
 
-require_once 'odoo.class.php' ;
-$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
 // Let's get all Odoo customers
 $result = $odooClient->SearchRead('res.partner', array(), 
@@ -142,26 +162,26 @@ while ($row = mysqli_fetch_array($result)) {
         if ($account == "ciel") { // Master is Ciel
             $updates = array() ; 
             // TODO should also copy first_name and last_name in complete_name ?    
-            if ($odoo_customer['street'] != db2web($row['address']))
+            if ($odoo_customer['street'] != db2web($row['address']) and $row['address'] != '')
                 $updates['street'] = db2web($row['address']) ;
-            if ($odoo_customer['zip'] != db2web($row['zipcode']))
+            if ($odoo_customer['zip'] != db2web($row['zipcode']) and $row['zipcode'] != '')
                 $updates['zip'] = db2web($row['zipcode']) ;
-            if ($odoo_customer['city'] != db2web($row['city']))
+            if ($odoo_customer['city'] != db2web($row['city']) and $row['city'] != '')
                 $updates['city'] = db2web($row['city']) ;
-            if ($odoo_customer['phone'] != db2web($row['home_phone']))
+            if ($odoo_customer['phone'] != db2web($row['home_phone']) and $row['home_phone'] != '')
                 $updates['phone'] = db2web($row['home_phone']) ;
-            if ($odoo_customer['mobile'] != db2web($row['cell_phone']))
+            if ($odoo_customer['mobile'] != db2web($row['cell_phone']) and $row['cell_phone'] != '')
                 $updates['mobile'] = db2web($row['cell_phone']) ;
-            if ($odoo_customer['name'] != $db_name)
+            if ($odoo_customer['name'] != $db_name and $db_name != '')
                 $updates['name'] = $db_name ;
-            if ($odoo_customer['complete_name'] != $db_name)
+            if ($odoo_customer['complete_name'] != $db_name and $db_name != '')
                 $updates['complete_name'] = $db_name ;
             // Code below is to copy from Ciel to Odoo
             // Disabled based on Dominique Collette's feedback over WhatsApp on 2023-12-27    
             //if ($row['ciel_code400'] != '' and $property_account_receivable_id  != $row['ciel_code400']) {
             //    $updates['property_account_receivable_id'] = GetOdooAccount($row['ciel_code400'], db2web("$row[last_name] $row[first_name]")) ;
             //}
-            // Code below is to ensure that all members are using the same 400000 account
+            // Code below is to ensure that all members are using the same 400100 account
             if ($property_account_receivable_id  != '400100') {
                 $updates['property_account_receivable_id'] = GetOdooAccount('400100', db2web("$row[last_name] $row[first_name]")) ;
             }
@@ -195,6 +215,9 @@ while ($row = mysqli_fetch_array($result)) {
         print("<td>$msg$odoo_customer[id]</td><td>$property_account_receivable_id</td><td" . 
             (($odoo_customer['total_due'] > 0) ? ' class="text-danger"' : '') .
              ">$odoo_customer[total_due]</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[zip] $odoo_customer[city]</td>") ;
+    } else { // if (isset($odoo_customers[$email])) 
+        print("<td class=\"text-info\" colspan=\"5\">Ce membre est inconnu chez Odoo <a href=\"$_SERVER[PHP_SELF]?create=$row[jom_id]\">ajouter</a></td>") ;
+
     }
     print("</tr>\n") ;
 }
