@@ -514,19 +514,21 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 <th class="select-checkbox" onclick="sortTable(0, true)" style="text-align: right;">#</th>
 <th onclick="sortTable(1, false)">Id</th>
 <th onclick="sortTable(2, false)">Ref. Ciel</th>
-<th onclick="sortTable(3, false)">Nom</th>
-<th onclick="sortTable(4, false)">Prénom</th>
-<th onclick="sortTable(5, false)">Adresse</th>
-<th onclick="sortTable(6, false)">Code</th>
-<th onclick="sortTable(7, false)">Ville</th>
-<th onclick="sortTable(8, false)">Pays</th>
-<th onclick="sortTable(9, false)">Membre non-navigant</th>
-<th onclick="sortTable(10, false)">Elève</th>
-<th onclick="sortTable(11, false)">Pilote</th>
-<th onclick="sortTable(12, false)">Membre Effectif</th>
-<th onclick="sortTable(13, true)">Solde</th>
-<th onclick="sortTable(14, false)">Status</th>
-<th onclick="sortTable(15, false)">Raison</th>
+<th onclick="sortTable(3, false)">Ref. odoo</th>
+<th onclick="sortTable(4, false)">Nom</th>
+<th onclick="sortTable(5, false)">Prénom</th>
+<th onclick="sortTable(6, false)">Adresse</th>
+<th onclick="sortTable(7, false)">Code</th>
+<th onclick="sortTable(8, false)">Ville</th>
+<th onclick="sortTable(9, false)">Pays</th>
+<th onclick="sortTable(10, false)">Membre non-navigant</th>
+<th onclick="sortTable(11, false)">Elève</th>
+<th onclick="sortTable(12, false)">Pilote</th>
+<th onclick="sortTable(13, false)">Membre Effectif</th>
+<th onclick="sortTable(14, true)">Cotisation</th>
+<th onclick="sortTable(15, true)">Solde</th>
+<th onclick="sortTable(16, false)">Status</th>
+<th onclick="sortTable(17, false)">Raison</th>
 </tr>
 </thead>
 <tbody id="myTable">
@@ -549,7 +551,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 
 // The subquery should retrieve the max date for this specific user...but it burns time
 	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
-		ciel_code, block, bkb_amount, b_reason, u.email as email, group_concat(group_id) as groups, sum(distinct bkl_debit) as invoice_total,
+		ciel_code, odoo_id, block, bkb_amount, b_reason, u.email as email, group_concat(group_id) as groups, sum(distinct bkl_debit) as invoice_total,
 		datediff(current_date(), b_when) as days_blocked
 			from $table_users as u join $table_user_usergroup_map on u.id=user_id 
 			join $table_person as p on u.id=p.jom_id
@@ -572,6 +574,8 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 	$cielCount=0;
 	$blockedCount=0;
 	$soldeTotal=0.0;
+	$odooCount=0;
+	$cotisationCount=0;
 	
 	$CheckMark="&#9989;";
 	
@@ -634,7 +638,17 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		if($row['ciel_code'] != "") {
 			$ciel="400".$row['ciel_code'];
 		}
-
+		$odooReference=$row['odoo_id'];
+		if ($odooReference == "") {
+			$odooReference="xxxxx";
+		}
+		else {
+			$odooCount+=1;			
+		}
+		$cotisation="xxxxx";
+		if($odooReference!="xxxxx") {
+			$cotisationCount+=1;		
+		}
 		if($solde < 0.0) $soldeTotal+=$solde;
 		// Let's do some checks on January invoice
 		if ($row['invoice_total'] == 70) {
@@ -667,6 +681,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			<td><input type=\"checkbox\"> $count</td>
 		    <td style='text-align: right;'>$personid</td>
 			<td style='text-align: left;'><a class=\"tooltip\" href=\"https://www.spa-aviation.be/resa/myfolio.php?user=$personid\">$ciel<span class='tooltiptext'>Click pour afficher le folio</span></a></td>
+			<td style='text-align: left;'>$odooReference</td>
 			<td style='text-align: left;'><a class=\"tooltip\" href=\"https://www.spa-aviation.be/resa/profile.php?displayed_id=$personid\">$row[last_name]<span class='tooltiptext'>Click pour editer le profile</span></a></td>
 			<td style='text-align: left;'>$row[first_name]</td>
 			<td style='text-align: left;'>$address</td>
@@ -676,7 +691,8 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			<td style='text-align: center;'>$member</td>
 			<td style='text-align: center;'>$student</td>
 			<td style='text-align: center;'>$pilot</td>
-			<td style='text-align: center;'>$effectif</td>");
+			<td style='text-align: center;'>$effectif</td>
+			<td style='text-align: center;'>$cotisation</td>");
 		if($row['ciel_code'] != '') {
 			$soldeText=number_format($solde,2,",",".");
 			print("<td $soldeStyle>$soldeText €</td>");				
@@ -710,6 +726,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		<td>Total</td>
 	    <td></td>
 		<td>$cielCount</td>
+		<td>$odooCount</td>
 		<td>$count</td>
 		<td></td>
 		<td></td>
@@ -719,7 +736,8 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		<td>$memberCount</td>
 		<td>$studentCount</td>
 		<td>$pilotCount</td>
-		<td>$effectifCount</td>");
+		<td>$effectifCount</td>
+		<td>$cotisationCount</td>");
 	$soldeTotalText=number_format($soldeTotal,2,",",".");
 	if($soldeTotal<0.0) {
 		print("<td style='color: red;text-align: right;'>$soldeTotalText €</td>");
