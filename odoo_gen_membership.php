@@ -65,7 +65,7 @@ $nav_membership_price = 185.0 ;
 $membership_analytic_account = 42  ;
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198, René 353
-if (true) {
+if (false) {
     $jom_ids = "62, 66, 348, 92, 353, 439";
     $jom_ids = "62, 66" ;
     $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS groups
@@ -78,6 +78,7 @@ if (true) {
             FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
             JOIN $table_person AS p ON u.id=p.jom_id
             WHERE group_id IN ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
+            AND NOT EXISTS (SELECT * FROM $table_membership_fees AS f WHERE f.bkf_user = p.jom_id and f.bkf_year = '$membership_year')
             GROUP BY id";
 }				
 $result_members = mysqli_query($mysqli_link, $sql)
