@@ -28,14 +28,18 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
+
+$membership_year = $_REQUEST['year'] ;
+$invoice_date = $_REQUEST['date'] ;
+$invoice_date_due = $_REQUEST['dueDate'] ;
 ?>
-<h2>Génération des factures dans Odoo pour les cotisations</h2>
+<h2>Génération des factures dans Odoo pour les cotisations <?=$membership_year?></h2>
 <?php
 if (!isset($_REQUEST['confirm']) or $_REQUEST['year'] == '' or $_REQUEST['date'] == '' or $_REQUEST['dueDate'] == '') {
 ?>
 <form action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="confirm" value="y">
-<label for="yearId" class="form-label">Cotisation pour l'anné:</label>
+<label for="yearId" class="form-label">Cotisation pour l'année:</label>
 <input type="number" name="year" id="yearId" class="form-control" value="<?=date("Y")?>">
 <label for="invoiceDateId" class="form-label">Date de la facture:</label>
 <input type="date" name="date" id="invoiceDateId" class="form-control" value="<?=date("Y-m-d")?>">
@@ -51,31 +55,30 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
-$membership_year = $_REQUEST['year'] ;
-$invoice_date = $_REQUEST['date'] ;
-$invoice_date_due = $_REQUEST['dueDate'] ;
+
 
 # Analytic accounts and products are harcoded
-$non_nav_membership_product = 24 ;
-$nav_membership_product = 25 ;
+$non_nav_membership_product = 7 ;
+$nav_membership_product = 8 ;
 $non_nav_membership_price = 70.0 ;
 $nav_membership_price = 185.0 ;
 $membership_analytic_account = 42  ;
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198, René 353
-if (true) {
+if (false) {
     $jom_ids = "62, 66, 348, 92, 353, 439";
     $jom_ids = "62, 66" ;
     $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS groups
-        FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
+        FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id
         JOIN $table_person AS p ON u.id=p.jom_id
-        WHERE p.jom_id IN ($jom_ids)
+        WHERE p.jom_id IN ($jom_ids) AND NOT EXISTS (SELECT * FROM $table_membership_fees AS f WHERE f.bkf_user = p.jom_id and f.bkf_year = '$membership_year')
         GROUP BY id";
 } else {
     $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS groups
             FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
             JOIN $table_person AS p ON u.id=p.jom_id
             WHERE group_id IN ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
+            AND NOT EXISTS (SELECT * FROM $table_membership_fees AS f WHERE f.bkf_user = p.jom_id and f.bkf_year = '$membership_year')
             GROUP BY id";
 }				
 $result_members = mysqli_query($mysqli_link, $sql)
@@ -119,6 +122,9 @@ while ($row = mysqli_fetch_array($result_members)) {
                     'invoice_line_ids' => $invoice_lines)) ;
     $result = $odooClient->Create('account.move', $params) ;
     print("Invoicing result for #$row[odoo_id]: $membership_price &euro;, " . implode(', ', $result) . "<br/>\n") ;
+    mysqli_query($mysqli_link, "INSERT INTO $table_membership_fees(bkf_user, bkf_year, bkf_amount, bkf_invoice_id, bkf_invoice_date)
+        VALUES($member, '$membership_year', $membership_price, $result[0], '$invoice_date')")
+        or journalise($userId, "F", "Cannot insert into $table_membership_fees: " . mysqli_error($mysqli_link)) ;
     $invoiceCount++ ;
 }
 journalise($userId, "I", "Successful generation of $invoiceCount membership invoices in Odoo.") ;					

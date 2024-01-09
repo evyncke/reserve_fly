@@ -48,15 +48,15 @@ $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_passwor
 $invoice_date_due = date("Y-m-d", strtotime("+1 week")) ;
 
 # Analytic accounts and products are harcoded
-$plane_product_id = 13 ;
+$plane_product_id = 6 ;
 $tax_product_id = 20; // Hard coded TILEA taxes
 // Before there was one product per FI, now all the same but let's keep the code here
-$fi_product_id = array(46 => 14, // Benoît Mendes
-    50 => 14, // Luc Wynand
-    59 => 14, // Nicolas Claessen
-    118 => 14) ; // David Gaspar
+$fi_product_id = array(46 => 5, // Benoît Mendes
+    50 => 5, // Luc Wynand
+    59 => 5, // Nicolas Claessen
+    118 => 5) ; // David Gaspar
 // Plane analytic accounts could be dynamically built (like in odoo_customers.php) as the 'name' property is set to the call sign
-    $plane_analytic = array('OO-ALD' => 46, 
+$plane_analytic = array('OO-ALD' => 46, 
     'OO-ALE' => 47, 
     'OO-APV' => 48, 
     'OO-FMX' => 49, 
@@ -69,7 +69,7 @@ $fi_analytic = array(46 => 41, // Benoît Mendes
     118 => 43) ; // David Gaspar
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198
-if (false) {
+if (true) {
     $jom_ids = "62, 66, 348, 92";
 //    $jom_ids = "62, 66" ;
     $sql = "SELECT u.id AS id, last_name, first_name, odoo_id
