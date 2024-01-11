@@ -56,17 +56,17 @@ $fi_product_id = array(46 => 5, // Benoît Mendes
     59 => 5, // Nicolas Claessen
     118 => 5) ; // David Gaspar
 // Plane analytic accounts could be dynamically built (like in odoo_customers.php) as the 'name' property is set to the call sign
-$plane_analytic = array('OO-ALD' => 46, 
-    'OO-ALE' => 47, 
-    'OO-APV' => 48, 
-    'OO-FMX' => 49, 
-    'OO-JRB' => 50, 
-    'OO-SPQ' => 51, 
-    'PH-AML' => 52) ;
-$fi_analytic = array(46 => 41, // Benoît Mendes
-    50 => 44, // Luc Wynand
-    59 => 45, // Nicolas Claessen
-    118 => 43) ; // David Gaspar
+$plane_analytic = array('OO-ALD' => 26, 
+    'OO-ALE' => 27, 
+    'OO-APV' => 28, 
+    'OO-FMX' => 29, 
+    'OO-JRB' => 30, 
+    'OO-SPQ' => 31, 
+    'PH-AML' => 32) ;
+$fi_analytic = array(46 => 36, // Benoît Mendes
+    50 => 34, // Luc Wynand
+    59 => 35, // Nicolas Claessen
+    118 => 33) ; // David Gaspar
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198
 if (true) {

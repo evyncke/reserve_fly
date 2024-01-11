@@ -62,7 +62,7 @@ $non_nav_membership_product = 7 ;
 $nav_membership_product = 8 ;
 $non_nav_membership_price = 70.0 ;
 $nav_membership_price = 185.0 ;
-$membership_analytic_account = 42  ;
+$membership_analytic_account = 25  ;
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198, René 353
 if (false) {
