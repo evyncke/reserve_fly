@@ -626,8 +626,10 @@ function compute_prix()
 	var aPrixAvion=compute_prix_avion();
 	if(check_coherence_heure() &&  check_coherence_compteur() && 
 		check_heure("id_cdv_heure_depart") && check_heure("id_cdv_heure_arrivee") &&
-	check_airport("id_cdv_departure_airport") && check_airport("id_cdv_arrival_airport") &&
-    check_CP()) 
+		check_airport("id_cdv_departure_airport") && check_airport("id_cdv_arrival_airport") &&
+		check_CP() &&
+		check_IFINIT()
+	) 
 	{
 		 document.getElementById("id_submitButton").disabled=false;
 		 document.getElementById("id_submitButton").style.backgroundColor = 'LightGreen';
@@ -1290,7 +1292,7 @@ function compute_aircraft(val)
    //document.getElementById("id_cdv_frais_remarque").value = aUserId;
 }
 //===============================================
-// Check if shared CP are correctly introdi=uced (Not orange)
+// Check if shared CP are correctly introduced (Not orange)
 function check_CP()
 {
 	if(document.getElementById("id_cdv_frais_CP").style.backgroundColor == "orange") {
@@ -1308,6 +1310,18 @@ function check_CP()
 		return false;
 	}
 	
+	return true;
+}
+//===============================================
+// Check if flight IF or INI is on segment 1 only ()
+function check_IFINIT()
+{
+	var aSegmentCountText=document.getElementById("id_cdv_segment_count").value;
+	if((document.getElementById("id_cdv_frais_numero_vol").value!="" || default_flight_reference!="") && 
+		aSegmentCountText!="1") {
+		alert("Un vol IF ou INIT ne peut comporter qu'un seul segment");
+		return false;
+	}
 	return true;
 }
 //===============================================
