@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2023 Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ $pilot = mysqli_fetch_array($result) or journalise(0, 'F', "Membre $userId incon
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 $userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
 $codeCiel = $pilot['ciel_code'] ;
+$odooId = $pilot['odoo_id'] ;
 mysqli_free_result($result) ;
 
 function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
@@ -102,6 +103,24 @@ while ($row = mysqli_fetch_array($result)) {
 	print("</tr>\n") ;
     $count ++ ;
 }
+
+// Now let's access Odoo invoices
+if ($odooId != '') {
+	require_once 'odoo.class.php' ;
+	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+	$invoices = $odooClient->SearchRead('account.move', array(array(
+				array('move_type','=','out_invoice'),
+				array('state', '=', 'posted'),
+				array('partner_id', '=', intval($odooId))
+			)), 
+			array('fields' => array('id', 'invoice_date', 'type_name', 'amount_total', 'name', 'payment_reference', 'access_url', 'access_token'))) ;
+	foreach ($invoices as $invoice) {
+		print("<tr><td>$invoice[invoice_date]</td><td>$invoice[name]</td><td>$invoice[type_name]</td><td style=\"text-align: right;\">$invoice[amount_total] &euro;</td>
+			<td><a href=\"https://$odoo_host/$invoice[access_url]?access_token=$invoice[access_token]\"target=\"_blank\">
+				<i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td></tr>\n") ;
+		$count++ ;
+	}
+} // if ($odooId != '')
 ?>
 </table>
 </div><!-- table responsive -->
