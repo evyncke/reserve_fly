@@ -73,7 +73,7 @@ if ($account == 'ciel') {
 // Let's get all Odoo customers
 $result = $odooClient->SearchRead('res.partner', array(), 
     array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id', 'total_due',
-        'street', 'street2', 'zip', 'city', 'country_id', 'category_id',
+        'street', 'street2', 'zip', 'city', 'country_id', 'country_code', 'category_id',
         'complete_name', 'email', 'phone', 'mobile', 'commercial_company_name'))) ;
 $odoo_customers = array() ;
 foreach($result as $client) {
@@ -147,7 +147,7 @@ $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS grou
 <table class="table table-striped table-hover table-bordered">
     <thead>
         <tr><th colspan="3" class="text-center">Joomla (site réservations)</th><th>Jointure</th><th colspan="5" class="text-center">Odoo</th></tr>
-        <tr><th>Nom</th><th>Joomla ID</th><th>Compte Client</th><th>Email</tH><th>Odoo ID</th><th>Compte Client</th><th>Solde</th><th>Rue</th><th>Zip/City</th></tr>
+        <tr><th>Nom</th><th>Joomla ID</th><th>Compte Client</th><th>Email</tH><th>Odoo ID</th><th>Compte Client</th><th class="text-end">Solde</th><th>Rue</th><th>Zip/City</th></tr>
     </thead>
     <tbody>
 <?php
@@ -212,9 +212,10 @@ while ($row = mysqli_fetch_array($result)) {
             } else
                 $msg = '' ;
         }
-        print("<td>$msg$odoo_customer[id]</td><td>$property_account_receivable_id</td><td" . 
-            (($odoo_customer['total_due'] > 0) ? ' class="text-danger"' : '') .
-             ">$odoo_customer[total_due]</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[zip] $odoo_customer[city]</td>") ;
+        $total_due = number_format(-$odoo_customer['total_due'], 2, ",", ".") ;
+        print("<td>$msg$odoo_customer[id]</td><td>$property_account_receivable_id</td><td " . 
+            (($odoo_customer['total_due'] > 0) ? 'class="text-danger text-end"' : 'class="text-end"') .
+             ">$total_due</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[country_code] $odoo_customer[zip] $odoo_customer[city]</td>") ;
     } else { // if (isset($odoo_customers[$email])) 
         print("<td class=\"text-info\" colspan=\"5\">Ce membre est inconnu chez Odoo <a href=\"$_SERVER[PHP_SELF]?create=$row[jom_id]\">ajouter</a></td>") ;
 
