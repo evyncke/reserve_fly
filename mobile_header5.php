@@ -154,19 +154,20 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
     <ul class="dropdown-menu">
-      <li><i><a class="dropdown-item" href="mobile_journal.php">Journal système</a></i></li>
-      <li><i><a class="dropdown-item" href="gestionMembres.php">Gestion membres <i class="bi bi-box-arrow-up-right"></i></a></i></li>
-      <li><i><a class="dropdown-item" href="mobile_tilea.php">Taxe TILEA</a></i></li>
-      <li><i><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></i></li>
+      <li><h6 class="dropdown-header class-primary">Réservé aux administrateurs/comptables</h6></li>
+      <li><a class="dropdown-item" href="mobile_journal.php">Journal système</a></li>
+      <li><a class="dropdown-item" href="gestionMembres.php">Gestion membres <i class="bi bi-box-arrow-up-right"></i></a></li>
+      <li><a class="dropdown-item" href="mobile_tilea.php">Taxe TILEA</a></li>
+      <li><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></li>
 <?php
   if ($userId == 62 or $userId == 66 or $userId == 92 or $userId == 348 or $userId == 306) { // Odoo users
 ?>
-      <li><h6 class="dropdown-header">Intégration Odoo (test limité)</h6></li>
+      <li><h6 class="dropdown-header">Intégration Odoo</h6></li>
       <li><a class="dropdown-item" href="https://<?=$odoo_host?>/">Connexion au site Odoo <i class="bi bi-box-arrow-up-right"></i></a></li>
-      <li><i><a class="dropdown-item" href="odoo_config.php">Configuration</a></i></li>
-      <li><i><a class="dropdown-item" href="odoo_customers.php">Clients</a></i></li>
-      <li><i><a class="dropdown-item" href="odoo_gen_invoices.php">Génération des factures vols membres</a></i></li>
-      <li><i><a class="dropdown-item" href="odoo_gen_membership.php">Génération des factures cotisations</a></i></li>
+      <li><a class="dropdown-item" href="odoo_config.php">Configuration</a></li>
+      <li><a class="dropdown-item" href="odoo_customers.php">Clients</a></li>
+      <li><a class="dropdown-item" href="odoo_gen_invoices.php">Génération des factures vols membres</a></li>
+      <li><a class="dropdown-item" href="odoo_gen_membership.php">Génération des factures cotisations</a></li>
       <li><i><a class="dropdown-item" href="odoo_model.php">Exploration des modèles</a></i></li>
 <?php    
   }// Odoo users
