@@ -82,6 +82,7 @@ if ($userIsInstructor or $userIsAdmin) {
 	<thead>
 		<tr><th>Date</th><th>N° pièce</th><th>Type</th><th style="text-align: right;">Montant</th><th>Action</th></tr>
 	</thead>
+<tbody class="table-group-divider">
 <?php
 $sql = "SELECT *, DATE(bki_date) AS bki_date 
 		FROM $table_person JOIN $table_bk_invoices ON bki_email = email 
@@ -106,6 +107,8 @@ while ($row = mysqli_fetch_array($result)) {
 
 // Now let's access Odoo invoices
 if ($odooId != '') {
+	print("</tobdy>
+	<tbody class=\"table-group-divider\">") ;
 	require_once 'odoo.class.php' ;
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 	$invoices = $odooClient->SearchRead('account.move', array(array(
@@ -122,6 +125,7 @@ if ($odooId != '') {
 	}
 } // if ($odooId != '')
 ?>
+</tbody>
 </table>
 </div><!-- table responsive -->
 </div><!-- col -->
