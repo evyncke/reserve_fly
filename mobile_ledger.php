@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2023 Eric Vyncke, Patrick Reginster
+   Copyright 2022-2024 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ $pilot = mysqli_fetch_array($result) or journalise(0, 'F', "Pilote $userId incon
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 $userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
 $codeCiel = $pilot['ciel_code'] ;
+$odooId = $pilot['odoo_id'] ;
 mysqli_free_result($result) ;
 
 function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
@@ -80,9 +81,9 @@ if ($userIsInstructor or $userIsAdmin) {
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<th>Date</th><th>Opération</th><th>Pièce</th><th>Description</th><th style="text-align: right;">Débit</th><th style="text-align: right;">Crédit</th><th style="text-align: right;">Solde</th>
+<th>Date</th><th>Opération (journal)</th><th>Pièce</th><th>Description</th><th style="text-align: right;">Débit</th><th style="text-align: right;">Crédit</th><th style="text-align: right;">Solde</th>
 </thead>
-<tbody>
+<tbody class="table-group-divider">
 <?php
 $sql = "SELECT *
 	FROM $table_person JOIN $table_bk_ledger ON ciel_code = bkl_client
@@ -122,6 +123,38 @@ while ($row = mysqli_fetch_array($result)) {
 	$solde=$total_credit-$total_debit;
 	$solde=number_format($solde,2,".","");
 	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td style=\"text-align: right;\">$debit</td><td style=\"text-align: right;\">$credit</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
+}
+
+// Now let's access Odoo ledger moves
+if ($odooId != '') {
+	print("</tobdy>
+	<tbody class=\"table-group-divider\">") ;
+	require_once 'odoo.class.php' ;
+	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+	$moves = $odooClient->SearchRead('account.move', array(array(
+				array('state', '=', 'posted'),
+				array('partner_id', '=', intval($odooId))
+			)), 
+			array('fields' => array('id', 'date', 'type_name', 'amount_total', 'display_name', 'direction_sign', 'journal_id', 'access_url', 'access_token'))) ;
+	foreach ($moves as $move) {
+		print("<tr><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
+			if ($move['access_token'] != '')
+				print("<td><a href=\"https://$odoo_host/$move[access_url]?access_token=$move[access_token]\"target=\"_blank\">$move[display_name]
+				<i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td>") ;
+			else
+				print("<td>$move[display_name]</td>") ;
+			print("<td>$move[type_name]</td>" ) ;
+			if ($move['direction_sign'] == -1) { // outgoing (invoice)
+				print("<td style=\"text-align: right;\">$move[amount_total] &euro;</td><td></td>") ;
+				$total_debit += $move['amount_total'] ;
+			} else { // Incoming (payment)
+				print("<td></td><td style=\"text-align: right;\">+$move[amount_total] &euro;</td>") ;
+				$total_credit += $move['amount_total'] ;
+			}
+			$solde=$total_credit-$total_debit;
+			$solde=number_format($solde,2,".","");
+			print("<td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
+	}
 }
 ?>
 </tbody>
