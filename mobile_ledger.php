@@ -112,16 +112,16 @@ while ($row = mysqli_fetch_array($result)) {
 		$reference = $row['bkl_reference'] ;
 	$debit="";
 	if ($row['bkl_debit']) {
-		$debit="-".$row['bkl_debit'];
+		$debit="-".number_format($row['bkl_debit'], 2, ",", ".") ;
 		$total_debit += $row['bkl_debit'] ;
 	}
 	$credit="";
 	if ($row['bkl_credit']){ 
-		$credit="+".$row['bkl_credit'];
+		$credit="+".number_format($row['bkl_credit'], 2, ",", ".") ;
 		$total_credit += $row['bkl_credit'] ;
 	}
 	$solde=$total_credit-$total_debit;
-	$solde=number_format($solde,2,".","");
+	$solde=number_format($solde,2,",",".");
 	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td style=\"text-align: right;\">$debit</td><td style=\"text-align: right;\">$credit</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
 }
 
@@ -135,24 +135,26 @@ if ($odooId != '') {
 				array('state', '=', 'posted'),
 				array('partner_id', '=', intval($odooId))
 			)), 
-			array('fields' => array('id', 'date', 'type_name', 'amount_total', 'display_name', 'direction_sign', 'journal_id', 'access_url', 'access_token'))) ;
+			array('fields' => array('id', 'date', 'type_name', 'amount_total', 'display_name', 'direction_sign', 'journal_id', 'access_url', 'access_token'),
+				'order' => 'date')) ;
 	foreach ($moves as $move) {
 		print("<tr><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
 			if ($move['access_token'] != '')
-				print("<td><a href=\"https://$odoo_host/$move[access_url]?access_token=$move[access_token]\"target=\"_blank\">$move[display_name]
+				print("<td><a href=\"https://$odoo_host$move[access_url]?access_token=$move[access_token]\"target=\"_blank\">$move[display_name]
 				<i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td>") ;
 			else
 				print("<td>$move[display_name]</td>") ;
 			print("<td>$move[type_name]</td>" ) ;
+			$amount = number_format($move['amount_total'], 2, ",", ".") ;
 			if ($move['direction_sign'] == -1) { // outgoing (invoice)
-				print("<td style=\"text-align: right;\">$move[amount_total] &euro;</td><td></td>") ;
+				print("<td style=\"text-align: right;\">-$amount</td><td></td>") ;
 				$total_debit += $move['amount_total'] ;
 			} else { // Incoming (payment)
-				print("<td></td><td style=\"text-align: right;\">+$move[amount_total] &euro;</td>") ;
+				print("<td></td><td style=\"text-align: right;\">+$amount</td>") ;
 				$total_credit += $move['amount_total'] ;
 			}
 			$solde=$total_credit-$total_debit;
-			$solde=number_format($solde,2,".","");
+			$solde=number_format($solde,2,".",",");
 			print("<td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
 	}
 }
@@ -160,8 +162,9 @@ if ($odooId != '') {
 </tbody>
 <tfoot>
 	<?php
-	$total_debit=-$total_debit;
-	print("<tr class=\"bg-info\"><td colspan=4>Totaux</td><td style=\"text-align: right;\">$total_debit &euro;</td><td style=\"text-align: right;\">$total_credit&nbsp;&euro;</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td><tr>");
+	$total_debit = "-" . number_format($total_debit, 2, ",", ".") ;
+	$total_credit = number_format($total_credit, 2, ",", ".") ;
+	print("<tr class=\"bg-info\"><td colspan=4>Totaux</td><td style=\"text-align: right;\">$total_debit&nbsp;&euro;</td><td style=\"text-align: right;\">$total_credit&nbsp;&euro;</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td><tr>");
 	?>
 </tfoot>
 </table>
