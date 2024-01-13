@@ -521,14 +521,15 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 <th onclick="sortTable(7, false)">Code</th>
 <th onclick="sortTable(8, false)">Ville</th>
 <th onclick="sortTable(9, false)">Pays</th>
-<th onclick="sortTable(10, false)">Membre non-navigant</th>
-<th onclick="sortTable(11, false)">Elève</th>
-<th onclick="sortTable(12, false)">Pilote</th>
-<th onclick="sortTable(13, false)">Membre Effectif</th>
-<th onclick="sortTable(14, true)">Cotisation</th>
-<th onclick="sortTable(15, true)">Solde</th>
-<th onclick="sortTable(16, false)">Status</th>
-<th onclick="sortTable(17, false)">Raison</th>
+<th onclick="sortTable(10, false)">email</th>
+<th onclick="sortTable(11, false)">Membre non-navigant</th>
+<th onclick="sortTable(12, false)">Elève</th>
+<th onclick="sortTable(13, false)">Pilote</th>
+<th onclick="sortTable(14, false)">Membre Effectif</th>
+<th onclick="sortTable(15, true)">Cotisation</th>
+<th onclick="sortTable(16, true)">Solde</th>
+<th onclick="sortTable(17, false)">Status</th>
+<th onclick="sortTable(18, false)">Raison</th>
 </tr>
 </thead>
 <tbody id="myTable">
@@ -591,6 +592,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		$code=db2web($row['zipcode']);
 		$ville=db2web($row['city']);
 		$pays=db2web($row['country']);
+		$email=db2web($row['email']);		
 		$nom=$row['last_name'];
 		if($nom == "") $nom=$row['name'];
 		$prenom=$row['first_name'];		
@@ -688,6 +690,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			<td style='text-align: left;'>$code</td>
 			<td style='text-align: left;'>$ville</td>
 			<td style='text-align: left;'>$pays</td>
+			<td style='text-align: left;'>$email</td>
 			<td style='text-align: center;'>$member</td>
 			<td style='text-align: center;'>$student</td>
 			<td style='text-align: center;'>$pilot</td>
@@ -728,6 +731,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		<td>$cielCount</td>
 		<td>$odooCount</td>
 		<td>$count</td>
+		<td></td>
 		<td></td>
 		<td></td>
 		<td></td>
