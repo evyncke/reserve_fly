@@ -105,7 +105,7 @@ class Student extends DTOMember {
             $this->firstFlight = $row['first_flight'] ;
             $this->lastFlight = $row['last_flight'] ;  
             $this->countFlights = $row['count_flights'] ; 
-        }
+        } 
     }
 
     function Flights() {
@@ -128,7 +128,7 @@ class DTOMembers implements Iterator {
             $fi_condition = "AND l_instructor = $fi " ;
         else 
             $fi_condition = '' ;
-        $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(*) AS count_flights, GROUP_CONCAT(group_id) AS group_ids 
+        $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(l_start) AS count_flights, GROUP_CONCAT(group_id) AS group_ids 
                 FROM $table_person 
                     JOIN $table_users AS u ON u.id = jom_id
                     JOIN $table_user_usergroup_map ON jom_id = user_id 
