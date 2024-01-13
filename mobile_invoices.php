@@ -107,7 +107,7 @@ while ($row = mysqli_fetch_array($result)) {
 
 // Now let's access Odoo invoices
 if ($odooId != '') {
-	print("</tobdy>
+	print("</tbody>
 	<tbody class=\"table-group-divider\">") ;
 	require_once 'odoo.class.php' ;
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
@@ -116,9 +116,14 @@ if ($odooId != '') {
 				array('state', '=', 'posted'),
 				array('partner_id', '=', intval($odooId))
 			)), 
-			array('fields' => array('id', 'invoice_date', 'type_name', 'amount_total', 'name', 'payment_reference', 'access_url', 'access_token'))) ;
+			array('fields' => array('id', 'invoice_date', 'type_name', 'amount_total', 'name', 'payment_reference', 'payment_state', 'access_url', 'access_token'))) ;
 	foreach ($invoices as $invoice) {
-		print("<tr><td>$invoice[invoice_date]</td><td>$invoice[name]</td><td>$invoice[type_name]</td><td style=\"text-align: right;\">$invoice[amount_total] &euro;</td>
+		$paid_msg = ($invoice['payment_state'] == 'paid') ? '<span class="badge rounded-pill text-bg-success">Payé</span>' : 
+			'<span class="badge rounded-pill text-bg-warning">Non payé</span>' ;
+		$amount = number_format($invoice['amount_total'], 2, ',', '.') ;
+		// TODO QR code BCD/002/1/SCT//Royal Aéro Para Club de Spa asbl/BE647.../EUR70.00//++000....+++
+		print("<tr><td>$invoice[invoice_date]</td><td>$invoice[name]</td><td>$invoice[type_name]</td>
+			<td style=\"text-align: right;\">$paid_msg$amount&nbsp;&euro;</td>
 			<td><a href=\"https://$odoo_host$invoice[access_url]?access_token=$invoice[access_token]\"target=\"_blank\">
 				<i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td></tr>\n") ;
 		$count++ ;
