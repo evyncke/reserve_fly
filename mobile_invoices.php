@@ -119,7 +119,7 @@ if ($odooId != '') {
 			array('fields' => array('id', 'invoice_date', 'type_name', 'amount_total', 'name', 'payment_reference', 'access_url', 'access_token'))) ;
 	foreach ($invoices as $invoice) {
 		print("<tr><td>$invoice[invoice_date]</td><td>$invoice[name]</td><td>$invoice[type_name]</td><td style=\"text-align: right;\">$invoice[amount_total] &euro;</td>
-			<td><a href=\"https://$odoo_host/$invoice[access_url]?access_token=$invoice[access_token]\"target=\"_blank\">
+			<td><a href=\"https://$odoo_host$invoice[access_url]?access_token=$invoice[access_token]\"target=\"_blank\">
 				<i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td></tr>\n") ;
 		$count++ ;
 	}
