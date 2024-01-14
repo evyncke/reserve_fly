@@ -171,7 +171,7 @@ if ($odooId != '') {
 				array('id', '=', intval($odooId))
 			)), 
 			array('fields' => array('id', 'total_due'))) ;
-	$balance = $accounts[0]['total_due'] ;
+	$balance = -1.0 * $accounts[0]['total_due'] ;
 } else { // Odoo account does not exist
 	$balance = 0 ;
 }
@@ -209,7 +209,6 @@ $fmt = datefmt_create(
     IntlDateFormatter::GREGORIAN,
     'MMMM yyyy' // See https://unicode-org.github.io/icu/userguide/format_parse/datetime/ !
 ) ;
-$today = datefmt_format($fmt, $displayTimestamp) ;
 ?>
 <h2><?=$document_title?>  du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?></h2>
 <p class="lead">Voici un folio (estimation de vos factures de vos vols).</p>
