@@ -584,7 +584,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		$personid=$row['id'];
 		$row['name'] = db2web($row['name']) ;
 		if ($row['name'] === FALSE) 
-			journalise(0, 'E', "There was an error while converting\n") ; 
+			journalise($userId, 'E', "There was an error while converting $row[name]") ; 
 		$row['first_name'] = db2web($row['first_name']) ;
 		$row['last_name'] = db2web($row['last_name']) ;
 		//$address=db2web($row['address']." ".$row['zipcode']." ".$row['city']." ".$row['country'];
