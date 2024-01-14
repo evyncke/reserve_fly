@@ -79,6 +79,7 @@ $pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 $userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
 $codeCiel = $pilot['ciel_code'] ;
+$odooId = $pilot['odoo_id'] ;
 $blocked_reason = db2web($pilot['b_reason']) ;
 $blocked_when = $pilot['b_when'] ;
 mysqli_free_result($result) ;
@@ -160,7 +161,18 @@ if ($row) {
 		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
 		$invoice_reason = 'solde' ;
 	}
-} else {
+} 
+
+// Now, let's check whether Odoo has also a balance
+if ($odooId != '') {
+	require_once 'odoo.class.php' ;
+	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+	$accounts = $odooClient->SearchRead('res.partner', array(array(
+				array('id', '=', intval($odooId))
+			)), 
+			array('fields' => array('id', 'total_due'))) ;
+	$balance = $accounts[0]['total_due'] ;
+} else { // Odoo account does not exist
 	$balance = 0 ;
 }
 
