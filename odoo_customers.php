@@ -146,14 +146,14 @@ $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS grou
 ?>
 <table class="table table-striped table-hover table-bordered">
     <thead>
-        <tr><th colspan="3" class="text-center">Joomla (site réservations)</th><th>Jointure</th><th colspan="5" class="text-center">Odoo</th></tr>
-        <tr><th>Nom</th><th>Joomla ID</th><th>Compte Client</th><th>Email</tH><th>Odoo ID</th><th>Compte Client</th><th class="text-end">Solde</th><th>Rue</th><th>Zip/City</th></tr>
+        <tr><th colspan="3" class="text-center">Joomla (site réservations)</th><th class="text-center">Jointure</th><th colspan="5" class="text-center">Odoo</th></tr>
+        <tr><th>Nom</th><th>Joomla ID</th><th>Compte Client</th><th class="text-center">Email</tH><th>Odoo ID</th><th>Compte Client</th><th class="text-end">Solde</th><th>Rue</th><th>Zip/City</th></tr>
     </thead>
     <tbody>
 <?php
 while ($row = mysqli_fetch_array($result)) {
     $email = strtolower($row['email']) ;
-    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "</td><td>$row[jom_id]</td><td>$row[ciel_code400]</td><td>$row[email]</td>") ;
+    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "</td><td>$row[jom_id]</td><td>$row[ciel_code400]</td><td class=\"text-center\">$row[email]</td>") ;
     if (isset($odoo_customers[$email])) {
         $odoo_customer = $odoo_customers[$email] ;
         $property_account_receivable_id = strtok($odoo_customer['property_account_receivable_id'][1], ' ') ;
@@ -217,7 +217,7 @@ while ($row = mysqli_fetch_array($result)) {
             (($odoo_customer['total_due'] > 0) ? 'class="text-danger text-end"' : 'class="text-end"') .
              ">$total_due</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[country_code] $odoo_customer[zip] $odoo_customer[city]</td>") ;
     } else { // if (isset($odoo_customers[$email])) 
-        print("<td class=\"text-info\" colspan=\"5\">Ce membre est inconnu chez Odoo <a href=\"$_SERVER[PHP_SELF]?create=$row[jom_id]\">ajouter</a></td>") ;
+        print("<td class=\"text-info\" colspan=\"5\">Ce membre est inconnu dans Odoo <a href=\"$_SERVER[PHP_SELF]?create=$row[jom_id]\">ajouter</a></td>") ;
 
     }
     print("</tr>\n") ;
