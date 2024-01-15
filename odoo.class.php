@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ class OdooClient {
     public $password ;
 
     function __construct($host, $db, $user, $password) {
-        global $userId ;
+        global $originUserId ;
 
         $this->host = $host ;
         $this->db = $db ;
@@ -46,9 +46,9 @@ class OdooClient {
         $response = $this->common->send(new PhpXmlRpc\Request('authenticate', $params)) ;
         if (!$response->faultCode()) {
             $this->uid = $response->value() ;
-            journalise($userId, "D", "Connected to Odoo $host as $user with UID $this->uid") ;
+            journalise($originUserId, "D", "Connected to Odoo $host as $user with UID $this->uid") ;
         } else {
-            journalise($userId, "F", "Cannot connect to Odoo $host as $user: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
+            journalise($originUserId, "F", "Cannot connect to Odoo $host as $user: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
                 htmlentities($response->faultString()));
         }
         $this->models = new PhpXmlRpc\Client("https://$host/xmlrpc/2/object");
@@ -65,12 +65,12 @@ class OdooClient {
     #
     # Could also contain: array('offset'=>10, 'limit'=>5)
     function SearchRead($model, $domain_filter, $display) {
-        global $userId ;
+        global $originUserId ;
 
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'search_read', $domain_filter, $display)) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
-            journalise($userId, "F", "Cannot search_read in Odoo model $model @ $this->host: " . 
+            journalise($originUserId, "F", "Cannot search_read in Odoo model $model @ $this->host: " . 
                 htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
         }
         return $response->value() ;
@@ -80,12 +80,12 @@ class OdooClient {
     # Example:
     # $response = $odooClient->Update('res.partner', array(2186, 2058), array('property_account_receivable_id' => $account_id)) ;
     function Update($model, $ids, $mapping) {
-        global $userId ;
+        global $originUserId ;
 
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'write', array($ids, $mapping))) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
-            journalise($userId, "F", "Cannot write in Odoo model $model @ $this->host: " . 
+            journalise($originUserId, "F", "Cannot write in Odoo model $model @ $this->host: " . 
                 htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
         }
         return $response->value() ;
@@ -100,12 +100,12 @@ class OdooClient {
     #    'code' => $code,
     #    'name' => "$code $fullName")) ;
     function Create($model, $mapping) {
-        global $userId ;
+        global $originUserId ;
 
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'create', array($mapping))) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
-            journalise($userId, "F", "Cannot create in Odoo model $model @ $this->host: " . 
+            journalise($originUserId, "F", "Cannot create in Odoo model $model @ $this->host: " . 
                 htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
         }
         return $response->value() ;
@@ -115,12 +115,12 @@ class OdooClient {
     # Example:
     # var_dump($odooClient->GetFields('account.move')) ;
     function GetFields($model, $keys = array('string', 'help', 'type', 'description')) {
-        global $userId ;
+        global $originUserId ;
         
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'fields_get', array(), array('attributes' => $keys))) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
-            journalise($userId, "F", "Cannot get all fields of Odoo model $model @ $this->host: " . 
+            journalise($originUserId, "F", "Cannot get all fields of Odoo model $model @ $this->host: " . 
                 htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
         }
         return $response->value();
