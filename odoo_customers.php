@@ -63,7 +63,7 @@ if ($account == 'ciel') {
 } else { # ($account == 'ciel') 
 ?>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
-<input type="hidden" name="account" value="ciel">
+<input type="hidden" name="account" value="joomla">
 <button type="submit" class="btn btn-primary">Copier les infos de ciel/réservation vers Odoo</button>
 </form>
 <?php
@@ -139,7 +139,7 @@ $board_member_tag = GetOdooCategory('Board Member') ;
 $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS groups 
     FROM $table_person AS p JOIN $table_users AS u ON u.id = p.jom_id
         LEFT JOIN $table_user_usergroup_map m ON u.id = m.user_id
-    WHERE jom_id IS NOT NULL AND u.block = 0
+    WHERE jom_id IS NOT NULL
     GROUP BY jom_id
     ORDER BY last_name, first_name") 
     or journalise($userId, "F", "Cannot list all members: " . mysqli_error($mysqli_link)) ;
@@ -153,13 +153,14 @@ $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS grou
 <?php
 while ($row = mysqli_fetch_array($result)) {
     $email = strtolower($row['email']) ;
-    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "</td><td>$row[jom_id]</td><td>$row[ciel_code400]</td><td class=\"text-center\">$row[email]</td>") ;
+    $active_msg = ($row['block'] == 0) ? '' : ' <span class="badge rounded-pill text-bg-info">Désactivé</span>' ;
+    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "$active_msg</td><td>$row[jom_id]</td><td>$row[ciel_code400]</td><td class=\"text-center\">$row[email]</td>") ;
     if (isset($odoo_customers[$email])) {
         $odoo_customer = $odoo_customers[$email] ;
         $property_account_receivable_id = strtok($odoo_customer['property_account_receivable_id'][1], ' ') ;
         $db_name = db2web("$row[last_name] $row[first_name]") ;
         $groups = explode(',', $row['groups']) ;
-        if ($account == "ciel") { // Master is Ciel
+        if ($account == "joomla") { // Master is Joomla
             $updates = array() ; 
             // TODO should also copy first_name and last_name in complete_name ?    
             if ($odoo_customer['street'] != db2web($row['address']) and $row['address'] != '')
@@ -187,18 +188,19 @@ while ($row = mysqli_fetch_array($result)) {
             }
             // TODO for FI, should do property_account_payable_id based on the code ? 400xxx to 700xxx ?
             $tags = array() ;
-            if (in_array($joomla_instructor_group, $groups))
+            if (in_array($joomla_instructor_group, $groups) and $row['block'] == 0)
                 $tags[] = $fi_tag ;
-            if (in_array($joomla_pilot_group, $groups))
+            if (in_array($joomla_pilot_group, $groups) and $row['block'] == 0)
                 $tags[] = $pilot_tag ;
-            if (in_array($joomla_student_group, $groups))
+            if (in_array($joomla_student_group, $groups) and $row['block'] == 0)
                 $tags[] = $student_tag ;
-            if (in_array($joomla_member_group, $groups))
+            if (in_array($joomla_member_group, $groups) and $row['block'] == 0)
                 $tags[] = $member_tag ;
-            if (in_array($joomla_board_group, $groups))
+            if (in_array($joomla_board_group, $groups)  and $row['block'] == 0)
                 $tags[] = $board_member_tag ;
-            if (count(array_diff($tags, $odoo_customer['category_id'])) > 0) // Compare arrays of Odoo and Ciel tags/groups
+            if (count(array_diff($tags, $odoo_customer['category_id'])) > 0 or count(array_diff($odoo_customer['category_id'], $tags)) > 0) // Compare arrays of Odoo and Ciel tags/groups
                 $updates['category_id'] = $tags ;
+            if ($userId == 62 and $row['jom_id'] == 49) { print("<pre>\nblock=$row[block]\n") ; var_dump($groups) ; var_dump($tags) ; var_dump($odoo_customer['category_id']) ; var_dump($updates) ; print('</pre>') ; }
             if (count($updates) > 0) { // There were some changes, let's update the Odoo record
                 $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
                 $msg = '<span class="text-warning">Odoo updated</span> ' ;
