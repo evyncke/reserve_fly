@@ -112,6 +112,7 @@ if ($odooId != '') {
 	require_once 'odoo.class.php' ;
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 	$invoices = $odooClient->SearchRead('account.move', array(array(
+		// TODO also list out_refund for credit notes ? like this without any move_type filter https://www.spa-aviation.be/resa/mobile_ledger.php?user=182
 				array('move_type','=','out_invoice'),
 				array('state', '=', 'posted'),
 				array('partner_id', '=', intval($odooId))
