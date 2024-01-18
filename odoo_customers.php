@@ -199,8 +199,7 @@ while ($row = mysqli_fetch_array($result)) {
             if (in_array($joomla_board_group, $groups)  and $row['block'] == 0)
                 $tags[] = $board_member_tag ;
             if (count(array_diff($tags, $odoo_customer['category_id'])) > 0 or count(array_diff($odoo_customer['category_id'], $tags)) > 0) // Compare arrays of Odoo and Ciel tags/groups
-                $updates['category_id'] = $tags ;
-            if ($userId == 62 and $row['jom_id'] == 49) { print("<pre>\nblock=$row[block]\n") ; var_dump($groups) ; var_dump($tags) ; var_dump($odoo_customer['category_id']) ; var_dump($updates) ; print('</pre>') ; }
+                $updates['category_id'] = (count($tags) > 0) ? $tags : false ; // False is the only way to clean up existing values...
             if (count($updates) > 0) { // There were some changes, let's update the Odoo record
                 $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
                 $msg = '<span class="text-warning">Odoo updated</span> ' ;
