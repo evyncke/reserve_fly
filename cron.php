@@ -1,7 +1,7 @@
 <pre>
 <?php
 /*
-   Copyright 2014-2023 Eric Vyncke
+   Copyright 2014-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -670,8 +670,6 @@ else {
 	fclose($f) ;
 }
 
-
-
 # Generate email aliases for eric
 $f = fopen("email.eric", "w") ;
 if (! $f) journalise(0, "E", "Cannot open email.eric for writing") ;
@@ -684,6 +682,35 @@ else {
 	}
 	fwrite($f, "eric.vyncke@uliege.be\n") ;
 	fclose($f) ;
+}
+
+// Let's get some data from Odoo
+require_once 'odoo.class.php' ;
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+
+// Check if unpaid membership fee is now paid
+$result = mysqli_query($mysqli_link, "SELECT bkf_invoice_id
+	FROM $table_membership_fees
+	WHERE bkf_payment_date IS NULL")
+	or journalise($userId, "E", "Cannot retrieve unpaid membership fees" . mysqli_error($mysqli_link)) ;
+$ids = array() ;
+while ($row = mysqli_fetch_array($result)) {
+	$ids[] = intval($row['bkf_invoice_id']) ;
+}
+if (count($ids) > 0) { // If there are still unpaid membership fees
+	$moves = $odooClient->Read('account.move', 
+		array($ids), 
+		array('fields' => array('id', 'name', 'state', 'payment_state'))) ;
+	$newly_paid = 0 ;
+	foreach($moves as $move) {
+		if ($move['payment_state'] == 'paid' or $move['payment_state'] == 'reversed') {
+			mysqli_query($mysqli_link, "UPDATE $table_membership_fees SET bkf_payment_date = SYSDATE() WHERE bkf_invoice_id = $move[id]")
+				or journalise($userId, "E", "Cannot mark membership fees as paid: " . mysqli_error($mysqli_link)) ;
+			$newly_paid ++ ;
+		}
+	}
+	if ($newly_paid > 0)
+		journalise($userId, "I", "There are $newly_paid newly paid membership fees") ;
 }
 
 // Some SQL clean-up
