@@ -46,13 +46,26 @@ class OdooClient {
         $response = $this->common->send(new PhpXmlRpc\Request('authenticate', $params)) ;
         if (!$response->faultCode()) {
             $this->uid = $response->value() ;
-            journalise($originUserId, "D", "Connected to Odoo $host as $user with UID $this->uid") ;
+//            journalise($originUserId, "D", "Connected to Odoo $host as $user with UID $this->uid") ;
         } else {
             journalise($originUserId, "F", "Cannot connect to Odoo $host as $user: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
                 htmlentities($response->faultString()));
         }
         $this->models = new PhpXmlRpc\Client("https://$host/xmlrpc/2/object");
         $this->models->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
+    }
+
+    # Read return all records from one model based on their IDs
+    function Read($model, $ids, $display) {
+        global $originUserId ;
+
+        $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'read', $ids, $display)) ;
+        $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
+        if ($response->faultCode()) {
+            journalise($originUserId, "F", "Cannot read in Odoo model $model @ $this->host: " . 
+                htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
+        }
+        return $response->value() ;
     }
 
     # Search one model based on $domain_filter (to select some rows) and $display (returned values)
