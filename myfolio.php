@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2023 Eric Vyncke, Patrick Reginster
+   Copyright 2022-2024 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -205,6 +205,8 @@ function selectChanged() {
 <body onload="init();" lang="fr">
 <div class="container-fluid">
 <h2>Situation comptable de <?=$userName?></h2>
+<div style="border: 5px dashed green; margin: 20px; padding: 20px; background-color: lightgreen; font-weigth: bold;">Attention cette page n'est plus actualisée, veuillez utiliser <a href="mobile_folio.php?user=<?=$userId?>">la nouvelle version</a>
+</div>
 <?php
 
 // Check the bookkeeping balance
