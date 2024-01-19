@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2023 Patrick Reginster
+   Copyright 2022-2024 Patrick Reginster (and partially Eric Vyncke)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -267,8 +267,8 @@ function filterRows(count, blocked, sign)
     var table = document.getElementById("myTable");
     var rows = table.rows;
 	var aSelectToggleColumn=0;
-  	var aStatusColumn=14;
-   	var aValueColumn=13;
+  	var aStatusColumn=17;
+   	var aValueColumn=16;
 	var aCielColumn=2;
 	var aHidden=false;
    	for (i = 0; i < rows.length; i++) {
@@ -486,6 +486,28 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		}
 	}
 }
+
+// Let's get some data from Odoo
+require_once 'odoo.class.php' ;
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+// Find all Odoo IDs
+$sql = "SELECT * 
+	FROM $table_person" ;
+$result = mysqli_query($mysqli_link, $sql)
+	or journalise($userId, "F", "Cannot retrieve all Odoo ids: " . mysqli_error($mysqli_link)) ;
+$ids = array() ;
+while ($row = mysqli_fetch_array($result)) {
+	$ids[] = intval($row['odoo_id']) ;
+}
+mysqli_free_result($result) ;
+$members = $odooClient->Read('res.partner', 
+	array($ids), 
+	array('fields' => array('email', 'total_due'))) ;
+$odoo_customers = array() ;
+foreach($members as $member) {
+	$email =  strtolower($member['email']) ;
+	$odoo_customers[$email] = $member ; // Let's build a dict indexed by the email addresses
+}
 ?>
 <h1>&nbsp;&nbsp;Table des membres du RAPCS</h1>
   <p>&nbsp;&nbsp;Type something to search the table for first names, last names , ciel ref, ...</p>  
@@ -527,7 +549,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 <th onclick="sortTable(13, false)">Pilote</th>
 <th onclick="sortTable(14, false)">Membre Effectif</th>
 <th onclick="sortTable(15, true)">Cotisation</th>
-<th onclick="sortTable(16, true)">Solde</th>
+<th onclick="sortTable(16, true)" style="width:20%;">Solde</th>
 <th onclick="sortTable(17, false)">Status</th>
 <th onclick="sortTable(18, false)">Raison</th>
 </tr>
@@ -590,6 +612,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		$student = (in_array($joomla_student_group, $groups)) ? $CheckMark : '' ;
 		$status=db2web($row['b_reason']);
 		$blocked=$row['block'];
+		$odoo = (isset($odoo_customers[strtolower($row['email'])])) ? $odoo_customers[strtolower($row['email'])] : null ;
 		if($blocked==1) {
 			$status="Web désactivé";
 			$pilote="";
@@ -616,9 +639,14 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		if($blocked==1 || $pilot == $CheckMark || $student== $CheckMark) {
 			$member='';
 		}
-		$solde=$row['bkb_amount'];
-		$solde=$solde*-1.00;
+		$solde=0.;
+		if($odoo) {
+			$solde=-$odoo['total_due'];
+		}
+		$soldeCiel=$row['bkb_amount'];
+		$soldeCiel=$soldeCiel*-1.00;
 		if(abs($solde)<0.01) $solde=0.0;
+		if(abs($soldeCiel)<0.01) $soldeCiel=0.0;
 		
 		//Don't display webdeactivated member if solde == 0
 		if(!$displayWebDeactivated && $blocked == 1 && $solde == 0.0) {
@@ -678,12 +706,12 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 	    	if($ciel != '') $cielCount++;
 		}
 		if($blocked == 2) $blockedCount++;
-		print("<tr id='$personid_row' style='text-align: right'; $rowStyle>
+		print("<tr style='text-align: right'; $rowStyle>
 			<td><input type=\"checkbox\"> $count</td>
 		    <td style='text-align: right;'>$personid</td>
-			<td style='text-align: left;'><a class=\"tooltip\" href=\"https://www.spa-aviation.be/resa/myfolio.php?user=$personid\">$ciel<span class='tooltiptext'>Click pour afficher le folio</span></a></td>
+			<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_folio.php?user=$personid\">$ciel<span class='tooltiptext'>Click pour afficher le folio</span></a></td>
 			<td style='text-align: left;'>$odooReference</td>
-			<td style='text-align: left;'><a class=\"tooltip\" href=\"https://www.spa-aviation.be/resa/profile.php?displayed_id=$personid\">$row[last_name]<span class='tooltiptext'>Click pour editer le profile</span></a></td>
+			<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_profile.php?displayed_id=$personid\">$row[last_name]<span class='tooltiptext'>Click pour editer le profile</span></a></td>
 			<td style='text-align: left;'>$row[first_name]</td>
 			<td style='text-align: left;'>$address</td>
 			<td style='text-align: left;'>$code</td>
@@ -703,13 +731,18 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			}
 			print("<td style='text-align: center;color: red;'>$cotisation</td>");			
 		}
+		$soldeText="";
+		$soldeStyle="";
+		if($solde<0.0) {
+			$soldeStyle="style='color: red;'";
+		}
+		if($odoo) {
+			$soldeText=number_format($solde,2,",",".") . "€(Odoo)";
+		}
 		if($row['ciel_code'] != '') {
-			$soldeText=number_format($solde,2,",",".");
-			print("<td $soldeStyle>$soldeText €</td>");				
+			$soldeText .="</br>" . number_format($soldeCiel, 2, ",", ".") . "€(Ciel)";
 		}
-		else {			
-			print("<td></td>");
-		}
+		print("<td $soldeStyle>$soldeText</td>");				
 		if($blocked==2) {
 			print("<td style='text-align: center;font-size: 17px;color: red;'>
 			<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Unblock','$nom $prenom','$personid','$solde')\">&#x26D4;<span class='tooltiptext'>Click pour DEBLOQUER</span>
