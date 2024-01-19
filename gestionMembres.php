@@ -508,7 +508,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 </br>
 	<p></p>
 <div class="table">
-<table width="100%" style="margin-left: auto; margin-right: auto; stickyHeader: true;" class="table table-striped table-hover table-bordered"> 
+<table width="100%" style="margin-left: auto; margin-right: auto;" class="table table-striped table-hover table-bordered"> 
 	<thead style="position: sticky;">
 <tr style="text-align: Center;">
 <th class="select-checkbox" onclick="sortTable(0, true)" style="text-align: right;">#</th>
