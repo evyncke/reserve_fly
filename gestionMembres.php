@@ -534,30 +534,17 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 </thead>
 <tbody id="myTable">
 <?php
-// ajouter block (Pour les pilotes bloque) + inverser les soldes.
-/*
-	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
-	ciel_code, block, bkb_amount, b_reason, u.email as email, group_concat(group_id) as groups, sum(distinct bkl_debit) as invoice_total
-		from $table_users as u join $table_user_usergroup_map on u.id=user_id 
-		join $table_person as p on u.id=p.jom_id
-		left join $table_bk_balance on concat('400',ciel_code)=bkb_account
-		left join $table_bk_ledger on bkl_client = ciel_code
-		left join $table_blocked on u.id = b_jom_id
-		where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
-		and (bkb_date is null or bkb_date=(select max(bkb_date) from $table_bk_balance))
-	    and bkl_journal = 'VEN' and bkl_date between '2023-01-01' and '2023-01-31'.  //removed//
-		group by user_id
-		order by last_name, first_name" ;
-*/
-
 // The subquery should retrieve the max date for this specific user...but it burns time
 	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
-		ciel_code, odoo_id, block, bkb_amount, b_reason, u.email as email, group_concat(group_id) as groups, sum(distinct bkl_debit) as invoice_total,
+		ciel_code, odoo_id, block, bkb_amount, b_reason, u.email as email, 
+		bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_id,
+		group_concat(group_id) as groups, sum(distinct bkl_debit) as invoice_total,
 		datediff(current_date(), b_when) as days_blocked
 			from $table_users as u join $table_user_usergroup_map on u.id=user_id 
 			join $table_person as p on u.id=p.jom_id
 			left join $table_bk_balance on ciel_code400=bkb_account
 			left join $table_bk_ledger on bkl_client = ciel_code
+			left join $table_membership_fees on bkf_user = p.jom_id
 			left join $table_blocked on u.id = b_jom_id
 			where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
 			and (bkb_date is null or bkb_date=(select max(bkb_date) from $table_bk_balance))
@@ -576,7 +563,8 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 	$blockedCount=0;
 	$soldeTotal=0.0;
 	$odooCount=0;
-	$cotisationCount=0;
+	$cotisationNonPayeCount=0;
+	$cotisationPayeCount=0;
 	
 	$CheckMark="&#9989;";
 	
@@ -603,7 +591,10 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		$status=db2web($row['b_reason']);
 		$blocked=$row['block'];
 		if($blocked==1) {
-			$status="Web désactivé";				
+			$status="Web désactivé";
+			$pilote="";
+			$student="";
+			$effectif="";
 		}
 		else if($status!="") {
 			//$blocked='&#x26D4;';
@@ -622,7 +613,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		}
 		if($status=="") $status="OK";
 		$member=$CheckMark;
-		if($pilot == $CheckMark || $student== $CheckMark) {
+		if($blocked==1 || $pilot == $CheckMark || $student== $CheckMark) {
 			$member='';
 		}
 		$solde=$row['bkb_amount'];
@@ -647,9 +638,17 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		else {
 			$odooCount+=1;			
 		}
-		$cotisation="xxxxx";
-		if($odooReference!="xxxxx") {
-			$cotisationCount+=1;		
+		$cotisation=$row['bkf_amount'];
+		$cotisationPaymentDate=$row['bkf_payment_date'];
+		if($cotisation!="") {
+			if($cotisationPaymentDate!="") {
+				$cotisationPayeCount+=1;	
+			}
+			else {
+				$cotisationNonPayeCount+=1;
+				$status.=" (&#10071;Cotisation non payée)";
+			}
+			$cotisation=$cotisation." €";
 		}
 		if($solde < 0.0) $soldeTotal+=$solde;
 		// Let's do some checks on January invoice
@@ -694,8 +693,16 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			<td style='text-align: center;'>$member</td>
 			<td style='text-align: center;'>$student</td>
 			<td style='text-align: center;'>$pilot</td>
-			<td style='text-align: center;'>$effectif</td>
-			<td style='text-align: center;'>$cotisation</td>");
+			<td style='text-align: center;'>$effectif</td>");
+		if($cotisationPaymentDate!="") {
+			print("<td style='text-align: center;'>$cotisation</td>");
+		}
+		else {
+			if($cotisation!="") {
+				$cotisation="[".$cotisation."]";
+			}
+			print("<td style='text-align: center;color: red;'>$cotisation</td>");			
+		}
 		if($row['ciel_code'] != '') {
 			$soldeText=number_format($solde,2,",",".");
 			print("<td $soldeStyle>$soldeText €</td>");				
@@ -741,7 +748,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		<td>$studentCount</td>
 		<td>$pilotCount</td>
 		<td>$effectifCount</td>
-		<td>$cotisationCount</td>");
+		<td><div style='color: red;'>[$cotisationNonPayeCount]</div><div>/$cotisationPayeCount</div></td>");
 	$soldeTotalText=number_format($soldeTotal,2,",",".");
 	if($soldeTotal<0.0) {
 		print("<td style='color: red;text-align: right;'>$soldeTotalText €</td>");
