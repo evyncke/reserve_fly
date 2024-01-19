@@ -73,7 +73,7 @@ if ($account == 'ciel') {
 // Let's get all Odoo customers
 $result = $odooClient->SearchRead('res.partner', array(), 
     array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id', 'total_due',
-        'street', 'street2', 'zip', 'city', 'country_id', 'country_code', 'category_id',
+        'street', 'street2', 'zip', 'city', 'country_id', 'country_code', 'category_id', 'partner_latitude', 'partner_longitude',
         'complete_name', 'email', 'phone', 'mobile', 'commercial_company_name'))) ;
 $odoo_customers = array() ;
 foreach($result as $client) {
@@ -169,6 +169,7 @@ while ($row = mysqli_fetch_array($result)) {
                 $updates['zip'] = db2web($row['zipcode']) ;
             if ($odoo_customer['city'] != db2web($row['city']) and $row['city'] != '')
                 $updates['city'] = db2web($row['city']) ;
+            // Should also trigger setting partner_longitude & partner_latitude...
             if ($odoo_customer['phone'] != db2web($row['home_phone']) and $row['home_phone'] != '')
                 $updates['phone'] = db2web($row['home_phone']) ;
             if ($odoo_customer['mobile'] != db2web($row['cell_phone']) and $row['cell_phone'] != '')

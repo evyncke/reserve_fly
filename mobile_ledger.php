@@ -135,15 +135,15 @@ if ($odooId != '') {
 				array('state', '=', 'posted'),
 				array('partner_id', '=', intval($odooId))
 			)), 
-			array('fields' => array('id', 'date', 'type_name', 'amount_total', 'display_name', 'direction_sign', 'journal_id', 'access_url', 'access_token'),
+			array('fields' => array('id', 'date', 'type_name', 'amount_total', 'name', 'direction_sign', 'journal_id', 'access_url', 'access_token'),
 				'order' => 'date')) ;
 	foreach ($moves as $move) {
 		print("<tr><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
 			if ($move['access_token'] != '')
-				print("<td><a href=\"https://$odoo_host$move[access_url]?access_token=$move[access_token]\"target=\"_blank\">$move[display_name]
+				print("<td><a href=\"https://$odoo_host$move[access_url]?access_token=$move[access_token]\"target=\"_blank\">$move[name]
 				<i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td>") ;
 			else
-				print("<td>$move[display_name]</td>") ;
+				print("<td>$move[name]</td>") ;
 			print("<td>$move[type_name]</td>" ) ;
 			$amount = number_format($move['amount_total'], 2, ",", ".") ;
 			if ($move['direction_sign'] == -1) { // outgoing (invoice)
