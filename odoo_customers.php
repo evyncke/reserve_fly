@@ -56,11 +56,11 @@ if ($create) {
     est disponible: <a href="https://<?=$odoo_host?>/web?debug=1#action=286&model=res.partner&view_type=kanban&cids=1&menu_id=127">ici</a>.
 </p>
 <?php
-if ($account == 'ciel') {
+if ($account == 'joomla') {
 ?>
-<p>Copie des données du site réservation vers Odoo... Cela inclut l'adresse, les numéros de téléphone, nom et prénom.</p>
+<p>Copie des données du site réservation vers Odoo... Cela inclut l'adresse (y compris longitude & latitude), les groupes, les numéros de téléphone, nom et prénom.</p>
 <?php
-} else { # ($account == 'ciel') 
+} else { # ($account == 'joomla') 
 ?>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="account" value="joomla">
@@ -129,6 +129,24 @@ function GetOdooCategory($role) {
     }
 }
 
+function geoCode($address) {
+    global $gmap_api_key, $userId ;
+    // https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=$gmap_api_key
+    // https://developers.google.com/maps/documentation/geocoding/requests-geocoding?hl=fr
+    $content = file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address=' . urlencode($address) . 
+        '&key=' . urlencode($gmap_api_key)) ;
+    // Could return { "error_message" : "This IP, site or mobile application is not authorized to use this API key. Request received from IP address 51.68.11.231, with empty referer", 
+    //      "results" : [], 
+    //      "status" : "REQUEST_DENIED" }
+    $json = json_decode($content, true) ; // Get an associative array
+    if ($json['status'] != 'OK') {
+        journalise($userId, 'E', "GeoCode($address) return $json[error_message]") ;
+        return false ;
+    }
+    $result = $json['results'][0]['geometry']['location'] ;
+    return $result ;
+}
+
 $fi_tag = GetOdooCategory('FI') ;
 $student_tag = GetOdooCategory('Student') ;
 $pilot_tag = GetOdooCategory('Pilot') ;
@@ -170,6 +188,15 @@ while ($row = mysqli_fetch_array($result)) {
             if ($odoo_customer['city'] != db2web($row['city']) and $row['city'] != '')
                 $updates['city'] = db2web($row['city']) ;
             // Should also trigger setting partner_longitude & partner_latitude...
+            // Using $gmap_api_key
+            // E.g., https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=$gmap_api_key
+            if ($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) {
+                $coordinates = geoCode(db2web($row['address']) . "," . db2web($row['city']) . ', ' . db2web($row['country'])) ;
+                if (false and $coordinates and count($coordinates) == 2) { 
+                    $updates['partner_latitude'] = $coordinates['lat'] ;
+                    $updates['partner_longitude'] = $coordinates['lng'] ;
+                }
+            }
             if ($odoo_customer['phone'] != db2web($row['home_phone']) and $row['home_phone'] != '')
                 $updates['phone'] = db2web($row['home_phone']) ;
             if ($odoo_customer['mobile'] != db2web($row['cell_phone']) and $row['cell_phone'] != '')
