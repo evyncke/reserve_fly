@@ -42,7 +42,8 @@ $invoice_date_due = (isset($_REQUEST['dueDate'] )) ? $_REQUEST['dueDate'] : date
 <input type="date" name="date" id="invoiceDateId" class="form-control" value="<?=$invoice_date?>">
 <label for="invoiceDueDateId" class="form-label">Date d'échéance:</label>
 <input type="date" name="dueDate" id="invoiceDueDateId" class="form-control" value="<?=$invoice_date_due?>">
-<button type="submit" class="btn btn-primary">Générer les factures</button> pour les cotisations sur la base des membres Joomla.
+<button type="submit" class="btn btn-primary">Générer les factures</button> pour les cotisations sur 
+la base des membres Joomla n'ayant pas encore reçu de factures pour l'année <?=$membership_year?>.
 </form>
 
 <h2 class="my-5">Paiements des cotisation <?=$membership_year?></h2>
