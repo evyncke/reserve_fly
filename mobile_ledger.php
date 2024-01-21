@@ -133,6 +133,7 @@ if ($odooId != '') {
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 	$moves = $odooClient->SearchRead('account.move', array(array(
 				array('state', '=', 'posted'),
+				array('date', '>' , '2023-12-31'),
 				array('partner_id', '=', intval($odooId))
 			)), 
 			array('fields' => array('id', 'date', 'type_name', 'amount_total', 'name', 'direction_sign', 'journal_id', 'access_url', 'access_token'),
