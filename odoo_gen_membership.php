@@ -29,33 +29,55 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
-$membership_year = $_REQUEST['year'] ;
-$invoice_date = $_REQUEST['date'] ;
-$invoice_date_due = $_REQUEST['dueDate'] ;
+$membership_year = (isset($_REQUEST['year'])) ? $_REQUEST['year'] : date('Y') ;
+$invoice_date = (isset($_REQUEST['date'])) ? $_REQUEST['date'] : date("Y-m-d") ;
+$invoice_date_due = (isset($_REQUEST['dueDate'] )) ? $_REQUEST['dueDate'] : date("Y-m-d", strtotime("+1 week")) ;
 ?>
-<h2>Génération des factures dans Odoo pour les cotisations <?=$membership_year?></h2>
-<?php
-if (!isset($_REQUEST['confirm']) or $_REQUEST['year'] == '' or $_REQUEST['date'] == '' or $_REQUEST['dueDate'] == '') {
-?>
+<h2>Cotisations <?=$membership_year?></h2>
 <form action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="confirm" value="y">
 <label for="yearId" class="form-label">Cotisation pour l'année:</label>
-<input type="number" name="year" id="yearId" class="form-control" value="<?=date("Y")?>">
+<input type="number" name="year" id="yearId" class="form-control" value="<?=$membership_year?>">
 <label for="invoiceDateId" class="form-label">Date de la facture:</label>
-<input type="date" name="date" id="invoiceDateId" class="form-control" value="<?=date("Y-m-d")?>">
+<input type="date" name="date" id="invoiceDateId" class="form-control" value="<?=$invoice_date?>">
 <label for="invoiceDueDateId" class="form-label">Date d'échéance:</label>
-<input type="date" name="dueDate" id="invoiceDueDateId" class="form-control" value="<?=date("Y-m-d", strtotime("+1 week"))?>">
-<button type="submit" class="btn btn-primary">Confirmer la génération</button> des cotisations sur la base des membres Joomla.
+<input type="date" name="dueDate" id="invoiceDueDateId" class="form-control" value="<?=$invoice_date_due?>">
+<button type="submit" class="btn btn-primary">Générer les factures</button> pour les cotisations sur la base des membres Joomla.
 </form>
+
+<h2 class="my-5">Paiements des cotisation <?=$membership_year?></h2>
+
+<table class="col-sm-8 col-lg-4 table-responsive table table-striped table-bordered table-sm">
+    <thead>
+        <tr><th>Date paiement</th><th class="text-end">Cotisation(s) payée(s)</th></tr>
+</thead>
+<tbody class="table-divider">
 <?php    
-    exit ;
-} // (! isset($_REQUEST['confirm']))
+$sql = "SELECT bkf_payment_date, COUNT(*) as n
+    FROM $table_membership_fees
+    WHERE bkf_year = '$membership_year'
+    GROUP by bkf_payment_date
+    ORDER BY bkf_payment_date ASC" ;
+$fees_count = 0 ;
+$result = mysqli_query($mysqli_link, $sql) or journalise($userId, "E", "Cannot get paid fees: " . mysqli_error($mysqli_link)) ;
+while ($row = mysqli_fetch_array($result)) {
+    if ($row['bkf_payment_date'] == '') $row['bkf_payment_date'] = 'Pas payé' ;
+    $fees_count += $row['n'] ;
+    print("<tr><td>$row[bkf_payment_date]</td><td class=\"text-end\">$row[n]</td>\n") ;
+}
+?>
+</tbody>
+<tfoot class="table-divider">
+    <tr class="table-info"><td>Total</td><td class="text-end"><?=$fees_count?></td></tr>
+</tfoot>
+</table>
+<?php
+if (!isset($_REQUEST['confirm']) or $_REQUEST['confirm'] != 'y') exit ; // Nothing to do
+
 journalise($userId, "I", "Odoo membership invoices generation started ") ;			
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-
-
 
 # Analytic accounts and products are harcoded
 $non_nav_membership_product = 7 ;
