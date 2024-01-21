@@ -165,14 +165,17 @@ $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS grou
 <table class="table table-striped table-hover table-bordered">
     <thead>
         <tr><th colspan="3" class="text-center">Joomla (site réservations)</th><th class="text-center">Jointure</th><th colspan="5" class="text-center">Odoo</th></tr>
-        <tr><th>Nom</th><th>Joomla ID</th><th>Compte Client</th><th class="text-center">Email</tH><th>Odoo ID</th><th>Compte Client</th><th class="text-end">Solde</th><th>Rue</th><th>Zip/City</th></tr>
+        <tr><th>Nom</th><th>Joomla ID</th><th>Compte Ciel</th><th class="text-center">Email</tH><th>Odoo ID</th><th>Compte Client</th><th class="text-end">Solde</th><th>Rue</th><th>Zip/City</th></tr>
     </thead>
     <tbody>
 <?php
 while ($row = mysqli_fetch_array($result)) {
     $email = strtolower($row['email']) ;
     $active_msg = ($row['block'] == 0) ? '' : ' <span class="badge rounded-pill text-bg-info">Désactivé</span>' ;
-    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "$active_msg</td><td>$row[jom_id]</td><td>$row[ciel_code400]</td><td class=\"text-center\">$row[email]</td>") ;
+    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "$active_msg</td>
+        <td><a href=\"mobile_profile.php?displayed_id=$row[jom_id]\">$row[jom_id]</a></td>
+        <td>$row[ciel_code400]</td>
+        <td class=\"text-center\"><a href=\"mailto:$row[email]\">$row[email]</a></td>") ;
     if (isset($odoo_customers[$email])) {
         $odoo_customer = $odoo_customers[$email] ;
         $property_account_receivable_id = strtok($odoo_customer['property_account_receivable_id'][1], ' ') ;
@@ -192,7 +195,7 @@ while ($row = mysqli_fetch_array($result)) {
             // E.g., https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=$gmap_api_key
             if ($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) {
                 $coordinates = geoCode(db2web($row['address']) . "," . db2web($row['city']) . ', ' . db2web($row['country'])) ;
-                if (false and $coordinates and count($coordinates) == 2) { 
+                if ($coordinates and count($coordinates) == 2) { 
                     $updates['partner_latitude'] = $coordinates['lat'] ;
                     $updates['partner_longitude'] = $coordinates['lng'] ;
                 }
@@ -242,7 +245,8 @@ while ($row = mysqli_fetch_array($result)) {
                 $msg = '' ;
         }
         $total_due = number_format(-$odoo_customer['total_due'], 2, ",", ".") ;
-        print("<td>$msg$odoo_customer[id]</td><td>$property_account_receivable_id</td><td " . 
+        print("<td>$msg<a href=\"https://spa-aviation.odoo.com/web#id=$odoo_customer[id]&cids=1&menu_id=122&action=275&model=res.partner&view_type=form\">$odoo_customer[id]</a></td>
+            <td>$property_account_receivable_id</td><td " . 
             (($odoo_customer['total_due'] > 0) ? 'class="text-danger text-end"' : 'class="text-end"') .
              ">$total_due</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[country_code] $odoo_customer[zip] $odoo_customer[city]</td>") ;
     } else { // if (isset($odoo_customers[$email])) 
