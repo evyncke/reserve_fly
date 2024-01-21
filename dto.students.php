@@ -57,7 +57,7 @@ if (isset($_REQUEST['fi']) and is_numeric($_REQUEST['fi']) and $_REQUEST['fi'] !
                     <a href=\"mailto:$student->email\"><i class=\"bi bi-envelope-fill\" title=\"Send email\"></i></a>
                     <a href=\"tel:$student->mobilePhone\"><i class=\"bi bi-telephone-fill\" title=\"Call on mobile\"></i></a>
             </td>
-            <td>$student->firstFlight <span class=\"badge bg-primary\" title=\"Number of flights\">$student->countFlights</span><br/>$student->lastFlight</td>
+            <td>$student->firstFlight <span class=\"badge bg-primary\" title=\"Number of flights\"><i class=\"bi bi-airplane-fill\"></i> $student->countFlights</span><br/>$student->lastFlight</td>
             <td class=\"d-none d-md-table-cell\"><a href=\"mailto:$student->email\">$student->email</a></td>
             <td class=\"d-none d-md-table-cell\"><a href=\"tel:$student->mobilePhone\">$student->mobilePhone</a></td>
             </tr>\n") ;
