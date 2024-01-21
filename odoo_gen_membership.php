@@ -47,7 +47,7 @@ $invoice_date_due = (isset($_REQUEST['dueDate'] )) ? $_REQUEST['dueDate'] : date
 
 <h2 class="my-5">Paiements des cotisation <?=$membership_year?></h2>
 
-<table class="col-sm-8 col-lg-4 table-responsive table table-striped table-bordered table-sm">
+<table class="w-auto table-responsive table table-striped table-bordered table-sm">
     <thead>
         <tr><th>Date paiement</th><th class="text-end">Cotisation(s) payée(s)</th></tr>
 </thead>
