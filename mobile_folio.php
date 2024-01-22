@@ -172,6 +172,12 @@ if ($odooId != '') {
 			)), 
 			array('fields' => array('id', 'total_due'))) ;
 	$balance = -1.0 * $accounts[0]['total_due'] ;
+	if ($balance < 0) {
+		$balance_text = "<span class=\"text-danger\"> $balance &euro; (vous devez de l'argent au RAPCS ASBL)</span>" ;
+		$invoice_total = -1.0 * $balance ;
+		$invoice_reason = 'solde' ;
+	} else
+		$balance_text = "$balance &euro;" ;
 } else { // Odoo account does not exist
 	$balance = 0 ;
 }
@@ -179,12 +185,12 @@ if ($odooId != '') {
 // Let's warn the used if he is blocked
 if ($blocked_reason != '') {
 	print("<p class=\"mt-2 p-4 bg-danger text-bg-danger rounded\">$blocked_reason</p>") ;
-	if ($userIsBoardMember and $row['bkb_amount'] > 0) { // Test mode
-		print("<p>EN TEST !!!! Si vous êtes bloqué(e) pour un solde négatif ($row[bkb_amount] &euro;), vous pouvez payer ce solde via 
-			<a href=\"payconiq/pay.php?amount=$row[bkb_amount]&reference=Solde%20$codeCiel&description=Solde%20courant%20$codeCiel&cb=$_SERVER[PHP_SELF]\">
-			l'application mobile payconiq (ou votre app bancaire) <img src=\"payconiq/payconiq_by_Bancontact-logo-app-pos-shadow.png\" width=88 height=88>
-			</a> et votre compte membre sera débloqué endéans quelques secondes.</p>") ;
-	}	
+//	if ($userIsBoardMember and $row['bkb_amount'] > 0) { // Test mode
+//		print("<p>EN TEST !!!! Si vous êtes bloqué(e) pour un solde négatif ($row[bkb_amount] &euro;), vous pouvez payer ce solde via 
+//			<a href=\"payconiq/pay.php?amount=$row[bkb_amount]&reference=Solde%20$codeCiel&description=Solde%20courant%20$codeCiel&cb=$_SERVER[PHP_SELF]\">
+//			l'application mobile payconiq (ou votre app bancaire) <img src=\"payconiq/payconiq_by_Bancontact-logo-app-pos-shadow.png\" width=88 height=88>
+//			</a> et votre compte membre sera débloqué endéans quelques secondes.</p>") ;
+//	}	
 }
 
 if ($userIsInstructor or $userIsAdmin or $userIsBoardMember) {
