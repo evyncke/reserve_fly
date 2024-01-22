@@ -115,9 +115,11 @@ if ($odooId != '') {
 		// TODO also list out_refund for credit notes ? like this without any move_type filter https://www.spa-aviation.be/resa/mobile_ledger.php?user=182
 				array('move_type','=','out_invoice'),
 				array('state', '=', 'posted'),
+				array('date', '>' , '2023-12-31'),
 				array('partner_id', '=', intval($odooId))
 			)), 
-			array('fields' => array('id', 'invoice_date', 'type_name', 'amount_total', 'name', 'payment_reference', 'payment_state', 'access_url', 'access_token'))) ;
+			array('fields' => array('id', 'invoice_date', 'type_name', 'amount_total', 'name', 'payment_reference', 'payment_state', 'access_url', 'access_token'),
+				'order' => 'date')) ;
 	foreach ($invoices as $invoice) {
 		$paid_msg = ($invoice['payment_state'] == 'paid') ? '<span class="badge rounded-pill text-bg-success">Payé</span>' : 
 			'<span class="badge rounded-pill text-bg-warning">Non payé</span>' ;
