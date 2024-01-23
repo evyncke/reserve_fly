@@ -36,7 +36,7 @@ if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	$displayed_id = $userId ;
 	$read_only = false ;
 }
-$body_attributes = "onload=\"initProfile($displayed_id);\"" ;
+$body_attributes = "onload=\"initProfile($displayed_id);init();\"" ;
 $header_postamble = '<script data-cfasync="true" src="profile.js"></script>' ;
 require_once 'mobile_header5.php' ;
 
@@ -280,7 +280,7 @@ foreach($me as $key => $value)
 ?>
 <div class="container-fluid">
 <div class="row">
-<h3>Données de contact de <?=$me['name']?></h3>
+<h2>Données de contact de <?=$me['name']?></h2>
 </div><!-- row -->
 
 <form>
