@@ -1,7 +1,7 @@
 <?php
 // Some icons (fast forward & co) by Snowish Icon Pack by Alexander Moore 
 /*
-   Copyright 2014-2023 Eric Vyncke
+   Copyright 2014-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 <meta property="og:image:type"    content="image/png" />
 <meta property="fb:app_id"        content="<?=$fb_app_id?>" />
 
-<title>R&eacute;servation des avions</title>
+<title>Réservation des avions</title>
 <script data-cfasync="true" src="datepickr.js"></script>
 <script>
 var // was 'const' but IE does not support it !
@@ -331,7 +331,18 @@ if ($row_blocked) {
 	$userNoFlight = true ;
 	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. 
 		Contactez <a href=\"mailto:info@spa-aviation.be\">l'a&eacute;roclub info@spa-aviation.be</a>.
-		Un clic sur le bouton <i>Folio du mois</i> ci-dessus vous permet de visualiser votre situation comptable.</div>") ;
+		Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
+}
+// Check whether users have paid theirs membership fees
+$result_fee = mysqli_query($mysqli_link, "SELECT * FROM $table_membership_fees 
+	WHERE bkf_user=$userId AND bkf_payment_date IS NOT NULL AND bkf_year = '" . date('Y') . "'")
+	or journalise($userId, 'E', "Cannot checked whether user has paid membership fee: " . mysqli_error($mysqli_link)) ;
+$row_fee = mysqli_fetch_array($result_fee) ;
+if (! $row_fee and ! $userIsInstructor) {
+	journalise($userId, "W", "This user has yet to pay their membership fee") ;
+//	$userNoFlight = false;
+	print("<div class=\"noFlyBox\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
+		Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
 }
 if ($userId == 0) {
 	print("<br/><font color=red>Vous devez &ecirc;tre connect&eacute;(e) pour r&eacute;server un avion.</font> ") ;
