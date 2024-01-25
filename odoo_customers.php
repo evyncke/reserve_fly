@@ -184,12 +184,18 @@ while ($row = mysqli_fetch_array($result)) {
         if ($account == "joomla") { // Master is Joomla
             $updates = array() ; 
             // TODO should also copy first_name and last_name in complete_name ?    
-            if ($odoo_customer['street'] != db2web($row['address']) and $row['address'] != '')
+            if ($odoo_customer['street'] != db2web($row['address']) and $row['address'] != '') {
                 $updates['street'] = db2web($row['address']) ;
-            if ($odoo_customer['zip'] != db2web($row['zipcode']) and $row['zipcode'] != '')
+                $odoo_customer['partner_latitude'] = 0.0 ;
+            }
+            if ($odoo_customer['zip'] != db2web($row['zipcode']) and $row['zipcode'] != '') {
                 $updates['zip'] = db2web($row['zipcode']) ;
-            if ($odoo_customer['city'] != db2web($row['city']) and $row['city'] != '')
+                $odoo_customer['partner_latitude'] = 0.0 ;
+            }
+            if ($odoo_customer['city'] != db2web($row['city']) and $row['city'] != '') {
                 $updates['city'] = db2web($row['city']) ;
+                $odoo_customer['partner_latitude'] = 0.0 ;
+            } 
             // Should also trigger setting partner_longitude & partner_latitude...
             // Using $gmap_api_key
             // E.g., https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=$gmap_api_key
