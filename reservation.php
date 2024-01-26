@@ -300,7 +300,6 @@ Ce n'est pas le cas avec votre navigateur Internet.</span>
 </script>
 <div class="userPrivileges">
 <?php
-// Based on fb_accessToken and joomla connection => propose login via FB, disconnect FB account, associate FB account, ...
 if ($userId != 0) {
 	$result = mysqli_query($mysqli_link, "select * from $table_users u left join $table_person p on u.id = p.jom_id where u.id = $userId")
 		or die("Erreur systeme lors de la lecture de votre profil: " . mysqli_error($mysqli_link)) ;
@@ -318,10 +317,6 @@ if ($userIsBoardMember) print(" administrateur-CA ") ;
 if ($userNoFlight) print(" <span style=\"color: red;\">interdit de vol</span> ") ;
 if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
 	print("<br/><font color=red>Vous devez &ecirc;tre au moins pilote pour r&eacute;server un avion.</font>") ;
-if ($userNoFlight)
-	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol (par exemple: factures non pay&eacute;es, 
-		contactez <a href=\"mailto:info@spa-aviation.be\">info@spa-aviation.be</a>.
-		Un clic sur le bouton <i>Folio du mois</i> ci-dessus vous permet de visualiser votre situation comptable.</div>") ;
 // Check whether the user is blocked
 $result_blocked = mysqli_query($mysqli_link, "SELECT * FROM $table_blocked WHERE b_jom_id=$userId")
 	or journalise($userId, 'E', "Cannot checked whether user is blocked: " . mysqli_error($mysqli_link)) ;
@@ -344,6 +339,10 @@ if (! $row_fee and ! $userIsInstructor and $userId != 294) {
 	print("<div class=\"noFlyBox\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
 		Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
 }
+if ($userNoFlight)
+	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol (par exemple: factures non pay&eacute;es, 
+		contactez <a href=\"mailto:info@spa-aviation.be\">info@spa-aviation.be</a>.
+		Un clic sur le bouton <i>Folio du mois</i> ci-dessus vous permet de visualiser votre situation comptable.</div>") ;
 if ($userId == 0) {
 	print("<br/><font color=red>Vous devez &ecirc;tre connect&eacute;(e) pour r&eacute;server un avion.</font> ") ;
 } else {
