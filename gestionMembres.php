@@ -535,23 +535,23 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 <tr style="text-align: Center;">
 <th class="select-checkbox" onclick="sortTable(0, true)" style="text-align: right;">#</th>
 <th onclick="sortTable(1, false)">Id</th>
-<th onclick="sortTable(2, false)">Ref. Ciel</th>
-<th onclick="sortTable(3, false)">Ref. odoo</th>
-<th onclick="sortTable(4, false)">Nom</th>
-<th onclick="sortTable(5, false)">Prénom</th>
-<th onclick="sortTable(6, false)">Adresse</th>
-<th onclick="sortTable(7, false)">Code</th>
-<th onclick="sortTable(8, false)">Ville</th>
-<th onclick="sortTable(9, false)">Pays</th>
-<th onclick="sortTable(10, false)">email</th>
-<th onclick="sortTable(11, false)">Membre non-navigant</th>
-<th onclick="sortTable(12, false)">Elève</th>
-<th onclick="sortTable(13, false)">Pilote</th>
-<th onclick="sortTable(14, false)">Membre Effectif</th>
-<th onclick="sortTable(15, true)">Cotisation</th>
-<th onclick="sortTable(16, true)" style="width:20%;">Solde</th>
-<th onclick="sortTable(17, false)">Status</th>
-<th onclick="sortTable(18, false)">Raison</th>
+<!--<th onclick="sortTable(2, false)">Ref. Ciel</th> -->
+<th onclick="sortTable(2, false)">Ref. odoo</th>
+<th onclick="sortTable(3, false)">Nom</th>
+<th onclick="sortTable(4, false)">Prénom</th>
+<th onclick="sortTable(5, false)">Adresse</th>
+<th onclick="sortTable(6, false)">Code</th>
+<th onclick="sortTable(7, false)">Ville</th>
+<th onclick="sortTable(8, false)">Pays</th>
+<th onclick="sortTable(9, false)">email</th>
+<th onclick="sortTable(10, false)">Membre non-navigant</th>
+<th onclick="sortTable(11, false)">Elève</th>
+<th onclick="sortTable(12, false)">Pilote</th>
+<th onclick="sortTable(13, false)">Membre Effectif</th>
+<th onclick="sortTable(14, true)">Cotisation</th>
+<th onclick="sortTable(15, true)">Solde</th>
+<th onclick="sortTable(16, false)">Status</th>
+<th onclick="sortTable(17, false)">Raison</th>
 </tr>
 </thead>
 <tbody id="myTable">
@@ -708,9 +708,9 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		if($blocked == 2) $blockedCount++;
 		print("<tr style='text-align: right'; $rowStyle>
 			<td><input type=\"checkbox\"> $count</td>
-		    <td style='text-align: right;'>$personid</td>
-			<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_folio.php?user=$personid\">$ciel<span class='tooltiptext'>Click pour afficher le folio</span></a></td>
-			<td style='text-align: left;'>$odooReference</td>
+		    <td style='text-align: right;'>$personid</td>");
+			//<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_folio.php?user=$personid\">$ciel<span class='tooltiptext'>Click pour afficher le folio</span></a></td>
+		print("<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_folio.php?user=$personid\">$odooReference<span class='tooltiptext'>Click pour afficher le folio</span></a></td>
 			<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_profile.php?displayed_id=$personid\">$row[last_name]<span class='tooltiptext'>Click pour editer le profile</span></a></td>
 			<td style='text-align: left;'>$row[first_name]</td>
 			<td style='text-align: left;'>$address</td>
@@ -737,9 +737,9 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			$soldeStyle="style='color: red;'";
 		}
 		if($odoo) {
-			$soldeText=number_format($solde,2,",",".") . "€(Odoo)";
+			$soldeText=number_format($solde,2,",",".")." €";
 		}
-		if($row['ciel_code'] != '') {
+		if(0 && $row['ciel_code'] != '') {
 			$soldeText .="</br>" . number_format($soldeCiel, 2, ",", ".") . "€(Ciel)";
 		}
 		print("<td $soldeStyle>$soldeText</td>");				
@@ -767,9 +767,9 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 	}
 	print("<tr style='background-color: #13d8f2; text-align: center;'>
 		<td>Total</td>
-	    <td></td>
-		<td>$cielCount</td>
-		<td>$odooCount</td>
+	    <td></td>");
+		//<td>$cielCount</td>
+	print("<td>$odooCount</td>
 		<td>$count</td>
 		<td></td>
 		<td></td>
