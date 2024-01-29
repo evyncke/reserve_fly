@@ -93,6 +93,7 @@ $sql = "SELECT *
 $result = mysqli_query($mysqli_link, $sql) or journalise($userId, "F", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
 $total_debit = 0.0 ;
 $total_credit = 0.0 ;
+$solde = 0.0 ;
 while ($row = mysqli_fetch_array($result)) {
 	switch ($row['bkl_journal']) {
 		case 'ANX': $journal = 'Report année précédente' ; break ;
