@@ -267,8 +267,8 @@ function filterRows(count, blocked, sign)
     var table = document.getElementById("myTable");
     var rows = table.rows;
 	var aSelectToggleColumn=0;
-  	var aStatusColumn=17;
-   	var aValueColumn=16;
+  	var aStatusColumn=16;
+   	var aValueColumn=15;
 	var aCielColumn=2;
 	var aHidden=false;
    	for (i = 0; i < rows.length; i++) {
