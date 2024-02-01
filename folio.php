@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -45,11 +45,13 @@ class FolioLine{
     public $pilot_fname ;
     public $pilot_code ;
     public $pilot_code_ciel ;
+    public $pilot_code_odoo ;
     public $share_type ;
     public $share_member ;
     public $share_member_name ;
     public $share_member_fname ;
     public $share_member_code_ciel ;
+    public $share_member_code_odoo ;
 
     function __construct($row, $userId) {
         global $revenue_fi_minute, $cost_fi_minute, $code_initiation, $revenue_fi_initiation, $tax_per_pax ;
@@ -174,9 +176,11 @@ class FolioLine{
                 }
         }
         $this->share_member_code_ciel = $row['share_member_code_ciel'] ;
+        $this->share_member_code_odoo = $row['share_member_code_odoo'] ;
         $this->pilot_name = db2web($row['pilot_name']) ;
         $this->pilot_fname = db2web($row['pilot_fname']) ;
         $this->pilot_code_ciel = $row['pilot_code_ciel'] ;
+        $this->pilot_code_odoo = $row['pilot_code_odoo'] ;
         $this->pilot_code = $row['l_pilot'] ;
         $this->is_pic = $row['l_is_pic'] ;
         $this->instructor_name = db2web($row['instructor_name']) ; 
@@ -227,6 +231,7 @@ class Folio implements Iterator {
     public $city ;
     public $country ;
     public $code_ciel ;
+    public $code_odoo ;
     public $bce ;
     public $company ;
     private $result ;
@@ -242,13 +247,13 @@ class Folio implements Iterator {
         // TODO rather than retrieving the names for pilots, fis, shared cost, let's use $member directly...
         $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
             l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, 
-            i.last_name as instructor_name, i.first_name as instructor_fname, i.ciel_code400 as instructor_code_ciel,
+            i.last_name as instructor_name, i.first_name as instructor_fname, i.ciel_code400 as instructor_code_ciel, i.odoo_id as insctructor_code_odoo,
             i.email as instructor_email, i.address as instructor_address, i.zipcode as instructor_zip_code,  i.city as instructor_city, i.country as instructor_country,
-            p.last_name as pilot_name, p.first_name as pilot_fname, p.ciel_code400 as pilot_code_ciel,
+            p.last_name as pilot_name, p.first_name as pilot_fname, p.ciel_code400 as pilot_code_ciel, p.odoo_id as pilot_code_odoo,
             p.email as pilot_email, p.address as pilot_address, p.zipcode as pilot_zip_code, p.city as pilot_city, p.country as pilot_country,
-            m.last_name as share_member_name, m.first_name as share_member_fname, m.ciel_code400 as share_member_code_ciel,
+            m.last_name as share_member_name, m.first_name as share_member_fname, m.ciel_code400 as share_member_code_ciel, m.odoo_id as share_member_code_odoo,
             m.email as share_member_email, m.address as share_member_address, m.zipcode as share_member_zip_code, m.city as share_member_city, m.country as share_member_country,
-            c.c_name as company_name, c.c_bce as bce,
+            c.c_name as company_name, c.c_bce as bce, c.c_odoo_id as company_odoo_id,
             c.c_address as company_address, c.c_zipcode as company_zip_code, c.c_city as company_city, c.c_country as company_country,
             UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
             l_start, l_end, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute as duration,
@@ -275,6 +280,7 @@ class Folio implements Iterator {
                 $this->fname = db2web($this->row['pilot_fname']) ;
                 $this->name = db2web($this->row['pilot_name']) ;
                 $this->code_ciel = $this->row['pilot_code_ciel'] ;
+                $this->code_odoo = $this->row['pilot_code_odoo'] ;
                 $this->email = $this->row['pilot_email'] ;
                 $this->address = db2web($this->row['pilot_address']) ;
                 $this->zip_code = $this->row['pilot_zip_code'] ;
@@ -284,6 +290,7 @@ class Folio implements Iterator {
                 $this->fname = db2web($this->row['instructor_fname']) ;
                 $this->name = db2web($this->row['instructor_name']) ;
                 $this->code_ciel = $this->row['instructor_code_ciel'] ;
+                $this->code_odoo = $this->row['instructor_code_odoo'] ;
                 $this->email = $this->row['instructor_email'] ;
                 $this->address = db2web($this->row['instructor_address']) ;
                 $this->zip_code = $this->row['instructor_zip_code'] ;
@@ -293,6 +300,7 @@ class Folio implements Iterator {
                 $this->fname = db2web($this->row['share_member_fname']) ;
                 $this->name = db2web($this->row['share_member_name']) ;
                 $this->code_ciel = $this->row['share_member_code_ciel'] ;
+                $this->code_odoo = $this->row['share_member_code_odoo'] ;
                 $this->email = $this->row['share_member_email'] ;
                 $this->address = db2web($this->row['share_member_address']) ;
                 $this->zip_code = $this->row['share_member_zip_code'] ;
@@ -307,6 +315,7 @@ class Folio implements Iterator {
             $this->zip_code = $this->row['company_zip_code'] ;
             $this->city = db2web($this->row['company_city']) ;
             $this->country = db2web($this->row['company_country']) ;
+            $this->code_odoo = $this->row['company_odoo_id'] ;
         }
         } // $this->count > 0  
     } // __contruct
