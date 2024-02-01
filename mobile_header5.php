@@ -159,21 +159,27 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><a class="dropdown-item" href="gestionMembres.php">Gestion membres <i class="bi bi-box-arrow-up-right"></i></a></li>
       <li><a class="dropdown-item" href="mobile_tilea.php">Taxe TILEA</a></li>
       <li><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></li>
+    </ul>
+  </li> <!-- dropdown administration-->
+
 <?php
   if ($userId == 62 or $userId == 66 or $userId == 92 or $userId == 348 or $userId == 306) { // Odoo users
 ?>
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Compta<span class="caret"></span></a>
+    <ul class="dropdown-menu">
       <li><h6 class="dropdown-header">Intégration Odoo</h6></li>
       <li><a class="dropdown-item" href="https://<?=$odoo_host?>/">Connexion au site Odoo <i class="bi bi-box-arrow-up-right"></i></a></li>
-      <li><a class="dropdown-item" href="odoo_config.php">Configuration</a></li>
+      <li><a class="dropdown-item" href="odoo_config.php">Configuration (choix DB)</a></li>
       <li><a class="dropdown-item" href="odoo_customers.php">Liaison membres<->clients Odoo</a></li>
       <li><a class="dropdown-item" href="odoo_gen_invoices.php">Génération des factures vols membres</a></li>
       <li><a class="dropdown-item" href="odoo_gen_membership.php">Cotisations des membres</a></li>
       <li><i><a class="dropdown-item" href="odoo_model.php">Exploration des modèles</a></i></li>
+    </ul>
+  </li> <!-- dropdown compta-->
 <?php    
   }// Odoo users
 ?> 
-    </ul>
-  </li> <!-- dropdown administration-->
 <?php
 } // $userIsAdmin or $userIsInstructor or $userIsBoardMember
 	if ($userIsAdmin or $userIsInstructor) {
@@ -181,19 +187,21 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">École<span class="caret"></span></a>
     <ul class="dropdown-menu">
+      <li><h6 class="dropdown-header">Réservé aux FIs & admins</h6></li>
+      <li><a class="dropdown-item" href="dto.students.php">Liste des élèves</a></li>
+      <li><a class="dropdown-item" href="dto.exercices.php">Liste des exercices</a></li>
+
 <?php
   if ($userIsInstructor) {
 ?>
+      <li><h6 class="dropdown-header">Réservé aux FIs</h6></li>
       <li><i><a class="dropdown-item" href="dto.students.php?fi=<?=$userId?>">Mes élèves</a></i></li>
       <li><i><a class="dropdown-item" href="dto.flights.php?fi=<?=$userId?>">Mes derniers vols</a></i></li>
 <?php
 }
 ?>
-      <li><i><a class="dropdown-item" href="dto.students.php">Liste des élèves</a></i></li>
-      <li><i><a class="dropdown-item" href="dto.exercices.php">Liste des exercices</a></i></li>
-
     </ul>
-  </li> <!-- dropdown administration-->
+  </li> <!-- dropdown Ecole-->
 <?php
 }
 ?>         <li class="nav-item dropdown">
