@@ -43,9 +43,8 @@ if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($us
 <p>Autre bases de données disponibles:
     <ul>
     <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=default">par défaut</a>;</li>
-    <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=rapcs">rapcs.odoo.com</a>;</li>
-    <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=rapcs2">rapcs2.odoo.com</a>;</li>
     <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=spa-aviation">spa-aviation.odoo.com</a>;</li>
+    <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=spa-aviation-eric">spa-aviation-eric.odoo.com</a> (tests février 2024);</li>
     </ul>
 </body>
 </html>
