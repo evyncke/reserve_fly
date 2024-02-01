@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ if (! $userIsAdmin && ! $userIsBoardMember)
 <h2>Génération des factures dans Odoo sur base des carnets de vol@<?=$odoo_host?></h2>
 <?php
 if (! isset($_REQUEST['confirm'])) {
+    // TODO should ask period and invoice date due
 ?>
 <form action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="confirm" value="y">
@@ -69,7 +70,7 @@ $fi_analytic = array(46 => 36, // Benoît Mendes
     118 => 33) ; // David Gaspar
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198
-if (true) {
+if (false) {
     $jom_ids = "62, 66, 348, 92";
 //    $jom_ids = "62, 66" ;
     $sql = "SELECT u.id AS id, last_name, first_name, odoo_id
@@ -90,7 +91,8 @@ $invoiceCount = 0 ;
 while ($row = mysqli_fetch_array($result_members)) {
 	$member=$row['id'];
     if ($row['odoo_id'] == '') continue ; 
-    $folio = new Folio($member, '2023-12-01', '2024-01-01') ;
+    // TODO obviously need to be dynamic
+    $folio = new Folio($member, '2024-01-01', '2024-02-01') ;
     if ($folio->count == 0) continue ; // Skip empty folios
     print("Processing " . db2web("#$member (odoo=$row[odoo_id]): $row[last_name] $row[first_name]") . "...<br/\n" );
     $invoice_lines = array() ;
@@ -121,19 +123,12 @@ while ($row = mysqli_fetch_array($result_members)) {
 				default: $shareInfo=$line->share_type." ".$line->share_member_name." ".$line-> share_member_fname; break;
             }
 		}
-		$libelle = $code_plane.$date;
-		if($DC != "") {
-			$libelle = $libelle.".".$DC;
-		}
-		if($shareInfo != "") {
-			$libelle = $libelle.".".$shareInfo;
-		}
 		$picName = "PIC ".$line->pic_name;
 		if($line->pic_name == "SELF") $picName= "";
 	    if ($line->cost_plane > 0) {
             $invoice_lines[] = array(0, 0,
 				array(
-					'name' => "$libelle $line->date $line->plane $shareInfo",
+					'name' => "$line->date {$line->time_start}Z $line->plane $shareInfo",
 					'product_id' => $plane_product_id, 
 					'quantity' => $line->duration,
 					'price_unit' => $line->cost_plane_minute,
@@ -145,7 +140,7 @@ while ($row = mysqli_fetch_array($result_members)) {
 			$taxPerPax=$line->cost_taxes/$line->pax_count;
             $invoice_lines[] = array(0, 0,
 				array(
-					'name' => "$libelle $line->date $line->plane Redevance Pax $line->from > $line->to",
+					'name' => "$line->date {$line->time_start}Z $line->plane Redevance Pax $line->from > $line->to",
 					'product_id' => $tax_product_id,
 					'quantity' => $line->pax_count,
 					'price_unit' => $taxPerPax
@@ -155,26 +150,27 @@ while ($row = mysqli_fetch_array($result_members)) {
         if ($line->cost_fi > 0) {
             $invoice_lines[] = array(0, 0, // See https://www.odoo.com/documentation/16.0/developer/reference/backend/orm.html#relational-fields for the 0, 0
 				array(
-					'name' => "$libelle $line->date $line->plane DC $line->instructor_name",
+					'name' => "$line->date {$line->time_start}Z $line->plane DC $line->instructor_name",
 					'product_id' => $fi_product_id[$line->instructor_code],
 					'quantity' => $line->duration,
 					'price_unit' => "$cost_fi_minute", // Forcing string format
                     'analytic_distribution' => array($fi_analytic[$line->instructor_code] => 100)
 				)) ;
         } 
-    }
+    } // foreach($folio as $line) 
     $total_folio += $line->cost_plane + $line->cost_fi + $line->cost_taxes ;
 	if ($total_folio > 0) {
         $params =  array(array('partner_id' => intval($row['odoo_id']), // Must be of INT type else Odoo does not accept
-                    'ref' => 'Test invoice generated from PHP',
+//                    'ref' => 'Test invoice generated',
                     'move_type' => 'out_invoice',
                     'invoice_date_due' => $invoice_date_due,
-                    'invoice_origin' => 'Carnets de vols',
+                    'invoice_origin' => 'Carnets de routes',
                     'invoice_line_ids' => $invoice_lines)) ;
         $result = $odooClient->Create('account.move', $params) ;
         print("Invoicing result for $row[odoo_id] $total_folio &euro;: " . implode(', ', $result) . "<br/>\n") ;
         $invoiceCount++ ;
-	}
+	} else
+        print("Folio total is $total_folio, i.e., no invoice will be generated.<br/>\n") ;
 }
 journalise($userId, "I", "Successful generation of $invoiceCount invoices in Odoo.") ;					
 ?>
