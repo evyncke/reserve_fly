@@ -491,7 +491,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 // Find all Odoo IDs
-$sql = "SELECT * 
+$sql = "SELECT odoo_id 
 	FROM $table_person" ;
 $result = mysqli_query($mysqli_link, $sql)
 	or journalise($userId, "F", "Cannot retrieve all Odoo ids: " . mysqli_error($mysqli_link)) ;
