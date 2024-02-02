@@ -33,6 +33,31 @@ if (isset($_REQUEST['fi']) and is_numeric($_REQUEST['fi']) and $_REQUEST['fi'] !
     $fi = NULL ;
 }
 
+// Let's get some data from Odoo
+require_once 'odoo.class.php' ;
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+
+// Find all Odoo IDs
+$sql = "SELECT odoo_id
+	FROM $table_person
+    JOIN $table_user_usergroup_map ON jom_id = user_id 
+    WHERE group_id = $joomla_student_group
+    GROUP BY jom_id" ;
+$result = mysqli_query($mysqli_link, $sql)
+	or journalise($userId, "F", "Cannot retrieve all Odoo ids: " . mysqli_error($mysqli_link)) ;
+$ids = array() ;
+while ($row = mysqli_fetch_array($result)) {
+	$ids[] = intval($row['odoo_id']) ;
+}
+mysqli_free_result($result) ;
+$members = $odooClient->Read('res.partner', 
+	array($ids), 
+	array('fields' => array('email', 'total_due'))) ;
+$odoo_customers = array() ;
+foreach($members as $member) {
+	$email =  strtolower($member['email']) ;
+	$odoo_customers[$email] = $member ; // Let's build a dict indexed by the email addresses
+}
 ?>
 
 <h2>Liste des élèves en cours de formation</h2>
@@ -50,12 +75,14 @@ if (isset($_REQUEST['fi']) and is_numeric($_REQUEST['fi']) and $_REQUEST['fi'] !
     $students = $dto->Students($fi) ;
     foreach($students as $student) {
         $blocked = ($student->blocked) ? ' <i class="bi bi-sign-stop-fill text-danger" title="This member is blocked"></i>' : '' ;
+        $odoo_customer = $odoo_customers[$student->email] ;
+        $bank_filled = ($odoo_customer['total_due'] > 0) ? ' <i class="bi bi-piggy-bank-fill text-success" title="This member has paid for future flights"></i>' : '' ;
         print("<tr>
             <td>
-                <a href=\"dto.student.php?student=$student->jom_id\" title=\"Display all flights\">$student->lastName $student->firstName<i class=\"bi bi-binoculars-fill\"></i></a>
-                    $blocked
+                <a href=\"dto.student.php?student=$student->jom_id\" title=\"Display all flights\">$student->lastName $student->firstName <i class=\"bi bi-binoculars-fill\"></i></a>
                     <a href=\"mailto:$student->email\"><i class=\"bi bi-envelope-fill\" title=\"Send email\"></i></a>
                     <a href=\"tel:$student->mobilePhone\"><i class=\"bi bi-telephone-fill\" title=\"Call on mobile\"></i></a>
+                    $blocked $bank_filled
             </td>
             <td>$student->firstFlight <span class=\"badge bg-primary\" title=\"Number of flights\"><i class=\"bi bi-airplane-fill\"></i> $student->countFlights</span><br/>$student->lastFlight</td>
             <td class=\"d-none d-md-table-cell\"><a href=\"mailto:$student->email\">$student->email</a></td>
