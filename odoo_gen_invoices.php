@@ -98,7 +98,7 @@ while ($row = mysqli_fetch_array($result_members)) {
     // TODO obviously need to be dynamic
     $folio = new Folio($member, '2024-01-01', '2024-02-01') ;
     if ($folio->count == 0) continue ; // Skip empty folios
-    print("Traitement de " . db2web("#$member (odoo=$row[odoo_id]): $row[last_name] $row[first_name]") . "...<br/\n" );
+    print("Traitement de " . db2web("#$member (odoo=$row[odoo_id]): $row[last_name] $row[first_name]") . "...<br/>\n" );
     $invoice_lines = array() ;
     $total_folio = 0 ;
     foreach($folio as $line) {
