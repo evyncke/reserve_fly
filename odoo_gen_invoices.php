@@ -28,6 +28,8 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
+
+$invoice_date_due = (isset($_REQUEST['dueDate'] )) ? $_REQUEST['dueDate'] : date("Y-m-d", strtotime("+1 week")) ;
 ?>
 <h2>Génération des factures dans Odoo sur base des carnets de vol@<?=$odoo_host?></h2>
 <?php
@@ -36,6 +38,8 @@ if (! isset($_REQUEST['confirm'])) {
 ?>
 <form action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="confirm" value="y">
+<label for="invoiceDueDateId" class="form-label">Date d'échéance:</label>
+<input type="date" name="dueDate" id="invoiceDueDateId" class="form-control" value="<?=$invoice_date_due?>">
 <button type="submit" class="btn btn-primary">Confirmer la génération</button> sur base des carnets de routes des avions.
 </form>
 <?php    
@@ -94,7 +98,7 @@ while ($row = mysqli_fetch_array($result_members)) {
     // TODO obviously need to be dynamic
     $folio = new Folio($member, '2024-01-01', '2024-02-01') ;
     if ($folio->count == 0) continue ; // Skip empty folios
-    print("Processing " . db2web("#$member (odoo=$row[odoo_id]): $row[last_name] $row[first_name]") . "...<br/\n" );
+    print("Traitement de " . db2web("#$member (odoo=$row[odoo_id]): $row[last_name] $row[first_name]") . "...<br/\n" );
     $invoice_lines = array() ;
     $total_folio = 0 ;
     foreach($folio as $line) {
@@ -161,16 +165,16 @@ while ($row = mysqli_fetch_array($result_members)) {
     $total_folio += $line->cost_plane + $line->cost_fi + $line->cost_taxes ;
 	if ($total_folio > 0) {
         $params =  array(array('partner_id' => intval($row['odoo_id']), // Must be of INT type else Odoo does not accept
-//                    'ref' => 'Test invoice generated',
+                    'ref' => db2web("Vols de $row[last_name] $row[first_name]"),
                     'move_type' => 'out_invoice',
                     'invoice_date_due' => $invoice_date_due,
                     'invoice_origin' => 'Carnets de routes',
                     'invoice_line_ids' => $invoice_lines)) ;
         $result = $odooClient->Create('account.move', $params) ;
-        print("Invoicing result for $row[odoo_id] $total_folio &euro;: " . implode(', ', $result) . "<br/>\n") ;
+        print("Facture pour Odoo ID #$row[odoo_id] $total_folio &euro;: " . implode(', ', $result) . "<br/>\n") ;
         $invoiceCount++ ;
 	} else
-        print("Folio total is $total_folio, i.e., no invoice will be generated.<br/>\n") ;
+        print("Total de la facture: $total_folio, aucune facture générée.<br/>\n") ;
 }
 journalise($userId, "I", "Successful generation of $invoiceCount invoices in Odoo.") ;					
 ?>
