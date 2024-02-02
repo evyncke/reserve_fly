@@ -75,8 +75,8 @@ foreach($members as $member) {
     $students = $dto->Students($fi) ;
     foreach($students as $student) {
         $blocked = ($student->blocked) ? ' <i class="bi bi-sign-stop-fill text-danger" title="This member is blocked"></i>' : '' ;
-        $odoo_customer = $odoo_customers[$student->email] ;
-        $bank_filled = ($odoo_customer['total_due'] > 0) ? ' <i class="bi bi-piggy-bank-fill text-success" title="This member has paid for future flights"></i>' : '' ;
+        $odoo_customer = $odoo_customers[strtolower($student->email)] ;
+        $bank_filled = ($odoo_customer['total_due'] < 0) ? ' <i class="bi bi-piggy-bank-fill text-success" title="This member has paid for future flights"></i>' : '' ;
         print("<tr>
             <td>
                 <a href=\"dto.student.php?student=$student->jom_id\" title=\"Display all flights\">$student->lastName $student->firstName <i class=\"bi bi-binoculars-fill\"></i></a>
