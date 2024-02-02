@@ -30,17 +30,36 @@ if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
 $invoice_date_due = (isset($_REQUEST['dueDate'] )) ? $_REQUEST['dueDate'] : date("Y-m-d", strtotime("+1 week")) ;
+$folio_start = (isset($_REQUEST['start'] )) ? 
+    new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) :
+    new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+$folio_end = (isset($_REQUEST['end'] )) ? 
+    new DateTime($_REQUEST['end'], new DateTimeZone('UTC')) :
+    new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
 ?>
 <h2>Génération des factures dans Odoo sur base des carnets de vol@<?=$odoo_host?></h2>
 <?php
 if (! isset($_REQUEST['confirm'])) {
-    // TODO should ask period and invoice date due
+    $first_date = date('Y-m-01') ;
+    $folio_start = new DateTime($first_date, new DateTimeZone('UTC')) ;
+    $folio_start = $folio_start->sub(new DateInterval('P1M')) ;
+    $folio_end = new DateTime($first_date, new DateTimeZone('UTC')) ;
 ?>
-<form action="<?=$_SERVER['PHP_SELF']?>">
+<form action="<?=$_SERVER['PHP_SELF']?>" class="row g-3">
 <input type="hidden" name="confirm" value="y">
-<label for="invoiceDueDateId" class="form-label">Date d'échéance:</label>
-<input type="date" name="dueDate" id="invoiceDueDateId" class="form-control" value="<?=$invoice_date_due?>">
-<button type="submit" class="btn btn-primary">Confirmer la génération</button> sur base des carnets de routes des avions.
+<div class="col-md-4">
+    <label for="invoiceDueDateId" class="form-label">Date d'échéance:</label>
+    <input type="date" name="dueDate" id="invoiceDueDateId" class="form-control" value="<?=$invoice_date_due?>">
+</div>
+<div class="col-md-4">
+    <label for="start" class="form-label">Date 1er vol</label>
+    <input type="date" class="form-control" id="start" name="start" value="<?=$folio_start->format('Y-m-d')?>">
+</div>
+<div class="col-md-4">
+    <label for="end" class="form-label">Date 1er vol facture suivante</label>
+    <input type="date" class="form-control" id="end" name="end" value="<?=$folio_end->format('Y-m-d')?>">
+</div>
+<button type="submit" class="btn btn-primary col-xs-12 col-md-2">Confirmer la génération</button> sur base des carnets de routes des avions.
 </form>
 <?php    
     exit ;
@@ -96,9 +115,9 @@ while ($row = mysqli_fetch_array($result_members)) {
 	$member=$row['id'];
     if ($row['odoo_id'] == '') continue ; 
     // TODO obviously need to be dynamic
-    $folio = new Folio($member, '2024-01-01', '2024-02-01') ;
+    $folio = new Folio($member,  $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) ;
     if ($folio->count == 0) continue ; // Skip empty folios
-    print("Traitement de " . db2web("#$member (odoo=$row[odoo_id]): $row[last_name] $row[first_name]") . "...<br/>\n" );
+    print("Traitement de " . db2web("#$member (odoo=$row[odoo_id]): $row[last_name] $row[first_name]") . "... \n" );
     $invoice_lines = array() ;
     $total_folio = 0 ;
     foreach($folio as $line) {
@@ -171,7 +190,7 @@ while ($row = mysqli_fetch_array($result_members)) {
                     'invoice_origin' => 'Carnets de routes',
                     'invoice_line_ids' => $invoice_lines)) ;
         $result = $odooClient->Create('account.move', $params) ;
-        print("Facture pour Odoo ID #$row[odoo_id] $total_folio &euro;: " . implode(', ', $result) . "<br/>\n") ;
+        print("Facture pour Odoo ID #$row[odoo_id] $total_folio &euro;: facture n° " . implode(', ', $result) . "<br/>\n") ;
         $invoiceCount++ ;
 	} else
         print("Total de la facture: $total_folio, aucune facture générée.<br/>\n") ;
