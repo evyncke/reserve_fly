@@ -29,13 +29,15 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
-$invoice_date_due = (isset($_REQUEST['dueDate'] )) ? $_REQUEST['dueDate'] : date("Y-m-d", strtotime("+1 week")) ;
+$invoice_date_due = (isset($_REQUEST['dueDate'])) ? $_REQUEST['dueDate'] : date("Y-m-d", strtotime("+1 week")) ;
+$invoice_jom_id = (isset($_REQUEST['jomId'])) ? $_REQUEST['jomId'] : '' ;
 $folio_start = (isset($_REQUEST['start'] )) ? 
     new DateTime($_REQUEST['start'], new DateTimeZone('UTC')) :
     new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
 $folio_end = (isset($_REQUEST['end'] )) ? 
     new DateTime($_REQUEST['end'], new DateTimeZone('UTC')) :
     new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+$sql_filter = ($invoice_jom_id != '' and is_numeric($invoice_jom_id)) ? "AND jom_id = $invoice_jom_id" : '' ;
 ?>
 <h2>Génération des factures dans Odoo sur base des carnets de vol@<?=$odoo_host?></h2>
 <?php
@@ -47,29 +49,31 @@ if (! isset($_REQUEST['confirm'])) {
 ?>
 <form action="<?=$_SERVER['PHP_SELF']?>" class="row g-3">
 <input type="hidden" name="confirm" value="y">
-<div class="col-md-4">
+<div class="col-md-3">
     <label for="invoiceDueDateId" class="form-label">Date d'échéance:</label>
     <input type="date" name="dueDate" id="invoiceDueDateId" class="form-control" value="<?=$invoice_date_due?>">
 </div>
-<div class="col-md-4">
+<div class="col-md-3">
     <label for="start" class="form-label">Date 1er vol</label>
     <input type="date" class="form-control" id="start" name="start" value="<?=$folio_start->format('Y-m-d')?>">
 </div>
-<div class="col-md-4">
+<div class="col-md-3">
     <label for="end" class="form-label">Date 1er vol facture suivante</label>
     <input type="date" class="form-control" id="end" name="end" value="<?=$folio_end->format('Y-m-d')?>">
+</div>
+<div class="col-md-3">
+    <label for="jomId" class="form-label">Uniquement pour le membre</label>
+    <input type="number" class="form-control" id="jomId" name="jomId" placeholder="66 ou 62 (jom_id) !!! avec précaution">
 </div>
 <button type="submit" class="btn btn-primary col-xs-12 col-md-2">Confirmer la génération</button> sur base des carnets de routes des avions.
 </form>
 <?php    
     exit ;
 } // (! isset($_REQUEST['confirm']))
-journalise($userId, "I", "Odoo invoices generation started ") ;			
+journalise($userId, "I", "Odoo invoices generation started ($odoo_host)") ;			
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-
-$invoice_date_due = date("Y-m-d", strtotime("+1 week")) ;
 
 # Analytic accounts and products are harcoded
 $plane_product_id = 6 ;
@@ -106,6 +110,7 @@ if (false) {
             FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
             JOIN $table_person AS p ON u.id=p.jom_id
             WHERE group_id IN ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
+            $sql_filter
             GROUP BY id";
 }				
 $result_members = mysqli_query($mysqli_link, $sql)
@@ -196,7 +201,7 @@ while ($row = mysqli_fetch_array($result_members)) {
 	} else
         print("Total de la facture: $total_folio, aucune facture générée.<br/>\n") ;
 }
-journalise($userId, "I", "Successful generation of $invoiceCount invoices in Odoo.") ;					
+journalise($userId, "I", "Successful generation of $invoiceCount invoices in Odoo@$odoo_host.") ;					
 ?>
 </body>
 </html>
