@@ -33,7 +33,7 @@ $membership_year = (isset($_REQUEST['year'])) ? $_REQUEST['year'] : date('Y') ;
 $invoice_date = (isset($_REQUEST['date'])) ? $_REQUEST['date'] : date("Y-m-d") ;
 $invoice_date_due = (isset($_REQUEST['dueDate'] )) ? $_REQUEST['dueDate'] : date("Y-m-d", strtotime("+1 week")) ;
 ?>
-<h2>Cotisations <?=$membership_year?></h2>
+<h2>Cotisations <?=$membership_year?> @<?=$odoo_host?></h2>
 <form action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="confirm" value="y">
 <label for="yearId" class="form-label">Cotisation pour l'année:</label>
@@ -46,7 +46,7 @@ $invoice_date_due = (isset($_REQUEST['dueDate'] )) ? $_REQUEST['dueDate'] : date
 la base des membres Joomla n'ayant pas encore reçu de factures pour l'année <?=$membership_year?>.
 </form>
 
-<h2 class="my-5">Paiements des cotisation <?=$membership_year?></h2>
+<h3 class="my-5">Paiements des cotisation <?=$membership_year?></h3>
 
 <table class="w-auto table-responsive table table-striped table-bordered table-sm">
     <thead>
