@@ -179,9 +179,10 @@ while ($row = mysqli_fetch_array($result_members)) {
 					'price_unit' => "$cost_fi_minute", // Forcing string format
                     'analytic_distribution' => array($fi_analytic[$line->instructor_code] => 100)
 				)) ;
-        } 
+        }
+        $total_folio += $line->cost_plane + $line->cost_fi + $line->cost_taxes ; 
     } // foreach($folio as $line) 
-    $total_folio += $line->cost_plane + $line->cost_fi + $line->cost_taxes ;
+    
 	if ($total_folio > 0) {
         $params =  array(array('partner_id' => intval($row['odoo_id']), // Must be of INT type else Odoo does not accept
                     'ref' => db2web("Vols de $row[last_name] $row[first_name]"),
