@@ -140,29 +140,6 @@ function selectChanged() {
 </script>
 <?php
 
-// Check the bookkeeping balance
-$result = mysqli_query($mysqli_link, "SELECT *
-		FROM $table_bk_balance JOIN $table_person ON bkb_account = CONCAT('400', ciel_code)
-		WHERE jom_id = $userId
-		ORDER BY bkb_date DESC
-		LIMIT 0,1")
-	or journalise($originalUserId, "F", "Cannot read booking keeping balance: " . mysqli_error($mysqli_link)) ;
-$row = mysqli_fetch_array($result) ;
-if ($row) {
-	if ($row['bkb_amount'] != 0) 
-		$balance = -1 * $row['bkb_amount'] ;
-	else
-		$balance = 0 ;
-	if ($balance < 0)
-		$balance_text = "<span class=\"text-danger\"> $balance &euro; (vous devez de l'argent au RAPCS ASBL)</span>" ;
-	else
-		$balance_text = "$balance &euro;" ;
-	if ($row['bkb_amount'] > 0) {
-		$invoice_total = $row['bkb_amount'] ; // Only for positive balance of course
-		$invoice_reason = 'solde' ;
-	}
-} 
-
 // Now, let's check whether Odoo has also a balance
 if ($odooId != '') {
 	require_once 'odoo.class.php' ;
@@ -180,6 +157,10 @@ if ($odooId != '') {
 		$balance_text = "$balance &euro;" ;
 } else { // Odoo account does not exist
 	$balance = 0 ;
+	$invoice_total = 0 ;
+	$invoice_reason = '' ;
+	journalise($userId, "E", "No Odoo id associated to $userName") ;
+	print("<p class=\"text-danger\">Vous n'avez pas encore de compte dans la comptabilité.</p>\n") ;
 }
 
 // Let's warn the used if he is blocked
@@ -217,8 +198,8 @@ $fmt = datefmt_create(
 ) ;
 ?>
 <h2><?=$document_title?>  du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?></h2>
-<p class="lead">Voici un folio (estimation de vos factures de vos vols).</p>
-<p class="small">Accès au folio et opérations comptables via les onglets ci-dessous.</p>
+<p class="lead">Voici un folio (estimation de vos factures de vos vols). Le solde de votre compte membre est de <?=$balance?>&euro;.</p>
+<p class="small">Accès aux factures et opérations comptables via les onglets ci-dessous.</p>
 
 <!-- using tabs -->
 <ul class="nav nav-tabs">
@@ -400,8 +381,15 @@ if ($diams_explanation)
 ?>
 
 <?php
-$invoice_reason = 'solde après folio' ;
-$invoice_total = round($cost_grand_total - $balance, 2) ;
+if (isset($_REQUEST['previous']))  {
+	$invoice_reason = 'folio de ' . datefmt_format($fmt, $previous_month_pager) ;
+	$invoice_total = round($cost_grand_total, 2)  ;
+	
+} else {
+	$invoice_reason = 'solde après folio' ;
+	$invoice_total = round($cost_grand_total - $balance, 2) ;
+	
+}
 
 /*
 as Google Charts API is about to be deprecated, alternatives could be:
