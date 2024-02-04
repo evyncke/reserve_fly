@@ -98,6 +98,7 @@ class Student extends DTOMember {
     public $firstFlight ;
     public $lastFlight ;
     public $countFlights ;
+    public $daysSinceLastFlight ;
 
     function __construct($row = NULL) {
         parent::__construct($row) ; 
@@ -105,6 +106,7 @@ class Student extends DTOMember {
             $this->firstFlight = $row['first_flight'] ;
             $this->lastFlight = $row['last_flight'] ;  
             $this->countFlights = $row['count_flights'] ; 
+            $this->daysSinceLastFlight = $row['days_since_last_flight'] ; 
         } 
     }
 
@@ -128,7 +130,9 @@ class DTOMembers implements Iterator {
             $fi_condition = "AND l_instructor = $fi " ;
         else 
             $fi_condition = '' ;
-        $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(l_start) AS count_flights, GROUP_CONCAT(group_id) AS group_ids 
+        $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(l_start) AS count_flights, 
+                    MIN(DATEDIFF(SYSDATE(), DATE(l_start))) AS days_since_last_flight,
+                    GROUP_CONCAT(group_id) AS group_ids 
                 FROM $table_person 
                     JOIN $table_users AS u ON u.id = jom_id
                     JOIN $table_user_usergroup_map ON jom_id = user_id 
