@@ -184,7 +184,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?> 
 <?php
 } // $userIsAdmin or $userIsInstructor or $userIsBoardMember
-	if ($userIsAdmin or $userIsInstructor) {
+	if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">École<span class="caret"></span></a>

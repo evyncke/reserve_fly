@@ -32,7 +32,7 @@ if (isset($_REQUEST['student']) and is_numeric($_REQUEST['student']) and $_REQUE
 } else {
     journalise($userId, 'F', "Invalid parameter student=$_REQUEST[student].") ;
 }
-if (! ($userIsAdmin or $userIsInstructor or $userId == $student_id))
+if (! ($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == $student_id))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
 
 if ($userId == $student_id)

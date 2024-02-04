@@ -36,7 +36,7 @@ if (isset($_REQUEST['flight']) and is_numeric($_REQUEST['flight']) and $_REQUEST
     journalise($userId, 'F', "Invalid or missing parameter flight=$_REQUEST[flight].") ;
 }
 
-if (! ($userIsAdmin or $userIsInstructor or $userId == $flight->student))
+if (! ($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == $flight->student))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
 
 if (isset($_REQUEST['action']))

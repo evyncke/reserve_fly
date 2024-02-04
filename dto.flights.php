@@ -25,7 +25,7 @@ if ($userId == 0) {
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 
-if (! ($userIsAdmin or $userIsInstructor))
+if (! ($userIsAdmin or $userIsBoardMember or $userIsInstructor))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
 
 if (isset($_REQUEST['fi']) and $_REQUEST['fi'] != '')
