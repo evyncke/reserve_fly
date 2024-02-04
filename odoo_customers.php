@@ -27,7 +27,7 @@ require_once 'mobile_header5.php' ;
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
-if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
+if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348 or $userId == 306)) journalise($userId, "F", "This admin page is reserved to administrators") ;
 $account = (isset($_REQUEST['account'])) ? $_REQUEST['account'] : '' ;
 $create = (isset($_REQUEST['create']) and is_numeric($_REQUEST['create'])) ? $_REQUEST['create'] : '' ;
 
@@ -172,7 +172,13 @@ $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS grou
 while ($row = mysqli_fetch_array($result)) {
     $email = strtolower($row['email']) ;
     $active_msg = ($row['block'] == 0) ? '' : ' <span class="badge rounded-pill text-bg-info">Désactivé</span>' ;
-    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "$active_msg</td>
+    $groups_msg = '' ;
+    $groups = explode(',', $row['groups']) ;
+    if (in_array($joomla_pilot_group, $groups) and $row['block'] == 0)
+        $groups_msg .= ' <span class="badge rounded-pill text-bg-warning">Pilote</span>' ;
+    if (in_array($joomla_student_group, $groups) and $row['block'] == 0)
+        $groups_msg .= ' <span class="badge rounded-pill text-bg-success">Élève</span>' ;
+    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "$active_msg$groups_msg</td>
         <td><a href=\"mobile_profile.php?displayed_id=$row[jom_id]\">$row[jom_id]</a></td>
         <td>$row[ciel_code400]</td>
         <td class=\"text-center\"><a href=\"mailto:$row[email]\">$row[email]</a></td>") ;
@@ -180,7 +186,6 @@ while ($row = mysqli_fetch_array($result)) {
         $odoo_customer = $odoo_customers[$email] ;
         $property_account_receivable_id = strtok($odoo_customer['property_account_receivable_id'][1], ' ') ;
         $db_name = db2web("$row[last_name] $row[first_name]") ;
-        $groups = explode(',', $row['groups']) ;
         if ($account == "joomla") { // Master is Joomla
             $updates = array() ; 
             // TODO should also copy first_name and last_name in complete_name ?    
@@ -256,8 +261,10 @@ while ($row = mysqli_fetch_array($result)) {
             (($odoo_customer['total_due'] > 0) ? 'class="text-danger text-end"' : 'class="text-end"') .
              ">$total_due</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[country_code] $odoo_customer[zip] $odoo_customer[city]</td>") ;
     } else { // if (isset($odoo_customers[$email])) 
-        print("<td class=\"text-info\" colspan=\"5\">Ce membre est inconnu dans Odoo <a href=\"$_SERVER[PHP_SELF]?create=$row[jom_id]\">ajouter</a></td>") ;
-
+        if ($row['block'] == 0)
+            print("<td class=\"text-info\" colspan=\"5\">Ce membre est inconnu dans Odoo <a href=\"$_SERVER[PHP_SELF]?create=$row[jom_id]\">ajouter</a></td>") ;
+        else
+            print("<td colspan=\"5\"></td>") ;
     }
     print("</tr>\n") ;
 }
