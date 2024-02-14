@@ -80,7 +80,7 @@ if ($userIsInstructor or $userIsAdmin) {
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 	<thead>
-		<tr><th>Date</th><th>N° pièce</th><th>Type</th><th style="text-align: right;">Montant</th><th>Action</th></tr>
+		<tr><th>Date</th><th>N° pièce</th><th>Type</th><th style="text-align: right;">Montant</th></tr>
 	</thead>
 <tbody class="table-group-divider">
 <?php
@@ -95,12 +95,13 @@ $count = 0 ;
 while ($row = mysqli_fetch_array($result)) {
 	// Using the invoice date from the email import as the general ledger is in the future
 	$action = "<a href=\"$row[bki_file_name]\" target=\"_blank\"> <i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a>" ;
-    print("<tr><td>$row[bki_date]</td><td>$row[bki_id]</td>") ;
-	if ($row['bkl_debit'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td>$action <a href=\"#\"  
+    print("<tr><td>$row[bki_date]</td>
+		<td><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_id] <i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td>") ;
+	if ($row['bkl_debit'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td><a href=\"#\"  
 		onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bkl_debit]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
-	else if ($row['bki_amount'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td>$action <a href=\"#\" 
+	else if ($row['bki_amount'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td><a href=\"#\" 
 		 onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bki_amount]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
-	else if ($row['bkl_credit'] != '') print("<td>Note de crédit</td><td  style=\"text-align: right;\">" . (0.0 - $row['bkl_credit']) . " &euro;</td><td>$action</td>") ;
+	else if ($row['bkl_credit'] != '') print("<td>Note de crédit</td><td  style=\"text-align: right;\">" . (0.0 - $row['bkl_credit']) . " &euro;</td><td></td>") ;
 	print("</tr>\n") ;
     $count ++ ;
 }
@@ -121,14 +122,19 @@ if ($odooId != '') {
 			array('fields' => array('id', 'invoice_date', 'type_name', 'amount_total', 'name', 'payment_reference', 'payment_state', 'access_url', 'access_token'),
 				'order' => 'date')) ;
 	foreach ($invoices as $invoice) {
-		$paid_msg = ($invoice['payment_state'] == 'paid') ? '<span class="badge rounded-pill text-bg-success">Payé</span>' : 
-			'<span class="badge rounded-pill text-bg-warning">Non payé</span>' ;
+		switch ($invoice['payment_state']) {
+			case 'paid': $paid_msg = '<span class="badge rounded-pill text-bg-success">Payé</span>'; break ;
+			case 'reversed': $paid_msg = '<span class="badge rounded-pill text-bg-info">Extourné</span>' ; break ;
+			default: $paid_msg = '<span class="badge rounded-pill text-bg-warning">Non payé</span>' ;
+		}
 		$amount = number_format($invoice['amount_total'], 2, ',', '.') ;
 		// TODO QR code BCD/002/1/SCT//Royal Aéro Para Club de Spa asbl/BE647.../EUR70.00//++000....+++
-		print("<tr><td>$invoice[invoice_date]</td><td>$invoice[name]</td><td>$invoice[type_name]</td>
+		print("<tr><td>$invoice[invoice_date]</td>
+			<td><a href=\"https://$odoo_host$invoice[access_url]?access_token=$invoice[access_token]\"target=\"_blank\">$invoice[name]
+				<i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td>
+			<td>$invoice[type_name]</td>
 			<td style=\"text-align: right;\">$paid_msg$amount&nbsp;&euro;</td>
-			<td><a href=\"https://$odoo_host$invoice[access_url]?access_token=$invoice[access_token]\"target=\"_blank\">
-				<i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td></tr>\n") ;
+			</tr>\n") ;
 		$count++ ;
 	}
 } // if ($odooId != '')
