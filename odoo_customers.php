@@ -79,6 +79,7 @@ $odoo_customers = array() ;
 foreach($result as $client) {
     $email =  strtolower($client['email']) ;
     $odoo_customers[$email] = $client ; // Let's build a dict indexed by the email addresses
+    $odoo_customers[$client['id']] = $client ; // Let's be dirty as associative PHP arrays allow is... let's also index by odoo id
 }
 
 function GetOdooAccount($code, $fullName) {
@@ -108,6 +109,7 @@ function GetOdooAccount($code, $fullName) {
         return 158 ; // Harcoded default 400000 in RAPCS2.odoo.com
 }
 
+// Role being 'student', 'member', ...
 function GetOdooCategory($role) {
     global $odooClient ;
     static $cache = array() ;
@@ -182,8 +184,8 @@ while ($row = mysqli_fetch_array($result)) {
         <td><a href=\"mobile_profile.php?displayed_id=$row[jom_id]\">$row[jom_id]</a></td>
         <td>$row[ciel_code400]</td>
         <td class=\"text-center\"><a href=\"mailto:$row[email]\">$row[email]</a></td>") ;
-    if (isset($odoo_customers[$email])) {
-        $odoo_customer = $odoo_customers[$email] ;
+    if (isset($odoo_customers[$email]) or ($row['odoo_id'] != '' and isset($odoo_customers[$row['odoo_id']]))) {
+        $odoo_customer = (isset($odoo_customers[$email])) ? $odoo_customers[$email] : $odoo_customers[$row['odoo_id']] ;
         $property_account_receivable_id = strtok($odoo_customer['property_account_receivable_id'][1], ' ') ;
         $db_name = db2web("$row[last_name] $row[first_name]") ;
         if ($account == "joomla") { // Master is Joomla
@@ -211,6 +213,8 @@ while ($row = mysqli_fetch_array($result)) {
                     $updates['partner_longitude'] = $coordinates['lng'] ;
                 }
             }
+            if ($odoo_customer['email'] != $row['email'] and $row['email'] != '')
+                $updates['email'] = $row['email'] ;    
             if ($odoo_customer['phone'] != db2web($row['home_phone']) and $row['home_phone'] != '')
                 $updates['phone'] = db2web($row['home_phone']) ;
             if ($odoo_customer['mobile'] != db2web($row['cell_phone']) and $row['cell_phone'] != '')
