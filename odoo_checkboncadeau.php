@@ -23,7 +23,7 @@ if ($userId == 0) {
 	exit ;
 }
 
-require_once 'mobile_header5.php' ;
+require_once 'flight_header.php' ;
 require_once 'odoo.class.php' ;
 
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;

@@ -102,6 +102,7 @@ var
             <li><a href="flight_create.php">Nouveau</a></li>
             <li><a href="flight_list.php?completed=false">Vols prévus</a></li>
             <li><a href="flight_list.php?completed=true">Vols terminés</a></li>
+            <li><a href="odoo_checkboncadeau.php">Bons cadeaux payés</a></li>
             <li><a href="flight_stats.php">Statistiques mensuelles</a></li>
             <li><a href="https://www.tripadvisor.fr/Attraction_Review-g230026-d26689532-Reviews-Spa_Aviation-Spa_Liege_Province_The_Ardennes_Wallonia.html"><img src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg" height="15px"> &boxbox;</a></li>
           </ul><!-- dropdown-menu -->
