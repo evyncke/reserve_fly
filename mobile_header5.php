@@ -174,6 +174,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><a class="dropdown-item" href="odoo_company.php">Sociétés des membres</a></li>
       <li><a class="dropdown-item" href="odoo_gen_invoices.php">Génération des factures vols membres</a></li>
       <li><a class="dropdown-item" href="odoo_gen_membership.php">Cotisations des membres</a></li>
+      <li><a class="dropdown-item" href="odoo_checkboncadeau.php">Bons cadeaux payés</a></li>
       <li><h6 class="dropdown-header">Réservé aux gars IT</h6></li>
       <li><i><a class="dropdown-item" href="odoo_model.php">Exploration des modèles</a></i></li>
       <li><a class="dropdown-item" href="odoo_config.php">Configuration (choix DB)</a></li>
