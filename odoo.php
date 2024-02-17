@@ -17,103 +17,50 @@ $encoder = $odooClient->encoder ;
 
 print("Connect with UID: $uid\n") ;
 
+$result = $odooClient->SearchRead('account.bank.statement.line', array(
+//	array('id', '=', '1416')
+), 
+	array('fields' => array('id', 'date', 'amount', 'name', 'move_id', 'statement_id', 'account_number', 'partner_name', 'statement_name', 'display_name',
+	'payment_ref',
+	'online_account_id', 'ref', 'move_type', 'journal_id', 'statement_line_id'))) ; 
+// online_account_id [1, "BE64732038421852 EUR (1852)"] ou [3, "BE14000078161283 (1283)"]
+// journal_id [13, "Banque CBC BE64 7320 3842 1852"] ou [15, "BPOST BE14 0000 7816 1283"]
+// name, move_id (to many), display_name BNK2/2024/00029
+// amount = float positive if paid to us, negative when we pay
+// payment_ref = "MME CHRISTINE FOSTIEZ Virement GRAND MARAIS(OL),38/A 7866 LESSINES BE24 8601 1198 2438 BIC: NICABEBBXXX BON CADEAU V-INIT-242207 DE CHRISTINE FOSTIEZ 12-02-24"
 
-function resize($img, $width, $height, $size) {
-	$width_resize = $width / $size ;
-	$height_resize = $height / $size ;
-	$actual_resize = max($width_resize, $height_resize) ;
-	$new_width = $width / $actual_resize ;
-	$new_height = $height / $actual_resize ;
-	$new_img = imagecreatetruecolor($new_width, $new_height);
-	imagecopyresized($new_img, $img, 0, 0, 0, 0, $new_width, $new_height, $width, $height) ;
-	ob_flush() ;
-	ob_start() ;
-	imagejpeg($new_img, NULL) ;
-	$bytes = ob_get_contents() ;
-	ob_end_clean() ;
-	return $bytes ;
+print("\nSearching for ...\n") ;
+$i = 0 ;
+foreach($result as $line) {
+	var_dump($line) ;
+	if ($i++ > 2 ) break ;
 }
 
-$result = mysqli_query($mysqli_link, "SELECT * 
-	FROM jom_kunena_users k 
-		JOIN $table_person p ON p.jom_id = k.userid 
-		JOIN jom_users j ON j.id = k.userid
-	WHERE k.avatar IS NOT NULL AND p.odoo_id IS NOT NULL AND j.block = 0 AND k.avatar NOT LIKE '%.jp%g'")
-	or print(mysqli_error($mysqli_link)) ;
-while (false and $row = mysqli_fetch_array($result)) {
-	print("Processing #$row[jom_id], " . db2web($row['name']) . ": $row[avatar]\n") ;
-	$fname = '../media/kunena/avatars/' . $row['avatar'] ;
-	// TODO process gravatars ! https://www.gravatar.com/avatar/" . md5(strtolower(trim($row['email']))) . "?s=200&d=blank&r=pg\"
-	if (!file_exists($fname)) {
-		print("Skipping, file $fname does not exist.\n") ;
-		continue ;
-	}
-	list($width, $height, $type, $attr) = getimagesize($fname) ;
-	print("  Image size W x H: $width x $height\n") ;
-	// TODO also support PNG based on $type (both in code below but also in the above SELECT)
-	if ($type == IMAGETYPE_JPEG )
-		$image = imagecreatefromjpeg($fname) ;
-	elseif ($type == IMAGETYPE_GIF)
-		$image = imagecreatefromgif($fname) ;
-	elseif ($type == IMAGETYPE_PNG)
-		$image = imagecreatefrompng($fname) ;
-	else {
-		print("   Unknown image type ($type) for $fname\n") ;
-		continue ;
-	}
-	if (!$image) {
-		print("   $fname is not a valid image !! Skipping\n") ;
-		continue ;
-	}
-	// Try resize to 128, 256, 512, 1024, 1920 ? 
-	// Width https://www.php.net/manual/fr/function.imagecopyresized.php 
-	// Update in Odoo
-	$updates = array() ;
-	$updates['image_128'] = base64_encode(resize($image, $width, $height, 128));
-	$updates['image_256'] = base64_encode(resize($image, $width, $height, 256));
-	$updates['image_512'] = base64_encode(resize($image, $width, $height, 512));
-	$updates['image_1024'] = base64_encode(resize($image, $width, $height, 1024));
-	$updates['image_1920'] = base64_encode(resize($image, $width, $height, 1920));
-	print("   About to update Odoo #$row[odoo_id] with: \n") ;
-//	var_dump($updates) ;
-	$response = $odooClient->Update('res.partner', array(0+$row['odoo_id']), $updates) ;
-	print("   Odoo response: $response\n") ;
+print("account.bank.statement\n") ;
+
+$result = $odooClient->SearchRead('account.bank.statement', array(
+//	array('id', '=', '1416')
+),
+	array(
+//	array('fields' => array('id', 'date', 'amount', 'name', 'move_id', 'statement_id', 'account_number', 'partner_name', 'statement_name', 'display_name',
+//	'payment_ref',
+//	'online_account_id', 'ref', 'move_type', 'journal_id', 'statement_line_id')
+	)) ; 
+// online_account_id [1, "BE64732038421852 EUR (1852)"] ou [3, "BE14000078161283 (1283)"]
+// journal_id [13, "Banque CBC BE64 7320 3842 1852"] ou [15, "BPOST BE14 0000 7816 1283"]
+// name, move_id (to many), display_name BNK2/2024/00029
+// amount = float positive if paid to us, negative when we pay
+// payment_ref = "MME CHRISTINE FOSTIEZ Virement GRAND MARAIS(OL),38/A 7866 LESSINES BE24 8601 1198 2438 BIC: NICABEBBXXX BON CADEAU V-INIT-242207 DE CHRISTINE FOSTIEZ 12-02-24"
+
+print("\n\nSearching in account.bank.statement\n\n") ;
+var_dump($result) ;
+$i = 0 ;
+foreach($result as $line) {
+	var_dump($line) ;
+	if ($i++ > 5 ) exit ;
 }
 
-$result = mysqli_query($mysqli_link, "SELECT * 
-	FROM jom_kunena_users k 
-		JOIN $table_person p ON p.jom_id = k.userid 
-		JOIN jom_users j ON j.id = k.userid
-	WHERE k.avatar IS NULL AND j.block = 0")
-	or print(mysqli_error($mysqli_link)) ;
-while ($row = mysqli_fetch_array($result)) {
-	print("Processing #$row[jom_id], " . db2web($row['name']) . "\n") ;
-	$hash = hash('sha256', strtolower(trim($row['email']))) ;
-	// TODO process gravatars ! https://www.gravatar.com/avatar/" . md5(strtolower(trim($row['email']))) . "?s=200&d=blank&r=pg\"
-	$url = "https://www.gravatar.com/avatar/$hash?s=128&d=404&r=pg" ;
-	$image_128 = file_get_contents($url) ;
-	if (! $image_128) {
-		print("Skipping, url $url does not exist.\n") ;
-		continue ;
-	}
-	print("   >>>>>>>> Found $url") ;
-	// Try resize to 128, 256, 512, 1024, 1920 ? 
-	// Width https://www.php.net/manual/fr/function.imagecopyresized.php 
-	// Update in Odoo
-	$updates = array() ;
-	$updates['image_128'] = base64_encode($image_128);
-	if (false) {
-	$updates['image_256'] = base64_encode(file_get_contents("https://www.gravatar.com/avatar/$hash?s=256&d=404&r=pg"));
-	$updates['image_512'] = base64_encode(file_get_contents("https://www.gravatar.com/avatar/$hash?s=512&d=404&r=pg"));
-	$updates['image_1024'] = base64_encode(file_get_contents("https://www.gravatar.com/avatar/$hash?s=1024&d=404&r=pg"));
-	$updates['image_1920'] = base64_encode(file_get_contents("https://www.gravatar.com/avatar/$hash?s=1920&d=404&r=pg"));
-	}
-	print("   About to update Odoo #$row[odoo_id] with: \n") ;
-//	var_dump($updates) ;
-	$response = $odooClient->Update('res.partner', array(0+$row['odoo_id']), $updates) ;
-	print("   Odoo response: $response\n") ;
-}
-
+print("====\n End of job\n</pre>") ;
 exit ;
 
 #Account #427: FX Engineering, 400FX, 400FX FX Engineering, asset_receivable, asset, 400 Customers, 400 Customers
