@@ -23,21 +23,7 @@ if ($userId == 0) {
 	exit ;
 }
 
-require_once 'flight_header.php' ;
-require_once 'odoo.class.php' ;
-
-if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor and !$userIsFlightManager) journalise($userId, "F", "This admin page is reserved to administrators") ;
-
-$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <link href="https://www.spa-aviation.be/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-	
+$header_postamble = '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script type="text/javascript">
 // Manage Search when keyup
 
@@ -46,18 +32,24 @@ $(document).ready(function() {
    $("#id_SearchInput").on("keyup", function() {
       var value = $(this).val().toLowerCase();
       $("#myTable tr").filter(function() {
-		  var aText=$(this).text().toLowerCase().normalize('NFD');
+		  var aText=$(this).text().toLowerCase().normalize("NFD");
         $(this).toggle(aText.indexOf(value) > -1)
      });
     });
     var value = $("#id_SearchInput").val().toLowerCase();
       $("#myTable tr").filter(function() {
-      $(this).toggle($(this).text().toLowerCase().normalize('NFD').indexOf(value) > -1)
+      $(this).toggle($(this).text().toLowerCase().normalize("NFD").indexOf(value) > -1)
       });
 });
-</script>
-</head>
-<body>
+</script>' ;
+
+require_once 'flight_header.php' ;
+require_once 'odoo.class.php' ;
+
+if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor and !$userIsFlightManager) journalise($userId, "F", "This admin page is reserved to administrators") ;
+
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+?>
 <h2>Bons cadeaux IF et INIT payés sur le compte CBC @<?=$odoo_host?></h2>
 <p>Virements contenants la communication V-IF- et V-INIT-</p>
 <p>Filtre : Numéro du bon ou valeur ou nom (Exemple: 242203 ou 170 ou christine)</p>  

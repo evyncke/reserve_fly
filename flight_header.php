@@ -79,8 +79,14 @@ var
   })();
 </script>
 <!-- End Matomo Code -->
+<?php  // Output any page specific header
+if (isset($header_postamble))
+	print($header_postamble) ;
+	
+$body_attributes = (isset($body_attributes)) ? $body_attributes : '' ; 
+?>
 </head>
-<body>
+<body <?=$body_attributes?>>
 
 <nav class="navbar navbar-inverse bg-light navbar-light">
   <div class="container-fluid">
@@ -123,5 +129,3 @@ var
 </nav>
 
 <div class="container-fluid">
-
- 
