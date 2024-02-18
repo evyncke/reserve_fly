@@ -17,7 +17,7 @@
 */
 require_once 'dbi.php';
 
-if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor and $userId != 306) // 306 = Bernard Penders) 
+if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor) 
 	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
 ob_start("ob_gzhandler"); // Enable gzip compression over HTTP
 

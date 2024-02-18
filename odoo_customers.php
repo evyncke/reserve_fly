@@ -27,7 +27,7 @@ require_once 'mobile_header5.php' ;
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
-if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348 or $userId == 306)) journalise($userId, "F", "This admin page is reserved to administrators") ;
+if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) journalise($userId, "F", "This admin page is reserved to administrators") ;
 $account = (isset($_REQUEST['account'])) ? $_REQUEST['account'] : '' ;
 $create = (isset($_REQUEST['create']) and is_numeric($_REQUEST['create'])) ? $_REQUEST['create'] : '' ;
 

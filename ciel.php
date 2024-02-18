@@ -20,7 +20,7 @@ require_once 'dbi.php' ;
 
 MustBeLoggedIn() ;
 
-if (! $userIsAdmin && ! $userIsBoardMember && $userId != 306) // Bernard Penders
+if (! $userIsAdmin && ! $userIsBoardMember) 
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
 ?><!DOCTYPE html>
