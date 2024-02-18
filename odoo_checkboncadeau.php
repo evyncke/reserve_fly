@@ -26,7 +26,7 @@ if ($userId == 0) {
 require_once 'flight_header.php' ;
 require_once 'odoo.class.php' ;
 
-if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
+if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor and !$userIsFlightManager) journalise($userId, "F", "This admin page is reserved to administrators") ;
 
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 ?>
@@ -46,27 +46,27 @@ $(document).ready(function() {
    $("#id_SearchInput").on("keyup", function() {
       var value = $(this).val().toLowerCase();
       $("#myTable tr").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '').indexOf(value) > -1)
+		  var aText=$(this).text().toLowerCase().normalize('NFD');
+        $(this).toggle(aText.indexOf(value) > -1)
      });
     });
     var value = $("#id_SearchInput").val().toLowerCase();
       $("#myTable tr").filter(function() {
-      $(this).toggle($(this).text().toLowerCase().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '').indexOf(value) > -1)
+      $(this).toggle($(this).text().toLowerCase().normalize('NFD').indexOf(value) > -1)
       });
 });
 </script>
 </head>
 <body>
 <h2>Bons cadeaux IF et INIT payés sur le compte CBC @<?=$odoo_host?></h2>
-<p>Virements contenant la communication V-IF- et V-INIT-</p>
-<p>Filtre : Exemple 242203</p>  
+<p>Virements contenants la communication V-IF- et V-INIT-</p>
+<p>Filtre : Numéro du bon ou valeur ou nom (Exemple: 242203 ou 170 ou christine)</p>  
 <?php	
 $searchText="";
 print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeholder=\"Search..\" value=\"$searchText\">");
 ?>
-
-<form action="<?=$_SERVER['PHP_SELF']?>" id="company_form">
-    <input type="hidden" name="save_company" value="true">
+<p></p>
+<form action="<?=$_SERVER['PHP_SELF']?>" id="checkboncadeau_form">
 <table class="table table-hover table-responsive table-bordered">
     <thead>
         <tr><th>id</th><th>Date</th><th>Communication</th><th>Valeur</th></tr>
