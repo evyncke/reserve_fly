@@ -81,7 +81,7 @@ foreach($result as $f=>$desc) {
 			//echo "desc=";
 			//echo var_dump($desc)."<br/>";
 			//print("id=$id;name=$name<br/>");
-    		print("<tr class=\"ciel-row\">
+    		print("<tr>
       	  	  <td>$id</td>
 			   <td>$date</td>
      	  	   <td>$communication</td>
