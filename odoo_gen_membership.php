@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -87,6 +87,9 @@ $non_nav_membership_price = 70.0 ;
 $nav_membership_price = 185.0 ;
 $membership_analytic_account = 25  ;
 
+// TODO
+// Don't invoice Joomla desactivated account
+// Partial fee after June
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198, René 353
 if (false) {
     $jom_ids = "62, 66, 348, 92, 353, 439";
@@ -95,13 +98,16 @@ if (false) {
     $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS groups
         FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id
         JOIN $table_person AS p ON u.id=p.jom_id
-        WHERE p.jom_id IN ($jom_ids) AND NOT EXISTS (SELECT * FROM $table_membership_fees AS f WHERE f.bkf_user = p.jom_id and f.bkf_year = '$membership_year')
+        WHERE p.jom_id IN ($jom_ids) 
+        AND u.block = 0
+        AND NOT EXISTS (SELECT * FROM $table_membership_fees AS f WHERE f.bkf_user = p.jom_id and f.bkf_year = '$membership_year')
         GROUP BY id";
 } else {
     $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS groups
             FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
             JOIN $table_person AS p ON u.id=p.jom_id
             WHERE group_id IN ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
+            AND u.block = 0
             AND NOT EXISTS (SELECT * FROM $table_membership_fees AS f WHERE f.bkf_user = p.jom_id and f.bkf_year = '$membership_year')
             GROUP BY id";
 }				
