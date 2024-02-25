@@ -40,8 +40,8 @@ if ($velocity == 'None') $velocity = "NULL" ;
 $track = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['track'])) ;
 if ($track == '' or $track == 'None') $track = "NULL" ;
 $squawk = (isset($_REQUEST['squawk'])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['squawk'])) : '' ;
-$sensor = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['sensor'])) ;
-$source = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['source'])) ;
+$sensor = (isset($_REQUEST['sensor'])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['sensor'])) : '' ;
+$source = (isset($_REQUEST['source'])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['source'])) : '' ;
 
 if (isset($_REQUEST['latest']) and $_REQUEST['latest'] == 'yes') {
 	$rc = mysqli_query($mysqli_link, "UPDATE $table_planes SET last_seen = '$daytime', last_longitude = $longitude, last_latitude = $latitude
