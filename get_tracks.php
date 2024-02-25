@@ -29,21 +29,21 @@ $since = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['since
 $latest = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['latest']))) ;
 
 function pilot($plane, $start, $end) {
-	global $mysqli_link, $table_bookings, $table_users, $userId ;
+	global $mysqli_link, $table_logbook, $table_users, $userId ;
+
 	
 	$result_pilot = mysqli_query($mysqli_link, "SELECT * 
-			FROM $table_bookings JOIN $table_users AS p ON r_pilot = p.id 
-			WHERE r_plane = '$plane' 
-				AND r_start <= CONVERT_TZ('$start', 'UTC', 'Europe/Brussels')
-				AND r_stop >= CONVERT_TZ('$end', 'UTC', 'Europe/Brussels')
-				AND r_cancel_who IS NULL
+			FROM $table_logbook JOIN $table_users AS p ON l_pilot = p.id 
+			WHERE l_plane = '$plane' 
+				AND l_start <= CONVERT_TZ('$start', 'UTC', 'Europe/Brussels')
+				AND l_end >= CONVERT_TZ('$end', 'UTC', 'Europe/Brussels')
 			") ;
 	if ($result_pilot) {
 		$row_pilot = mysqli_fetch_array($result_pilot) ;
 		mysqli_free_result($result_pilot) ;
-		if ($row_pilot) 
+		if ($row_pilot) {
 			return db2web($row_pilot['name'])  ;
-		else
+		} else
 			return '' ;
 	} else {
 		journalise($userId, 'E', 'Cannot find the pilot for a track: ' . mysqli_error($mysqli_link)) ;
@@ -123,6 +123,8 @@ if ($current_plane != '') {
 
 // Let's send the data back
 @header('Content-type: application/json');
+
+$tracks['log'] = $log ;
 
 $json_encoded = json_encode($tracks) ;
 if ($json_encoded === FALSE) {
