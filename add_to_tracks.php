@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2021 Eric Vyncke
+   Copyright 2014-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
    limitations under the License.
 
 */
+
+// Added to debug a few things
+// Notably the INSERT IGNORE for duplicate kets
+ini_set('display_errors', 1) ; // extensive error reporting for debugging
 
 include_once 'dbi.php' ;
 
@@ -35,7 +39,7 @@ $velocity = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['velocity']))
 if ($velocity == 'None') $velocity = "NULL" ;
 $track = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['track'])) ;
 if ($track == '' or $track == 'None') $track = "NULL" ;
-$squawk = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['squawk'])) ;
+$squawk = (isset($_REQUEST['squawk'])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['squawk'])) : '' ;
 $sensor = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['sensor'])) ;
 $source = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['source'])) ;
 
@@ -48,7 +52,7 @@ if (isset($_REQUEST['latest']) and $_REQUEST['latest'] == 'yes') {
 }
 
 if (! isset($_REQUEST['local']) or $_REQUEST['local'] != 'yes') {
-	$rc = mysqli_query($mysqli_link, "INSERT INTO $table_tracks (t_icao24, t_time, t_longitude, t_latitude, t_altitude, t_velocity, t_squawk, t_sensor, t_source)
+	$rc = mysqli_query($mysqli_link, "INSERT IGNORE INTO $table_tracks (t_icao24, t_time, t_longitude, t_latitude, t_altitude, t_velocity, t_squawk, t_sensor, t_source)
 			VALUES('$icao24', '$daytime', $longitude, $latitude, $altitude, $velocity, '$squawk', $sensor, '$source')") ;
 	if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
 		journalise(0, 'E', "Cannot insert track for $icao24 (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
@@ -57,12 +61,12 @@ if (! isset($_REQUEST['local']) or $_REQUEST['local'] != 'yes') {
 // If flight is near the default airport, then add the track to $table_local_tracks
 
 if (abs($longitude - $apt_longitude) <= $local_longitude_bound*2.0 and abs($latitude - $apt_latitude) <= $local_latitude_bound*2.0 and $altitude <= $local_altimeter_bound) {
-	$rc = mysqli_query($mysqli_link, "INSERT INTO $table_local_tracks (lt_timestamp, lt_longitude, lt_latitude, lt_altitude, lt_velocity, lt_track, lt_icao24, lt_tail_number, lt_source)
+	$rc = mysqli_query($mysqli_link, "INSERT IGNORE INTO $table_local_tracks (lt_timestamp, lt_longitude, lt_latitude, lt_altitude, lt_velocity, lt_track, lt_icao24, lt_tail_number, lt_source)
 		VALUES('$daytime', $longitude, $latitude, $altitude, $velocity, $track, '$icao24', '$tail_number', '$source')") ;
 	if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
 		journalise(0, 'E', "Cannot insert local track for $icao24/$tail_number (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
 } else if (in_array($tail_number, $tracked_planes)) { // Mainly for rallye Air Spa
-	$rc = mysqli_query($mysqli_link, "INSERT INTO $table_local_tracks (lt_timestamp, lt_longitude, lt_latitude, lt_altitude, lt_velocity, lt_track, lt_icao24, lt_tail_number, lt_source)
+	$rc = mysqli_query($mysqli_link, "INSERT IGNORE INTO $table_local_tracks (lt_timestamp, lt_longitude, lt_latitude, lt_altitude, lt_velocity, lt_track, lt_icao24, lt_tail_number, lt_source)
 		VALUES('$daytime', $longitude, $latitude, $altitude, $velocity, $track, '$icao24', '$tail_number', '$source')") ;
 	if ($rc == 0 and mysqli_errno($mysqli_link) != 1062) # Ignore duplicate entries
 		journalise(0, 'E', "Cannot insert local track for tracked $icao24/$tail_number (RC=" . mysqli_errno($mysqli_link) . "): " . mysqli_error($mysqli_link)) ; 
