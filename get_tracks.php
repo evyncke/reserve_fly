@@ -35,8 +35,8 @@ function pilot($plane, $start, $end) {
 	$result_pilot = mysqli_query($mysqli_link, "SELECT * 
 			FROM $table_logbook JOIN $table_users AS p ON l_pilot = p.id 
 			WHERE l_plane = '$plane' 
-				AND l_start <= CONVERT_TZ('$start', 'UTC', 'Europe/Brussels')
-				AND l_end >= CONVERT_TZ('$end', 'UTC', 'Europe/Brussels')
+				AND l_start <= '$start'
+				AND l_end >= '$end'
 			") ;
 	if ($result_pilot) {
 		$row_pilot = mysqli_fetch_array($result_pilot) ;
