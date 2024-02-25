@@ -188,7 +188,7 @@ function insertTrackPoints (flights) {
 	}
 
 	if (legendDiv) {
-		legendDiv.innerHTML = 'Plane/Last seen / First seen / Pilot/student<br/>' ;
+		legendDiv.innerHTML = 'Plane / Last seen / First seen / Pilot<br/>' ;
 		var x = legendItems.sort(function (a,b) {
 				var firstA = a.match(/.*\/(.+)\/.*\/.*/)[1] ;
 				var firstB = b.match(/.*\/(.+)\/.*\/.*/)[1] ;
