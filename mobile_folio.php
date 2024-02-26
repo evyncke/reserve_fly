@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2023 Eric Vyncke, Patrick Reginster
+   Copyright 2022-2024 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -77,8 +77,7 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	or journalise($originalUserId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
 $pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
-$userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
-$codeCiel = $pilot['ciel_code'] ;
+$userLastName = db2web($pilot['last_name']) ;
 $odooId = $pilot['odoo_id'] ;
 $blocked_reason = db2web($pilot['b_reason']) ;
 $blocked_when = $pilot['b_when'] ;
@@ -399,8 +398,7 @@ https://github.com/typpo/quickchart
 ?>
 <span id="payment">
 <h3>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
-<p>Le QR-code contient votre identifiant au niveau de la comptabilité
-RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
+<p>Le QR-code est à utiliser avec une application bancaire
 et pas encore Payconiq (ce dernier étant payant pour le commerçant).</p>
 <img id="payment_qr_code" width="200" height="200" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>">
 </span id="payment">
@@ -411,7 +409,6 @@ var
 	epcBic = '<?=$bic?>' ;
 	epcName = '<?=$bank_account_name?>' ;
 	epcIban = '<?=$iban?>' ;
-	compteCiel = '400<?=$codeCiel?>' ;
 	userLastName = '<?=$userLastName?>' ;
 
 function pay(reason, amount) {
@@ -424,7 +421,7 @@ function pay(reason, amount) {
 	document.getElementById('payment_amount').innerText = amount ;
 	// Should update to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
-	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " " + compteCiel + "\n" + reason + " " + compteCiel + '/' + userLastName ;
+	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " " + userLastName + "\n" + reason + " " + userLastName ;
 	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 }
 
