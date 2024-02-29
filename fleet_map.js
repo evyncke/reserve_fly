@@ -125,7 +125,7 @@ function insertTrackPoints (flights) {
 	flightFeatureCollection = [] ;
 	locationFeatureCollection = [] ;
 	for (var flight in flights) {
-		if (flight == 'sql') continue ;
+		if (flight == 'sql' || flight == 'log') continue ;
 		if (flight == 'error') {
 			console.log(flights['error']) ;
 			continue ;
