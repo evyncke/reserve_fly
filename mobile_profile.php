@@ -18,6 +18,7 @@
 
 // TODO
 // - ensure consistency of email in rapcs_person and jom_user
+// refuse validity being 0000-00-00 optionally by javascript but in PHP for sure
 
 ob_start("ob_gzhandler");
 require_once "dbi.php" ;
@@ -36,7 +37,7 @@ if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	$displayed_id = $userId ;
 	$read_only = false ;
 }
-$body_attributes = "onload=\"initProfile($displayed_id);init();\"" ;
+$body_attributes = "onload=\"selectedUserId=$displayed_id;init();\"" ;
 $header_postamble = '<script data-cfasync="true" src="profile.js"></script>' ;
 require_once 'mobile_header5.php' ;
 
@@ -643,7 +644,7 @@ if (! $read_only) {
 $result = mysqli_query($mysqli_link, "select *
 	from $table_validity_type t left join $table_validity v on validity_type_id = t.id and jom_id = $displayed_id
 	order by t.name") or journalise($userId, "F", "Erreur systeme a propos de l'access a validity: " . mysqli_error($mysqli_link)) ;
-$options = '<option value="-1" disabled selected> -- validité/annotation à ajouter et remplir les cases sur cette ligne--</option>' ;
+$options = '<option value="-1" style=\"background-color: #cccccc;\" disabled selected> -- validité/annotation à ajouter et remplir les cases sur cette ligne--</option>' ;
 while ($row = mysqli_fetch_array($result)) {
 	if ($row['grant_date']) {
 		if ($userId == $displayed_id)
@@ -673,7 +674,7 @@ while ($row = mysqli_fetch_array($result)) {
 if ($userId == $displayed_id) {
 	print("
 	<tr>
-	<td class=\"validityCell\">Nouvelle validit&eacute; ou annotation club: <select name=\"newValidityId\" class=\"form-control\">$options</select></td>
+	<td class=\"validityCell\">Nouvelle validit&eacute; ou annotation club: <select name=\"newValidityId\" class=\"form-select\">$options</select></td>
 	<td class=\"validityCell\"><input type=\"text\" name=\"new_ident_value\"/></td>
 	<td class=\"validityCell\"><input type=\"date\" name=\"new_grant_date\"/></td>
 	<td class=\"validityCell\"><input type=\"date\" name=\"new_expire_date\"/></td>
