@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
    limitations under the License.
 
 */
+
+// TODO remove weather items per David Gaspard's request
 
 ob_start("ob_gzhandler");
 require_once "dbi.php" ;
@@ -47,7 +49,6 @@ else
 // Check if header data needs to be updated
 if ($action == 'header') {
     $flight->remark = $_REQUEST['remark'] ;
-    $flight->weather = $_REQUEST['weather'] ;
     $flight->flightType = $_REQUEST['type'] ;
     $flight->sessionGrade = $_REQUEST['grading'] ;
     $flight->save() ;
@@ -88,8 +89,8 @@ function gradeChanged(object, reference, grade) {
 }
 </script>
 <h2>Flight N° <?=$flight->flightId?> of <?=$flight->studentLastName?> <?=$flight->studentFirstName?>
-    <a href="dto.student.php?student=<?=$flight->student?>"><i class="bi bi-folder"></i></a>
-    <i class="bi bi-printer link-primary" onclick="window.print()"></i>
+    <a href="dto.student.php?student=<?=$flight->student?>"><i class="bi bi-folder" title="Back to the list of flights"></i></a>
+    <i class="bi bi-printer link-primary" onclick="window.print();" title="Print this page"></i>
 </h2>
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">
@@ -110,7 +111,6 @@ function gradeChanged(object, reference, grade) {
     </select>    
 </td></tr>
 <tr><td>Flight Duration</td><td><?="$flight->flightDuration"?> minutes</td></tr>
-<tr><td>Weather</td><td><input class="form-control" type="text" name="weather" size="80" value="<?="$flight->weather"?>"></td></tr>
 <tr><td>Remark</td><td><input class="form-control" type="text" name="remark" size="80" value="<?="$flight->remark"?>"></td></tr>
 <tr><td>Session Grading</td><td>
     <select class="form-select" name="grading">
