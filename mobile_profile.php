@@ -18,7 +18,6 @@
 
 // TODO
 // - ensure consistency of email in rapcs_person and jom_user
-// refuse validity being 0000-00-00 optionally by javascript but in PHP for sure
 
 ob_start("ob_gzhandler");
 require_once "dbi.php" ;
@@ -75,12 +74,12 @@ if (isset($_REQUEST['action'])) journalise($userId, 'I', "Profile is called with
 // Apply any change on the photo tab before fetching all displayed_id information
 if (isset($_POST['action']) and $_POST['action'] == 'photo' and !$read_only) {
 	if (!isset($_FILES['photoFile']) or !isset($_FILES['photoFile']['name']) or $_FILES['photoFile']['size'] == 0)
-		die('Ne pas oublier pas de sélectionner un fichier d\'abord. <button onclick="window.history.back();">Essayer à nouveau</button>') ;
+		journalise($userId, "F",'Ne pas oublier pas de sélectionner un fichier d\'abord. <button onclick="window.history.back();">Essayer à nouveau</button>') ;
 	$source_file = $_FILES['photoFile']['tmp_name'] ;
 	$image_size = getimagesize($source_file) ;
 	if ($image_size === FALSE) {
 		journalise($userId, 'E', "Ce fichier n'est pas une photo($displayed_id): " . $_FILES['photoFile']['name'] . '/' . $source_file) ;
-		die("Ce fichier ne semble pas être une image, veuillez l'envoyer par email à webmaster@spa-aviation.be") ;
+		journalise($userId, "F", "Ce fichier ne semble pas être une image, veuillez l'envoyer par email à webmaster@spa-aviation.be") ;
 	}
 	$image_width = $image_size[0] ;
 	$image_height = $image_size[1] ;
@@ -117,7 +116,7 @@ if (isset($_POST['action']) and $_POST['action'] == 'photo' and !$read_only) {
 	}
 	// Update the kunena line for this user
 	mysqli_query($mysqli_link, "update jom_kunena_users set avatar = 'users/avatar$displayed_id.$image_filetype' where userid = $displayed_id")
-                        or die("Erreur systeme lors de la mise a jour de jom_kunena_users (avatar): " . mysqli_error($mysqli_link)) ;
+                        or journalise($userId, "F", "Erreur systeme lors de la mise a jour de jom_kunena_users (avatar): " . mysqli_error($mysqli_link)) ;
 	if ($affected_rows > 0) 
 		journalise($userId, 'I', "Changement de photo($me[username]/$displayed_id)") ;
 }
@@ -138,7 +137,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'log' and !$read_only)
 	mysqli_query($mysqli_link, "UPDATE $table_person SET pic_minutes=$pic_minutes, dc_minutes=$dc_minutes, fi_minutes=$fi_minutes,
 		day_landings=$day_landings, night_landings=$night_landings
 		WHERE jom_id = $displayed_id")
-		or die("Erreur systeme lors de la mise a jour de $table_person: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_person: " . mysqli_error($mysqli_link)) ;
 	$affected_rows += mysqli_affected_rows($mysqli_link) ;
 	$change_profile_message .= ($affected_rows > 0) ? "Changement(s) effectu&eacute;(s).<br/>" : "Aucun changement effectu&eacute;.<br/>" ;
 	if ($affected_rows > 0) 
@@ -154,7 +153,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'social' and !$read_on
 	// Do some sanity checks on the URL
 	mysqli_query($mysqli_link, "update jom_kunena_users set facebook='$facebook', twitter='$twitter', linkedin='$linkedin', skype='$skype'
 		where userid = $displayed_id")
-		or die("Erreur systeme lors de la mise a jour de jom_kunena_users: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Erreur systeme lors de la mise a jour de jom_kunena_users: " . mysqli_error($mysqli_link)) ;
 	$affected_rows += mysqli_affected_rows($mysqli_link) ;
 	$change_profile_message .= ($affected_rows > 0) ? "Changement(s) effectu&eacute;(s).<br/>" : "Aucun changement effectu&eacute;.<br/>" ;
 	if ($affected_rows > 0) 
@@ -163,7 +162,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'social' and !$read_on
 
 // Apply any change on validity before fetching all displayed_id information
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'validity' and !$read_only) {
-	$result = mysqli_query($mysqli_link, "select * from $table_validity_type") or die("Erreur systeme lors du parcours des types de validites: ". mysqli_error($mysqli_link)) ;
+	$result = mysqli_query($mysqli_link, "SELECT * FROM $table_validity_type") 
+		or journalise($userId, "F", "Erreur systeme lors du parcours des types de validites: ". mysqli_error($mysqli_link)) ;
 	$affected_rows = 0 ;
 	$log = '' ;
 	while ($row =  mysqli_fetch_array($result)) {
@@ -172,10 +172,11 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'validity' and !$read_
 		$grant_date = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['grant_date'][$type])) ;
 		$expire_date = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['expire_date'][$type])) ;
 		if ($ident_value == '' and $grant_date == '' and $expire_date == '') continue ;
+		if ($ident_value == '' and $grant_date == '' and $expire_date == '') continue ;
 		$sql_statement = "replace into $table_validity(jom_id, validity_type_id, ident_value, grant_date, expire_date)
 			values($displayed_id, $type, '$ident_value', '$grant_date', '$expire_date')"; 
 		mysqli_query($mysqli_link, $sql_statement)
-			or die("Impossible de mettre à jour les validités/annotations: " . mysqli_error($mysqli_link)) ;
+			or journalise($userId, "F","Impossible de mettre à jour les validités/annotations: " . mysqli_error($mysqli_link)) ;
 		$affected_rows += mysqli_affected_rows($mysqli_link) ;
 		$log .= "$row[name] ($ident_value): $grant_date -> $expire_date; \n" ;
 	}
@@ -184,26 +185,30 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'validity' and !$read_
 	// newValidityId=6&new_ident_value=test&new_grant_date=2000-01-01&new_expire_date=2011-01-01
 	if (isset($_REQUEST['newValidityId'])) {
 		$newValidityId = intval(trim($_REQUEST['newValidityId'])) ;
-		if (! is_numeric($newValidityId) or $newValidityId <= 0) die("Invalid newValidityId") ;
+		if (! is_numeric($newValidityId) or $newValidityId <= 0) journalise($userId, "F", "Invalid newValidityId ($newValidityId)") ;
 		$new_ident_value = mysqli_real_escape_string($mysqli_link, web2db(trim($_REQUEST['new_ident_value']))) ;
 		$new_grant_date = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['new_grant_date'])) ;
-		$new_expire_date = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['new_expire_date'])) ;
-		mysqli_query($mysqli_link, "INSERT INTO $table_validity(jom_id, validity_type_id, ident_value, grant_date, expire_date)
-			values($displayed_id, $newValidityId, '$new_ident_value', '$new_grant_date', '$new_expire_date')")
-			or die("Impossible d'ajouter la validité/annotation: " . mysqli_error($mysqli_link)) ;
-		$affected_rows++ ;
-		$log .= "new $newValidityId ($new_ident_value): $new_grant_date -> $new_expire_date; \n" ;
+		if ($new_grant_date == '')
+			$log .= "empty grant date for new validity $newValidityId;\n" ;
+		else {
+			$new_expire_date = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['new_expire_date'])) ;
+			mysqli_query($mysqli_link, "INSERT INTO $table_validity(jom_id, validity_type_id, ident_value, grant_date, expire_date)
+				VALUES($displayed_id, $newValidityId, '$new_ident_value', '$new_grant_date', '$new_expire_date')")
+				or journalise($userId, "F","Impossible d'ajouter la validité/annotation: " . mysqli_error($mysqli_link)) ;
+			$affected_rows++ ;
+			$log .= "new $newValidityId ($new_ident_value): $new_grant_date -> $new_expire_date; \n" ;
+		}
 	}
-	$change_profile_message .= ($affected_rows > 0) ? "Changement(s) effectu&eacute;(s).<br/>" : "Aucun changement effectu&eacute;.<br/>" ;
+	$change_profile_message .= ($affected_rows > 0) ? "Changement(s) effectué(s).<br/>" : "Aucun changement effectué.<br/>" ;
 	if ($affected_rows > 0)
-		journalise($userId, 'W', "$affected_rows validit&eacute;s chang&eacute;es pour $me[username]/$displayed_id: $log") ;
+		journalise($userId, 'W', "$affected_rows validités changées pour $me[username]/$displayed_id: $log") ;
 }
 
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'delete_rating' and !$read_only) {
 	$validity_id = intval(trim($_REQUEST['validity_id'])) ;
-	if (! $validity_id or $validity_id <= 0) die("Rating type is invalid") ;
+	if (! $validity_id or $validity_id <= 0) journalise($userId, "F", "Rating type is invalid") ;
 	mysqli_query($mysqli_link, "DELETE FROM $table_validity WHERE jom_id=$displayed_id AND validity_type_id=$validity_id")
-		or die("Cannot delete rating: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot delete rating: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "W", "Rating $validity_id deleted") ;
 }
 // Apply any change before fetching all displayed_id information
@@ -228,7 +233,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 	$last_name = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['last_name']))) ;
 //	if ($first_name == '' or $last_name == '') {
 //		journalise($userId, 'E', "Nom ou pr&eacute;nom invalides pour $me[username]/$displayed_id: prenom=" . db2web($first_name) . ", nom: " . db2web($last_name)) ;
-//		die("Le nom et/ou le pr&eacute;nom sont invalides. Changements refus&eacute;s.") ;
+//		journalise($userId, "F", "Le nom et/ou le pr&eacute;nom sont invalides. Changements refus&eacute;s.") ;
 //	}
 	mysqli_query($mysqli_link, "update $table_person set home_phone='$home_phone', work_phone='$work_phone', cell_phone='$cell_phone',
 		address='$address', zipcode='$zipcode', city='$city', country='$country', birthdate='$birthdate', sex=$sex, email='$email',
@@ -259,7 +264,7 @@ $result = mysqli_query($mysqli_link, "SELECT *,u.username as username,u.email as
 		LEFT JOIN $table_company_member AS cm ON cm.cm_member = $displayed_id
         LEFT JOIN $table_company AS c ON c.c_id = cm.cm_company
 	WHERE u.id = $displayed_id") or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
-$me = mysqli_fetch_array($result) or die("Utilisateur inconnu") ;
+$me = mysqli_fetch_array($result) or journalise($userId, "F", "Utilisateur inconnu") ;
 $me['name'] = db2web($me['name']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
