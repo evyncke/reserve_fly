@@ -65,7 +65,7 @@ print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeho
     </thead>
     <tbody class="table-group-divider" id="myTable">
 <?php
-$result = $odooClient->SearchRead('account.move.line', array(), array('fields' => array('id', 'name', 'move_type','account_id','debit', 'create_date'))) ;
+$result = $odooClient->SearchRead('account.move.line', array(), array('fields' => array('id', 'name', 'move_type','account_id','debit', 'credit', 'partner_id', 'create_date'))) ;
 $ids = array() ;
 foreach($result as $f=>$desc) {
 	//echo "f=";
@@ -93,6 +93,58 @@ foreach($result as $f=>$desc) {
 ?>
 </tbody>
 </table>
+<p></p>
+<p><b>Bons cadeaux non utilisés vu par ODOO (INIT: 4999001 et IF: 499002)</b></p>
+<table class="table table-hover table-responsive table-bordered">
+    <thead>
+        <tr><th>id</th><th>Date</th><th>account_id</th><th>Communication</th><th>Client</th><th>Valeur</th></tr>
+    </thead>
+    <tbody class="table-group-divider" id="myTable">
+<?php
+		$accountINI=0;
+		$accountIF=0;
+		foreach($result as $f=>$desc) {
+			//echo "f=";
+			//echo var_dump($f);
+			$id = (isset($desc['id'])) ? $desc['id'] : '' ;
+			$communication = (isset($desc['name'])) ? $desc['name'] : '' ;
+			$communicationUppercase = strtoupper($communication);
+			$credit = (isset($desc['credit'])) ? $desc['credit'] : '' ;
+			$account_id=(isset($desc['account_id'])) ? $desc['account_id'] : '' ;
+			$account="";
+			if(!is_bool($account_id)) {
+				$account= substr($account_id[1],0,6);
+			}
+			$date = (isset($desc['create_date'])) ? $desc['create_date'] : '' ;
+			$date = substr($date,0,10);
+			$partner_id = (isset($desc['partner_id'])) ? $desc['partner_id'] : '' ;
+			$partner="";
+			if(!is_bool($partner_id)) {
+				$partner=$partner_id[1];
+			}
+			if($account=="499001" || $account=="499002") {
+				if($account=="499001") {
+					++$accountINI;
+				}
+				else {
+					++$accountIF;
+				}
+		    	print("<tr>
+		      	 	<td>$id</td>
+		   			<td>$date</td>
+		   			<td>$account</td>
+		     	  	<td>$communication</td>
+		     	  	<td>$partner</td>
+		     	  	<td>$credit €</td>
+		      	  	 </tr>\n") ;
+			}
+		}
+?>
+</tbody>
+</table>
+<?php
+		print("<b>#INIT: $accountINI - #IF: $accountIF</b><br/>");
+?>
 </form>
 </body>
 </html>
