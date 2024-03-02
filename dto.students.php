@@ -74,15 +74,24 @@ foreach($members as $member) {
     $dto = new DTO() ;
     $students = $dto->Students($fi) ;
     foreach($students as $student) {
-        $blocked = ($student->blocked) ? ' <i class="bi bi-sign-stop-fill text-danger" title="This member is blocked"></i>' : '' ;
-        $odoo_customer = $odoo_customers[strtolower($student->email)] ;
-        $bank_filled = ($odoo_customer['total_due'] < 0) ? ' <i class="bi bi-piggy-bank-fill text-success" title="This member has paid for future flights"></i>' : '' ;
+        if (isset($odoo_customers[strtolower($student->email)])) {
+            $odoo_customer = $odoo_customers[strtolower($student->email)] ;
+            $blocked = ($student->blocked) ? ' <i class="bi bi-sign-stop-fill text-danger" title="This member is blocked (' . $odoo_customer['total_due'] . '€ due)"></i>' : '' ;
+            $bank_filled = ($odoo_customer['total_due'] < 0) ? ' <i class="bi bi-piggy-bank-fill text-success" title="This member has paid ' .
+                (-$odoo_customer['total_due']) . '€ for future flights"></i>' : '' ;
+        } else {
+            $blocked = '<span class="text-danger">Ce membre n\'est pas lié à un compte dans la comptabilité</span>' ;
+            $bank_filled = '' ;
+        }
+        if ($student->mobilePhone == '')
+            $mobile_phone = "<i class=\"bi bi-telephone-fill text-danger\" title=\"Pas de téléphone mobile spécifié\">" ;
+        else
+            $mobile_phone = "<a href=\"tel:$student->mobilePhone\"><i class=\"bi bi-telephone-fill\" title=\"Call on mobile\"></i></a>" ;
         print("<tr>
             <td>
-                <a href=\"dto.student.php?student=$student->jom_id\" title=\"Display all flights\">$student->lastName $student->firstName <i class=\"bi bi-binoculars-fill\"></i></a>
+                <a href=\"dto.student.php?student=$student->jom_id\" title=\"Display all flights\">$student->lastName, $student->firstName <i class=\"bi bi-binoculars-fill\"></i></a>
                     <a href=\"mailto:$student->email\"><i class=\"bi bi-envelope-fill\" title=\"Send email\"></i></a>
-                    <a href=\"tel:$student->mobilePhone\"><i class=\"bi bi-telephone-fill\" title=\"Call on mobile\"></i></a>
-                    $blocked $bank_filled
+                    $mobile_phone $blocked $bank_filled
             </td>
             <td>$student->firstFlight <span class=\"badge text-bg-info\" title=\"Number of flights\"><i class=\"bi bi-airplane-fill\"></i> $student->countFlights</span><br/>
                 $student->lastFlight <span class=\"badge text-bg-info\" title=\"Days since last flight\"><i class=\"bi bi-calendar3\"></i> $student->daysSinceLastFlight</span></td>
