@@ -28,6 +28,7 @@ require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
 if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) journalise($userId, "F", "This admin page is reserved to administrators") ;
+
 $account = (isset($_REQUEST['account'])) ? $_REQUEST['account'] : '' ;
 $create = (isset($_REQUEST['create']) and is_numeric($_REQUEST['create'])) ? $_REQUEST['create'] : '' ;
 
@@ -48,6 +49,7 @@ if ($create) {
         'phone' => db2web($row['home_phone']),
         'mobile' => db2web($row['cell_phone'])
     )) ;
+    // TODO also copy the Joomla groups into Odoo categories !!!
 }
 ?>
 <h2>Liste de nos membres et leurs configurations Odoo@<?=$odoo_host?></h2>
