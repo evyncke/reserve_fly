@@ -111,6 +111,7 @@ if (false) {
             AND NOT EXISTS (SELECT * FROM $table_membership_fees AS f WHERE f.bkf_user = p.jom_id and f.bkf_year = '$membership_year')
             GROUP BY id";
 }				
+
 $result_members = mysqli_query($mysqli_link, $sql)
 			or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
 $invoiceCount = 0 ;
