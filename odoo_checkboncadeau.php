@@ -50,9 +50,8 @@ if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor and !$userIsFli
 
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 ?>
-<h2>Bons cadeaux IF et INIT payés sur le compte CBC @<?=$odoo_host?></h2>
-<p>Virements contenants la communication V-IF- et V-INIT-</p>
-<p>Filtre : Numéro du bon ou valeur ou nom (Exemple: 242203 ou 170 ou christine)</p>  
+<h2><p><b>Bons cadeaux non encore utilisés vus par ODOO.<br/>Comptes d'attente 499001 INIT et 499002 IF.</b></p></h2>
+<p id="id_nombre_bons_cadeaux">#INIT: ... - #IF: ... </p>
 <?php	
 $searchText="";
 print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeholder=\"Search..\" value=\"$searchText\">");
@@ -61,12 +60,53 @@ print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeho
 <form action="<?=$_SERVER['PHP_SELF']?>" id="checkboncadeau_form">
 <table class="table table-hover table-responsive table-bordered">
     <thead>
-        <tr><th>id</th><th>Date</th><th>Communication</th><th>Valeur</th></tr>
+       <tr><th>id</th><th>Date</th><th>Compte</th><th>Communication</th><th>Client</th><th>Valeur</th></tr>
     </thead>
     <tbody class="table-group-divider" id="myTable">
 <?php
 $result = $odooClient->SearchRead('account.move.line', array(), array('fields' => array('id', 'name', 'move_type','account_id','debit', 'credit', 'partner_id', 'create_date'))) ;
 $ids = array() ;
+
+$accountINI=0;
+$accountIF=0;
+foreach($result as $f=>$desc) {
+	//echo "f=";
+	//echo var_dump($f);
+	$id = (isset($desc['id'])) ? $desc['id'] : '' ;
+	$communication = (isset($desc['name'])) ? $desc['name'] : '' ;
+	$communicationUppercase = strtoupper($communication);
+	$credit = (isset($desc['credit'])) ? $desc['credit'] : '' ;
+	$account_id=(isset($desc['account_id'])) ? $desc['account_id'] : '' ;
+	$account="";
+	if(!is_bool($account_id)) {
+		$account= substr($account_id[1],0,6);
+	}
+	$date = (isset($desc['create_date'])) ? $desc['create_date'] : '' ;
+	$date = substr($date,0,10);
+	$partner_id = (isset($desc['partner_id'])) ? $desc['partner_id'] : '' ;
+	$partner="";
+	if(!is_bool($partner_id)) {
+		$partner=$partner_id[1];
+	}
+	if($account=="499001" || $account=="499002") {
+		if($account=="499001") {
+			++$accountINI;
+		}
+		else {
+			++$accountIF;
+		}
+    	print("<tr>
+      	 	<td>$id</td>
+   			<td>$date</td>
+   			<td>$account</td>
+     	  	<td>$communication</td>
+     	  	<td>$partner</td>
+     	  	<td>$credit €</td>
+      	  	 </tr>\n") ;
+	}
+}
+/*
+// affiche les 550001 (Compte CBC avec communication V-INI ou V-IF)
 foreach($result as $f=>$desc) {
 	//echo "f=";
 	//echo var_dump($f);
@@ -90,61 +130,18 @@ foreach($result as $f=>$desc) {
 	  	}
 	}
 }
+*/
 ?>
 </tbody>
 </table>
-<p></p>
-<p><b>Bons cadeaux non utilisés vu par ODOO (INIT: 4999001 et IF: 499002)</b></p>
-<table class="table table-hover table-responsive table-bordered">
-    <thead>
-        <tr><th>id</th><th>Date</th><th>account_id</th><th>Communication</th><th>Client</th><th>Valeur</th></tr>
-    </thead>
-    <tbody class="table-group-divider" id="myTable">
+
 <?php
-		$accountINI=0;
-		$accountIF=0;
-		foreach($result as $f=>$desc) {
-			//echo "f=";
-			//echo var_dump($f);
-			$id = (isset($desc['id'])) ? $desc['id'] : '' ;
-			$communication = (isset($desc['name'])) ? $desc['name'] : '' ;
-			$communicationUppercase = strtoupper($communication);
-			$credit = (isset($desc['credit'])) ? $desc['credit'] : '' ;
-			$account_id=(isset($desc['account_id'])) ? $desc['account_id'] : '' ;
-			$account="";
-			if(!is_bool($account_id)) {
-				$account= substr($account_id[1],0,6);
-			}
-			$date = (isset($desc['create_date'])) ? $desc['create_date'] : '' ;
-			$date = substr($date,0,10);
-			$partner_id = (isset($desc['partner_id'])) ? $desc['partner_id'] : '' ;
-			$partner="";
-			if(!is_bool($partner_id)) {
-				$partner=$partner_id[1];
-			}
-			if($account=="499001" || $account=="499002") {
-				if($account=="499001") {
-					++$accountINI;
-				}
-				else {
-					++$accountIF;
-				}
-		    	print("<tr>
-		      	 	<td>$id</td>
-		   			<td>$date</td>
-		   			<td>$account</td>
-		     	  	<td>$communication</td>
-		     	  	<td>$partner</td>
-		     	  	<td>$credit €</td>
-		      	  	 </tr>\n") ;
-			}
-		}
+		//print("<b>#INIT: $accountINI - #IF: $accountIF</b><br/>");
+		print("<script type='text/javascript'>
+			document.getElementById('id_nombre_bons_cadeaux').innerHTML ='Nombre de bons cadeaux INIT: $accountINI - Nombre de bons cadeaux IF: $accountIF';
+		</script>");
 ?>
-</tbody>
-</table>
-<?php
-		print("<b>#INIT: $accountINI - #IF: $accountIF</b><br/>");
-?>
+
 </form>
 </body>
 </html>
