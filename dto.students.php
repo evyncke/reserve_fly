@@ -23,7 +23,7 @@ if ($userId == 0) {
 	exit ;
 }
 if (! ($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) //Exception for Dominique
-    journalise($userId, "F", "Vous devez être adminstrateur ou instructeur pour voir cette page.") ;
+    journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 
