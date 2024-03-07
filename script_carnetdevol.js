@@ -203,11 +203,18 @@ function carnetdevol_page_loaded() {
   else {
       document.getElementById("id_submitButton").value="Modifiez segment "+aSegmentCountText;	
   }
+  
   if(default_qrcode_communication_pilote!="") {
 	  if(default_fqrcode_montant_total_pilote!=0) {
-		  fillQRCode(default_qrcode_communication_pilote,default_fqrcode_montant_total_pilote);
+		  document.getElementById("id_payment_after").style.display="";
+		  fillQRCode(default_qrcode_communication_pilote,default_fqrcode_montant_total_pilote,"_after");
 	  }
   }
+  else {
+	  document.getElementById("id_payment_after").style.display="none";
+  }
+  document.getElementById("id_cdv_qrcode_montant_total_pilote_row").style.display="none";
+  document.getElementById("id_cdv_qrcode_communication_pilote_row").style.display="none";
 }
 
 //==============================================
@@ -1392,30 +1399,30 @@ function payQRCode(amount) {
 	var avion=document.getElementById("id_cdv_aircraft").value;
 	var date=document.getElementById("id_cdv_flight_date").value;
 	var heure=document.getElementById("id_cdv_heure_depart").value;
-	var communication ='Vol '+ avion + ' '+ date + '-' + heure + " " + userLastName;
-	fillQRCode(communication, amount);
+	var communication ='Vol '+ avion + ' '+ date + ' ' + heure + " " + userLastName;
+	fillQRCode(communication, amount, "");
 	document.getElementById('id_cdv_qrcode_montant_total_pilote').value = amount ;
 	document.getElementById('id_cdv_qrcode_communication_pilote').value = communication ;
 }
 
 //==========================================
-function fillQRCode(communication, amount) {
+function fillQRCode(communication, amount, theAfterString) {
 	// CBC
 	var epcBic = 'CREGBEBB' ;
 	var epcName = 'Royal Aero Para Club Spa' ;
 	var epcIban = 'BE64732038421852' ;
 	if (amount <= 0.0 || amount <= 0) {
-		document.getElementById('id_payment').style.display = 'none' ;
+		document.getElementById('id_payment'+theAfterString).style.display = 'none' ;
 		return ;
 	}
-	document.getElementById('id_payment').style.display = "" ;
-	document.getElementById('id_payment_amount').innerText = amount ;
-	document.getElementById('id_payment_communication').innerText = communication ;
+	document.getElementById('id_payment'+theAfterString).style.display = "" ;
+	document.getElementById('id_payment_amount'+theAfterString).innerText = amount ;
+	document.getElementById('id_payment_communication'+theAfterString).innerText = communication ;
 	// Should update to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + communication + "\n" + communication ;
 	//var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " " + userLastName + "\n" + reason + " " + userLastName ;
-	document.getElementById('id_payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
+	document.getElementById('id_payment_qr_code'+theAfterString).src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 }
 
 

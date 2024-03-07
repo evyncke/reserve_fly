@@ -559,6 +559,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	print("<td>$cdv_heure_arrivee</td>");
 	print("<td>$cdv_duree</td>");
 	print("</tbody></table></center>");
+			
 		
 	//----------------------------------------------------
 	// Associate the flight with a DTO fligth
@@ -588,6 +589,12 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		//print("Ce n'est pas un eleve</br");
 	}
 }
+// QRCode apres enregistrement
+print("<center><span id=\"id_payment_after\">");
+print("<h3>Paiement du vol - Montant: <span id=\"id_payment_amount_after\"></span> &euro;</br>");
+print("Communication : \"<span id=\"id_payment_communication_after\"></span>\"</br>Compte : BE64 7320 3842 1852</h3>");
+print("<img style=\"text-align: right;\" id=\"id_payment_qr_code_after\" width=\"150\" height=\"150\"  src=\"https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>\"></center>");
+print("</span>");
 
 	//----------------------------------------------------
 	// Associate the flight with an IF or an INIT flight
@@ -913,8 +920,6 @@ else {
 	}
 }
 print("</script>\n");
-
-
 ?>
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" onkeydown="return event.key != 'Enter';" autocomplete="off">
 <p> </p>
@@ -1150,9 +1155,9 @@ print("<button type=\"button\" value=\"Fill\" onclick=\"window.location.href='$_
 </table>
 
 <center><span id="id_payment">
-<h3>Paiement immédiat par QR-code - Montant: <span id="id_payment_amount"></span> &euro;</br>
-Communication : "<span id="id_payment_communication"></span>"</h3>
-<img style="text-align: right;" id="id_payment_qr_code" width="150" height="150" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>"></center>
+<h3>Paiement du vol - Montant: <span id="id_payment_amount"></span> &euro;</br>
+Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 7320 3842 1852</h3>
+<img style="text-align: right;" id="id_payment_qr_code" width="150" height="150" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=url>"></center>
 </span>
 
 <p></p>
