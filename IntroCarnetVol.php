@@ -66,7 +66,9 @@ print("var default_compteur_moteur_end=\"\";\n");
 print("var default_compteur_flight_start=\"\";\n");				 	
 print("var default_compteur_flight_end=\"\";\n");	
 print("var default_flight_reference=\"\";\n");	
-print("var default_flight_id=0;\n");	
+print("var default_flight_id=0;\n");
+print("var default_qrcode_communication_pilote=\"\";\n");
+print("var default_fqrcode_montant_total_pilote=0;\n");	
 
 // bookingid is defined by the key "id" (coming from the booking) or by the key "cdv_booking" (coming from this page)
 if (isset($_REQUEST['auth']) and $_REQUEST['auth'] != '') {
@@ -370,6 +372,12 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$cdv_frais_CP_PAX=$_REQUEST['cdv_frais_CP_PAX'];
 	$cdv_frais_remarque=$_REQUEST['cdv_frais_remarque'];
 	$cdv_frais_DC=$_REQUEST['cdv_frais_DC'];
+	$cdv_qrcode_montant_total_pilote=$_REQUEST['cdv_qrcode_montant_total_pilote'];
+	$cdv_qrcode_communication_pilote=$_REQUEST['cdv_qrcode_communication_pilote'];
+	print("<script>\n");
+	print("var default_qrcode_communication_pilote=\"$cdv_qrcode_communication_pilote\";\n");
+	print("var default_fqrcode_montant_total_pilote=$cdv_qrcode_montant_total_pilote;\n");	
+	print("</script>\n");
 	
     $planeId=$cdv_aircraft;
 	$planeModel=$cdv_aircraft_model;
@@ -551,7 +559,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	print("<td>$cdv_heure_arrivee</td>");
 	print("<td>$cdv_duree</td>");
 	print("</tbody></table></center>");
-	
+		
 	//----------------------------------------------------
 	// Associate the flight with a DTO fligth
 	// Only if pilot is a student
@@ -1082,6 +1090,14 @@ else {
 <option value="No DC">No DC</option>
 </select></td>
 </tr>
+<tr id="id_cdv_qrcode_montant_total_pilote_row">
+<td class="segmentLabel">Montant Total Pilote</td>
+<td class="segmentInput"><input id="id_cdv_qrcode_montant_total_pilote" name="cdv_qrcode_montant_total_pilote"  type="text" value="0" /></td>
+</tr>
+<tr id="id_cdv_qrcode_communication_pilote_row">
+<td class="segmentLabel">Communication Pilote</td>
+<td class="segmentInput"><input id="id_cdv_qrcode_communication_pilote" name="cdv_qrcode_communication_pilote"  type="text" value="communication" /></td>
+</tr>
 </tbody>
 </table>
 <p><center><input type="submit" id="id_submitButton" value="Enregistrer le vol" name="action"/>&nbsp;
@@ -1132,6 +1148,13 @@ print("<button type=\"button\" value=\"Fill\" onclick=\"window.location.href='$_
 </tr>
 </tbody>
 </table>
+
+<center><span id="id_payment">
+<h3>Paiement immédiat par QR-code - Montant: <span id="id_payment_amount"></span> &euro;</br>
+Communication : "<span id="id_payment_communication"></span>"</h3>
+<img style="text-align: right;" id="id_payment_qr_code" width="150" height="150" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>"></center>
+</span>
+
 <p></p>
 <p><center><input class="button" type="button" value="Mon Folio" onclick="javascript:document.location.href='../../resa/myfolio.php';"></input></center>
 <center><input class="button" type="button" value="Mon carnet de vol" onclick="javascript:document.location.href='../../resa/mobile_mylog.php';"></input></center>
@@ -1150,7 +1173,7 @@ print("<button type=\"button\" value=\"Fill\" onclick=\"window.location.href='$_
 <script src="https://www.spa-aviation.be/resa/pilots.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/CP_frais_type.js"\></script>-->
 <script src="https://www.spa-aviation.be/resa/prix.js"></script>
-<!--<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
+<!---<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
 <script src="https://www.spa-aviation.be/resa/script_carnetdevol.js"></script>
 </body>
 </html>

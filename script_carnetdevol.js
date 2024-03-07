@@ -203,7 +203,11 @@ function carnetdevol_page_loaded() {
   else {
       document.getElementById("id_submitButton").value="Modifiez segment "+aSegmentCountText;	
   }
-
+  if(default_qrcode_communication_pilote!="") {
+	  if(default_fqrcode_montant_total_pilote!=0) {
+		  fillQRCode(default_qrcode_communication_pilote,default_fqrcode_montant_total_pilote);
+	  }
+  }
 }
 
 //==============================================
@@ -677,6 +681,8 @@ function compute_prix()
 	document.getElementById("id_cdv_prix_total_cp2").value=aPrixTotalCP2.toFixed(2)+" €";
 	document.getElementById("id_cdv_prix_reference").value="Date/PilotID/reference";
 	document.getElementById("id_cdv_prix_solde").value=aSolde.toFixed(2)+" €";
+	
+	payQRCode(aPrixTotalPilote) ;
 }
 
 //==============================================
@@ -1312,6 +1318,7 @@ function check_CP()
 	
 	return true;
 }
+
 //===============================================
 // Check if flight IF or INI is on segment 1 only ()
 function check_IFINIT()
@@ -1377,6 +1384,41 @@ function compute_frais_CP()
 		document.getElementById("id_cdv_frais_CP_PAX").style.display="none";
 	}	
 }
+
+//==========================================
+function payQRCode(amount) {
+	var userLastNameId = document.getElementById("id_cdv_pilot_name").value;
+	var userLastName = getPiloteNameFromId(members, userLastNameId);
+	var avion=document.getElementById("id_cdv_aircraft").value;
+	var date=document.getElementById("id_cdv_flight_date").value;
+	var heure=document.getElementById("id_cdv_heure_depart").value;
+	var communication ='Vol '+ avion + ' '+ date + '-' + heure + " " + userLastName;
+	fillQRCode(communication, amount);
+	document.getElementById('id_cdv_qrcode_montant_total_pilote').value = amount ;
+	document.getElementById('id_cdv_qrcode_communication_pilote').value = communication ;
+}
+
+//==========================================
+function fillQRCode(communication, amount) {
+	// CBC
+	var epcBic = 'CREGBEBB' ;
+	var epcName = 'Royal Aero Para Club Spa' ;
+	var epcIban = 'BE64732038421852' ;
+	if (amount <= 0.0 || amount <= 0) {
+		document.getElementById('id_payment').style.display = 'none' ;
+		return ;
+	}
+	document.getElementById('id_payment').style.display = "" ;
+	document.getElementById('id_payment_amount').innerText = amount ;
+	document.getElementById('id_payment_communication').innerText = communication ;
+	// Should update to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
+	// There should be 2 reasons, first one is structured, the second one is free text
+	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + communication + "\n" + communication ;
+	//var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " " + userLastName + "\n" + reason + " " + userLastName ;
+	document.getElementById('id_payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
+}
+
+
 //===============================================
 function GetPlaneCompteurType()
 {
@@ -1409,7 +1451,16 @@ function computeRenamedPilots(pilots_renamed, thePilots)
    }
    pilots_renamed.sort(compareName);
 }
-
+//===============================================
+function getPiloteNameFromId(thePilots, theId)
+{
+    for (var i = 0; i < thePilots.length; i++) {
+ 	   if(thePilots[i].id == theId) {
+		   return  thePilots[i].name;
+	   }
+   }
+   return "";
+}
 //===============================================
 function computePAX(PAX)
 {
