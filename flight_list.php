@@ -88,7 +88,7 @@ if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == "true") {
 
 <table class="table table-striped table-responsive table-hover" id="allFlights">
 <thead>
-<tr><th>Réf</th><th>Actions</th><th>Créé le</th><th>Etat</th><th>Depuis</th><th>Vol</th><th id="pilots">Pilote</th><th>Type</th><th>Client</th><th>Remarque client</th><th>Notes club</th></tr>
+<tr><th>#</th><th>Réf</th><th>Actions</th><th>Créé le</th><th>Etat</th><th>Depuis</th><th>Vol</th><th id="pilots">Pilote</th><th>Type</th><th>Client</th><th>Remarque client</th><th>Notes club</th></tr>
 </thead>
 <tbody>
 <?php
@@ -100,6 +100,7 @@ $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() AS today, SUM(fl_amoun
 	GROUP BY f_id
 	ORDER BY f_id DESC") 
 	or journalise($userId, "F", "Impossible de lister les vols: " . mysqli_error($mysqli_link));
+	$count=0;
 while ($row = mysqli_fetch_array($result)) {
 	$reference = db2web($row['f_reference']) ;
 	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"glyphicon glyphicon-envelope\" title=\"Envoyer un email\"></span></a>" : "" ; 
@@ -132,7 +133,9 @@ while ($row = mysqli_fetch_array($result)) {
 		$date_vol = "ETD $row[r_start] ($row[r_plane])"  ;
 	else
 		$date_vol = "à déterminer" ;
-	print("<tr$row_style><td>$reference</td><td>$edit$print$pay</td><td>$row[f_date_created]</td><td>$status</td><td>$date_vol</td>
+	
+	$count++;
+	print("<tr$row_style><td>$count</td><td>$reference</td><td>$edit$print$pay</td><td>$row[f_date_created]</td><td>$status</td><td>$date_vol</td>
 		<td>" . db2web($row['first_name']) . " <b>" . db2web($row['last_name']) . "</b></td>
 		<td>$type$is_gift</td>
 		<td>" . db2web($row['p_fname']) . " <b>" . db2web($row['p_lname']) . "$email$telephone</b></td>

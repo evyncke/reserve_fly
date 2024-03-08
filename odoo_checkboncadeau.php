@@ -60,13 +60,13 @@ print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeho
 <form action="<?=$_SERVER['PHP_SELF']?>" id="checkboncadeau_form">
 <table class="table table-hover table-responsive table-bordered">
     <thead>
-       <tr><th>id</th><th>Date</th><th>Compte</th><th>Communication</th><th>Client</th><th>Valeur</th></tr>
+       <tr><th>#</th><th>id</th><th>Date</th><th>Compte</th><th>Communication</th><th>Client</th><th>Valeur</th></tr>
     </thead>
     <tbody class="table-group-divider" id="myTable">
 <?php
 $result = $odooClient->SearchRead('account.move.line', array(), array('fields' => array('id', 'name', 'move_type','account_id','debit', 'credit', 'partner_id', 'create_date'))) ;
 $ids = array() ;
-
+$rowNumber=0;
 $accountINI=0;
 $accountIF=0;
 foreach($result as $f=>$desc) {
@@ -95,8 +95,10 @@ foreach($result as $f=>$desc) {
 		else {
 			++$accountIF;
 		}
+		$rowNumber++;
     	print("<tr>
-      	 	<td>$id</td>
+      	 	<td>$rowNumber</td>
+		    <td>$id</td>
    			<td>$date</td>
    			<td>$account</td>
      	  	<td>$communication</td>
