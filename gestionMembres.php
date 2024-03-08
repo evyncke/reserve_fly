@@ -605,7 +605,11 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		$email=db2web($row['email']);		
 		$nom=$row['last_name'];
 		if($nom == "") $nom=$row['name'];
-		$prenom=$row['first_name'];		
+		$prenom=$row['first_name'];	
+		if($row['last_name']=="") {
+			$row['last_name']="xxxxx";
+		}
+			
 		$groups = explode(',', $row['groups']) ;
 		$effectif = (in_array($joomla_effectif_group, $groups)) ? $CheckMark : '' ;
 		$pilot = (in_array($joomla_pilot_group, $groups)) ? $CheckMark : '' ;
