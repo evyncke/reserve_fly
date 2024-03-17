@@ -204,11 +204,9 @@ function carnetdevol_page_loaded() {
       document.getElementById("id_submitButton").value="Modifiez segment "+aSegmentCountText;	
   }
   
-  if(default_qrcode_communication_pilote!="") {
-	  if(default_fqrcode_montant_total_pilote!=0) {
-		  document.getElementById("id_payment_after").style.display="";
-		  fillQRCode(default_qrcode_communication_pilote,default_fqrcode_montant_total_pilote,"_after");
-	  }
+  if(default_qrcode_communication_pilote!="" && default_fqrcode_montant_total_pilote!=0) {
+	document.getElementById("id_payment_after").style.display="";
+	fillQRCode(default_qrcode_communication_pilote,default_fqrcode_montant_total_pilote,"_after");
   }
   else {
 	  document.getElementById("id_payment_after").style.display="none";
@@ -1400,6 +1398,15 @@ function payQRCode(amount) {
 	var date=document.getElementById("id_cdv_flight_date").value;
 	var heure=document.getElementById("id_cdv_heure_depart").value;
 	var communication ='Vol '+ avion + ' '+ date + ' ' + heure + " " + userLastName;
+	
+	var dc=document.getElementById("id_cdv_frais_DC").value;
+	if(dc=="DC") {
+		var piloteFunction=document.getElementById("id_cdv_pilot_function").value;
+		if(piloteFunction!="PIC") {
+			var instructor=document.getElementById("id_cdv_flight_instructor").value;
+			communication += " DC " + GetPropertyFromId(instructor, "name", GetInstructors());
+		}
+	}
 	fillQRCode(communication, amount, "");
 	document.getElementById('id_cdv_qrcode_montant_total_pilote').value = amount ;
 	document.getElementById('id_cdv_qrcode_communication_pilote').value = communication ;
