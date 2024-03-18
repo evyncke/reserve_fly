@@ -106,6 +106,9 @@ if ($create or $modify) {
 	if ($email == '') die("Email address cannot be empty") ;
 	$phone = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['phone'])) ;
 	if ($phone == '') die("Phone number cannot be empty") ;
+	$street = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['street'])) ;
+	$zip = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['zip'])) ;
+	$city = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['city'])) ;
 	if ($create) {
 		$weight = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['weight'])) ;
 		if ($weight == '') $weight = 0 ;
@@ -121,8 +124,8 @@ if ($create or $modify) {
 }
 
 if ($create) {
-	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_birthdate, p_weight, p_gender)
-		VALUES('" . web2db($lname) . "', '" . web2db($fname) . "', '$email', '$phone', '$birthdate', $weight, '$gender')")
+	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_birthdate, p_weight, p_gender, p_street, p_zip, p_city)
+		VALUES('" . web2db($lname) . "', '" . web2db($fname) . "', '$email', '$phone', '$birthdate', $weight, '$gender', '$street', '$zip', '$city')")
 		or journalise($userId, "F", "Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
 	$pax_id = mysqli_insert_id($mysqli_link) ; 
 	// As f_reference is a unique index, let's simply use a random value
@@ -156,7 +159,7 @@ if ($modify) {
 	mysqli_free_result($result) ;
 	$pax_id = $row_pax['pr_pax'] ;
 	mysqli_query($mysqli_link, "UPDATE $table_pax
-			SET p_lname='" . web2db($lname) . "', p_fname='" . web2db($fname) . "', p_email='$email', p_tel='$phone', p_gender='$gender'
+			SET p_lname='" . web2db($lname) . "', p_fname='" . web2db($fname) . "', p_email='$email', p_tel='$phone', p_gender='$gender', p_street='$street', p_zip='$zip', p_city='$city'
 			WHERE p_id = $pax_id")
 		or journalise($userId, "F", "Cannot modify contact, system error: " . mysqli_error($mysqli_link)) ;
 	$sql = "UPDATE $table_flight 
