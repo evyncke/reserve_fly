@@ -109,6 +109,7 @@ if ($create or $modify) {
 	$street = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['street'])) ;
 	$zip = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['zip'])) ;
 	$city = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['city'])) ;
+	$country = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['country'])) ;
 	if ($create) {
 		$weight = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['weight'])) ;
 		if ($weight == '') $weight = 0 ;
@@ -124,8 +125,8 @@ if ($create or $modify) {
 }
 
 if ($create) {
-	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_birthdate, p_weight, p_gender, p_street, p_zip, p_city)
-		VALUES('" . web2db($lname) . "', '" . web2db($fname) . "', '$email', '$phone', '$birthdate', $weight, '$gender', '" . web2db($street) . "', '$zip', '" . web2db($city) . "')")
+	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_birthdate, p_weight, p_gender, p_street, p_zip, p_city, p_country)
+		VALUES('" . web2db($lname) . "', '" . web2db($fname) . "', '$email', '$phone', '$birthdate', $weight, '$gender', '" . web2db($street) . "', '$zip', '" . web2db($city) . "', '" . web2db($country) . "')")
 		or journalise($userId, "F", "Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
 	$pax_id = mysqli_insert_id($mysqli_link) ; 
 	// As f_reference is a unique index, let's simply use a random value
@@ -159,7 +160,7 @@ if ($modify) {
 	mysqli_free_result($result) ;
 	$pax_id = $row_pax['pr_pax'] ;
 	mysqli_query($mysqli_link, "UPDATE $table_pax
-			SET p_lname='" . web2db($lname) . "', p_fname='" . web2db($fname) . "', p_email='$email', p_tel='$phone', p_gender='$gender', p_street='" . web2db($street) . "', p_zip='$zip', p_city='" . web2db($city) . "'
+			SET p_lname='" . web2db($lname) . "', p_fname='" . web2db($fname) . "', p_email='$email', p_tel='$phone', p_gender='$gender', p_street='" . web2db($street) . "', p_zip='$zip', p_city='" . web2db($city) . "', p_country='" . web2db($country) . "'
 			WHERE p_id = $pax_id")
 		or journalise($userId, "F", "Cannot modify contact, system error: " . mysqli_error($mysqli_link)) ;
 	$sql = "UPDATE $table_flight 
@@ -486,6 +487,10 @@ if (isset($flight_id) and $flight_id != 0) {
 	<div class="form-group col-xs-12 col-sm-4">
 		<label for="phone">Ville:</label>
 		<input type="tel" class="form-control" name="city">
+	</div><!-- form-group -->
+	<div class="form-group col-xs-12 col-sm-4">
+		<label for="phone">Pays:</label>
+		<input type="tel" class="form-control" name="country">
 	</div><!-- form-group -->
 </div> <!-- row -->
 
@@ -845,6 +850,7 @@ setValue('fname', '<?=db2web(addslashes($row_flight['p_fname']))?>') ;
 setValue('street', '<?=db2web(addslashes($row_flight['p_street']))?>') ;
 setValue('zip', '<?=db2web($row_flight['p_zip'])?>') ;
 setValue('city', '<?=db2web(addslashes($row_flight['p_city']))?>') ;
+setValue('country', '<?=db2web(addslashes($row_flight['p_country']))?>') ;
 setValue('email', '<?=db2web($row_flight['p_email'])?>') ;
 setValue('phone', '<?=db2web($row_flight['p_tel'])?>') ;
 setValue('comment', '<?=db2web(str_replace(array("\r\n", "\n", "\r"), "<br/>", addslashes($row_flight['f_description'])))?>') ;
