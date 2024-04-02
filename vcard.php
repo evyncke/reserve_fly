@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2023 Eric Vyncke
+   Copyright 2014-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ if (isset($_REQUEST['qr']) and $_REQUEST['qr'] != '') {
 <body>
 <h1>Contact QR-code pour <?=$me['first_name'] . ' ' . $me['last_name']?></h1>
 <?php
-	print("<img src=\"https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" . urlencode($s) . "\">") ;
+	print("<img src=\"qr-code.php?chs=300x300&chl=" . urlencode($s) . "\">") ;
 	journalise($userId, 'I', "QR-code for $me[name] displayed") ;
 } else {
 		header("Content-Type: text/vcard;charset=UTF-8") ;

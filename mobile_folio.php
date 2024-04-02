@@ -385,7 +385,7 @@ if (isset($_REQUEST['previous']))  {
 	$invoice_total = round($cost_grand_total, 2)  ;
 	
 } else {
-	$invoice_reason = 'solde après folio' ;
+	$invoice_reason = 'solde selon folio' ;
 	$invoice_total = round($cost_grand_total - $balance, 2) ;
 	
 }
@@ -400,7 +400,7 @@ https://github.com/typpo/quickchart
 <h3>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
 <p>Le QR-code est à utiliser avec une application bancaire
 et pas encore Payconiq (ce dernier étant payant pour le commerçant).</p>
-<img id="payment_qr_code" width="200" height="200" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>">
+<img id="payment_qr_code" width="200" height="200" src="qr-code.php?chs=200x200&&chl=<?=urlencode($epcString)?>">
 </span id="payment">
 <script>
 var 
@@ -422,7 +422,7 @@ function pay(reason, amount) {
 	// Should update to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " " + userLastName + "\n" + reason + " " + userLastName ;
-	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
+	document.getElementById('payment_qr_code').src = "qr-code.php?chs=200x200&&chl=" + encodeURI(epcURI) ;
 }
 
 pay(invoice_reason, invoice_total) ;

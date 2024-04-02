@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke - Patrick Reginster
+   Copyright 2023-2024 Eric Vyncke - Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ public $invoiceCommunication;
 		$h=32;
 	    $this->SetXY(150,$y);
 		
-		$url="https://chart.googleapis.com/chart?cht=qr&chs=125x125&&chl=BCD%0A001%0A1%0ASCT%0ACREGBEBB%0ARoyal%20Aero%20Para%20Club%20Spa%0ABE64732038421852%0AEUR".$totalFolio."%0A".$communication."%0A".$communication;
+		$url="qr-code.php?chs=125x125&&chl=BCD%0A001%0A1%0ASCT%0ACREGBEBB%0ARoyal%20Aero%20Para%20Club%20Spa%0ABE64732038421852%0AEUR".$totalFolio."%0A".$communication."%0A".$communication;
 		//print("url=$url</br>");
 		$url=str_replace(" ","%20",$url);
 		//print("url=$url</br>");

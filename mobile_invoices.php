@@ -152,7 +152,7 @@ if ($count == 0) print("<p class=\"alter-info\">Hélas, pas encore de facture à
 <p>Le QR-code contient votre identifiant au niveau de la comptabilité
 RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant pour le commerçant).</p>
-<img id="payment_qr_code" width="200" height="200" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>">
+<img id="payment_qr_code" width="300" height="300" src="qr-code.php?chs=300x300&&chl=<?=urlencode($epcString)?>">
 </span id="payment">
 <script>
 var 
@@ -173,7 +173,7 @@ function pay(reason, amount) {
 	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + "\n" + reason ;
-	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
+	document.getElementById('payment_qr_code').src = "qr-code.php?chs=300x300&&chl=" + encodeURI(epcURI) ;
 }
 
 </script>

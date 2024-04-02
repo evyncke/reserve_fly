@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2023 Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ if ($count == 0) print("<p class=\"text-warning\">Hélas, pas encore de facture 
 <p>Le QR-code contient votre identifiant au niveau de la comptabilité
 RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant pour le commerçant).</p>
-<img id="payment_qr_code" width="200" height="200" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>">
+<img id="payment_qr_code" width="200" height="200" src="qr-code.php?chs=300x300&&chl=<?=urlencode($epcString)?>">
 </span id="payment">
 <script>
 var 
@@ -148,12 +148,12 @@ function pay(reason, amount) {
 	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " client " + compteCiel + "\n" + reason + " client " + compteCiel + '/' + userLastName ;
-	document.getElementById('payment_qr_code').src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
+	document.getElementById('payment_qr_code').src = "qr-code.php?chs=300x300&&chl=" + encodeURI(epcURI) ;
 }
 
 </script>
 <hr>
-<p><small>R&eacute;alisation: Eric Vyncke, 2022-2023, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
+<p><small>R&eacute;alisation: Eric Vyncke, 2022-2024, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
 Version: PHP=<?=$version_php?></small></p>
 </div> <!-- container fluid -->
 </body>
