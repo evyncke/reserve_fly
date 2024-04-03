@@ -1178,7 +1178,7 @@ Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 
 <script src="https://www.spa-aviation.be/resa/pilots.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/CP_frais_type.js"\></script>-->
 <script src="https://www.spa-aviation.be/resa/prix.js"></script>
-<!---<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
+<!--<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
 <script src="https://www.spa-aviation.be/resa/script_carnetdevol.js"></script>
 </body>
 </html>

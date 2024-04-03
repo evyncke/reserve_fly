@@ -4,7 +4,7 @@ function carnetdevol_page_loaded() {
 
   //document.getElementById("id_valeur_virement").style.display="none";
   //document.getElementById("id_cdv_bookingid_row").style.display="none";
-  document.getElementById("id_cdv_nombre_crew_row").style.display="none"; 
+  //document.getElementById("id_cdv_nombre_crew_row").style.display="none"; 
    
   document.getElementById("id_cdv_bookingid").readOnly=true;;
   document.getElementById("id_cdv_bookingid").style.backgroundColor = ReadOnlyColor;
@@ -401,6 +401,8 @@ function compute_prix_avion()
 	var aPrixAvion=Number(GetPropertyFromId(anAircraftName, "prix", planes_properties));
     var aCompteurVol=Number(GetPropertyFromId(anAircraftName, "compteur_vol", planes_properties));
 	var aDureeText="";
+	// Ancienne facon de calculer. AML: Duree de vol
+	/*
 	if(aCompteurVol==0) {
 		aDureeText=document.getElementById("id_cdv_compteur_duree").value;
 	}
@@ -408,7 +410,15 @@ function compute_prix_avion()
 		//PH-AML
 		aDureeText=document.getElementById("id_cdv_compteur_vol_duree").value;		
 	}
+	*/
+	// Nouvelle facon de calculer: AML: Duree moteur - 12 min
+	aDureeText=document.getElementById("id_cdv_compteur_duree").value;
 	var aDuree=convertDureeEnMinute(aDureeText);
+	if(aCompteurVol!=0) {
+		//PH-AML
+		aDuree-=12;	
+		if(aDuree<0) aDuree=0;
+	}	
  	return aDuree*aPrixAvion;
 }
 
@@ -1392,6 +1402,8 @@ function compute_frais_CP()
 
 //==========================================
 function payQRCode(amount) {
+	var aValue=amount;
+	if(aValue<0.0) aValue=0.0;
 	var userLastNameId = document.getElementById("id_cdv_pilot_name").value;
 	var userLastName = getPiloteNameFromId(members, userLastNameId);
 	var avion=document.getElementById("id_cdv_aircraft").value;
@@ -1407,8 +1419,8 @@ function payQRCode(amount) {
 			communication += " DC " + GetPropertyFromId(instructor, "name", GetInstructors());
 		}
 	}
-	fillQRCode(communication, amount, "");
-	document.getElementById('id_cdv_qrcode_montant_total_pilote').value = amount ;
+	fillQRCode(communication, aValue, "");
+	document.getElementById('id_cdv_qrcode_montant_total_pilote').value = aValue ;
 	document.getElementById('id_cdv_qrcode_communication_pilote').value = communication ;
 }
 

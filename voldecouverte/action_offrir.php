@@ -131,7 +131,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$flight_type = 'I' ; 
 	else 
 		$flight_type = '?' ;
-	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_street, p_zip, p_city)
+	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_street, p_zip, p_city, p_country)
 			VALUES(
 			'" . mysqli_real_escape_string($mysqli_link, web2db($lastname1)) . "',
 			'" . mysqli_real_escape_string($mysqli_link, web2db($firstname1)) . "',
@@ -139,7 +139,8 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 			'" . mysqli_real_escape_string($mysqli_link, $contactphone) . "', 
 			'" . mysqli_real_escape_string($mysqli_link, web2db("$rue $boitelettre")) . "', 
 			'" . mysqli_real_escape_string($mysqli_link, $codepostal) . "',
-			'" . mysqli_real_escape_string($mysqli_link, web2db("$ville $pays")) . "')")
+			'" . mysqli_real_escape_string($mysqli_link, web2db("$ville")) . "', 
+			'" . mysqli_real_escape_string($mysqli_link, web2db("$pays")) . "')")
 			or journalise(0, "E", "Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
 	$contact_id = mysqli_insert_id($mysqli_link) ;
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel)
@@ -224,7 +225,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$message.="Valeur &agrave; verser sur le compte BE64 7320 3842 1852 BIC CREGBEBB au nom de RAPCS asbl: ".htmlentities($valeur_versement) ." &euro;<br/>";
 		$message.="<p>Communication &agrave; associer au virement: Bon cadeau $flight_reference de ".htmlentities($firstname1) ." " . htmlentities($lastname1)." - Date: ".$today."</p>";
         $epcURI = "BCD\n001\n1\nSCT\nCREGBEBB\nRAPCS asbl\nBE64732038421852\nEUR$valeur_versement\nBon $flight_reference $lastname1 $today\nBon $flight_reference $lastname1 $today" ;
-        $message .= "<p>Ou utilisez le QR-code ci-dessous et votre application bancaire (<b>pas</b> payconiq):<br/><img width=300 height=300 src=\"https://chart.googleapis.com/chart?cht=qr&chs=300x300&chld=M&chl=" . urlencode($epcURI) . "\"></p>\n" ;
+        $message .= "<p>Ou utilisez le QR-code ci-dessous et votre application bancaire (<b>pas</b> payconiq):<br/><img width=300 height=300 src=\"https://spa-aviation.be/resa/qr-code.php?cht=qr&chs=200x200&&chl=" . urlencode($epcURI) . "\"></p>\n" ;
 		if(count($remarques)==0 || $remarques[0]=="") {
 			$message.="Pas de Remarques<br/>";
 		} else {
