@@ -16,15 +16,32 @@
    limitations under the License.
 
 This script emulates the obsolete Google chart code
-qr-code.php?cht=qr&chs=300x300&&chl
+qr-code.php?cht=qr&chs=300x300&&chl=string
 */
-if (! isset($_REQUEST['chs'])) die('Missing paramater chs') ;
-$chs = trim($_REQUEST['chs']) ;
+if (! isset($_REQUEST['chs'])) {
+    // Default phpqrcode values
+    $size = 3 ;
+    $margin = 4 ;
+} else {
+    $chs = trim($_REQUEST['chs']) ;
+    $parts = explode('x', $chs) ;
+    if ($parts[0] != $parts[1]) die('Incorrect value for chs') ;
+    // margin increase dimension by 2 x size * margin
+    // size = 1 -> 53x53 (no margin)
+    // size = 2 -> 106x106 (no margin)
+    // size = 3 -> 159x159 (no margin), 171x171 (margin = 2)
+    // size = 4 -> 212x212 (no margin), 228x228 (margin = 2)
+    // size = 5 -> 265x265 (no margin)
+    // size should be max(1, chs / 53)
+    // margin should be (chs - size * 53)
+    $size = max(1, round($parts[0] / 53)) ;
+    $margin = 0 ;
+}   
 if (! isset($_REQUEST['chl'])) die('Missing paramater chl') ;
 $chl = trim($_REQUEST['chl']) ;
 
 header('Content-type: image/png'); // Unsure whether required though
 include('phpqrcode.php');
 // Parameters, see https://phpqrcode.sourceforge.net/docs/html/class_q_rcode.html
-QRcode::png($chl, false, QR_ECLEVEL_Q);
+QRcode::png($chl, false, QR_ECLEVEL_Q, $size, $margin);
 ?>
