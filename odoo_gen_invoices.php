@@ -77,7 +77,7 @@ $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_passwor
 
 # Analytic accounts and products are harcoded
 $plane_product_id = 6 ;
-$tax_product_id = 20; // Hard coded TILEA taxes
+$tax_product_id = 53; // Hard coded TILEA taxes
 // Before there was one product per FI, now all the same but let's keep the code here
 $fi_product_id = array(46 => 5, // Benoît Mendes
     50 => 5, // Luc Wynand
@@ -96,9 +96,11 @@ $fi_analytic = array(46 => 36, // Benoît Mendes
     59 => 35, // Nicolas Claessen
     118 => 33) ; // David Gaspar
 
+$pax_telia_analytic = 40; // Centre de cout telia taxe passager
+
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198
 if (false) {
-    $jom_ids = "62, 66, 348, 92";
+    $jom_ids = "438";
 //    $jom_ids = "62, 66" ;
     $sql = "SELECT u.id AS id, last_name, first_name, odoo_id
         FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
@@ -163,7 +165,7 @@ while ($row = mysqli_fetch_array($result_members)) {
                     'analytic_distribution' => array($plane_analytic[$plane] => 100)
 				)) ;
 		}
-        // Special line if there are taxes
+        // Special line if there are taxes (Passanger)
         if ($line->cost_taxes > 0) {
 			$taxPerPax=$line->cost_taxes/$line->pax_count;
             $invoice_lines[] = array(0, 0,
@@ -171,7 +173,8 @@ while ($row = mysqli_fetch_array($result_members)) {
 					'name' => "$line->date {$line->time_start}Z $line->plane Redevance Pax $line->from > $line->to",
 					'product_id' => $tax_product_id,
 					'quantity' => $line->pax_count,
-					'price_unit' => $taxPerPax
+					'price_unit' => $taxPerPax,
+					'analytic_distribution' => array($pax_telia_analytic => 100)
 				)) ;
         }
         // Special line if there is an instructor
