@@ -663,18 +663,20 @@ while ($row = mysqli_fetch_array($result)) {
 		else
 			continue ;
 		print("<tr><td class=\"validityNameCell\">" . db2web($row['name']) . "$private_validity$delete</td>\n") ;
+		$readonly = ($row['user_update'] == 0) ? ' readonly' : '' ;
 		if ($row['ident_value_enable'])
-			print("<td class=\"validityCell\"><input type=\"text\" name=\"ident_value[$row[id]]\" value=\"" . db2web($row['ident_value']) . "\"></td>\n") ;
+			print("<td class=\"validityCell\"><input type=\"text\" name=\"ident_value[$row[id]]\" value=\"" . db2web($row['ident_value']) . "\"$readonly></td>\n") ;
 		else	
 			print("<td class=\"validityCell\"></td>\n") ;
-		print("<td class=\"validityCell\"><input type=\"date\" name=\"grant_date[$row[id]]\" value=\"$row[grant_date]\"></td>\n") ;
+		print("<td class=\"validityCell\"><input type=\"date\" name=\"grant_date[$row[id]]\" value=\"$row[grant_date]\"$readonly></td>\n") ;
 		if ($row['time_limitation'])
-			print("<td class=\"validityCell\"><input type=\"date\" name=\"expire_date[$row[id]]\" value=\"$row[expire_date]\"></td>\n") ;
+			print("<td class=\"validityCell\"><input type=\"date\" name=\"expire_date[$row[id]]\" value=\"$row[expire_date]\"$readonly></td>\n") ;
 		else	
 			print("<td class=\"validityCell\"></td>\n") ;
 		print("</tr>\n") ;
 	} else
-		$options = "$options<option value=\"$row[id]\">" . db2web($row['name']) . "</option>\n" ;
+		if ($row['user_update'] != 0)
+			$options = "$options<option value=\"$row[id]\">" . db2web($row['name']) . "</option>\n" ;
 }
 if ($userId == $displayed_id) {
 	print("
