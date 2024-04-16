@@ -280,7 +280,7 @@ foreach ($folio as $line)	{
 	$duration_mm = $line->duration_mm ;
 	$duration_total_hour += $duration_hh ;
 	$duration_total_minute += $duration_mm ;
-	if ($line->compteur_vol) {
+	if ($line->cost_policy == 'F') {
 		$diams_explanation = true ;
 		$plane_token = ' &diams;' ;
 	} else if ($line->cost_plane_margin > 0) {

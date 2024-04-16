@@ -29,6 +29,7 @@ class FolioLine{
     public $model ;
     public $plane;
     public $cost_plane_minute ;
+    public $cost_plane_policy ; // E for engine, F for flight index
     public $cost_plane_margin ;
     public $cost_plane ;
     public $cost_fi ;
@@ -77,15 +78,17 @@ class FolioLine{
         }
         $this->model = $row['l_model'] ;
         $this->compteur_vol = $row['compteur_vol'] ;
-        $this->duration = ($row['compteur_vol']) ? $row['flight_duration'] : $row['duration'] ;
+        // Plane cost and policy
+        $this->cost_plane_minute = $row['cout'] ;
+        $this->cost_plane_margin = $row['cout_marge'] ;
+        $this->cost_plane_policy = $row['cout_source'] ;
+        $this->duration = ($this->cost_plane_policy == 'F') ? $row['flight_duration'] : $row['duration'] ;
         $this->duration_hh = floor($this->duration / 60) ;
         $this->duration_mm = $this->duration % 60 ;
         // DB contains UTC time
 	    $this->time_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
 	    $this->time_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
-        // Plane cost
-        $this->cost_plane_minute = $row['cout'] ;
-        $this->cost_plane_margin = $row['cout_marge'] ;
+
         if ($row['l_instructor'] == $userId and $row['l_pilot'] != $userId and $row['l_share_member'] != $userId) // FI only pays the plane rental when they are the pilot
 		    $this->cost_plane = 0 ;
         else
@@ -260,7 +263,7 @@ class Folio implements Iterator {
             UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
             l_start, l_end, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute as duration,
             60 * (l_flight_end_hour - l_flight_start_hour) + l_flight_end_minute - l_flight_start_minute as flight_duration,
-            l_share_type, l_share_member, cout, cout_marge, l_pax_count
+            l_share_type, l_share_member, cout, cout_marge, cout_source, l_pax_count
             FROM $table_logbook l JOIN $table_planes AS a ON l_plane = a.id
             LEFT JOIN $table_person AS p ON p.jom_id = l_pilot
             LEFT JOIN $table_person AS i ON i.jom_id = l_instructor
