@@ -29,6 +29,7 @@ class FolioLine{
     public $model ;
     public $plane;
     public $cost_plane_minute ;
+    public $cost_plane_margin ;
     public $cost_plane ;
     public $cost_fi ;
     public $cost_taxes ;
@@ -84,16 +85,17 @@ class FolioLine{
 	    $this->time_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
         // Plane cost
         $this->cost_plane_minute = $row['cout'] ;
+        $this->cost_plane_margin = $row['cout_marge'] ;
         if ($row['l_instructor'] == $userId and $row['l_pilot'] != $userId and $row['l_share_member'] != $userId) // FI only pays the plane rental when they are the pilot
 		    $this->cost_plane = 0 ;
         else
             if ($row['l_share_type'] == 'CP2') {
-                $this->cost_plane = round($row['cout'] * 0.5, 2) * $this->duration ;
+                $this->cost_plane = round($row['cout'] * 0.5, 2) * ($this->duration - $this->cost_plane_margin) ;
                 $this->cost_plane_minute = round($row['cout'] * 0.5, 2) ;
             } else if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] != $userId) {
                 $this->cost_plane = 0 ;
             } else
-                $this->cost_plane = $row['cout'] * $this->duration ;	
+                $this->cost_plane = $row['cout'] * ($this->duration - $this->cost_plane_margin) ;	
         // Vol PIC- Recheck : 
         // Pour le Pilote -> SELF
         // Pour l'Instructeur -> Pilote_name    
@@ -102,7 +104,7 @@ class FolioLine{
             $this->pic_name = "SELF" ; //Pilot Point of View. A PIC-Recheck is SELF
         } else  // Dual command
             if ($userId == $row['l_instructor'])
-                $this->pic_name = db2web($row['pilot_name']) ; //Point of view of the Instructore. A PIC Recheck is a DC
+                $this->pic_name = db2web($row['pilot_name']) ; //Point of view of the Instructor. A PIC Recheck is a DC
             else
                 $this->pic_name = db2web($row['instructor_name']) ;// DC 
         // Instructor cost
@@ -258,7 +260,7 @@ class Folio implements Iterator {
             UPPER(l_from) as l_from, UPPER(l_to) as l_to, 
             l_start, l_end, 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute as duration,
             60 * (l_flight_end_hour - l_flight_start_hour) + l_flight_end_minute - l_flight_start_minute as flight_duration,
-            l_share_type, l_share_member, cout, l_pax_count
+            l_share_type, l_share_member, cout, cout_marge, l_pax_count
             FROM $table_logbook l JOIN $table_planes AS a ON l_plane = a.id
             LEFT JOIN $table_person AS p ON p.jom_id = l_pilot
             LEFT JOIN $table_person AS i ON i.jom_id = l_instructor

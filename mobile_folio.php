@@ -272,6 +272,7 @@ $cost_fi_total = 0 ;
 $cost_taxes_total = 0 ;
 $cost_grand_total = 0 ;
 $diams_explanation = false ; // Whether to display explanation about flight duration
+$clubs_explanation = false ; // Whether to display explanation about flight cost
 $folio = new Folio($userId, $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) 
 	or journalise($originalUserId, "F", "Cannot get access to the folio");
 foreach ($folio as $line)	{
@@ -282,6 +283,9 @@ foreach ($folio as $line)	{
 	if ($line->compteur_vol) {
 		$diams_explanation = true ;
 		$plane_token = ' &diams;' ;
+	} else if ($line->cost_plane_margin > 0) {
+		$clubs_explanation = true ;
+		$plane_token = ' &clubs;' ;
 	} else
 		$plane_token = '' ;
 	print("<tr>
@@ -375,6 +379,8 @@ Le montant n'inclut aucune note de frais (par exemple carburant), note de crédi
 if ($userIsInstructor)
 	print("<p>&spades; Veuillez noter qu'en tant qu'instructeur les montants négatifs de la colonne FI sont en fait des montants à facturer au club.</p>") ;
 
+if ($clubs_explanation)
+	print("<p><mark>&clubs;: pour cet avion, la facture sur fait sur l'index moteur mais avec un forfait de plusieurs minutes.</mark></p>") ;
 if ($diams_explanation)
 	print("<p><mark>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</mark></p>") ;
 ?>
