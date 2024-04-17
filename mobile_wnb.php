@@ -166,7 +166,8 @@ function processWnB() {
     document.getElementById('moment_total').innerText = totalMoment.toFixed(2) ;
     document.getElementById('warningsDiv').innerHTML = '' ;
     if (totalWeight > maxWeight) {
-        document.getElementById('warningsDiv').innerHTML += "Total weight, " + Math.round(totalWeight) + " pounds, exceeds the maximum weight of " + maxWeight + " pounds.<br/>" ;
+        document.getElementById('warningsDiv').innerHTML += "Total weight, " + Math.round(totalWeight/2.20462) + " kg = " + 
+                Math.round(totalWeight) + " pounds, exceeds the maximum weight of " +  + Math.round(maxWeight/2.20462) + " kg = " + maxWeight + " pounds.<br/>" ;
         document.getElementById('warningsDiv').style.visibility = 'visible' ; 
         document.getElementById('warningsDiv').style.display = 'block' ;
         document.getElementById('wlb_total').parentNode.classList.remove('table-info') ; 
