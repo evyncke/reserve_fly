@@ -65,8 +65,8 @@ journalise($userId, "I", "Safety Day attested") ;
 <?php
 } // Else code exist
 if ($userIsAdmin or $userIsInstructor) {
-    $url = "https://" . $_SERVER['HTTP_HOST'] . "/" . $_SERVER['PHP_SELF'] . '?code=' . $code ;
-    print('<div class="row"><br/><hr><p>Uniquement visible pour les administrateurs et instructeurs, le code pour ce Safety Day est <b>' . $code . "</b>.
+    $url = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'] . '?code=' . $code ;
+    print('<br><br><hr><div class="row"><p>Uniquement visible pour les administrateurs et instructeurs, le code pour ce Safety Day est <b>' . $code . "</b>.
         Ou l'URL: <a href=\"$url\">$url</a> ou le QR code:</p>
         <p> <img width=\"300\" height=\"300\" src=\"qr-code.php?chs=300x300&chl=" . urlencode($url) . "\">") ;
     print("</p></div>") ;
