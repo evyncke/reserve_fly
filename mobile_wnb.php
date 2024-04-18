@@ -83,7 +83,7 @@ while ($row = mysqli_fetch_array($result)) {
         $cgAft = $row['cgwarnaft'] ;
         $cgFwd = $row['cgwarnfwd'] ;
     } else {
-        $readonly = ($row['weigth'] > 0) ? ' readonly' : 'onkeyup="processWnB();"' ;
+        $readonly = ($row['weigth'] > 0) ? ' readonly' : 'oninput="processWnB();"' ;
         print("<td><input type=\"number\" id=\"w_$rowCount\" class=\"text-end\" value=\"$row[weight]\" style=\"width: 50%;\" $readonly>") ;
         if ($row['fuel'] == 'true') {
             print("&nbsp;l</td>") ;
@@ -242,7 +242,7 @@ print("\t[$firstArm, $firstWeight, null]\n") ;
             0: {lineWidth: 5, pointSize: 0, visibleInLegend: true} ,
             1: {lineWidth: 0, pointSize: 15, visibleInLegend: true}
           },
-          legend: {position: 'in'},
+          legend: {position: 'bottom'},
         };
 
         chart = new google.visualization.LineChart(document.getElementById('chart_div'));
