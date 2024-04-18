@@ -3,7 +3,7 @@
 // Developped by Joseph La Chine in 2013, Eric Vyncke 2014/2020
 /*
    Copyright Joseph La China 2013-2014
-   Copyright 2014-2020 Eric Vyncke
+   Copyright 2014-2024 Eric Vyncke
    Copyright 2020 Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -410,7 +410,7 @@ if ($canview) {
 			<LI><B>Limite PLB:</B> <?=$info[0]->plb_date_limite?></LI>
 			<LI><B>Prochain pesage:</B> <?=$info[0]->pesage?></LI>
 			<LI><B>Masse et centrage (<a style="text-decoration: underline;color: blue;" 
-				href="/TippingPoint/index.php?tailnumber=<?=$avion?>">Calcul en ligne</a>):</B>
+				href="/resa/mobile_wnb.php?plane=<?=$avion?>">Calcul en ligne</a>):</B>
 				 poids &agrave; vide <?= $info[0]->poids; ?> livres, bras <?= $info[0]->bras?> pouces
 				<i> date: <?=$info[0]->wb_date2?></i></LI>
 			<LI><B>Commentaire:</B><BR> <?= nl2br(db2web($info[0]->commentaire))?></LI>
