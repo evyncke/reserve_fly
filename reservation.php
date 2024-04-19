@@ -30,7 +30,6 @@ require_once "dbi.php" ;
 
 MustBeLoggedIn() ;
 
-require_once 'facebook.php' ;
 $month_names = array('N/A', 'Jan', 'F&eacute;v', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil', 'Ao&ucirc;t', 'Sept', 'Oct', 'Nov', 'D&eacute;c') ;
 
 for ($i = 1, $all_day_options = '' ; $i <= 31 ; $i++)

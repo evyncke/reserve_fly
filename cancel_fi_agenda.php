@@ -1,10 +1,9 @@
 <?php
 // TODO
-// warn the bookers/pilots just before/after
 // add pilot/booker's name in error messages...
 
 /*
-   Copyright 2013 Eric Vyncke
+   Copyright 2013-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,7 +22,6 @@
 ob_start("ob_gzhandler");
 
 require_once 'dbi.php' ;
-require_once 'facebook.php' ;
 
 $response = array() ;
 $response['error'] = '' ; // Until now: no error :-)

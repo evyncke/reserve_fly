@@ -20,7 +20,6 @@
 // - add first and last name
 // - ensure consistency of email in rapcs_person and jom_user
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
 
 if (isset($_REQUEST['id']) and $_REQUEST['id'] != '') {
 	$displayed_id = $_REQUEST['id'] ;

@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2023 Eric Vyncke, Patrick Reginster
+   Copyright 2014-2024 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 
 ob_start("ob_gzhandler");
 require_once "dbi.php" ;
-require_once 'facebook.php' ;
 
 MustBeLoggedIn() ;
 
