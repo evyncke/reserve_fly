@@ -26,7 +26,7 @@ if ($userId == 0) {
 require_once 'mobile_header5.php' ;
 
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
-$model = (isset($_REQUEST['model'])) ? $_REQUEST['model'] : 'account.move.line' ;
+$model = (isset($_REQUEST['model'])) ? $_REQUEST['model'] : 'ir.model' ;
 $name = (isset($_REQUEST['name'])) ? $_REQUEST['name'] : '' ;
 $id = (isset($_REQUEST['id'])) ? $_REQUEST['id'] : '' ;
 ?>
