@@ -151,7 +151,7 @@ while ($row = mysqli_fetch_array($result)) {
         $row['p_city'] = $matches[1] ;
         mysqli_query($mysqli_link, "UPDATE $table_pax SET p_city = '$matches[1]', p_country = 'Belgique'
             WHERE p_id = $row[p_id]")
-        or journalise($userId, "E", "Cannot update country/city for $row[p_id] $email: " . mysqli_error($mysqli_link)) ;
+            or journalise($userId, "E", "Cannot update country/city for $row[p_id] $email: " . mysqli_error($mysqli_link)) ;
     }
     print("<tr><td>" . db2web("<b>$row[p_lname]</b> $row[p_fname]") . 
         " <a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\">Vol</a></td>
@@ -166,10 +166,6 @@ while ($row = mysqli_fetch_array($result)) {
         $db_name = db2web("$row[p_lname] $row[p_fname]") ;
         $updates = array(
             'category_id' => array($flight_tag),
-            'street' => db2web($row['p_street']),
-            'zip' => db2web($row['p_zip']),
-            'city' => db2web($row['p_city']),
-            'country_id' => GetOdooCountry($row['p_country']), 
             'email' => $row['p_email'],  
             'phone' => db2web($row['p_tel']),
             'comment' => "Vol: <a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\">$row[f_reference]</a><br/>
@@ -177,6 +173,10 @@ while ($row = mysqli_fetch_array($result)) {
             'ref' => $row['f_reference'],
             'name' => $db_name,
             'complete_name' => $db_name) ;  
+        // Not all flights have valid address if any...
+        if ($row['p_street'] != '') $updates['street'] = db2web($row['p_street']) ;
+        if ($row['p_zip'] != '') $updates['zip'] = db2web($row['p_zip']) ;
+        if ($row['p_country'] != '') $updates['country_id'] = GetOdooCountry($row['p_country']) ;
         $coordinates = geoCode(db2web($row['p_street']) . "," . db2web($row['p_city']) . ', ' . db2web($row['p_country'])) ;
         if ($coordinates and count($coordinates) == 2) { 
             $updates['partner_latitude'] = $coordinates['lat'] ;
@@ -184,13 +184,13 @@ while ($row = mysqli_fetch_array($result)) {
         }
         //$updates['property_account_receivable_id'] = GetOdooAccount('400100', db2web("$row[p_lname] $row[p_fname]")) ;
         $id = $odooClient->Create('res.partner', $updates) ;
+        if (! $id) journalise($userId, "E", "Cannot create Odoo partner") ;
         print("<td>Odoo client $id created</td>") ;
         mysqli_query($mysqli_link, "UPDATE $table_pax SET p_odoo_cust_id = $id WHERE p_id = $row[p_id]")
             or journalise($userId, "E", "Cannot update p_odoo_cust_id for $id $email: " . mysqli_error($mysqli_link)) ;
         // Update the cache as some email have multiple pax
         $odoo_customers[$id] = $updates ;
         $odoo_customers[$email] = $updates ;
-        exit ;
     }
     print("</tr>\n") ;
 }
