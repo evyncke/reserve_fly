@@ -193,6 +193,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><h6 class="dropdown-header">Réservé aux FIs & admins</h6></li>
       <li><a class="dropdown-item" href="dto.students.php">Liste des élèves</a></li>
       <li><a class="dropdown-item" href="dto.exercices.php">Liste des exercices</a></li>
+      <li><a class="dropdown-item" href="dto.safetyday.php">Participation au Safety Day</a></li>
 
 <?php
   if ($userIsInstructor) {
