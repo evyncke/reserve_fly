@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2023 Eric Vyncke
+   Copyright 2014-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ if ($plane == '') {
 ?>
 <table class="table table-striped table-hover table-bordered w-auto">
 <thead>
-<tr><th class="text-end">Item</th><th>Weight</th><th class="text-end d-none d-lg-table-cell">Weight (pound)</th><th class="text-end d-none d-md-table-cell">Arm (inch)</th><th class="text-end d-none d-md-table-cell">Moment (inch-pound)</th></tr>
+<tr><th class="text-end py-0 py-md-3">Item</th><th class="py-0 py-md-3" >Weight (kg)</th><th class="text-end d-none d-lg-table-cell py-0 py-md-3">Weight (pound)</th><th class="text-end d-none d-md-table-cell py-0 py-md-3">Arm (inch)</th><th class="text-end d-none d-md-table-cell py-0 py-md-3">Moment (inch-pound)</th></tr>
 </thead>
 <tbody class="table-divider">
 <?php
@@ -73,9 +73,9 @@ $result = mysqli_query($mysqli_link, "SELECT *, MIN(w.order) AS line_order, GROU
 $rowCount = 0 ;
 $density = array() ;
 while ($row = mysqli_fetch_array($result)) {
-    print("<tr><td class=\"text-end\">$row[line_item]</td>") ;
+    print("<tr><td class=\"text-end py-0 py-md-3\">$row[line_item]</td>") ;
     if ($row['emptyweight'] == 'true') {
-        print("<td>" . round($row['weight'] / 2.20462) . "&nbsp;kg</td><td class=\"text-end d-none d-lg-table-cell\"><span id=\"wlb_$rowCount\">$row[weight]</span></td>") ;
+        print("<td class=\"py-0 py-md-3\">" . round($row['weight'] / 2.20462) . "&nbsp;kg</td><td class=\"text-end d-none d-lg-table-cell py-0 py-md-3\"><span id=\"wlb_$rowCount\">$row[weight]</span></td>") ;
         $weight_lbs = $row['weight'] ;
         $density[$rowCount] = 1.0 ; // Empty weight is in pounds
         // Save some aircraft-related values
@@ -84,7 +84,7 @@ while ($row = mysqli_fetch_array($result)) {
         $cgFwd = $row['cgwarnfwd'] ;
     } else {
         $readonly = ($row['weigth'] > 0) ? ' readonly' : 'oninput="processWnB();"' ;
-        print("<td><input type=\"number\" id=\"w_$rowCount\" class=\"text-end\" value=\"$row[weight]\" style=\"width: 50%;\" $readonly>") ;
+        print("<td class=\"py-0\"><input type=\"number\" id=\"w_$rowCount\" class=\"text-end py-0 py-md-3\" value=\"$row[weight]\" style=\"width: 50%;\" $readonly>") ;
         if ($row['fuel'] == 'true') {
             print("&nbsp;l</td>") ;
             $weight_lbs = round($row['weight'] * $row['fuelwt'], 1) ;
@@ -94,10 +94,10 @@ while ($row = mysqli_fetch_array($result)) {
             $weight_lbs = round($row['weight'] * 2.20462, 1) ;
             $density[$rowCount] = 2.20462 ;
         }
-        print("<td  class=\"text-end d-none d-lg-table-cell\"><span id=\"wlb_$rowCount\">$weight_lbs</span></td>") ;
+        print("<td  class=\"text-end d-none d-lg-table-cell py-0 py-md-3\"><span id=\"wlb_$rowCount\">$weight_lbs</span></td>") ;
     }
-    print("<td class=\"text-end d-none d-md-table-cell\"><span id=\"arm_$rowCount\">$row[arm]</span></td>") ;
-    print("<td class=\"text-end d-none d-md-table-cell\"><span id=\"moment_$rowCount\">" . round($weight_lbs * $row['arm'], 1) . "</span></td>") ;
+    print("<td class=\"text-end d-none d-md-table-cell py-0 py-md-3\"><span id=\"arm_$rowCount\">$row[arm]</span></td>") ;
+    print("<td class=\"text-end d-none d-md-table-cell py-0 py-md-3 \"><span id=\"moment_$rowCount\">" . round($weight_lbs * $row['arm'], 1) . "</span></td>") ;
     print("</tr>\n") ;
     $rowCount ++ ;
 }
@@ -105,11 +105,11 @@ while ($row = mysqli_fetch_array($result)) {
 </tbody>
 <tfoot class="table-divider">
     <tr>
-        <th class="table-info text-start">Totals at take-off</th>
-        <td class="table-info text-start"><span id="w_total"></span>&nbsp;kg</td>
-        <td class="table-info text-end d-none d-lg-table-cell"><span id="wlb_total"></span></td>
-        <td class="table-info text-end d-none d-md-table-cell"><span id="arm_total"></span></td>
-        <td class="table-info text-end d-none d-md-table-cell"><span id="moment_total"></span></td>
+        <th class="table-info text-start py-0 py-md-3">Totals at take-off</th>
+        <td class="table-info text-start py-0 py-md-3"><span id="w_total"></span>&nbsp;kg</td>
+        <td class="table-info text-end d-none d-lg-table-cell py-0 py-md-3"><span id="wlb_total"></span></td>
+        <td class="table-info text-end d-none d-md-table-cell py-0 py-md-3"><span id="arm_total"></span></td>
+        <td class="table-info text-end d-none d-md-table-cell py-0 py-md-3"><span id="moment_total"></span></td>
     </tr>
 </tfoot>
 </table>
@@ -232,7 +232,7 @@ print("\t[$firstArm, $firstWeight, null]\n") ;
         ]);
         data.addRow([parseFloat(document.getElementById('arm_total').innerText), null, Math.round(parseFloat(document.getElementById('wlb_total').innerText) / 2.20462)]) ;
         options = {
-          title: 'Flight envelope',
+          title: 'Flight envelope <?=$plane?>',
           hAxis: {title: 'Inches From Reference Datum', minValue: <?=$minArmValue?>, maxValue: <?=$maxArmValue?>},
           vAxes: { // Serie 1 was for weigth in pounds, but, cannot manage to them 
             0: { title: 'Weight (kg)', textPosition: 'out', viewWindowMode: 'maximized', minValue: <?=$minWeightValue?>, maxValue: <?=$maxWeightValue?>},
