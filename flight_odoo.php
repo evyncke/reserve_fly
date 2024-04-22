@@ -175,14 +175,16 @@ while ($row = mysqli_fetch_array($result)) {
             'complete_name' => $db_name) ;  
         // Not all flights have valid address if any...
         if ($row['p_street'] != '') $updates['street'] = db2web($row['p_street']) ;
+        if ($row['p_city'] != '') $updates['city'] = db2web($row['p_city']) ;
         if ($row['p_zip'] != '') $updates['zip'] = db2web($row['p_zip']) ;
         if ($row['p_country'] != '') $updates['country_id'] = GetOdooCountry($row['p_country']) ;
-        $coordinates = geoCode(db2web($row['p_street']) . "," . db2web($row['p_city']) . ', ' . db2web($row['p_country'])) ;
-        if ($coordinates and count($coordinates) == 2) { 
-            $updates['partner_latitude'] = $coordinates['lat'] ;
-            $updates['partner_longitude'] = $coordinates['lng'] ;
+        if ($row['p_street'] != '' and $row['p_city'] != '') {
+            $coordinates = geoCode(db2web($row['p_street']) . "," . db2web($row['p_city']) . ', ' . db2web($row['p_country'])) ;
+            if ($coordinates and count($coordinates) == 2) { 
+                $updates['partner_latitude'] = $coordinates['lat'] ;
+                $updates['partner_longitude'] = $coordinates['lng'] ;
+            }
         }
-        //$updates['property_account_receivable_id'] = GetOdooAccount('400100', db2web("$row[p_lname] $row[p_fname]")) ;
         $id = $odooClient->Create('res.partner', $updates) ;
         if (! $id) journalise($userId, "E", "Cannot create Odoo partner") ;
         print("<td>Odoo client $id created</td>") ;
