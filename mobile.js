@@ -387,7 +387,7 @@ function init() {
 	var pilotSelect = document.getElementById('pilotSelect') ;
 	if (pilotSelect) {
 	// Dropdown selected the pilot
-		if (userIsInstructor || userIsAdmin) {
+		if (userIsInstructor || userIsAdmin || window.location.pathname == '/resa/mobile_profile.php') {
 				// Initiliaze pilotSelect from members.js
 				for (var member = 0; member < members.length; member++) {
 						var option = document.createElement("option");
