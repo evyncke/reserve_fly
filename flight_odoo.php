@@ -24,15 +24,15 @@ $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_passwor
 if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) journalise($userId, "F", "This admin page is reserved to administrators") ;
 
 ?>
-<h2>Liste des demandeurs de vols INIT/FI et Odoo@<?=$odoo_host?></h2>
-<p>Copie des données des bons/vouchers du site vols IF/INIT (pas encore effectués) vers Odoo... Cela inclut l'adresse (y compris longitude & latitude), les numéros de téléphone, nom et prénom.</p>
+<h2>Export des vols INIT/IF vers Odoo@<?=$odoo_host?></h2>
+<p>Recopie les données des personnes de contact des bons/vouchers du site vols IF/INIT (pas encore effectués) vers Odoo... Cela inclut l'adresse (y compris longitude & latitude), les numéros de téléphone, nom et prénom.</p>
 
 <?php
 // Let's get all Odoo customers
 $result = $odooClient->SearchRead('res.partner', array(), 
     array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id', 'total_due',
         'street', 'street2', 'zip', 'city', 'country_id', 'country_code', 'category_id', 'partner_latitude', 'partner_longitude',
-        'complete_name', 'email', 'phone', 'mobile', 'commercial_company_name'))) ;
+        'complete_name', 'email', 'phone', 'mobile', 'ref', 'commercial_company_name'))) ;
 $odoo_customers = array() ;
 foreach($result as $client) {
     $email =  strtolower($client['email']) ;
@@ -120,7 +120,7 @@ function geoCode($address) {
     //      "status" : "REQUEST_DENIED" }
     $json = json_decode($content, true) ; // Get an associative array
     if ($json['status'] != 'OK') {
-        journalise($userId, 'E', "GeoCode($address) return $json[error_message]") ;
+        journalise($userId, 'E', "GeoCode($address) return $json[status]") ;
         return false ;
     }
     $result = $json['results'][0]['geometry']['location'] ;
@@ -133,7 +133,7 @@ $flight_tag = GetOdooCategory('Client-IF-INI') ;
 $result = mysqli_query($mysqli_link, "SELECT *
     FROM $table_flights JOIN $table_pax_role ON pr_flight = f_id
         JOIN $table_pax ON p_id = pr_pax
-    WHERE f_date_flown IS NULL AND f_date_cancelled IS NULL AND p_odoo_cust_id IS NULL AND pr_role = 'C' AND f_gift <> 0
+    WHERE f_date_flown IS NULL AND f_date_cancelled IS NULL AND pr_role = 'C' AND f_gift <> 0
     ORDER BY p_email") 
     or journalise($userId, "F", "Cannot list all flights: " . mysqli_error($mysqli_link)) ;
 ?>
@@ -157,11 +157,41 @@ while ($row = mysqli_fetch_array($result)) {
         " <a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\">Vol</a></td>
         <td class=\"text-center\"><a href=\"mailto:$email\">$email</a></td>
         <td>" . db2web("$row[p_street]<br/>$row[p_zip] $row[p_city]") . "</td><td>$row[p_country]</td>") ;
-    if (isset($odoo_customers[$email])) { // Pax already exists in Odoo... TODO should we update Odoo address ?
+    if (isset($odoo_customers[$email])) { // Does the customer already exists in Odoo ?
         $odoo_customer = $odoo_customers[$email] ;
-        mysqli_query($mysqli_link, "UPDATE $table_pax SET p_odoo_cust_id = $odoo_customer[id] WHERE p_id = $row[p_id]")
-            or journalise($userId, "E", "Cannot update p_odoo_cust_id for $row[p_id] $email: " . mysqli_error($mysqli_link)) ;
-        print("<td>Odoo #$odoo_customer[id] ajouté au passager</td>") ;
+        if ($row['p_odoo_cust_id'] = '') // Does the flight contact has the link to Odoo ?
+            mysqli_query($mysqli_link, "UPDATE $table_pax SET p_odoo_cust_id = $odoo_customer[id] WHERE p_id = $row[p_id]")
+                or journalise($userId, "E", "Cannot update p_odoo_cust_id for $row[p_id] $email: " . mysqli_error($mysqli_link)) ;
+        // Prepare some updates to Odoo (if data in flights has been modified)
+        $updates = array() ; 
+        if ($odoo_customer['ref'] == '' and $row['f_reference'] != '') // Some customers have several flights...
+            $updates['ref'] = db2web($row['f_reference']) ;
+        if ($odoo_customer['phone'] != db2web($row['p_tel']) and $row['p_tel'] != '')
+            $updates['phone'] = db2web($row['p_tel']) ;
+        if ($odoo_customer['street'] != db2web($row['p_street']) and $row['p_street'] != '') {
+            $updates['street'] = db2web($row['p_street']) ;
+            $odoo_customer['partner_latitude'] = 0.0 ;
+        }
+        if ($odoo_customer['zip'] != db2web($row['p_zip']) and $row['p_zip'] != '') {
+            $updates['zip'] = db2web($row['p_zip']) ;
+            $odoo_customer['partner_latitude'] = 0.0 ;
+        }
+        if ($odoo_customer['city'] != db2web($row['p_city']) and $row['p_city'] != '') {
+            $updates['city'] = db2web($row['p_city']) ;
+            $odoo_customer['partner_latitude'] = 0.0 ;
+        } 
+        if ($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) {
+            $coordinates = geoCode(db2web($row['p_street']) . "," . db2web($row['p_city']) . ', ' . db2web($row['p_country'])) ;
+            if ($coordinates and count($coordinates) == 2) { 
+                $updates['partner_latitude'] = $coordinates['lat'] ;
+                $updates['partner_longitude'] = $coordinates['lng'] ;
+            }
+        }
+        if (count($updates) > 0) { // There were some changes, let's update the Odoo record
+            $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
+            print("<td>Odoo #$odoo_customer[id] mis à jour</td>") ;
+        } else
+            print("<td><a href=\"https://spa-aviation.odoo.com/web#id=$odoo_customer[id]&cids=1&menu_id=122&action=275&model=res.partner&view_type=form\">#$odoo_customer[id]</a></td>") ;
     } else {
         $db_name = db2web("$row[p_lname] $row[p_fname]") ;
         $updates = array(
