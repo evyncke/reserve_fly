@@ -45,6 +45,9 @@ require_once 'mobile_header5.php' ;
 <!--div class="container vh-90" style="height: 80vh!important;width: 100vw!important;bottom:0!important;left:0!important;right:0!important;"-->
 <h2 class="d-none d-md-block">Devis masse et centrage <?=$plane?></h2>
 
+<div class="row">
+<div class="col-xs-12 col-sm-12 col-lg-6">
+
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form" class="form-horizontal">
 <!--div class="row m-0-xs"-->
 	<label for="planeSelect" class="col-form-label col-xs-1 col-md-1">Plane:</label>
@@ -59,7 +62,7 @@ if ($plane == '') {
 ?>
 <table class="table table-striped table-hover table-bordered w-auto">
 <thead>
-<tr><th class="text-end py-0 py-md-3">Item</th><th class="py-0 py-md-3" >Weight (kg)</th><th class="text-end d-none d-lg-table-cell py-0 py-md-3">Weight (pound)</th><th class="text-end d-none d-md-table-cell py-0 py-md-3">Arm (inch)</th><th class="text-end d-none d-md-table-cell py-0 py-md-3">Moment (inch-pound)</th></tr>
+<tr><th class="text-end py-0 py-md-1">Item</th><th class="py-0 py-md-1 py-md-1" >Weight (kg)</th><th class="text-end d-none d-lg-table-cell py-0 py-md-1">Weight (pound)</th><th class="text-end d-none d-md-table-cell py-0 py-md-1">Arm (inch)</th><th class="text-end d-none d-md-table-cell py-0 py-md-1">Moment (inch-pound)</th></tr>
 </thead>
 <tbody class="table-divider">
 <?php
@@ -73,9 +76,9 @@ $result = mysqli_query($mysqli_link, "SELECT *, MIN(w.order) AS line_order, GROU
 $rowCount = 0 ;
 $density = array() ;
 while ($row = mysqli_fetch_array($result)) {
-    print("<tr><td class=\"text-end py-0 py-md-3\">$row[line_item]</td>") ;
+    print("<tr><td class=\"text-end py-0 py-md-1\">$row[line_item]</td>") ;
     if ($row['emptyweight'] == 'true') {
-        print("<td class=\"py-0 py-md-3\">" . round($row['weight'] / 2.20462) . "&nbsp;kg</td><td class=\"text-end d-none d-lg-table-cell py-0 py-md-3\"><span id=\"wlb_$rowCount\">$row[weight]</span></td>") ;
+        print("<td class=\"py-0 py-md-1\">" . round($row['weight'] / 2.20462) . "&nbsp;kg</td><td class=\"text-end d-none d-lg-table-cell py-0 py-md-1\"><span id=\"wlb_$rowCount\">$row[weight]</span></td>") ;
         $weight_lbs = $row['weight'] ;
         $density[$rowCount] = 1.0 ; // Empty weight is in pounds
         // Save some aircraft-related values
@@ -84,7 +87,7 @@ while ($row = mysqli_fetch_array($result)) {
         $cgFwd = $row['cgwarnfwd'] ;
     } else {
         $readonly = ($row['weigth'] > 0) ? ' readonly' : 'oninput="processWnB();"' ;
-        print("<td class=\"py-0\"><input type=\"number\" id=\"w_$rowCount\" class=\"text-end py-0 py-md-3\" value=\"$row[weight]\" style=\"width: 50%;\" $readonly>") ;
+        print("<td class=\"py-0\"><input type=\"number\" id=\"w_$rowCount\" class=\"text-end py-0 py-md-1\" value=\"$row[weight]\" style=\"width: 50%;\" $readonly>") ;
         if ($row['fuel'] == 'true') {
             print("&nbsp;l</td>") ;
             $weight_lbs = round($row['weight'] * $row['fuelwt'], 1) ;
@@ -94,10 +97,10 @@ while ($row = mysqli_fetch_array($result)) {
             $weight_lbs = round($row['weight'] * 2.20462, 1) ;
             $density[$rowCount] = 2.20462 ;
         }
-        print("<td  class=\"text-end d-none d-lg-table-cell py-0 py-md-3\"><span id=\"wlb_$rowCount\">$weight_lbs</span></td>") ;
+        print("<td  class=\"text-end d-none d-lg-table-cell py-0 py-md-1\"><span id=\"wlb_$rowCount\">$weight_lbs</span></td>") ;
     }
-    print("<td class=\"text-end d-none d-md-table-cell py-0 py-md-3\"><span id=\"arm_$rowCount\">$row[arm]</span></td>") ;
-    print("<td class=\"text-end d-none d-md-table-cell py-0 py-md-3 \"><span id=\"moment_$rowCount\">" . round($weight_lbs * $row['arm'], 1) . "</span></td>") ;
+    print("<td class=\"text-end d-none d-md-table-cell py-0 py-md-1\"><span id=\"arm_$rowCount\">$row[arm]</span></td>") ;
+    print("<td class=\"text-end d-none d-md-table-cell py-0 py-md-1 \"><span id=\"moment_$rowCount\">" . round($weight_lbs * $row['arm'], 1) . "</span></td>") ;
     print("</tr>\n") ;
     $rowCount ++ ;
 }
@@ -105,11 +108,11 @@ while ($row = mysqli_fetch_array($result)) {
 </tbody>
 <tfoot class="table-divider">
     <tr>
-        <th class="table-info text-start py-0 py-md-3">Totals at take-off</th>
-        <td class="table-info text-start py-0 py-md-3"><span id="w_total"></span>&nbsp;kg</td>
-        <td class="table-info text-end d-none d-lg-table-cell py-0 py-md-3"><span id="wlb_total"></span></td>
-        <td class="table-info text-end d-none d-md-table-cell py-0 py-md-3"><span id="arm_total"></span></td>
-        <td class="table-info text-end d-none d-md-table-cell py-0 py-md-3"><span id="moment_total"></span></td>
+        <th class="table-info text-start py-0 py-md-1">Totals at take-off</th>
+        <td class="table-info text-start py-0 py-md-1"><span id="w_total"></span>&nbsp;kg</td>
+        <td class="table-info text-end d-none d-lg-table-cell py-0 py-md-1"><span id="wlb_total"></span></td>
+        <td class="table-info text-end d-none d-md-table-cell py-0 py-md-1"><span id="arm_total"></span></td>
+        <td class="table-info text-end d-none d-md-table-cell py-0 py-md-1"><span id="moment_total"></span></td>
     </tr>
 </tfoot>
 </table>
@@ -118,10 +121,16 @@ while ($row = mysqli_fetch_array($result)) {
 <div class="mt-2 p-2 bg-danger text-bg-danger rounded" style="visibility: hidden; display: none;" id="warningsDiv">
 </div>
 
+</div><!--col-->
+
 <!-- should try to use fixed aspect ration with CSS: aspect-ration: 4 / 3 or padding-top: 75% to replace the height setting 
 using aspect-ratio makes printing over two pages... 
 using padding-top also prints over 2 pages and makes the display ultra small-->
-<div id="chart_div" style="width: 80vw; height: 50vw; margin: auto;">... loading ...</div>
+<div class="col-xs-12 col-sm-12 col-lg-6">
+<div id="chart_div" style="width: 40vw; height: 3   0vw; margin: auto;">... loading ...</div>
+</div><!--col-->
+
+</div><!--row-->
 
 <p class="bg-warning text-bg-warning mx-auto fs-6" style="height: 20px; position: fixed; margin:0; bottom: 0px;">
     <small>Ceci est un simple outil informatique, le pilote doit toujours vérifier le POH ainsi que le certificat W&B officiel de l'avion.
