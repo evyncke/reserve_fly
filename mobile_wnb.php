@@ -23,7 +23,7 @@ if ($userId == 0) {
 	exit ;
 }
 
-$plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['plane'])) : '' ;
+$plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['plane'])) : 'OO-ALD' ;
 $body_attributes = "style=\"height: 100%; min-height: 100%; width:100%;\" onload=\"init(); prefillDropdownMenus('plane', planes, '$plane');\"" ;
 $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>
 <script type=\"text/javascript\">
@@ -71,7 +71,7 @@ $result = mysqli_query($mysqli_link, "SELECT *, MIN(w.order) AS line_order, GROU
     FROM tp_aircraft AS a JOIN tp_aircraft_weights AS w ON a.id = w.tailnumber
     WHERE a.tailnumber = '$plane'
     GROUP BY w.arm
-    ORDER BY line_order ASC")
+    ORDER BY line_order, w.order ASC")
     or journalise($userId, "F", "Cannot read W&B data: " . mysqli_error($mysqli_link)) ;
 $rowCount = 0 ;
 $density = array() ;
@@ -127,7 +127,7 @@ while ($row = mysqli_fetch_array($result)) {
 using aspect-ratio makes printing over two pages... 
 using padding-top also prints over 2 pages and makes the display ultra small-->
 <div class="col-xs-12 col-sm-12 col-lg-6">
-<div id="chart_div" style="width: 40vw; height: 3   0vw; margin: auto;">... loading ...</div>
+<div id="chart_div" style="width: 40vw; height: 30vw; margin: auto;">... loading ...</div>
 </div><!--col-->
 
 </div><!--row-->
