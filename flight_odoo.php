@@ -180,7 +180,7 @@ while ($row = mysqli_fetch_array($result)) {
             $updates['city'] = db2web($row['p_city']) ;
             $odoo_customer['partner_latitude'] = 0.0 ;
         } 
-        if ($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) {
+        if (($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) and $row['p_street'] != '' and $row['p_city'] != '') {
             $coordinates = geoCode(db2web($row['p_street']) . "," . db2web($row['p_city']) . ', ' . db2web($row['p_country'])) ;
             if ($coordinates and count($coordinates) == 2) { 
                 $updates['partner_latitude'] = $coordinates['lat'] ;
