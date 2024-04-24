@@ -39,8 +39,8 @@ if (!($userIsAdmin or $userIsInstructor)) journalise($userId, "F", "Vous devez √
 <h1>Ech√©ances des avions</h1>
 <table class="col-sm-12 col-lg-8 table table-hover table-bordered">
 <thead>
-<tr class="text-center"><th>Plane</th> <th>Last mechanics / pilots</th> <th colspan="3">Inspections</th>        <th colspan="2">Time limit</th> <th colspan="3">Circ. Equip 4 ed5</th>    <th>&lt; 30 days</th>            <th>Mag.</th> <th>Pesage</th><th>PLB</th></tr>
-<tr class="text-center"><th>     </th> <th>                       </th> <th>50h</th><th>100h</th><th>200h</th>  <th>Eng</th><th>Prop</th>       <th>ATC</th><th>Enc.</th><th>Alti</th>    <th>CN</th>                      <th>500h</th> <th>10 y </th><th>Date</th></tr>
+<tr class="text-center"><th>Plane</th> <th>Last mechanics / pilots</th> <th colspan="3">Inspections</th>        <th colspan="2">Time limit</th> <th>Circ. Equip 4 ed5</th>    <th>&lt; 30 days</th>            <th>Mag.</th> <th>Pesage</th><th>PLB</th></tr>
+<tr class="text-center"><th>     </th> <th>                       </th> <th>50h</th><th>100h</th><th>200h</th>  <th>Eng</th><th>Prop</th>       <th>ATC -Enc. - Alti</th>    <th>CN</th>                      <th>500h</th> <th>10 y </th><th>Date</th></tr>
 </thead>
 <tbody>
 <?php
@@ -56,16 +56,16 @@ function GenCell($value) {
 	return "<td>$value</td>" ;
 }
 function GenCellDate($value, $orangeDays, $redDays) {	
+	if ($value == "0000-00-00")
+		return "<td class=\"bg-warning text-bg-warning\">$value</td>" ;
 	$today=time();
 	$date=strtotime($value);
 	$day_diff = $date - $today;
     $day_diff = floor($day_diff/(60*60*24));
-	if ($value == "0000-00-00")
-		return "<td class=\"orange\">$value</td>" ;
 	if($day_diff<$redDays)
-		return "<td class=\"red\">$value</td>" ;
+		return "<td class=\"bg-danger text-bg-danger\">$value</td>" ;
 	if($day_diff<$orangeDays)
-		return "<td class=\"orange\">$value</td>" ;	
+		return "<td class=\"bg-warning text-bg-warning\">$value</td>" ;	
 	return "<td>$value</td>" ;
 }
 
@@ -93,9 +93,9 @@ while ($row = mysqli_fetch_array($result)) {
 		print("<td></td><td></td>". GenCell($row['entretien'])) ;
 	else // Assuming 50h
 		print("<td>$row[entretien] ????</td><td></td><td></td>") ;
-	print("<td>$row[limite_moteur_heure]<br/>$row[limite_moteur_12ans]</td>" . GenCell($row['limite_helice']) . "
-		<td></td><td></td><td></td>
-		<td>$row[cn]</td>" . 
+	print("<td>$row[limite_moteur_heure]<br/>$row[limite_moteur_12ans]</td>" . GenCell($row['limite_helice']) . 
+		GenCellDate($row['instrument_date_limite'], 100, 30). 
+		"<td>$row[cn]</td>" . 
 		GenCell($row['limite_magnetos']) .
 	    GenCellDate($row['pesage'], 100, 30).GenCellDate($row['plb_date_limite'], 100, 30).
 		"</tr>\n") ;
