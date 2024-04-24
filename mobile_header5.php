@@ -230,6 +230,7 @@ if ($userId > 0) {
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Avions<span class="caret"></span></a>
           <ul class="dropdown-menu" id="planesDropdown">
+            <li><a class="dropdown-item" href="mobile_wnb.php">Masse et centrage</a></li>
 <?php
 if ($userId > 0) {
 ?>
@@ -244,7 +245,7 @@ if ($userId > 0) {
 ?>
             <li><a class="dropdown-item" href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
             <li><a class="dropdown-item" href="mobile_fleet_map.php?latest">Dernières localisations</a></li>
-            <li><a class="dropdown-item" href="mobile_wnb.php">Masse et centrage</a></li><?php
+<?php
 }
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>

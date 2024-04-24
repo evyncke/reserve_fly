@@ -19,8 +19,8 @@
 ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
+	//header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+	//exit ;
 }
 
 $plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['plane'])) : 'OO-ALD' ;
@@ -51,7 +51,7 @@ require_once 'mobile_header5.php' ;
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form" class="form-horizontal">
 <!--div class="row m-0-xs"-->
 	<label for="planeSelect" class="col-form-label col-xs-1 col-md-1">Plane:</label>
-    <select id="planeSelect" class="col-form-select col-xs-1 col-md-1" name="plane" onchange="document.location.href='<?=$_SERVER['PHP_SELF']?>?plane=' + this.value ;"></select>
+    <select id="planeSelect" class="col-form-select col-xs-1" name="plane" onchange="document.location.href='<?=$_SERVER['PHP_SELF']?>?plane=' + this.value ;"></select>
 <!--/div> <!-- row -->
 
 <?php
@@ -78,7 +78,7 @@ $density = array() ;
 while ($row = mysqli_fetch_array($result)) {
     print("<tr><td class=\"text-end py-0 py-md-1\">$row[line_item]</td>") ;
     if ($row['emptyweight'] == 'true') {
-        print("<td class=\"py-0 py-md-1\">" . round($row['weight'] / 2.20462) . "&nbsp;kg</td><td class=\"text-end d-none d-lg-table-cell py-0 py-md-1\"><span id=\"wlb_$rowCount\">$row[weight]</span></td>") ;
+        print("<td class=\"py-0 py-md-1\">" . round($row['weight'] / 2.20462,1) . "&nbsp;kg<small class=\"d-none d-md-block\">(".round($row['weight'],2)."&nbsp;lbs)</small></td><td class=\"text-end d-none d-lg-table-cell py-0 py-md-1\"><span id=\"wlb_$rowCount\">$row[weight]</span></td>") ;
         $weight_lbs = $row['weight'] ;
         $density[$rowCount] = 1.0 ; // Empty weight is in pounds
         // Save some aircraft-related values
@@ -127,12 +127,12 @@ while ($row = mysqli_fetch_array($result)) {
 using aspect-ratio makes printing over two pages... 
 using padding-top also prints over 2 pages and makes the display ultra small-->
 <div class="col-xs-12 col-sm-12 col-lg-6">
-<div id="chart_div" style="width: 40vw; height: 30vw; margin: auto;">... loading ...</div>
+<div id="chart_div" style="width: 60vw; height: 50vw; margin: auto;">... loading ...</div>
 </div><!--col-->
 
 </div><!--row-->
 
-<p class="bg-warning text-bg-warning mx-auto fs-6" style="height: 20px; position: fixed; margin:0; bottom: 0px;">
+<p class="d-none d-md-block bg-warning text-bg-warning mx-auto fs-6" style="height: 20px; position: fixed; margin:0; bottom: 0px;">
     <small>Ceci est un simple outil informatique, le pilote doit toujours vérifier le POH ainsi que le certificat W&B officiel de l'avion.
 </small></p>
 
