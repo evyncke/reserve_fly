@@ -22,8 +22,15 @@ if ($userId == 0) {
 	//header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	//exit ;
 }
-
+$displayAllColumns=false;
+$hiddenTag="hidden";
+$itemWidth="width=\"50%\"";
 $plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['plane'])) : 'OO-ALD' ;
+$displayAllColumns = (isset($_REQUEST['displayallcolumns'])) ? $_REQUEST['displayallcolumns']: 'false' ;
+if($displayAllColumns=='true') {
+    $hiddenTag="";
+    $itemWidth="width=\"25%\"";
+}
 $body_attributes = "style=\"height: 100%; min-height: 100%; width:100%;\" onload=\"init(); prefillDropdownMenus('plane', planes, '$plane');\"" ;
 $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>
 <script type=\"text/javascript\">
@@ -39,6 +46,7 @@ $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.
 
 require_once 'mobile_header5.php' ;
 ?>
+
 <div class="container-fluid">
 <!--div class="container-fluid" style="height: 100%!important;overflow:auto;top:0;bottom:0;left:0;right:0;position:fixed;"-->
 <!--div class="container-fluid" style="height: 100%!important;"-->
@@ -51,7 +59,7 @@ require_once 'mobile_header5.php' ;
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form" class="form-horizontal">
 <!--div class="row m-0-xs"-->
 	<label for="planeSelect" class="col-form-label col-xs-1 col-md-1">Plane:</label>
-    <select id="planeSelect" class="col-form-select col-xs-1" name="plane" onchange="document.location.href='<?=$_SERVER['PHP_SELF']?>?plane=' + this.value ;"></select>
+    <select id="planeSelect" class="col-form-select col-xs-1" name="plane" onchange="document.location.href='<?=$_SERVER['PHP_SELF']?>?displayallcolumns=<?print($displayAllColumns);?>&plane=' + this.value ;"></select>
 <!--/div> <!-- row -->
 
 <?php
@@ -60,9 +68,14 @@ if ($plane == '') {
     exit ;
 }
 ?>
-<table class="table table-striped table-hover table-bordered w-auto">
+<table class="table table-striped table-hover table-bordered table-condensed w-auto" style="margin-bottom: 0rem;">
 <thead>
-<tr><th class="text-end py-0 py-md-1">Item</th><th class="py-0 py-md-1 py-md-1" >Weight (kg)</th><th class="text-end d-none d-lg-table-cell py-0 py-md-1">Weight (pound)</th><th class="text-end d-none d-md-table-cell py-0 py-md-1">Arm (inch)</th><th class="text-end d-none d-md-table-cell py-0 py-md-1">Moment (inch-pound)</th></tr>
+<tr><th <?php print("$itemWidth"); ?> class="text-end py-0 py-md-1">Item</th>
+    <th class="py-0 py-md-1 py-md-1" >Weight</th>
+    <th <?php print("$hiddenTag"); ?> class="py-md-1">Weight (pound)</th>
+    <th <?php print("$hiddenTag"); ?> class="py-md-1">Arm (inch)</th>
+    <th <?php print("$hiddenTag"); ?> class="py-md-1">Moment (inch-pound)</th>
+</tr>
 </thead>
 <tbody class="table-divider">
 <?php
@@ -76,9 +89,23 @@ $result = mysqli_query($mysqli_link, "SELECT *, MIN(w.order) AS line_order, GROU
 $rowCount = 0 ;
 $density = array() ;
 while ($row = mysqli_fetch_array($result)) {
-    print("<tr><td class=\"text-end py-0 py-md-1\">$row[line_item]</td>") ;
+    $item=$row['line_item'];
+    if($item=="Co-Pilot+Pilot") {
+        $item="Pilot + Co-Pilot";
+    }
+    if($item=="Pilot+Co-Pilot") {
+        $item="Pilot + Co-Pilot";
+    }
+    else if($item=="Passenger 1+Passenger 2") {
+        $item="Rear Passengers";
+    }
+    else if($item=="Basic empty weight") {
+        $item="Empty Weight";
+    }
+    print("<tr><td class=\"text-end py-0 py-md-1\">$item</td>") ;
     if ($row['emptyweight'] == 'true') {
-        print("<td class=\"py-0 py-md-1\">" . round($row['weight'] / 2.20462,1) . "&nbsp;kg<small class=\"d-none d-md-block\">(".round($row['weight'],2)."&nbsp;lbs)</small></td><td class=\"text-end d-none d-lg-table-cell py-0 py-md-1\"><span id=\"wlb_$rowCount\">$row[weight]</span></td>") ;
+        print("<td class=\"py-0 py-md-1\">" . round($row['weight'] / 2.20462,1) . "&nbsp;kg</td>");
+		print("<td $hiddenTag class=\"py-md-1\"><span id=\"wlb_$rowCount\">$row[weight]</span></td>") ;
         $weight_lbs = $row['weight'] ;
         $density[$rowCount] = 1.0 ; // Empty weight is in pounds
         // Save some aircraft-related values
@@ -87,7 +114,7 @@ while ($row = mysqli_fetch_array($result)) {
         $cgFwd = $row['cgwarnfwd'] ;
     } else {
         $readonly = ($row['weigth'] > 0) ? ' readonly' : 'oninput="processWnB();"' ;
-        print("<td class=\"py-0\"><input type=\"number\" id=\"w_$rowCount\" class=\"text-end py-0 py-md-1\" value=\"$row[weight]\" style=\"width: 50%;\" $readonly>") ;
+        print("<td class=\"py-0\"><input type=\"number\" id=\"w_$rowCount\" class=\"text-end py-0 py-md-1\" value=\"$row[weight]\" style=\"width: 80%;\" $readonly>") ;
         if ($row['fuel'] == 'true') {
             print("&nbsp;l</td>") ;
             $weight_lbs = round($row['weight'] * $row['fuelwt'], 1) ;
@@ -97,10 +124,10 @@ while ($row = mysqli_fetch_array($result)) {
             $weight_lbs = round($row['weight'] * 2.20462, 1) ;
             $density[$rowCount] = 2.20462 ;
         }
-        print("<td  class=\"text-end d-none d-lg-table-cell py-0 py-md-1\"><span id=\"wlb_$rowCount\">$weight_lbs</span></td>") ;
+        print("<td $hiddenTag class=\"py-md-1\"><span id=\"wlb_$rowCount\">$weight_lbs</span></td>") ;
     }
-    print("<td class=\"text-end d-none d-md-table-cell py-0 py-md-1\"><span id=\"arm_$rowCount\">$row[arm]</span></td>") ;
-    print("<td class=\"text-end d-none d-md-table-cell py-0 py-md-1 \"><span id=\"moment_$rowCount\">" . round($weight_lbs * $row['arm'], 1) . "</span></td>") ;
+    print("<td $hiddenTag class=\"py-md-1\"><span id=\"arm_$rowCount\">$row[arm]</span></td>") ;
+    print("<td $hiddenTag class=\"py-md-1 \"><span id=\"moment_$rowCount\">" . round($weight_lbs * $row['arm'], 1) . "</span></td>") ;
     print("</tr>\n") ;
     $rowCount ++ ;
 }
@@ -108,14 +135,24 @@ while ($row = mysqli_fetch_array($result)) {
 </tbody>
 <tfoot class="table-divider">
     <tr>
-        <th class="table-info text-start py-0 py-md-1">Totals at take-off</th>
+        <th class="table-info text-end text-start py-0 py-md-1">Totals</th>
         <td class="table-info text-start py-0 py-md-1"><span id="w_total"></span>&nbsp;kg</td>
-        <td class="table-info text-end d-none d-lg-table-cell py-0 py-md-1"><span id="wlb_total"></span></td>
-        <td class="table-info text-end d-none d-md-table-cell py-0 py-md-1"><span id="arm_total"></span></td>
-        <td class="table-info text-end d-none d-md-table-cell py-0 py-md-1"><span id="moment_total"></span></td>
+        <td <?php print("$hiddenTag"); ?> class="py-md-1"><span id="wlb_total"></span></td>
+        <td <?php print("$hiddenTag"); ?> class="py-md-1"><span id="arm_total"></span></td>
+        <td <?php print("$hiddenTag"); ?> class="py-md-1 table-info"><span id="moment_total"></span></td>
     </tr>
 </tfoot>
 </table>
+<span class="d-none d-md-block py-0" >
+<?php
+$checkedItem="";
+if($displayAllColumns=='true') {
+ $checkedItem="checked";
+}
+print ("<input type=\"checkbox\" id=\"id_AllColumns\" name=\"name_AllColumns\" value=\"All columns\" onclick=\"document.location.href='$_SERVER[PHP_SELF]?plane=$plane&displayallcolumns=' + this.checked ;\" $checkedItem >");
+?>
+<label for="name_AllColumns">&nbsp;Display all columns</label>
+</span>
 </form>
 
 <div class="mt-2 p-2 bg-danger text-bg-danger rounded" style="visibility: hidden; display: none;" id="warningsDiv">
@@ -126,8 +163,8 @@ while ($row = mysqli_fetch_array($result)) {
 <!-- should try to use fixed aspect ration with CSS: aspect-ration: 4 / 3 or padding-top: 75% to replace the height setting 
 using aspect-ratio makes printing over two pages... 
 using padding-top also prints over 2 pages and makes the display ultra small-->
-<div class="col-xs-12 col-sm-12 col-lg-6">
-<div id="chart_div" style="width: 60vw; height: 50vw; margin: auto;">... loading ...</div>
+<div class="col-xs-12 col-sm-12 col-lg-6" style="margin: auto;">
+<div id="chart_div" style="width: 60vw; height: 50vw; margin: auto; ">... loading ...</div>
 </div><!--col-->
 
 </div><!--row-->
@@ -159,20 +196,20 @@ function processWnB() {
        var elem = document.getElementById('w_' + i) ;
         if (elem) {
             var weight = parseFloat(elem.value) * density[i];
-            document.getElementById('wlb_' + i).innerText = weight.toFixed(2) ;
+            document.getElementById('wlb_' + i).innerText = weight.toFixed(1) ;
         }
         if (! document.getElementById('wlb_' + i)) continue ;
         totalWeight += parseFloat(document.getElementById('wlb_' + i).innerText) ;
-        document.getElementById('arm_' + i).innerText = parseFloat(document.getElementById('arm_' + i).innerText).toFixed(2) ;
+        document.getElementById('arm_' + i).innerText = parseFloat(document.getElementById('arm_' + i).innerText).toFixed(1) ;
         var moment = parseFloat(document.getElementById('wlb_' + i).innerText) * parseFloat(document.getElementById('arm_' + i).innerText) ;
-        document.getElementById('moment_' + i).innerText = moment.toFixed(2) ;
+        document.getElementById('moment_' + i).innerText = moment.toFixed(1) ;
         totalMoment += moment ;
     }
     totalArm = totalMoment / totalWeight ;
-    document.getElementById('w_total').innerText = (totalWeight / 2.20462).toFixed(2) ;
-    document.getElementById('wlb_total').innerText = totalWeight.toFixed(2) ;
-    document.getElementById('arm_total').innerText = totalArm.toFixed(2) ;
-    document.getElementById('moment_total').innerText = totalMoment.toFixed(2) ;
+    document.getElementById('w_total').innerText = (totalWeight / 2.20462).toFixed(1) ;
+    document.getElementById('wlb_total').innerText = totalWeight.toFixed(1) ;
+    document.getElementById('arm_total').innerText = totalArm.toFixed(1) ;
+    document.getElementById('moment_total').innerText = totalMoment.toFixed(1) ;
     document.getElementById('warningsDiv').innerHTML = '' ;
     if (totalWeight > maxWeight) {
         document.getElementById('warningsDiv').innerHTML += "Total weight, " + Math.round(totalWeight/2.20462) + " kg = " + 
@@ -183,14 +220,14 @@ function processWnB() {
         document.getElementById('wlb_total').parentNode.classList.add('table-danger') ; 
     }
     if (cgFwd > totalArm) {
-        document.getElementById('warningsDiv').innerHTML += "Global arm, " + totalArm.toFixed(2) + " in, is below the minimum Fwd moment of " + cgFwd + " in.<br/>" ;
+        document.getElementById('warningsDiv').innerHTML += "Global arm, " + totalArm.toFixed(1) + " in, is below the minimum Fwd moment of " + cgFwd + " in.<br/>" ;
         document.getElementById('warningsDiv').style.visibility = 'visible' ;
         document.getElementById('warningsDiv').style.display = 'block' ;
         document.getElementById('arm_total').parentNode.classList.remove('table-info') ; 
         document.getElementById('arm_total').parentNode.classList.add('table-danger') ; 
     }
     if (totalArm > cgAft) {
-        document.getElementById('warningsDiv').innerHTML += "Global arm, " + totalArm.toFixed(2) + " in, is beyond the maximum Aft moment of " + cgAft + " in.<br/>" ;
+        document.getElementById('warningsDiv').innerHTML += "Global arm, " + totalArm.toFixed(1) + " in, is beyond the maximum Aft moment of " + cgAft + " in.<br/>" ;
         document.getElementById('warningsDiv').style.visibility = 'visible' ;
         document.getElementById('warningsDiv').style.display = 'block' ;
         document.getElementById('arm_total').parentNode.classList.remove('table-info') ; 
