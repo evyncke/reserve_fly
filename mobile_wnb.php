@@ -51,11 +51,10 @@ require_once 'mobile_header5.php' ;
 <!--div class="container-fluid" style="height: 100%!important;overflow:auto;top:0;bottom:0;left:0;right:0;position:fixed;"-->
 <!--div class="container-fluid" style="height: 100%!important;"-->
 <!--div class="container vh-90" style="height: 80vh!important;width: 100vw!important;bottom:0!important;left:0!important;right:0!important;"-->
-<h2 class="d-none d-md-block">Devis masse et centrage <?=$plane?></h2>
 
 <div class="row">
 <div class="col-xs-12 col-sm-12 col-lg-6">
-
+<h2 class="d-none d-md-block">Devis masse et centrage <?=$plane?></h2>
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form" class="form-horizontal">
 <!--div class="row m-0-xs"-->
 	<label for="planeSelect" class="col-form-label col-xs-1 col-md-1">Plane:</label>
