@@ -150,7 +150,7 @@ if($displayAllColumns=='true') {
 }
 print ("<input type=\"checkbox\" id=\"id_AllColumns\" name=\"name_AllColumns\" value=\"All columns\" onclick=\"document.location.href='$_SERVER[PHP_SELF]?plane=$plane&displayallcolumns=' + this.checked ;\" $checkedItem >");
 ?>
-<label for="name_AllColumns">&nbsp;Display all columns</label>
+<label for="name_AllColumns">&nbsp;Optional columns</label>
 </span>
 </form>
 
