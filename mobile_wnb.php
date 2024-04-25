@@ -98,6 +98,9 @@ while ($row = mysqli_fetch_array($result)) {
     else if($item=="Passenger 1+Passenger 2") {
         $item="Rear Passengers";
     }
+    else if($item=="Passenger 2+Passenger 1") {
+        $item="Rear Passengers";
+    }
     else if($item=="Basic empty weight") {
         $item="Empty Weight";
     }
