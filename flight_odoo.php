@@ -139,7 +139,7 @@ $result = mysqli_query($mysqli_link, "SELECT *
 ?>
 <table class="table table-striped table-hover table-bordered">
     <thead>
-        <tr><th>Nom</th><th class="text-center">Email</tH><th>Adresse</th><th>Pays</th><th>Odoo action</th></tr>
+        <tr><th>Client</th><th class="text-center">Email</tH><th>Adresse</th><th>Ville</th><th>Pays</th><th>Date commande</th><th>Odoo action</th></tr>
     </thead>
     <tbody>
 <?php
@@ -154,9 +154,9 @@ while ($row = mysqli_fetch_array($result)) {
             or journalise($userId, "E", "Cannot update country/city for $row[p_id] $email: " . mysqli_error($mysqli_link)) ;
     }
     print("<tr><td>" . db2web("<b>$row[p_lname]</b> $row[p_fname]") . 
-        " <a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\">Vol</a></td>
+        " <a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\">$row[f_reference]</a></td>
         <td class=\"text-center\"><a href=\"mailto:$email\">$email</a></td>
-        <td>" . db2web("$row[p_street]<br/>$row[p_zip] $row[p_city]") . "</td><td>$row[p_country]</td>") ;
+        <td>" . db2web("$row[p_street]</td><td>$row[p_zip] $row[p_city]") . "</td><td>$row[p_country]</td><td>$row[f_date_created]</td>") ;
     if (isset($odoo_customers[$email])) { // Does the customer already exists in Odoo ?
         $odoo_customer = $odoo_customers[$email] ;
         if ($row['p_odoo_cust_id'] = '') // Does the flight contact has the link to Odoo ?
@@ -189,7 +189,7 @@ while ($row = mysqli_fetch_array($result)) {
         }
         if (count($updates) > 0) { // There were some changes, let's update the Odoo record
             $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
-            print("<td>Odoo #$odoo_customer[id] mis à jour</td>") ;
+            print("<td>Odoo #<a href=\"https://spa-aviation.odoo.com/web#id=$odoo_customer[id]&cids=1&menu_id=122&action=275&model=res.partner&view_type=form\">#$odoo_customer[id]</a> mis à jour</td>") ;
         } else
             print("<td><a href=\"https://spa-aviation.odoo.com/web#id=$odoo_customer[id]&cids=1&menu_id=122&action=275&model=res.partner&view_type=form\">#$odoo_customer[id]</a></td>") ;
     } else {
@@ -217,7 +217,7 @@ while ($row = mysqli_fetch_array($result)) {
         }
         $id = $odooClient->Create('res.partner', $updates) ;
         if (! $id) journalise($userId, "E", "Cannot create Odoo partner") ;
-        print("<td>Odoo client $id created</td>") ;
+        print("<td>Client Odoo #<a href=\"https://spa-aviation.odoo.com/web#id=$id&cids=1&menu_id=122&action=275&model=res.partner&view_type=form\">#$id</a> créé</td>") ;
         mysqli_query($mysqli_link, "UPDATE $table_pax SET p_odoo_cust_id = $id WHERE p_id = $row[p_id]")
             or journalise($userId, "E", "Cannot update p_odoo_cust_id for $id $email: " . mysqli_error($mysqli_link)) ;
         // Update the cache as some email have multiple pax
