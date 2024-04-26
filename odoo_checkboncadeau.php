@@ -60,7 +60,7 @@ print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeho
 <form action="<?=$_SERVER['PHP_SELF']?>" id="checkboncadeau_form">
 <table class="table table-hover table-responsive table-bordered">
     <thead>
-       <tr><th>#</th><th>id</th><th>Date</th><th>Compte</th><th>Communication</th><th>Client</th><th>Valeur</th></tr>
+       <tr><th>#</th><th>id</th><th>Date</th><th>Compte</th><th>Communication</th><th>Ref.</th><th>Client</th><th>Valeur</th></tr>
     </thead>
     <tbody class="table-group-divider" id="myTable">
 <?php
@@ -88,12 +88,25 @@ foreach($result as $f=>$desc) {
 	if(!is_bool($partner_id)) {
 		$partner=$partner_id[1];
 	}
-	if($account=="499001" || $account=="499002") {
+    $flightReference="????";
+	if(($account=="499001" || $account=="499002") && $credit > 0.0) {
 		if($account=="499001") {
 			++$accountINI;
+            $posFlightReference = strpos($communicationUppercase, "V-INIT-");
+            if ($posFlightReference === false) {
+                $flightReference="V-INIT-??????";
+            } else {
+                $flightReference=substr($communicationUppercase, $posFlightReference, 13);
+            }
 		}
 		else {
 			++$accountIF;
+            $posFlightReference = strpos($communicationUppercase, "V-IF-");
+            if ($posFlightReference === false) {
+                $flightReference="V-IF-??????";
+            } else {
+                $flightReference=substr($communicationUppercase, $posFlightReference, 11);
+            }
 		}
 		$rowNumber++;
     	print("<tr>
@@ -102,6 +115,7 @@ foreach($result as $f=>$desc) {
    			<td>$date</td>
    			<td>$account</td>
      	  	<td>$communication</td>
+     	  	<td>$flightReference</td>
      	  	<td>$partner</td>
      	  	<td>$credit €</td>
       	  	 </tr>\n") ;
