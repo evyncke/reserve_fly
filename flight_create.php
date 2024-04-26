@@ -121,6 +121,7 @@ if ($create or $modify) {
 	$date2 = (trim($_REQUEST['date2']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date2'])))) : 'NULL';
 	$comment = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['comment'])) ;
 	$reference = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['reference'])) ;
+	$odooreference = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['odoopaymentreference'])) ;
 	$notes = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['notes'])) ;
 }
 
@@ -164,7 +165,7 @@ if ($modify) {
 			WHERE p_id = $pax_id")
 		or journalise($userId, "F", "Cannot modify contact, system error: " . mysqli_error($mysqli_link)) ;
 	$sql = "UPDATE $table_flight 
-		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "', f_reference='" . web2db($reference) . "', f_notes='" . web2db($notes) . "'
+		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "', f_reference='" . web2db($reference) . "', f_odoo_payment_id='" . web2db($odooreference) . "', f_notes='" . web2db($notes) . "'
 		WHERE f_id = $flight_id" ;
 	if (!mysqli_query($mysqli_link, $sql))
 		if (mysqli_errno($mysqli_link) == 1062)
@@ -314,11 +315,13 @@ if ($pay) {
 			$date = "SYSDATE()";
 		else
 			$date = "'" . mysqli_real_escape_string($mysqli_link, $_REQUEST['paymentDate']) . "'";
-		$reference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['paymentReference'])) . "'";
+	    $reference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['paymentReference'])) . "'";
+	    $odooreference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['odooPaymentReference'])) . "'";
 		$amount = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['paymentAmount'])) . "'";
 	} else {
 		$date = 'NULL' ;
 		$reference = 'NULL' ;
+		$odooreference = 'NULL' ;
 		$amount = 'NULL' ;
 	}
 	mysqli_query($mysqli_link, "UPDATE $table_flight
@@ -335,9 +338,10 @@ if ($addPayment) {
 	else
 		$date = "'" . mysqli_real_escape_string($mysqli_link, $_REQUEST['paymentDate']) . "'";
 	$reference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['paymentReference'])) . "'";
+	$odooreference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['odooPaymentReference'])) . "'";
 	$amount = "'" . mysqli_real_escape_string($mysqli_link, web2db(str_replace(',', '.', $_REQUEST['paymentAmount']))) . "'";
-	mysqli_query($mysqli_link, "INSERT INTO $table_flights_ledger(fl_flight, fl_date, fl_who, fl_amount, fl_reference)
-		VALUES($flight_id, $date, $userId, $amount, $reference)")
+	mysqli_query($mysqli_link, "INSERT INTO $table_flights_ledger(fl_flight, fl_date, fl_who, fl_amount, fl_reference, fl_odoo_payment_id)
+		VALUES($flight_id, $date, $userId, $amount, $reference, $odooreference)")
 		or journalise($userId, "F", "Impossible d'ajouter un paiement: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "I", "Flight $flight_id payment information updated $amount") ;
 }
@@ -646,7 +650,7 @@ for ($i = $known_pax_count+1; $i <= $row_flight['f_pax_cnt']; $i++) {
 <h3>Historique des paiements</h3>
 <table class="table table-striped table-responsive table-hover" id="ledgerTable">
 	<thead>
-		<tr><th></th><th>Date</th><th>Montant</th><th>Référence</th><th>Par</th></tr>
+		<tr><th></th><th>Date</th><th>Montant</th><th>Référence</th><th>Odoo Réf.</th><th>Par</th></tr>
 	</thead>
 	<tbody>
 <?php
@@ -658,6 +662,7 @@ while ($row = mysqli_fetch_array($result)) {
 	print("<tr>
 		<td><button onclick=\"location.href='" . $_SERVER['PHP_SELF'] . "?deletePayment=$row[fl_id]&flight_id=$flight_id&pay_open=Y'\" class=\"btn btn-danger\" title=\"Enlever ce paiement\"><span class=\"glyphicon glyphicon-remove\"></span></button></td>
 		<td>$row[fl_date]</td><td>$row[fl_amount]</td><td>" . db2web($row['fl_reference']) . "</td>
+        <td>" . db2web($row['fl_odoo_payment_id']) . "</td>
 		<td>" . db2web("$row[first_name] $row[last_name]") . "</td></tr>\n") ;
 	$total_paid += $row['fl_amount'] ;
 }
@@ -670,11 +675,12 @@ print("<form action=\"" . $_SERVER['PHP_SELF'] . "?\">
 	<td><input type=\"date\" name=\"paymentDate\" value=\"" . date('Y-m-d') . "\"></td>
 	<td><input type=\"text\" name=\"paymentAmount\"></td>
 	<td><input type=\"text\" name=\"paymentReference\"></td>
+	<td><input type=\"text\" name=\"odooPaymentReference\"></td>
 	<td></td>
 	</tr>
 	</form>\n") ;
 // Show the total
-print("<tr class=\"bg-info\"><td></td><td></td><td><b>$total_paid</b></td><td><b>TOTAL</b></td><td></td></tr>\n") ;
+print("<tr class=\"bg-info\"><td></td><td></td><td><b>$total_paid</b></td><td><b>TOTAL</b></td><td></td><td></td></tr>\n") ;
 ?>
 	</tbody>
 </table>

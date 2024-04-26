@@ -60,7 +60,7 @@ print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeho
 <form action="<?=$_SERVER['PHP_SELF']?>" id="checkboncadeau_form">
 <table class="table table-hover table-responsive table-bordered">
     <thead>
-       <tr><th>#</th><th>id</th><th>Date</th><th>Compte</th><th>Communication</th><th>Ref.</th><th>Client</th><th>Valeur</th></tr>
+       <tr><th>#</th><th>Odoo Réf.</th><th>Date</th><th>Compte</th><th>Communication</th><th>Ref.</th><th>Client</th><th>Valeur</th></tr>
     </thead>
     <tbody class="table-group-divider" id="myTable">
 <?php
