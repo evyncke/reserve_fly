@@ -340,9 +340,19 @@ if ($addPayment) {
 	$reference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['paymentReference'])) . "'";
 	$odooreference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['odooPaymentReference'])) . "'";
 	$amount = "'" . mysqli_real_escape_string($mysqli_link, web2db(str_replace(',', '.', $_REQUEST['paymentAmount']))) . "'";
-	mysqli_query($mysqli_link, "INSERT INTO $table_flights_ledger(fl_flight, fl_date, fl_who, fl_amount, fl_reference, fl_odoo_payment_id)
-		VALUES($flight_id, $date, $userId, $amount, $reference, $odooreference)")
-		or journalise($userId, "F", "Impossible d'ajouter un paiement: " . mysqli_error($mysqli_link)) ;
+    print("odooreference=$odooreference<br>");
+    if($odooreference!="''") {
+        print("1odooreference=$odooreference<br>");
+	    mysqli_query($mysqli_link, "INSERT INTO $table_flights_ledger(fl_flight, fl_date, fl_who, fl_amount, fl_reference, fl_odoo_payment_id)
+		    VALUES($flight_id, $date, $userId, $amount, $reference, $odooreference)")
+		    or journalise($userId, "F", "Impossible d'ajouter un paiement: " . mysqli_error($mysqli_link)) ;
+    }
+    else {
+        print("2odooreference=$odooreference<br>");
+	    mysqli_query($mysqli_link, "INSERT INTO $table_flights_ledger(fl_flight, fl_date, fl_who, fl_amount, fl_reference)
+		    VALUES($flight_id, $date, $userId, $amount, $reference)")
+		    or journalise($userId, "F", "Impossible d'ajouter un paiement: " . mysqli_error($mysqli_link)) ;
+    }
 	journalise($userId, "I", "Flight $flight_id payment information updated $amount") ;
 }
 
