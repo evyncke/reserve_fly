@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2022 Eric Vyncke
+   Copyright 2014-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ $date = date_format(date_create("$year-$month-$day"), 'Y-m-d H:i:s') ; // Let's 
 if ($error_message != '') {
 	$bookings['errorMessage'] = $error_message ;
 } else {
-	// TODO sometime the booked plane is replaced on the field by another one...
+	// TODO sometime the booked plane is replaced on the field by another one... tried 2024-04-30
 	$result = mysqli_query($mysqli_link, "SELECT r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
 		CONVERT(r_comment USING UTF8) AS r_comment, r_from, r_via1, r_via2, r_to, r_duration, r_crew_wanted, r_pax_wanted,
 		p.username as username, p.name as name, w.username AS username2, w.name AS name2,
@@ -50,11 +50,14 @@ if ($error_message != '') {
 		LEFT JOIN $table_logbook AS l ON l.l_booking = r_id
 		LEFT JOIN $table_blocked ON b_jom_id = p.id,
 		$table_users AS w, $table_person
-		WHERE r_plane = '$plane' AND DATE(r_start) <= '$date' AND '$date' <= DATE(r_stop) AND
+		WHERE (r_plane = '$plane' OR l.l_plane = '$plane') AND DATE(r_start) <= '$date' AND '$date' <= DATE(r_stop) AND
 		r_who = w.id AND jom_id = p.id AND r_cancel_date IS NULL
 		ORDER BY r_plane, r_start") ;
 	if ($result)  {
 		while ($row = mysqli_fetch_array($result)) {
+			// If flown plane is different than booked plane, then only return the flown one
+			if ($row['log_plane'] != '' and  $row['log_plane'] !=  $row['r_plane'])
+				if ($row['log_plane'] != $plane) continue ;
 			$booking = array() ;
 			$booking['id'] = $row['r_id'] ;
 			$booking['date'] = $date ;
