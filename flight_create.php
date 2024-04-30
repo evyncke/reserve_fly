@@ -165,7 +165,7 @@ if ($modify) {
 			WHERE p_id = $pax_id")
 		or journalise($userId, "F", "Cannot modify contact, system error: " . mysqli_error($mysqli_link)) ;
 	$sql = "UPDATE $table_flight 
-		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "', f_reference='" . web2db($reference) . "', f_odoo_payment_id='" . web2db($odooreference) . "', f_notes='" . web2db($notes) . "'
+		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "', f_reference='" . web2db($reference) . "', f_notes='" . web2db($notes) . "'
 		WHERE f_id = $flight_id" ;
 	if (!mysqli_query($mysqli_link, $sql))
 		if (mysqli_errno($mysqli_link) == 1062)
@@ -340,15 +340,15 @@ if ($addPayment) {
 	$reference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['paymentReference'])) . "'";
 	$odooreference = "'" . mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['odooPaymentReference'])) . "'";
 	$amount = "'" . mysqli_real_escape_string($mysqli_link, web2db(str_replace(',', '.', $_REQUEST['paymentAmount']))) . "'";
-    print("odooreference=$odooreference<br>");
+    //print("odooreference=$odooreference<br>");
     if($odooreference!="''") {
-        print("1odooreference=$odooreference<br>");
+        //print("1odooreference=$odooreference<br>");
 	    mysqli_query($mysqli_link, "INSERT INTO $table_flights_ledger(fl_flight, fl_date, fl_who, fl_amount, fl_reference, fl_odoo_payment_id)
 		    VALUES($flight_id, $date, $userId, $amount, $reference, $odooreference)")
 		    or journalise($userId, "F", "Impossible d'ajouter un paiement: " . mysqli_error($mysqli_link)) ;
     }
     else {
-        print("2odooreference=$odooreference<br>");
+        //print("2odooreference=$odooreference<br>");
 	    mysqli_query($mysqli_link, "INSERT INTO $table_flights_ledger(fl_flight, fl_date, fl_who, fl_amount, fl_reference)
 		    VALUES($flight_id, $date, $userId, $amount, $reference)")
 		    or journalise($userId, "F", "Impossible d'ajouter un paiement: " . mysqli_error($mysqli_link)) ;
