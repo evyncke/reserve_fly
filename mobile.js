@@ -96,6 +96,11 @@ function displayMETAR(station) {
 									li.innerHTML += ' <b>!Caution!</b>' ;
 								else if (Math.abs(crossComponent) > 15)
 									li.innerHTML += ' <b>!Caution!</b>' ;
+								if (Math.abs(crossComponent) >= 25) {
+									elem.style.backgroundColor = 'pink' ;
+								} else if (Math.abs(crossComponent) >= 15 && elem.style.backgroundColor != 'pink') { // Need to prevent changing red into orange ;-)
+									elem.style.backgroundColor = 'orange' ;
+								}
 							}
 						}
 					}
