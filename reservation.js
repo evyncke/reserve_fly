@@ -1972,7 +1972,7 @@ function refreshPlanningTable() {
 				// Add FlightAware link only for members, need to stop event propagation to the TD click causing a switch of presentation
 				if (userId > 0)
 					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="https://flightaware.com/live/flight/' + allPlanes[plane].id.toUpperCase() +
-						'" onclick="event.stopPropagation();" target="_blank"><img src="fa.ico" border="0" width="12" height="12"></a>' ;
+						'" onclick="event.stopPropagation();" target="_blank"><img src="fa.ico" border="0" width="12" height="12" title="Dernier vol sur Flightaware"></a>' ;
 				if (allPlanes[plane].compteur_pilote_date > allPlanes[plane].compteur_date)
 					compteur = allPlanes[plane].compteur_pilote ;
 				else
@@ -2001,8 +2001,6 @@ function refreshPlanningTable() {
 	}
 	document.getElementById('planningDayOfWeek').innerHTML = (planningDayOfWeek == -1) ? '' : weekdays[planningDayOfWeek] + ': ' ; 
 	document.getElementById('planningDate').value = planningDay + '/' + planningMonth + '/' + planningYear ;
-// TODO June 2020, do we really need it repeated ? It is heavy with displayMETAR() notably...
-//	clearBookingDetails() ; // Repeated to unsure accurate (? but this is asynchronous) dayMessagesHTML display...
 	myLog("end refreshPlanningTable()") ;
 }
 
