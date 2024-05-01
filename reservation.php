@@ -640,7 +640,7 @@ $version_css = date ("Y-m-d H:i:s.", filemtime('reservation.css')) ;
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 ?>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, d&eacute;cembre 2014-2022 et Patrick Reginster 2020-2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
+<div class="copyright">R&eacute;alisation: Eric Vyncke, d&eacute;cembre 2014-2024 et Patrick Reginster 2020-2022, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br/>
 Open Source code: <a href="https://github.com/evyncke/reserve_fly">on github</a><br/>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, ex&eacute;cut&eacute en <?=$execution_time?> sec</div>
 <br/>
