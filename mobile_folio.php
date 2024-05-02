@@ -380,7 +380,7 @@ if ($userIsInstructor)
 	print("<p>&spades; Veuillez noter qu'en tant qu'instructeur les montants négatifs de la colonne FI sont en fait des montants à facturer au club.</p>") ;
 
 if ($clubs_explanation)
-	print("<p><mark>&clubs;: pour cet avion, la facture sur fait sur l'index moteur mais avec un forfait de plusieurs minutes.</mark></p>") ;
+	print("<p><mark>&clubs;: pour cet avion, la facture sur fait sur l'index moteur mais avec une déduction de plusieurs minutes, la durée indiquée est donc la durée facturée et pas celle du carnet de routes.</mark></p>") ;
 if ($diams_explanation)
 	print("<p><mark>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</mark></p>") ;
 ?>
