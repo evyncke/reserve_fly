@@ -27,6 +27,7 @@ class OdooClient {
     public $db ;
     public $user ;
     public $password ;
+    public $debug ;
 
     function __construct($host, $db, $user, $password) {
         global $originUserId ;
@@ -36,6 +37,7 @@ class OdooClient {
         $this->user = $user ;
         $this->password = $password ;
         $this->encoder = new PhpXmlRpc\Encoder() ;
+        $this->debug = false ;
 
         $this->common = new PhpXmlRpc\Client("https://$host/xmlrpc/2/common");
         $this->common->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
@@ -83,8 +85,13 @@ class OdooClient {
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'search_read', $domain_filter, $display)) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
-            journalise($originUserId, "F", "Cannot search_read in Odoo model $model @ $this->host: " . 
-                htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
+            if ($this->debug)
+                die("<hr><b>Cannot search_read in Odoo model $model @ $this->host</b><br/>
+                    Faultcode: " . htmlentities($response->faultCode()) . "<br/>
+                    Reason: '" . nl2br($response->faultString()) . "'<hr>") ;
+            else
+                journalise($originUserId, "F", "Cannot search_read in Odoo model $model @ $this->host: " . 
+                    htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
         }
         return $response->value() ;
     }
