@@ -2079,7 +2079,7 @@ function init() {
 			option.innerHTML = members[member].name ;
 		}
                 if (members[member].student) {  // Add a student icon
-                        option.innerHTML += ' &#x1f4da;' ;
+                        option.innerHTML += ' &#x1F393;' ;
                 }
 		option.value = members[member].id ;
 		document.getElementById('memberSelect').add(option) ;
@@ -2092,7 +2092,7 @@ function init() {
 			option.innerHTML = pilots[pilot].name ;
 		}
                 if (pilots[pilot].student) {  // Add a student icon
-                        option.innerHTML += ' &#x1f4da;' ;
+                        option.innerHTML += ' &#x1F393;' ;
                 }
 		option.value = pilots[pilot].id ;
 		document.getElementById('pilotSelect').add(option) ;
