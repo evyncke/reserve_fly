@@ -126,7 +126,7 @@ function init() {
 </head>
 <body onload="init();">
 <div class="container-fluid">
-<h2 class="text-center">Carnet de route de <?=$plane?> du <?=$since?> au <?=$monthAfterForTitleString?></h2>
+<h2 class="text-center">Carnet de routes de <?=$plane?> du <?=$since?> au <?=$monthAfterForTitleString?></h2>
 <?php
 print("Carnet de route de: <select id=\"planeSelect\" onchange=\"planeChanged(this);\">" ) ;
 $result = mysqli_query($mysqli_link, "select * from $table_planes
@@ -214,7 +214,7 @@ $sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_h
 	order by l_start asc" ;
 // Before, all entries add a l_booking for the flight club planes...
 //	where l_plane = '$plane' and l_booking is not null
-$result = mysqli_query($mysqli_link, $sql) or die("Erreur système à propos de l'accès au carnet de route: " . mysqli_error($mysqli_link)) ;
+$result = mysqli_query($mysqli_link, $sql) or die("Erreur système à propos de l'accès au carnet de routes: " . mysqli_error($mysqli_link)) ;
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
 $pic_total_hour = 0 ;
