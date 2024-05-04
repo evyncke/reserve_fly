@@ -367,7 +367,7 @@ if (!isset($_REQUEST['previous'])) {
 </div><!-- col -->
 </div><!-- row -->
 <p>Sur base des données que vous avez entrées après les vols dans le
-carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui (<?=date('D, j-m-Y H:i e')?>),
+carnet de routes des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui (<?=date('D, j-m-Y H:i e')?>),
 donc il peut y avoir une différence si les prix par minute ont changé depuis vos vols.
 Le montant n'inclut aucune note de frais (par exemple carburant), note de crédit, ainsi que d'autres frais (par exemple, cotisations, ou taxes d'atterrissage).</p>
 <p>Les heures sont les heures UTC. </p>
