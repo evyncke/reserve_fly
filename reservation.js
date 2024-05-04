@@ -207,7 +207,7 @@ function refreshTimestamp() {
 }
 
 function roadBookClick() {
-	window.location.href = 'planelog.php?plane=' + allPlanes[planningPlaneIndex].id ;
+	window.location.href = 'mobile_planelog.php?plane=' + allPlanes[planningPlaneIndex].id ;
 }
 
 function toggleLogDisplay () {

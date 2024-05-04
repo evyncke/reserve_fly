@@ -163,13 +163,13 @@ while ($row = mysqli_fetch_array($result)) {
 		$row2['compteur_pilote_nom'] = db2web(($row2['compteur_pilote_nom'] == '') ? $row2['name']  : $row2['compteur_pilote_nom']) ;
 	}
 	// Not too distant reservation?
-// Old code: only looking in the actual 'carnet de route' entries
+// Old code: only looking in the actual 'carnet de routes' entries
 //	$result3 = mysqli_query($mysqli_link, "select l_end, datediff(sysdate(), l_end) as temps_dernier 
 //		from $table_logbook l join $table_bookings r on l_booking = r_id
 //		where r_plane = '$row[id]' and (r_pilot = $userId or (r_instructor is not null and r_instructor = $userId)) and l_booking is not null
 //		order by l_end desc") or die("Cannot get last reservation: " . mysqli_error($mysqli_link)) ;
 
-	// New code: look at pilot log book whether 'carnet de route' or not :-(
+	// New code: look at pilot log book whether 'carnet de routes' or not :-(
 	$index_column = ($row['compteur_vol'] == 0) ? 'l_end_hour' : 'l_flight_end_hour' ;
 	$result3 = mysqli_query($mysqli_link, "select $index_column, datediff(sysdate(), l_end) as temps_dernier 
 		from $table_logbook l
@@ -363,7 +363,7 @@ if ($userId == 0) {
 		$userNoFlight = true ;
 	}
 	print('<input type="button" style="background-color: green; color: white;" value="Mon profil" onclick="javascript:document.location.href=\'mobile_profile.php\';"> ') ;
-	print('<input type="button" style="background-color: green; color: white;"value="Mon carnet de vol" onclick="javascript:document.location.href=\'mobile_mylog.php\';"> ') ;
+	print('<input type="button" style="background-color: green; color: white;"value="Mon carnet de vols" onclick="javascript:document.location.href=\'mobile_mylog.php\';"> ') ;
 	print('<input type="button" value="Carte de mes vols" onclick="javascript:document.location.href=\'mymap.php\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;" value="Site mobile" onclick="javascript:document.location.href=\'mobile.php?news\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;" value="Folio du mois" onclick="javascript:document.location.href=\'mobile_folio.php\';"> ') ;
@@ -477,12 +477,12 @@ D&egrave;s que le probl&eacute;me chez OVH est r&eacute;solu, tout refonctionner
 <span class="planningLegend">
 Indications pour un avion que nous n'&ecirc;tes probablement pas en droit de r&eacute;server (sauf avec un instructeur) car:<br/>
 <img src="exclamation-icon.png" width="12" height="12" alt="!"  onStalled="imgStalled();">: vous n'avez pas vol&eacute; dessus r&eacute;cemment (sur
-base de l'entr&eacute;e des heures de vol dans votre carnet de vol).<br/>
+base de l'entr&eacute;e des heures de vol dans votre carnet de vols).<br/>
 <img src="forbidden-icon.png" width="12" height="12" alt="X"  onStalled="imgStalled();">: vous n'avez pas les qualifications requises (sur base des validit&eacute;s de votre profil).<br/>
 V&eacute;rifiez les r&egrave;gles de r&eacute;servation et si vous les respectez: r&eacute;servez :-)<br/>
 <img src="fa.ico" border="0" width="12" height="12">: ouvre Flight Aware avec le dernier vol de cet avion.<br/>
 </span>
-<center><input type="button" id="roadBookButton" value="Carnet de route" onclick="roadBookClick();" disabled="true" style="display: none;"></center>
+<center><input type="button" id="roadBookButton" value="Carnet de routes" onclick="roadBookClick();" disabled="true" style="display: none;"></center>
 <p>
 <div id="pilotDetailsDiv"><img id="pilotDetailsImage"><span id="pilotDetailsSpan"></span><hr><center><button onclick="hidePilotDetails();">OK</button></center></div>
 <!-- div to display the plane/ressource booking confirmation message-->
