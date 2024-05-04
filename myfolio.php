@@ -166,7 +166,7 @@ function init() {
                         else
                                 option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
                         if (members[member].student) {  // Add a student icon
-                                option.innerHTML += ' &#x1f4da;' ;
+                                option.innerHTML += ' &#x1F393;' ;
                         }
                         option.value = members[member].id ;
                         document.getElementById('pilotSelect').add(option) ;
