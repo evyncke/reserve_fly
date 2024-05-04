@@ -87,6 +87,12 @@ foreach($members as $member) {
             $mobile_phone = "<i class=\"bi bi-telephone-fill text-danger\" title=\"Pas de téléphone mobile spécifié\">" ;
         else
             $mobile_phone = "<a href=\"tel:$student->mobilePhone\"><i class=\"bi bi-telephone-fill\" title=\"Call on mobile\"></i></a>" ;
+        if ($student->daysSinceLastFlight <= 60)
+            $daysColor = 'text-bg-info' ;
+        else if ($student->daysSinceLastFlight <= 120)
+            $daysColor = 'text-bg-warning' ;
+        else
+            $daysColor = 'text-bg-danger' ;
         print("<tr>
             <td>
                 <a href=\"dto.student.php?student=$student->jom_id\" title=\"Display all flights\">$student->lastName, $student->firstName <i class=\"bi bi-binoculars-fill\"></i></a>
@@ -94,7 +100,7 @@ foreach($members as $member) {
                     $mobile_phone $blocked $bank_filled
             </td>
             <td>$student->firstFlight <span class=\"badge text-bg-info\" title=\"Number of flights\"><i class=\"bi bi-airplane-fill\"></i> $student->countFlights</span><br/>
-                $student->lastFlight <span class=\"badge text-bg-info\" title=\"Days since last flight\"><i class=\"bi bi-calendar3\"></i> $student->daysSinceLastFlight</span></td>
+                $student->lastFlight <span class=\"badge $daysColor\" title=\"Days since last flight\"><i class=\"bi bi-calendar3\"></i> $student->daysSinceLastFlight</span></td>
             <td class=\"d-none d-md-table-cell\"><a href=\"mailto:$student->email\">$student->email</a></td>
             <td class=\"d-none d-md-table-cell\"><a href=\"tel:$student->mobilePhone\">$student->mobilePhone</a></td>
             </tr>\n") ;
