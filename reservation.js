@@ -1,4 +1,4 @@
-//   Copyright 2014-2023 Eric Vyncke
+//   Copyright 2014-2024 Eric Vyncke
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -958,9 +958,7 @@ function cancelAgendaItem() {
 }
 
 function modifyBooking(id) {
-//	console.log('modifyBooking() start') ;
 	displayWaiting() ;
-//	console.log('modifyBooking(' + id + ') currentlyDisplayedBooking=' + currentlyDisplayedBooking + ', bookingFromID()=' + bookingFromID(currentlyDisplayedBooking) + ', loggingFromID()=' + loggingFromID(currentlyDisplayedBooking)) ;
 	if (allBookings[bookingFromID(currentlyDisplayedBooking)][loggingFromID(currentlyDisplayedBooking)].ressource == 0) {
 		var plane = document.getElementById("planeSelect").value ;
 		var pilotId = document.getElementById("pilotSelect").value ;
@@ -1029,8 +1027,9 @@ function modifyBooking(id) {
 	}
 	var requestUrl = "modify_booking.php?booking=" + currentlyDisplayedBooking + "&plane=" + plane + '&pilotId=' + pilotId + '&instructorId=' + instructorId +
 		'&customerId=' + customerId + '&start=' + bookingStart + '&end=' + bookingEnd +
-		'&comment=' + comment + '&crewWanted=' + crewWanted + '&paxWanted=' + paxWanted + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
-		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
+		'&comment=' + encodeURIComponent(comment) + '&crewWanted=' + crewWanted + '&paxWanted=' + paxWanted + 
+		'&fromApt=' + encodeURIComponent(departingAirport) + '&toApt=' + encodeURIComponent(destinationAirport) +
+		'&via1Apt=' + encodeURIComponent(via1Airport) + '&via2Apt=' + encodeURIComponent(via2Airport) +
 		'&duration=' + flightDuration ;
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
@@ -1081,9 +1080,9 @@ function modifyAgendaItem(id) {
 			}
 		}
 	}
-	var requestUrl = "modify_fi_agenda.php?item=" + currentlyDisplayedAgendaItem + '&fi=' + instructorId +
+	var requestUrl = "modify_fi_agenda.php?item=" + encodeURIComponent(currentlyDisplayedAgendaItem) + '&fi=' + instructorId +
 		'&callType=' + itemCallType + '&studentOnly=' + itemStudentOnly +
-		'&start=' + itemStart + '&end=' + itemEnd + '&comment=' + comment ;
+		'&start=' + itemStart + '&end=' + itemEnd + '&comment=' + encodeURIComponent(comment) ;
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 	// Now, let's refresh the screen to display the new booking
@@ -1209,8 +1208,9 @@ function confirmBooking(bookingIsForFlying) {
 		bookingType = bookingTypeMaintenance ;
 	var requestUrl = "create_booking.php?plane=" + plane + '&pilotId=' + pilotId +  '&instructorId=' + instructorId +
 		'&customerId=' + customerId + '&start=' + bookingStart + '&end=' + bookingEnd +
-		'&type=' + bookingType + '&comment=' + comment + '&crewWanted=' + crewWanted + '&paxWanted=' + paxWanted + '&fromApt=' + departingAirport + '&toApt=' + destinationAirport +
-		'&via1Apt=' + via1Airport + '&via2Apt=' + via2Airport +
+		'&type=' + bookingType + '&comment=' + encodeURIComponent(comment) + '&crewWanted=' + crewWanted + '&paxWanted=' + paxWanted + 
+		'&fromApt=' + encodeURIComponent(departingAirport) + '&toApt=' + encodeURIComponent(destinationAirport) +
+		'&via1Apt=' + encodeURIComponent(via1Airport) + '&via2Apt=' + encodeURIComponent(via2Airport) +
 		'&duration=' + flightDuration ;
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
@@ -1263,7 +1263,7 @@ function confirmAgendaItem() {
 		}
 	}
 	var requestUrl = "create_fi_agenda.php?fi=" + instructorId + '&start=' + itemStart + '&end=' + itemEnd +
-		'&callType=' + itemCallType + '&studentOnly=' + itemStudentOnly + '&comment=' + comment ;
+		'&callType=' + itemCallType + '&studentOnly=' + itemStudentOnly + '&comment=' + encodeURIComponent(comment) ;
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 	// Now, let's refresh the screen to display the new booking

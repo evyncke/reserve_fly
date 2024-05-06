@@ -23,7 +23,7 @@ ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
 header('Link: </resa/reservation.css>;rel=preload;as=style, </resa/datepickr.css>;rel=preload;as=style,</resa/reservation.js>;rel=preload;as=script,</resa/datepickr.js>;rel=preload;as=script') ;
-header('Link: </resa/gtk_media_play_rtl.png>;rel=preload;as=image, </resa/spinner.gif>;rel=preload;as=image,</resa/fa.ico>;rel=preload;as=image,</resa/members.js>;rel=preload;as=script') ;
+header('Link: </resa/fa.ico>;rel=preload;as=image,</resa/members.js>;rel=preload;as=script') ;
 
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
 require_once "dbi.php" ;

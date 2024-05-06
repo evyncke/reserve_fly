@@ -55,10 +55,10 @@ $comment = mysqli_real_escape_string($mysqli_link, $_REQUEST['comment']) ;
 $comment_db = mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['comment'])) ;
 $crew_wanted = (isset($_REQUEST['crewWanted'])) ? mysqli_real_escape_string($mysqli_link, $_REQUEST['crewWanted']) : 0 ;
 $pax_wanted = (isset($_REQUEST['paxWanted'])) ? mysqli_real_escape_string($mysqli_link, $_REQUEST['paxWanted']) : 0 ;
-$from_apt = (isset($_REQUEST['fromApt'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['fromApt'])) : $default_airport;
-$via1_apt = (isset($_REQUEST['via1Apt'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['via1Apt'])) : '';
-$via2_apt = (isset($_REQUEST['via2Apt'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['via2Apt'])) : '';
-$to_apt = (isset($_REQUEST['toApt'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['toApt'])) : $default_airport;
+$from_apt = (isset($_REQUEST['fromApt'])) ? mysqli_real_escape_string($mysqli_link, web2db(strtoupper($_REQUEST['fromApt']))) : $default_airport;
+$via1_apt = (isset($_REQUEST['via1Apt'])) ? mysqli_real_escape_string($mysqli_link, web2db(strtoupper($_REQUEST['via1Apt']))) : '';
+$via2_apt = (isset($_REQUEST['via2Apt'])) ? mysqli_real_escape_string($mysqli_link, web2db(strtoupper($_REQUEST['via2Apt']))) : '';
+$to_apt = (isset($_REQUEST['toApt'])) ? mysqli_real_escape_string($mysqli_link, web2db(strtoupper($_REQUEST['toApt']))) : $default_airport;
 
 // Basic checks on dates
 $start_date = new DateTime($start) ;

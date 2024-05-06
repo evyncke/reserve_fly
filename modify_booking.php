@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2023 Eric Vyncke
+   Copyright 2014-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -44,10 +44,10 @@ $crew_wanted = mysqli_real_escape_string($mysqli_link, $_REQUEST['crewWanted']) 
 if ($crew_wanted == '' or ! is_numeric($crew_wanted)) $crew_wanted = 0 ;
 $pax_wanted = mysqli_real_escape_string($mysqli_link, $_REQUEST['paxWanted']) ;
 if ($pax_wanted == '' or ! is_numeric($pax_wanted)) $pax_wanted = 0 ;
-$from_apt = mysqli_real_escape_string($mysqli_link, $_REQUEST['fromApt']) ;
-$via1_apt = mysqli_real_escape_string($mysqli_link, $_REQUEST['via1Apt']) ;
-$via2_apt = mysqli_real_escape_string($mysqli_link, $_REQUEST['via2Apt']) ;
-$to_apt = mysqli_real_escape_string($mysqli_link, $_REQUEST['toApt']) ;
+$from_apt = mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['fromApt'])) ;
+$via1_apt = mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['via1Apt'])) ;
+$via2_apt = mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['via2Apt'])) ;
+$to_apt = mysqli_real_escape_string($mysqli_link, web2db($_REQUEST['toApt'])) ;
 // booking ID
 $id = trim($_REQUEST['booking']) ;
 if ($id == '') die("Missing parameter: booking") ;
