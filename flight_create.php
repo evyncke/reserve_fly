@@ -803,6 +803,7 @@ function show_reservation($date, $header) {
 
 	if ($row_flight['f_date_1'] != '' and $row_flight['f_date_1'] != '0000-00-00s') show_reservation($row_flight['f_date_1'], 'Date préférée') ;
 	if ($row_flight['f_date_2'] != '' and $row_flight['f_date_2'] != '0000-00-00') show_reservation($row_flight['f_date_2'], 'Date alternative') ;
+	// TODO also display the actual day of flight whenn the flight is booked by the pilot
 ?>
 </div><!-- menuPlane -->
 
