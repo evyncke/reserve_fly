@@ -18,6 +18,7 @@
 
 ob_start("ob_gzhandler");
 require_once "dbi.php" ;
+require_once "odooFlight.class.php" ;
 
 MustBeLoggedIn() ;
 
@@ -41,7 +42,37 @@ $monthAfterForTitle = $monthAfterForTitle->sub(new DateInterval('P1D')) ;
 $monthAfterForTitleString = $monthAfterForTitle->format('Y-m-d') ; // Then Title is 31-01-2023 and not 01-02-2023
 $mounthName=$sinceDate->format('F') ;
 
-?><html>
+// Actions
+if (isset($_REQUEST['action']) and $_REQUEST['action'] == "createfactureif") {
+	$flightReference = $_REQUEST['reference'] ;
+    $date=$_REQUEST['date'] ;
+    $logbookid=$_REQUEST['logbookid'] ;
+    $montant=$_REQUEST['montant'] ;
+    $flyid=$_REQUEST['flyid'] ;
+    if(OF_createFactureIF($flightReference, $date, $logbookid, $montant, $flyid)) {
+    	print("<h2 style=\"color: red;\"><b>Create Facture IF Reference:$flightReference: DONE</b></h2>");
+    }
+    else {
+	    print("<h2 style=\"color: red;\"><b>Error to create Facture IF Reference:$flightReference</b></h2>");
+    }
+}
+
+if (isset($_REQUEST['action']) and $_REQUEST['action'] == "createfactureinit") {
+	$flightReference = $_REQUEST['reference'] ;
+    $date=$_REQUEST['date'] ;
+    $logbookid=$_REQUEST['logbookid'] ;
+    $montant=$_REQUEST['montant'] ;
+    $flyid=$_REQUEST['flyid'] ;
+    if(OF_createFactureINIT($flightReference, $date, $logbookid, $montant, $flyid)) {
+    	print("<h2 style=\"color: red;\"><b>Create Facture INIT Reference:$flightReference: DONE</b></h2>");
+    }
+    else {
+	    print("<h2 style=\"color: red;\"><b>Error to create Facture INIT Reference:$flightReference</b></h2>");
+    }
+}
+
+?>
+<html>
 <head>
 <link rel="stylesheet" type="text/css" href="log.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
@@ -85,6 +116,29 @@ function init() {
 			spanElem.innerText = ' (' + memberText + ')';
 	}
 }
+
+function createFactureIFFunction(PHP_Self,theSince, theReferenceFlight, theDate, theLogbookID, theMontant, theFlightID) {
+	if (confirm("Confirmer que vous voulez crér une facture pour le vol IF  "+theReferenceFlight ) == true) {			
+	 	var aCommand=PHP_Self+"?since="+theSince+"&action=createfactureif&reference=" + theReferenceFlight + 
+        "&date=" + theDate +
+        "&logbookid=" + theLogbookID +
+        "&montant=" + theMontant +
+        "&flyid="+theFlightID;
+	 	window.location.href = encodeURI(aCommand);
+	}
+}
+
+function createFactureINITFunction(PHP_Self,theSince, theReferenceFlight, theDate, theLogbookID, theMontant, theFlightID) {
+	if (confirm("Confirmer que vous voulez crér une facture pour le vol INIT  "+theReferenceFlight ) == true) {			
+	 	var aCommand=PHP_Self+"?since="+theSince+"&action=createfactureinit&reference=" + theReferenceFlight + 
+        "&date=" + theDate +
+        "&logbookid=" + theLogbookID +
+        "&montant=" + theMontant +
+        "&flyid="+theFlightID;
+	 	window.location.href = encodeURI(aCommand);
+	}
+}
+ 
 </script>
 <!-- Matomo -->
 <script type="text/javascript">
@@ -147,6 +201,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 		$datePaiement=gmdate('d/m/Y', strtotime($datePaiement)) ;
 		$type=$row['f_type'];
 		$gift=$row['f_gift'];
+        $odooreference=$row['fl_odoo_payment_id'];
 		$dateFlown="";
 		if(isset($row['f_date_flown'])) {
 			$dateFlown=gmdate('Y-m-d', strtotime("$row[f_date_flown]")) ;
@@ -169,18 +224,23 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 			$typeVol=$typeVol."? ";
 		}
 		$referencePaiement=db2web($row['fl_reference']);	
-		$pos = strpos(strtoupper($referencePaiement), "FACTURE");
-		if($pos===false) {
-			if($dateFlown == $date) {
-				$moyenPaiement="Bancontact";
-			}
-			else {
-				$moyenPaiement="Virement";			
-			}
-		}
-		else {
-			$moyenPaiement="Facture";
-		}
+        if($odooreference!="") {
+            $moyenPaiement="Virement CBC";
+        }
+        else {		
+		    $pos = strpos(strtoupper($referencePaiement), "FACTURE");
+		    if($pos===false) {
+			    if($dateFlown == $date) {
+				    $moyenPaiement="Bancontact";
+			    }
+			    else {
+				    $moyenPaiement="Virement non lié à odoo";	
+			    }
+		    }
+		    else {
+			    $moyenPaiement="Facture";
+		    }
+        }
 		$montant=$row['fl_amount'];
 		$totalMontant+=$montant;
 	
@@ -204,40 +264,71 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 <th class="logHeader">Avion</th>
 <th class="logHeader">Pilote</th>
 <th class="logHeader">Prix du vol</th>
-<th class="logHeader">Référence Ciel</th>
+<th class="logHeader">Facture Odoo</th>
 </tr>
 </thead>
 <tbody>
-	<?php
+<?php
 	$filterType = ' AND f_type ="I"' ;
 	$filter = ' AND f_date_flown IS NOT NULL' ;
 	$date_filter = " AND f_date_flown >= '" . $since . "' AND f_date_flown <= '" . $monthAfterString. "'";
 
+	$result = mysqli_query($mysqli_link, "SELECT DISTINCT l_id, f_invoice_ref, l_plane, f_reference, f_date_flown, first_name, last_name, r_plane, f_id, fl_reference, fl_odoo_payment_id, sum(fl_amount) as prix 
+			FROM $table_flight AS f  
+			JOIN $table_person ON f.f_pilot = jom_id
+			JOIN $table_bookings AS b ON f.f_booking = b.r_id
+			JOIN $table_flights_ledger ON f_id = fl_flight
+			JOIN $table_logbook AS l ON f.f_booking = l.l_booking
+            WHERE true $filterType $filter $date_filter 
+			GROUP BY f_reference, f_id
+			ORDER BY f_date_flown") 
+			or journalise($userId, "F", "Impossible de lister les vols INIT: " . mysqli_error($mysqli_link));
+
+
+	$montantTotal=0.0;
+	while ($row = mysqli_fetch_array($result)) {
+        $invoiceRef=$row['f_invoice_ref'];
+        $referenceFlight=$row['f_reference'];
+        
+		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
+		$date=$row['f_date_flown'];
+		$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
+		$plane=$row['r_plane'];
+		$pilote=db2web($row['first_name'])." ".db2web($row['last_name']) ;
+		$montant=$row['prix'];
+		$montantTotal+=$montant;
+		//$referenceOdoo="Créer Facture INIT";
+        
+		$referencePaiement=db2web($row['fl_reference']);	
+		$referencePaiementOdoo=$row['fl_odoo_payment_id'];	
+        $flyid=$row['f_id'];
+        $logbookID=$row['l_id'];	
+        
+        
+		print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td>");
+        //****************************************************************************
+        if($invoiceRef>0) {
+            // Invoice already created
+            print("<td class=\"logCell\">Déjà facturé<td>");
+        }
+        else {
+            print("<td class=\"logCell\"><a href=\"javascript:void(0);\" onclick=\"createFactureINITFunction('$_SERVER[PHP_SELF]', '$since', '$referenceFlight', '$date', '$logbookID', '$montant','$flyid')\">Créer Facture INIT</a></td>");
+        }
+        print("</tr>");
+	}
+	$montantTotalText=number_format($montantTotal, 2, '.', ' ') ;
+	print("<tr><td class=\"logCell\"><b>Total</b></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"><b>$montantTotalText</b></td><td class=\"logCell\"></td></tr>");
+    
+    
+    
+    /*
 	$result = mysqli_query($mysqli_link, "SELECT DISTINCT f_reference, f_date_flown, first_name, last_name, r_plane, f_id, fl_reference, sum(fl_amount) as prix 
 			FROM $table_flight AS f  
 			JOIN $table_bookings AS b ON f.f_booking = b.r_id
 			JOIN $table_person ON f.f_pilot = jom_id
 			LEFT JOIN $table_flights_ledger ON f_id = fl_flight
-			WHERE true $filterType $filter $date_filter 
-			GROUP BY f_reference, f_id
-			ORDER BY f_date_flown") 
-			or journalise($userId, "F", "Impossible de lister les vols INIT: " . mysqli_error($mysqli_link));
-		
-	$montantTotal=0.0;
-	while ($row = mysqli_fetch_array($result)) {
-			$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
-			$date=$row['f_date_flown'];
-			$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
-			$plane=$row['r_plane'];
-			$pilote=db2web($row['first_name'])." ".db2web($row['last_name']) ;
-			$montant=$row['prix'];
-			$montantTotal+=$montant;
-			$referenceCiel="400R004 (INIT)";
-			print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td><td class=\"logCell\">$referenceCiel</td></tr>");
-	}
-	$montantTotalText=number_format($montantTotal, 2, '.', ' ') ;
-	print("<tr><td class=\"logCell\"><b>Total</b></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"><b>$montantTotalText</b></td><td class=\"logCell\"></td></tr>");
-	?>
+*/
+?>
 </tbody>
 </table>
 <!-- Vols IF -->
@@ -251,7 +342,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 <th class="logHeader">Avion</th>
 <th class="logHeader">Pilote</th>
 <th class="logHeader">Prix du vol</th>
-<th class="logHeader">Référence Ciel</th>
+<th class="logHeader">Facture odoo</th>
 </tr>
 </thead>
 <tbody>
@@ -263,7 +354,82 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 	$filter = ' AND f_date_flown IS NOT NULL' ;
 	$date_filter = " AND f_date_flown >= '" . $since . "' AND f_date_flown <= '" . $monthAfterString. "'";
 	
-	$result = mysqli_query($mysqli_link, "SELECT DISTINCT f_reference, f_date_flown, first_name, last_name, r_plane, f_id, fl_reference, sum(fl_amount) as prix 
+	$result = mysqli_query($mysqli_link, "SELECT DISTINCT l_id, f_invoice_ref, l_plane, f_reference, f_date_flown, first_name, last_name, r_plane, f_id, fl_reference, fl_odoo_payment_id, sum(fl_amount) as prix 
+			FROM $table_flight AS f  
+			JOIN $table_person ON f.f_pilot = jom_id
+			JOIN $table_bookings AS b ON f.f_booking = b.r_id
+			JOIN $table_flights_ledger ON f_id = fl_flight
+			JOIN $table_logbook AS l ON f.f_booking = l.l_booking
+			WHERE true $filterType $filter $date_filter 
+			GROUP BY f_reference
+			ORDER BY f_date_flown") 
+			or journalise($userId, "F", "Impossible de lister les vols IF: " . mysqli_error($mysqli_link));
+
+	$montantTotal=0.0;
+	while ($row = mysqli_fetch_array($result)) {
+        $invoiceRef=$row['f_invoice_ref'];
+        $referenceFlight=$row['f_reference'];
+		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
+		$date=$row['f_date_flown'];
+		$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
+		$plane=$row['l_plane'];
+		$pilote=db2web($row['first_name'])." ".db2web($row['last_name']) ;
+		$montant=$row['prix'];
+		$montantTotal+=$montant;
+		$referencePaiement=db2web($row['fl_reference']);	
+		$referencePaiementOdoo=$row['fl_odoo_payment_id'];	
+		$pos = strpos(strtoupper($referencePaiement), "FACTURE DHF");
+        $flyid=$row['f_id'];
+        $logbookID=$row['l_id'];	
+		if($pos===false) {
+			$referenceOdoo="Créer facture IF";
+		}
+		else {
+			$referenceOdoo="DHF";
+		}			
+		print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td>");
+        //****************************************************************************
+        if($invoiceRef>0) {
+            // Invoice already created
+            print("<td class=\"logCell\">Déjà facturé<td>");
+        }
+        else {
+            print("<td class=\"logCell\"><a href=\"javascript:void(0);\" onclick=\"createFactureIFFunction('$_SERVER[PHP_SELF]', '$since', '$referenceFlight', '$date', '$logbookID', '$montant','$flyid')\">Créer Facture IF</a></td>");
+        }
+        print("</tr>");
+	}
+	$montantTotalText=number_format($montantTotal, 2, '.', ' ') ;
+	print("<tr><td class=\"logCell\"><b>Total</b></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"><b>$montantTotalText</b></td><td class=\"logCell\"></td></tr>");
+	
+	?>
+	
+</tbody>
+</table>
+
+<!-- Vols DHF -->
+<br>
+<p><b>Vols DHF effectués mois <?=$mounthName?></b></p>
+<table class="logTable">
+<thead>
+<tr>
+<th class="logHeader">Date Vol</th>
+<th class="logHeader">Référence</th>
+<th class="logHeader">Avion</th>
+<th class="logHeader">Pilote</th>
+<th class="logHeader">Prix du vol</th>
+<th class="logHeader">Facture odoo</th>
+</tr>
+</thead>
+<tbody>
+	<?php
+	//WHERE pr_role = 'C'$deleted_filter $completed_filter $other_filter 
+	//print("Filter=".$other_filter.",/br>");
+
+	$filterType = ' AND f_type ="D"' ;
+	$filter = ' AND f_date_flown IS NOT NULL' ;
+	$date_filter = " AND f_date_flown >= '" . $since . "' AND f_date_flown <= '" . $monthAfterString. "'";
+	
+	$result = mysqli_query($mysqli_link, "SELECT DISTINCT f_reference, f_invoice_ref, f_date_flown, first_name, last_name, r_plane, f_id, fl_reference, sum(fl_amount) as prix 
 			FROM $table_flight AS f  
 			JOIN $table_person ON f.f_pilot = jom_id
 			JOIN $table_bookings AS b ON f.f_booking = b.r_id
@@ -285,12 +451,12 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 			$referencePaiement=db2web($row['fl_reference']);	
 			$pos = strpos(strtoupper($referencePaiement), "FACTURE DHF");
 			if($pos===false) {
-				$referenceCiel="400R006 (IF)";
+				$referenceOdoo="Créer facture IF";
 			}
 			else {
-				$referenceCiel="400DHF (IF)";
+				$referenceOdoo="DHF";
 			}			
-			print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td><td class=\"logCell\">$referenceCiel</td></tr>");
+			print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td><td class=\"logCell\">$referenceOdoo</td></tr>");
 	}
 	$montantTotalText=number_format($montantTotal, 2, '.', ' ') ;
 	print("<tr><td class=\"logCell\"><b>Total</b></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"><b>$montantTotalText</b></td><td class=\"logCell\"></td></tr>");
