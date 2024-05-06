@@ -16,6 +16,7 @@
 
 */
 require_once 'dbi.php';
+require_once 'mobile_header5.php' ;
 
 if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor) 
 	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution

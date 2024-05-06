@@ -675,9 +675,12 @@ function compute_prix()
         document.getElementById("id_cdv_prix_total_cp2_row").style.display="none";		
  	}
 	else if(aCPType.indexOf("CP2")==0) {
-		aPrixTotalPilote=aPrixFI + aPrixPassager + aPrixAvion/2.;
+        var aMinutes=aPrixAvion/aPrixUnitaireAvion;
+        // To be compatible with invoice way to compute
+        var aPrixUnitaireAvionCP2=Math.round(100.0*aPrixUnitaireAvion/2.)/100.;
+		aPrixTotalPilote=aPrixFI + aPrixPassager + aPrixUnitaireAvionCP2*aMinutes;
 		aPrixTotalCP1=0.;
-		aPrixTotalCP2=aPrixAvion/2.;
+		aPrixTotalCP2=aPrixUnitaireAvionCP2*aMinutes;
         document.getElementById("id_cdv_prix_total_cp1_row").style.display="none";		
         document.getElementById("id_cdv_prix_total_cp2_row").style.display="";		
  	}
@@ -1434,8 +1437,9 @@ function fillQRCode(communication, amount, theAfterString) {
 		document.getElementById('id_payment'+theAfterString).style.display = 'none' ;
 		return ;
 	}
+    var amountRouded=Math.round(amount*100.0)/100.0;
 	document.getElementById('id_payment'+theAfterString).style.display = "" ;
-	document.getElementById('id_payment_amount'+theAfterString).innerText = amount ;
+	document.getElementById('id_payment_amount'+theAfterString).innerText = amountRouded ;
 	document.getElementById('id_payment_communication'+theAfterString).innerText = communication ;
 	// Should update to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text

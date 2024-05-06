@@ -121,7 +121,7 @@ print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeho
     </thead>
     <tbody class="table-group-divider" id="myTable">
 <?php
-$result = $odooClient->SearchRead('account.move.line', array(), array('fields' => array('id', 'name', 'move_type','account_id','debit', 'credit', 'partner_id', 'create_date'))) ;
+$result = $odooClient->SearchRead('account.move.line', array(), array('fields' => array('id', 'name', 'move_type','account_id','debit', 'credit', 'partner_id', 'reconciled', 'create_date'))) ;
 $ids = array() ;
 $rowNumber=0;
 $accountINI=0;
@@ -140,13 +140,14 @@ foreach($result as $f=>$desc) {
 	}
 	$date = (isset($desc['create_date'])) ? $desc['create_date'] : '' ;
 	$date = substr($date,0,10);
+    $reconciled=(isset($desc['reconciled'])) ? $desc['reconciled'] : 0 ;
 	$partner_id = (isset($desc['partner_id'])) ? $desc['partner_id'] : '' ;
 	$partner="";
 	if(!is_bool($partner_id)) {
 		$partner=$partner_id[1];
 	}
     $flightReference="????";
-	if(($account=="499001" || $account=="499002") && $credit > 0.0) {
+	if(($account=="499001" || $account=="499002") && $credit > 0.0 && $reconciled != 1) {
 		if($account=="499001") {
 			++$accountINI;
             $posFlightReference = strpos($communicationUppercase, "V-INIT-");
@@ -198,7 +199,12 @@ foreach($result as $f=>$desc) {
             $amountFlight=$paymentFlightMap[$flightReference];
         }
         else {
-            $amountFlight="?";;
+            if (array_key_exists($referenceInFlight, $paymentFlightMap)) {
+                $amountFlight=$paymentFlightMap[$referenceInFlight];
+            }
+            else {
+                $amountFlight="?";
+            }
         }
         
     	print("<tr>
