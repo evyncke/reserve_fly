@@ -17,6 +17,7 @@
 */
 
 ob_start("ob_gzhandler");
+require_once 'flight_header.php' ;
 require_once "dbi.php" ;
 require_once "odooFlight.class.php" ;
 

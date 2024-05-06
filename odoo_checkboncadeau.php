@@ -147,7 +147,7 @@ foreach($result as $f=>$desc) {
 		$partner=$partner_id[1];
 	}
     $flightReference="????";
-	if(($account=="499001" || $account=="499002") && $credit > 0.0) {
+	if(($account=="499001" || $account=="499002") && $credit > 0.0 && $reconciled != 1) {
 		if($account=="499001") {
 			++$accountINI;
             $posFlightReference = strpos($communicationUppercase, "V-INIT-");
@@ -199,12 +199,17 @@ foreach($result as $f=>$desc) {
             $amountFlight=$paymentFlightMap[$flightReference];
         }
         else {
-            $amountFlight="?";;
+            if (array_key_exists($referenceInFlight, $paymentFlightMap)) {
+                $amountFlight=$paymentFlightMap[$referenceInFlight];
+            }
+            else {
+                $amountFlight="?";
+            }
         }
         
     	print("<tr>
       	 	<td>$rowNumber</td>
-		    <td>$idText<br>reconciled=$reconciled</td>
+		    <td>$idText</td>
    			<td>$date</td>
    			<td>$account</td>
      	  	<td>$communication</td>");
