@@ -27,6 +27,7 @@ class OdooClient {
     public $db ;
     public $user ;
     public $password ;
+    public $debug ;
 
     function __construct($host, $db, $user, $password) {
         global $originUserId ;
@@ -36,6 +37,7 @@ class OdooClient {
         $this->user = $user ;
         $this->password = $password ;
         $this->encoder = new PhpXmlRpc\Encoder() ;
+        $this->debug = false ;
 
         $this->common = new PhpXmlRpc\Client("https://$host/xmlrpc/2/common");
         $this->common->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
@@ -46,10 +48,13 @@ class OdooClient {
         $response = $this->common->send(new PhpXmlRpc\Request('authenticate', $params)) ;
         if (!$response->faultCode()) {
             $this->uid = $response->value() ;
-//            journalise($originUserId, "D", "Connected to Odoo $host as $user with UID $this->uid") ;
         } else {
-            journalise($originUserId, "F", "Cannot connect to Odoo $host as $user: " . htmlentities($response->faultCode()) . "\n" . "Reason: '" .
-                htmlentities($response->faultString()));
+                if ($this->debug)
+                    die("<hr><b>Cannot connect to Odoo $host as $user:</b><br/>
+                        Reason: '" . nl2br($response->faultString()) . "'<hr>") ;
+                else
+                    journalise($originUserId, "F", "Cannot connect to Odoo $host as $user. " . 
+                        "Reason: '" . htmlentities($response->faultString()));
         }
         $this->models = new PhpXmlRpc\Client("https://$host/xmlrpc/2/object");
         $this->models->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
@@ -62,8 +67,13 @@ class OdooClient {
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'read', $ids, $display)) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
-            journalise($originUserId, "F", "Cannot read in Odoo model $model @ $this->host: " . 
-                htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
+            if ($this->debug)
+                die("<hr><b>Cannot read in Odoo model $model @ $this->host</b><br/>
+                    Faultcode: " . htmlentities($response->faultCode()) . "<br/>
+                    Reason: '" . nl2br($response->faultString()) . "'<hr>") ;
+            else
+                journalise($originUserId, "F", "Cannot read in Odoo model $model @ $this->host: " . 
+                    htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
         }
         return $response->value() ;
     }
@@ -83,9 +93,15 @@ class OdooClient {
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'search_read', $domain_filter, $display)) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
-            journalise($originUserId, "F", "Cannot search_read in Odoo model $model @ $this->host: " . 
-                htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
+            if ($this->debug)
+                die("<hr><b>Cannot search_read in Odoo model $model @ $this->host</b><br/>
+                    Faultcode: " . htmlentities($response->faultCode()) . "<br/>
+                    Reason: '" . nl2br($response->faultString()) . "'<hr>") ;
+            else
+                journalise($originUserId, "F", "Cannot search_read in Odoo model $model @ $this->host: " . 
+                    htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
         }
+        
         return $response->value() ;
     }
 
@@ -98,8 +114,13 @@ class OdooClient {
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'write', array($ids, $mapping))) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
-            journalise($originUserId, "F", "Cannot write in Odoo model $model @ $this->host: " . 
-                htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
+            if ($this->debug)
+                die("<hr><b>Cannot write in Odoo model $model @ $this->host</b><br/>
+                    Faultcode: " . htmlentities($response->faultCode()) . "<br/>
+                    Reason: '" . nl2br($response->faultString()) . "'<hr>") ;
+            else
+                journalise($originUserId, "F", "Cannot write in Odoo model $model @ $this->host: " . 
+                    htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
         }
         return $response->value() ;
     }

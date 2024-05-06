@@ -82,7 +82,7 @@ class FolioLine{
         $this->cost_plane_minute = $row['cout'] ;
         $this->cost_plane_margin = $row['cout_marge'] ;
         $this->cost_plane_policy = $row['cout_source'] ;
-        $this->duration = ($this->cost_plane_policy == 'F') ? $row['flight_duration'] : $row['duration'] ;
+        $this->duration = (($this->cost_plane_policy == 'F') ? $row['flight_duration'] : $row['duration']) - $this->cost_plane_margin ;
         $this->duration_hh = floor($this->duration / 60) ;
         $this->duration_mm = $this->duration % 60 ;
         // DB contains UTC time
@@ -93,12 +93,12 @@ class FolioLine{
 		    $this->cost_plane = 0 ;
         else
             if ($row['l_share_type'] == 'CP2') {
-                $this->cost_plane = round($row['cout'] * 0.5, 2) * ($this->duration - $this->cost_plane_margin) ;
+                $this->cost_plane = round($row['cout'] * 0.5, 2) * $this->duration ;
                 $this->cost_plane_minute = round($row['cout'] * 0.5, 2) ;
             } else if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] != $userId) {
                 $this->cost_plane = 0 ;
             } else
-                $this->cost_plane = $row['cout'] * ($this->duration - $this->cost_plane_margin) ;	
+                $this->cost_plane = $row['cout'] * $this->duration ;	
         // Vol PIC- Recheck : 
         // Pour le Pilote -> SELF
         // Pour l'Instructeur -> Pilote_name    
@@ -252,7 +252,7 @@ class Folio implements Iterator {
         // TODO rather than retrieving the names for pilots, fis, shared cost, let's use $member directly...
         $sql = "SELECT l_id, date_format(l_start, '%d/%m/%y') AS date,
             l_model, l_plane, compteur_vol, l_pilot, l_is_pic, l_instructor, l_instructor_paid, 
-            i.last_name as instructor_name, i.first_name as instructor_fname, i.ciel_code400 as instructor_code_ciel, i.odoo_id as insctructor_code_odoo,
+            i.last_name as instructor_name, i.first_name as instructor_fname, i.ciel_code400 as instructor_code_ciel, i.odoo_id as instructor_code_odoo,
             i.email as instructor_email, i.address as instructor_address, i.zipcode as instructor_zip_code,  i.city as instructor_city, i.country as instructor_country,
             p.last_name as pilot_name, p.first_name as pilot_fname, p.ciel_code400 as pilot_code_ciel, p.odoo_id as pilot_code_odoo,
             p.email as pilot_email, p.address as pilot_address, p.zipcode as pilot_zip_code, p.city as pilot_city, p.country as pilot_country,

@@ -368,7 +368,10 @@ if ($deletePayment) {
 
 if (isset($flight_id) and $flight_id != 0) {
 	$result = mysqli_query($mysqli_link, "SELECT * 
-			FROM $table_flight JOIN $table_pax_role ON pr_flight = f_id LEFT JOIN $table_pax ON pr_pax = p_id LEFT JOIN $table_person ON f_who_created = jom_id
+			FROM $table_flight JOIN $table_pax_role ON pr_flight = f_id 
+				LEFT JOIN $table_pax ON pr_pax = p_id 
+				LEFT JOIN $table_person ON f_who_created = jom_id
+				LEFT JOIN $table_bookings ON f_booking = r_id
 			WHERE f_id = $flight_id and pr_role='C'")
 		or journalise($userId, "F", "Cannot retrieve flight $flight_id: " . mysqli_error($mysqli_link)) ;
 	$row_flight = mysqli_fetch_array($result) ;
@@ -803,6 +806,10 @@ function show_reservation($date, $header) {
 
 	if ($row_flight['f_date_1'] != '' and $row_flight['f_date_1'] != '0000-00-00s') show_reservation($row_flight['f_date_1'], 'Date préférée') ;
 	if ($row_flight['f_date_2'] != '' and $row_flight['f_date_2'] != '0000-00-00') show_reservation($row_flight['f_date_2'], 'Date alternative') ;
+	$booking_date = ($row_flight['r_start'] != '') ? substr($row_flight['r_start'], 0, 10) : null ;
+	if ($booking_date and $booking_date != $row_flight['f_date_1'] and $booking_date != $row_flight['f_date_2']) 
+		show_reservation($booking_date, 'Date de la réservation') ;
+	// TODO also display the actual day of flight whenn the flight is booked by the pilot
 ?>
 </div><!-- menuPlane -->
 

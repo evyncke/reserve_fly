@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2020-2023 Eric Vyncke
+   Copyright 2020-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -36,11 +36,11 @@ if (!($userIsAdmin or $userIsInstructor)) journalise($userId, "F", "Vous devez �
 
 ?>
 <div class="container-fluid">
-<h1>Echéances des avions</h1>
+<h2>Echéances des avions</h2>
 <table class="col-sm-12 col-lg-8 table table-hover table-bordered">
 <thead>
-<tr class="text-center"><th>Plane</th> <th>Last mechanics / pilots</th> <th colspan="3">Inspections</th>        <th colspan="2">Time limit</th> <th>Circ. Equip 4 ed5</th>    <th>&lt; 30 days</th>            <th>Mag.</th> <th>Pesage</th><th>PLB</th></tr>
-<tr class="text-center"><th>     </th> <th>                       </th> <th>50h</th><th>100h</th><th>200h</th>  <th>Eng</th><th>Prop</th>       <th>ATC -Enc. - Alti</th>    <th>CN</th>                      <th>500h</th> <th>10 y </th><th>Date</th></tr>
+<tr class="text-center"><th>Plane</th> <th>Last index</th> <th colspan="3">Inspections</th>        <th colspan="2">Time limit</th> <th>Circ. Equip 4 ed5</th>    <th>&lt; 30 days</th>            <th>Mag.</th> <th>Pesage</th><th>PLB</th><th>Instruments</th></tr>
+<tr class="text-center"><th>     </th> <th>                       </th> <th>50h</th><th>100h</th><th>200h</th>  <th>Eng</th><th>Prop</th>       <th>ATC -Enc. - Alti</th>    <th>CN</th>                      <th>500h</th> <th>10 y </th><th>Date</th><th>Date</th></tr>
 </thead>
 <tbody>
 <?php
@@ -83,7 +83,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$row2 = mysqli_fetch_array($result2) ;
 	$current_value_pilot = $row2['compteur_pilote'] ;
 
-	print("<tr class=\"text-center\"><td><a href=\"plane_chart.php?id=$row[id]\">" . strtoupper($row['id']) . "</a></td><td>$current_value / $current_value_pilot</td>") ;
+	print("<tr class=\"text-center\"><td><a href=\"plane_chart.php?id=$row[id]\">" . strtoupper($row['id']) . "</a></td><td>$current_value_pilot</td>") ;
 	// Type_entretien... human encoding :-( 50h, 50h->200h, 100h
 	if (stripos($row['type_entretien'], '50h') === 0)
 		print("". GenCell($row['entretien']) . "<td></td><td></td>") ;
@@ -97,7 +97,9 @@ while ($row = mysqli_fetch_array($result)) {
 		GenCellDate($row['instrument_date_limite'], 100, 30). 
 		"<td>$row[cn]</td>" . 
 		GenCell($row['limite_magnetos']) .
-	    GenCellDate($row['pesage'], 100, 30).GenCellDate($row['plb_date_limite'], 100, 30).
+	    GenCellDate($row['pesage'], 100, 30).
+		GenCellDate($row['plb_date_limite'], 100, 30).
+		GenCellDate($row['instrument_date_limite'], 100, 30).
 		"</tr>\n") ;
 }
 ?>

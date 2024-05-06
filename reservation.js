@@ -207,7 +207,7 @@ function refreshTimestamp() {
 }
 
 function roadBookClick() {
-	window.location.href = 'planelog.php?plane=' + allPlanes[planningPlaneIndex].id ;
+	window.location.href = 'mobile_planelog.php?plane=' + allPlanes[planningPlaneIndex].id ;
 }
 
 function toggleLogDisplay () {
@@ -1619,12 +1619,12 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 			thisCell.onmouseenter = function () { displayBookingDetails(booking.id + '-' + booking.log_id) ; } ;
 			thisCell.onmouseleave = function () { clearBookingDetails() ; } ;
 			if (!isInThePast(displayYear, displayMonth, displayDay, hour, minute) &&
-					(userIsAdmin || userIsMechanic || userIsInstructor || userId == booking.user || userId == booking.bookedById)) {
+					(userIsAdmin || userIsMechanic || userIsInstructor || (userId == booking.user && booking.instructorId == 0) || userId == booking.bookedById)) {
 				thisCell.id = booking.id + '-' + booking.log_id ;
 				thisCell.removeEventListener('click', newBookingDetails) ;
 				thisCell.addEventListener('click', editBookingDetails) ;
 			} else if (isInThePast(displayYear, displayMonth, displayDay, hour, minute) &&
-					(userIsAdmin || userId == booking.user || userId == booking.instructorId || userId == booking.bookedById)) {
+					(userIsAdmin || (userId == booking.user && booking.instructorId == 0) || userId == booking.instructorId || userId == booking.bookedById)) {
 				thisCell.id = booking.id + '-' + booking.log_id ;
 				thisCell.removeEventListener('click', newBookingDetails) ;
 				thisCell.addEventListener('click', redirectLogBook) ;
@@ -1972,7 +1972,7 @@ function refreshPlanningTable() {
 				// Add FlightAware link only for members, need to stop event propagation to the TD click causing a switch of presentation
 				if (userId > 0)
 					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="https://flightaware.com/live/flight/' + allPlanes[plane].id.toUpperCase() +
-						'" onclick="event.stopPropagation();" target="_blank"><img src="fa.ico" border="0" width="12" height="12"></a>' ;
+						'" onclick="event.stopPropagation();" target="_blank"><img src="fa.ico" border="0" width="12" height="12" title="Dernier vol sur Flightaware"></a>' ;
 				if (allPlanes[plane].compteur_pilote_date > allPlanes[plane].compteur_date)
 					compteur = allPlanes[plane].compteur_pilote ;
 				else
@@ -2001,8 +2001,6 @@ function refreshPlanningTable() {
 	}
 	document.getElementById('planningDayOfWeek').innerHTML = (planningDayOfWeek == -1) ? '' : weekdays[planningDayOfWeek] + ': ' ; 
 	document.getElementById('planningDate').value = planningDay + '/' + planningMonth + '/' + planningYear ;
-// TODO June 2020, do we really need it repeated ? It is heavy with displayMETAR() notably...
-//	clearBookingDetails() ; // Repeated to unsure accurate (? but this is asynchronous) dayMessagesHTML display...
 	myLog("end refreshPlanningTable()") ;
 }
 
@@ -2081,7 +2079,7 @@ function init() {
 			option.innerHTML = members[member].name ;
 		}
                 if (members[member].student) {  // Add a student icon
-                        option.innerHTML += ' &#x1f4da;' ;
+                        option.innerHTML += ' &#x1F393;' ;
                 }
 		option.value = members[member].id ;
 		document.getElementById('memberSelect').add(option) ;
@@ -2094,7 +2092,7 @@ function init() {
 			option.innerHTML = pilots[pilot].name ;
 		}
                 if (pilots[pilot].student) {  // Add a student icon
-                        option.innerHTML += ' &#x1f4da;' ;
+                        option.innerHTML += ' &#x1F393;' ;
                 }
 		option.value = pilots[pilot].id ;
 		document.getElementById('pilotSelect').add(option) ;

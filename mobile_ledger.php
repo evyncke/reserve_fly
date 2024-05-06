@@ -138,7 +138,7 @@ if ($odooId != '') {
 				array('partner_id', '=', intval($odooId))
 			)), 
 			array('fields' => array('id', 'date', 'type_name', 'amount_total', 'name', 'direction_sign', 'journal_id', 'access_url', 'access_token'),
-				'order' => 'date')) ;
+				'order' => 'date,name')) ;
 	foreach ($moves as $move) {
 		print("<tr><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
 			if ($move['access_token'] != '')

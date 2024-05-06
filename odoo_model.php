@@ -46,6 +46,7 @@ $id = (isset($_REQUEST['id'])) ? $_REQUEST['id'] : '' ;
 
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+$odooClient->debug = true ;
 
 if ($id != '') { // Display all field of this line
     print("<thead><tr><th>Field Name</th><th>Field Value</th></tr><tbody class=table-divider>\n") ;

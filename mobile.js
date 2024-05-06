@@ -400,8 +400,8 @@ function init() {
 								option.innerHTML = members[member].name ;
 						else
 								option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
-						if (members[member].student) {  // Add a student icon
-								option.innerHTML += ' &#x1f4da;' ;
+						if (members[member].student) {  // Add a student icon was &#x1f4da;
+								option.innerHTML += ' &#x1F393;' ;
 						}
 						option.value = members[member].id ;
 						pilotSelect.add(option) ;

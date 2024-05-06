@@ -47,12 +47,15 @@ It does not include members/students who registered by using other means (signat
 <tbody class="table-group-divider">
 
 <?php
-$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person p JOIN $table_validity v ON p.jom_id = v.jom_id
+$result = mysqli_query($mysqli_link, "SELECT * 
+    FROM $table_person p JOIN $table_validity v ON p.jom_id = v.jom_id
+        LEFT JOIN jom_user_usergroup_map g ON g.user_id = p.jom_id AND g.group_id = $joomla_student_group
     WHERE validity_type_id = 13 AND expire_date > CURRENT_DATE()
     ORDER by last_name, first_name")
     or journalise($userId, "F", "Cannot read validity: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
-    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]</td><td>$row[grant_date]</td><td>$row[expire_date]</td></tr>\n")) ;
+    $icon = ($row['group_id']== $joomla_student_group) ? ' <i class="bi bi-mortarboard-fill"></i>' : '' ;
+    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]$icon</td><td>$row[grant_date]</td><td>$row[expire_date]</td></tr>\n")) ;
 }
 ?>
 </tbody>

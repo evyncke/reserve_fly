@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2022 Eric Vyncke
+   Copyright 2014-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -56,9 +56,7 @@ journalise(0, 'I', "Cron-monthly: starting for actions = {$actions}") ;
  
 print(date('Y-m-d H:i:s').": preparing lists of plane bookings & logbook entries.\n") ;
 
-$email_body = "<p>Voici la liste mensuelle des diverses r&eacute;servations des avions du RAPCS. <i><span style='color: blue;'>
-	Cette liste est bas&eacute;e sur les entr&eacute;es volontaires des pilotes, instructeurs et &eacute;l&egrave;ves via
-	le site web.</span></i></p>" ;
+$email_body = "<p>Voici la liste mensuelle des diverses r&eacute;servations des avions du RAPCS.</p>" ;
 
 function print_plane_table($title, $sql, $columns) {
 	global $email_body, $mysqli_link, $convertToUtf8 ;
@@ -120,7 +118,7 @@ $sql = "select r_plane, count(l_id), min(l_start_hour), max(l_end_hour), max(l_e
 	where p.actif != 0 and p.ressource = 0 and r_cancel_date is null and r_start > date_sub(sysdate(), interval 1 month) and r_type != " . BOOKING_MAINTENANCE . "
 	group by r_plane" ;
 
-print_plane_table("Entr&eacute;es dans les carnets de route informatiques du dernier mois", $sql, ['Avion', 'Nbr de vols', 'D&eacute;but', 'Fin', 'Minutes moteur']) ;
+print_plane_table("Entr&eacute;es dans les carnets de routes informatiques du dernier mois", $sql, ['Avion', 'Nbr de vols', 'D&eacute;but', 'Fin', 'Minutes moteur']) ;
 }
 
 if (strpos($actions, 'm') !== FALSE) {

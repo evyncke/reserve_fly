@@ -367,7 +367,7 @@ if (!isset($_REQUEST['previous'])) {
 </div><!-- col -->
 </div><!-- row -->
 <p>Sur base des données que vous avez entrées après les vols dans le
-carnet de route des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui (<?=date('D, j-m-Y H:i e')?>),
+carnet de routes des avions et en utilisant le prix des avions/instructeurs/taxes d'aujourd'hui (<?=date('D, j-m-Y H:i e')?>),
 donc il peut y avoir une différence si les prix par minute ont changé depuis vos vols.
 Le montant n'inclut aucune note de frais (par exemple carburant), note de crédit, ainsi que d'autres frais (par exemple, cotisations, ou taxes d'atterrissage).</p>
 <p>Les heures sont les heures UTC. </p>
@@ -380,7 +380,7 @@ if ($userIsInstructor)
 	print("<p>&spades; Veuillez noter qu'en tant qu'instructeur les montants négatifs de la colonne FI sont en fait des montants à facturer au club.</p>") ;
 
 if ($clubs_explanation)
-	print("<p><mark>&clubs;: pour cet avion, la facture sur fait sur l'index moteur mais avec un forfait de plusieurs minutes.</mark></p>") ;
+	print("<p><mark>&clubs;: pour cet avion, la facture sur fait sur l'index moteur mais avec une déduction de plusieurs minutes, la durée indiquée est donc la durée facturée et pas celle du carnet de routes.</mark></p>") ;
 if ($diams_explanation)
 	print("<p><mark>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</mark></p>") ;
 ?>
