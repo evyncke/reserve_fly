@@ -128,7 +128,7 @@ while ($row = mysqli_fetch_array($result)) {
 
 // Now let's access Odoo ledger moves
 if ($odooId != '') {
-	print("</tobdy>
+	print("</tbody>
 	<tbody class=\"table-group-divider\">") ;
 	require_once 'odoo.class.php' ;
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
