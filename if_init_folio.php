@@ -24,7 +24,9 @@ require_once "odooFlight.class.php" ;
 MustBeLoggedIn() ;
 
 $plane="OO-ALD";
-$since = mysqli_real_escape_string($mysqli_link, $_REQUEST['since']) ;
+$since = "";
+if (isset($_REQUEST['since'])) $since =$_REQUEST['since'];
+$since = mysqli_real_escape_string($mysqli_link, $since) ;
 if ($since == '')
 	$since = date('Y-m-01') ;
 
