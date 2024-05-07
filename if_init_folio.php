@@ -15,15 +15,18 @@
    limitations under the License.
 
 */
-
-ob_start("ob_gzhandler");
+$header_postamble ='
+    <link rel="stylesheet" type="text/css" href="log.css">
+';
 require_once 'flight_header.php' ;
 require_once "dbi.php" ;
 require_once "odooFlight.class.php" ;
 
-MustBeLoggedIn() ;
+//MustBeLoggedIn() ;
+// In the mobile_header.php, $header_postamble will be inserted in the actual <head>...</head> section
 
-$plane="OO-ALD";
+
+
 $since = "";
 if (isset($_REQUEST['since'])) $since =$_REQUEST['since'];
 $since = mysqli_real_escape_string($mysqli_link, $since) ;
@@ -44,6 +47,9 @@ $monthAfterForTitle = $monthAfterForTitle->add($monthInterval) ;
 $monthAfterForTitle = $monthAfterForTitle->sub(new DateInterval('P1D')) ;
 $monthAfterForTitleString = $monthAfterForTitle->format('Y-m-d') ; // Then Title is 31-01-2023 and not 01-02-2023
 $mounthName=$sinceDate->format('F') ;
+$alreadyInvoicedDate=new DateTime(Date("2024-05-01"));
+$alreadyInvoicedDateString = $alreadyInvoicedDate->format('Y-m-d') ;
+//print("alreadyInvoicedDateString=$alreadyInvoicedDateString <br>");
 
 // Actions
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == "createfactureif") {
@@ -75,51 +81,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == "createfactureinit") {
 }
 
 ?>
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="log.css">
-<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-<link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<title>Folio du mois vols IF-INIT</title>
-<script src="members.js"></script>
-<script src="shareCodes.js"></script>
+
 <script>
-const
-	// preset Javascript constant fill with the right data from db.php PHP variables
-	userFullName = '<?=$userFullName?>' ;
-	userName = '<?=$userName?>' ;
-	userId = <?=$userId?> ;
-	userIsPilot = <?=($userIsPilot)? 'true' : 'false'?> ;
-	userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?> ;
-	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ;
-	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ;
-
-function planeChanged(elem) {
-	window.location.href = '<?=$_SERVER['PHP_SELF']?>?plane=' + elem.value + '&since=<?=$_REQUEST['since']?>';
-}
-
-function findMember(a, m) {
-	for (let i = 0 ; i < a.length ; i++)
-		if (a[i].id == m)
-			return a[i].name ;
-	return null ;
-}
-
-function init() {
-	var planeSelect = document.getElementById('planeSelect') ;
-	if (planeSelect) planeSelect.value = '<?=$plane?>' ;
-	var collection = document.getElementsByClassName("shareCodeClass") ;
-	for (let i = 0; i < collection.length ; i++) {
-		var spanElem = collection[i] ;
-		var member = spanElem.innerText ;
-		memberText = findMember(shareCodes, member) ;
-		if (memberText == null)
-			memberText = findMember(members, member) ;
-		if (memberText != null)
-			spanElem.innerText = ' (' + memberText + ')';
-	}
-}
-
 function createFactureIFFunction(PHP_Self,theSince, theReferenceFlight, theDate, theLogbookID, theMontant, theFlightID) {
 	if (confirm("Confirmer que vous voulez crér une facture pour le vol IF  "+theReferenceFlight ) == true) {			
 	 	var aCommand=PHP_Self+"?since="+theSince+"&action=createfactureif&reference=" + theReferenceFlight + 
@@ -143,31 +106,10 @@ function createFactureINITFunction(PHP_Self,theSince, theReferenceFlight, theDat
 }
  
 </script>
-<!-- Matomo -->
-<script type="text/javascript">
-  var _paq = window._paq = window._paq || [];
-  _paq.push(['setUserId', '<?=$userName?>']);
-  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
-  _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
-  _paq.push(['enableHeartBeatTimer']);
-  _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
-  _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
-  _paq.push(['trackPageView']);
-  _paq.push(['enableLinkTracking']);
-  (function() {
-    var u="//analytics.vyncke.org/";
-    _paq.push(['setTrackerUrl', u+'matomo.php']);
-    _paq.push(['setSiteId', '5']);
-    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-    g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
-  })();
-</script>
-<!-- End Matomo Code -->
-</head>
-<body onload="init();">
+
 <center><h2>Folio du mois: vols IF-INIT du <?=$since?> au <?=$monthAfterForTitleString?></h2></center>
 <?php
-print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString>&lt;</a>&nbsp; $mounthName &nbsp;<a href=$_SERVER[PHP_SELF]?since=$monthAfterString>&gt;</a></b></br>\n") ;
+print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbsp; $mounthName &nbsp;<a href=$_SERVER[PHP_SELF]?since=$monthAfterString>&gt;</a></b></br>\n") ;
 ?>
 <br/>
 <p><b>Paiement effectués mois <?=$mounthName?></b></p>
@@ -310,7 +252,8 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
         
 		print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td>");
         //****************************************************************************
-        if($invoiceRef>0) {
+            
+        if($invoiceRef>0 || ($alreadyInvoicedDateString > $since)) {
             // Invoice already created
             print("<td class=\"logCell\">Déjà facturé<td>");
         }
@@ -392,7 +335,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString
 		}			
 		print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td>");
         //****************************************************************************
-        if($invoiceRef>0) {
+        if($invoiceRef>0 || ($alreadyInvoicedDateString > $since)) {
             // Invoice already created
             print("<td class=\"logCell\">Déjà facturé<td>");
         }
