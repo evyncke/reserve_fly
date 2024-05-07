@@ -16,23 +16,14 @@
 
 */
 require_once 'dbi.php';
-require_once 'mobile_header5.php' ;
 
 if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor) 
 	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
 ob_start("ob_gzhandler"); // Enable gzip compression over HTTP
 
-?><!DOCTYPE html>
-<html lang="fr">
-<head>
-  <title>Gestion des utilisateurs</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://www.spa-aviation.be/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  
-	<style>
+// In the mobile_header.php, $header_postamble will be inserted in the actual <head>...</head> section
+$header_postamble ='
+<style>
 	.tooltip {
 	  position: relative;
 	  display: inline-block;
@@ -73,7 +64,15 @@ ob_start("ob_gzhandler"); // Enable gzip compression over HTTP
 	  opacity: 1;
 	}
 	</style>
-  
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+' ;
+
+require_once 'mobile_header5.php' ;
+
+?>  
+<!-- Eric's suggestion: move all the JS code in gestionMembres.js and include this file, it will be cached on the client browser and
+and the page load will be faster -->
 <script type="text/javascript">
 // Manage Search when keyup
 
@@ -364,7 +363,7 @@ function submitBlocked(PHP_Self, blocked) {
 	var aReason="";
 	if(blocked=="Block") {
 		aReason=getReason("");
-		if (confirm("Confirmer que vous voulez bloquer " + aCount.toString() +" personnes" + "?\nRaison: "+aReason) == true) {			
+		if (confirm("Confirmer que vous voulez bloquer " + aCount.toString() +" personne(s)" + "?\nRaison: "+aReason) == true) {			
    		 	var aCommand=PHP_Self+"?block=true&listpersonid="+aListOfId+"&reason="+aReason;	
 			if(aSearchText!="")	 {
 				aCommand+="&search="+aSearchText;
@@ -373,7 +372,7 @@ function submitBlocked(PHP_Self, blocked) {
 		}
 	}
 	else {
-		if (confirm("Confirmer que vous voulez débloquer "+ aCount.toString() +" personnes" + "?") == true) {
+		if (confirm("Confirmer que vous voulez débloquer "+ aCount.toString() +" personne(s)" + "?") == true) {
       		var aCommand=PHP_Self+"?unblock=true&listpersonid="+aListOfId+"&reason="+aReason;
  			if(aSearchText!="")	 {
  				aCommand+="&search="+aSearchText;
@@ -384,29 +383,6 @@ function submitBlocked(PHP_Self, blocked) {
 }
 
 </script>
-<!-- Matomo -->
-<script type="text/javascript">
-  var _paq = window._paq = window._paq || [];
-  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-  _paq.push(['setUserId', '<?=$userName?>']);
-  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
-  _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
-  _paq.push(['enableHeartBeatTimer']);
-  _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
-  _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
-  _paq.push(['trackPageView']);
-  _paq.push(['enableLinkTracking']);
-  (function() {
-    var u="//analytics.vyncke.org/";
-    _paq.push(['setTrackerUrl', u+'matomo.php']);
-    _paq.push(['setSiteId', '5']);
-    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-    g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
-  })();
-</script>
-<!-- End Matomo Code -->
-</head>
-<body>
 <?php
 // Display or not Web deActicated member (Must be managed by a toggle button)
 $displayWebDeactivated=false;
@@ -417,7 +393,7 @@ if (isset($_REQUEST['search']) and $_REQUEST['search'] != '') {
 }
 if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 	if(!$userIsBoardMember) {
-		print("<p><h2 style='color: red;'><b>Vous n'êtes pas autorisés à débloquer un membre.<br/>Seuls les membres du CA peuvent débloquer un membre !</b></h2></p>");
+		print("<p class=\"text-danger\"><b>Vous n'êtes pas autorisés à débloquer un membre.<br/>Seuls les membres du CA peuvent débloquer un membre !</b></p>");
 		journalise($userId, "I", "One FI try to unblock a member $personid. Not allowed") ;
 	}
 	else {
@@ -510,7 +486,7 @@ foreach($members as $member) {
 	$odoo_customers[$email] = $member ; // Let's build a dict indexed by the email addresses
 }
 ?>
-<h1>&nbsp;&nbsp;Table des membres du RAPCS</h1>
+<h2>Table des membres du RAPCS</h2>
   <p>&nbsp;&nbsp;Type something to search the table for first names, last names , ciel ref, ...</p>  
 <?php	
   print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeholder=\"Search..\" value=\"$searchText\">");
@@ -694,14 +670,14 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		$soldeStyle='';
 		$rowStyle="";
 		if($solde<0.0) {
-			$soldeStyle="style='color: red;'";
-			$rowStyle="class='warning'";
+//			$soldeStyle="style='color: red;'";
+			$rowStyle="class='text-warning'";
 		}
 		if($blocked==2) {
-			$rowStyle="class='danger'";	
+			$rowStyle="class='text-danger'";	
 		}
 		else if($blocked==1) {
-			$rowStyle="class='info'";	
+			$rowStyle="class='text-info'";	
 		}
 		if($blocked!=1) {
 			if($member == $CheckMark) $memberCount++;
@@ -715,7 +691,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			<td><input type=\"checkbox\"> $count</td>
 		    <td style='text-align: right;'>$personid</td>");
 			//<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_folio.php?user=$personid\">$ciel<span class='tooltiptext'>Click pour afficher le folio</span></a></td>
-		print("<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_folio.php?user=$personid\">$odooReference<span class='tooltiptext'>Click pour afficher le folio</span></a></td>
+		print("<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_ledger.php?user=$personid\">$odooReference<span class='tooltiptext'>Click pour afficher les opérations comptables</span></a></td>
 			<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_profile.php?displayed_id=$personid\">$row[last_name]<span class='tooltiptext'>Click pour editer le profile</span></a></td>
 			<td style='text-align: left;'>$row[first_name]</td>
 			<td style='text-align: left;'>$address</td>
@@ -734,12 +710,12 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			if($cotisation!="") {
 				$cotisation="[".$cotisation."]";
 			}
-			print("<td style='text-align: center;color: red;'>$cotisation</td>");			
+			print("<td style='text-align: center;' class='text-danger'>$cotisation</td>");			
 		}
 		$soldeText="";
 		$soldeStyle="";
 		if($solde<0.0) {
-			$soldeStyle="style='color: red;'";
+			$soldeStyle=' class="text-danger" ';
 		}
 		if($odoo) {
 			$soldeText=number_format($solde,2,",",".")." €";
@@ -749,15 +725,15 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		}
 		print("<td $soldeStyle>$soldeText</td>");				
 		if($blocked==2) {
-			print("<td style='text-align: center;font-size: 17px;color: red;'>
+			print("<td style='text-align: center;font-size: 17px;' class='text-danger'>
 			<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Unblock','$nom $prenom','$personid','$solde')\">&#x26D4;<span class='tooltiptext'>Click pour DEBLOQUER</span>
-				<span class=\"badge text-primary\">$row[days_blocked]</span></a></td>");
+				<span class=\"badge text-bg-info\">$row[days_blocked]</span></a></td>");
 		}
 		else if($blocked==1){
-			print("<td style='text-align: center;font-size: 15px;color: red;'>&#10060;</td>");		
+			print("<td style='text-align: center;font-size: 15px;' class='text-danger'>&#10060;</td>");		
 		}
 		else {
-			print("<td style='text-align: center;font-size: 17px;color: green;'>
+			print("<td style='text-align: center;font-size: 17px;' class='text-success'>
 				<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Block','$nom $prenom','$personid','$solde')\">&#x2714;<span class='tooltiptext'>Click pour BLOQUER</span></a></td>");		
 		}
 		print("<td style='text-align: left;'>$status</td>");
@@ -770,7 +746,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		*/
 		print("</tr>\n");
 	}
-	print("<tr style='background-color: #13d8f2; text-align: center;'>
+	print("<tr style='text-align: center;' class='text-bg-info'>
 		<td>Total</td>
 	    <td></td>");
 		//<td>$cielCount</td>
@@ -786,10 +762,10 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		<td>$studentCount</td>
 		<td>$pilotCount</td>
 		<td>$effectifCount</td>
-		<td><div style='color: red;'>[$cotisationNonPayeCount]</div><div>/$cotisationPayeCount</div></td>");
+		<td><div class='text-danger'>[$cotisationNonPayeCount]</div><div>/$cotisationPayeCount</div></td>");
 	$soldeTotalText=number_format($soldeTotal,2,",",".");
 	if($soldeTotal<0.0) {
-		print("<td style='color: red;text-align: right;'>$soldeTotalText €</td>");
+		print("<td style='text-align: right;' class='text-danger'>$soldeTotalText €</td>");
 	}
 	else {
 		print("<td style='text-align: right;'>$soldeTotalText €</td>");		
@@ -803,7 +779,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 </div>
 <?php
 if(abs($cielCount-161)>15) {
-	print("<p style='color: red;'><b>La table ne semble pas correcte. Il semble manquer des comptes! A vérifier.</b></p>");
+	print("<p class='text-bg-danger'><b>La table ne semble pas correcte. Il semble manquer des comptes! A vérifier.</b></p>");
 }
 ?>
 </body>
