@@ -36,13 +36,18 @@ if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
 } else
 	if ($userId != 62) journalise($userId, "I", "Start of myfolio") ;
 
-$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $userId")
+$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person 
+		LEFT JOIN $table_company_member ON cm_member = jom_id
+		LEFT JOIN $table_company ON cm_company = c_id
+		WHERE jom_id = $userId")
 	or journalise(0, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
 $pilot = mysqli_fetch_array($result) or journalise(0, 'F', "Pilote $userId inconnu") ;
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 $userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
 $codeCiel = $pilot['ciel_code'] ;
-$odooId = $pilot['odoo_id'] ;
+$odooId = ($pilot['c_odoo_id']) ? $pilot['c_odoo_id'] : $pilot['odoo_id'] ;
+$ledgerOwner = ($pilot['c_name']) ? db2web($pilot['c_name']) : $userName ;
+if ($userId == 62) print("<hr>EVY jom_id=$userId, c_odoo_id=$pilot[c_odoo_id], odoo_id=$pilot[odoo_id], odooId=$odooId<hr>") ;
 mysqli_free_result($result) ;
 
 function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
@@ -56,7 +61,7 @@ if ($userIsInstructor or $userIsAdmin) {
         print("</select></p>") ;
 }
 ?>
-<h2>Grand livre comptable de <?=$userName?></h2>
+<h2>Grand livre comptable de <?=$ledgerOwner?></h2>
 <p class="lead">Voici une vue comptable de votre compte membre RAPCS (mis à jour chaque semaine par nos bénévoles).</p>
 <p class="small">Accès au folio et aux factures via le menu déroulant en cliquant sur votre nom en haut à droite ou les onglets ci-dessous.</p>
 
@@ -130,8 +135,10 @@ while ($row = mysqli_fetch_array($result)) {
 if ($odooId != '') {
 	print("</tbody>
 	<tbody class=\"table-group-divider\">") ;
+	if ($userId == 62) print("<hr>EVY odooId = $odooId<hr>") ;
 	require_once 'odoo.class.php' ;
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+	$odooClient->debug= true ; //EVY
 	$moves = $odooClient->SearchRead('account.move', array(array(
 				array('state', '=', 'posted'),
 				array('date', '>' , '2023-12-31'),
@@ -139,6 +146,7 @@ if ($odooId != '') {
 			)), 
 			array('fields' => array('id', 'date', 'type_name', 'amount_total', 'name', 'direction_sign', 'journal_id', 'access_url', 'access_token'),
 				'order' => 'date,name')) ;
+	if ($userId == 62) print('<pre>EVY moves:\n') ; var_dump($moves) ; print("</pre>") ;
 	foreach ($moves as $move) {
 		print("<tr><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
 			if ($move['access_token'] != '')
