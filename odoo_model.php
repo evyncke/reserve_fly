@@ -52,7 +52,9 @@ if ($id != '') { // Display all field of this line
     $result = $odooClient->SearchRead($model, array(array(array('id','=',$id))), array()) ;
     if ($result) {
         print("<thead><tr><th>Field Name</th><th>Field Value</th></tr><tbody class=table-divider>\n") ;
-        foreach($result[0] as $f=>$desc) {
+        $fields = $result[0] ;
+        ksort($fields) ;
+        foreach($fields as $f=>$desc) {
             $value = (isset($desc)) ? $desc : '' ;
             if (is_array($value)) $value = '[' . implode(', ', $value) . ']';
             print("<tr><td><a href=\"?model=$model&name=$f\">$f</a></td><td>$value</td></tr>\n") ;
