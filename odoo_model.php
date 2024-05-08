@@ -41,7 +41,7 @@ $id = (isset($_REQUEST['id'])) ? $_REQUEST['id'] : '' ;
 <input type="text" class="form-control" id="nameId" name="name" value="<?=$name?>">
 <button type="submit" class="btn btn-primary">Afficher ce modèle</button>
 </form>
-<table class="table table-striped table-hover">
+
 <?php
 
 require_once 'odoo.class.php' ;
@@ -51,7 +51,9 @@ $odooClient->debug = true ;
 if ($id != '') { // Display all field of this line
     $result = $odooClient->SearchRead($model, array(array(array('id','=',$id))), array()) ;
     if ($result) {
-        print("<thead><tr><th>Field Name</th><th>Field Value</th></tr><tbody class=table-divider>\n") ;
+        print("<table class=\"table table-striped table-hover caption-top\">
+            <caption>All values for record #$id<caption>
+            <thead><tr><th>Field Name</th><th>Field Value</th></tr><tbody class=\"table-divider\">\n") ;
         $fields = $result[0] ;
         ksort($fields) ;
         foreach($fields as $f=>$desc) {
@@ -65,7 +67,9 @@ if ($id != '') { // Display all field of this line
 } else if ($name != '') { // Display all lines with this field
     $result = $odooClient->SearchRead($model, array(), array('fields' => array('id', 'name', $name))) ;
     if ($result) {
-           print("<thead><tr><th>Id</th><th>Name</th><th>Field Name</th><th>Field Value</th></tr><tbody class=table-divider>\n") ;
+           print("<table class=\"table table-striped table-hover caption-top\">
+            <caption>All values for field name '$name'<caption>
+            <thead><tr><th>Id</th><th>Name</th><th>Field Name</th><th>Field Value</th></tr><tbody class=table-divider>\n") ;
         foreach($result as $f=>$desc) {
             $value = (isset($desc[$name])) ? $desc[$name] : '' ;
             if (is_array($value)) $value = '[' . implode(', ', $value) . ']';
@@ -78,7 +82,8 @@ if ($id != '') { // Display all field of this line
     // Let's get all Odoo fields from the model
     $result = $odooClient->GetFields($model, array('string', 'type','help', 'description', 'default', 'index', 'states', 'selection')) ;
  //   print("<pre>") ; var_dump($result) ; print("</pre>") ;
-    print("<thead><tr><th>Field</th><th>Description<br/>Help</th><th>Type</th><th>Information</th></tr><tbody class=table-divider>\n") ;
+    print("<table class=\"table table-striped table-hover\">
+        <thead><tr><th>Field</th><th>Description<br/>Help</th><th>Type</th><th>Information</th></tr><tbody class=table-divider>\n") ;
     foreach($result as $f=>$desc) {
         $help = (isset($desc['help'])) ? $desc['help'] : '' ;
         print("<tr><td><a href=\"?model=$model&name=$f\">$f</a></td><td>$desc[string]</td><td>$desc[type]</td><td>$help</td></tr>\n") ;
