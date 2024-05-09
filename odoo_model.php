@@ -58,7 +58,7 @@ if ($id != '') { // Display all field of this line
         ksort($fields) ;
         foreach($fields as $f=>$desc) {
             $value = (isset($desc)) ? $desc : '' ;
-            if (is_array($value)) $value = '[' . implode(', ', $value) . ']';
+            if (is_array($value)) $value = '[' . nl2br(print_r($value, true)) . ']';
             print("<tr><td><a href=\"?model=$model&name=$f\">$f</a></td><td>$value</td></tr>\n") ;
         }
     } else
