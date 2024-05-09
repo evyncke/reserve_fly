@@ -700,7 +700,7 @@ while ($row = mysqli_fetch_array($result)) {
 
 if (count($ids) > 0) { // If there are still unpaid membership fees
 	$moves = $odooClient->Read('account.move', 
-		array($ids), 
+		$ids, 
 		array('fields' => array('id', 'name', 'state', 'payment_state'))) ;
 	$newly_paid = 0 ;
 	foreach($moves as $move) {
@@ -728,7 +728,7 @@ while ($row = mysqli_fetch_array($result)) {
 
 if (count($ids) > 0) { // If there are still blocked members
 	$members = $odooClient->Read('res.partner', 
-		array($ids), 
+		$ids, 
 		array('fields' => array('id', 'name', 'email', 'total_due'))) ; // TODO could filter on total_due <= 0
 	$unblocked_members = 0 ;
 	foreach($members as $member) {

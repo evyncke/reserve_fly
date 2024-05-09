@@ -64,7 +64,7 @@ class OdooClient {
     function Read($model, $ids, $display) {
         global $originUserId ;
 
-        $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'read', $ids, $display)) ;
+        $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'read', array($ids), $display)) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
             if ($this->debug)
@@ -86,7 +86,7 @@ class OdooClient {
     #   'complete_name', 'email', 'mobile', 'commercial_company_name'))) ;
     # $result = $odooClient->SearchRead('account.account', array(array(array('account_type', '=', 'asset_receivable'))), array()) ; 
     #
-    # Could also contain: array('offset'=>10, 'limit'=>5)
+    # Could also contain: array('offset'=>10, 'limit'=>5, 'order=>col1,col2')
     function SearchRead($model, $domain_filter, $display) {
         global $originUserId ;
 

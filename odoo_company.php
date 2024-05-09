@@ -40,7 +40,7 @@ while ($row = mysqli_fetch_array($result)) {
 }
 
 $result = $odooClient->Read('res.partner', 
-    array($ids), 
+    $ids, 
     array('fields' => array('id', 'name', 'email', 'street', 'zip', 'city', 'country_id', 'total_due'))) ; 
 $companies = [] ;
 foreach($result as $record)

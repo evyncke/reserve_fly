@@ -51,7 +51,7 @@ while ($row = mysqli_fetch_array($result)) {
 }
 mysqli_free_result($result) ;
 $members = $odooClient->Read('res.partner', 
-	array($ids), 
+	$ids, 
 	array('fields' => array('email', 'total_due'))) ;
 $odoo_customers = array() ;
 foreach($members as $member) {
