@@ -30,24 +30,24 @@ require_once "folio.php" ;
 $originalUserId = $userId ;
 
 if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
-	if ($userId != 62) journalise($userId, "I", "Start of myfolio, setting user to $_REQUEST[user]") ;
+	if ($originalUserId != 62) journalise($userId, "I", "Start of myfolio, setting user to $_REQUEST[user]") ;
 	$userId = $_REQUEST['user'] ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
 } else
-	if ($userId != 62) journalise($userId, "I", "Start of myfolio") ;
+	if ($originalUserId != 62) journalise($originalUserId, "I", "Start of myfolio") ; // Eric Vyncke doing too many tests
 
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person 
 		LEFT JOIN $table_company_member ON cm_member = jom_id
 		LEFT JOIN $table_company ON cm_company = c_id
 		WHERE jom_id = $userId")
-	or journalise(0, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
-$pilot = mysqli_fetch_array($result) or journalise(0, 'F', "Pilote $userId inconnu") ;
+	or journalise($originalUserId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
+$pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 $userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
 $codeCiel = $pilot['ciel_code'] ;
-$odooId = ($pilot['c_odoo_id']) ? $pilot['c_odoo_id'] : $pilot['odoo_id'] ;
-$ledgerOwner = ($pilot['c_name']) ? db2web($pilot['c_name']) : $userName ;
-if ($userId == 62) print("<hr>EVY jom_id=$userId, c_odoo_id=$pilot[c_odoo_id], odoo_id=$pilot[odoo_id], odooId=$odooId<hr>") ;
+$odooId = $pilot['odoo_id'] ;
+$odooCommercialId = $pilot['c_odoo_id'] ;
+$ledgerOwner = ($pilot['c_name']) ? db2web("$pilot[first_name] $pilot[last_name] (<i>$pilot[c_name]</i>)") : $userName ;
 mysqli_free_result($result) ;
 
 function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
@@ -62,7 +62,8 @@ if ($userIsInstructor or $userIsAdmin) {
 }
 ?>
 <h2>Grand livre comptable de <?=$ledgerOwner?></h2>
-<p class="lead">Voici une vue comptable de votre compte membre RAPCS (mis à jour chaque semaine par nos bénévoles).</p>
+<p class="lead">Voici une vue comptable de votre compte membre RAPCS (mise à jour plusieurs fois par semaine par nos bénévoles voire plusieurs
+	fois par jour ouvrable en utilisant un virement immédiat avec la communication structurée des factures).</p>
 <p class="small">Accès au folio et aux factures via le menu déroulant en cliquant sur votre nom en haut à droite ou les onglets ci-dessous.</p>
 
 <!-- using tabs -->
@@ -95,7 +96,7 @@ $sql = "SELECT *
 		LEFT JOIN $table_bk_invoices ON bki_id = bkl_reference
 	WHERE jom_id = $userId
 	ORDER BY bkl_date ASC, bkl_posting ASC" ;
-$result = mysqli_query($mysqli_link, $sql) or journalise($userId, "F", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
+$result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
 $total_debit = 0.0 ;
 $total_credit = 0.0 ;
 $solde = 0.0 ;
@@ -135,18 +136,21 @@ while ($row = mysqli_fetch_array($result)) {
 if ($odooId != '') {
 	print("</tbody>
 	<tbody class=\"table-group-divider\">") ;
-	if ($userId == 62) print("<hr>EVY odooId = $odooId<hr>") ;
 	require_once 'odoo.class.php' ;
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-	$odooClient->debug= true ; //EVY
-	$moves = $odooClient->SearchRead('account.move', array(array(
-				array('state', '=', 'posted'),
-				array('date', '>' , '2023-12-31'),
-				array('partner_id', '=', intval($odooId))
+	if ($originalUserId == 62) $odooClient->debug= true ; //EVY
+	if (false) {
+	$moves = $odooClient->SearchRead('account.move', array(
+		array(
+			array('state', '=', 'posted'),
+			array('date', '>' , '2023-12-31'),
+			'|', // Reverse Polish notation for OR...
+			array('partner_id', '=', intval($odooId)),
+			array('commercial_partner_id', '=', intval($odooCommercialId))
 			)), 
-			array('fields' => array('id', 'date', 'type_name', 'amount_total', 'name', 'direction_sign', 'journal_id', 'access_url', 'access_token'),
-				'order' => 'date,name')) ;
-	if ($userId == 62) print('<pre>EVY moves:\n') ; var_dump($moves) ; print("</pre>") ;
+		array(
+			'fields' => array('id', 'date', 'type_name', 'amount_total', 'name', 'partner_id', 'commercial_partner_id', 'direction_sign', 'journal_id', 'access_url', 'access_token'),
+			'order' => 'date,name')) ;
 	foreach ($moves as $move) {
 		print("<tr><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
 			if ($move['access_token'] != '')
@@ -167,6 +171,42 @@ if ($odooId != '') {
 			$solde=number_format($solde,2,".",",");
 			print("<td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
 	}
+} // if false
+		print("</tbody>
+		<tbody class=\"table-group-divider\">") ;
+		$moves = $odooClient->SearchRead('account.move.line', array(
+			array(
+				array('date', '>' , '2023-12-31'),
+				'|', // Reverse Polish notation for OR...
+				array('partner_id', '=', intval($odooId)),
+				array('partner_id', '=', intval($odooCommercialId)),
+//				'|', // Should include liability_payable (for incoming bills) and liability_payable (for payment of incoming bills)
+				array('account_type', '=', 'asset_receivable'),
+//				array('account_type', '=', 'asset_cash'),
+				)), 
+			array(
+				'fields' => array('id', 'date', 'move_type', 'journal_id','account_type',
+				'move_id', 'debit', 'credit'
+			),
+				'order' => 'date,id')) ;
+			foreach ($moves as $move) {
+			print("<tr><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
+				print("<td>" . $move['move_id'][1] . "</td>") ;
+				print("<td>$move[move_type]<!--<br/>$move[account_type]--></td>" ) ;
+				if ($move['debit'] > 0) {
+					$debit = number_format($move['debit'], 2, ",", ".") ;
+					print("<td style=\"text-align: right;\">-$debit</td><td></td>") ;
+					$total_debit += $move['debit'] ;
+				} 
+				if ($move['credit'] > 0) {
+					$credit = number_format($move['credit'], 2, ",", ".") ;
+					print("<td></td><td style=\"text-align: right;\">+$credit</td>") ;
+					$total_credit += $move['credit'] ;
+				} 
+				$solde=$total_credit-$total_debit;
+				$solde=number_format($solde,2,".",",");
+				print("<td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
+		}
 }
 ?>
 </tbody>
