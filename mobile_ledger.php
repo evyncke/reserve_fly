@@ -180,9 +180,9 @@ if ($odooId != '') {
 				'|', // Reverse Polish notation for OR...
 				array('partner_id', '=', intval($odooId)),
 				array('partner_id', '=', intval($odooCommercialId)),
-//				'|', // Should include liability_payable (for incoming bills) and liability_payable (for payment of incoming bills)
+				'|', // Should include liability_payable (for incoming bills) and liability_payable (for payment of incoming bills)
+				array('account_type', '=', 'liability_payable'),
 				array('account_type', '=', 'asset_receivable'),
-//				array('account_type', '=', 'asset_cash'),
 				)), 
 			array(
 				'fields' => array('id', 'date', 'move_type', 'journal_id','account_type',
