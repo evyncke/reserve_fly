@@ -48,6 +48,29 @@ require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 $odooClient->debug = true ;
 
+function pretty_print($value, $prefix) {
+    if ($value == '') return '' ;
+    if (is_array($value)) {
+        if (array_is_list($value)) {
+            $s = $prefix . '[<br/>' ;
+            for ($i = 0; $i < sizeof($value) ; $i++) {
+                $s .= $prefix . "&nbsp;&nbsp;$i: " . pretty_print($value[$i], "&nbsp;&nbsp;$prefix") . '<br/>';
+            }
+            $s .= $prefix . ']' ;
+            return $s ;
+        } else { // Associative array
+            $s = $prefix . '[<br/>' ;
+            foreach ($value as $k=>$v) {
+                $s .= $prefix . "&nbsp;&nbsp;$k: " . pretty_print($v, "&nbsp;&nbsp;$prefix") . '<br/>';
+            }
+            $s .= $prefix . ']' ;
+            return $s ;
+        }
+    } else { //Scalar
+        return $value ;
+    }
+}
+
 if ($id != '') { // Display all field of this line
     $result = $odooClient->SearchRead($model, array(array(array('id','=',$id))), array()) ;
     if ($result) {
@@ -57,8 +80,8 @@ if ($id != '') { // Display all field of this line
         $fields = $result[0] ;
         ksort($fields) ;
         foreach($fields as $f=>$desc) {
-            $value = (isset($desc)) ? $desc : '' ;
-            if (is_array($value)) $value = '[' . nl2br(print_r($value, true)) . ']';
+            $value = pretty_print((isset($desc)) ? $desc : '', '') ;
+            // if (is_array($value)) $value = '[' . nl2br(print_r($value, true)) . ']';
             print("<tr><td><a href=\"?model=$model&name=$f\">$f</a></td><td>$value</td></tr>\n") ;
         }
     } else
