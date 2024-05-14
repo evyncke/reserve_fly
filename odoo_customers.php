@@ -205,9 +205,7 @@ while ($row = mysqli_fetch_array($result)) {
                 $updates['city'] = db2web($row['city']) ;
                 $odoo_customer['partner_latitude'] = 0.0 ;
             } 
-            // Should also trigger setting partner_longitude & partner_latitude...
-            // Using $gmap_api_key
-            // E.g., https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=$gmap_api_key
+            // If coordinates have changed, let's redo them
             if ($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) {
                 $coordinates = geoCode(db2web($row['address']) . "," . db2web($row['city']) . ', ' . db2web($row['country'])) ;
                 if ($coordinates and count($coordinates) == 2) { 
@@ -279,3 +277,4 @@ while ($row = mysqli_fetch_array($result)) {
 </table>
 </body>
 </html>
+
