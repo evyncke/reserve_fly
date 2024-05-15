@@ -243,6 +243,7 @@ if ($userId > 0) {
 }
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
+          <li><i><a class="dropdown-item" href="mobile_planelog.php?plane=OO-FMX">Carnets de routes</a></i></li>
           <li><i><a class="dropdown-item" href="mobile_plane_planning.php">Echéances des avions</a></i></li>
           <li><i><a class="dropdown-item" href="mobile_shared_flights.php">Vols en codes partagés</a></i></li>
           <li><h6 class="dropdown-header">Disponible pour tous les membres</h6></li>
