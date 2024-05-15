@@ -35,9 +35,10 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	FROM jom_kunena_users k 
 		JOIN $table_person p ON p.jom_id = k.userid 
 		JOIN jom_users j ON j.id = k.userid
-	WHERE k.avatar IS NOT NULL AND p.odoo_id IS NOT NULL AND j.block = 0 AND k.avatar NOT LIKE '%.jp%g'")
+	WHERE k.avatar IS NOT NULL AND p.odoo_id IS NOT NULL")
+//	WHERE k.avatar IS NOT NULL AND p.odoo_id IS NOT NULL AND j.block = 0 AND k.avatar NOT LIKE '%.jp%g'")
 	or print(mysqli_error($mysqli_link)) ;
-while (false and $row = mysqli_fetch_array($result)) {
+while ($row = mysqli_fetch_array($result)) {
 	print("Processing #$row[jom_id], " . db2web($row['name']) . ": $row[avatar]\n") ;
 	$fname = '../media/kunena/avatars/' . $row['avatar'] ;
 	// TODO process gravatars ! https://www.gravatar.com/avatar/" . md5(strtolower(trim($row['email']))) . "?s=200&d=blank&r=pg\"
@@ -77,6 +78,8 @@ while (false and $row = mysqli_fetch_array($result)) {
 	print("   Odoo response: $response\n") ;
 }
 
+exit ;
+
 $result = mysqli_query($mysqli_link, "SELECT * 
 	FROM jom_kunena_users k 
 		JOIN $table_person p ON p.jom_id = k.userid 
@@ -112,31 +115,6 @@ while ($row = mysqli_fetch_array($result)) {
 }
 
 exit ;
-
-#Account #427: FX Engineering, 400FX, 400FX FX Engineering, asset_receivable, asset, 400 Customers, 400 Customers
-#Account #426: Reginster Patrick, 400REGP, 400REGP Reginster Patrick, asset_receivable, asset, 400 Customers, 400 Customers
-$result = $odooClient->SearchRead('account.account', array(array(
-		array('account_type', '=', 'asset_receivable'),
-		array('code', '=', '400REGP'))), 
-	array()) ; 
-print("\nSearching for Patrick...\n") ;
-foreach($result as $account) {
-	print("Account #$account[id]: $account[name], $account[code], $account[display_name], $account[account_type], $account[internal_group], " . 
-		$account['group_id'][1] . "\n") ;
-	$account_id = $account['id'] ;
-}
-
-$result = $odooClient->SearchRead('account.account', array(array(
-	array('account_type', '=', 'asset_receivable'),
-	array('code', '=', '400REGP'))), 
-array()) ; 
-print("\nSearching for Patrick...\n") ;
-foreach($result as $account) {
-print("Account #$account[id]: $account[name], $account[code], $account[display_name], $account[account_type], $account[internal_group], " . 
-	$account['group_id'][1] . "\n") ;
-$account_id = $account['id'] ;
-var_dump($account) ;
-}
 ?>
 </pre>
 </body>
