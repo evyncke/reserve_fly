@@ -81,7 +81,7 @@ function OF_createPayment($theFlightID, $theOdooID, $theAmount, $thePaymentDate,
 //      theLedgerIdMap[$f_reference]=$row['fl_id'];
 //      theReferenceIDMap[$f_reference]=$row['f_id'];
 //============================================
-function OF_FillFlightOdooMaps(&$theOdooPaymentMap,&$thePaymentFlightMap,&$theLedgerIdMap,&$theReferenceIDMap) {
+function OF_FillFlightOdooMaps(&$theOdooPaymentMap,&$thePaymentFlightMap,&$theLedgerIdMap,&$theReferenceIDMap,&$theGiftFlagMap) {
     global $mysqli_link, $table_flights_ledger,$table_flights;
 
     $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flights_ledger JOIN $table_flights ON fl_flight=f_id")
@@ -95,6 +95,7 @@ function OF_FillFlightOdooMaps(&$theOdooPaymentMap,&$thePaymentFlightMap,&$theLe
          $theReferenceIDMap[$f_reference]=$row['f_id'];
          $thePaymentFlightMap[$f_reference]=$row['fl_amount'];
          $theLedgerIdMap[$f_reference]=$row['fl_id'];
+         $theGiftFlagMap[$f_reference]=$row['f_gift'];
     }
 }
 //============================================
@@ -121,7 +122,7 @@ function OF_FillFlightMaps(&$theReferenceIDMap) {
 function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMontant, $theFlyID) {
     global $mysqli_link, $table_logbook;
     global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
-    print("OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMontant, $theFlyID):started<br>");
+    //print("OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMontant, $theFlyID):started<br>");
     
     $result = mysqli_query($mysqli_link, "SELECT * FROM $table_logbook WHERE l_id=$theLogbookid")
     		or journalise($userId, "E", "Cannot read logbook: " . mysqli_error($mysqli_link)) ;
@@ -133,7 +134,7 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
         $flyReference=$theFlightReference;
         $duration=OF_ComputeDurationToBeInvoiced($row);
         $cost_plane_minute=OF_ComputeCostPerMinute($plane);
-        print("plane=$plane, date=$date,flyReference=$flyReference,duration=$duration,cost_plane_minute=$cost_plane_minute<br>");
+        //print("plane=$plane, date=$date,flyReference=$flyReference,duration=$duration,cost_plane_minute=$cost_plane_minute<br>");
         if($cost_plane_minute<=0.0) {
             return false;
         }
@@ -151,7 +152,7 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
     $analytic_club_init_if=OF_GetAnalyticAccountID("club_init_if");
     $journal_if=OF_GetJournalID("if");
     $invoice_date_due = date("Y-m-d", strtotime("+1 week")) ;
-	print("</br>Création facture V-IF</br>");
+	//print("</br>Création facture V-IF</br>");
 	// Reference facture : V-IF-24xxxx + 50€ par carte
 	$libelle_name=$flyReference." ".$date;
 	
@@ -199,7 +200,7 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
     //$invoiceID=0;
     $invoiceID = $odooClient->Create('account.move', $params) ;
     echo var_dump($invoiceID);
-    print("<br>Facture IF pour " . implode(', ', $invoiceID) . "<br>") ;
+    //print("<br>Facture IF pour " . implode(', ', $invoiceID) . "<br>") ;
     print("<br>Facture IF pour " . $invoiceID[0] . "<br>") ;
     OF_SetFlightInvoiceRef($theFlyID, $invoiceID[0]);
     
@@ -247,9 +248,9 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
     	print("</br> 2 Création OD V-IF</br>");
     	//print("params=$params");
         echo var_dump($params);
-        print("<br>Pousser ****** dans odoo<br>");
+        //print("<br>Pousser ****** dans odoo<br>");
         $result_OD = $odooClient->Create('account.move', $params_OD) ;
-        print("<br>OD V-IF **** pour " . implode(', ', $result_OD) . " Name=".$name." Prix=".$valeur_compte_attente."<br>") ;
+        //print("<br>OD V-IF **** pour " . implode(', ', $result_OD) . " Name=".$name." Prix=".$valeur_compte_attente."<br>") ;
     }
     return true;
 }
@@ -272,7 +273,7 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
         $flyReference=$theFlightReference;
         $duration=OF_ComputeDurationToBeInvoiced($row);
         $cost_plane_minute=OF_ComputeCostPerMinute($plane);
-        print("plane=$plane, date=$date,flyReference=$flyReference,duration=$duration,cost_plane_minute=$cost_plane_minute<br>");
+        //print("plane=$plane, date=$date,flyReference=$flyReference,duration=$duration,cost_plane_minute=$cost_plane_minute<br>");
         if($cost_plane_minute<=0.0) {
             return false;
         }
@@ -400,6 +401,111 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
         $result_OD = $odooClient->Create('account.move', $params_OD) ;
         //print("<br>OD V-IF **** pour " . implode(', ', $result_OD) . " Name=".$name." Prix=".$valeur_compte_attente."<br>") ;
     }
+    return true;
+}
+//============================================
+// Function: OF_createFactureDHF
+// Purpose: Create an invoice for an DHF flight
+//============================================
+function OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids) {
+    global $mysqli_link, $table_logbook;
+    global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
+    print("OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids):started<br>");
+    $referencesMap= array();
+
+    $code_700102=OF_GetAccountID(700102);
+    $code_499002=OF_GetAccountID(499002);
+    $code_499003=OF_GetAccountID(499003);
+    $code_400000=OF_GetAccountID(400000);
+	$partner_customer_id =  OF_GetPartnerID("DHF-",0);
+    $analytic_club_init_if=OF_GetAnalyticAccountID("club_init_if");
+    $journal_if=OF_GetJournalID("if");
+    $invoice_date_due = date("Y-m-d", strtotime("+1 week")) ;
+	print("</br>Création facture DHF</br>");
+    ////journalise($userId, "I", "Odoo invoices generation started ($odoo_host)") ;			
+    ini_set('display_errors', 1) ; // extensive error reporting for debugging
+    $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+    $invoice_lines = array() ;
+
+    OF_FillFlightMaps($referencesMap);
+    $referencesArray=explode(";",$theFlightReferences);
+    $logbookidsArray=explode(";",$thelogbookids);
+    $count=-1;
+    foreach ($referencesArray as $reference) {
+        $count++;
+        $logbookid=$logbookidsArray[$count];
+        echo "reference=$reference, $referencesMap[$reference] logbookid=$logbookid<br>"; 
+
+        $result = mysqli_query($mysqli_link, "SELECT * FROM $table_logbook WHERE l_id=$logbookid")
+        		or journalise($userId, "E", "Cannot read logbook: " . mysqli_error($mysqli_link)) ;
+        while ($row = mysqli_fetch_array($result)) {
+            $partnerName=OF_GetPartnerNameFromReference($reference);
+            $plane=$row['l_plane'];
+            $planeTableRow=OF_GetPlaneTableRow($plane);
+            $date=$row['l_start'];
+            $date=substr($date,0,16);
+            $flyReference=$reference;
+            $duration=OF_ComputeDurationToBeInvoiced($row);
+            $cost_plane_minute=OF_ComputeCostPerMinute($plane);
+            print("plane=$plane, date=$date,flyReference=$flyReference,duration=$duration,cost_plane_minute=$cost_plane_minute<br>");
+            if($cost_plane_minute<=0.0) {
+                return false;
+            }
+            if($duration<=0.0) {
+                print("<h2 style=\"color: red;\">ERROR:OF_createFactureDHF: Flight duration < 0: $duration</h2>");
+                return false;
+            }
+
+            $plane_analytic=OF_GetAnalyticAccountID($plane);
+        	$libelle_name="Vol ".$flyReference." ".substr($date,0,10)." ".$partnerName;
+            $libelle_name_cotisation= "cotisation membre VIP ".$partnerName;
+            
+            $cost_plane_dhf = 100.0;
+            $cotisation = 70.0;
+            
+        	// Partie Avion
+            $invoice_lines[] = array(0, 0,
+        		array(
+        			'name' => db2web($libelle_name),
+        			//'product_id' => $plane_dhf_product_id,
+        			'account_id' => $code_700102,  
+        			'quantity' => 1,
+        			'price_unit' => $cost_plane_dhf,
+                    'analytic_distribution' => array($plane_analytic => 100)
+        		)) ;
+		
+        	// Partie Club
+            $invoice_lines[] = array(0, 0,
+        		array(
+        			'name' => db2web($libelle_name_cotisation),
+        			//'product_id' => $plane_dhf_product_id, 
+        			'account_id' => $code_700102, 
+        			'quantity' => 1,
+        			'price_unit' => $cotisation,
+                    'analytic_distribution' => array($analytic_club_init_if => 100)
+        		)) ;
+        }
+    }
+
+	// Invoice creation	
+    $DHFReference="Facture DHF ".$theDate;
+    $params =  array(array('partner_id' => intval($partner_customer_id), //(Must be of INT type else Odoo does not accept)
+                    'ref' => db2web($DHFReference),
+					'payment_reference' => db2web($DHFReference),
+                    'move_type' => 'out_invoice',
+					'journal_id'=> $journal_if,
+                    'invoice_date_due' => $invoice_date_due,
+                    'invoice_origin' => 'Carnets de routes',
+                    'invoice_line_ids' => $invoice_lines)) ;
+	print("</br> 1 Création facture DHF invoice_date_due=$invoice_date_due</br>");
+	//print("params=$params");
+	echo var_dump($params);
+    $invoiceID = $odooClient->Create('account.move', $params) ;
+    echo var_dump($invoiceID);
+    print("<br>Facture DHF pour " . implode(', ', $invoiceID) . "<br>") ;
+    print("<br>Facture DHF pour " . $invoiceID[0] . "<br>") ;
+    //OF_SetFlightInvoiceRef($theFlyID, $invoiceID[0]);
+    
     return true;
 }
 
@@ -545,6 +651,13 @@ function OF_GetAnalyticAccountID($theAnalyticAccount)
 //============================================
 function OF_GetPartnerID($theFlightReference,$theFlyID) 
 {
+    //DHF = 346
+    $pos = strpos(strtoupper($theFlightReference), "DHF-");
+    if($pos!==false && $pos==0) {
+        // Flight DHF
+        // Partner 346	DHF Domaine Haute Fagne
+        return 346; 
+    }
     $pos = strpos(strtoupper($theFlightReference), "V-");
     if($pos===false || $pos!=0) {
         // Flight IF- or INIT-
@@ -619,6 +732,37 @@ function OF_GetPartnerFromPayment($odooPaymentReference)
         array('fields'=>array('id', 'name', 'move_type','account_id','debit', 'credit', 'partner_id', 'create_date'))) ;
             */
     return $partner;
+}
+//============================================
+// Function: OF_GetPartnerNameFromReference
+// Purpose: Get the passager Name from Reference (DHF-245678)
+//============================================
+function OF_GetPartnerNameFromReference($theReference)
+{
+    global $mysqli_link, $table_pax_role, $table_pax, $table_flight;
+    print("<br>OF_GetPartnerNameFromReference:start theReference=$theReference<br>");
+    $result = mysqli_query($mysqli_link, "SELECT f_id FROM $table_flight WHERE f_reference='$theReference'")
+    		or journalise($userId, "E", "Cannot read flight: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        $referenceID=$row['f_id'];
+        print("<br>OF_GetPartnerNameFromReference:referenceID=$referenceID<br>");
+        $result1 = mysqli_query($mysqli_link, "SELECT * FROM $table_pax_role WHERE pr_flight=$referenceID AND pr_role='C'")
+        		or journalise($userId, "E", "Cannot read pax_role: " . mysqli_error($mysqli_link)) ;
+        while ($row1 = mysqli_fetch_array($result1)) {
+            $paxID=$row1['pr_pax'];
+            print("<br>OF_GetPartnerNameFromReference:paxID=$paxID<br>");
+            if($paxID>0) {
+                $result2 = mysqli_query($mysqli_link, "SELECT * FROM $table_pax WHERE p_id=$paxID")
+                		or journalise($userId, "E", "Cannot read pax: " . mysqli_error($mysqli_link)) ;
+                while ($row2 = mysqli_fetch_array($result2)) {
+                    $partnerName=$row2['p_lname']." ".$row2['p_fname'];
+                    print("<br>OF_GetPartnerNameFromReference:partnerName=$partnerName<br>");
+                    return $partnerName;
+                }
+            }
+        }
+    }
+    return "";
 }
 
 //============================================

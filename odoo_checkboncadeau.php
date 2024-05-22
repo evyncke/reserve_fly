@@ -84,7 +84,8 @@ $odooPaymentMap=array();
 $paymentFlightMap=array();
 $ledgerIdMap=array();
 $referenceIDMap=array();
-OF_FillFlightOdooMaps($odooPaymentMap,$paymentFlightMap,$ledgerIdMap,$referenceIDMap);
+$giftFlagMap=array();
+OF_FillFlightOdooMaps($odooPaymentMap,$paymentFlightMap,$ledgerIdMap,$referenceIDMap,$giftFlagMap);
 
 // Map between f_reference and f_id
 $referenceIDFlightMap=array();
@@ -126,6 +127,8 @@ $ids = array() ;
 $rowNumber=0;
 $accountINI=0;
 $accountIF=0;
+$accountValueINI=0.0;
+$accountValueIF=0.0;
 foreach($result as $f=>$desc) {
 	//echo "f=";
 	//echo var_dump($f);
@@ -150,6 +153,7 @@ foreach($result as $f=>$desc) {
 	if(($account=="499001" || $account=="499002") && $credit > 0.0 && $reconciled != 1) {
 		if($account=="499001") {
 			++$accountINI;
+            $accountValueINIT+=$credit;
             $posFlightReference = strpos($communicationUppercase, "V-INIT-");
             if ($posFlightReference === false) {
                 $flightReference="V-INIT-??????";
@@ -166,6 +170,7 @@ foreach($result as $f=>$desc) {
 		}
 		else {
 			++$accountIF;
+            $accountValueIF+=$credit;
             $posFlightReference = strpos($communicationUppercase, "V-IF-");
             if ($posFlightReference === false) {
                 $flightReference="V-IF-??????";
@@ -206,10 +211,22 @@ foreach($result as $f=>$desc) {
                 $amountFlight="?";
             }
         }
-        
+        $giftFlagWarning="";
+        if(strpos($referenceInFlight,"V-") !== false) {
+            if (array_key_exists($flightReference, $giftFlagMap)) {
+                if($giftFlagMap[$flightReference]!=1) {
+                    $giftFlagWarning="&nbsp;&#10067;";
+                }
+            }
+            else if (array_key_exists($referenceInFlight, $giftFlagMap)) {
+                if($giftFlagMap[$referenceInFlight]!=1) {
+                    $giftFlagWarning="&nbsp;&#10067;";
+                }
+            }
+        }
     	print("<tr>
       	 	<td>$rowNumber</td>
-		    <td>$idText</td>
+		    <td>$idText$giftFlagWarning</td>
    			<td>$date</td>
    			<td>$account</td>
      	  	<td>$communication</td>");
@@ -265,7 +282,7 @@ foreach($result as $f=>$desc) {
 <?php
 		//print("<b>#INIT: $accountINI - #IF: $accountIF</b><br/>");
 		print("<script type='text/javascript'>
-			document.getElementById('id_nombre_bons_cadeaux').innerHTML ='Nombre de bons cadeaux INIT: $accountINI - Nombre de bons cadeaux IF: $accountIF';
+			document.getElementById('id_nombre_bons_cadeaux').innerHTML ='Nombre de bons cadeaux INIT: $accountINI ($accountValueINIT €) - Nombre de bons cadeaux IF: $accountIF ($accountValueIF €)';
 		</script>");
 ?>
 
