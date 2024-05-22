@@ -73,15 +73,28 @@ function id2name($id) {
 
 // Clean-up input data and canonicalize
 if ($create or $modify) {
-	if ($_REQUEST['discovery_flight'] == 'on') {
+    //print("%%%Modify:Start");
+	//if ($_REQUEST['discovery_flight'] == 'on') {
+    if ($_REQUEST['selectedFlightType'] == 'decouverte') {
 		$flight_type = 'D' ;
 		$circuit = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['selectedCircuit'])) ;
 		if (!is_numeric($circuit)) die("Invalid circuit: $circuit") ;
-	} elseif ($_REQUEST['initiation_flight'] == 'on') {
-		$flight_type = 'I' ;
+        //} elseif ($_REQUEST['initiation_flight'] == 'on') {
+    } elseif ($_REQUEST['selectedFlightType'] == 'initiation') {
+    		$flight_type = 'I' ;
+    		$circuit = -1 ;
+	} elseif ($_REQUEST['selectedFlightType'] == 'bon') {
+		$flight_type = 'B' ;
+		$circuit = -1 ;
+	} elseif ($_REQUEST['selectedFlightType'] == 'dhf') {
+		$flight_type = 'D' ;
 		$circuit = -1 ;
 	} else 
-		die("Vous devez choisir le type de vol (initiation ou découverte)") ;
+		die("Vous devez choisir le type de vol (initiation, découverte, bon ou DHF)") ;
+    $gift=0;
+    if($_REQUEST['gift']=="on") {
+        $gift=1;
+    }
 	$pax_cnt = $_REQUEST['pax_cnt'] ;
 	if (!is_numeric($pax_cnt)) die("Invalid pax_cnt: $pax_cnt") ;
 	if ($_REQUEST['pax'] == 'yes')
@@ -131,8 +144,8 @@ if ($create) {
 		or journalise($userId, "F", "Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
 	$pax_id = mysqli_insert_id($mysqli_link) ; 
 	// As f_reference is a unique index, let's simply use a random value
-	mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_reference, f_date_created, f_who_created, f_type, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_notes, f_pilot) 
-		VALUES(RAND()*10000, SYSDATE(), $userId, '$flight_type', $pax_cnt, $circuit, '$schedule', $date1, $date2, '" . web2db($comment) . "', '" . web2db($notes) . "', NULL)")
+	mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_reference, f_date_created, f_who_created, f_type, f_gift, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_notes, f_pilot) 
+		VALUES(RAND()*10000, SYSDATE(), $userId, '$flight_type', $gift, $pax_cnt, $circuit, '$schedule', $date1, $date2, '" . web2db($comment) . "', '" . web2db($notes) . "', NULL)")
 		or journalise($userId, "F", "Cannot add flight, system error: " . mysqli_error($mysqli_link)) ;
 	$flight_id = mysqli_insert_id($mysqli_link) ; 
 	// Now that we have the flight_id, let's update the flight reference
@@ -154,19 +167,29 @@ if ($create) {
 }
 
 if ($modify) {
+    //print("%%%Modify:SELECT * from $table_pax_role WHERE pr_flight = $flight_id and pr_role='C'<br>");
 	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
 	$result = mysqli_query($mysqli_link, "SELECT * from $table_pax_role WHERE pr_flight = $flight_id and pr_role='C'")
 		or journalise($userId, "F", "Cannot retrieve contact for $flight_id: " . mysqli_error($mysqli_link)) ;
 	$row_pax = mysqli_fetch_array($result) or die("Contact not found") ;
 	mysqli_free_result($result) ;
 	$pax_id = $row_pax['pr_pax'] ;
+    /*
+    print("MODIFY: UPDATE $table_pax
+			SET p_lname='" . web2db($lname) . "', p_fname='" . web2db($fname) . "', p_email='$email', p_tel='$phone', p_gender='$gender', p_street='" . web2db($street) . "', p_zip='$zip', p_city='" . web2db($city) . "', p_country='" . web2db($country) . "'
+			WHERE p_id = $pax_id");  
+    */  
 	mysqli_query($mysqli_link, "UPDATE $table_pax
 			SET p_lname='" . web2db($lname) . "', p_fname='" . web2db($fname) . "', p_email='$email', p_tel='$phone', p_gender='$gender', p_street='" . web2db($street) . "', p_zip='$zip', p_city='" . web2db($city) . "', p_country='" . web2db($country) . "'
 			WHERE p_id = $pax_id")
 		or journalise($userId, "F", "Cannot modify contact, system error: " . mysqli_error($mysqli_link)) ;
+  
 	$sql = "UPDATE $table_flight 
-		SET f_type='$flight_type', f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "', f_reference='" . web2db($reference) . "', f_notes='" . web2db($notes) . "'
+		SET f_type='$flight_type', f_gift=$gift, f_pax_cnt=$pax_cnt, f_circuit = $circuit, f_date_1 = $date1, f_date_2 = $date2, f_schedule = '$schedule', f_description='" . web2db($comment) . "', f_reference='" . web2db($reference) . "', f_notes='" . web2db($notes) . "'
 		WHERE f_id = $flight_id" ;
+
+    //print("%%%Modify:$sql<br>");
+
 	if (!mysqli_query($mysqli_link, $sql))
 		if (mysqli_errno($mysqli_link) == 1062)
 			journalise($userId, "F", "***Impossible de modifier le vol, la reference est deja utilisee ou deux vols crees en meme temps***" . mysqli_error($mysqli_link)) ;
@@ -407,19 +430,32 @@ if (isset($flight_id) and $flight_id != 0) {
 
 <div id="menuContact" class="tab-pane fade <?=$contact_active?>">
 
-<form action="flight_create.php" method="post" autocomplete="off">
+<form action="<?=$_SERVER['PHP_SELF']?>" method="post" autocomplete="off">
 
 <div class="row">
 	<div class="form-group col-xs-3 col-sm-2">
-		<label class="radio control-label">Type de vol</label>
+		<label class="radio control-label">Type de vol:</label>
+		<div class="radio">
+            <select class="form-control" id="idFlightTypeSelect" name="selectedFlightType" onchange="flightTypeChanged(<?=$flight_id?> , <?=$row_flight['f_gift']?>);">
+                <option value="decouverte">Découverte</option>
+                <option value="initiation">Initiation</option>
+                <option value="bon">Bon Valeur</option>
+                <option value="dhf">DHF</option>
+           </select>
+        </div>
+		<div class="radio">
+			<label><input type="checkbox" name="gift" id="idgift" onchange="giftChanged(<?=$flight_id?>);">&nbsp;Bon Valeur</label>
+		</div>
+<!--
 		<div class="radio">
 			<label><input type="radio" name="discovery_flight">découverte</label>
 		</div>
 		<div class="radio">
 			<label><input type="radio" name="initiation_flight">initiation</label>
 		</div>
+        -->
 	</div> <!-- form-group flight type -->
-	<div class="form-group col-xs-6 col-sm-2"">
+	<div class="form-group col-xs-6 col-sm-2">
 		<label class="control-label" for="circuitSelect">Circuit:</label>
 			<select class="form-control" id="circuitSelect" name="selectedCircuit">
 <?php
@@ -458,6 +494,13 @@ if (isset($flight_id) and $flight_id != 0) {
 		<input type="number" min="1" max="3" class="form-control" name="pax_cnt" value="1">
 	</div> <!-- form-group pax count -->
 
+</div><!-- row -->
+
+<div class="row">
+	<div class="form-group col-xs-12 col-sm-6">
+		<label for="reference">Référence (V-INIT-239999, IF-239999, ...) :</label>
+		<input type="text" class="form-control" name="reference" id="idreference">
+    </div><!-- form-group -->
 </div><!-- row -->
 
 <div class="row">
@@ -552,13 +595,6 @@ if ($flight_id == '') {
 	<div class="form-group col-xs-12">
 		<label for="notes">Notes club:</label>
 		<textarea class="form-control" rows="5" name="notes"></textarea>
-	</div><!-- form-group -->
-</div><!-- row -->
-
-<div class="row">
-	<div class="form-group col-xs-6 col-sm-2">
-		<label for="reference">Référence (V-INIT-239999, IF-239999, ...) :</label>
-		<input type="text" class="form-control" name="reference">
 	</div><!-- form-group -->
 </div><!-- row -->
 
@@ -844,7 +880,62 @@ while ($row = mysqli_fetch_array($result))
 </div> <!-- tab-content-->
 
 <script>
+function giftChanged(flight_id) {
+    var aGiftInput=document.getElementById("idgift");
+    var aGift=aGiftInput.checked;
+    var aReferenceInput=document.getElementById("idreference");
+    var aPreviousReference=aReferenceInput.value;
+    var aReference=aPreviousReference;
+    if(aPreviousReference.indexOf("V-")==0) {
+        if(!aGift) {
+            aReference=aPreviousReference.substr(2);
+            aReferenceInput.value=aReference;
+        }
+    }
+    else {
+        if(aGift) {
+            aReference="V-"+aPreviousReference;
+            aReferenceInput.value=aReference;
+        }
+    }
+}
 
+function flightTypeChanged(flight_id, gift) {
+    var aReferenceInput=document.getElementById("idreference");
+    var aPreviousReference=aReferenceInput.value;
+    var aFlightTypeInput=document.getElementById("idFlightTypeSelect");
+    var aType="";
+    for (var i = 0; i < aFlightTypeInput.length; i++) {
+    	var aFlightTypeOption=aFlightTypeInput[i];
+    	if(aFlightTypeOption.selected==true) {
+    	    aType=aFlightTypeOption.value;
+            break;
+    	}
+    }
+    var newReference=flight_id;
+    if(aType=="decouverte") {
+        newReference="IF-"+newReference;
+        if(gift==1) {
+            newReference="V-"+newReference;
+        }
+    }
+    else if(aType == "initiation") {
+        newReference="INIT-"+newReference;
+        if(gift==1) {
+            newReference="V-"+newReference;           
+        }
+    }
+    else if (aType=="bon") {
+        newReference="V-BON-"+newReference;
+    }
+    else if(aType=="dhf") {
+        newReference="DHF-"+newReference;
+    }
+    if (confirm("Confirmer la nouvelle reference "+ newReference + " à la place de "+ aPreviousReference+".\nVoulez-vous vraiment introduire cette reference?")) {
+        aReferenceInput.value=newReference;
+		return ;
+	}
+}
 function submitForm(id) {
 	document.getElementById(id).submit() ;
 }
@@ -852,9 +943,39 @@ function submitForm(id) {
 function setValue(name, value) {
 	document.getElementsByName(name)[0].value = value.replace(/<br\s*[\/]?>/gi, "\n") ;
 }
-
-document.getElementsByName('discovery_flight')[0].checked = ('<?=$row_flight['f_type']?>' == 'D') ;
-document.getElementsByName('initiation_flight')[0].checked = ('<?=$row_flight['f_type']?>' == 'I') ;
+//FlyType initialization
+var aFlightType='<?=$row_flight['f_type']?>';
+var aFlightTypeInput=document.getElementById("idFlightTypeSelect");
+// Vol DHF
+var aReference='<?=$row_flight['f_reference']?>';
+if(aFlightType=="D" && aReference.indexOf("DHF-")==0) {
+    aFlightType="DHF";
+}
+for (var i = 0; i < aFlightTypeInput.length; i++) {
+	var aFlightTypeOption=aFlightTypeInput[i];
+	if(aFlightTypeOption.value=="initiation" && aFlightType=="I") {
+        var aFlightTypeInput=document.getElementById("idFlightTypeSelect");
+		aFlightTypeOption.selected=true;
+	}
+	else if(aFlightTypeOption.value=="decouverte" && aFlightType=="D") {
+		aFlightTypeOption.selected=true;
+	}
+	else if(aFlightTypeOption.value=="bon" && aFlightType=="B") {
+		aFlightTypeOption.selected=true;
+	}
+	else if(aFlightTypeOption.value=="dhf" && aFlightType=="DHF") {
+		aFlightTypeOption.selected=true;
+	}
+	else {
+		aFlightTypeOption.selected=false;
+	}
+ }
+ 
+ // Gift initialization
+var aGiftInput=document.getElementById("idgift");
+aGiftInput.checked=<?=$row_flight['f_gift']?>;
+//document.getElementsByName('discovery_flight')[0].checked = ('<?=$row_flight['f_type']?>' == 'D') ;
+//document.getElementsByName('initiation_flight')[0].checked = ('<?=$row_flight['f_type']?>' == 'I') ;
 <?php
 // Some fields do not exist when modifying a flight
 if ($flight_id == '') {

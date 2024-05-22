@@ -52,7 +52,7 @@ if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == "true") {
 } else {
 	$completed = "false" ;
 	$completed_filter = ' AND f_date_flown IS NULL' ;
-	$title = 'non terminés' ;
+	$title = 'prévus' ;
 }
 ?>
 

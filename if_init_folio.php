@@ -80,6 +80,18 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == "createfactureinit") {
     }
 }
 
+if (isset($_REQUEST['action']) and $_REQUEST['action'] == "createfacturedhf") {
+    $sinceDate=$_REQUEST['since'] ;
+    $references= $_REQUEST['references'] ;
+    $logbookids= $_REQUEST['logbookids'] ;
+    if(OF_createFactureDHF($references, $sinceDate, $logbookids)) {
+    	print("<h2 style=\"color: red;\"><b>Create Facture DHF References:$references: DONE</b></h2>");
+    }
+    else {
+	    print("<h2 style=\"color: red;\"><b>Error to create Facture DHF References:$references</b></h2>");
+    }
+}
+
 ?>
 
 <script>
@@ -101,6 +113,13 @@ function createFactureINITFunction(PHP_Self,theSince, theReferenceFlight, theDat
         "&logbookid=" + theLogbookID +
         "&montant=" + theMontant +
         "&flyid="+theFlightID;
+	 	window.location.href = encodeURI(aCommand);
+	}
+}
+
+function createFactureDHFFunction(PHP_Self,theSince, theReferences, theLogbookids) {
+	if (confirm("Confirmer que vous voulez crér une facture mensuelle pour les vols DHF  "+ theReferences + ", "+theLogbookids) == true) {			
+	 	var aCommand=PHP_Self+"?since="+theSince+"&action=createfacturedhf&references=" + theReferences+"&logbookids="+theLogbookids;
 	 	window.location.href = encodeURI(aCommand);
 	}
 }
@@ -315,35 +334,38 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
 	while ($row = mysqli_fetch_array($result)) {
         $invoiceRef=$row['f_invoice_ref'];
         $referenceFlight=$row['f_reference'];
-		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
-		$date=$row['f_date_flown'];
-		$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
-		$plane=$row['l_plane'];
-		$pilote=db2web($row['first_name'])." ".db2web($row['last_name']) ;
-		$montant=$row['prix'];
-		$montantTotal+=$montant;
-		$referencePaiement=db2web($row['fl_reference']);	
-		$referencePaiementOdoo=$row['fl_odoo_payment_id'];	
-		$pos = strpos(strtoupper($referencePaiement), "FACTURE DHF");
-        $flyid=$row['f_id'];
-        $logbookID=$row['l_id'];	
+		$pos = strpos(strtoupper($referenceFlight), "DHF-");
 		if($pos===false) {
-			$referenceOdoo="Créer facture IF";
-		}
-		else {
-			$referenceOdoo="DHF";
-		}			
-		print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td>");
-        //****************************************************************************
-        if($invoiceRef>0 || ($alreadyInvoicedDateString > $since)) {
-            // Invoice already created
-            print("<td class=\"logCell\">Déjà facturé<td>");
-        }
-        else {
-            print("<td class=\"logCell\"><a href=\"javascript:void(0);\" onclick=\"createFactureIFFunction('$_SERVER[PHP_SELF]', '$since', '$referenceFlight', '$date', '$logbookID', '$montant','$flyid')\">Créer Facture IF</a></td>");
-        }
-        print("</tr>");
-	}
+    		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
+    		$date=$row['f_date_flown'];
+    		$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
+    		$plane=$row['l_plane'];
+    		$pilote=db2web($row['first_name'])." ".db2web($row['last_name']) ;
+    		$montant=$row['prix'];
+    		$montantTotal+=$montant;
+    		$referencePaiement=db2web($row['fl_reference']);	
+    		$referencePaiementOdoo=$row['fl_odoo_payment_id'];	
+    		$pos = strpos(strtoupper($referencePaiement), "FACTURE DHF");
+            $flyid=$row['f_id'];
+            $logbookID=$row['l_id'];	
+    		if($pos===false) {
+    			$referenceOdoo="Créer facture IF";
+    		}
+    		else {
+    			$referenceOdoo="DHF";
+    		}			
+    		print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td>");
+            //****************************************************************************
+            if($invoiceRef>0 || ($alreadyInvoicedDateString > $since)) {
+                // Invoice already created
+                print("<td class=\"logCell\">Déjà facturé<td>");
+            }
+            else {
+                print("<td class=\"logCell\"><a href=\"javascript:void(0);\" onclick=\"createFactureIFFunction('$_SERVER[PHP_SELF]', '$since', '$referenceFlight', '$date', '$logbookID', '$montant','$flyid')\">Créer Facture IF</a></td>");
+            }
+            print("</tr>");
+    	}
+    }
 	$montantTotalText=number_format($montantTotal, 2, '.', ' ') ;
 	print("<tr><td class=\"logCell\"><b>Total</b></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"><b>$montantTotalText</b></td><td class=\"logCell\"></td></tr>");
 	
@@ -374,7 +396,18 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
 	$filterType = ' AND f_type ="D"' ;
 	$filter = ' AND f_date_flown IS NOT NULL' ;
 	$date_filter = " AND f_date_flown >= '" . $since . "' AND f_date_flown <= '" . $monthAfterString. "'";
-	
+	$result = mysqli_query($mysqli_link, "SELECT DISTINCT l_id, f_invoice_ref, l_plane, f_reference, f_date_flown, first_name, last_name, r_plane, f_id, fl_reference, fl_odoo_payment_id, sum(fl_amount) as prix 
+			FROM $table_flight AS f  
+			JOIN $table_person ON f.f_pilot = jom_id
+			JOIN $table_bookings AS b ON f.f_booking = b.r_id
+			JOIN $table_flights_ledger ON f_id = fl_flight
+			JOIN $table_logbook AS l ON f.f_booking = l.l_booking
+			WHERE true $filterType $filter $date_filter 
+			GROUP BY f_reference
+			ORDER BY f_date_flown") 
+			or journalise($userId, "F", "Impossible de lister les vols IF: " . mysqli_error($mysqli_link));
+    
+	/*
 	$result = mysqli_query($mysqli_link, "SELECT DISTINCT f_reference, f_invoice_ref, f_date_flown, first_name, last_name, r_plane, f_id, fl_reference, sum(fl_amount) as prix 
 			FROM $table_flight AS f  
 			JOIN $table_person ON f.f_pilot = jom_id
@@ -384,10 +417,25 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
 			GROUP BY f_reference
 			ORDER BY f_date_flown") 
 			or journalise($userId, "F", "Impossible de lister les vols IF: " . mysqli_error($mysqli_link));
-
+*/
 	$montantTotal=0.0;
+    $DHFCount=0;
+    $references="";
+    $logbookids="";
 	while ($row = mysqli_fetch_array($result)) {
-			$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
+        $reference = $row['f_reference'];
+		$pos = strpos(strtoupper($reference), "DHF-");
+		if($pos!==false && $pos==0) {
+            $DHFCount++;
+            if($references!="") $references=$references.";";
+            $reference = $row['f_reference'];
+            $references=$references.$reference;
+            if($logbookids!="") $logbookids=$logbookids.";";
+            $logbookid=$row['l_id'];	
+            $logbookids=$logbookids.$logbookid;
+            print("logbookid=$logbookid logbookids=$logbookids<br>");
+        
+			$reference = db2web($reference)."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
 			$date=$row['f_date_flown'];
 			$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
 			$plane=$row['r_plane'];
@@ -397,20 +445,92 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
 			$referencePaiement=db2web($row['fl_reference']);	
 			$pos = strpos(strtoupper($referencePaiement), "FACTURE DHF");
 			if($pos===false) {
-				$referenceOdoo="Créer facture IF";
-			}
-			else {
 				$referenceOdoo="DHF";
 			}			
 			print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$reference</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilote</td><td class=\"logCell\">$montant</td><td class=\"logCell\">$referenceOdoo</td></tr>");
-	}
+	    }
+    }
 	$montantTotalText=number_format($montantTotal, 2, '.', ' ') ;
-	print("<tr><td class=\"logCell\"><b>Total</b></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"><b>$montantTotalText</b></td><td class=\"logCell\"></td></tr>");
+    $factureDHF="";
+    if($DHFCount>0) {
+        $factureDHF="<a href=\"javascript:void(0);\" onclick=\"createFactureDHFFunction('$_SERVER[PHP_SELF]', '$since', '$references','$logbookids')\">Créer Facture Mensuelle DHF</a>";
+    }
+	print("<tr><td class=\"logCell\"><b>Total</b></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"><b>$montantTotalText</b></td><td class=\"logCell\">$factureDHF</td></tr>");
 	
 	?>
 	
 </tbody>
 </table>
+
+<!-- Vols DTO -->
+<?php
+$year="2023";
+?>
+<!--<br>
+<p><b>Vols DTO effectués mois <?=$year?></b></p>
+<table class="logTable">
+<thead>
+<tr>
+<th class="logHeader">Date Vol</th>
+<th class="logHeader">Avion</th>
+<th class="logHeader">Pilote</th>
+<th class="logHeader">Minutes</th>
+<th class="logHeader">Instructor</th>
+</tr>
+</thead>
+<tbody>
+-->
+	<?php
+    /*
+    $studentMap=array();
+    //print("StudentMap1<br>");
+    // Found student
+	$result = mysqli_query($mysqli_link, "SELECT * FROM `jom_user_usergroup_map`
+        where group_id=16") 
+			or journalise($userId, "F", "Impossible de lister jom_user_usergroup_map: " . mysqli_error($mysqli_link));
+    while ($row = mysqli_fetch_array($result)) {
+        if($row['group_id']==16) {
+            $studentMap[$row['user_id']]=16;
+            //print("StudentMap2<br>");
+        }
+    }
+    // add pilot who was student in 2023
+    $studentMap[429]=16;
+    $studentMap[338]=16;
+    $studentMap[397]=16;
+    $studentMap[410]=16;
+    $studentMap[317]=16;
+    
+	//WHERE pr_role = 'C'$deleted_filter $completed_filter $other_filter 
+	//print("Filter=".$other_filter.",/br>");
+	
+	$result = mysqli_query($mysqli_link, "SELECT * FROM `rapcs_logbook`
+        where l_start like '2023%'") 
+			or journalise($userId, "F", "Impossible de lister les vols DTO: " . mysqli_error($mysqli_link));
+
+	$montantTotal=0.0;
+    $nbrDC=0;
+    $totalMinutes=0;
+	while ($row = mysqli_fetch_array($result)) {
+        $pilot=$row['l_pilot'];
+        if (array_key_exists($pilot, $studentMap)) {
+             $nbrDC=$nbrDC+1;
+             $instructeur=$row['l_instructor'];
+             $minutes=60*($row['l_end_hour']-$row['l_start_hour'])+$row['l_end_minute']-$row['l_start_minute'];
+             $totalMinutes+=$minutes;
+			 $date=$row['l_start'];
+			 $plane=$row['l_plane'];
+			 print("<tr><td class=\"logCell\">$date</td><td class=\"logCell\">$plane</td><td class=\"logCell\">$pilot</td><td class=\"logCell\">$minutes</td><td class=\"logCell\">$instructeur</td></tr>");
+        }
+	}
+	$montantTotalText=number_format($montantTotal, 2, '.', ' ') ;
+	print("<tr><td class=\"logCell\"><b>Total</b></td><td class=\"logCell\">$nbrDC</td><td class=\"logCell\"></td><td class=\"logCell\"><b>$totalMinutes</b></td><td class=\"logCell\"></td></tr>");
+    */
+	?>
+<!---
+</tbody>
+</table>
+-->
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('if_init_folio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
