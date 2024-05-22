@@ -443,8 +443,8 @@ function init() {
 			{ path: 'mobile_ephemerides.php', duration: 20},
 			{ path: 'mobile_dept_board.php', duration: 10},
 			{ path: 'mobile_local_flights.php', duration: 10},
-			{ path: 'mobile_webcam.php?cam=0', duration: 20},
-			{ path: 'mobile_wx_map', duration: 5}
+		//	{ path: 'mobile_webcam.php?cam=0', duration: 20},
+			{ path: 'mobile_wx_map.php', duration: 5}
 		] ;
 		var thisPath = window.location.pathname.substring(window.location.pathname.lastIndexOf('/')+1) ; // Extract the script name
 		for (var i = 0; i < kioskURIs.length; i++) {
