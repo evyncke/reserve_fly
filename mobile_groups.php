@@ -47,6 +47,7 @@ $userIsAdmin = array_key_exists($joomla_admin_group, $joomla_groups)
     || array_key_exists($joomla_superuser_group, $joomla_groups) ;
 $userIsInstructor = array_key_exists($joomla_instructor_group, $joomla_groups) ;
 $userIsBoardMember = array_key_exists($joomla_board_group, $joomla_groups) ;
+$userIsEffectiveMember = array_key_exists($joomla_effectif_group, $joomla_groups) ;
 $userIsMechanic = array_key_exists($joomla_mechanic_group, $joomla_groups) ;
 $userIsStudent = array_key_exists($joomla_student_group, $joomla_groups) ;
 $userIsFlightPilot = array_key_exists($joomla_flight_pilot_group, $joomla_groups) || array_key_exists($joomla_flight_group, $joomla_groups);
@@ -80,8 +81,9 @@ if ($userIsStudent) print("<li>élève</li>") ;
 if ($userIsPilot) print("<li>pilote</li>") ;
 if ($userIsMechanic) print("<li>mécano</li>") ;
 if ($userIsInstructor) print("<li>instructeur</li>") ;
+if ($userIsEffectiveMember) print("<li>membre effectif (droit de vote lors des AG)</li>") ;
 if ($userIsAdmin) print("<li>gestionnaire-système, les options des menus en italique vous sont réservées</li>") ;
-if ($userIsBoardMember) print("<li>administrateur (membre du CA), les options des menus en italique vous sont réservées</li>") ;
+if ($userIsBoardMember) print("<li>administrateur (membre de l'OA), les options des menus en italique vous sont réservées</li>") ;
 ?>
 </ul>
 </p>
