@@ -157,6 +157,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><h6 class="dropdown-header class-primary">Réservé aux administrateurs/comptables</h6></li>
       <li><a class="dropdown-item" href="mobile_journal.php">Journal système</a></li>
       <li><a class="dropdown-item" href="gestionMembres.php">Gestion membres</a></li>
+      <li><a class="dropdown-item" href="mobile_members_map.php">Localisation de nos membres</a></li>
       <li><a class="dropdown-item" href="mobile_email_lists.php">Adresses emails des membres</a></li>
       <li><a class="dropdown-item" href="mobile_tilea.php">Taxe TILEA</a></li>
       <li><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></li>
@@ -271,6 +272,7 @@ if ($userId > 0) {
 ?>
             <li><a class="dropdown-item" href="mobile_local_flights.php">Vols proches</a></li>
             <li><a class="dropdown-item" href="mobile_metar.php">METAR</a></li>
+            <li><a class="dropdown-item" href="mobile_wx_map.php">Météo des environs</a></li>
             <li><a class="dropdown-item" href="mobile_dept_board.php?cam=0">Départs</a></li> 
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam Apron</a></li>
             <!--li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam Fuel</a></li-->
