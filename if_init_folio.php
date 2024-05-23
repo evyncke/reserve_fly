@@ -118,7 +118,7 @@ function createFactureINITFunction(PHP_Self,theSince, theReferenceFlight, theDat
 }
 
 function createFactureDHFFunction(PHP_Self,theSince, theReferences, theLogbookids) {
-	if (confirm("Confirmer que vous voulez crér une facture mensuelle pour les vols DHF  "+ theReferences + ", "+theLogbookids) == true) {			
+	if (confirm("Confirmer que vous voulez crér une facture mensuelle pour les vols DHF  "+ theReferences ) == true) {			
 	 	var aCommand=PHP_Self+"?since="+theSince+"&action=createfacturedhf&references=" + theReferences+"&logbookids="+theLogbookids;
 	 	window.location.href = encodeURI(aCommand);
 	}
@@ -433,7 +433,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
             if($logbookids!="") $logbookids=$logbookids.";";
             $logbookid=$row['l_id'];	
             $logbookids=$logbookids.$logbookid;
-            print("logbookid=$logbookid logbookids=$logbookids<br>");
+            //print("logbookid=$logbookid logbookids=$logbookids<br>");
         
 			$reference = db2web($reference)."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
 			$date=$row['f_date_flown'];
