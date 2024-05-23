@@ -159,6 +159,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><a class="dropdown-item" href="gestionMembres.php">Gestion membres</a></li>
       <li><a class="dropdown-item" href="mobile_members_map.php">Localisation de nos membres</a></li>
       <li><a class="dropdown-item" href="mobile_email_lists.php">Adresses emails des membres</a></li>
+      <li><a class="dropdown-item" href="mobile_members_list.php">Listes spécifiques des membres</a></li>
       <li><a class="dropdown-item" href="mobile_tilea.php">Taxe TILEA</a></li>
       <li><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></li>
     </ul>
