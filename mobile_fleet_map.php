@@ -25,7 +25,7 @@ if ($userId == 0 and !isset($_REQUEST['kiosk'])) {
 	exit ;
 }
 
-if ($userId != 62) journalise($userId, 'I', "Fleet map displayed") ;
+if ($userId != 62 and ! isset($_REQUEST['kiosk'])) journalise($userId, 'I', "Fleet map displayed") ;
 
 $latest = (isset($_REQUEST['latest'])) ? '?latest=y' : '' ;
 
