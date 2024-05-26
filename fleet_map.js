@@ -121,6 +121,7 @@ function insertTrackPoints (flights) {
 	var currentFeature ;
 	var legendDiv = document.getElementById('flightLegend') ;
 	var legendItems = [] ;
+	var northCorner = -90, southCorner = +90, westCorner = 180, eastCorner = -180 ; // The box containing all markers
 
 	flightFeatureCollection = [] ;
 	locationFeatureCollection = [] ;
@@ -133,7 +134,8 @@ function insertTrackPoints (flights) {
 		thisFlight = flights[flight] ;
 		planeColor = tailNumber2Color(flight) ;
 		if (legendDiv) {
-			legendItems.push('<i class="bi bi-airplane-fill" style="color:' + planeColor + ';"></i> ' + flight + ' / ' + thisFlight.first + ' UTC / ' + thisFlight.pilot + '<br/>') ;
+			legendItems.push('<tr><td><i class="bi bi-airplane-fill" style="color:' + planeColor + ';"></i> ' + thisFlight.plane + '</td><td>' +
+				thisFlight.last + ' UTC</td><td>' + thisFlight.first + ' UTC</td><td>' + thisFlight.pilot + '</td></tr>') ;
 		}
 		currentFeature = {type : 'Feature',
 			properties : {title : '',comment : '', color: ''},
@@ -150,11 +152,15 @@ function insertTrackPoints (flights) {
 		thisTrack = thisFlight.track ;
 		var lastLongitude, lastLatitude ;
 		for (trackPosition in thisTrack) {
-//			if (trackPosition < 10 || (Math.abs(lastLongitude-thisTrack[trackPosition][0]) <= 0.1 && Math.abs(lastLatitude-thisTrack[trackPosition][1]) <= 0.1)) {
 			if (trackPosition < 2 || (Math.abs(lastLongitude-thisTrack[trackPosition][0]) <= 0.3 && Math.abs(lastLatitude-thisTrack[trackPosition][1]) <= 0.3)) {
 				currentFeature.geometry.coordinates.push([parseFloat(thisTrack[trackPosition][0]), parseFloat(thisTrack[trackPosition][1])]) ;
 				lastLongitude = thisTrack[trackPosition][0] ;
 				lastLatitude = thisTrack[trackPosition][1] ;
+				// Let's update the box of all tracks
+				if (thisTrack[trackPosition][0] < westCorner) westCorner = thisTrack[trackPosition][0]  ;
+				if (thisTrack[trackPosition][0] > eastCorner) eastCorner = thisTrack[trackPosition][0]  ;
+				if (thisTrack[trackPosition][1] < southCorner) southCorner = thisTrack[trackPosition][1]  ;
+				if (thisTrack[trackPosition][1] > northCorner) northCorner = thisTrack[trackPosition][1]  ;
 			} else
 				console.log("Skipping position #" + trackPosition + '=<' + thisTrack[trackPosition][0] + ', ' + thisTrack[trackPosition][1] + '>, delta=<' + Math.abs(lastLongitude-thisTrack[trackPosition][0]) + ', ' + Math.abs(lastLatitude-thisTrack[trackPosition][1])) ;
 		}
@@ -188,7 +194,6 @@ function insertTrackPoints (flights) {
 	}
 
 	if (legendDiv) {
-		legendDiv.innerHTML = 'Plane / Last seen / First seen / Pilot<br/>' ;
 		var x = legendItems.sort(function (a,b) {
 				var firstA = a.match(/.*\/(.+)\/.*\/.*/)[1] ;
 				var firstB = b.match(/.*\/(.+)\/.*\/.*/)[1] ;
@@ -198,7 +203,11 @@ function insertTrackPoints (flights) {
 						return -1 ;
 				}
 			})
-		legendDiv.innerHTML += x.join('') ;
+ 		legendDiv.innerHTML = '<table class="table table-bordered table-striped">' +
+		 '<thead><tr><th>Plane</th><th>Last seen</th><th>First seen</th><th>Pilot</th></tr></thead>' +
+		 '<tbody>'  + x.join('') + '</tbody></table>';
+//		legendDiv.innerHTML += '</tbody></table>' ;
+
 		// TODO position the div
 	}
 		
@@ -210,7 +219,11 @@ function insertTrackPoints (flights) {
 			type : 'FeatureCollection',
 			features : locationFeatureCollection
 		}) ;	
-
+	// bound the map to fit all flights
+	map.fitBounds([[westCorner, southCorner],
+		[eastCorner, northCorner]],
+		{padding: {top: 20, bottom: 20, left: 20, right: 20}}
+	);
 }
 
 function getTrackPoints() {
@@ -310,7 +323,8 @@ function mapAddLayers() {
 	map.addLayer(flightLayer) ;
 	// Build the track points
 	getTrackPoints(ajaxURL) ;
-	setInterval(getTrackPoints, 10000) ;	
+	// Redraw every 5 seconds
+//	setInterval(getTrackPoints, 5 * 1000) ;	
 }
 
 function initFleet(longitudeArg, latitudeArg, mapBoxToken, ajaxURLArg) {

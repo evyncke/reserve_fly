@@ -304,7 +304,8 @@ function mapAddLayers() {
 	map.addLayer(flightLayer) ;
 	// Build the track points
 	getTrackPoints() ;
-	setInterval(getTrackPoints, 5000) ;	
+	// Refresh every second
+	setInterval(getTrackPoints, 1 * 1000) ;	
 }
 
 function drawBox() {
