@@ -47,7 +47,7 @@ require_once 'mobile_header5.php' ;
 <div class="row">
 <div id='mapContainer' style='position: relative;'>
 	<div id='map' style='width: 100%; height: 800px;'></div>
-	<div id='flightLegend' style='display: block; position: absolute; bottom: 30px; right: 5px; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.8;'></div>
+	<div id='flightLegend' style='display: block; position: relative; right: 5px; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.8;'></div>
 </div> <!-- mapContainer -->
 
 <div id='flightInfo' style='display: none; position: absolute; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.7;'></div>
