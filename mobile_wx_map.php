@@ -56,7 +56,7 @@ $header_postamble = '
 }
 </style>
 <script type="text/javascript" src="//www.google.com/jsapi"></script>
-<script async defer type="text/javascript" src="//maps.googleapis.com/maps/api/js?libraries=geometry,markers&key=AIzaSyAN-Kv1_frzFl4gYutO9zsMEI_goTs3h4Y"></script>
+<script async defer type="text/javascript" src="//maps.googleapis.com/maps/api/js?libraries=geometry,marker&key=AIzaSyAN-Kv1_frzFl4gYutO9zsMEI_goTs3h4Y"></script>
 <script language=javascript>
 var CenterLat = ' . $center_lat .' ;
 var CenterLng = ' . $center_long . ' ;

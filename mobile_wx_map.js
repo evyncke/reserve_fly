@@ -57,14 +57,13 @@ function loadWxMap() {
 
 	// Refresh all markers every 10 minutes
 	setInterval(refreshMarkers, 10 * 60 * 1000) ;
-    console.log('End of loadWxMap()') ;
 }
 
 function createMarker(pointLatLng, type, code, name, heading) {
 	var marker, furtherActions ;
 
 	switch (type) {
-                case 'APT': marker = airportMarker; break ;
+        case 'APT': marker = airportMarker; break ;
 		case 'IFR': marker = ifrMarker; break ;
 		case 'MFR': marker = mfrMarker; break ;
 		case 'UFR': marker = ufrMarker; break ;
@@ -102,10 +101,8 @@ function removeMetarMarkers() {
 }
 
 function updateMetarMarker(response) {
-    console.log("Starting updateMetarMarker() for " + response.station) ;
 	for (var i = 0; i < metarsMarkers.length; i++) {
 		if (metarsMarkers[i].title == response.station) {
-            console.log("Found it !!!!") ;
 			switch(response.condition) {
 				case 'IMC': metarsMarkers[i].setIcon(ifrMarker) ; break ;
 				case 'MMC': metarsMarkers[i].setIcon(mfrMarker) ; break ;
@@ -138,11 +135,9 @@ function updateMetarMarker(response) {
 				}) ;
 		}
 	}
-    console.log("Ending updateMetarMarker() for " + response.station) ;
 }
 
 function metarCallback(response) {
-console.log('metarCallback for station: ' + response.station + ', METAR: ' + response.METAR + ', error: ' + response.error) ;
 	metarsCache[response.station] = response ;
 	updateMetarMarker(response) ;
 }
@@ -227,7 +222,6 @@ function displayAirportsMarkers() {
                         if(XHR.status  == 200) {
                                 try {
                                         var response = eval('(' + XHR.responseText + ')') ;
-console.log(XHR.responseText) ;
                                 } catch(err) {
                                         return ;
                                 }
@@ -244,7 +238,6 @@ console.log(XHR.responseText) ;
 }
 
 function airportDisplayChanged() {
-console.log('airportDisplayChanged') ;
 	removeAirportsMarkers() ;
 	displayAirportsMarkers() ;
 }
