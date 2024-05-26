@@ -60,10 +60,11 @@ if ($group) {
     </thead>
     <tbody>
 <?php
-    $result = mysqli_query($mysqli_link, "SELECT last_name, first_name, email, cell_phone, CONCAT(g.title) AS titles 
+    $result = mysqli_query($mysqli_link, "SELECT last_name, first_name, p.email as email, cell_phone, CONCAT(g.title) AS titles 
         FROM $table_person p JOIN jom_user_usergroup_map m ON m.user_id = p.jom_id
             JOIN jom_usergroups g ON g.id = m.group_id
-        WHERE group_id = $group
+            JOIN jom_users u ON u.id = p.jom_id 
+        WHERE group_id = $group AND u.block = 0
         GROUP by p.jom_id
         ORDER BY p.last_name, p.first_name")
         or journalise($userId, "F", "Cannot read members: " . mysqli_error($mysli_link)) ;
@@ -97,15 +98,16 @@ if ($group) {
 } else { // display the form
 ?>
 </div><!-- mb-3-->
+
+<div class="row ms-3">
+<form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form">
 <div class="mb-3">
 <div class="form-check">
     <label class="form-check-label" for="titleId">Titre de la liste</label>
-    <input type="text" class="form-control" name="title" length="60" id="titleId" placeholder="Titre de la liste">
+    <input type="text" class="form-control" name="title" id="titleId" placeholder="Titre de la liste">
     <div id="titleHelp" class="form-text">Ce titre va apparaître en haut de la liste.</div>
 </div><!-- form-check-->
 </div><!-- mb-3-->
-<div class="row ms-3">
-<form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form">
 <div class="mb-3">
 <label for="groupId" class="form-label">Sélectionner les membre du groupe</label>
 <select id="groupId" class="col-form-select col-xs-1" name="group">

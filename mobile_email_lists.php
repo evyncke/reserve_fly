@@ -48,8 +48,11 @@ const copyToClipboard = async () => {
 <button type="button" class="btn btn-outline-info btn-sm" onclick="copyToClipboard();"><i class="bi bi-copy"></i> Copier</button>
 <div id="addresses" class="border border-info row m-3 text-secondary">
 <?php
-    $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person p JOIN jom_user_usergroup_map m ON m.user_id = p.jom_id
-        WHERE group_id = $group
+    $result = mysqli_query($mysqli_link, "SELECT * 
+        FROM $table_person p 
+            JOIN jom_user_usergroup_map m ON m.user_id = p.jom_id
+            JOIN jom_users u ON u.id = p.jom_id 
+        WHERE group_id = $group AND block = 0
         ORDER BY p.last_name, p.first_name")
         or journalise($userId, "F", "Cannot read members: " . mysqli_error($mysli_link)) ;
     $first = true ;
