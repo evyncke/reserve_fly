@@ -147,6 +147,8 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
     $code_499002=OF_GetAccountID(499002);
     $code_499003=OF_GetAccountID(499003);
     $code_400000=OF_GetAccountID(400000);
+    $edgerReference=OF_GetPaymentReference($theFlyID);
+    //print("edgerReference=$edgerReference<br>");
 	$partner_customer_id =  OF_GetPartnerID($theFlightReference,$theFlyID);
     $plane_analytic=OF_GetAnalyticAccountID($plane);
     $analytic_club_init_if=OF_GetAnalyticAccountID("club_init_if");
@@ -186,6 +188,11 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
 		)) ;
 	
 	// Invoice creation	
+    if($edgerReference!="" && strpos(strtoupper($flyReference), "V-")===false) {
+        // Fly IF Bancontact or Via Compte
+        $flyReference.=" (".$edgerReference.")";
+    }
+    
     $params =  array(array('partner_id' => intval($partner_customer_id), // 37: Reginster (Must be of INT type else Odoo does not accept)
                     'ref' => db2web($flyReference),
 					'payment_reference' => db2web($flyReference),
@@ -194,14 +201,14 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
                     'invoice_date_due' => $invoice_date_due,
                     'invoice_origin' => 'Carnets de routes',
                     'invoice_line_ids' => $invoice_lines)) ;
-	print("</br> 1 Création facture IF invoice_date_due=$invoice_date_due</br>");
+	//print("</br> 1 Création facture IF invoice_date_due=$invoice_date_due</br>");
 	//print("params=$params");
-	echo var_dump($params);
+	//echo var_dump($params);
     //$invoiceID=0;
     $invoiceID = $odooClient->Create('account.move', $params) ;
-    echo var_dump($invoiceID);
+    //echo var_dump($invoiceID);
     //print("<br>Facture IF pour " . implode(', ', $invoiceID) . "<br>") ;
-    print("<br>Facture IF pour " . $invoiceID[0] . "<br>") ;
+    //print("<br>Facture IF pour " . $invoiceID[0] . "<br>") ;
     OF_SetFlightInvoiceRef($theFlyID, $invoiceID[0]);
     
     //***************************************************************************
@@ -286,6 +293,7 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
     $code_499001=OF_GetAccountID(499001);
     $code_499003=OF_GetAccountID(499003);
     $code_400000=OF_GetAccountID(400000);
+    $edgerReference=OF_GetPaymentReference($theFlyID);
     $cost_FI = 50.;
 	$partner_customer_id =  OF_GetPartnerID($theFlightReference,$theFlyID);
     $plane_analytic=OF_GetAnalyticAccountID($plane);
@@ -337,6 +345,10 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
 		)) ;
 	
 	// Invoice creation	
+    if($edgerReference!="" && strpos(strtoupper($flyReference), "V-")===false) {
+        // Fly INIT Bancontact or Via Compte
+        $flyReference.=" (".$edgerReference.")";
+    }
     $params =  array(array('partner_id' => intval($partner_customer_id), // 37: Reginster (Must be of INT type else Odoo does not accept)
                     'ref' => db2web($flyReference),
 					'payment_reference' => db2web($flyReference),
@@ -700,7 +712,26 @@ function OF_GetPaymentOdooReference($theFlyID)
     }
     return 0;
 }
-    
+//============================================
+// Function: OF_GetPaymentReference
+// Purpose: Get the reference to a payment from the flight id
+//============================================
+ 
+function OF_GetPaymentReference($theFlyID)
+{
+    global $mysqli_link, $table_flights_ledger;
+    //print("<br>OF_GetPaymentReference:start<br>");
+    $result = mysqli_query($mysqli_link, "SELECT fl_reference FROM $table_flights_ledger WHERE fl_flight=$theFlyID")
+    		or journalise($userId, "E", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        $edgerReference=$row['fl_reference'];
+        //print("<br>OF_GetPaymentReference:odooReference=$$edgerReference<br>");
+        if($edgerReference!=NULL) {
+            return $edgerReference;
+        }
+    }
+    return "";
+}   
 //============================================
 // Function: OF_GetPartnerFromPayment
 // Purpose: Get the partner odoo ID from the odoo payment
