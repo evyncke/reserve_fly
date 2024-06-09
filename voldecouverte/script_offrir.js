@@ -13,15 +13,78 @@ function offrir_page_loaded() {
 	document.getElementById("id_valeur_bon_libre").oninput = function() {compute_tarifs("id_valeur_bon_libre")};
 
 	document.getElementById("id_valeur_bon_libre").onchange = function() {compute_tarifs("id_valeur_bon_libre")};
+    
+    document.getElementById("id_typeofgift").onchange = function() {
+        check_field("id_typeofgift");
+        check_submit();
+        compute_tarifs("id_typeofgift");
+    };
+    check_field("id_typeofgift");
+    document.getElementById("id_rue").onchange = function() {check_field("id_rue");check_submit();};
+    check_field("id_rue");
+    document.getElementById("id_firstname1").onchange = function() {check_field("id_firstname1");check_submit();};
+    check_field("id_firstname1");
+    document.getElementById("id_lastname1").onchange = function() {check_field("id_lastname1");check_submit();};
+    check_field("id_lastname1");
+    document.getElementById("id_contactphone").onchange = function() {check_field("id_contactphone");check_submit();};
+    check_field("id_contactphone");
+    document.getElementById("id_firstname2").onchange = function() {check_field("id_firstname2");check_submit();};
+    check_field("id_firstname2");
+     document.getElementById("id_lastname2").onchange = function() {check_field("id_lastname2");check_submit();};
+    check_field("id_lastname2");
+    document.getElementById("id_contactmail").onchange = function() {check_field("id_contactmail");check_submit();};
+    check_field("id_contactmail");
+    document.getElementById("id_boitelettre").onchange = function() {check_field("id_boitelettre");check_submit();};
+    check_field("id_boitelettre");
+    document.getElementById("id_ville").onchange = function() {check_field("id_ville");check_submit();};
+    check_field("id_ville");
+    document.getElementById("id_codepostal").onchange = function() {check_field("id_codepostal");check_submit();};
+    check_field("id_codepostal");
+    check_submit();
+    compute_tarifs("id_typeofgift");
 
- compute_tarifs("id_typeofgift");
-
+}
+//========================================================
+function check_field(theFieldId) {
+    var aText=document.getElementById(theFieldId).value;
+    if(aText=="") {
+        document.getElementById(theFieldId).style.backgroundColor = 'orange';
+        return false;
+    }
+    document.getElementById(theFieldId).style.backgroundColor = 'white';
+    return true;
+}
+//========================================================
+function check_fields() {
+    if(!check_field("id_typeofgift")) return false;
+    if(!check_field("id_rue")) return false;
+    if(!check_field("id_firstname1")) return false;
+    if(!check_field("id_lastname1")) return false;
+    if(!check_field("id_contactphone")) return false;
+    if(!check_field("id_firstname2")) return false;
+    if(!check_field("id_lastname2")) return false;
+    if(!check_field("id_contactmail")) return false;
+    if(!check_field("id_boitelettre")) return false;
+    if(!check_field("id_codepostal")) return false;
+    if(!check_field("id_ville")) return false;
+    return true;
+}
+//========================================================
+function check_submit() {
+    if(!check_fields()) {
+        document.getElementById("id_submit").disabled=true;
+        document.getElementById("id_pleaseWait").innerHTML  = "";
+        return false;
+    }
+    document.getElementById("id_submit").disabled=false;
+	document.getElementById("id_pleaseWait").innerHTML  = "";
+    return true;
 }
 //========================================================
 function submitFunction() {
 	//alert("The form was submitted. Press OK and wait.");
 	//document.write("<!DOCTYPE html><html><body><p>Please wait</p></body></html>");
-	    document.getElementById("id_pleaseWait").innerHTML  = "Please Wait. It can take one minute.";
+	document.getElementById("id_pleaseWait").innerHTML  = "Please Wait. It can take one minute.";
 }
 
 //========================================================

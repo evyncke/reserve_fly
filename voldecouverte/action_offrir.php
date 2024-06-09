@@ -129,6 +129,8 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$flight_type = 'D' ;
 	else if ($typeofgift == "vol_initiation") 
 		$flight_type = 'I' ; 
+	else if ($typeofgift == "bon_valeur") 
+		$flight_type = 'B' ; 
 	else 
 		$flight_type = '?' ;
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_street, p_zip, p_city, p_country)
@@ -164,7 +166,14 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		VALUES($flight_id, $pax_id, 'S')")
 		or journalise(0, "E", "Cannot add student role $role, system error: " . mysqli_error($mysqli_link)) ;
 	$prefix = 'V-'  ; // As it is a voucher
-	$type = ($flight_type == 'D') ? 'IF-' : 'INIT-' ;
+	$type = 'IF-';
+    if($flight_type == 'I')
+        $type='INIT-';
+    else if($flight_type == 'B')
+        $type='BON-';
+    else 
+        $type='IF-';
+    
 	$flight_reference = $prefix . $type . sprintf("%06d", $flight_id) ;
 	mysqli_query($mysqli_link, "UPDATE $table_flight 
 							SET f_reference='$flight_reference' 

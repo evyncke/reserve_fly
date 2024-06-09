@@ -7,8 +7,51 @@ function reservation_page_loaded() {
 
     document.getElementById("id_numberofpassagers").oninput = function() {compute_reservation("id_numberofpassagers")};
 
-     compute_reservation("id_typeoffligth");
-
+    document.getElementById("id_firstname1").onchange = function() {check_field("id_firstname1");check_submit();};
+    check_field("id_firstname1");
+    document.getElementById("id_lastname1").onchange = function() {check_field("id_lastname1");check_submit();};
+    check_field("id_lastname1");
+    document.getElementById("id_contactphone").onchange = function() {check_field("id_contactphone");check_submit();};
+    check_field("id_contactphone");
+    document.getElementById("id_contactmail").onchange = function() {check_field("id_contactmail");check_submit();};
+    check_field("id_contactmail");
+    document.getElementById("id_flightdate").onchange = function() {check_field("id_flightdate");check_submit();};
+    check_field("id_flightdate");
+    check_submit();
+    compute_reservation("id_typeofflight");
+}
+//========================================================
+function check_field(theFieldId) {
+    var aText=document.getElementById(theFieldId).value;
+    if(aText=="") {
+        document.getElementById(theFieldId).style.backgroundColor = 'orange';
+        return false;
+    }
+    document.getElementById(theFieldId).style.backgroundColor = 'white';
+    return true;
+}
+//========================================================
+function check_fields() {
+    if(!check_field("id_firstname1")) return false;
+    if(!check_field("id_lastname1")) return false;
+    if(!check_field("id_contactphone")) return false;
+    if(!check_field("id_contactmail")) return false;
+    var aTypeOfFlight=document.getElementById("id_typeofflight").value; 
+    if(aTypeOfFlight=="vol_decouverte")  {
+        if(!check_field("id_flightdate")) return false;
+    }
+    return true;
+}
+//========================================================
+function check_submit() {
+    if(!check_fields()) {
+        document.getElementById("id_submit").disabled=true;
+        document.getElementById("id_pleaseWait").innerHTML  = "";
+        return false;
+    }
+    document.getElementById("id_submit").disabled=false;
+	document.getElementById("id_pleaseWait").innerHTML  = "";
+    return true;
 }
 
 //========================================================
@@ -17,8 +60,6 @@ function submitFunction() {
 	//document.write("<!DOCTYPE html><html><body><p>Please wait</p></body></html>");
 	document.getElementById("id_pleaseWait").innerHTML  = "Please Wait. It can take one minute.";
 }
-
-//==============================================
 
 //==============================================
 
