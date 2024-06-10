@@ -427,7 +427,8 @@ function pay(reason, amount) {
 	document.getElementById('payment_amount').innerText = amount ;
 	// Should update to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
-	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " " + userLastName + "\n" + reason + " " + userLastName ;
+	var epcPurpose = '' ; // No clue what to put in this 4-char field
+	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + epcPurpose + "\n" + "\n" + reason + " " + userLastName + "\n";
 	document.getElementById('payment_qr_code').src = "qr-code.php?chs=200x200&&chl=" + encodeURI(epcURI) ;
 }
 
