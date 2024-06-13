@@ -55,7 +55,7 @@ function pilot($plane, $start, $end) {
 if ($latest) {
 	$sql = "SELECT *, last_seen as t_time, last_longitude as t_longitude, last_latitude as t_latitude
 		FROM $table_planes
-		WHERE ressource = 0 AND actif = 1" ;
+		WHERE ressource = 0 AND actif = 1 AND last_seen IS NOT NULL" ;
 } else {// SQL filters
 	$sql_filter  = array() ;
 	if ($plane) $sql_filters[] = "id = '$plane'" ;
