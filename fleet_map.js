@@ -16,8 +16,11 @@ var airportLayer = {
 		"text-field": "{title}",
 		"text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
 		"text-offset": [0, 0.6],
-		"text-anchor": "top-left",
+//		"text-anchor": "top-left",
+	        "text-variable-anchor": ["top-left", "top-right", "bottom-right", "bottom-left", "left"],
+		"text-justify": "auto",
 		"text-ignore-placement": true,
+		"icon-ignore-placement": true,
 	}
 } ;
 
@@ -56,8 +59,11 @@ var locationLayer = {
 		"text-field": "{title}",
 		"text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
 		"text-offset": [0, 0.6],
-		"text-anchor": "top-left",
+	        "text-variable-anchor": ["top-left", "top-right", "bottom-right", "bottom-left", "left"],
+		"text-justify": "auto",
 		"text-ignore-placement": true,
+		"icon-ignore-placement": true,
+		"icon-allow-overlap": true,
 	}
 } ;
 
@@ -206,9 +212,6 @@ function insertTrackPoints (flights) {
  		legendDiv.innerHTML = '<table class="table table-bordered table-striped">' +
 		 '<thead><tr><th>Plane</th><th>Last seen</th><th>First seen</th><th>Pilot</th></tr></thead>' +
 		 '<tbody>'  + x.join('') + '</tbody></table>';
-//		legendDiv.innerHTML += '</tbody></table>' ;
-
-		// TODO position the div
 	}
 		
 	map.getSource('flights').setData({
@@ -217,7 +220,7 @@ function insertTrackPoints (flights) {
 		}) ;		
 	map.getSource('locations').setData({
 			type : 'FeatureCollection',
-			features : locationFeatureCollection
+			features : locationFeatureCollection,
 		}) ;	
 	// bound the map to fit all flights
 	map.fitBounds([[westCorner, southCorner],
