@@ -27,7 +27,7 @@ include_once 'dbi.php' ;
 $icao24 = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['icao24'])) ;
 if ($icao24 == 'None') $icao24 = "" ;
 if (isset($_REQUEST['tail_number']))
-	$tail_number = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['tail_number'])) ;
+	$tail_number = mysqli_real_escape_string($mysqli_link, str_replace('-', '', trim($_REQUEST['tail_number']))) ;
 else
 	$tail_number = $icao24 ;
 $daytime = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['daytime'])) ;
