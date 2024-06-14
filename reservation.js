@@ -334,20 +334,20 @@ function displayMETAR() {
 					elem.innerHTML =  metar_response.error ;
 				} else {
 					elem.innerHTML = '<b>' +  metar_response.METAR + '</b>' ;
-					if (metar_response.temperature &&  metar_response.dew_point && (( metar_response.temperature -  metar_response.dew_point) <= 10))
-						elem.innerHTML += '<br/>Relative humidity: ' +
-							Math.round(100.0 - 5.0 * ( metar_response.temperature - metar_response.dew_point)) + '%' ;
-					if (metar_response.clouds_base) {
-						elem.innerHTML += '<br/>Theorical clouds base at ' +  metar_response.station + ': ' +  metar_response.clouds_base + ' ft' ;
+					if (userId == 62 && metar_response.temperature &&  metar_response.dew_point && (( metar_response.temperature -  metar_response.dew_point) <= 10))
+						elem.innerHTML += '<br/><i>Relative humidity: ' +
+							Math.round(100.0 - 5.0 * ( metar_response.temperature - metar_response.dew_point)) + '%</i>' ;
+					if (userId == 62 && metar_response.clouds_base) {
+						elem.innerHTML += '<br/><i>Theorical clouds base at ' +  metar_response.station + ': ' +  metar_response.clouds_base + ' ft</i>' ;
 					}
-					if (metar_response.density_altitude) {
-						elem.innerHTML += '<br/>Density altitude at ' +  metar_response.station + ': ' +  metar_response.density_altitude +
-							' ft, elevation: ' +  metar_response.elevation + ' ft';
+					if (userId == 62 && metar_response.density_altitude) {
+						elem.innerHTML += '<br/><i>Density altitude at ' +  metar_response.station + ': ' +  metar_response.density_altitude +
+							' ft, elevation: ' +  metar_response.elevation + ' ft</i>';
 						if ( metar_response.density_altitude >  metar_response.elevation + 1500)
-							elem.innerHTML += '<br/><span style="color: red; font-size: x-large;">Caution, high density altitude!!!</span>' ;
+							elem.innerHTML += '<br/><i><span style="color: red; font-size: x-large;">Caution, high density altitude!!!</span></i>' ;
 					}
-					if (metar_response.pressure_altitude) {
-						elem.innerHTML += '<br/>Pressure altitude at ' +  metar_response.station + ': ' +  metar_response.pressure_altitude + ' ft' ;
+					if (userId == 62 && metar_response.pressure_altitude) {
+						elem.innerHTML += '<br/><i>Pressure altitude at ' +  metar_response.station + ': ' +  metar_response.pressure_altitude + ' ft</i>' ;
 					}
 					if (metar_response.condition != null &&  metar_response.condition == 'VMC')
 						elem.style.backgroundColor =  'paleGreen' ;
