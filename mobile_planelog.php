@@ -310,12 +310,13 @@ $missingPilots = array() ;
 // Moreover, the MySQL server at OVH does not support timezone... I.e., everything must be done in PHP
 // I.e., the logging data must be converted into local time
 $result2 = mysqli_query($mysqli_link, "SELECT last_name, r_start, r_stop, r_type, r_id
-	FROM $table_bookings JOIN $table_person ON r_pilot = jom_id
+	FROM $table_bookings AS b JOIN $table_person ON b.r_pilot = jom_id
 	WHERE r_plane = '$plane' AND r_cancel_date IS NULL
 		AND '" . $previous_end_lt->format('Y-m-d H:i') . "' <= r_start
 		AND r_stop < SYSDATE()
 		AND r_start < '$monthAfterString'
-	ORDER by r_start ASC") or die("Erreur système à propos de l'accès aux réservations manquantes après: " . mysqli_error($mysqli_link));
+		AND NOT EXISTS (SELECT * FROM $table_logbook AS l WHERE b.r_id = l.l_booking)
+	ORDER by b.r_start ASC") or die("Erreur système à propos de l'accès aux réservations manquantes après: " . mysqli_error($mysqli_link));
 while ($row2 = mysqli_fetch_array($result2)) {
 	if ($row2['r_type'] == BOOKING_MAINTENANCE)
 		$missingPilots[] = 'Maintenance (' . substr($row2['r_start'], 0, 10) . ') #' . $row2['r_id'] ;
