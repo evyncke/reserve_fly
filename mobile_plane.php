@@ -85,7 +85,7 @@ function generateMaintenanceClass($entretien, $compteur) {
 	<tr><td>Carnet de routes  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"mobile_planelog.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-journal\"></i></a></td></tr>
 	<tr><td>Masse et centrage</i></td><td><a href=\"mobile_wnb.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-rulers\"></i></a></td></tr>\n") ;
 	if ($userIsAdmin or $userIsBoardMember)
-		print("<tr><td><i>Incidents en cours (en test, ne pas s'y fier)	</i></td><td><a href=\"mobile_incidents.php?plane=$plane\"><i class=\"bi bi-card-checklist\"></i></a></td></tr>\n") ;
+		print("<tr><td><i>Incidents en cours (en test, ne pas s'y fier)	</i></td><td><a href=\"mobile_incidents.php?plane=$plane\"><i class=\"bi bi-tools\"></i></a></td></tr>\n") ;
 ?>
 </table>
 </div><!-- col-->
