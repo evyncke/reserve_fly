@@ -37,7 +37,7 @@ require_once 'mobile_header5.php' ;
 <div class="container-fluid">
 
 <div class="page-header">
-<h3>Vols proches de l'aéroport ces <?=$local_delay?> dernières minutes</h3>
+<h2>Vols proches de l'aéroport ces <?=$local_delay?> dernières minutes</h2>
 </div> <!-- row -->
 
 <div class="row">
