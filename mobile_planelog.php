@@ -24,6 +24,7 @@ if ($userId == 0) {
 	exit ;
 }
 
+$header_postamble = '<script src="shareCodes.js"></script>' ;
 $body_attributes=' onload="initPlaneLog();init();" ' ;
 require_once 'mobile_header5.php' ;
 
@@ -63,9 +64,27 @@ function planeChanged(elem) {
 	window.location.href = '<?=$_SERVER['PHP_SELF']?>?plane=' + elem.value + '&since=<?=$_REQUEST['since']?>';
 }
 
+function findMember(a, m) {
+        for (let i = 0 ; i < a.length ; i++)
+                if (a[i].id == m)
+                        return a[i].name ;
+        return null ;
+}
+
 function initPlaneLog() {
 	var planeSelect = document.getElementById('planeSelect') ;
-	if (planeSelect) planeSelect.value = '<?=$plane?>' 
+	if (planeSelect) planeSelect.value = '<?=$plane?>' ;
+	// Convert all share codes into strings
+	var collection = document.getElementsByClassName("shareCodeClass") ;
+	for (let i = 0; i < collection.length ; i++) {
+			var spanElem = collection[i] ;
+			var member = spanElem.innerText ;
+			memberText = findMember(shareCodes, member) ;
+			if (memberText == null)
+					memberText = findMember(members, member) ;
+			if (memberText != null)
+					spanElem.innerText = ' (' + memberText + ')';
+	}
 }
 
 </script>
@@ -331,8 +350,8 @@ if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS') {
 </tfoot>
 </table>
 <br>
-<p><em>Sur base des donn&eacute;es entr&eacute;es apr&egrave;s les vols dans le
-carnet de route des avions. Heure affich&eacute;e en heure universelle.</em></p>
+<p><em>Sur base des données entrées après les vols dans le
+carnet de route des avions. Heure affichée en heure universelle.</em></p>
 </div><!-- container -->
 </body>
 </html>
