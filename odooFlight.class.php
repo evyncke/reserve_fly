@@ -209,7 +209,7 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
     //echo var_dump($invoiceID);
     //print("<br>Facture IF pour " . implode(', ', $invoiceID) . "<br>") ;
     //print("<br>Facture IF pour " . $invoiceID[0] . "<br>") ;
-    OF_SetFlightInvoiceRef($theFlyID, $invoiceID[0]);
+    OF_SetFlightInvoiceFromFlyID($theFlyID, $invoiceID[0]);
     
     //***************************************************************************
     // Creation une OD pour le transfert 499002 -> 400000 (Ou 499003 -> 400000)
@@ -364,7 +364,7 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
     //echo var_dump($invoiceID);
     //print("<br>Facture IF pour " . implode(', ', $invoiceID) . "<br>") ;
     //print("<br>Facture IF pour " . $invoiceID[0] . "<br>") ;
-    OF_SetFlightInvoiceRef($theFlyID, $invoiceID[0]);
+    OF_SetFlightInvoiceFromFlyID($theFlyID, $invoiceID[0]);
     
     //***************************************************************************
     // Creation une OD pour le transfert 499001 -> 400000 (Ou 499003 -> 400000)
@@ -513,11 +513,19 @@ function OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids) {
 	//print("</br> 1 Création facture DHF invoice_date_due=$invoice_date_due</br>");
 	//print("params=$params");
 	//echo var_dump($params);
+    
     $invoiceID = $odooClient->Create('account.move', $params) ;
+    
+    // Store the invoice reference into each fly
+    foreach ($referencesArray as $reference) {
+        print("OF_SetFlightInvoiceFromFlyReference($reference, invoiceID[0])<br>");
+        OF_SetFlightInvoiceFromFlyReference($reference, $invoiceID[0]);
+        //OF_SetFlightInvoiceFromFlyReference($reference, 1);
+    }
     //echo var_dump($invoiceID);
     //print("<br>Facture DHF pour " . implode(', ', $invoiceID) . "<br>") ;
     //print("<br>Facture DHF pour " . $invoiceID[0] . "<br>") ;
-    //OF_SetFlightInvoiceRef($theFlyID, $invoiceID[0]);
+    //OF_SetFlightInvoiceFromFlyID($theFlyID, $invoiceID[0]);
     
     return true;
 }
@@ -798,16 +806,33 @@ function OF_GetPartnerNameFromReference($theReference)
 }
 
 //============================================
-// Function: OF_SetFlightInvoiceRef
-// Purpose: Set the column f_invoice_ref in the table flight for a flightID
+// Function: OF_SetFlightInvoiceFromFlyID
+// Purpose: Set the column f_invoice_ref in the table flight for a flightID (2423456)
 //============================================
-function OF_SetFlightInvoiceRef($theFlightID,$theInvoiceID)
+function OF_SetFlightInvoiceFromFlyID($theFlightID,$theInvoiceID)
 {
     global $mysqli_link, $table_flights,$userId;
 	mysqli_query($mysqli_link, "UPDATE $table_flights SET f_invoice_ref=$theInvoiceID WHERE f_id=$theFlightID")
     or 
 		journalise($userId, "F", "Impossible de mettre à jour le flights_ledger: " . mysqli_error($mysqli_link)) ;	
-    //print("OF_SetFlightInvoiceRef theFlightID=$theFlightID,theInvoiceID=$theInvoiceID");
+    //print("OF_SetFlightInvoiceFromFlyID theFlightID=$theFlightID,theInvoiceID=$theInvoiceID");
+    return true;
+}
+
+//============================================
+// Function: OF_SetFlightInvoiceFromFlyReference
+// Purpose: Set the column f_invoice_ref in the table flight for a flight reference (IF-2423456)
+//============================================
+function OF_SetFlightInvoiceFromFlyReference($theFlightReference,$theInvoiceID)
+{
+    global $mysqli_link, $table_flights,$userId;
+    print("OF_SetFlightInvoiceFromFlyReference: UPDATE $table_flights SET f_invoice_ref=$theInvoiceID WHERE f_reference='$theFlightReference'<br>");
+
+	mysqli_query($mysqli_link, "UPDATE $table_flights SET f_invoice_ref=$theInvoiceID WHERE f_reference='$theFlightReference'")
+    or 
+		journalise($userId, "F", "Impossible de mettre à jour le flights_ledger: " . mysqli_error($mysqli_link)) ;	
+
+    //print("OF_SetFlightInvoiceFromFlyReference theFlightID=$theFlightID,theInvoiceID=$theInvoiceID");
     return true;
 }
     
