@@ -26,6 +26,7 @@ if ($userId == 0) {
 require_once 'mobile_header5.php' ;
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+$odooClient->debug = true ;
 
 if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) journalise($userId, "F", "This admin page is reserved to administrators") ;
 
@@ -189,7 +190,7 @@ while ($row = mysqli_fetch_array($result)) {
     if (isset($odoo_customers[$email]) or ($row['odoo_id'] != '' and isset($odoo_customers[$row['odoo_id']]))) {
         $odoo_customer = (isset($odoo_customers[$email])) ? $odoo_customers[$email] : $odoo_customers[$row['odoo_id']] ;
         $property_account_receivable_id = strtok($odoo_customer['property_account_receivable_id'][1], ' ') ;
-        $db_name = db2web("$row[last_name] $row[first_name]") ;
+        $name_from_db= db2web("$row[last_name] $row[first_name]") ;
         if ($account == "joomla") { // Master is Joomla
             $updates = array() ; 
             // TODO should also copy first_name and last_name in complete_name ?    
@@ -219,10 +220,10 @@ while ($row = mysqli_fetch_array($result)) {
                 $updates['phone'] = db2web($row['home_phone']) ;
             if ($odoo_customer['mobile'] != db2web($row['cell_phone']) and $row['cell_phone'] != '')
                 $updates['mobile'] = db2web($row['cell_phone']) ;
-            if ($odoo_customer['name'] != $db_name and $db_name != '')
-                $updates['name'] = $db_name ;
-            if ($odoo_customer['complete_name'] != $db_name and $db_name != '')
-                $updates['complete_name'] = $db_name ;
+            if ($odoo_customer['name'] != $name_from_db and $name_from_db != '')
+                $updates['name'] = $name_from_db ;
+            if ($odoo_customer['complete_name'] != $name_from_db and $name_from_db != '')
+                $updates['complete_name'] = $name_from_db ;
             // Code below is to copy from Ciel to Odoo
             // Disabled based on Dominique Collette's feedback over WhatsApp on 2023-12-27    
             //if ($row['ciel_code400'] != '' and $property_account_receivable_id  != $row['ciel_code400']) {
@@ -245,7 +246,8 @@ while ($row = mysqli_fetch_array($result)) {
             if (in_array($joomla_board_group, $groups)  and $row['block'] == 0)
                 $tags[] = $board_member_tag ;
             if (count(array_diff($tags, $odoo_customer['category_id'])) > 0 or count(array_diff($odoo_customer['category_id'], $tags)) > 0) // Compare arrays of Odoo and Ciel tags/groups
-                $updates['category_id'] = (count($tags) > 0) ? $tags : false ; // False is the only way to clean up existing values...
+                // cfr https://stackoverflow.com/questions/29643834/how-to-add-tags-category-id-while-creating-customer-res-partner-in-odoo and https://www.odoo.com/documentation/12.0/developer/reference/orm.html#openerp-models-relationals-format 
+                $updates['category_id'] = (count($tags) > 0) ? array(array(6, 0, $tags)) : false ; 
             if (count($updates) > 0) { // There were some changes, let's update the Odoo record
                 $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
                 $msg = '<span class="text-warning">Odoo updated</span> ' ;
