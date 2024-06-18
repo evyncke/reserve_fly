@@ -108,19 +108,25 @@ class OdooClient {
     # Updating existing $model rows whose ids are in $ids with mapping $mapping
     # Example:
     # $response = $odooClient->Update('res.partner', array(2186, 2058), array('property_account_receivable_id' => $account_id)) ;
+    #
+    # Many2Many requires an array of triplets whose first part is the action
+    # See https://www.odoo.com/documentation/12.0/developer/reference/orm.html#openerp-models-relationals-format 
+    # E.g.,  $mapping['category_id'] = array(array(6, 0, $tags))
     function Update($model, $ids, $mapping) {
         global $originUserId ;
 
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'write', array($ids, $mapping))) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
-            if ($this->debug)
-                die("<hr><b>Cannot write in Odoo model $model @ $this->host</b><br/>
+            $ids_string = implode(',', $ids) ;
+            if ($this->debug) {
+                die("<hr><b>Cannot update($model, [$ids_string]) in Odoo</b><br/>
                     Faultcode: " . htmlentities($response->faultCode()) . "<br/>
                     Reason: '" . nl2br($response->faultString()) . "'<hr>") ;
-            else
-                journalise($originUserId, "F", "Cannot write in Odoo model $model @ $this->host: " . 
+            } else
+                journalise($originUserId, "F", "Cannot update(model, [ids_string]) in Odoo: " .
                     htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
+                return null ;
         }
         return $response->value() ;
     }
@@ -133,6 +139,8 @@ class OdooClient {
     #    'internal_group' => 'asset',
     #    'code' => $code,
     #    'name' => "$code $fullName")) ;
+    # Many2Many requires an array of triplets whose first part is the action
+    # See https://www.odoo.com/documentation/12.0/developer/reference/orm.html#openerp-models-relationals-format 
     function Create($model, $mapping) {
         global $originUserId ;
 
