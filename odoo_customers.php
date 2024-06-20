@@ -18,11 +18,13 @@
 
 ob_start("ob_gzhandler");
 require_once "dbi.php" ;
+
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
 
+$body_attributes = 'onload="filterRows(); init(); "' ;
 require_once 'mobile_header5.php' ;
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
@@ -65,6 +67,52 @@ if ($account == 'joomla') {
 <?php
 } else { # ($account == 'joomla') 
 ?>
+
+<script language="javascript">
+
+function isDimmed(id) {
+    var elem = document.getElementById(id) ;
+    return elem.className.search("text-bg-secondary") >= 0 ;
+}
+
+function filterRows() {
+    if (userId != 62) return ;
+    var table = document.getElementById('memberTable') ;
+    var hidePilot = isDimmed('spanPilot'), hideStudent = isDimmed('spanStudent'), hideDesactivated = isDimmed('spanDesactivated')
+    var rows = table.rows ;
+    for (var i = 0; i < rows.length; i++) {
+        var td = rows[i].getElementsByTagName("TD")[0];
+        if (! td) continue ; // Some rows only have TH ;-)
+        rows[i].style.display = 'none' ;
+        if (td && td.innerText.search("Pilote") >= 0 && !hidePilot)
+            rows[i].style.display = '' ;
+        if (td && td.innerText.search("Élève") >= 0 && !hideStudent)
+            rows[i].style.display = '' ;
+        if (td && td.innerText.search("Désactivé") >= 0 && !hideDesactivated)
+            rows[i].style.display = '' ;
+    }
+}
+
+function filterClick(elem, bg) {
+    var currentClass = elem.className ;
+    if (currentClass.search("text-bg-secondary") < 0) {
+        elem.className = "badge rounded-pill text-bg-secondary" ;
+    } else {
+        elem.className = "badge rounded-pill text-bg-" + bg ;
+    }
+    // Now, let's do the actual filtering !
+    filterRows() ;
+}
+</script>
+
+<p>
+Filtre: 
+<span class="badge rounded-pill text-bg-warning" onClick="filterClick(this, 'warning');" id="spanPilot">Pilote</span>
+<span class="badge rounded-pill text-bg-success" onClick="filterClick(this, 'success');" id="spanStudent">Élève</span>
+<span class="badge rounded-pill text-bg-secondary" onClick="filterClick(this, 'info');" id="spanDesactivated">Désactivé</span>
+Cliquez sur un des badges pour activer/désactiver l'affichage.
+</p>
+
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="account" value="joomla">
 <button type="submit" class="btn btn-primary">Copier les infos de ciel/réservation vers Odoo</button>
@@ -167,7 +215,7 @@ $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS grou
     ORDER BY last_name, first_name") 
     or journalise($userId, "F", "Cannot list all members: " . mysqli_error($mysqli_link)) ;
 ?>
-<table class="table table-striped table-hover table-bordered">
+<table class="table table-striped table-hover table-bordered" id="memberTable">
     <thead>
         <tr><th colspan="3" class="text-center">Joomla (site réservations)</th><th class="text-center">Jointure</th><th colspan="5" class="text-center">Odoo</th></tr>
         <tr><th>Nom</th><th>Joomla ID</th><th>Compte Ciel</th><th class="text-center">Email</tH><th>Odoo ID</th><th>Compte Client</th><th class="text-end">Solde</th><th>Rue</th><th>Zip/City</th></tr>
@@ -277,6 +325,6 @@ while ($row = mysqli_fetch_array($result)) {
 ?>        
     </tbody>
 </table>
+
 </body>
 </html>
-
