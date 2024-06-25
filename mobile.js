@@ -44,16 +44,17 @@ function myDateGetHoursMinutes(d) {
 function displayMETAR(station) {
 	var XHR=new XMLHttpRequest();
 
-	document.getElementById('metarMessage').innerHTML = '<em>... fetching data over the Internet ...</em>' ;
+	document.getElementById('metarMessage').innerHTML = '<em style="font-size: 8wv;">... fetching data over the Internet ...</em>' ;
 	XHR.onreadystatechange = function() {
 		if(this.readyState  == 4) {
-			if(this.status  == 200) {
+			if(this.status  == 200 || this.status == 304) { // OK or not modified
 				var elem = document.getElementById('metarMessage') ;
 				try {
 					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
 				}
+				elem.style.fontSize = "3vw" ;
 				if (response.error != '') {
 					elem.innerHTML = response.error ;
 				} else {

@@ -23,12 +23,12 @@ require_once 'mobile_header5.php' ;
 
 $station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(strtoupper($_REQUEST['station'])) : $default_metar_station ;
 ?> 
-<div class="container">
+<div class="container-fluid">
 
 <h2><?=$station?> METAR</h2>
 
 <div class="row">
-	<div id="metarMessage" class="col-sm-10 col-md-8 bg-muted">... fetching data over the Internet ...</div> 
+	<div id="metarMessage" class="col-12 bg-muted">... fetching data over the Internet ...</div> 
 </div> <!-- row -->
 
 <div class="row d-sm-none d-md-block">

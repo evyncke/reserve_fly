@@ -30,10 +30,10 @@ $next_cam = ($cam+1 >= count($webcam_uris)) ? 0 : $cam + 1 ;
 require_once 'mobile_header5.php' ;
 
 ?> 
-<div class="container">
+<div class="container-fluid">
 <figure class="figure">
     <a href="<?=$webcam_uris[$cam]?>">
-    <img class="figure-img img-fluid" src="<?=$webcam_uris[$cam]?>" id="webcamImg">
+    <img class="figure-img img-fluid col-12" src="<?=$webcam_uris[$cam]?>" id="webcamImg">
     </a>
 </figure>
 </div> <!-- container-->
