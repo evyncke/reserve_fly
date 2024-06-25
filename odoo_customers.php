@@ -56,17 +56,10 @@ if ($create) {
 }
 ?>
 <h2>Liste de nos membres et leurs configurations Odoo@<?=$odoo_host?></h2>
-<p>Les informations venant du site réservation/Joomle et d'Odoo sont croisées par l'adresse email de nos membres actifs, 
+<p>Les informations venant du site réservation/Joomla et d'Odoo sont croisées par l'adresse email de nos membres actifs, 
     le compte Odoo est associé au compte du site réservation si ce compte Odoo n'était pas lié. La vue Odoo 
     est disponible: <a href="https://<?=$odoo_host?>/web?debug=1#action=286&model=res.partner&view_type=kanban&cids=1&menu_id=127">ici</a>.
 </p>
-<?php
-if ($account == 'joomla') {
-?>
-<p>Copie des données du site réservation vers Odoo... Cela inclut l'adresse (y compris longitude & latitude), les groupes, les numéros de téléphone, nom et prénom.</p>
-<?php
-} else { # ($account == 'joomla') 
-?>
 
 <script language="javascript">
 
@@ -78,7 +71,7 @@ function isDimmed(id) {
 function filterRows() {
     if (userId != 62) return ;
     var table = document.getElementById('memberTable') ;
-    var hidePilot = isDimmed('spanPilot'), hideStudent = isDimmed('spanStudent'), hideDesactivated = isDimmed('spanDesactivated')
+    var hidePilot = isDimmed('spanPilot'), hideStudent = isDimmed('spanStudent'), hideBlocked = isDimmed('spanBlocked'), hideDesactivated = isDimmed('spanDesactivated') ;
     var rows = table.rows ;
     for (var i = 0; i < rows.length; i++) {
         var td = rows[i].getElementsByTagName("TD")[0];
@@ -87,6 +80,8 @@ function filterRows() {
         if (td && td.innerText.search("Pilote") >= 0 && !hidePilot)
             rows[i].style.display = '' ;
         if (td && td.innerText.search("Élève") >= 0 && !hideStudent)
+            rows[i].style.display = '' ;
+        if (td && td.innerText.search("Bloqué") >= 0 && !hideBlocked)
             rows[i].style.display = '' ;
         if (td && td.innerText.search("Désactivé") >= 0 && !hideDesactivated)
             rows[i].style.display = '' ;
@@ -106,12 +101,20 @@ function filterClick(elem, bg) {
 </script>
 
 <p>
-Filtre: 
+Cliquez sur un des badges pour activer/désactiver l'affichage: 
 <span class="badge rounded-pill text-bg-warning" onClick="filterClick(this, 'warning');" id="spanPilot">Pilote</span>
 <span class="badge rounded-pill text-bg-success" onClick="filterClick(this, 'success');" id="spanStudent">Élève</span>
+<span class="badge rounded-pill text-bg-danger" onClick="filterClick(this, 'danger');" id="spanBlocked">Bloqué</span>
 <span class="badge rounded-pill text-bg-secondary" onClick="filterClick(this, 'info');" id="spanDesactivated">Désactivé</span>
-Cliquez sur un des badges pour activer/désactiver l'affichage.
 </p>
+
+<?php
+if ($account == 'joomla') {
+?>
+<p>Copie des données du site réservation vers Odoo... Cela inclut l'adresse (y compris longitude & latitude), les groupes, les numéros de téléphone, nom et prénom.</p>
+<?php
+} else { # ($account == 'joomla') 
+?>
 
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="account" value="joomla">
@@ -210,6 +213,7 @@ $board_member_tag = GetOdooCategory('Board Member') ;
 $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS groups 
     FROM $table_person AS p JOIN $table_users AS u ON u.id = p.jom_id
         LEFT JOIN $table_user_usergroup_map m ON u.id = m.user_id
+        LEFT JOIN $table_blocked b ON b.b_jom_id = p.jom_id
     WHERE jom_id IS NOT NULL
     GROUP BY jom_id
     ORDER BY last_name, first_name") 
@@ -217,23 +221,23 @@ $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS grou
 ?>
 <table class="table table-striped table-hover table-bordered" id="memberTable">
     <thead>
-        <tr><th colspan="3" class="text-center">Joomla (site réservations)</th><th class="text-center">Jointure</th><th colspan="5" class="text-center">Odoo</th></tr>
-        <tr><th>Nom</th><th>Joomla ID</th><th>Compte Ciel</th><th class="text-center">Email</tH><th>Odoo ID</th><th>Compte Client</th><th class="text-end">Solde</th><th>Rue</th><th>Zip/City</th></tr>
+        <tr><th colspan="2" class="text-center">Joomla (site réservations)</th><th class="text-center">Jointure</th><th colspan="4" class="text-center">Odoo</th></tr>
+        <tr><th>Nom</th><th>Joomla ID</th><th class="text-center">Email</tH><th>Odoo ID</th><th class="text-end">Solde</th><th>Rue</th><th>Zip/City</th></tr>
     </thead>
     <tbody>
 <?php
 while ($row = mysqli_fetch_array($result)) {
     $email = strtolower($row['email']) ;
     $active_msg = ($row['block'] == 0) ? '' : ' <span class="badge rounded-pill text-bg-info">Désactivé</span>' ;
+    $blocked_msg = ($row['b_reason'] == '') ? '' : ' <span class="badge rounded-pill text-bg-danger">Bloqué</span>' ;
     $groups_msg = '' ;
     $groups = explode(',', $row['groups']) ;
     if (in_array($joomla_pilot_group, $groups) and $row['block'] == 0)
         $groups_msg .= ' <span class="badge rounded-pill text-bg-warning">Pilote</span>' ;
     if (in_array($joomla_student_group, $groups) and $row['block'] == 0)
         $groups_msg .= ' <span class="badge rounded-pill text-bg-success">Élève</span>' ;
-    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "$active_msg$groups_msg</td>
+    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "$active_msg$blocked_msg$groups_msg</td>
         <td><a href=\"mobile_profile.php?displayed_id=$row[jom_id]\">$row[jom_id]</a></td>
-        <td>$row[ciel_code400]</td>
         <td class=\"text-center\"><a href=\"mailto:$row[email]\">$row[email]</a></td>") ;
     if (isset($odoo_customers[$email]) or ($row['odoo_id'] != '' and isset($odoo_customers[$row['odoo_id']]))) {
         $odoo_customer = (isset($odoo_customers[$email])) ? $odoo_customers[$email] : $odoo_customers[$row['odoo_id']] ;
@@ -311,7 +315,7 @@ while ($row = mysqli_fetch_array($result)) {
         }
         $total_due = number_format(-$odoo_customer['total_due'], 2, ",", ".") ;
         print("<td>$msg<a href=\"https://spa-aviation.odoo.com/web#id=$odoo_customer[id]&cids=1&menu_id=122&action=275&model=res.partner&view_type=form\">$odoo_customer[id]</a></td>
-            <td>$property_account_receivable_id</td><td " . 
+            <td " . 
             (($odoo_customer['total_due'] > 0) ? 'class="text-danger text-end"' : 'class="text-end"') .
              ">$total_due</td><td>$odoo_customer[street]<br/>$odoo_customer[street2]</td><td>$odoo_customer[country_code] $odoo_customer[zip] $odoo_customer[city]</td>") ;
     } else { // if (isset($odoo_customers[$email])) 
