@@ -721,7 +721,6 @@ function displayPlaneDetails(planeIndex) {
 	if (thisPlane.commentaire) span.innerHTML += '<i>' + thisPlane.commentaire + '</i><hr>' ;
 	if (thisPlane.ressource == 0) { // Engine index only valid for planes
 		span.innerHTML += 'Compteur relev&eacute; par ' + thisPlane.compteur_pilote_nom + ' en date du ' + thisPlane.compteur_pilote_date + ': ' + thisPlane.compteur_pilote + '<br/>' ;
-		span.innerHTML += 'Compteur relev&eacute; par le club en date du ' + thisPlane.compteur_date + ': ' + thisPlane.compteur  ;
 		if (thisPlane.actif == 2)
 			span.innerHTML += "<br/><span style=\"color: red\">\nCet avion est r&eacute;serv&eacute; aux instructeurs et &agrave; leurs &eacute;l&egrave;ves.\n</span>\n" ;
 	}
@@ -1973,10 +1972,7 @@ function refreshPlanningTable() {
 				if (userId > 0)
 					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="https://flightaware.com/live/flight/' + allPlanes[plane].id.toUpperCase() +
 						'" onclick="event.stopPropagation();" target="_blank"><img src="fa.ico" border="0" width="12" height="12" title="Dernier vol sur Flightaware"></a>' ;
-				if (allPlanes[plane].compteur_pilote_date > allPlanes[plane].compteur_date)
-					compteur = allPlanes[plane].compteur_pilote ;
-				else
-					compteur = allPlanes[plane].compteur ;
+				compteur = allPlanes[plane].compteur_pilote ;
 				planePlanningTable.rows[1 + plane].cells[0].innerHTML += '<br/>Compteur: ' + compteur + '<br/>Maint. &agrave;: ' + allPlanes[plane].entretien ;
 				if (allPlanes[plane].entretien <= compteur)
 					planePlanningTable.rows[1 + plane].cells[0].style.color = 'red' ;
