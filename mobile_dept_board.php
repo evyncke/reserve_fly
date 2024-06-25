@@ -117,7 +117,7 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
         LEFT JOIN $table_flights fl ON r_id = f_booking
         LEFT JOIN $table_pax_role pr ON fl.f_id = pr.pr_flight AND pr.pr_role = 'C'
         LEFT JOIN $table_pax pax ON pax.p_id = pr.pr_pax
-        WHERE  p.actif = 1 AND p.ressource = 0 AND r_cancel_date IS NULL AND DATE(r_start) = '$sql_date'
+        WHERE  p.actif = 1 AND p.ressource = 0 AND r_cancel_date IS NULL AND DATE(r_start) = '$sql_date' AND r_stop >= NOW()
         ORDER BY r_start, r_plane ASC LIMIT 0,20" ;
 	$result = mysqli_query($mysqli_link, $sql)
 		or die("Cannot retrieve bookings: " . mysqli_error($mysqli_link)) ;
@@ -144,7 +144,7 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
 		// Display time only
 		$time = substr($row['r_start'], 11, 2) .  substr($row['r_start'], 14, 2);  
         $plane = substr($row['r_plane'], 0, 2) . substr($row['r_plane'], 3, 3) ;
-        print('<div class="row mx-0 px-0 flex-nowrap">') ; // Set boostrap margin/padding left-right to 0 to align board characters with the black backgound div
+        print('<div class="row mx-0 my-4 px-0 flex-nowrap">') ; // Set boostrap margin/padding left-right to 0 to align board characters with the black backgound div
         boardPrint($time, 4, 1) ;
         boardPrint($plane, 5, 1) ;
         boardPrint($name, 10, 1, "yellow") ;
