@@ -1443,8 +1443,8 @@ function fillQRCode(communication, amount, theAfterString) {
 	document.getElementById('id_payment_communication'+theAfterString).innerText = communication ;
 	// Should update to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
-	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + communication + "\n" + communication ;
-	//var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + " " + userLastName + "\n" + reason + " " + userLastName ;
+	var epcPurpose = '' ; // No clue what to put in this 4-char field
+	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + epcPurpose + "\n" + "\n" + communication ;
 	document.getElementById('id_payment_qr_code'+theAfterString).src = "https://spa-aviation.be/resa/qr-code.php?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 	//document.getElementById('id_payment_qr_code'+theAfterString).src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 }
