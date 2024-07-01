@@ -119,6 +119,10 @@ print("<option value=\"TOUS\">Tous</option>
 <table class="table table-bordered table-hover table-sm">
 <thead>
 <tr>
+<?php
+if ($plane == 'TOUS') 
+	print("<th class=\"text-center border-bottom-0\">Plane</th>") ;
+?>
 <th class="text-center border-bottom-0">Date</th>
 <th class="text-center border-bottom-0">Pilot(s)</th>
 <th class="text-center border-bottom-0" colspan="2">Airports</th>
@@ -138,6 +142,10 @@ if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS')
 <th class="text-center border-bottom-0">Remark</th>
 </tr>
 <tr>
+<?php
+if ($plane == 'TOUS') 
+	print("<th class=\"text-center border-bottom-0\"></th>") ;
+?>
 <th class="text-center border-top-0">(dd/mm/yy)</th>
 <th class="text-center border-top-0"></th>
 <th class="text-center border-top-0">Origin</th>
@@ -163,18 +171,19 @@ if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS')
 </thead>
 <?php
 $plane_sql_filter = ($plane == 'TOUS') ? '' : " l_plane = '$plane' AND " ;
-$sql = "select date_format(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, l_start_hour, l_start_minute,
-	timediff(l_end, l_start) as duration,
-	l_flight_end_hour, l_flight_end_minute, l_flight_start_hour, l_flight_start_minute,
-	upper(l_from) as l_from, upper(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark, l_pax_count, l_crew_count, 
-	l_share_type, l_share_member,
-	l_booking, l_pilot, l_instructor
-	from $table_logbook l 
-	join $table_users p on l_pilot=p.id
-	left join $table_users i on l_instructor = i.id
-	where $plane_sql_filter
-		'$since' <= l_start and l_start < '$monthAfterString'
-	order by l_plane ASC, l_start asc" ;
+$sql = "SELECT l_plane, DATE_FORMAT(l_start, '%d/%m/%y') as date, l_start, l_end, l_end_hour, l_end_minute, l_start_hour, l_start_minute,
+			TIMEDIFF(l_end, l_start) AS duration,
+			l_flight_end_hour, l_flight_end_minute, l_flight_start_hour, l_flight_start_minute,
+			UPPER(l_from) as l_from, UPPER(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark, l_pax_count, l_crew_count, 
+			l_share_type, l_share_member,
+			l_booking, l_pilot, l_instructor
+	FROM $table_logbook l 
+		JOIN $table_users p ON l_pilot=p.id
+		LEFT JOIN $table_users i ON l_instructor = i.id
+	WHERE $plane_sql_filter
+		'$since' <= l_start AND l_start < '$monthAfterString'
+		AND l_start_hour != 0
+	ORDER BY l_plane ASC, l_start ASC" ;
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur système à propos de l'accès au carnet de routes: " . mysqli_error($mysqli_link)) ;
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
@@ -276,8 +285,10 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['l_flight_end_minute'] < 10)
 			$row['l_flight_end_minute'] = "0$row[l_flight_end_minute]" ;
 	if ($row['l_share_type'] != '') $row['l_remark'] = '<b>' . $row['l_share_type'] . '<span class="shareCodeClass">' . $row['l_share_member'] . '</span></b> ' . $row['l_remark'] ;
-	print("<tr>
-		<td class=\"text-center\">$row[date]</td>
+	print("<tr>") ;
+	if ($plane == 'TOUS')
+		print("<td class=\"text-center\">$row[l_plane]</td>") ;
+	print("<td class=\"text-center\">$row[date]</td>
 		<td class=\"text-center\">$pilot_name$instructor$bookingLink</td>
 		<td class=\"text-center\">$row[l_from]</td>
 		<td class=\"text-center\">$row[l_to]</td>
@@ -293,9 +304,12 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"text-center\">$row[l_flight_type]</td>
 		<td class=\"text-center\">$row[l_start_hour]:$row[l_start_minute]</td>
 		<td class=\"text-center\">$row[l_end_hour]:$row[l_end_minute]</td>\n") ;
-	if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS') {
+	if ($plane_details['compteur_vol'] != 0) {
 		print("<td class=\"text-center\">$row[l_flight_start_hour]:$row[l_flight_start_minute]</td>\n") ;
 		print("<td class=\"text-center\">$row[l_flight_end_hour]:$row[l_flight_end_minute]</td>\n") ;
+	} else 	if ($plane == 'TOUS') {
+		print("<td class=\"text-center\"></td>\n") ;
+		print("<td class=\"text-center\"></td>\n") ;
 	}
 	print("<td class=\"text-start\">$row[l_remark]</td>") ;
 	print("</tr>\n") ;
