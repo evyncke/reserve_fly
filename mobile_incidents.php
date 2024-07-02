@@ -25,7 +25,7 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
-$body_attributes = "onLoad=\"prefillDropdownMenus('plane', planes, 'none') ;\"";
+$body_attributes = "onLoad=\"prefillDropdownMenus('plane', planes, 'none');init()\"";
 require_once 'mobile_header5.php' ;
 require_once 'incident.class.php' ;
 
@@ -54,7 +54,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 ?>
 <p class="lead text-danger mb-5">Under development, do not use yet beside tests by developpers, fleet managers, FIs. Data is just dumb fantasies often invented by Eric.</p>
 
-<h2>Add a techlog entry for <?=$plane?></h2>
+<h3>Add a techlog entry</h3>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="POST" role="form" class="form-horizontal">
@@ -89,7 +89,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </form>
 </div><!-- row -->
 
-<h2>Tech log for <?=$plane?></h2>
+<h2>Tech log</h2>
 
 <div class="row">
     <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
@@ -110,7 +110,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 
 <?php
     if ($closed == NULL)
-        $incidents = new Incidents($plane, ['opened', 'accepted', 'inprogress']) ;
+        $incidents = new Incidents($plane, ['opened', 'accepted', 'inprogress', 'camook']) ;
     else
         $incidents = new Incidents($plane) ;
     foreach($incidents as $incident) {

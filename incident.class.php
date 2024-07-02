@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2023 Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ class IncidentEvent {
             switch($this->status) {
                 case 'opened': $this->statusFrench = 'Ouvert' ; break ;
                 case 'accepted': $this->statusFrench = 'Accepté' ; break ;
+                case 'camook': $this->statusFrench = 'CAMO: l\'avion peut voler' ; break ;
                 case 'inprogress': $this->statusFrench = 'En progrès' ; break ;
                 case 'closed': $this->statusFrench = 'Clôturé' ; break ;
                 case 'rejected': $this->statusFrench = 'Rejeté' ; break ;
@@ -171,6 +172,7 @@ class Incident {
             $this->firstStatus = strtolower($row['first_status']) ;
             switch(strtolower($this->firstStatus)) {
                 case 'opened': $this->firstStatusFrench = 'Ouvert' ; break ;
+                case 'camook': $this->firstStatusFrench = 'CAMO: l\'avion peut voler' ; break ;
                 case 'accepted': $this->firstStatusFrench = 'Accepté' ; break ;
                 case 'inprogress': $this->firstStatusFrench = 'En progrès' ; break ;
                 case 'closed': $this->firstStatusFrench = 'Clôturé' ; break ;
@@ -186,6 +188,7 @@ class Incident {
             $this->lastStatus = $row['last_status'] ;
             switch($this->lastStatus) {
                 case 'opened': $this->lastStatusFrench = 'Ouvert' ; break ;
+                case 'camook': $this->firstStatusFrench = 'CAMO: l\'avion peut voler' ; break ;
                 case 'accepted': $this->lastStatusFrench = 'Accepté' ; break ;
                 case 'inprogress': $this->lastStatusFrench = 'En progrès' ; break ;
                 case 'closed': $this->lastStatusFrench = 'Clôturé' ; break ;

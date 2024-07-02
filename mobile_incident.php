@@ -37,7 +37,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
     $event = new IncidentEvent() ;
     $event->incident = $incident ;
     switch ($_REQUEST['status']) {
-        case 'rejected':
+        case 'open':
+        case 'accepted':
+        case 'camook':
         case 'inprogress':
         case 'closed':
         case 'opened': $event->status = $_REQUEST['status'] ; break ;
@@ -64,6 +66,7 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 	<div class="col-sm-4 col-md-1">
         <select id="statusSelect" class="form-select" name="status">
             <option value="opened" <?=($incident->lastStatus == 'opened') ? 'selected':''?>>Opened</option>
+            <option value="camook" <?=($incident->lastStatus == 'camook') ? 'selected':''?>>CAMO: Plane can be flown</option>
             <option value="accepted" <?=($incident->lastStatus == 'accepted') ? 'selected':''?>>Accepted</option>
             <option value="inprogress" <?=($incident->lastStatus == 'inprogress') ? 'selected':''?>>In progress</option>
             <option value="closed" <?=($incident->lastStatus == 'closed') ? 'selected':''?>>Closed</option>
