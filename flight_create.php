@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2023 Eric Vyncke
+   Copyright 2014-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
    limitations under the License.
 
 */
+
 require_once 'flight_header.php' ;
 $modify = (isset($_REQUEST['modify']) and $_REQUEST['modify'] != '') ? TRUE : FALSE ;
 $delete = (isset($_REQUEST['delete']) and $_REQUEST['delete'] != '') ? TRUE : FALSE ;
@@ -606,7 +607,8 @@ if ($flight_id == '') {
 	if (isset($flight_id) and $flight_id != 0) {
 		print('<input type="hidden" name="flight_id" value="' . $flight_id . '">') ;
 		print('<button type="submit" class="btn btn-primary" name="modify" value="modify">Modifier la demande</button>') ;
-		print('<button type="submit" class="btn btn-danger" name="delete" value="delete">Annuler la demande</button>') ;
+		if ($row_flight['f_booking'] == '')
+			print('<button type="submit" class="btn btn-danger" name="delete" value="delete">Annuler la demande</button>') ;
 		$result = mysqli_query($mysqli_link, "SELECT * 
 				FROM $table_flight JOIN $table_pax_role ON pr_flight = f_id LEFT JOIN $table_pax ON pr_pax = p_id
 				WHERE f_id = $flight_id and pr_role = 'C'")
