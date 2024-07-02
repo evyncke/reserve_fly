@@ -58,6 +58,19 @@ $fmt = datefmt_create(
 ) ;
 $monthName = datefmt_format($fmt, $sinceDate) ;
 
+$validAirports = [] ;
+
+function isValidAirport($apt) {
+	global $validAirports, $mysqli_link, $userId, $table_airports ;
+
+	if (isset($validAirports[$apt])) return true ;
+	$result = mysqli_query($mysqli_link, "SELECT * FROM $table_airports WHERE a_code = '$apt'")
+		or journalise($userId, "F", "Cannot verify airport: " . mysqli_error($mysqli_link)) ;
+	if (mysqli_num_rows($result) == 0) return false ;
+	$validAirports[$apt] = true ;
+	return true ;
+}
+
 ?><script>
 
 function planeChanged(elem) {
@@ -246,6 +259,11 @@ while ($row = mysqli_fetch_array($result)) {
 	// Emit a red line if previous arrival apt and this departure airport do not match
 	if ($previous_airport and $previous_airport != $row['l_from'])
 		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Departure airport below($row[l_from]) does not match previous arrival airport ($previous_airport)... taxes are probably invalid.</td></tr>\n") ;
+	// Emit a red line if airports are unknown/invalid
+	if (!isValidAirport($row['l_from']))
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Departure airport below($row[l_from]) is not valid or is unknown... taxes are probably invalid.</td></tr>\n") ;
+	if (!isValidAirport($row['l_to']))
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Arrival airport below($row[l_to]) is not valid or is unknown... taxes are probably invalid.</td></tr>\n") ;
 	// Emit a red line if pilot and instructor are the same
 	if ($row['l_pilot'] == $row['l_instructor'])
 		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>The pilot is the instructor on the line below...</td></tr>\n") ;
