@@ -113,10 +113,12 @@ print_plane_table("R&eacute;servations OO-SPQ top-10 du dernier mois", $sql, ['P
 }
 
 if (strpos($actions, 'l') !== FALSE) {
-$sql = "select r_plane, count(l_id), min(l_start_hour), max(l_end_hour), max(l_end_hour * 60 + l_end_minute) - min(l_start_hour * 60 + l_start_minute) 
-	from $table_planes p left join $table_bookings on p.id = r_plane join $table_logbook on r_id = l_booking
-	where p.actif != 0 and p.ressource = 0 and r_cancel_date is null and r_start > date_sub(sysdate(), interval 1 month) and r_type != " . BOOKING_MAINTENANCE . "
-	group by r_plane" ;
+$sql = "SELECT r_plane, count(l_id), min(l_start_hour), max(l_end_hour), max(l_end_hour * 60 + l_end_minute) - min(l_start_hour * 60 + l_start_minute) 
+	FROM $table_planes p LEFT JOIN $table_bookings ON p.id = r_plane JOIN $table_logbook ON r_id = l_booking
+	WHERE p.actif != 0 and p.ressource = 0 AND r_cancel_date is null 
+		AND r_start > date_sub(sysdate(), interval 1 month) AND r_start < sysdate()
+		AND r_type != " . BOOKING_MAINTENANCE . "
+	GROUP BY l_plane" ;
 
 print_plane_table("Entr&eacute;es dans les carnets de routes informatiques du dernier mois", $sql, ['Avion', 'Nbr de vols', 'D&eacute;but', 'Fin', 'Minutes moteur']) ;
 }
