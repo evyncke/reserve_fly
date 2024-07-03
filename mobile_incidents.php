@@ -3,7 +3,7 @@
 // apparently because of +AND+ triggering a Web Application Firewall rule...
 // Passengers headset bolt on the jack is loose. Gave the bolt and ring to René V
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,15 +25,17 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
-$body_attributes = "onLoad=\"prefillDropdownMenus('plane', planes, 'none');init()\"";
-require_once 'mobile_header5.php' ;
-require_once 'incident.class.php' ;
 
 if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '') {
     $plane = strtoupper(trim($_REQUEST['plane'])) ;
 } else {
     $plane = NULL ;
 }
+
+$body_attributes = "onLoad=\"prefillDropdownMenus('plane', planes, '$plane');init()\"";
+require_once 'mobile_header5.php' ;
+require_once 'incident.class.php' ;
+
 
 if (isset($_REQUEST['closed']) and $_REQUEST['closed'] != '')
     $closed = " checked" ;
@@ -54,14 +56,15 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 ?>
 <p class="lead text-danger mb-5">Under development, do not use yet beside tests by developpers, fleet managers, FIs. Data is just dumb fantasies often invented by Eric.</p>
 
-<h3>Add a techlog entry</h3>
+<h3>Add an aircraft techlog entry</h3>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="POST" role="form" class="form-horizontal">
 <div class="row mb-3">
-	<label for="planeSelect" class="col-form-label col-sm-4 col-md-2">Plane:</label>
+	<label for="planeSelect" class="col-form-label col-sm-4 col-md-2">Aircraft:</label>
 	<div class="col-sm-4 col-md-1">
-        <select id="planeSelect" class="form-select" name="plane"></select>
+        <select id="planeSelect" class="form-select" name="plane">
+        </select>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
@@ -71,7 +74,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="importanceId" class="col-form-label col-sm-4 col-md-2">Importance/urgency:</label>
+	<label for="importanceId" class="col-form-label col-sm-4 col-md-2">Severity:</label>
 	<div class="col-sm-2 col-md-1">
         <select name="importance" id="importanceId" class="form-select">
             <option value="mineure">minor</option>
@@ -84,12 +87,14 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </div> <!-- row -->
 <div class="row mb-3">
         <button type="submit" name="action" value="create" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary" >
-            Add techlog entry
+            Add aircraft techlog entry
         </button></div>
 </form>
 </div><!-- row -->
 
-<h2>Tech log</h2>
+<hr>
+
+<h2>Aircraft Technical Log</h2>
 
 <div class="row">
     <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
@@ -104,7 +109,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <table class="table table-striped table-hover">
 <thead>
 <tr><th class="text-center" colspan="6">Report</th><th class="text-center border-start" colspan="4">Follow-up</th></tr>
-<tr><th>#Entry</th><th>Plane</th><th>Importance/Urgency</th><th>Date</th><th>Description</th><th>By</th><th class="border-start">Status</th><th>Action</th><th>Date</th><th>By</th></tr>
+<tr><th>#Entry</th><th>Aircraft</th><th>Severity</th><th>Date</th><th>Description</th><th>By</th><th class="border-start">Status</th><th>Action</th><th>Date</th><th>By</th></tr>
 </thead>
 <tbody class="table-group-divider">
 

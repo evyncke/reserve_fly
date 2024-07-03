@@ -237,7 +237,7 @@ if ($userId > 0) {
       if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
             <li><h6 class="dropdown-header">Réservé aux FIs & admins</h6></li>
-            <li><i><a class="dropdown-item" href="mobile_incidents.php">Tech Log</a></i></li>
+            <li><i><a class="dropdown-item" href="mobile_incidents.php">Aircraft Tech Log</a></i></li>
 <?php
       }
 ?>

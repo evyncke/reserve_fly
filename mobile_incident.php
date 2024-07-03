@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -54,9 +54,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
 <?php
 if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 ?>
-<h2>Add a new entry in the tech log</h2>
+<h2>Change state of an aircraft technical log entry</h2>
 
-<p class="lead">This function is only availanle to fleet managers, mechanics, and FIs.</p>
+<p class="lead">This function is only available to fleet managers, CAMO, mechanics, and FIs.</p>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
@@ -90,7 +90,7 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 <?php
 } // if ($userIsBoardMember or $userIsInstructor or $userIsMechanic)
 ?>
-<h2>History of tech long entry#<?=$incident_id?> (<?=$incident->plane?>)</h2>
+<h2>History of the aircraft technical log entry#<?=$incident_id?> (<?=$incident->plane?>)</h2>
 
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-7">
