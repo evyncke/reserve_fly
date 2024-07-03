@@ -1,5 +1,5 @@
 <?php
-// Failing on https://www.spa-aviation.be/resa/mobile_incidents.php?plane=OO-ALE&remark=Passengers+headset+bolt+on+the+jack+is+loose.+Gave+the+bolt+and+ring+to+Ren%C3%A9+V.&importance=mineure&action=create
+// Failing on https://www.spa-aviation.be/resa/mobile_incidents.php?plane=OO-ALE&remark=Passengers+headset+bolt+on+the+jack+is+loose.+Gave+the+bolt+and+ring+to+Ren%C3%A9+V.&severity=mineure&action=create
 // apparently because of +AND+ triggering a Web Application Firewall rule...
 // Passengers headset bolt on the jack is loose. Gave the bolt and ring to René V
 /*
@@ -45,7 +45,7 @@ else
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     $incident = new Incident() ;
     $incident->plane = strtoupper($_REQUEST['plane']) ;
-    $incident->importance = strtoupper($_REQUEST['importance']) ;
+    $incident->severity = strtoupper($_REQUEST['severity']) ;
     $incident->save() ;
     $event = new IncidentEvent() ;
     $event->incident = $incident ;
@@ -56,7 +56,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 ?>
 <p class="lead text-danger mb-5">Under development, do not use yet beside tests by developpers, fleet managers, FIs. Data is just dumb fantasies often invented by Eric.</p>
 
-<h3>Add an aircraft techlog entry</h3>
+<h3>Create an aircraft techlog entry</h3>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="POST" role="form" class="form-horizontal">
@@ -74,20 +74,20 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="importanceId" class="col-form-label col-sm-4 col-md-2">Severity:</label>
+	<label for="severityId" class="col-form-label col-sm-4 col-md-2">Severity:</label>
 	<div class="col-sm-2 col-md-1">
-        <select name="importance" id="importanceId" class="form-select">
-            <option value="mineure">minor</option>
-            <option value="majeure">major</option>
-            <option value="urgent">urgent</option>
-            <option value="U/S">U/S</option>
+        <select name="severity" id="severityId" class="form-select">
+            <option value="esthetic">Esthetic</option>
+            <option value="nuisance">Nuisance</option>
+            <option value="nohazard">No hazard to fly</option>
+            <option value="hazard">Hazard to fly</option>
             <option value="" selected>-- unknown --</option>
         </select>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
         <button type="submit" name="action" value="create" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary" >
-            Add aircraft techlog entry
+            Create aircraft techlog entry
         </button></div>
 </form>
 </div><!-- row -->
@@ -124,7 +124,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
                 <a href=\"mobile_incident.php?incident=$incident->id\" title=\"Edit incident\">$incident->id<i class=\"bi bi-pen-fill\"></i></a>
             </td>
             <td><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a></td>
-            <td>$incident->importance</td>
+            <td>$incident->severity</td>
             <td>$incident->firstDate&nbsp;&nbsp;<span class=\"badge bg-primary\">$incident->daysPending</span></td>   
             <td>$incident->firstText</td>   
             <td><b>$incident->firstLastName</b> $incident->firstFirstName</td>\n") ;

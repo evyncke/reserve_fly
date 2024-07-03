@@ -96,7 +96,7 @@ class IncidentEvents implements Iterator {
             JOIN $table_incident ON ih_incident = i_id
             JOIN $table_person ON ih_who = jom_id 
             WHERE i_id = $incidentId
-            ORDER BY ih_when DESC" ;
+            ORDER BY ih_when ASC" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur systeme a propos de l'access aux événements liés à l'incident $this->incidentId: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
@@ -133,8 +133,8 @@ class IncidentEvents implements Iterator {
 class Incident {
     public $id ;
     public $plane ;
-    public $importance ;
-    public $importanceFrench ;
+    public $severity ;
+    public $severityFrench ;
     public $firstId ;
     public $firstDate ;
     public $firstWho ;
@@ -157,12 +157,14 @@ class Incident {
         if ($row) {
             $this->id = $row['i_id'] ;
             $this->plane = strtoupper($row['i_plane']) ;
-            $this->importanceFrench = db2web(strtolower($row['i_importance'])) ;
-            switch(strtolower($row['i_importance'])) {
-                case 'mineure': $this->importance = 'minor' ; break ;
-                case 'majeure': $this->importance = 'major' ; break ;
-                case '': $this->importance = 'unknown' ; break ;
-                default: $this->importance = db2web($row['i_importance']) ;
+            $this->severityFrench = db2web(strtolower($row['i_severity'])) ;
+            switch(strtolower($row['i_severity'])) {
+                case 'esthetic': 
+                case 'nuisance': 
+                case 'nohazard': 
+                case 'hazard':
+                    $this->severity = $row['i_severity'] ; break ;
+                default: $this->severity = 'unknown/unsupported' ;
             }
             $this->firstId = $row['first_id'] ;
             $this->firstDate = $row['first_when'] ;
@@ -213,7 +215,8 @@ class Incident {
             JOIN $table_person AS lep ON lep.jom_id = le.ih_who
             WHERE i.i_id = $id AND
                 fe.ih_id = (SELECT MIN(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id) AND
-                le.ih_id = (SELECT MAX(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id)" ;
+                le.ih_id = (SELECT MAX(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id)
+            " ;
         $result = mysqli_query($mysqli_link, $sql)
             or  journalise($userId, "F", "Cannot retrieve indcident by id ($id): " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
@@ -224,16 +227,16 @@ class Incident {
     function save() {
         global $mysqli_link, $table_incident, $userId ;
 
-        $importance = mysqli_real_escape_string($mysqli_link, web2db($this->importance)) ;
+        $severity = mysqli_real_escape_string($mysqli_link, web2db($this->severity)) ;
         if ($this->id) {
             mysqli_query($mysqli_link, "UPDATE $table_incident
-                SET i_plane = '$this->plane', i_importance = '$importance'
+                SET i_plane = '$this->plane', i_severity = '$severity'
                     WHERE i_id=$this->id")
                 or journalise($userId, "F", "Cannot update $table_incident: " . mysqli_error($mysqli_link)) ;
             return $this->id ;
         } else {
-            mysqli_query($mysqli_link, "INSERT INTO $table_incident(i_plane, i_importance)
-                VALUES('$this->plane', '$importance')")
+            mysqli_query($mysqli_link, "INSERT INTO $table_incident(i_plane, i_severity)
+                VALUES('$this->plane', '$severity')")
                 or journalise($userId, "F", "Cannot insert into $table_incident: " . mysqli_error($mysqli_link)) ;
             $this->id = mysqli_insert_id($mysqli_link) ;
             return $this->id ;

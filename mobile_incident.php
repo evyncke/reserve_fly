@@ -51,10 +51,43 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
 ?>
 <p class="lead text-danger mb-5">Under development, do not use yet beside tests by developpers, fleet managers, FIs. Data is just dumb fantasies often invented by Eric.</p>
 
+
+<h2><?=$incident->plane?> Aircraft Technical Log entry#<?=$incident_id?></h2>
+
+<p>Severity: <?=$incident->severity?></p>
+
+<h3>History</h3>
+
+<div class="row">
+<div class="col-sm-12 col-md-12 col-lg-7">
+<div class="table-responsive">
+<table class="table table-striped table-hover">
+<thead>
+<tr><th>Date</th><th>Status</th><th>Description</th><th>By</th></tr>
+</thead>
+<tbody class="table-group-divider">
+
+<?php
+    $events = new IncidentEvents($incident_id) ;
+    foreach($events as $event) {
+        print("<tr>
+            <td>$event->date</td>
+            <td>$event->status</td>
+            <td>$event->text</td>
+            <td><b>$event->whoLastName</b> $event->whoFirstName</td>
+            </tr>\n") ;
+    }
+?>
+</tbody>
+</table>
+</div><!-- table responsive -->
+</div><!-- col -->
+</div><!-- row --> 
+
 <?php
 if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 ?>
-<h2>Change state of an aircraft technical log entry</h2>
+<h3>Change state of an aircraft technical log entry</h3>
 
 <p class="lead">This function is only available to fleet managers, CAMO, mechanics, and FIs.</p>
 
@@ -90,32 +123,6 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 <?php
 } // if ($userIsBoardMember or $userIsInstructor or $userIsMechanic)
 ?>
-<h2>History of the aircraft technical log entry#<?=$incident_id?> (<?=$incident->plane?>)</h2>
 
-<div class="row">
-<div class="col-sm-12 col-md-12 col-lg-7">
-<div class="table-responsive">
-<table class="table table-striped table-hover">
-<thead>
-<tr><th>Date</th><th>Status</th><th>Description</th><th>By</th></tr>
-</thead>
-<tbody class="table-group-divider">
-
-<?php
-    $events = new IncidentEvents($incident_id) ;
-    foreach($events as $event) {
-        print("<tr>
-            <td>$event->date</td>
-            <td>$event->status</td>
-            <td>$event->text</td>
-            <td><b>$event->whoLastName</b> $event->whoFirstName</td>
-            </tr>\n") ;
-    }
-?>
-</tbody>
-</table>
-</div><!-- table responsive -->
-</div><!-- col -->
-</div><!-- row --> 
 </body>
 </html>
