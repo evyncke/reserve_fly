@@ -97,7 +97,8 @@ if ($error_message != '') {
 						$flight_reference = $prefix . $type . sprintf("%03d", $customer_row['f_id']) ;
 					} else
 						$flight_reference = db2web($customer_row['f_reference']) ;
-					$booking['comment'] = $booking['comment'] . "\n (Vol $type_vol $flight_reference pour $booking[customerName])." ;
+					$booking['commentFlight'] = "Vol $type_vol $flight_reference pour $booking[customerName]" ;
+					$booking['flightId'] = $customer_row['f_id'] ;
 				} else
 					journalise($userId, "W", "Impossible de trouver le client pour la réservation $row[r_id].") ;
 			}
@@ -166,8 +167,8 @@ if ($error_message != '') {
 			// To allow asynchronous AJAX calls, we need to pass back an argument...
 			if ($_REQUEST['arg'] != '') $booking['arg'] = $_REQUEST['arg'] ;
 			// Be paranoid and prevent XSS
-			foreach($booking as $key => $value)
-				$booking[$key] = htmlspecialchars($value) ;
+			//foreach($booking as $key => $value)
+			//	$booking[$key] = htmlspecialchars($value) ;
 			$bookings[] = $booking ;
 		}
 	} else

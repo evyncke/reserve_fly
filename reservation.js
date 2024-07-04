@@ -768,6 +768,8 @@ function displayBookingDetails(id) {
 	}
 	if (booking.comment)
 		span.innerHTML += '<i>' + booking.comment + '</i><br/>';
+	if (booking.commentFlight)
+		span.innerHTML += '<i>[' + booking.commentFlight + ']</i><br/>';
 	if (booking.crew_wanted != 0)
 		span.innerHTML += '<span style="color: blue;">Pilote(s) supplémentaire(s) bienvenu(s).</span><br/>' ;
 	if (booking.pax_wanted != 0)
@@ -1612,8 +1614,6 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 			}
 			if (typeof booking.blocked_date !== 'undefined') { // TODO only for future bookings ?
 				thisCell.className = 'blocked' ;
-				console.log('This booking is blocked') ;
-				console.log(booking) ;
 			}
 			thisCell.onmouseenter = function () { displayBookingDetails(booking.id + '-' + booking.log_id) ; } ;
 			thisCell.onmouseleave = function () { clearBookingDetails() ; } ;
