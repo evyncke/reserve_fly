@@ -108,7 +108,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<tr><th class="text-center" colspan="6">Report</th><th class="text-center border-start" colspan="4">Follow-up</th></tr>
+<tr><th class="text-center" colspan="6">Report</th><th class="text-center border-start" colspan="4">Latest status</th></tr>
 <tr><th>#Entry</th><th>Aircraft</th><th>Severity</th><th>Date</th><th>Description</th><th>By</th><th class="border-start">Status</th><th>Action</th><th>Date</th><th>By</th></tr>
 </thead>
 <tbody class="table-group-divider">
@@ -123,7 +123,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
             <td>
                 <a href=\"mobile_incident.php?incident=$incident->id\" title=\"Edit incident\">$incident->id<i class=\"bi bi-pen-fill\"></i></a>
             </td>
-            <td><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a></td>
+            <td><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a><br/>$incident->planeType</td>
             <td>$incident->severity</td>
             <td>$incident->firstDate&nbsp;&nbsp;<span class=\"badge bg-primary\">$incident->daysPending</span></td>   
             <td>$incident->firstText</td>   

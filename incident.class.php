@@ -133,6 +133,7 @@ class IncidentEvents implements Iterator {
 class Incident {
     public $id ;
     public $plane ;
+    public $planeType ;
     public $severity ;
     public $severityFrench ;
     public $firstId ;
@@ -157,6 +158,7 @@ class Incident {
         if ($row) {
             $this->id = $row['i_id'] ;
             $this->plane = strtoupper($row['i_plane']) ;
+            $this->planeType = strtoupper($row['model']) ;
             $this->severityFrench = db2web(strtolower($row['i_severity'])) ;
             switch(strtolower($row['i_severity'])) {
                 case 'esthetic': 
@@ -203,12 +205,13 @@ class Incident {
     }
 
     function getById($id) {
-        global $userId, $mysqli_link, $table_incident, $table_incident_history, $table_person ;
+        global $userId, $mysqli_link, $table_incident, $table_incident_history, $table_person, $table_planes ;
 
         $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending,
                 fe.ih_id AS first_id, fe.ih_when AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
                 le.ih_id AS last_id, le.ih_when AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
             FROM $table_incident AS i
+            JOIN $table_planes as p ON p.id = i.i_plane
             JOIN $table_incident_history AS fe ON fe.ih_incident = i.i_id
             JOIN $table_person AS fep ON fep.jom_id = fe.ih_who
             JOIN $table_incident_history AS le ON le.ih_incident = i.i_id
@@ -246,12 +249,13 @@ class Incident {
 
 class Incidents implements Iterator {
     public $plane ;
+    public $planeType ;
     private $row ;
     private $count ;
     private $result ;
 
     function __construct ($plane = NULL, $status = NULL) {
-        global $mysqli_link, $table_incident_history, $table_incident, $table_person, $userId ;
+        global $mysqli_link, $table_incident_history, $table_incident, $table_person, $table_planes, $userId ;
 
         if ($plane == NULL) 
             $planeCondition = '' ;
@@ -266,6 +270,7 @@ class Incidents implements Iterator {
                 fe.ih_id AS first_id, DATE(fe.ih_when) AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
                 le.ih_id AS last_id, DATE(le.ih_when) AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
             FROM $table_incident AS i
+            JOIN $table_planes AS p ON i.i_plane = p.id
             JOIN $table_incident_history AS fe ON fe.ih_incident = i.i_id
             JOIN $table_person AS fep ON fep.jom_id = fe.ih_who
             JOIN $table_incident_history AS le ON le.ih_incident = i.i_id
