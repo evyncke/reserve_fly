@@ -1702,7 +1702,7 @@ function displayAgenda(row, item, displayDay, displayMonth, displayYear) {
 					nameDisplayed = true ;
 					firstColumn = i ;
 					widthInColumn = 1 ;
-					thisCell.innerHTML = (booking !== undefined) ? booking.name : 'loading...' ;
+					thisCell.innerHTML = (booking !== undefined) ? booking.name : 'working...' ;
 					thisCell.className = (booking !== undefined && item.fi == booking.instructorId) ? 'booked_dc' : 'booked' ; 
 				}
 				// As it is linked to a plane booking, neither adding nor modifying on this cell
