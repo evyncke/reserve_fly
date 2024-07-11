@@ -404,6 +404,7 @@ if ($response['error'] == '') {
 			$email_message  .
 			"</body></html>\r\n\r\n" ;
 		// Prepare an ICS file to be attached
+		// See also RFC 6047
 		require_once('ics_utils.php') ;
 		$content = '' ;
 		emit_header('') ;
