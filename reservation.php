@@ -16,8 +16,6 @@
    limitations under the License.
 
 */
-// TODO
-// - add warning when javascript is not enabled
 
 ob_start("ob_gzhandler");
 
@@ -347,19 +345,20 @@ if ($userId == 0) {
 } else {
 	// Check for profile settings
 	$profile_count = 0 ;
-	if ($row['email'] != '') $profile_count ++ ;
-	if ($row['first_name'] != '') $profile_count ++ ;
-	if ($row['last_name'] != '') $profile_count ++ ;
-	if ($row['home_phone'] != '') $profile_count ++ ;
-	if ($row['work_phone'] != '') $profile_count ++ ;
-	if ($row['cell_phone'] != '') $profile_count ++ ;
-	if ($row['city'] != '') $profile_count ++ ;
-	if ($row['country'] != '') $profile_count ++ ;
-	if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ;
-	if ($row['birthdate'] != '') $profile_count ++ ;
-	if ($profile_count != 10) print("<div class=\"validityBox\">Votre profil est compl&eacute;t&eacute; &agrave; " . round(100 * $profile_count / 10) . "% seulement, veuillez cliquer sur le bouton 'Mon Profil'.</div>") ;
+	$missings = array() ;
+	if ($row['email'] != '') $profile_count ++ ; else $missings[] = 'email' ;
+	if ($row['first_name'] != '') $profile_count ++ ; else $missings[] = 'prénom' ;
+	if ($row['last_name'] != '') $profile_count ++ ; else $missings[] = 'nom de famille' ;
+	if ($row['cell_phone'] != '') $profile_count ++ ; else $missings[] = 'n° GSM/mobile' ;
+	if ($row['city'] != '') $profile_count ++ ; else $missings[] = 'ville' ;
+	if ($row['country'] != '') $profile_count ++ ; else $missings[] = 'pays' ;
+	if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ; else $missings[] = 'genre' ;
+	if ($row['birthdate'] != '') $profile_count ++ ; else $missings[] = 'date de naissance' ;
+	if ($profile_count != 8) print("<div class=\"validityBox\">Votre profil est compl&eacute;t&eacute; &agrave; " . round(100 * $profile_count / 10) . "% seulement,
+		veuillez cliquer sur le bouton 'Mon Profil' pour mettre votre profil (" . implode(', ', $missings) . ") à jour.</div>") ;
 	if ($row['cell_phone'] == '') {
-		print("<div class=\"validityBox\">Il manque votre num&eacute;ro de GSM/mobile, impossible de r&eacute;server. Veuillez cliquer sur le bouton 'Mon Profil'.</div>") ;
+		print("<div class=\"validityBox\">Il manque votre num&eacute;ro de GSM/mobile, impossible de r&eacute;server.
+			Veuillez cliquer sur le bouton 'Mon Profil' pour mettre votre profil à jour.</div>") ;
 		$userNoFlight = true ;
 	}
 	print('<input type="button" style="background-color: green; color: white;" value="Mon profil" onclick="javascript:document.location.href=\'mobile_profile.php\';"> ') ;
