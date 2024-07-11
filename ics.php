@@ -35,7 +35,7 @@ if ($auth != md5($user_id . $shared_secret)) die("Wrong key for calendar#$user_i
 if (! is_numeric($user_id)) die("Wrong user id: $user_id") ;
 
 header('Content-Type: text/calendar; charset=UTF-8') ;
-header("Content-Disposition: inline; filename=rapcs-${user_id}.ics") ;
+header("Content-Disposition: inline; filename=rapcs-$user_id.ics") ;
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate') ;
 header('Pragma: no-cache') ;
