@@ -133,7 +133,6 @@ print("var default_pilot=$userId;\n");
   <h1 style="text-align: center;">Introduction vol</h1>
 
 <?php
-  
 //---------------------------------------------------------------------------
 // For FI (or when the trusted_booker cookie is set), display all existing reservations of today w/o any log entries
 //---------------------------------------------------------------------------
@@ -147,16 +146,18 @@ if ($userIsAdmin or $userIsInstructor) {
 			WHERE r_cancel_date IS NULL AND r_type != " . BOOKING_MAINTENANCE . " AND DATE(r_start) = CURRENT_DATE() AND pp.ressource = 0
 			ORDER BY r_start")
 			or die("Cannot get all today bookings: " . mysqli_error($mysqli_link)) ;
-	if ($result->num_rows == 0)
+	if ($result->num_rows == 0) {
 		print("<p>Aucune r&eacute;servation pr&eacute;vue ce jour.</p>\n") ;
+      }
 	else {
+        
 		// Table des reservations du jours
 		print("<center><h2>Choisir une réservation de ce jour</h2>
 		<p>Liste des réservations de ce jour (cliquez sur la date pour préremplir les champs ci-dessous).</br><em>Visible uniquement par les FIs et administrateurs.$trustedBookerMsg</em></p>
 		<table width=\"100%\">
 		<tr><th>Heure locale</th><th>Avion</th><th>Pilote</th><th>Remarque</th><th>Action</th></tr>\n") ;
 		while ($row = $result->fetch_assoc()) {
-			$pilot = db2web($row['pilot_name']) ;
+ 			$pilot = db2web($row['pilot_name']) ;
 			$instructor = db2web($row['instructor_name']) ;
 			$crew = ($instructor == '') ? $pilot : "$pilot/$instructor" ;
 			$comment = db2web($row['r_comment']) ;
@@ -590,6 +591,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	}
 }
 // QRCode apres enregistrement
+$epcString="";
 print("<center><span id=\"id_payment_after\">");
 print("<h3>Paiement du vol - Montant: <span id=\"id_payment_amount_after\"></span> &euro;</br>");
 print("Communication : \"<span id=\"id_payment_communication_after\"></span>\"</br>Compte : BE64 7320 3842 1852</h3>");
@@ -605,14 +607,21 @@ print("</span>");
 		$f_date_flown=$startDayTime;
 		$cdv_flightreferenceid=0;
 		if($cdv_flightreferenceid==0) {
-			//print("SELECT f_id, f_reference, f_type, f_date_flown FROM $table_flight WHERE f_reference = '$numeroVol';</br>") ;
-			$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference, f_type, f_date_flown FROM $table_flight WHERE f_reference = '$numeroVol';") or die("Impossible de retrouver le f_reference dans table_flight: " . mysqli_error($mysqli_link)) ;
+			//print("SELECT f_id, f_reference, f_type, f_date_flown , f_booking FROM $table_flight WHERE f_reference = '$numeroVol';</br>") ;
+			$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference, f_type, f_date_flown, f_booking  FROM $table_flight WHERE f_reference = '$numeroVol';") or die("Impossible de retrouver le f_reference dans table_flight: " . mysqli_error($mysqli_link)) ;
 			if ($flightResult->num_rows == 0) {
 				print("<script>alert('La reference du vol IF/INI $numeroVol n existe pas. Ce référence de vol IF/INI n\'est pas fermée.');</script>");
+    			print("<p style=\"color: red;\"><b>The flight $numeroVol is NOT correctly closed</b></p>") ;
 			}
 			else {
 				$flightRow=mysqli_fetch_array($flightResult);
 				$cdv_flightreferenceid=	$flightRow['f_id'];	
+                $associatedBookingID=$flightRow['f_booking'];
+                if($associatedBookingID != $bookingid) {
+    				print("<script>alert('La reference du vol IF/INI $numeroVol n est pas associé à cette réservation. Il faut corriger dans l outil de gestion des vols découvertes ou utiliser le numéro de vol correct. Cette référence de vol IF/INI n est pas fermée.');</script>");
+                    $cdv_flightreferenceid=0;
+        			print("<p style=\"color: red;\"><b>The flight $numeroVol is NOT correctly closed</b></p>") ;
+                }
 			}
 		}
 		if($cdv_flightreferenceid!=0) {
