@@ -134,6 +134,7 @@ class Incident {
     public $id ;
     public $plane ;
     public $planeType ;
+    public $logId ; 
     public $severity ;
     public $severityFrench ;
     public $firstId ;
@@ -159,6 +160,7 @@ class Incident {
             $this->id = $row['i_id'] ;
             $this->plane = strtoupper($row['i_plane']) ;
             $this->planeType = strtoupper($row['model']) ;
+            $this->logId = $row['i_log'] ;
             $this->severityFrench = db2web(strtolower($row['i_severity'])) ;
             switch(strtolower($row['i_severity'])) {
                 case 'esthetic': 
@@ -207,7 +209,7 @@ class Incident {
     function getById($id) {
         global $userId, $mysqli_link, $table_incident, $table_incident_history, $table_person, $table_planes ;
 
-        $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending,
+        $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending, i.i_log,
                 fe.ih_id AS first_id, fe.ih_when AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
                 le.ih_id AS last_id, le.ih_when AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
             FROM $table_incident AS i
@@ -221,7 +223,30 @@ class Incident {
                 le.ih_id = (SELECT MAX(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id)
             " ;
         $result = mysqli_query($mysqli_link, $sql)
-            or  journalise($userId, "F", "Cannot retrieve indcident by id ($id): " . mysqli_error($mysqli_link)) ;
+            or  journalise($userId, "F", "Cannot retrieve incident by id ($id): " . mysqli_error($mysqli_link)) ;
+        $row = mysqli_fetch_array($result) ;
+        if (! $row) return NULL ;
+        $this->__construct($row) ;
+    }
+
+    function getByLogId($logId) {
+        global $userId, $mysqli_link, $table_incident, $table_incident_history, $table_person, $table_planes ;
+
+        $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending, i.i_log,
+                fe.ih_id AS first_id, fe.ih_when AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
+                le.ih_id AS last_id, le.ih_when AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
+            FROM $table_incident AS i
+            JOIN $table_planes as p ON p.id = i.i_plane
+            JOIN $table_incident_history AS fe ON fe.ih_incident = i.i_id
+            JOIN $table_person AS fep ON fep.jom_id = fe.ih_who
+            JOIN $table_incident_history AS le ON le.ih_incident = i.i_id
+            JOIN $table_person AS lep ON lep.jom_id = le.ih_who
+            WHERE i.i_log = $logId AND
+                fe.ih_id = (SELECT MIN(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id) AND
+                le.ih_id = (SELECT MAX(h.ih_id) FROM $table_incident_history AS h WHERE h.ih_incident = i.i_id)
+            " ;
+        $result = mysqli_query($mysqli_link, $sql)
+            or  journalise($userId, "F", "Cannot retrieve incident by log id ($logId): " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
         if (! $row) return NULL ;
         $this->__construct($row) ;
@@ -231,15 +256,16 @@ class Incident {
         global $mysqli_link, $table_incident, $userId ;
 
         $severity = mysqli_real_escape_string($mysqli_link, web2db($this->severity)) ;
+        $logId = ($this->logId > 0) ? $this->logId : 'NULL' ;
         if ($this->id) {
             mysqli_query($mysqli_link, "UPDATE $table_incident
-                SET i_plane = '$this->plane', i_severity = '$severity'
-                    WHERE i_id=$this->id")
+                SET i_plane = '$this->plane', i_severity = '$severity', i_log = $logId
+                    WHERE i_id = $this->id")
                 or journalise($userId, "F", "Cannot update $table_incident: " . mysqli_error($mysqli_link)) ;
             return $this->id ;
         } else {
-            mysqli_query($mysqli_link, "INSERT INTO $table_incident(i_plane, i_severity)
-                VALUES('$this->plane', '$severity')")
+            mysqli_query($mysqli_link, "INSERT INTO $table_incident(i_plane, i_severity, i_log)
+                VALUES('$this->plane', '$severity', $logId)")
                 or journalise($userId, "F", "Cannot insert into $table_incident: " . mysqli_error($mysqli_link)) ;
             $this->id = mysqli_insert_id($mysqli_link) ;
             return $this->id ;
@@ -266,7 +292,7 @@ class Incidents implements Iterator {
             $statusCondition = '' ;
         else
             $statusCondition = " AND le.ih_status IN ('" . implode("','", $status) . "') " ;
-        $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending,
+        $sql = "SELECT *, DATEDIFF(CURRENT_TIMESTAMP(), fe.ih_when) AS days_pending, i.i_log,
                 fe.ih_id AS first_id, DATE(fe.ih_when) AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
                 le.ih_id AS last_id, DATE(le.ih_when) AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
             FROM $table_incident AS i
