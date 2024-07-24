@@ -164,4 +164,20 @@ function GetATLIncidentDescription($theIncidentId) {
     return "";
 }
 
+// Check if a DTO flight is already associated to the logbook
+function HasDTOFlight($theLogId) { 
+    global $mysqli_link, $table_dto_flight;
+    if($theLogiID=="") {
+        return true;
+    }
+    $result = mysqli_query($mysqli_link, "SELECT *
+            FROM $table_dto_flight 
+            WHERE df_flight_log = $theLogId")
+        or journalise($userId, "F", "Cannot read from $table_dto_flight for df_flight_log $theLogId: " . mysqli_error($mysqli_link)) ;
+    $row = mysqli_fetch_array($result) ;
+    if (! $row) {
+        return false ;
+    }
+    return true;
+}
 ?>
