@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2023 Eric Vyncke
+   Copyright 2014-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ mysqli_free_result($result) ;
 
 $sql_filter = [] ;
 
+if (!isset($_REQUEST['period']) or $_REQUEST['period'] == '') $_REQUEST['period'] = '1y' ; // Default to one year
 if (isset($_REQUEST['period']) and $_REQUEST['period'] != 'always') {
 	$period = $_REQUEST['period'] ;
 	switch ($_REQUEST['period']) {
