@@ -182,6 +182,16 @@ function carnetdevol_page_loaded() {
   document.getElementById("id_cdv_compteur_duree").readOnly=true;
   document.getElementById("id_cdv_compteur_duree").style.backgroundColor = ReadOnlyColor;
 
+// Check Aircraft Techlog
+  document.getElementById("id_cdv_ATL_level").onchange = function() {
+	  	check_techlog();
+        compute_prix();
+  };
+  document.getElementById("id_cdv_ATL_description").onchange = function() {
+	  	check_techlog();
+        compute_prix();
+  };
+
   document.getElementById("id_cdv_prix_solde_row").style.display="none";
   document.getElementById("id_cdv_prix_reference_row").style.display="none";
   
@@ -193,6 +203,7 @@ function carnetdevol_page_loaded() {
   compute_frais_CP();
   check_heure("id_cdv_heure_depart");
   compute_prix();
+  check_techlog();
 
   var aSegmentCountText=document.getElementById("id_cdv_segment_count").value;
   if(default_logbookid==0) {
@@ -219,6 +230,47 @@ function carnetdevol_page_loaded() {
 
 function carnetdevol_page_after_loaded() {
    //("Page loaded !");
+}
+
+//==============================================
+// Function: check_techlog
+// Purpose: Check the Aircraft Techiical log 
+//==============================================
+
+function check_techlog()
+{
+    if(default_pilot!= 66 && default_pilot!= 62 && default_pilot!= 118 && default_pilot!= 92) {
+        // Techlog activated only for patrick, eric, david and alain
+        document.getElementById("id_cdv_ATL_row").style.display="none";
+        return true;
+    }
+    var aLevel=document.getElementById("id_cdv_ATL_level").value;
+    if(aLevel=="select" || aLevel=="nothing") {
+        document.getElementById("id_cdv_ATL_description_row").style.display="none";
+    }
+    else {
+        document.getElementById("id_cdv_ATL_description_row").style.display="";        
+    }
+    if(aLevel=="select") {
+        document.getElementById("id_cdv_ATL_level").style.backgroundColor = 'orange';
+    }
+    else {
+        document.getElementById("id_cdv_ATL_level").style.backgroundColor = 'white';        
+    }
+    var aDescription=document.getElementById("id_cdv_ATL_description").value;
+    if(aLevel!="select") {
+        if(aLevel=="nothing") {
+            document.getElementById("id_cdv_ATL_description").value="";
+            document.getElementById("id_cdv_ATL_description").style.backgroundColor = 'white';
+             return true;
+        }
+        if(aDescription!="") {
+            document.getElementById("id_cdv_ATL_description").style.backgroundColor = 'white';
+            return true;
+        }
+        document.getElementById("id_cdv_ATL_description").style.backgroundColor = 'orange';
+    }
+    return false;
 }
 
 //==============================================
@@ -647,7 +699,7 @@ function compute_prix()
 		check_heure("id_cdv_heure_depart") && check_heure("id_cdv_heure_arrivee") &&
 		check_airport("id_cdv_departure_airport") && check_airport("id_cdv_arrival_airport") &&
 		check_CP() &&
-		check_IFINIT()
+		check_IFINIT() && check_techlog()
 	) 
 	{
 		 document.getElementById("id_submitButton").disabled=false;
@@ -951,6 +1003,9 @@ function compute_defaultValues()
 	document.getElementById("id_cdv_nature_vol").value=default_flight_type;
 	document.getElementById("id_cdv_nombre_crew").value=default_crew_count;
 	document.getElementById("id_cdv_nombre_passager").value=default_pax_count;
+    
+	document.getElementById("id_cdv_ATL_level").value=default_ATL_level;
+	document.getElementById("id_cdv_ATL_description").value=default_ATL_description;
 
 	compute_defaultPartageFrais();
 	

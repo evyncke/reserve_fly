@@ -67,6 +67,8 @@ print("var default_compteur_flight_start=\"\";\n");
 print("var default_compteur_flight_end=\"\";\n");	
 print("var default_flight_reference=\"\";\n");	
 print("var default_flight_id=0;\n");
+print("var default_ATL_level=\"select\";\n");
+print("var default_ATL_description=\"\";\n");
 print("var default_qrcode_communication_pilote=\"\";\n");
 print("var default_fqrcode_montant_total_pilote=0;\n");	
 
@@ -373,6 +375,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$cdv_frais_CP_PAX=$_REQUEST['cdv_frais_CP_PAX'];
 	$cdv_frais_remarque=$_REQUEST['cdv_frais_remarque'];
 	$cdv_frais_DC=$_REQUEST['cdv_frais_DC'];
+	$cdv_ATL_level=$_REQUEST['cdv_ATL_level'];
+	$cdv_ATL_description=$_REQUEST['cdv_ATL_description']; 
 	$cdv_qrcode_montant_total_pilote=$_REQUEST['cdv_qrcode_montant_total_pilote'];
 	$cdv_qrcode_communication_pilote=$_REQUEST['cdv_qrcode_communication_pilote'];
 	print("<script>\n");
@@ -409,6 +413,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		$isPICFunction=1;
 	}
 	$remark=CheckVar($cdv_frais_remarque); // May return the string NULL
+    
+    // Aircraft Technical Log
+	$ATLLevel=$cdv_ATL_level;
+	$ATLDescription=$cdv_ATL_description;
+    //print("PRE1 ATLLevel=$ATLLevel; ATLDescription=$ATLDescription<br>");
+    
+    // Vol IF or INIT
 	$numeroVol=CheckVar($cdv_frais_numero_vol); // May return the string NULL
 	//print("numeroVol1:$numeroVol</br>\n");
 	if ($numeroVol != 'NULL') {
@@ -561,6 +572,15 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	print("<td>$cdv_duree</td>");
 	print("</tbody></table></center>");
 			
+	//----------------------------------------------------
+    //Manage Aircraft Technical Log
+	//----------------------------------------------------
+    if($ATLLevel!="" && $ATLLevel!="select") {
+        if(AddATLIncident($l_id, $planeId, $ATLLevel, $ATLDescription)) {
+    		print("<p style=\"color: red;\"><b>An entry is introduced in the Technical Log: $ATLLevel </b></p>") ;
+        }
+    }
+    
 		
 	//----------------------------------------------------
 	// Associate the flight with a DTO fligth
@@ -846,7 +866,22 @@ if (isset($_REQUEST['edit']) and $_REQUEST['edit'] != '') {
 			else {
 				$compteurFlightEnd=$compteurFlightEnd."$row[l_flight_end_minute]";
 			}				 	
-			print("var default_compteur_flight_end=\"$compteurFlightEnd\";\n");		 	
+			print("var default_compteur_flight_end=\"$compteurFlightEnd\";\n");	
+
+            //Edit Aircraft Techical log
+            $ATLIncidentId=GetATLIncidentID($logid);
+            if( $ATLIncidentId != 0)	{
+                // An incident was associated to the segment
+                $ATLSeverity=GetATLIncidentSeverity($ATLIncidentId);
+                $ATLDescription=GetATLIncidentDescription($ATLIncidentId);
+                print("var default_ATL_level=\"$ATLSeverity\";\n");
+                print("var default_ATL_description=\"$ATLDescription\";\n");                
+            }
+            else {
+                // no incident  associated to the segment
+                print("var default_ATL_level=\"nothing\";\n");
+                print("var default_ATL_description=\"\";\n");
+            }
 		 }
 	 }
    }
@@ -1104,6 +1139,27 @@ else {
 <option value="No DC">No DC</option>
 </select></td>
 </tr>
+
+<tr id="id_cdv_ATL_row">
+<td class="segmentLabel"style="vertical-align: top;">Aircraft Technical Log</td>
+<td class="segmentInput">
+<table style="border: 0px solid black;width: 100%; margin-left: auto; margin-right: auto;" >
+<tbody>
+<tr><td class="segmentInput">
+<select id="id_cdv_ATL_level" name="cdv_ATL_level">
+<option selected="select" value="select">Select</option>
+<option value="nothing">Nothing to Declare</option>
+<option value="nohazard">no Hazard to flight safety</option>
+<option value="hazard">Hazard to fly safety</option>
+</select>&#8505;
+</td></tr>
+<tr id="id_cdv_ATL_description_row"><td class="segmentInput">
+<input id="id_cdv_ATL_description" name="cdv_ATL_description" size="35" type="text" placeholder="Description du problème" autocomplete="off" />
+</td></tr>
+</tbody></table>
+</td>
+</tr>
+
 <tr id="id_cdv_qrcode_montant_total_pilote_row">
 <td class="segmentLabel">Montant Total Pilote</td>
 <td class="segmentInput"><input id="id_cdv_qrcode_montant_total_pilote" name="cdv_qrcode_montant_total_pilote"  type="text" value="0" /></td>
@@ -1187,7 +1243,7 @@ Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 
 <script src="https://www.spa-aviation.be/resa/pilots.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/CP_frais_type.js"\></script>-->
 <script src="https://www.spa-aviation.be/resa/prix.js"></script>
-<!--<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
+<!---<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
 <script src="https://www.spa-aviation.be/resa/script_carnetdevol.js"></script>
 </body>
 </html>

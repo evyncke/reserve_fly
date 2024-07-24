@@ -1,4 +1,5 @@
 <?php
+require_once 'incident.class.php' ;
 
 function GetCompteurHour($Compteur) {
 	$aPos=strpos($Compteur,".");
@@ -77,4 +78,90 @@ function GetFullRemarks( $theFraisCP,  $thePAX, $theRemarque, $theFraisDC) {
 	}
 	return $aRemark;
 }
+
+// Add an incident in the Aircraft Technical Log 
+function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
+    global $mysqli_link, $table_incident_history, $userId ;
+
+    if(GetATLIncidentID($theLogId) == 0) {
+        if($theSeverity != "nothing") {
+            // No incident associated to the logid $$ severity = hazard or nohazard
+            $incident = new Incident() ;
+            $incident->logId = $theLogId;
+            $incident->plane = $thePlane ;
+            $incident->severity = $theSeverity ;
+            $incident->save() ;
+            $event = new IncidentEvent() ;
+            $event->incident = $incident ;
+            $event->status = 'opened' ;
+            $event->text = $theRemark ;
+            $event->save() ;
+            return true;
+        }
+    }
+    else {
+          // An incident is already associated to the logid then edit the incident
+          $incident = new Incident() ; 
+          $incident->getByLogId($theLogId) ;
+          $incident->plane = $thePlane ;
+          $aPreviousSeverity=$incident->severity;
+          $incident->severity = $theSeverity ;
+          $firstId=$incident->firstId;
+          $incident->save() ;
+          
+          $event = new IncidentEvent() ;
+          $event->getById($firstId) ;
+          $status=$event->status;
+          if($theSeverity != "nothing") {
+              $event->text = $theRemark ;
+          }
+          else {
+              $aPreviousRemark=$event->text;
+              $event->text = "Event removed by the pilot: ".$aPreviousRemark." (".$aPreviousSeverity.")";
+              $status="closed";
+          }
+          //$event->save() ;
+          $text=web2db($event->text);
+          mysqli_query($mysqli_link, "UPDATE $table_incident_history
+             SET ih_text = '$text', ih_status = '$status', ih_who = $userId, ih_when=CURRENT_TIMESTAMP()
+                 WHERE ih_id = $firstId")
+             or journalise($userId, "F", "Cannot update $table_incident_history: " . mysqli_error($mysqli_link)) ;
+          
+          return true;
+    }
+    return false;
+}
+
+// Retrieve the IncidentId associated to the logID
+// Returns 0 if no incident associated to the loggID
+function GetATLIncidentID($theLogid) {
+    $incident = new Incident() ;
+    $incident->getByLogId($theLogid) ;
+    if($incident!=NULL) {
+        return $incident->id;
+    }
+    return 0;
+}
+
+// Retrieve the severity associated to an incidentId
+function GetATLIncidentSeverity($theIncidentId) {
+    
+    $incident = new Incident() ;
+    $incident->getById($theIncidentId) ;
+    if($incident!=NULL) {
+        return $incident->severity;
+    }
+    return "select";
+}
+// Retrieve the description associated to an incidentId
+function GetATLIncidentDescription($theIncidentId) {
+    
+    $incident = new Incident() ;
+    $incident->getById($theIncidentId) ;
+    if($incident!=NULL) {
+        return $incident->firstText;
+    }
+    return "";
+}
+
 ?>
