@@ -231,33 +231,26 @@ if ($userId > 0) {
           <ul class="dropdown-menu" id="planesDropdown">
             <li><a class="dropdown-item" href="mobile_wnb.php">Masse et centrage</a></li>
 <?php
-if ($userId > 0) {
-?>
-<?php
-      if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
-?>
-            <li><h6 class="dropdown-header">Réservé aux FIs & admins</h6></li>
-            <li><i><a class="dropdown-item" href="mobile_incidents.php">Aircraft Tech Log</a></i></li>
-<?php
-      }
-?>
-<?php
-}
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
-          <li><i><a class="dropdown-item" href="mobile_planelog.php?plane=OO-FMX">Carnets de routes</a></i></li>
+          <li><h6 class="dropdown-header">Disponible pour les FIs et administrateurs</h6></li>
           <li><i><a class="dropdown-item" href="mobile_plane_planning.php">Echéances des avions</a></i></li>
           <li><i><a class="dropdown-item" href="mobile_plane_4_camo.php">Rapport hebdomadaire des avions pour CAMO</a></i></li>
           <li><i><a class="dropdown-item" href="mobile_shared_flights.php">Vols en codes partagés</a></i></li>
           <li><h6 class="dropdown-header">Disponible pour tous les membres</h6></li>
 <?php
 }
+if ($userId > 0) {
 ?>
-
+            <li><a class="dropdown-item" href="mobile_planelog.php?plane=OO-FMX">Carnets de routes</a></li>
+            <li><a class="dropdown-item" href="mobile_incidents.php">Aircraft Tech Log</a></li>
             <li><a class="dropdown-item" href="IntroCarnetVol.php">Encodage compteurs <i class="bi bi-box-arrow-up-right"></i></span></a></li>
             <li><a class="dropdown-item" href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
             <li><a class="dropdown-item" href="mobile_fleet_map.php?latest">Dernières localisations</a></li>
             <!-- init() in mobile.js will insert all active planes -->
+<?php
+}
+?>
             </ul>
         </li>
         <li class="nav-item dropdown">
