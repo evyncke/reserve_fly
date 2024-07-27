@@ -54,6 +54,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     $event->save() ;
 }
 ?>
+
 <h3>Create an Aircraft Technical Log (ATL) entry</h3>
 
 <div class="row">
@@ -68,15 +69,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <div class="row mb-3">
 	<label for="remarkId" class="col-form-label col-sm-4 col-md-2">Description:</label>
 	<div class="col-sm-12 col-md-6">
-		<input type="text" class="form-control" name="remark" id="remarkId" placeholder="Short description of the techlog entry">
+		<input type="text" class="form-control" name="remark" id="remarkId" placeholder="Short description of the techlog entry" >
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
 	<label for="severityId" class="col-form-label col-sm-4 col-md-2">Severity:</label>
 	<div class="col-sm-4 col-md-2">
-        <select name="severity" id="severityId" class="form-select">
-            <option value="esthetic">Esthetic</option>
-            <option value="nuisance">Nuisance</option>
+        <select name="severity" id="severityId" class="form-select" onchange="selectSeverity();">
             <option value="nohazard">No hazard to fly</option>
             <option value="hazard">Hazard to fly</option>
             <option value="" selected>-- unknown --</option>
@@ -84,7 +83,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <button type="submit" name="action" value="create" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary" >
+        <button type="submit" id="id_createatlentry" name="action" value="create" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary" disabled>
             Create ATL entry
         </button></div>
 </form>
@@ -110,7 +109,21 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <tr><th>#Entry</th><th>Aircraft</th><th>Severity</th><th>Date</th><th>Description</th><th>By</th><th class="border-start">Status</th><th>Action</th><th>Date</th><th>By</th></tr>
 </thead>
 <tbody class="table-group-divider">
-
+<script type="text/javascript">
+    //var anEntry=document.getElementById("id_createatlentry");
+    //anEntry.disabled=true;        
+    function selectSeverity() {
+        var anEntry=document.getElementById("id_createatlentry");
+        
+		var severity=document.getElementById("severityId").value;
+        if(severity=="hazard" || severity =="nohazard") {
+            document.getElementById("id_createatlentry").disabled=false;
+        }
+        else {
+            document.getElementById("id_createatlentry").disabled=true;            
+        }
+    }
+</script>
 <?php
     if ($closed == NULL)
         $incidents = new Incidents($plane, ['opened', 'accepted', 'inprogress', 'camook']) ;
