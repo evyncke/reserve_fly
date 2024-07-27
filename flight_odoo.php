@@ -188,6 +188,7 @@ while ($row = mysqli_fetch_array($result)) {
             }
         }
         if (count($updates) > 0) { // There were some changes, let's update the Odoo record
+            if (! $odoo_customer['id']) { print("<pre>") ; var_dump($odoo_customer); print("</pre>") ; }
             $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
             print("<td>Odoo #<a href=\"https://spa-aviation.odoo.com/web#id=$odoo_customer[id]&cids=1&menu_id=122&action=275&model=res.partner&view_type=form\">#$odoo_customer[id]</a> mis à jour</td>") ;
         } else
