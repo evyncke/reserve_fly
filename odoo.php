@@ -14,8 +14,101 @@ $common = $odooClient->common;
 $models = $odooClient->models ;
 $uid = $odooClient->uid ;
 $encoder = $odooClient->encoder ;
+$odooClient->debug = true ;
 
 print("Connect with UID: $uid\n") ;
+
+# Display all members with coordinates
+
+function GetOdooCategory($role) {
+    global $odooClient ;
+    static $cache = array() ;
+
+    if (isset($cache[$role])) return $cache[$role] ;
+    $result = $odooClient->SearchRead('res.partner.category', array(array(
+		array('name', '=', $role))), 
+	array()) ; 
+    if (count($result) > 0) {
+        $cache[$role] = $result[0]['id'] ;
+    	return $result[0]['id'] ;
+    }
+    // Category does not exist... Need to create one
+    $id = $odooClient->Create('res.partner.category', array(
+        'name' => $role, 'display_name' => $role)) ;
+    if ($id > 0) {
+        $cache[$role] = $id ;
+        return $id ;
+    }
+}
+
+$member_tag = GetOdooCategory('Member') ;
+
+$result = $odooClient->SearchRead('res.partner', array(), array('fields'=>array('id', 
+	'name',
+	'partner_longitude',
+	'partner_latitude',
+	'complete_name',
+	'email',
+	'mobile',
+	'street',
+	'category_id',
+	'city'))) ; 
+
+
+print("\nCustomers\n") ;
+foreach($result as $client) {
+	if (in_array($member_tag, $client['category_id']))
+		print("Client #$client[id]: $client[complete_name], $client[partner_latitude], $client[partner_longitude], $client[email], $client[mobile],
+		$client[street], $client[city] \n") ;
+}
+
+exit ;
+
+# Display all out_invoices accounting moves 102 = françois, 223 = francois engineerin, 32 = eric, 44 = Mendes
+print("\nAccounting moves\n") ;
+$result = $odooClient->SearchRead('account.move', 
+	array(array(
+		array('state', '=', 'posted'),
+		array('date', '>' , '2023-12-31'),
+		'|', 
+		array('commercial_partner_id', '=', 44), 
+		array('partner_id', '=', 44))), 
+	array('fields' => array('id', 'activity_state', 'name', 'ref',
+		'state', 'type_name', 'journal_id', 'amount_total',  'partner_id', 'commercial_partner_id',
+		'move_type'),
+		'order' => 'id')) ;
+// var_dump($result) ;
+foreach($result as $account) {
+	print("$account[id]: $account[name], $account[ref], $account[type_name], " . $account['journal_id'][1] . ", " .
+		$account['partner_id'][0] . ", " . $account['commercial_partner_id'][0] . ", " .
+		"$account[move_type], $account[amount_total] €\n") ;
+}
+
+print("\nAccounting move lines\n") ;
+//$result = $odooClient->Read('account.move', 
+//	array(5848, 6400), 
+//	array()
+//	) ;
+$result = $odooClient->Read('account.move.line', 
+//	array(14205, 14206, 16221, 16222, 15657, 15658), François Henquet
+	array(14515, 14517, 14528, 14529),
+	array('fields' => array('id', 'name', 'move_id', 'move_name', 'ref', 'move_type',
+	'debit', 'credit', 'balance', // work as expected
+	'partner_id', // always the same
+//	'matched_debit_ids','matched_credit_ids', // not useful
+'account_type', // Semble prometeur, ne prendre que asset_receivable ignorer asset_cash
+'account_id' // aussi prometteur, ne prendre que les comptes 4xxxxx
+	))
+	) ;
+var_dump($result) ;
+exit ;
+foreach($result as $account) {
+	print("$account[id]: $account[name], $account[ref], $account[type_name], " . $account['journal_id'][1] . ", " .
+		$account['partner_id'][0] . ", " . $account['commercial_partner_id'][0] . ", " .
+		"$account[move_type], $account[amount_total] €\n") ;
+}
+
+exit ;
 
 $result = $odooClient->SearchRead('account.bank.statement.line', array(
 //	array('id', '=', '1416')

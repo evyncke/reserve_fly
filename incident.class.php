@@ -261,12 +261,14 @@ class Incident {
                 SET i_plane = '$this->plane', i_severity = '$severity', i_log = $logId
                     WHERE i_id = $this->id")
                 or journalise($userId, "F", "Cannot update $table_incident: " . mysqli_error($mysqli_link)) ;
+            journalise($userId, "I", "Incident $this->id updated: severity = $severity") ;
             return $this->id ;
         } else {
              mysqli_query($mysqli_link, "INSERT INTO $table_incident(i_plane, i_severity, i_log)
                 VALUES('$this->plane', '$severity', $logId)")
                 or journalise($userId, "F", "Cannot insert into $table_incident: " . mysqli_error($mysqli_link)) ;
             $this->id = mysqli_insert_id($mysqli_link) ;
+            journalise($userId, "I", "Incident #$this->id created: severity = $severity") ;
             return $this->id ;
         } 
     }
