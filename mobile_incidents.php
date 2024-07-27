@@ -60,7 +60,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <form action="<?=$_SERVER['PHP_SELF']?>" method="POST" role="form" class="form-horizontal">
 <div class="row mb-3">
 	<label for="planeSelect" class="col-form-label col-sm-4 col-md-2">Aircraft:</label>
-	<div class="col-sm-4 col-md-1">
+	<div class="col-sm-4 col-md-2">
         <select id="planeSelect" class="form-select" name="plane">
         </select>
 	</div> <!-- col -->
@@ -73,7 +73,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </div> <!-- row -->
 <div class="row mb-3">
 	<label for="severityId" class="col-form-label col-sm-4 col-md-2">Severity:</label>
-	<div class="col-sm-2 col-md-1">
+	<div class="col-sm-4 col-md-2">
         <select name="severity" id="severityId" class="form-select">
             <option value="esthetic">Esthetic</option>
             <option value="nuisance">Nuisance</option>
