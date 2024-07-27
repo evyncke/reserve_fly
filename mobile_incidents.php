@@ -54,7 +54,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     $event->save() ;
 }
 ?>
-<h3>Create an aircraft techlog entry</h3>
+<h3>Create an Aircraft Technical Log (ATL) entry</h3>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="POST" role="form" class="form-horizontal">
@@ -85,7 +85,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </div> <!-- row -->
 <div class="row mb-3">
         <button type="submit" name="action" value="create" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary" >
-            Create aircraft techlog entry
+            Create ATL entry
         </button></div>
 </form>
 </div><!-- row -->
