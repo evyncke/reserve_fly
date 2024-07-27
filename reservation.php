@@ -303,7 +303,7 @@ if ($userId != 0) {
 	$row = mysqli_fetch_array($result) ;
 }
 ?>
-Vos droits d'acc&egrave;s (<?=$userFullName?>) sur cette page: 
+Vos droits d'acc&egrave;s (<?=$userFullName?>): 
 <?php
 if ($userIsStudent) print(" &eacute;l&egrave;ve ") ;
 if ($userIsPilot) print(" pilote ") ;
@@ -361,11 +361,13 @@ if ($userId == 0) {
 			Veuillez cliquer sur le bouton 'Mon Profil' pour mettre votre profil à jour.</div>") ;
 		$userNoFlight = true ;
 	}
+    print('<br>');
 	print('<input type="button" style="background-color: green; color: white;" value="Mon profil" onclick="javascript:document.location.href=\'mobile_profile.php\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;"value="Mon carnet de vols" onclick="javascript:document.location.href=\'mobile_mylog.php\';"> ') ;
 	print('<input type="button" value="Carte de mes vols" onclick="javascript:document.location.href=\'mymap.php\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;" value="Site mobile" onclick="javascript:document.location.href=\'mobile.php?news\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;" value="Folio du mois" onclick="javascript:document.location.href=\'mobile_folio.php\';"> ') ;
+    print('<input type="button" style="background-color: green; color: white;" value="TechLog" onclick="javascript:document.location.href=\'mobile_incidents.php\';"> ') ;
 	if ($userIsAdmin) print('<input style="background-color: green; color: white;" type="button" value="Journal des opérations" onclick="javascript:document.location.href=\'mobile_journal.php\';"> ') ;
 	if ($userIsAdmin || $userIsMechanic) print('<input type="button" value="Echéances des maintenances" style="background-color: green; color: white;" onclick="javascript:document.location.href=\'plane_planning.php\';"> ') ;
 	print('<input type="button" value="No log" style="background-color: yellow; visibility: hidden;" id="logButton" onclick="javascript:toggleLogDisplay();"> ') ;

@@ -54,8 +54,6 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     $event->save() ;
 }
 ?>
-<p class="lead text-danger mb-5">Under development, do not use yet beside tests by developpers, fleet managers, FIs. Data is just dumb fantasies often invented by Eric.</p>
-
 <h3>Create an aircraft techlog entry</h3>
 
 <div class="row">
@@ -143,8 +141,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </div><!-- table responsive -->
 </div><!-- col -->
 </div><!-- row --> 
-<p class="fw-light">Cliquer sur un numéro d'incident (ou sur l'icône <i class="bi bi-pen-fill"></i>) pour consulter/modifier l'historique de cet incident, y compris changer le statut.
-Cliquer sur un avion, pour afficher uniquement les incidents de cet avion. <span class="badge bg-primary">9</span> indique le nombre de jours depuis
+<p class="fw-light">Cliquer sur un numéro d'incident (ou sur l'icône <i class="bi bi-pen-fill"></i>) pour consulter/modifier l'historique de cet incident, y compris changer le statut.<br>
+Cliquer sur un avion, pour afficher uniquement les incidents de cet avion.<br><span class="badge bg-primary">9</span> indique le nombre de jours depuis
 l'ouverture de l'incident.</p>
 </body>
 </html>
