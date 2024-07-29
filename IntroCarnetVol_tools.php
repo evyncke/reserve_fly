@@ -167,7 +167,9 @@ function GetATLIncidentDescription($theIncidentId) {
 // Check if a DTO flight is already associated to the logbook
 function HasDTOFlight($theLogId) { 
     global $mysqli_link, $table_dto_flight;
-    if($theLogiID=="") {
+    //print("PRE HasDTOFlight: theLogId=$theLogId<br>");
+    if(!isset($theLogId)) {
+        //print("PRE1 HasDTOFlight: theLogId=$theLogId<br>");
         return true;
     }
     $result = mysqli_query($mysqli_link, "SELECT *
@@ -176,8 +178,10 @@ function HasDTOFlight($theLogId) {
         or journalise($userId, "F", "Cannot read from $table_dto_flight for df_flight_log $theLogId: " . mysqli_error($mysqli_link)) ;
     $row = mysqli_fetch_array($result) ;
     if (! $row) {
+        //print("PRE2 HasDTOFlight: theLogId=$theLogId<br>");
         return false ;
     }
+    //print("PRE3 HasDTOFlight: theLogId=$theLogId<br>");
     return true;
 }
 ?>

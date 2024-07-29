@@ -591,12 +591,15 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	// Look in the $table_user_usergroup_map if the pilot is a student
 	$studentResult=mysqli_query($mysqli_link,"SELECT user_id FROM $table_user_usergroup_map WHERE user_id = '$pilotId' and group_id='$joomla_student_group';") or die("Impossible de retrouver le user_id dans table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
 	if ($studentResult->num_rows != 0) {
+        if($logid!="") {
+            $l_id=$logid;
+        }
         if(!HasDTOFlight($l_id)) {
     		//print("C'est aussi un eleve logid=$logid</br>");
     		//print("Creating  also Flight</br>");
     		// Create a flight in the DTO table rapcs_dto_flight
     		$flight = new Flight() ;
-    		$flight->flightLog = $logid;
+    		$flight->flightLog = $l_id;
     		$flight->student= $pilotId;
     		if($isPICFunction) {
     			$flight->flightType="Solo";
