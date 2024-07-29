@@ -49,8 +49,6 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
     $event->save() ;
 }
 ?>
-<p class="lead text-danger mb-5">Under development, do not use yet beside tests by developpers, fleet managers, FIs. Data is just dumb fantasies often invented by Eric.</p>
-
 
 <h2><?=$incident->plane?> Aircraft Technical Log entry#<?=$incident_id?></h2>
 
@@ -96,7 +94,7 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 <input type="hidden" name="incident" value="<?=$incident_id?>">
 <div class="row mb-3">
 	<label for="statusSelect" class="col-form-label col-sm-4 col-md-2">New status:</label>
-	<div class="col-sm-4 col-md-1">
+	<div class="col-sm-4 col-md-2">
         <select id="statusSelect" class="form-select" name="status">
             <option value="opened" <?=($incident->lastStatus == 'opened') ? 'selected':''?>>Opened</option>
             <option value="camook" <?=($incident->lastStatus == 'camook') ? 'selected':''?>>CAMO: Plane can be flown</option>
