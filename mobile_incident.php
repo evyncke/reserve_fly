@@ -16,7 +16,6 @@
 
 */
 
-ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
@@ -33,7 +32,9 @@ if (isset($_REQUEST['incident']) and $_REQUEST['incident'] != '' and is_numeric(
     journalise($userId, "F", "Bad value or missing parameter incident='$incident'") ;
 }
 
-if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQUEST['status']) and isset($_REQUEST['remark'])) {
+if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQUEST['status']) and $_REQUEST['status'] != '' and isset($_REQUEST['remark']) and $_REQUEST['remark'] != '') {
+    if (! ($userIsBoardMember or $userIsInstructor or $userIsMechanic))
+        journalise($userId, "F", "You do not have the permission for this action") ;
     $event = new IncidentEvent() ;
     $event->incident = $incident ;
     switch ($_REQUEST['status']) {
