@@ -26,10 +26,13 @@ $header_postamble = '<script src="shareCodes.js"></script>' ;
 $body_attributes=' onload="initPlaneLog();init();" ' ;
 require_once 'mobile_header5.php' ;
 
-$plane = strtoupper(mysqli_real_escape_string($mysqli_link, $_REQUEST['plane'])) ;
-if ($plane == '') die("Missing parameter plane") ;
-$since = mysqli_real_escape_string($mysqli_link, $_REQUEST['since']) ;
-if ($since == '')
+if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '')
+	$plane = strtoupper(mysqli_real_escape_string($mysqli_link, $_REQUEST['plane'])) ;
+else
+	journalise($userId, "F", "missing plane parameter") ;
+if (isset($_REQUEST['since']) and $_REQUEST['since'] != '')
+	$since = mysqli_real_escape_string($mysqli_link, $_REQUEST['since']) ;
+else
 	$since = date('Y-m-01') ;
 
 $sinceDate = new DateTime($since) ;
@@ -103,15 +106,15 @@ function initPlaneLog() {
 <h2>Carnet de routes de <?=$plane?> du <?=$since?> au <?=$monthAfterForTitleString?></h2>
 <?php
 print("Carnet de route de: <select id=\"planeSelect\" onchange=\"planeChanged(this);\">" ) ;
-$result = mysqli_query($mysqli_link, "select * from $table_planes
-	where ressource = 0
-	order by id") ;
+$result = mysqli_query($mysqli_link, "SELECT *
+	FROM $table_planes
+	WHERE ressource = 0
+	ORDER BY id") ;
 $plane_details = array() ;
 while ($row = mysqli_fetch_array($result)) {
 	$row['id'] = strtoupper($row['id']) ;
 	print("<option value=\"$row[id]\">$row[id]</option>\n") ;
-	if ($row['id'] == $plane)
-		$plane_details = $row ;
+	$plane_details[$row['id']] = $row ;
 }
 print("<option value=\"TOUS\">Tous</option>
 </select> ") ;
@@ -140,14 +143,14 @@ if ($plane == 'TOUS')
 <th class="text-center border-bottom-0" colspan="2">Time (UTC)</th>
 <th class="text-center border-bottom-0">Engine time</th>
 <?php 
-if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS')
+if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0)
 	print("<th class=\"text-center border-bottom-0\">Flight Time</th>\n") ;
 ?>
 <th class="text-center border-bottom-0">Pax/crew</th>
 <th class="text-center border-bottom-0">Type of</th>
 <th class="text-center border-bottom-0" colspan="2">Engine index</th>
 <?php 
-if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS')
+if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0)
 	print("<th class=\"text-center border-bottom-0\" colspan=\"2\">Flight index</th>\n") ;
 ?>
 <th class="text-center border-bottom-0">Remark</th>
@@ -165,7 +168,7 @@ if ($plane == 'TOUS')
 <th class="text-center border-top-0">Landing</th>
 <th class="text-center border-top-0">minutes</th>
 <?php 
-if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS')
+if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0)
 	print("<th class=\"text-center border-top-0\">minutes</th>\n") ;
 ?>
 <th class="text-center border-top-0">Count</th>
@@ -173,7 +176,7 @@ if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS')
 <th class="text-center border-top-0">Begin</th>
 <th class="text-center border-top-0">End</th>
 <?php 
-if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS')
+if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0)
 	print("<th class=\"text-center border-top-0\">Begin</th>\n
 		<th class=\"text-centerborder-top-0 \">End</th>\n") ;
 ?>
@@ -311,7 +314,7 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"text-center\">$l_start</td>
 		<td class=\"text-center\">$l_end</td>
 		<td class=\"text-center\">$duration</td>\n") ;
-		if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS') {
+		if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0) {
 			$flight_duration = 60 * ($row['l_flight_end_hour'] - $row['l_flight_start_hour']) + $row['l_flight_end_minute'] - $row['l_flight_start_minute'] ;
 			$flight_total_minute += $flight_duration ;
 			print("<td class=\"text-center\">$flight_duration</td>\n") ;
@@ -320,7 +323,7 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"text-center\">$row[l_flight_type]</td>
 		<td class=\"text-center\">$row[l_start_hour]:$row[l_start_minute]</td>
 		<td class=\"text-center\">$row[l_end_hour]:$row[l_end_minute]</td>\n") ;
-	if ($plane_details['compteur_vol'] != 0) {
+	if ($plane != 'TOUS' and $plane_details[$plane]['compteur_vol'] != 0) {
 		print("<td class=\"text-center\">$row[l_flight_start_hour]:$row[l_flight_start_minute]</td>\n") ;
 		print("<td class=\"text-center\">$row[l_flight_end_hour]:$row[l_flight_end_minute]</td>\n") ;
 	} else 	if ($plane == 'TOUS') {
@@ -332,7 +335,7 @@ while ($row = mysqli_fetch_array($result)) {
 }
 
 // Missing logbook entries until now
-if (! $previous_end_lt) {
+if (! isset($previous_end_lt)) {
 	$previous_end_lt = new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
 }
 $missingPilots = array() ;
@@ -360,7 +363,7 @@ $engine_total_hour = floor($engine_total_minute / 60) ;
 $engine_total_minute = $engine_total_minute % 60 ;
 if ($engine_total_minute < 10)
 	$engine_total_minute = "0$engine_total_minute" ;
-if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS') {
+if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0) {
 	$flight_total_hour = floor($flight_total_minute / 60) ;
 	$flight_total_minute = $flight_total_minute % 60 ;
 	if ($flight_total_minute < 10)
@@ -369,14 +372,23 @@ if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS') {
 ?>
 </tbody>
 <tfoot  class="table-group-divider">
-<tr class="table-info"><td colspan="6" class="text-end"><strong>Logged total</strong></td>
-<td class="text-center"><strong><?="$engine_total_hour:$engine_total_minute"?></strong></td>
+
 <?php
-if ($plane_details['compteur_vol'] != 0 or $plane == 'TOUS') {
+if ($plane == 'TOUS') {
+	print('<tr class="table-info"><td colspan="7" class="text-end"><strong>Logged total</strong></td>') ;
+	print('<td class="text-center"><strong>' . "$engine_total_hour:$engine_total_minute" . '</strong></td>') ;
 	print("<td class=\"text-center\"><strong>$flight_total_hour:$flight_total_minute</strong></td>") ;
 	print('<td colspan="7" class="text-center"></td>') ;
-} else
+} else if ($plane != 'TOUS' and $plane_details[$plane]['compteur_vol'] != 0) {
+		print('<tr class="table-info"><td colspan="6" class="text-end"><strong>Logged total</strong></td>') ;
+		print('<td class="text-center"><strong>' . "$engine_total_hour:$engine_total_minute" . '</strong></td>') ;
+		print("<td class=\"text-center\"><strong>$flight_total_hour:$flight_total_minute</strong></td>") ;
+		print('<td colspan="7" class="text-center"></td>') ;
+} else {
+	print('<tr class="table-info"><td colspan="6" class="text-end"><strong>Logged total</strong></td>') ;
+	print('<td class="text-center"><strong>' . "$engine_total_hour:$engine_total_minute" . '</strong></td>') ;
 	print('<td colspan="5" class="text-center"></td>') ;
+}
 ?>
 </tfoot>
 </table>
