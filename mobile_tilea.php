@@ -26,8 +26,9 @@ require_once 'mobile_header5.php' ;
 
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
 
-$since = mysqli_real_escape_string($mysqli_link, $_REQUEST['since']) ;
-if ($since == '')
+if (isset($_REQUEST['since']) and $_REQUEST['since'] != '')
+    $since = mysqli_real_escape_string($mysqli_link, $_REQUEST['since']) ;
+else
 	$since = date('Y-m-01') ;
 
 $sinceDate = new DateTime($since) ;
