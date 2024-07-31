@@ -75,7 +75,8 @@ function isValidAirport($apt) {
 ?><script>
 
 function planeChanged(elem) {
-	window.location.href = '<?=$_SERVER['PHP_SELF']?>?plane=' + elem.value + '&since=<?=$_REQUEST['since']?>';
+	window.location.href = '<?=$_SERVER['PHP_SELF']?>?plane=' + elem.value + 
+		'&since=<?=(isset($_REQUEST['since'])) ? $_REQUEST['since'] : ''?>';
 }
 
 function findMember(a, m) {
