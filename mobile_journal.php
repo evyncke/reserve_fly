@@ -16,7 +16,6 @@
 
 */
 
-ob_start("ob_gzhandler");
 require_once "dbi.php" ;
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
@@ -59,7 +58,6 @@ $result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'
 $first_id = -1 ;
 while ($row = mysqli_fetch_array($result)) {
 	if ($first_id < 0) $first_id = $row['j_id'] ;
-	$line_count ++ ;
 	$last_id = $row['j_id'] ;
 	$nameStyle = ($row['j_trusted_booker'] == 1) ? ' style="font-weight: bold;"' : '' ;
 	switch (strtoupper($row['j_severity'])) {

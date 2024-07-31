@@ -16,8 +16,6 @@
 
 */
 
-ob_start("ob_gzhandler");
-
 require_once "dbi.php" ;
 if ($userId == 0 and !isset($_REQUEST['auth'])) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;

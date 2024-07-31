@@ -16,10 +16,7 @@
 
 */
 
-ob_start("ob_gzhandler");
-
 require_once "dbi.php" ;
-
 
 $cam = (isset($_REQUEST['cam'])) ? $_REQUEST['cam'] : 0 ;
 if (! is_numeric($cam)) die("Invalid camera ID") ;

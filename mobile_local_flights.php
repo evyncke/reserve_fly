@@ -16,8 +16,6 @@
 
 */
 
-ob_start("ob_gzhandler");
-
 require_once "dbi.php" ;
 
 $zoom_level = 10 ;

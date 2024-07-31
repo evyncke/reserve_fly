@@ -16,9 +16,7 @@
 
 */
 
-ob_start("ob_gzhandler");
 header('Access-Control-Allow-Origin: *');
-
 
 include 'dbi.php' ;
 

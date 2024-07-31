@@ -16,8 +16,6 @@
 
 */
 
-ob_start("ob_gzhandler");
-
 require_once "dbi.php" ;
 // font-size Should be based on actual width of display (% ?) rather than the original 80px changed into 40px and finally to 3vw (% of view port width)
 $header_postamble = '<style>
