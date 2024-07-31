@@ -32,7 +32,8 @@ if (isset($_REQUEST['apt'])) {
         $row = mysqli_fetch_array($result) or die("Unknown airport = $apt") ;
         $center_lat = $row['a_latitude'] ;
         $center_long = $row['a_longitude'] ;
-}
+} else
+        $apt = $default_airport ;
 
 if (isset($_REQUEST['zoom']) and is_numeric($_REQUEST['zoom']))
         $center_zoom = $_REQUEST['zoom'] ;
