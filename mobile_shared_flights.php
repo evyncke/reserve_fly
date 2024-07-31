@@ -30,10 +30,10 @@ require_once 'mobile_header5.php' ;
 
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
 
-$since = mysqli_real_escape_string($mysqli_link, $_REQUEST['since']) ;
-if ($since == '')
+if (isset($_REQUEST['since']) and $_REQUEST['since'] != '')
+    $since = mysqli_real_escape_string($mysqli_link, $_REQUEST['since']) ;
+else
 	$since = date('Y-m-01') ;
-
 $sinceDate = new DateTime($since) ;
 $monthAfter = new DateTime($since) ;
 $monthAfterForTitle = new DateTime($since) ;
@@ -142,10 +142,8 @@ $sql = "select l_plane, date_format(l_start, '%d/%m/%y') as date, l_start, l_end
 //	where l_plane = '$plane' and l_booking is not null
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur système à propos de l'accès au carnet de route: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
-	$line_count ++ ;
 	// Don't trust the row but the diff of engine index
 	$duration = 60 * ($row['l_end_hour'] - $row['l_start_hour']) + $row['l_end_minute'] - $row['l_start_minute'] ;
-	$engine_total_minute += $duration ;
 	// Handling character sets...
 	$pilot_name = db2web($row['pilot_name']) ;
 	$instructor_name = db2web($row['instructor_name']) ;
