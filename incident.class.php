@@ -31,7 +31,7 @@ class IncidentEvent {
     function __construct($row = NULL) {
         if ($row) {
             $this->eventId = $row['ih_id'] ;
-            $this->incident = new Incident($row) ;
+//            $this->incident = new Incident($row) ; // This means that the row should have most of the Incident class properties... :-(
             $this->date = $row['ih_when'] ;
             $this->whoFirstName = db2web($row['first_name']) ;
             $this->whoLastName = db2web($row['last_name']) ;
@@ -162,8 +162,6 @@ class Incident {
             $this->logId = $row['i_log'] ;
             $this->severityFrench = db2web(strtolower($row['i_severity'])) ;
             switch(strtolower($row['i_severity'])) {
-                case 'esthetic': 
-                case 'nuisance': 
                 case 'nohazard': 
                 case 'hazard':
                     $this->severity = $row['i_severity'] ; break ;
@@ -212,7 +210,7 @@ class Incident {
                 fe.ih_id AS first_id, fe.ih_when AS first_when, fe.ih_text AS first_text, fe.ih_status AS first_status, fe.ih_who AS first_who, fep.first_name AS first_first_name, fep.last_name AS first_last_name,
                 le.ih_id AS last_id, le.ih_when AS last_when, le.ih_text AS last_text, le.ih_status AS last_status, le.ih_who AS last_who, lep.first_name AS last_first_name, lep.last_name AS last_last_name
             FROM $table_incident AS i
-            JOIN $table_planes as p ON p.id = i.i_plane
+            JOIN $table_planes AS p ON p.id = i.i_plane
             JOIN $table_incident_history AS fe ON fe.ih_incident = i.i_id
             JOIN $table_person AS fep ON fep.jom_id = fe.ih_who
             JOIN $table_incident_history AS le ON le.ih_incident = i.i_id
