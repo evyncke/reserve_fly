@@ -106,7 +106,7 @@ var // was 'const' but IE does not support it !
 	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ,
 	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ,
 	userIsStudent = <?=($userIsStudent)? 'true' : 'false'?> ,
-	userIsNoFlight = <?=($userIsNoFlight)? 'true' : 'false'?> ,
+	userIsNoFlight = <?=($userNoFlight)? 'true' : 'false'?> ,
 	bookingTypePilot = <?= BOOKING_PILOT?> ,
 	bookingTypeInstructor = <?= BOOKING_INSTRUCTOR?> ,
 	bookingTypeAdmin = <?= BOOKING_ADMIN?> ,
@@ -169,7 +169,7 @@ while ($row = mysqli_fetch_array($result)) {
 
 	// New code: look at pilot log book whether 'carnet de routes' or not :-(
 	$index_column = ($row['compteur_vol'] == 0) ? 'l_end_hour' : 'l_flight_end_hour' ;
-	$result3 = mysqli_query($mysqli_link, "select $index_column, datediff(sysdate(), l_end) as temps_dernier 
+	$result3 = mysqli_query($mysqli_link, "select $index_column, l_end, datediff(sysdate(), l_end) as temps_dernier 
 		from $table_logbook l
 		where l_plane = '$row[id]' and (l_pilot = $userId or (l_instructor is not null and l_instructor = $userId))
 		order by l_end desc") or die("Cannot get last reservation: " . mysqli_error($mysqli_link)) ;
