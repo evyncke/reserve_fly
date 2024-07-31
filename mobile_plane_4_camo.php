@@ -86,7 +86,10 @@ function Cell($m) {
     }
 }
 foreach($ytd as $id => $ytd_row) {
-    $weekly_row = $weekly[$id] ;
+    if (isset($weekly[$id]))
+        $weekly_row = $weekly[$id] ;
+    else
+        $weekly_row = array('engine_minutes' => '', 'flight_minutes' => '', 'landings' => '') ;
     print("<tr class=\"text-center\"><td>$id</td>") ;
     if ($ytd_row['compteur_vol'] != 0)
         print("<td>$ytd_row[latest_flight]</td>") ;
