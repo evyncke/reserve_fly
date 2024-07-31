@@ -24,9 +24,9 @@ $log = '' ;
 $tracks = array() ;
 
 // Parameter sanitization
-$plane = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['plane']))) ;
-$since = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['since']))) ;
-$latest = mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['latest']))) ;
+$plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['plane']))) : false ;
+$since = (isset($_REQUEST['since'])) ? mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['since']))) : false ;
+$latest = (isset($_REQUEST['latest'])) ? mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['latest']))) : false ;
 
 function pilot($plane, $start, $end) {
 	global $mysqli_link, $table_logbook, $table_users, $userId ;
@@ -53,7 +53,7 @@ function pilot($plane, $start, $end) {
 
 // Handle the specific case where only the latest flight location is requested
 if ($latest) {
-	$sql = "SELECT *, last_seen as t_time, last_longitude as t_longitude, last_latitude as t_latitude
+	$sql = "SELECT *, last_seen as t_time, last_seen AS ts, last_longitude as t_longitude, last_latitude as t_latitude
 		FROM $table_planes
 		WHERE ressource = 0 AND actif = 1 AND last_seen IS NOT NULL" ;
 } else {// SQL filters
@@ -97,7 +97,7 @@ while ($row = mysqli_fetch_array($result)) {
 			$flight['last'] = $last_seen ;
 			$flight['pilot'] = pilot($current_plane, $first_seen, $last_seen) ;
 			$tracks["$current_plane/$last_seen"] = $flight ;
-			$log .= "$current_plane/$last_seen/$pilot " ;
+			$log .= "$current_plane/$last_seen/$flight[pilot] " ;
 		} 
 		$current_plane = $plane ;
 		$current_track = array() ;
@@ -118,7 +118,7 @@ if ($current_plane != '') {
 		$flight['last'] = $last_seen ;
 		$flight['pilot'] = pilot($current_plane, $first_seen, $last_seen) ;
 		$tracks["$current_plane/$last_seen"] = $flight ;
-		$log .= "$current_plane/$last_seen/$pilot" ;
+		$log .= "$current_plane/$last_seen/$flight[pilot] " ;
 }
 
 // Let's send the data back
