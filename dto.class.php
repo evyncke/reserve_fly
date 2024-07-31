@@ -103,10 +103,12 @@ class Student extends DTOMember {
     function __construct($row = NULL) {
         parent::__construct($row) ; 
         if ($row) {
-            $this->firstFlight = $row['first_flight'] ;
-            $this->lastFlight = $row['last_flight'] ;  
-            $this->countFlights = $row['count_flights'] ; 
-            $this->daysSinceLastFlight = $row['days_since_last_flight'] ; 
+            if (isset($row['first_flight'])) { // Depending on how the Student is created (listing all students or via a DTOMmember.getById() some columns are not present
+                $this->firstFlight = $row['first_flight'] ;
+                $this->lastFlight = $row['last_flight'] ;  
+                $this->countFlights = $row['count_flights'] ; 
+                $this->daysSinceLastFlight = $row['days_since_last_flight'] ;
+            } 
         } 
     }
 
