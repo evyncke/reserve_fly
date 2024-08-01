@@ -80,7 +80,8 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 <link rel="stylesheet" type="text/css" href="datepickr.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
 
 <!-- Facebook Open graph data -->
 <meta property="og:url"           content="https://www.spa-aviation.be/resa/reservation.php" />
@@ -129,12 +130,13 @@ var // was 'const' but IE does not support it !
 <?
 ob_flush() ; // Attempt to push as much as HTML to the browser
 
-// Get the engine time from the mechanics  
-$result = mysqli_query($mysqli_link, "SELECT upper(id) as id, classe, compteur, compteur_vol, compteur_vol_valeur, compteur_date, entretien, photo, sous_controle, delai_reservation, commentaire, actif, compteur_vol
+// Get the engine time from the mechanics  TODO no more useful as pilot logbook is now mandatory
+$result = mysqli_query($mysqli_link, "SELECT upper(id) as id, classe, compteur, compteur_vol, compteur_vol_valeur, compteur_date, entretien, photo, 
+		sous_controle, delai_reservation, commentaire, actif, compteur_vol
 	FROM $table_planes
 	WHERE actif > 0 AND ressource = 0
-	ORDER BY model ASC, id ASC") or die("Cannot get all active planes:".mysqli_error($mysqli_link)) 
-	or journalise($userId, "F", "Cannot get plane info: " . mysqli_error($mysqli_link));
+	ORDER BY model ASC, id ASC") 
+		or journalise($userId, "F", "Cannot get plane info: " . mysqli_error($mysqli_link));
 $first = true ;
 while ($row = mysqli_fetch_array($result)) {
 	if ($first)
@@ -183,6 +185,20 @@ while ($row = mysqli_fetch_array($result)) {
 		$reservation_permise = $row['delai_reservation'] >= $row3['temps_dernier'] ;
 		print("// last booking $row3[temps_dernier] and delai_reservation = $row[delai_reservation]\n") ;
 	}
+	// Check for any opened Aircraft Tech Log entries for the plane
+	$sql = "SELECT GROUP_CONCAT(DISTINCT i_severity) AS severities
+		FROM $table_incident AS i
+		LEFT JOIN $table_incident_history AS ih ON i_id = ih_incident
+		WHERE i_plane = '$row[id]' AND NOT EXISTS (SELECT * FROM $table_incident_history AS ih2 WHERE ih2.ih_incident = ih.ih_incident AND ih_status IN ('closed', 'rejected'))" ;
+	$result_incident = mysqli_query($mysqli_link, $sql) or journalise($userId, "E", "Cannot read incident for $row[id]: " . mysqli_error($mysqli_link)) ;
+	$row_incident = mysqli_fetch_assoc($result_incident) ;
+	// if ($userId == 62) var_dump($row_incident) ;
+	switch ($row_incident['severities']) {
+		case NULL: $incidents = '' ; break ;
+		case 'NOHAZARD':
+		case 'HAZARD': $incidents = $row_incident['severities'] ; break ;
+		case 'HAZARD,NOHAZARD': $incidents = 'HAZARD' ; break ;
+		}
 	// Check required qualifications
 	$qualifications_validated = TRUE ;
 	$result4 = mysqli_query($mysqli_link, "select * from $table_planes_validity where pv_plane='$row[id]'")
@@ -198,14 +214,14 @@ while ($row = mysqli_fetch_array($result)) {
 	$row['entretien'] = htmlspecialchars(db2web($row['entretien']), ENT_QUOTES) ;
 	$row['commentaire'] = htmlspecialchars(db2web($row['commentaire']), ENT_QUOTES) ;
 	$row['id'] = htmlspecialchars(db2web($row['id']), ENT_QUOTES) ;
-	print("{ \"id\": \"$row[id]\", \"compteur\": $row[compteur], \"compteur_date\": new Date(\"" . str_replace('-', '/', $row['compteur_date']) . "\"), " .
-		" \"compteur_pilote\": $row2[compteur_pilote], \"compteur_pilote_date\": new Date(\"" . str_replace('-', '/', $row2['compteur_pilote_date']) . "\"), " .
-		" \"compteur_pilote_nom\": \"$row2[compteur_pilote_nom]\", " .
-		" \"entretien\": $row[entretien], \"photo\": \"$row[photo]\", \"commentaire\": \"" . str_replace(array("\r\n", "\r", "\n"), '<br />', $row['commentaire']) . "\", " .
-		" \"reservation_permise\": " . (($reservation_permise) ? 'true' : 'false') . ", " .
-		" \"qualifications_requises\": " . (($qualifications_validated) ? 'true' : 'false') . ", " .
-		" \"dernier_vol\": \"$l_end\", \"actif\": $row[actif], \"ressource\": 0, " .  
-		" \"classe\": \"$row[classe]\", \"sous_controle\": " . (($row['sous_controle'] == 0) ? 'false' : 'true') . "}") ;
+	print("{ \"id\": \"$row[id]\", \"compteur\": $row[compteur], \"compteur_date\": new Date(\"" . str_replace('-', '/', $row['compteur_date']) . "\"),\n" .
+		" \"compteur_pilote\": $row2[compteur_pilote], \"compteur_pilote_date\": new Date(\"" . str_replace('-', '/', $row2['compteur_pilote_date']) . "\"),\n" .
+		" \"compteur_pilote_nom\": \"$row2[compteur_pilote_nom]\",\n" .
+		" \"entretien\": $row[entretien], \"photo\": \"$row[photo]\", \"commentaire\": \"" . str_replace(array("\r\n", "\r", "\n"), '<br />', $row['commentaire']) . "\",\n" .
+		" \"reservation_permise\": " . (($reservation_permise) ? 'true' : 'false') . ",\n" .
+		" \"qualifications_requises\": " . (($qualifications_validated) ? 'true' : 'false') . ",\n" .
+		" \"dernier_vol\": \"$l_end\", \"actif\": $row[actif], \"ressource\": 0, \"incidents\": '$incidents',\n" .
+		" \"classe\": \"$row[classe]\", \"sous_controle\": " . (($row['sous_controle'] == 0) ? 'false' : 'true') . "}\n") ;
 }
 ob_flush() ;
 // Now process the ressources (rooms, ...)
@@ -481,6 +497,7 @@ Indications pour un avion que nous n'&ecirc;tes probablement pas en droit de r&e
 base de l'entr&eacute;e des heures de vol dans votre carnet de vols).<br/>
 <img src="forbidden-icon.png" width="12" height="12" alt="X"  onStalled="imgStalled();">: vous n'avez pas les qualifications requises (sur base des validit&eacute;s de votre profil).<br/>
 V&eacute;rifiez les r&egrave;gles de r&eacute;servation et si vous les respectez: r&eacute;servez :-)<br/>
+<span class="material-symbols-rounded" style="font-size: 12px; color: orangeRed;">handyman</span>: il existe un Aircraft Technical Log pour ce avion à consulter.<br/>
 <img src="fa.ico" border="0" width="12" height="12">: ouvre Flight Aware avec le dernier vol de cet avion.<br/>
 </span>
 <center><input type="button" id="roadBookButton" value="Carnet de routes" onclick="roadBookClick();" disabled="true" style="display: none;"></center>

@@ -285,7 +285,9 @@ function ressourceHasChanged(thisSelect) {
 			if (allPlanes[i].actif == 2)
 				document.getElementById('planeComment').innerHTML += "<br/><span style=\"color: red\"><b>\nCet avion est r&eacute;serv&eacute; aux instructeurs et &agrave; leurs &eacute;l&egrave;ves.\n</b></span>\n" ;
 			if (allPlanes[i].commentaire)
-				document.getElementById('planeComment').innerHTML += "<br/><fspan style=\"color: red\">\n" + allPlanes[i].commentaire + "</span>\n" ;
+				document.getElementById('planeComment').innerHTML += "<br/><span style=\"color: red\">\n" + allPlanes[i].commentaire + "</span>\n" ;
+			if (allPlanes[i].incidents != '')
+				document.getElementById('planeComment').innerHTML += "<br/><span style=\"color: red\">\nConsultez l'ATL: " + allPlanes[i].incidents + " en cliquant sur <span class=\"material-symbols-rounded\"</span></span>\n" ;
 		}
 	}
 }
@@ -720,11 +722,18 @@ function displayPlaneDetails(planeIndex) {
 	span.innerHTML = '<b>' + thisPlane.id + '</b><br/>' ;
 	if (thisPlane.commentaire) span.innerHTML += '<i>' + thisPlane.commentaire + '</i><hr>' ;
 	if (thisPlane.ressource == 0) { // Engine index only valid for planes
-		span.innerHTML += 'Compteur relev&eacute; par ' + thisPlane.compteur_pilote_nom + ' en date du ' + thisPlane.compteur_pilote_date + ': ' + thisPlane.compteur_pilote + '<br/>' ;
+		span.innerHTML += 'Compteur relevé par ' + thisPlane.compteur_pilote_nom + ' en date du ' + thisPlane.compteur_pilote_date + ': ' + thisPlane.compteur_pilote + '<br/>' ;
 		if (thisPlane.actif == 2)
-			span.innerHTML += "<br/><span style=\"color: red\">\nCet avion est r&eacute;serv&eacute; aux instructeurs et &agrave; leurs &eacute;l&egrave;ves.\n</span>\n" ;
+			span.innerHTML += "<br/><span style=\"color: red\">\nCet avion est réservé aux instructeurs et à leurs élèves.\n</span>\n" ;
+		if (thisPlane.incidents == 'HAZARD')
+			span.innerHTML += "<br/><span style=\"color: red\">\nCet avion n'est pas en état de voler, consultez l'Aircraft Technical Log en cliquant sur <span class=\"material-symbols-rounded\">handyman</span>\n</span>\n" ;
+		else if (thisPlane.incidents == 'NOHAZARD')
+			span.innerHTML += "<br/><span style=\"color: orangeRed\">\nConsultez l'Aircraft Technical Log en cliquant sur <span class=\"material-symbols-rounded\">handyman</span>\n</span>\n" ;
 	}
-	span.style.backgroundColor = 'lightGray' ;
+	if (thisPlane.incidents == '')
+		span.style.backgroundColor = 'lightGray' ;
+	else
+		span.style.backgroundColor = 'lightPink' ;
 	span.style.visibility = 'visible' ;
 }
 
@@ -1338,6 +1347,10 @@ function editBookingDetails(event) {
 				document.getElementById('webcamImg').src = allPlanes[i].photo ;
 			if (allPlanes[i].commentaire)
 				document.getElementById('planeComment').innerHTML = '<br/><span style="color: red;">' + allPlanes[i].commentaire + "</span>\n" ;
+			if (allPlanes[i].incidents == 'NOHAZARD')
+				document.getElementById('planeComment').innerHTML += '<br/><span style="color: orangeRed;">Il existe un Aircraft Technical Log pour cet avion.</span>\n' ;
+			else if (allPlanes[i].incidents == 'HAZARD')
+				document.getElementById('planeComment').innerHTML += '<br/><span style="color: red;">Cet avion doit rester au sol, il y a un Aircraft Technical Log.</span>\n' ;
 			ressource = allPlanes[i].ressource ;
 			break ;
 		}
@@ -1459,6 +1472,10 @@ function newBookingDetails(event) {
 				document.getElementById('planeComment').innerHTML += "<br/><span style=\"color: red;\">\n<b>Cet avion est r&eacute;serv&eacute; aux instructeurs et &agrave; leurs &eacute;l&egrave;ves.\n</b></span>\n" ;
 			if (allPlanes[i].commentaire)
 				document.getElementById('planeComment').innerHTML += "<br/><span style=\"color: red;\">\n" + allPlanes[i].commentaire + "</spa,>\n" ;
+			if (allPlanes[i].incidents == 'NOHAZARD')
+				document.getElementById('planeComment').innerHTML += '<br/><span style="color: orangeRed;">Il existe un Aircraft Technical Log pour cet avion.</span>\n' ;
+			else if (allPlanes[i].incidents == 'HAZARD')
+				document.getElementById('planeComment').innerHTML += '<br/><span style="color: red;">Cet avion doit rester au sol, il y a un Aircraft Technical Log.</span>\n' ;
 			ressourceType = allPlanes[i].ressource ;
 			break ;
 		}
@@ -1964,8 +1981,15 @@ function refreshPlanningTable() {
 				if (bookingAllowed && allPlanes[plane].actif == 2)
 					bookingAllowed = false ;
 				if (!bookingAllowed)
-					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <img src="exclamation-icon.png" width="12" height="12" title="Pas de vol r&eacute;cent" alt="!">' ;
+					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <img src="exclamation-icon.png" width="12" height="12" title="Pas de vol récent" alt="!">' ;
 			}
+			// Check for incidents ATL
+			if (allPlanes[plane].incidents == 'NOHAZARD')
+				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id + '" target="_blank">' +
+					'<span class="material-symbols-rounded" style="font-size: 12px; color: orangeRed;" title="Consulter l\'ATL NOHAZARD">handyman</span></a>';
+			else if (allPlanes[plane].incidents == 'HAZARD')
+				planePlanningTable.rows[1 + plane].cells[0].innerHTML +=  ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id + '" target="_blank">' +
+					'<span class="material-symbols-rounded" style="font-size: 12px; color: red;" title="Consulter l\'ATL HAZARD">handyman</span></a>';
 			// add for engine hours using the most recent data but not for ressources
 			if (allPlanes[plane].ressource == 0) {
 				// Add FlightAware link only for members, need to stop event propagation to the TD click causing a switch of presentation
