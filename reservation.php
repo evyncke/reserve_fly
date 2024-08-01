@@ -80,7 +80,6 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 <link rel="stylesheet" type="text/css" href="datepickr.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
 
 <!-- Facebook Open graph data -->
