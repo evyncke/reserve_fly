@@ -19,7 +19,6 @@ require_once 'dbi.php';
 
 if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor) 
 	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
-ob_start("ob_gzhandler"); // Enable gzip compression over HTTP
 
 // In the mobile_header.php, $header_postamble will be inserted in the actual <head>...</head> section
 $header_postamble ='
@@ -534,6 +533,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 <tbody id="myTable">
 <?php
 // The subquery should retrieve the max date for this specific user...but it burns time
+// TODO as now Odoo is well in full force, probably need to only process Odoo balance
 	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
 		ciel_code, odoo_id, block, bkb_amount, b_reason, u.email as email, 
 		bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_id,
