@@ -23,7 +23,7 @@ MustBeLoggedIn() ;
 if (! $userIsAdmin)
 	die("Vous devez &ecirc;tre connect&eacute; et administrateur pour ajouter une nouvelle.") ;
 
-if ($_REQUEST['action'] == 'news_add') {
+if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'news_add') {
 	$start = mysqli_real_escape_string($mysqli_link, web2db(trim($_REQUEST['start']))) ;	
 	$stop = mysqli_real_escape_string($mysqli_link, web2db(trim($_REQUEST['stop']))) ;	
 	$subject = mysqli_real_escape_string($mysqli_link, web2db(trim($_REQUEST['subject']))) ;	
