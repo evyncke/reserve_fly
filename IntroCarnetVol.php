@@ -215,7 +215,13 @@ $previous_auth = md5($previous_id . $shared_secret) ;
 $result = mysqli_query($mysqli_link, "select * from $table_bookings where r_cancel_date is null and r_start > '$booking[r_stop]' and r_start <= sysdate() and $condition order by r_start asc limit 0,1")
 	or die("Cannot access next booking: ".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
-$next_id = $row['r_id'] ;
+$next_id='';
+if(!is_null($row )) {
+    $next_id = $row['r_id'] ;
+}
+else {
+    $next_id='';
+}
 $next_auth = md5($next_id . $shared_secret) ;
 print('<table width="100%" border-spacing="0px">');
 print('<tr><td width="33%" style="text-align: left;">');
@@ -340,7 +346,7 @@ if($bookingid) {
 //---------------------------------------------------------------------------
 // Manage l'enregistrement du vol introduit dans la form.
 //---------------------------------------------------------------------------
-
+$numeroVol="";
 if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	// TODO sanitize all fields to prevent SQL injection
 	$cdv_bookingid=$_REQUEST['cdv_bookingid'];
@@ -353,7 +359,10 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$cdv_flight_date=$_REQUEST['cdv_flight_date'];
 	$cdv_pilot_name=$_REQUEST['cdv_pilot_name'];
 	$cdv_pilot_function=$_REQUEST['cdv_pilot_function'];
-	$cdv_flight_instructor=$_REQUEST['cdv_flight_instructor'];
+    $cdv_flight_instructor="";
+    if(isset($_REQUEST['cdv_flight_instructor'])) {
+	    $cdv_flight_instructor=$_REQUEST['cdv_flight_instructor'];
+    }
 	$cdv_departure_airport=$_REQUEST['cdv_departure_airport'];
 	$cdv_arrival_airport=$_REQUEST['cdv_arrival_airport'];
 	$cdv_heure_depart=$_REQUEST['cdv_heure_depart'];
@@ -372,7 +381,10 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$cdv_frais_CP=$_REQUEST['cdv_frais_CP'];
 	$cdv_frais_CP_type=$_REQUEST['cdv_frais_CP_type'];
 	$cdv_frais_numero_vol=$_REQUEST['cdv_frais_numero_vol'];
-	$cdv_frais_CP_PAX=$_REQUEST['cdv_frais_CP_PAX'];
+    $cdv_frais_CP_PAX="";
+    if(isset($_REQUEST['cdv_frais_CP_PAX'])) {
+	    $cdv_frais_CP_PAX=$_REQUEST['cdv_frais_CP_PAX'];
+    }
 	$cdv_frais_remarque=$_REQUEST['cdv_frais_remarque'];
 	$cdv_frais_DC=$_REQUEST['cdv_frais_DC'];
 	$cdv_ATL_level=$_REQUEST['cdv_ATL_level'];
@@ -627,7 +639,7 @@ print("</span>");
 	// Associate the flight with an IF or an INIT flight
 	//----------------------------------------------------
     //print("cdv_flightreferenceid=$cdv_flightreferenceid;numeroVol=$numeroVol;shareType=$shareType;shareMember=$shareMember</br>");	
-	if($numeroVol!="" && $shareType=="CP1" && ($shareMember==-3 ||$shareMember==-4 || $shareMember==-6)) {
+if($numeroVol!="" && $shareType=="CP1" && ($shareMember==-3 ||$shareMember==-4 || $shareMember==-6)) {
 		//print("Associate the flight with an IF or an INIT flight</br>");	
 		$f_date_flown=$startDayTime;
 		$cdv_flightreferenceid=0;
@@ -657,7 +669,7 @@ print("</span>");
 			//$f_id = mysqli_insert_id($mysqli_link) ; 
 			print("<p style=\"color: red;\"><b>The flight $numeroVol is correctly closed</b></p>") ;
 		}	
-	}
+}
 
 //-----------------------------------------------------------------------------------------------------
 // display any previous entries related to this booking

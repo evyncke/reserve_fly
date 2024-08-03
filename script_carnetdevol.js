@@ -1484,6 +1484,8 @@ function payQRCode(amount) {
 
 //==========================================
 function fillQRCode(communication, amount, theAfterString) {
+
+
 	// CBC
 	var epcBic = 'CREGBEBB' ;
 	var epcName = 'Royal Aero Para Club Spa' ;
@@ -1496,6 +1498,10 @@ function fillQRCode(communication, amount, theAfterString) {
 	document.getElementById('id_payment'+theAfterString).style.display = "" ;
 	document.getElementById('id_payment_amount'+theAfterString).innerText = amountRouded ;
 	document.getElementById('id_payment_communication'+theAfterString).innerText = communication ;
+    
+    //Le QRCode pendant l'intro des valeurs n'est plus affiche pour eviter d'oublier sur le bouton "Enregistrer"
+  	document.getElementById("id_payment").style.display="none";
+    
 	// Should update to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
 	// There should be 2 reasons, first one is structured, the second one is free text
 	var epcPurpose = '' ; // No clue what to put in this 4-char field
