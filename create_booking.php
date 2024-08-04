@@ -142,7 +142,7 @@ if ($instructor_id != 'NULL') {
 $result = mysqli_query($mysqli_link, "select name, email from $table_users where id = $userId") ;
 $booker = mysqli_fetch_array($result) ;
 $booker_quality = 'pilote' ;
-if ($useirIsInstructor)
+if ($userIsInstructor)
 	$booker_quality = 'instructeur' ;
 elseif ($userIsMechanic)
 	$booker_quality = 'm&eacute;cano' ;
@@ -354,7 +354,6 @@ if ($response['error'] == '') {
 			$email_message .= "Cette op&eacute;ration a &eacute;t&eacute; effectu&eacute;e par $booker[name] ($booker_quality)." ;
 		$email_message .= '</p>' ;
 		$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
-		$request_scheme = ($_SERVER['REQUEST_SCHEME'] != '') ? $_SERVER['REQUEST_SCHEME'] : 'http' ; // TODO pourquoi cela ne fonctionne pas???
 		$request_scheme = 'https' ;
 		$directory_prefix = '/resa' ;
 		$email_message .= "<p>Vous pouvez lier votre calendrier &agrave; cette r&eacute;servation via <a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">ce calendrier (iCal)</a>.</p>\n" .

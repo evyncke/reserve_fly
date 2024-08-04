@@ -29,10 +29,10 @@ $response['error'] = '' ; // Until now: no error :-)
 $response['message'] = '' ; // Until now: no error :-)
 
 // Parameter sanitization
-$id = trim($_REQUEST['id']) ;
+$id = (isset($_REQUEST['id'])) ? trim($_REQUEST['id']) : '' ;
 if ($id == '') die("Missing parameter: id") ;
 if (!is_numeric($id)) die("Bien essaye... $id") ;
-$auth = trim($_REQUEST['auth']) ;
+$auth = (isset($_REQUEST['auth'])) ? trim($_REQUEST['auth']) : '' ;
 if ($auth && ($auth != md5($id . $shared_secret)))
 	die("Code ($auth) is not valid for booking $id") ;
 $reason = mysqli_real_escape_string($mysqli_link, web2db(trim($_REQUEST['reason']))) ;

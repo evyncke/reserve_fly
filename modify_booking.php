@@ -23,19 +23,20 @@ $response = array() ;
 $response['error'] = '' ; // Until now: no error :-)
 
 // Parameter sanitization
-$plane = trim($_REQUEST['plane']) ;
+$plane = (isset($_REQUEST['plane'])) ? trim($_REQUEST['plane']) : '' ;
 if ($plane == '') die("Missing parameter: plane") ;
 $plane = mysqli_real_escape_string($mysqli_link, $plane) ;
-$pilot_id = $_REQUEST['pilotId'] ;
-if (!is_numeric($pilot_id)) die("Bien essaye... $pilot_id") ;
-$instructor_id = $_REQUEST['instructorId'] ;
+$pilot_id = (isset($_REQUEST['pilotId'])) ? trim($_REQUEST['pilotId']) : '' ;
+if (!is_numeric($pilot_id)) die("Bien essaye... pilot: $pilot_id") ;
+$instructor_id = (isset($_REQUEST['instructorId'])) ? trim($_REQUEST['instructorId']) : '' ;
 if ($instructor_id) {
         if (!is_numeric($instructor_id)) die("Bien essaye... instructor: $instructor_id") ;
         if ($instructor_id == -1) $instructor_id = "NULL" ;
 } else
         $instructor_id = "NULL" ;
+$duration = (isset($_REQUEST['duration'])) ? trim($_REQUEST['duration']) : '' ;
 $duration = str_replace(',', '.', $_REQUEST['duration']) ;
-if (!is_numeric($duration) or $duration < 0) die("Bien essaye... $duration") ;
+if (!is_numeric($duration) or $duration < 0) die("Bien essaye... duration: $duration") ;
 $start = mysqli_real_escape_string($mysqli_link, $_REQUEST['start']) ;
 $end = mysqli_real_escape_string($mysqli_link, $_REQUEST['end']) ;
 $comment = mysqli_real_escape_string($mysqli_link, $_REQUEST['comment']) ;
@@ -164,11 +165,11 @@ if ($response['error'] == '') {
 		$booker = mysqli_fetch_array($result) ;
 		$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 		$booker_quality = 'pilote' ;
-		if ($useIsInstructeur)
+		if ($userIsInstructor)
 			$booker_quality = 'instructeur' ;
-		elseif ($useIsMechanic)
+		elseif ($userIsMechanic)
 			$booker_quality = 'm&eacute;cano' ;
-		elseif ($useIsAdmin)
+		elseif ($userIsAdmin)
 			$booker_quality = 'administrateur web' ;
 		$mime_preferences = array(
 			"input-charset" => "UTF-8",
@@ -207,7 +208,7 @@ if ($response['error'] == '') {
 				$email_header .= "Cc: $booker[name] <$booker[email]>\r\n" ;
 				$email_recipients .= ", $booker[email]" ;
 			}
-			if ($instructor_id != $userId and $instructor['email'] != '') {
+			if ($instructor_id != 'NULL' and $instructor_id != $userId and $instructor['email'] != '') {
 				$email_header .= "Cc: $instructor[name] <$instructor[email]>\r\n" ;
 				$email_recipients .= ", $instructor[email]" ;
 			}

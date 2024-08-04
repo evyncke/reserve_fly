@@ -75,7 +75,7 @@ function emit_booking($booking) {
 	$date_flight_end =   gmdate('Ymd\THis\Z', strtotime("$booking[r_stop] $default_timezone")) ;
 	$date_time_booking = gmdate('Ymd\THis\Z', strtotime("$booking[r_date] $default_timezone")) ;
 	$date_alert =        gmdate('Ymd\THis\Z', strtotime("$booking[alert] $default_timezone")) ;
-	if ($cancellation)
+	if ($booking['r_cancel_date'])
 		$date_cancel = gmdate('Ymd\THis\Z', strtotime("$booking[r_cancel_date] $default_timezone")) ;
 	$auth = md5($booking['r_id'] . $shared_secret) ;
 	emit("BEGIN:VEVENT" . $eol) ;
