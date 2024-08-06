@@ -71,7 +71,7 @@ $sql_date = date('Y-m-d') ;
 
 function boardPrint($s, $width, $margin, $color = "#fff") {
     $chars = mb_str_split($s) ; // Need to support UTF-8 strings that do not support $s[$i]
-    for ($i = 0; $i < $width; $i++)
+    for ($i = 0; ($i < $width) and ($i < sizeof($chars)); $i++)
         print('<div class="pane" style="color: ' . $color . ';">' . mb_strtoupper($chars[$i]) . '</div>') ;
     // TODO insert white space rather blank character for the padding ?
     while ($i < $width) {
