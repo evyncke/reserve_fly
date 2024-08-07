@@ -239,11 +239,13 @@ function carnetdevol_page_after_loaded() {
 
 function check_techlog()
 {
+    /*
     if(default_pilot!= 66 && default_pilot!= 62 && default_pilot!= 118 && default_pilot!= 92) {
         // Techlog activated only for patrick, eric, david and alain
         document.getElementById("id_cdv_ATL_row").style.display="none";
         return true;
     }
+    */
     var aLevel=document.getElementById("id_cdv_ATL_level").value;
     if(aLevel=="select" || aLevel=="nothing") {
         document.getElementById("id_cdv_ATL_description_row").style.display="none";

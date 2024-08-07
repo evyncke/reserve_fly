@@ -210,7 +210,10 @@ if ($bookingidForPrevious) {
 $result = mysqli_query($mysqli_link, "select * from $table_bookings where r_cancel_date is null and r_stop < '$booking[r_start]' and r_start <= sysdate() and $condition order by r_start desc limit 0,1")
 	or die("Cannot access previous booking: ".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
-$previous_id = $row['r_id'] ;
+$previous_id='';
+if(isset($_REQUEST['r_id'])) {
+    $previous_id = $row['r_id'] ;
+}
 $previous_auth = md5($previous_id . $shared_secret) ;
 $result = mysqli_query($mysqli_link, "select * from $table_bookings where r_cancel_date is null and r_start > '$booking[r_stop]' and r_start <= sysdate() and $condition order by r_start asc limit 0,1")
 	or die("Cannot access next booking: ".mysqli_error($mysqli_link)) ;
