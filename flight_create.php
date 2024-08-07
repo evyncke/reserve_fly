@@ -73,6 +73,7 @@ function id2name($id) {
 }
 
 // Clean-up input data and canonicalize
+$gift=0;
 if ($create or $modify) {
     //print("%%%Modify:Start");
 	//if ($_REQUEST['discovery_flight'] == 'on') {
@@ -93,14 +94,14 @@ if ($create or $modify) {
 	} else 
 		die("Vous devez choisir le type de vol (initiation, découverte, bon ou DHF)") ;
     $gift=0;
-    if($_REQUEST['gift']=="on") {
+    if(isset($_REQUEST['gift']) && $_REQUEST['gift']=="on") {
         $gift=1;
     }
 	$pax_cnt = $_REQUEST['pax_cnt'] ;
 	if (!is_numeric($pax_cnt)) die("Invalid pax_cnt: $pax_cnt") ;
-	if ($_REQUEST['pax'] == 'yes')
+	if (isset($_REQUEST['pax']) && $_REQUEST['pax'] == 'yes')
 		$role = 'P' ;
-	elseif ($_REQUEST['student'] == 'yes')
+	elseif (isset($_REQUEST['student']) && $_REQUEST['student'] == 'yes')
 		$role = 'S' ;
 	else
 		$role = 'C' ;
@@ -135,7 +136,11 @@ if ($create or $modify) {
 	$date2 = (trim($_REQUEST['date2']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date2'])))) : 'NULL';
 	$comment = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['comment'])) ;
 	$reference = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['reference'])) ;
-	$odooreference = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['odoopaymentreference'])) ;
+    $odooPaymentReference=0;
+    if(isset($_REQUEST['odoopaymentreference'])) {
+        $odooPaymentReference=$_REQUEST['odoopaymentreference'];
+    }
+	$odooreference = mysqli_real_escape_string($mysqli_link, trim($odooPaymentReference)) ;
 	$notes = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['notes'])) ;
 }
 

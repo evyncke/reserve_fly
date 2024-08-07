@@ -1243,7 +1243,7 @@ Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 
 </span>
 
 <p></p>
-<p><center><input class="button" type="button" value="Mon Folio" onclick="javascript:document.location.href='../../resa/myfolio.php';"></input></center>
+<p><center><input class="button" type="button" value="Mon Folio" onclick="javascript:document.location.href='../../resa/mobile_folio.php';"></input></center>
 <center><input class="button" type="button" value="Mon carnet de vol" onclick="javascript:document.location.href='../../resa/mobile_mylog.php';"></input></center>
 <center><input class="button" type="button" value="Retour à la page de réservation" onclick="javascript:document.location.href='https://www.spa-aviation.be/index.php/fr/resa-full/reserver';"></input></center></p>
 <p></p>
