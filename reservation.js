@@ -1662,7 +1662,7 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 			}
 		}
 		// If booked by someelse, then also display the booker initials
-		if (booking.instructorName != 'solo') {
+		if (booking.instructorName != 'solo' && booking.type != bookingTypeCustomer) {
 			var fiInitials, fiTokens ;
 			fiTokens = booking.instructorName.split(' ') ;
 			for (var i = 0, fiInitials = '' ; i < fiTokens.length; i ++)
