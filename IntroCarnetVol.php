@@ -211,7 +211,7 @@ $result = mysqli_query($mysqli_link, "select * from $table_bookings where r_canc
 	or die("Cannot access previous booking: ".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 $previous_id='';
-if(isset($_REQUEST['r_id'])) {
+if(!is_null($row ) && isset($row['r_id'])) {
     $previous_id = $row['r_id'] ;
 }
 $previous_auth = md5($previous_id . $shared_secret) ;
@@ -679,6 +679,8 @@ if($numeroVol!="" && $shareType=="CP1" && ($shareMember==-3 ||$shareMember==-4 |
 //-----------------------------------------------------------------------------------------------------
 
 print('<p></p>');
+$end_Time='';
+$toAirport='';
 if($bookingid) {
 	//print(" 2. bookingid=$bookingid</br>");
 	// Now, display any previous entries related to this booking

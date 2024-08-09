@@ -38,12 +38,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
     $event = new IncidentEvent() ;
     $event->incident = $incident ;
     switch ($_REQUEST['status']) {
-        case 'open':
-        case 'accepted':
-        case 'camook':
-        case 'inprogress':
+        case 'opened':
+        case 'inprogressnoaog':
+        case 'inprogressaog':
+        case 'camonoaog':
+        case 'camoaog':
         case 'closed':
-        case 'opened': $event->status = $_REQUEST['status'] ; break ;
+        case 'rejected': $event->status = $_REQUEST['status'] ; break ;
         default: journalise($userId, "F", "Missing or wrong value for status=$_REQUEST[staus]") ;
     } ;
     $event->text = trim($_REQUEST['remark']) ;
@@ -53,7 +54,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
 
 <h2><?=$incident->plane?> Aircraft Technical Log entry#<?=$incident_id?></h2>
 
-<p>Severity: <?=$incident->severity?></p>
+<p>Severity: <b><?=$incident->severity?></b></p>
 
 <h3>History</h3>
 
@@ -71,7 +72,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
     foreach($events as $event) {
         print("<tr>
             <td>$event->date</td>
-            <td>$event->status</td>
+            <td>$event->statusFrench</td>
             <td>$event->text</td>
             <td><b>$event->whoLastName</b> $event->whoFirstName</td>
             </tr>\n") ;
@@ -95,30 +96,45 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 <input type="hidden" name="incident" value="<?=$incident_id?>">
 <div class="row mb-3">
 	<label for="statusSelect" class="col-form-label col-sm-4 col-md-2">New status:</label>
-	<div class="col-sm-4 col-md-2">
-        <select id="statusSelect" class="form-select" name="status">
-            <option value="opened" <?=($incident->lastStatus == 'opened') ? 'selected':''?>>Opened</option>
-            <option value="camook" <?=($incident->lastStatus == 'camook') ? 'selected':''?>>CAMO: Plane can be flown</option>
-            <option value="accepted" <?=($incident->lastStatus == 'accepted') ? 'selected':''?>>Accepted</option>
-            <option value="inprogress" <?=($incident->lastStatus == 'inprogress') ? 'selected':''?>>In progress</option>
-            <option value="closed" <?=($incident->lastStatus == 'closed') ? 'selected':''?>>Closed</option>
-            <option value="rejected" <?=($incident->lastStatus == 'rejected') ? 'selected':''?>>Rejected</option>
+	<div class="col-sm-4 col-md-3">
+        <select id="statusSelect" class="form-select" name="status" onchange="selectSeverity();">
+            <option value="select" 'selected'>Select a status</option>
+            <option value="opened">Opened</option>
+            <option value="inprogressnoaog">In progress NO AOG</option>
+            <option value="inprogressaog">In progress AOG</option>
+            <option value="camonoaog">CAMO: Plane can be flown</option>
+            <option value="camoaog">CAMO: Plane AOG</option>
+            <option value="closed">Closed</option>
+            <option value="rejected">Rejected</option>
         </select>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
 	<label for="remarkId" class="col-form-label col-sm-4 col-md-2">Description:</label>
 	<div class="col-sm-12 col-md-6">
-		<input type="text" class="form-control" name="remark" id="remarkId" placeholder="Short description of the action/question/answer">
+		<input type="text" class="form-control" name="remark" id="remarkId" placeholder="Short description of the action/question/answer" onchange="selectSeverity();">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <button type="submit" name="action" value="add" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary" >
-            Modify techlog entry
+        <button type="submit" name="action" id="id_addentry" value="add" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary" disabled>Add techlog entry
         </button></div>
 </form>
 </div><!-- row -->
-
+<script type="text/javascript">       
+    function selectSeverity() {
+        var remark=document.getElementById("remarkId").value;
+        if(remark=="") {
+            document.getElementById("id_addentry").disabled=true;
+            return;
+        }        
+		var status=document.getElementById("statusSelect").value;
+        if(status=="select") {
+            document.getElementById("id_addentry").disabled=true;
+            return;
+        }
+        document.getElementById("id_addentry").disabled=false;            
+    }
+</script>
 <?php
 } // if ($userIsBoardMember or $userIsInstructor or $userIsMechanic)
 ?>
