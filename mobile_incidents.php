@@ -90,7 +90,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 
 <hr>
 
-<h2>Aircraft Technical Log</h2>
+<h2>Aircraft Technical Log (ATL)</h2>
 
 <div class="row">
     <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
@@ -131,11 +131,11 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     foreach($incidents as $incident) {
         print("<tr>
             <td>
-                <a href=\"mobile_incident.php?incident=$incident->id\" title=\"Edit incident\">$incident->id<i class=\"bi bi-pen-fill\"></i></a>
+                <a href=\"mobile_incident.php?incident=$incident->id\" title=\"Edit ATL\">$incident->id <i class=\"bi bi-pen-fill\"></i></a>
             </td>
             <td><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a><br/>$incident->planeType</td>
             <td>$incident->severity</td>
-            <td>$incident->firstDate&nbsp;&nbsp;<span class=\"badge bg-primary\">$incident->daysPending</span></td>   
+            <td>$incident->firstDate&nbsp;&nbsp;<span class=\"badge bg-primary\"><i class=\"bi bi-clock-fill\"></i> $incident->daysPending</span></td>   
             <td>$incident->firstText</td>   
             <td><b>$incident->firstLastName</b> $incident->firstFirstName</td>\n") ;
         if ($incident->firstId == $incident->lastId)
@@ -153,8 +153,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </div><!-- table responsive -->
 </div><!-- col -->
 </div><!-- row --> 
-<p class="fw-light">Cliquer sur un numéro d'incident (ou sur l'icône <i class="bi bi-pen-fill"></i>) pour consulter/modifier l'historique de cet incident, y compris changer le statut.<br>
-Cliquer sur un avion, pour afficher uniquement les incidents de cet avion.<br><span class="badge bg-primary">9</span> indique le nombre de jours depuis
-l'ouverture de l'incident.</p>
+<p class="fw-light">Cliquer sur un numéro d'ATL (ou sur l'icône <i class="bi bi-pen-fill"></i>) pour consulter/modifier l'historique de cet ATL, y compris changer le statut.<br>
+Cliquer sur un avion, pour afficher uniquement les ATL de cet avion.<br><span class="badge bg-primary"><i class="bi bi-clock-fill"></i> 9</span> indique le nombre de jours depuis
+l'ouverture de l'ATL.</p>
 </body>
 </html>
