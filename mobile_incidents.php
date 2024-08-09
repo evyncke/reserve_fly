@@ -125,7 +125,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </script>
 <?php
     if ($closed == NULL)
-        $incidents = new Incidents($plane, ['opened', 'accepted', 'inprogress', 'camook']) ;
+        $incidents = new Incidents($plane, ['opened', 'inprogressnoaog', 'inprogressaog', 'camonoaog', 'camoaog']) ;
     else
         $incidents = new Incidents($plane) ;
     foreach($incidents as $incident) {

@@ -39,9 +39,10 @@ class IncidentEvent {
             $this->status = $row['ih_status'] ;
             switch($this->status) {
                 case 'opened': $this->statusFrench = 'Ouvert' ; break ;
-                case 'accepted': $this->statusFrench = 'Accepté' ; break ;
-                case 'camook': $this->statusFrench = 'CAMO: l\'avion peut voler' ; break ;
-                case 'inprogress': $this->statusFrench = 'En progrès' ; break ;
+                case 'inprogressnoaog': $this->statusFrench = 'En progrès: Avion au sol' ; break ;
+                case 'inprogressaog': $this->statusFrench = 'En progrès: Avion peut voler' ; break ;
+                case 'camonoaog': $this->statusFrench = 'CAMO: Avion au sol' ; break ;
+                case 'camoaog': $this->statusFrench = 'CAMO: Avion peut voler' ; break ;
                 case 'closed': $this->statusFrench = 'Clôturé' ; break ;
                 case 'rejected': $this->statusFrench = 'Rejeté' ; break ;
                 default: $this->statusFrench = $this->status ;
@@ -64,7 +65,6 @@ class IncidentEvent {
 
     function save() {
         global $mysqli_link, $table_incident_history, $userId ;
-        
         if ($this->eventId) {
             journalise($userId, "F", "Saving an existing incident event is not allowed.") ;
         } else {
