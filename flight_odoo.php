@@ -222,6 +222,7 @@ while ($row = mysqli_fetch_array($result)) {
         mysqli_query($mysqli_link, "UPDATE $table_pax SET p_odoo_cust_id = $id WHERE p_id = $row[p_id]")
             or journalise($userId, "E", "Cannot update p_odoo_cust_id for $id $email: " . mysqli_error($mysqli_link)) ;
         // Update the cache as some email have multiple pax
+        $updates['id'] = $id ;
         $odoo_customers[$id] = $updates ;
         $odoo_customers[$email] = $updates ;
     }
