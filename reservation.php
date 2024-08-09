@@ -185,7 +185,7 @@ while ($row = mysqli_fetch_array($result)) {
 		print("// last booking $row3[temps_dernier] and delai_reservation = $row[delai_reservation]\n") ;
 	}
 	// Check for any opened Aircraft Tech Log entries for the plane
-	$sql = "SELECT GROUP_CONCAT(DISTINCT i_severity) AS severities
+	$sql = "SELECT GROUP_CONCAT(DISTINCT UPPER(i_severity)) AS severities
 		FROM $table_incident AS i
 		LEFT JOIN $table_incident_history AS ih ON i_id = ih_incident
 		WHERE i_plane = '$row[id]' AND NOT EXISTS (SELECT * FROM $table_incident_history AS ih2 WHERE ih2.ih_incident = ih.ih_incident AND ih_status IN ('closed', 'rejected'))" ;
