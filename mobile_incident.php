@@ -44,6 +44,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'add' and isset($_REQU
         case 'camonoaog':
         case 'camoaog':
         case 'closed':
+        case 'duplicate':
         case 'rejected': $event->status = $_REQUEST['status'] ; break ;
         default: journalise($userId, "F", "Missing or wrong value for status=$_REQUEST[staus]") ;
     } ;
@@ -105,6 +106,7 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
             <option value="camonoaog">CAMO: Plane can be flown</option>
             <option value="camoaog">CAMO: Plane AOG</option>
             <option value="closed">Closed</option>
+            <option value="duplicate">Duplicate</option>
             <option value="rejected">Rejected</option>
         </select>
 	</div> <!-- col -->

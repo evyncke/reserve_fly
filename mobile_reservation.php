@@ -530,7 +530,7 @@ V&eacute;rifiez les r&egrave;gles de r&eacute;servation et si vous les respectez
 	  	<span id="bookingMessage"></span>
       </div>
       <div class="modal-footer">
-        <button type="button" onclick="hideBookingMessage();" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+        <button type="button" onclick="hideBookingMessage();" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
       </div>
     </div>
   </div>

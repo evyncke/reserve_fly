@@ -44,6 +44,7 @@ class IncidentEvent {
                 case 'camonoaog': $this->statusFrench = 'CAMO: Avion au sol' ; break ;
                 case 'camoaog': $this->statusFrench = 'CAMO: Avion peut voler' ; break ;
                 case 'closed': $this->statusFrench = 'Clôturé' ; break ;
+                case 'duplicate': $this->statusFrench = 'Doublon' ; break ;
                 case 'rejected': $this->statusFrench = 'Rejeté' ; break ;
                 default: $this->statusFrench = $this->status ;
             }
@@ -179,6 +180,7 @@ class Incident {
                 case 'accepted': $this->firstStatusFrench = 'Accepté' ; break ;
                 case 'inprogress': $this->firstStatusFrench = 'En progrès' ; break ;
                 case 'closed': $this->firstStatusFrench = 'Clôturé' ; break ;
+                case 'duplicate': $this->firstStatusFrench = 'Doublon' ; break ;
                 case 'rejected': $this->firstStatusFrench = 'Rejeté' ; break ;
                 default: $this->lastStatusFrench = $this->firstStatus ;
             }
@@ -195,6 +197,7 @@ class Incident {
                 case 'accepted': $this->lastStatusFrench = 'Accepté' ; break ;
                 case 'inprogress': $this->lastStatusFrench = 'En progrès' ; break ;
                 case 'closed': $this->lastStatusFrench = 'Clôturé' ; break ;
+                case 'duplicate': $this->lastStatusFrench = 'Doublon' ; break ;
                 case 'rejected': $this->lastStatusFrench = 'Rejeté' ; break ;
                 default: $this->lastStatusFrench = $this->lastStatus ;
             }
