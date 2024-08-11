@@ -203,7 +203,7 @@ while ($row = mysqli_fetch_array($result)) {
 		print("// last booking $row3[temps_dernier] and delai_reservation = $row[delai_reservation]\n") ;
 	}
 	// Check for any opened Aircraft Tech Log entries for the plane
-	$sql = "SELECT GROUP_CONCAT(DISTINCT i_severity) AS severities
+	$sql = "SELECT GROUP_CONCAT(DISTINCT UPPER(i_severity)) AS severities
 		FROM $table_incident AS i
 		LEFT JOIN $table_incident_history AS ih ON i_id = ih_incident
 		WHERE i_plane = '$row[id]' AND NOT EXISTS (SELECT * FROM $table_incident_history AS ih2 WHERE ih2.ih_incident = ih.ih_incident AND ih_status IN ('closed', 'rejected'))" ;
@@ -519,11 +519,11 @@ V&eacute;rifiez les r&egrave;gles de r&eacute;servation et si vous les respectez
 <div id="pilotDetailsDiv"><img id="pilotDetailsImage"><span id="pilotDetailsSpan"></span><hr><center><button onclick="hidePilotDetails();">OK</button></center></div>
 
 <!-- model window to display the plane/ressource booking confirmation message-->
-<div class="modal fade" id="bookingMessageModal" tabindex="-1" aria-labelledby="bookingMessageLabel" aria-hidden="true">
+<div class="modal fade" id="bookingMessageModal" tabindex="-1" aria-labelledby="bookingMessageLabel">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="bookingMessageLabel">Statut de la réservation</h1>
+        <h5 class="modal-title" id="bookingMessageLabel">Statut de la réservation</h5>
         <button type="button" onclick="hideBookingMessage();" class="btn-close" data-bs-dismiss="modal" aria-label="OK"></button>
       </div>
       <div class="modal-body">
@@ -537,7 +537,7 @@ V&eacute;rifiez les r&egrave;gles de r&eacute;servation et si vous les respectez
 </div>
 
 <!-- modal window to display the plane/ressource booking window (create, modify, cancel) -->
-<div class="modal fade" id="bookingModal" tabindex="-1" role="dialog" aria-labelledby="bookingTitle" aria-hidden="true">
+<div class="modal fade" id="bookingModal" tabindex="-1" role="dialog" aria-labelledby="bookingTitle">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -620,16 +620,16 @@ règles d'emport de passagers et les autres règles du club définies dans
       <div class="modal-footer">
 	  <?php
 if ($userIsMechanic || $userIsInstructor) {
-	print('<button type="button" class="btn btn-secondary" id="addMaintenanceButton" onclick="javascript:confirmBooking(false);">Immobiliser pour maintenance</button><br/>' . "\n") ;
-	print('<button type="button" class="btn btn-secondary" id="cancelMaintenanceButton" onclick="javascript:cancelBooking(false);">Annuler la maintenance</button><br/>' . "\n") ;
+	print('<button type="button" class="btn btn-secondary" id="addMaintenanceButton" onclick="javascript:confirmBooking(false);" data-bs-dismiss="modal">Immobiliser pour maintenance</button><br/>' . "\n") ;
+	print('<button type="button" class="btn btn-secondary" id="cancelMaintenanceButton" onclick="javascript:cancelBooking(false);" data-bs-dismiss="modal">Annuler la maintenance</button><br/>' . "\n") ;
 }
 if (! $userNoFlight && ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin)) {
-	print('<button type="button" class="btn btn-primary" id="addBookingButton" onclick="javascript:confirmBooking(true);">Je respecte les conditions et réserve</button>' . "\n") ;
-	print('<button type="button" class="btn btn-primary" id="modifyBookingButton" onclick="javascript:modifyBooking(true);">Modifier la réservation</button>' . "\n") ;
+	print('<button type="button" class="btn btn-primary" id="addBookingButton" onclick="javascript:confirmBooking(true);" data-bs-dismiss="modal">Je respecte les conditions et réserve</button>' . "\n") ;
+	print('<button type="button" class="btn btn-primary" id="modifyBookingButton" onclick="javascript:modifyBooking(true);" data-bs-dismiss="modal">Modifier la réservation</button>' . "\n") ;
 }
 if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin) {
-	print('<button type="button" class="btn btn-danger" id="cancelBookingButton" onclick="javascript:confirmCancelBooking();">Annuler la réservation</button>' . "\n") ;
-	print('<button type="button" class="btn btn-primary" id="engineHoursButton" onclick="javascript:engineHoursClicked();">Encoder les heures moteur</button>' . "\n") ;
+	print('<button type="button" class="btn btn-danger" id="cancelBookingButton" onclick="javascript:confirmCancelBooking();" data-bs-dismiss="modal">Annuler la réservation</button>' . "\n") ;
+	print('<button type="button" class="btn btn-primary" id="engineHoursButton" onclick="javascript:engineHoursClicked();" data-bs-dismiss="modal">Encoder les heures moteur</button>' . "\n") ;
 }
 ?>
 	    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>

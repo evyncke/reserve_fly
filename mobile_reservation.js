@@ -132,7 +132,10 @@ function buttonDisplayIf(id, cond) {
 
 function hideBookingMessage() {
 	// Clear any booking message
-	jQuery("#bookingMessageModal").modal('hide') ;
+	console.log("hideBookingMessage()") ;
+	jQuery('.modal').removeClass('fade') ;
+	jQuery('.modal-backdrop').remove();
+	jQuery("#bookingMessageModal").hide() ;
 }
 
 function refreshWebcam() {
@@ -1032,7 +1035,7 @@ function modifyBooking(id) {
 		'&duration=' + flightDuration ;
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
-	// Now, let's refresh the screen to display the new booking
+	// Now, let's hide the modal form and allow the waiting div to be shown
 	hideEditBookingDetails() ;
 }
 
@@ -1285,11 +1288,14 @@ function showDivDetails(div, event) {
 }
 
 function hideEditBookingDetails() {
+	console.log("hideEditBookingDetails()") ;
+	jQuery('.modal-backdrop').remove() ;
 	jQuery('#bookingModal').modal('hide') ;
 	currentlyDisplayedBooking = null ;
 }
 
 function hideCancelBookingDetails() {
+	console.log("hideCancelBookingDetails()") ;
 	jQuery('#cancelBookingModal').modal('hide') ;
 	currentlyDisplayedBooking = null ;
 }
@@ -2039,20 +2045,17 @@ function presentationByDay(event) {
 }
 
 function init() {
-	myLog("start init(), userId=" + userId + ", userName=" + userName + ', ' + navigator.userAgent) ;
-	document.onkeydown = function(evt) {
-		evt = evt || window.event;
-		if (evt.keyCode == 27) {
-			hideEditBookingDetails() ;
+	console.log("start init(), userId=" + userId + ", userName=" + userName + ', ' + navigator.userAgent) ;
+	document.onkeydown = function(event) {
+		event = event ;
+		if (event.key == 'Escape') {
+			console.log("event key == Escape onkeydown()") ;
+			// hideEditBookingDetails() ;
 			hideEditAgendaItemDetails() ;
-			hideBookingMessage() ;
+			// hideBookingMessage() ;
 			hidePilotDetails() ;
 		}
 	}
-// Hmmm even if stopPropagate() we cannot click on drop-down boxes...
-//	document.onclick = function(event) {
-//			hideEditBookingDetails() ;
-//		}
 	refreshEphemerides(false) ; // Only way to get airport open/close time needed for the rest, so, let's avoid asynchronous AJAX
 	displayClock() ;
 	refreshWebcam() ;
