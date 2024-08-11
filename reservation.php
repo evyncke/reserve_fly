@@ -591,7 +591,7 @@ if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin) {
 	print('<button id="engineHoursButton" onclick="javascript:engineHoursClicked();">Encoder les heures moteur</button>' . "\n") ;
 }
 ?>
-<button onclick="javascript:hideEditBookingDetails();">Fermer la fen&ecirc;tre</button>
+<button onclick="javascript:hideEditBookingDetails();">Fermer la fenêtre</button>
 </center>
 </div>
 <!-- end of div for the plane/ressource booking window-->
