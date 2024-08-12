@@ -59,20 +59,19 @@ if ($id and is_numeric($id)) {
 	$duration = 1 ;
 	$comment = '' ;
 }
-	
+
 $body_attributes = 'onload="init();initBook();"' ; // mobile_header.php will force this into the body tag
 
 $header_postamble = "<script>
 var
 	planeId = " . ((isset($booking)) ? "'$booking[r_plane]'" : "null") . ",
 	pilotId = " . ((isset($booking)) ? $booking['r_pilot'] : $userId) . ",
-	instructorId = " . (($booking['r_instructor'])? $booking['r_instructor'] : -1)  . " ;
+	instructorId = " . ((isset($booking['r_instructor']) and $booking['r_instructor']) ? $booking['r_instructor'] : -1)  . " ;
 </script>
 <script src=\"instructors.js\"></script>
 <script src=\"pilots.js\"></script>" ;
 
 require_once 'mobile_header5.php' ;
-
 ?> 
 
 
@@ -162,7 +161,7 @@ if ($action == 'Modifier') {
 </div><!-- row -->
 
 <?php
-if ($booking['r_type'] == BOOKING_MAINTENANCE)
+if (isset($booking['r_type']) and $booking['r_type'] == BOOKING_MAINTENANCE)
 	print("<br/><div class=\"alert alert-danger\">Cette réservation est une maintenance.</div>") ;
 ?>
 
