@@ -88,7 +88,7 @@ if ($error_message != '') {
 				$customer_row = mysqli_fetch_array($customer_result) ;
 				mysqli_free_result($customer_result) ;
 				if ($customer_row) {
-					$booking['customerName'] = db2web($customer_row['p_fname']) . ' ' . db2web($customer_row['p_lname']) ;
+					$booking['customerName'] = db2web(trim($customer_row['p_fname'] . ' ' . db2web($customer_row['p_lname']))) ;
 					$booking['customerPhone'] = "$customer_row[p_tel]" ;
 					$type_vol = ($customer_row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 					if ($customer_row['f_reference'] == '') {
