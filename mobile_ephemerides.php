@@ -19,6 +19,7 @@
 require_once "dbi.php" ;
 require_once 'mobile_header5.php' ;
 
+$fontSize = (isset($_REQUEST['kiosk'])) ? '3vw' : '1em' ;
 ?> 
 <div class="container-fluid">
 
@@ -26,15 +27,15 @@ require_once 'mobile_header5.php' ;
 <h3>Ephémérides du <span id="displayDate"><span></h3>
 </div> <!-- row -->
 
-<div class="row" style="font-size: 3vw">
-			<div class="col-md-4 col-xs-8">Jour a&eacute;ronautique:</div><div id="aeroDay" class="col-md-2 col-xs-4"></div>
-			<div class="col-md-4 col-xs-8">Nuit a&eacute;ronautique:</div><div id="aeroNight" class="col-md-2 col-xs-4"></div>
+<div class="row" style="font-size: <?=$fontSize?>">
+			<div class="col-md-4 col-xs-8">Jour aéronautique:</div><div id="aeroDay" class="col-md-2 col-xs-4"></div>
+			<div class="col-md-4 col-xs-8">Nuit aéronautique:</div><div id="aeroNight" class="col-md-2 col-xs-4"></div>
 			<div class="col-md-4 col-xs-8">Lever du soleil:</div><div id="civilDay" class="col-md-2 col-xs-4"></div>
 			<div class="col-md-4 col-xs-8">Coucher du soleil:</div><div id="civilNight" class="col-md-2 col-xs-4"></div>
-			<div class="col-md-4 col-xs-8">Ouverture a&eacute;roport:</div><div id="airportDay" class="col-md-2 col-xs-4"></div>
-			<div class="col-md-4 col-xs-8">Fermeture a&eacute;roport:</div><div id="airportNight" class="col-md-2 col-xs-4"></div>
+			<div class="col-md-4 col-xs-8">Ouverture aéroport:</div><div id="airportDay" class="col-md-2 col-xs-4"></div>
+			<div class="col-md-4 col-xs-8">Fermeture aéroport:</div><div id="airportNight" class="col-md-2 col-xs-4"></div>
 			<div class="col-sm-12"><i><b>En heure locale de <?=$default_airport?> et pour info seulement.</b></i></div>
-			<div class="col-md-4 col-xs-8">Heure locale &agrave; <?=$default_airport?>:</div><div class="col-md-2 col-xs-4"><span id="hhmmLocal"></span></div>
+			<div class="col-md-4 col-xs-8">Heure locale à <?=$default_airport?>:</div><div class="col-md-2 col-xs-4"><span id="hhmmLocal"></span></div>
 			<div class="col-md-4 col-xs-8">Heure universelle:</div><div class="col-md-2 col-xs-4"><span id="hhmmUTC"></span></div>
 </div> <!-- row -->
 
