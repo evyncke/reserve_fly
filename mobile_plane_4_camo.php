@@ -31,7 +31,7 @@ if ($userId == 0) {
 
 require_once 'mobile_header5.php' ;
 require_once 'incident.class.php' ;
-if (!($userIsAdmin )or $userIsInstructor or $userIsMechanic) journalise($userId, "F", "Vous devez être admin ou FI ou mecano pour voir cette page") ;
+if (!($userIsAdmin or $userIsInstructor or $userIsMechanic)) journalise($userId, "F", "Vous devez être admin ou FI ou mecano pour voir cette page") ;
 
 $first_day = date('Y-m-d', time() - 7 * 24 * 60 * 60) ; // Go back 7 days
 $last_day = date('Y-m-d') ;
@@ -56,11 +56,11 @@ function delta2BSClass($n) {
 }
 ?>
 <div class="container-fluid">
-<h2>Weekly plane report for CAMO</h2>
+<h2>Weekly Aircraft Report for CAMO</h2>
 <table class="col-sm-12 col-lg-8 table table-hover table-bordered table-striped">
 <thead>
-<tr class="text-center"><th>Plane</th> <th colspan="4">Engine Index</th>                                <th>Tech Log</th><th colspan="3">Last 7 days (from <?=$first_day?> to <?=$last_day?> included)</th><th colspan="3">Year to date</th></tr>
-<tr class="text-center"><th></th>      <th>Last</th><th>Limit</th><th>Delta</th><th>Next Operation</th> <th></th>        <th>Engine</th><th>Flight</th><th>Landings</th>                       <th>Engine</th><th>Flight</th><th>Landings</th></tr>
+<tr class="text-center"><th>Plane</th> <th colspan="4">Engine/Flight Index</th>                        <th>Aircraft Tech Log</th><th colspan="3">Last 7 days (from <?=$first_day?> to <?=$last_day?> included)</th><th colspan="3">Year to date</th></tr>
+<tr class="text-center"><th></th>      <th>Last</th><th>Limit</th><th>Delta</th><th>Next Operation</th><th></th>                 <th>Engine</th><th>Flight</th><th>Landings</th>                       <th>Engine</th><th>Flight</th><th>Landings</th></tr>
 </thead>
 <tbody>
 <?php
@@ -98,7 +98,7 @@ while ($row = mysqli_fetch_array($result)) {
 $atl = array() ;
 $incidents = new Incidents(null, ['opened', 'inprogressnoaog', 'inprogressaog', 'camonoaog', 'camoaog']) ;
 foreach($incidents as $incident) {
-    $description = "<li class=\"text-start\">#$incident->id <span class=\"badge bg-primary\"><i class=\"bi bi-clock-fill\"></i> $incident->daysPending</span>
+    $description = "<li class=\"text-start\"><a href=\"mobile_incident.php?incident=$incident->id\">#$incident->id</a> <span class=\"badge bg-primary\"><i class=\"bi bi-clock-fill\"></i> $incident->daysPending</span>
         $incident->severity: $incident->firstText</li>" ;
     if (isset($atl[$incident->plane]))
         $atl[$incident->plane] .= $description ;
