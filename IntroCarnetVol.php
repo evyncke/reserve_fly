@@ -937,10 +937,18 @@ else {
 		print("var default_date_heure_depart=\"$start_UTC\";\n");
 		if($end_Time != NULL && $end_Time != '') {
 			print("var default_date_heure_depart=\"$end_Time\";\n");
-		}		
-		print("var default_flight_reference=\"$flightRow[f_reference]\"\n");
-		print("var default_flight_type=\"$flightRow[f_type]\"\n");
-		if($flightRow['f_reference']!='') {
+		}
+        $fReference='';
+        if (isset($flightRow['f_reference'])) {
+            $fReference=$flightRow['f_reference'];
+        }
+		print("var default_flight_reference=\"fReference\"\n");
+        $fType='';
+        if (isset($flightRow['f_type'])) {
+            $fReference=$flightRow['f_type'];
+        }
+		print("var default_flight_type=\"f_type\"\n");
+		if($fReference!='') {
 			print("var default_flight_id=$flightRow[f_id]\n");
 			print("var default_share_type=\"CP1\";\n");
 			if($flightRow['f_type']=='D') {
