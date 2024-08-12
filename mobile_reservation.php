@@ -436,7 +436,7 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 </div>
 
 <div class="row">
-	<div class="col d-none d-md-block text-bg-light">
+	<div class="col d-none d-md-block text-bg-light border rounded-3 mx-lg-3">
 			<table id="ephemeridesTable">
 			<tr><td>Jour aéronautique:</td><td></td>
 				<td>Coucher du soleil:</td><td></td></tr>
@@ -456,7 +456,7 @@ $result_news = mysqli_query($mysqli_link, "SELECT * FROM $table_news
 	LIMIT 0,5") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
 
 if (mysqli_num_rows($result_news) or $userIsAdmin) {
-	print('<div class="col d-none d-md-block text-bg-info">') ;
+	print('<div class="col d-none d-md-block text-bg-info border rounded-3  mx-lg-3">') ;
 	while ($row_news = mysqli_fetch_array($result_news)) {
 		$subject = db2web($row_news['n_subject']) ;
 		$text = db2web(nl2br($row_news['n_text'])) ;
@@ -469,7 +469,7 @@ if (mysqli_num_rows($result_news) or $userIsAdmin) {
 }
 mysqli_free_result($result_news) ;
 ?>
-		<div class="col" id="reservationDetails" style="width: 30%;"></div>
+		<div class="col border rounded-3  mx-lg-3" id="reservationDetails" style="width: 30%;"></div>
 		<div class="col d-none d-md-block" id="webcamCell">
 			<a href="" id="webcamURI" border="0"><img id="webcamImg" style="width: 256px; height: 192px;" alt="Webcam" onStalled="imgStalled();"></a>
 		</div><!--col-->
