@@ -45,6 +45,10 @@ function displayMETAR(station) {
 	var XHR=new XMLHttpRequest();
 
 	document.getElementById('metarMessage').innerHTML = '<em style="font-size: 8wv;">... fetching data over the Internet ...</em>' ;
+	if (window.location.search.search('kiosk') >= 0)
+		document.getElementById('metarMessage').style.fontSize = "3vw" ;
+	else
+		document.getElementById('metarMessage').style.fontSize = "1em" ;
 	XHR.onreadystatechange = function() {
 		if(this.readyState  == 4) {
 			if(this.status  == 200 || this.status == 304) { // OK or not modified
@@ -54,7 +58,10 @@ function displayMETAR(station) {
 				} catch(err) {
 					return ;
 				}
-				elem.style.fontSize = "3vw" ;
+				if (window.location.search.search('kiosk') >= 0)
+					elem.style.fontSize = "3vw" ;
+				else
+					elem.style.fontSize = "1em" ;
 				if (response.error != '') {
 					elem.innerHTML = response.error ;
 				} else {
