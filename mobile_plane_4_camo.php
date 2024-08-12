@@ -30,18 +30,37 @@ if ($userId == 0) {
 }
 
 require_once 'mobile_header5.php' ;
-if (!($userIsAdmin or $userIsInstructor)) journalise($userId, "F", "Vous devez être admin ou FI pour voir cette page") ;
+require_once 'incident.class.php' ;
+if (!($userIsAdmin )or $userIsInstructor or $userIsMechanic) journalise($userId, "F", "Vous devez être admin ou FI ou mecano pour voir cette page") ;
 
 $first_day = date('Y-m-d', time() - 7 * 24 * 60 * 60) ; // Go back 7 days
 $last_day = date('Y-m-d') ;
 $first_day_year = date('Y') . '-01-01' ;
+
+function Cell($m) {
+    if ($m == '' or $m == 0)
+        print("<td></td>") ;
+    else {
+        $hours = floor($m / 60) ;
+        $minutes = $m % 60 ;
+        print("<td>$hours:$minutes</td>") ;
+    }
+}
+
+function delta2BSClass($n) {
+    if ($n > 5)
+        return '' ;
+    else if ($n < 0)
+        return 'text-bg-danger' ;
+    return 'text-bg-warning' ;
+}
 ?>
 <div class="container-fluid">
 <h2>Weekly plane report for CAMO</h2>
 <table class="col-sm-12 col-lg-8 table table-hover table-bordered table-striped">
 <thead>
-<tr class="text-center"><th>Plane</th> <th colspan="4">Engine</th>                                <th colspan="3">Last 7 days (from <?=$first_day?> to <?=$last_day?> included)</th><th colspan="3">Year to date</th></tr>
-<tr class="text-center"><th></th>      <th>Last</th><th>Limit</th><th>Delta</th><th>Operation</th> <th>Engine</th><th>Flight</th><th>Landings</th>                       <th>Engine</th><th>Flight</th><th>Landings</th></tr>
+<tr class="text-center"><th>Plane</th> <th colspan="4">Engine Index</th>                                <th>Tech Log</th><th colspan="3">Last 7 days (from <?=$first_day?> to <?=$last_day?> included)</th><th colspan="3">Year to date</th></tr>
+<tr class="text-center"><th></th>      <th>Last</th><th>Limit</th><th>Delta</th><th>Next Operation</th> <th></th>        <th>Engine</th><th>Flight</th><th>Landings</th>                       <th>Engine</th><th>Flight</th><th>Landings</th></tr>
 </thead>
 <tbody>
 <?php
@@ -75,32 +94,40 @@ $ytd = array() ;
 while ($row = mysqli_fetch_array($result)) {
     $ytd[$row['id']] = $row ;
 }
-
-function Cell($m) {
-    if ($m == '' or $m == 0)
-        print("<td></td>") ;
-    else {
-        $hours = floor($m / 60) ;
-        $minutes = $m % 60 ;
-        print("<td>$hours:$minutes</td>") ;
-    }
+// Per plane: ATL
+$atl = array() ;
+$incidents = new Incidents(null, ['opened', 'inprogressnoaog', 'inprogressaog', 'camonoaog', 'camoaog']) ;
+foreach($incidents as $incident) {
+    $description = "<li class=\"text-start\">#$incident->id <span class=\"badge bg-primary\"><i class=\"bi bi-clock-fill\"></i> $incident->daysPending</span>
+        $incident->severity: $incident->firstText</li>" ;
+    if (isset($atl[$incident->plane]))
+        $atl[$incident->plane] .= $description ;
+    else
+        $atl[$incident->plane] = $description ;
 }
+
+
 foreach($ytd as $id => $ytd_row) {
-    if (isset($weekly[$id]))
+    if (isset($weekly[$id])) // Some aircfrafts have not flown this week...
         $weekly_row = $weekly[$id] ;
     else
         $weekly_row = array('engine_minutes' => '', 'flight_minutes' => '', 'landings' => '') ;
-    print("<tr class=\"text-center\"><td>$id</td>") ;
+    print("<tr class=\"text-center\"><td class=\"text-nowrap\">$id</td>") ;
     if ($ytd_row['compteur_vol'] != 0)
         print("<td>$ytd_row[latest_flight]</td>") ;
     else
         print("<td>$ytd_row[latest_engine]</td>") ;
     print("<td>$ytd_row[entretien]</td>") ;
-    if ($ytd_row['compteur_vol'] != 0)
-        print("<td>" . ($ytd_row['entretien'] - $ytd_row['latest_flight']) . "</td>") ;
-    else
-        print("<td>" . ($ytd_row['entretien'] - $ytd_row['latest_engine']) . "</td>") ;
+    if ($ytd_row['compteur_vol'] != 0) {
+        print("<td class=\"" . delta2BSClass($ytd_row['entretien'] - $ytd_row['latest_flight']) . "\">" . ($ytd_row['entretien'] - $ytd_row['latest_flight']) . "</td>") ;
+    } else {
+        print("<td class=\"" .  delta2BSClass($ytd_row['entretien'] - $ytd_row['latest_engine']) . "\">" . ($ytd_row['entretien'] - $ytd_row['latest_engine']) . "</td>") ;
+    }
     print("<td>$ytd_row[type_entretien]</td>") ;
+    if (isset($atl[$id]))
+        print("<td>$atl[$id]</td>") ;
+    else
+        print("<td></td>") ;
     Cell($weekly_row['engine_minutes']) ;
     Cell($weekly_row['flight_minutes']) ;
     print("<td>$weekly_row[landings]</td>") ;
