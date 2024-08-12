@@ -2044,7 +2044,7 @@ function presentationByDay(event) {
 	displayMETAR() ; // As the date has changed, last action to be taken as it is the least important
 }
 
-function init() {
+function initBooking() {
 	console.log("start init(), userId=" + userId + ", userName=" + userName + ', ' + navigator.userAgent) ;
 	document.onkeydown = function(event) {
 		event = event ;

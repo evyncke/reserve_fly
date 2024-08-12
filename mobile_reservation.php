@@ -318,16 +318,10 @@ function imgStalled() {
 </script>
 <!-- End Matomo Code -->
 </head>
-<body onload="init();">
+<body onload="initBooking();">
 
 <h2>Réservation des avions</h2>
 <div id="logDiv" style="visibility: collapse; background-color: yellow;"></div>
-<span id="noScript" style="color: red; font-size: x-large;">Pour avoir acc&egrave;s &agrave; la r&eacute;servation, <b>javascript</b> doit &ecirc;tre activ&eacute;. 
-Ce n'est pas le cas avec votre navigateur Internet.</span>
-<script>
-	document.getElementById('noScript').innerHTML = '' ;
-	document.getElementById('noScript').style.visibility = 'hidden' ;
-</script>
 <div class="userPrivileges">
 <?php
 if ($userId != 0) {
@@ -433,33 +427,28 @@ if ($userId == 0) {
 	}
 	} // Not $isInstructor
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
-} // ($userId == 0)
-// Facebook log-in
+} 
 ?>
-<!--div class="fb-login-button" data-max-rows="1" data-size="small" data-show-faces="true" data-button-type="continue_with" data-auto-logout-link="false" data-use-continue-as="true" scope="public_profile" onlogin="checkLoginState();"></div--> <span id="helloFBUser"></span>
-
-
 
 <script>
 	var userRatingValid = <?=($userRatingValid) ? 'true' : 'false' ?> ; // Was 'const' but IE does not support it
 </script>
-<!--- a href="<?=$_SERVER['PHP_SELF']?>">Passer en mode plein &eacute;cran.</a-->
 </div>
-<table border="0" width="100%">
-	<tr style="vertical-align: top;">
-		<td style="width: 370;">
-			<table id="ephemeridesTable"  class="hidden-phone">
-			<tr><td class="ephemeridesCell">Jour a&eacute;ronautique:</td><td class="ephemeridesCell"></td>
-				<td class="ephemeridesCell">Coucher du soleil:</td><td class="ephemeridesCell"></td></tr>
-			<tr><td class="ephemeridesCell">Lever du soleil:</td><td class="ephemeridesCell"></td>
-				<td class="ephemeridesCell">Nuit a&eacute;ronautique:</td><td class="ephemeridesCell"></td></tr>
-			<tr><td class="ephemeridesCell">Ouverture a&eacute;roport:</td><td class="ephemeridesCell"></td>
-				<td class="ephemeridesCell">Fermeture a&eacute;roport:</td><td class="ephemeridesCell"></td></tr>
-			<tr><td class="ephemeridesCell" colspan="4"><i><b>En heure locale de <?=$default_airport?> et pour info seulement.</b><br/>
+
+<div class="row">
+	<div class="col d-none d-md-block text-bg-light">
+			<table id="ephemeridesTable">
+			<tr><td>Jour aéronautique:</td><td></td>
+				<td>Coucher du soleil:</td><td></td></tr>
+			<tr><td>Lever du soleil:</td><td></td>
+				<td>Nuit aéronautique:</td><td></td></tr>
+			<tr><td>Ouverture aéroport:</td><td></td>
+				<td>Fermeture aéroport:</td><td></td></tr>
+			<tr><td colspan="4"><i><b>En heure locale de <?=$default_airport?> et pour info seulement.</b><br/>
 					Heure locale &agrave; <?=$default_airport?>:  <span id="hhmmLocal"></span><br/>
 					Heure universelle:  <span id="hhmmUTC"></span>Z</i></td></tr>
-			</table>	
-		</td>
+			</table>
+	</div><!-- col -->	
 <?php
 $result_news = mysqli_query($mysqli_link, "SELECT * FROM $table_news
 	WHERE n_stop >= CURRENT_DATE() and n_start <= CURRENT_DATE()
@@ -467,7 +456,7 @@ $result_news = mysqli_query($mysqli_link, "SELECT * FROM $table_news
 	LIMIT 0,5") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
 
 if (mysqli_num_rows($result_news) or $userIsAdmin) {
-	print('<td class="hidden-phone" style="width: 25%;"><div id="newsDiv"><ul>') ;
+	print('<div class="col d-none d-md-block text-bg-info">') ;
 	while ($row_news = mysqli_fetch_array($result_news)) {
 		$subject = db2web($row_news['n_subject']) ;
 		$text = db2web(nl2br($row_news['n_text'])) ;
@@ -475,16 +464,18 @@ if (mysqli_num_rows($result_news) or $userIsAdmin) {
 		print("<li><b>$subject</b>: $text$delete_action</li>\n") ;
 	}
 	if ($userIsAdmin) print('<li><a href="news_add.php">Ajouter une nouvelle</a></li>') ;
-	print('</ul></div></td>') ;
+	print('</ul>
+	</div><!-- col -->') ;
 }
 mysqli_free_result($result_news) ;
 ?>
-		<td id="reservationDetails" style="width: 30%;"></td>
-		<td id="webcamCell" class="hidden-phone">
+		<div class="col" id="reservationDetails" style="width: 30%;"></div>
+		<div class="col d-none d-md-block" id="webcamCell">
 			<a href="" id="webcamURI" border="0"><img id="webcamImg" style="width: 256px; height: 192px;" alt="Webcam" onStalled="imgStalled();"></a>
-		</td>
-	</tr>
-</table>
+		</div><!--col-->
+
+</div><!-- row -->
+
 <br/>
 <table class="planningRuler">
 <tr stylex="vertical-align: top; background: white;">
@@ -704,6 +695,7 @@ if ($userIsInstructor || $userIsAdmin) {
 </center>
 </div>
 <!-- end of div for the agenda item window-->
+
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('mobile_reservation.php')) ;
 $version_js = date ("Y-m-d H:i:s.", filemtime('mobile_reservation.js')) ;

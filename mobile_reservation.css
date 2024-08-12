@@ -97,14 +97,9 @@ span#planningDayOfWeek { width: 80px; font-size: 14; text-align: center; vertica
 input#planningDate { width: 90px; font-size: 14; text-align: center; vertical-align: top; }
 .planningTable { border-spacing: 1px; margin-left: auto; margin-right: auto; font-size: /*0.75em*/ 1em; border-width: 1px; line-height: 1 ;}
 
-#reservationDetails {border-style: dotted; height: 120px; max-height: 120px; overflow: hidden; background: lightgray; vertical-align: top; font-size: 1em; line-height: 1; visibility: visible;}
-#ephemeridesTable {color: gray; border-style: solid; border-radius: 5px; background: white ; font-size: 1em; line-height:1 ; }
-#ephemeridesCell {color: gray; border-style: solid; }
+#reservationDetails {border-style: dotted; background: lightgray; vertical-align: top; font-size: 1em; line-height: 1; visibility: visible;}
 
-#newsDiv {border-style: dotted; background: lightblue;
-	border-width: 1px; padding: 5px ; margin-right: 20px ;
-	font-size: 1em; line-height: 1 ; 
-}
+#ephemeridesTable {border-style: solid; border-radius: 5px; line-height:1 ; }
 
 .toggleInstructorAgendaSpan {
 	display: block; font-size: small; text-align: center ;
