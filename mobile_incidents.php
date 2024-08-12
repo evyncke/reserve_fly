@@ -133,7 +133,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
             <td>
                 <a href=\"mobile_incident.php?incident=$incident->id\" title=\"Edit ATL\">$incident->id <i class=\"bi bi-pen-fill\"></i></a>
             </td>
-            <td><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a><br/>$incident->planeType</td>
+            <td class=\"text-nowrap\"><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a><br/>$incident->planeType</td>
             <td>$incident->severity</td>
             <td>$incident->firstDate&nbsp;&nbsp;<span class=\"badge bg-primary\"><i class=\"bi bi-clock-fill\"></i> $incident->daysPending</span></td>   
             <td>$incident->firstText</td>   
