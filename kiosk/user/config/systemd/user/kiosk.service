@@ -1,0 +1,16 @@
+[Unit]
+Description=Run the RAPCS kiosk with Chrome
+After=graphical.target
+Wants=graphical.target
+
+[Service]
+Type=simple
+Environment="DISPLAY=:0"
+User=rapcs
+Group=rapcs
+ExecStart=/usr/bin/chromium-browser --noerrdialogs --disable-infobars --no-first-run --start-maximized --start-fullscreen --app="https://www.spa-aviation.be/resa/mobile_metar.php?kiosk=y"
+Restart=Always
+ExecReload=/bin/kill -s HUP $MAINPID
+
+[Install]
+WantedBy=graphical.target
