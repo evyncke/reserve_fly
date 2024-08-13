@@ -57,19 +57,6 @@ td.onsite { background-color: #97F024; }
 td.oncall { background-color: yellow; }
 td.unavailable { background-color: lightblue; }
 
-
-#bookingDiv { visibility: hidden; display: none; border-style: solid; border-radius: 10px ; background: lightgray;
-	width:400px; border-width: 1px; padding: 5px ; box-shadow: 5px 5px 10px gray;
-	font-size: 1em; z-index: 10;}
-
-#cancelBookingDiv { visibility: hidden; display: none; border-style: solid; border-radius: 10px ; background: salmon;
-	width:400px; border-width: 1px; padding: 5px ; box-shadow: 5px 5px 10px gray;
-	font-size: 1em; position: absolute; z-index: 10;}
-
-#agendaItemDiv { visibility: hidden; display: none; border-style: solid; border-radius: 10px ; background: lightgray;
-	width:400px; border-width: 1px; padding: 5px ; box-shadow: 5px 5px 10px gray;
-	font-size: 1em; position: absolute;}
-
 .bookingErrorMessage { background-color: red; }
 #bookingMessageDiv {width: 300px; z-index: 3; background-color: lightgray; border-width: 1px; border-style: solid; border-color: black;
 	padding: 5px; font-size: 1em; visibility: hidden; border-radius: 5px; box-shadow: 3px 3px 10px gray;
@@ -92,7 +79,7 @@ td.unavailable { background-color: lightblue; }
 .planningRuler { height: 32px ; margin-left: auto; vertical-align: text-top ;  margin-right: auto; }
 .planningRulerCell { height: 32px ; padding-left: 10px; padding-right: 10px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
 .planningRulerCellCalendar { height: 32px ; padding-left: 1px; padding-right: 1px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
-.planningRulerCellLarge { height: 32px ; width: 170px; padding-left: 5px; padding-right: 1px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
+.planningRulerCellLarge { height: 32px ; width: 200px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
 span#planningDayOfWeek { width: 80px; font-size: 14; text-align: center; vertical-align: top; }
 input#planningDate { width: 90px; font-size: 14; text-align: center; vertical-align: top; }
 .planningTable { border-spacing: 1px; margin-left: auto; margin-right: auto; font-size: /*0.75em*/ 1em; border-width: 1px; line-height: 1 ;}

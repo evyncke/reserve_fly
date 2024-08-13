@@ -132,7 +132,6 @@ function buttonDisplayIf(id, cond) {
 
 function hideBookingMessage() {
 	// Clear any booking message
-	console.log("hideBookingMessage()") ;
 	jQuery('.modal').removeClass('fade') ;
 	jQuery('.modal-backdrop').remove();
 	jQuery("#bookingMessageModal").hide() ;
@@ -286,7 +285,7 @@ function ressourceHasChanged(thisSelect) {
 				document.getElementById('webcamURI').href = allPlanes[i].photo ;
 			}
 			if (allPlanes[i].actif == 2)
-				document.getElementById('planeComment').innerHTML += "<br/><span style=\"color: red\"><b>\nCet avion est r&eacute;serv&eacute; aux instructeurs et &agrave; leurs &eacute;l&egrave;ves.\n</b></span>\n" ;
+				document.getElementById('planeComment').innerHTML += "<br/><span style=\"color: red\"><b>\nCet avion est réservé aux instructeurs et à leurs élèves.\n</b></span>\n" ;
 			if (allPlanes[i].commentaire)
 				document.getElementById('planeComment').innerHTML += "<br/><span style=\"color: red\">\n" + allPlanes[i].commentaire + "</span>\n" ;
 			if (allPlanes[i].incidents != '')
@@ -470,7 +469,7 @@ function showPilotDetails(id) {
 		if (booking.cell_phone)
 			span.innerHTML += '<br/>Mobile: <a href="tel:' + booking.cell_phone + '">' + booking.cell_phone + '</a>';
 		if (booking.home_phone)
-			span.innerHTML += '<br/>Priv&eacute;: <a href="tel:' + booking.home_phone + '">' + booking.home_phone + '</a>';
+			span.innerHTML += '<br/>Privé: <a href="tel:' + booking.home_phone + '">' + booking.home_phone + '</a>';
 		if (booking.work_phone)
 			span.innerHTML += '<br/>Prof.: <a href="tel:' + booking.work_phone + '">' + booking.work_phone + '</a>';
 		if (booking.email)
@@ -491,7 +490,7 @@ function showPilotDetails(id) {
 		if (booking.instructorCellPhone)
 			span.innerHTML += '<br/>Mobile: <a href="tel:' + booking.instructorCellPhone + '">' + booking.instructorCellPhone + '</a>';
 		if (booking.instructorHomePhone)
-			span.innerHTML += '<br/>Priv&eacute;: ' + booking.instructorHomePhone ;
+			span.innerHTML += '<br/>Privé: ' + booking.instructorHomePhone ;
 		if (booking.instructorWorkPhone)
 			span.innerHTML += '<br/>Prof.: ' + booking.instructorWorkPhone ;
 		if (booking.instructorEmail)
@@ -592,12 +591,13 @@ function initPlanningTable() {
 		// For all instructors, create empty cells
 		instructorPlanningTable.style.visibility = 'visible' ;
 		instructorPlanningTable.style.display = 'table' ;
-		for (var instructor = 1; instructor < instructors.length; instructor++) { // Instructors[0] is always 'solo'
+		// FI TEST
+		for (var instructor = 1; instructor < instructors.length+1; instructor++) { // Instructors[0] is always 'solo'
 			newRow = instructorPlanningTable.insertRow(-1) ;
 			newRow.insertCell(0) ;
 			newRow.cells[0].className = 'plane_cell' ;
 			for (i = 1; i < columnCount; i ++) {
-				newRow.insertCell(i).className = 'slot 	available' ;
+				newRow.insertCell(i).className = 'slot available' ;
 			}
 		}
 	}
@@ -606,8 +606,9 @@ function initPlanningTable() {
 }
 
 function jumpPlanningDate() {
-	var tokens = document.getElementById('planningDate').value.split('/') ;
-	var workDate = new Date(tokens[2], tokens[1] - 1 , tokens[0], 0, 0, 0, 0) ;
+	// Tricky as it seems that an input type=date gives 2024-08-12
+	var tokens = document.getElementById('planningDate').value.split('-') ;
+	var workDate = new Date(tokens[0], tokens[1] - 1 , tokens[2], 0, 0, 0, 0) ;
 	planningDay = workDate.getDate() ;
 	planningDayOfWeek = workDate.getDay() ;
 	planningMonth = workDate.getMonth() + 1 ; // Stupid JS starts month at 0 !
@@ -747,33 +748,33 @@ function displayBookingDetails(id) {
 	span = document.getElementById('reservationDetails') ;
 	span.style.backgroundColor = 'lightGray' ; // METAR displayed in the same span can change the color
 	span.innerHTML = '<b>' + booking.plane + '</b><br/>' ;
-	span.innerHTML += "R&eacute;servation pour: " + booking.name ;
+	span.innerHTML += "Réservation pour: " + booking.name ;
 	span.innerHTML += "<br/>Faite le " + booking.bookedDate + '.';
 	if (booking.user != booking.bookedById) {
 		switch (Number(booking.type)) {
 			case bookingTypeAdmin: bookerQuality = "administrateur web" ; break ;
 			case bookingTypeInstructor: bookerQuality = "instructeur" ; break ;
-			case bookingTypeMaintenance: bookerQuality = "m&eacute;cano" ; break ;
+			case bookingTypeMaintenance: bookerQuality = "mécano" ; break ;
 			case bookingTypePilot: bookerQuality = "pilote" ; break ;
 			case bookingTypeCustomer: bookerQuality = "administrateur vols" ; break ;
 			case bookingTypeOnHold: bookerQuality = "pilote" ; break ;
 			default: bookerQuality = "??? erreur system" ;
 		}
-		span.innerHTML += '<br/>Effectu&eacute;e par ' + booking.bookedByName + ' en tant que ' + bookerQuality + '.' ;
+		span.innerHTML += '<br/>Effectuée par ' + booking.bookedByName + ' en tant que ' + bookerQuality + '.' ;
 	}
 	span.innerHTML += '<br/>' ;
 	if (booking.instructorId != -1)
 		span.innerHTML += 'Instructeur vol: ' + booking.instructorName + '<br/>' ;
-	span.innerHTML += 'R&eacute;servation du: ' + booking.start + ", " ;
-	span.innerHTML += '&agrave;: ' + booking.end + " <i>(" + booking.duration + " heure(s) de vol)</i><br/>" ;
+	span.innerHTML += 'Réservation du: ' + booking.start + ", " ;
+	span.innerHTML += 'à: ' + booking.end + " <i>(" + booking.duration + " heure(s) de vol)</i><br/>" ;
 	if (booking.log_start) {
 		span.innerHTML += 'Carnet de route: ' + booking.log_start + ", " ;
-		span.innerHTML += '&agrave;: ' + booking.log_end + ' (' + booking.log_pilotName + ')<br/>'  ;
+		span.innerHTML += 'à: ' + booking.log_end + ' (' + booking.log_pilotName + ')<br/>'  ;
 	}
 	if (booking.type == bookingTypeMaintenance) 
 		span.innerHTML += '<span style="color: red;">Maintenance</span><br/>' ;
 	else if (booking.from != '' || booking.to != '') {
-		span.innerHTML += 'De: ' + booking.from + ' &agrave; ' + booking.to + '<br/>' ;
+		span.innerHTML += 'De: ' + booking.from + ' à ' + booking.to + '<br/>' ;
 		if (booking.via1 != '' || booking.via2 != '') {
 			span.innerHTML += 'Via: ' + booking.via1 + ' et ' + booking.via2 + '<br/>' ;
 		}
@@ -819,15 +820,15 @@ function displayAgendaItemDetails(id) {
 		if (allFIAgendas[id].comment !== undefined)
 			span.innerHTML += 'Commentaire: <i>' + allFIAgendas[id].comment + '</i><br/>' ;
 		if (allFIAgendas[id].studentOnly !== undefined && allFIAgendas[id].studentOnly)
-			span.innerHTML += '<b>Uniquement pour les &eacute;l&egrave;ves.</b><br/>' ;
+			span.innerHTML += '<b>Uniquement pour les élèves.</b><br/>' ;
 		if (allFIAgendas[id].callType == 0x01)
 			span.innerHTML += 'Disponible au clubhouse.<br/>' ;
 		else {
-			span.innerHTML += 'Rendez-vous &agrave; prendre ' ;
+			span.innerHTML += 'Rendez-vous à prendre ' ;
 			var callTypes = new Array() ;
 			if (allFIAgendas[id].callType & 0x01) callTypes.push('au clubhouse');
 			if (allFIAgendas[id].callType & 0x02) callTypes.push('par email');
-			if (allFIAgendas[id].callType & 0x04) callTypes.push('par t&eacute;l&eacute;phone');
+			if (allFIAgendas[id].callType & 0x04) callTypes.push('par téléphone');
 			if (allFIAgendas[id].callType & 0x08) callTypes.push('par SMS');
 			span.innerHTML += callTypes.join(', ') ;
 			span.innerHTML += '<br/>' ;
@@ -919,7 +920,7 @@ function cancelOldBooking(bookingId) {
 				if (response.error != '') {
 					alert("Il y a eu une erreur: " + response.error) ;
 				} else {
-					alert("R&eacute;servation effac&eacute;e: " + response.message + "\nVeuillez rafra&icirc;chir la page") ;
+					alert("Réservation effacée: " + response.message + "\nVeuillez rafra&icirc;chir la page") ;
 				}
 			}
 		}
@@ -1007,7 +1008,6 @@ function modifyBooking(id) {
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
 		if(this.readyState  == 4) {
-			console.log('callback in modifyBooking()') ;
 			hideWaiting() ;
 			if(this.status  == 200) {
 				try {
@@ -1288,20 +1288,18 @@ function showDivDetails(div, event) {
 }
 
 function hideEditBookingDetails() {
-	console.log("hideEditBookingDetails()") ;
 	jQuery('.modal-backdrop').remove() ;
 	jQuery('#bookingModal').modal('hide') ;
 	currentlyDisplayedBooking = null ;
 }
 
-function hideCancelBookingDetails() {
-	console.log("hideCancelBookingDetails()") ;
+function hideCancelBookingDetails() {;
 	jQuery('#cancelBookingModal').modal('hide') ;
 	currentlyDisplayedBooking = null ;
 }
 
 function hideEditAgendaItemDetails() {
-	hideDivDetails('agendaItemDiv') ;
+	jQuery('#agendaItemModal').modal('hide') ;
 	currentlyDisplayedAgendaItem = null ;
 }
 
@@ -1413,7 +1411,7 @@ function editAgendaItemDetails(event) {
 	if (id == 0) return ; // When clicking on pilot details, this event is also triggered :-(
 	currentlyDisplayedAgendaItem = id ;
 	var item = allFIAgendas[id] ;
-	document.getElementById('agendaItemTitle').innerHTML = "Annuler/modifier une disponibilit&eacute;" ; 
+	document.getElementById('agendaItemTitle').innerHTML = "Annuler/modifier une disponibilité" ; 
 	document.getElementById("agendaItemInstructorSelect").value = item.fi ;
 	// Time
 	document.getElementById("agendaItemDateStart").value = item.start.substr(0,10).replace(/\//g, '-') ;
@@ -1434,8 +1432,8 @@ function editAgendaItemDetails(event) {
 	buttonHide('addAgendaItemButton') ;
 	buttonDisplayIf('modifyAgendaItemButton', (userIsAdmin || userIsInstructor)) ;
 	buttonDisplayIf('cancelAgendaItemButton', (userIsAdmin || userIsInstructor)) ;
-	// Make the form appear
-	showDivDetails('agendaItemDiv', event) ;
+	// Make the modal form appear
+	jQuery('#agendaItemModal').modal('show');
 }
 
 // TODO when selecting another plane, then refresh the planeComment
@@ -1454,7 +1452,7 @@ function newBookingDetails(event) {
 			if (document.getElementById('webcamImg'))
 				document.getElementById('webcamImg').src = allPlanes[i].photo ;
 			if (allPlanes[i].actif == 2)
-				document.getElementById('planeComment').innerHTML += "<br/><span style=\"color: red;\">\n<b>Cet avion est r&eacute;serv&eacute; aux instructeurs et &agrave; leurs &eacute;l&egrave;ves.\n</b></span>\n" ;
+				document.getElementById('planeComment').innerHTML += "<br/><span style=\"color: red;\">\n<b>Cet avion est réservé aux instructeurs et à leurs élèves.\n</b></span>\n" ;
 			if (allPlanes[i].commentaire)
 				document.getElementById('planeComment').innerHTML += "<br/><span style=\"color: red;\">\n" + allPlanes[i].commentaire + "</spa,>\n" ;
 			if (allPlanes[i].incidents == 'NOHAZARD')
@@ -1527,14 +1525,12 @@ function newBookingDetails(event) {
 	buttonHide('cancelMaintenanceButton') ;
 	buttonHide('engineHoursButton') ;
 	// Make the modal form appear
-	// showModalDetails('bookingModal', event)
 	jQuery('#bookingModal').modal('show');
 }
 
 function newAgendaItemDetails(event) {
-	myLog('Start of newAgendaItemDetails() Y-M-D = ' + planningYear + '-' + planningMonth + '-' + planningDay) ;
 	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
-	document.getElementById('agendaItemTitle').innerHTML = "Ajout d'une disponibilit&eacute;" ; 
+	document.getElementById('agendaItemTitle').innerHTML = "Ajout d'une disponibilité" ; 
 	// Pre-set the form fields based on the clicked cell, format: FI-id/row/year/month/day/hour/minute
 	cellDetails = event.target.id.split('/') ;
 	document.getElementById("agendaItemInstructorSelect").value = cellDetails[0] ;
@@ -1553,8 +1549,8 @@ function newAgendaItemDetails(event) {
 	buttonDisplayIf('addAgendaItemButton', userIsInstructor || userIsAdmin) ;
 	buttonHide('modifyAgendaItemButton') ;
 	buttonHide('cancelAgendaItemButton') ;
-	// Make the form appear
-	showDivDetails('agendaItemDiv', event) ;
+	// Make the modal form appear
+	jQuery('#agendaItemModal').modal('show');
 }
 
 // Called when a new booking is received (by AJAX) in order to change the displayed table on specific row
@@ -1670,7 +1666,7 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 			thisCell.innerHTML += '<br/><b><i>' + pInitials + '</i></b>' ;
 		}
 		// Add a clickable icons to display details
-		thisCell.innerHTML += '<br/><a href="javascript:showPilotDetails(\'' + booking.id + '-' + booking.log_id + '\');"><img src="usl_search_icon.png" alt="?" title="D&eacute;tails"></a>' ;
+		thisCell.innerHTML += '<br/><a href="javascript:showPilotDetails(\'' + booking.id + '-' + booking.log_id + '\');"><i class="bi bi-eye-fill text-white" title="Détails"></i></a>' ;
 	}
 }
 
@@ -1955,7 +1951,7 @@ function refreshPlanningTable() {
 			// }
 			// Check for rating validity 
 			if (!allPlanes[plane].qualifications_requises) {
-				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <img src="forbidden-icon.png" width="12" height="12" title="Manque la qualification" alt="X">' ;
+				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <i class="bi bi-ban text-danger" width="12" height="12" title="Manque la qualification" alt="X"></i>' ;
 			} else {
 				// Ratings are valid, let's do further check whether plane can be booked
 				var bookingAllowed = allPlanes[plane].reservation_permise ;
@@ -1970,15 +1966,15 @@ function refreshPlanningTable() {
 				if (bookingAllowed && allPlanes[plane].actif == 2)
 					bookingAllowed = false ;
 				if (!bookingAllowed)
-					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <img src="exclamation-icon.png" width="12" height="12" title="Pas de vol récent" alt="!">' ;
+					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <i class="bi bi-exclamation-triangle-fill text-danger" width="12" height="12" title="Pas de vol récent" alt="!"></i>' ;
 			}
 			// Check for incidents ATL
 			if (allPlanes[plane].incidents == 'NOHAZARD')
 				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id + '" target="_blank">' +
-					'<span class="material-symbols-rounded" style="font-size: 12px; color: orangeRed;" title="Consulter l\'ATL NOHAZARD">handyman</span></a>';
+					'<span class="material-symbols-rounded text-warning" width="12" height="12" style="color: orangeRed;" title="Consulter l\'ATL NOHAZARD">handyman</span></a>';
 			else if (allPlanes[plane].incidents == 'HAZARD')
 				planePlanningTable.rows[1 + plane].cells[0].innerHTML +=  ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id + '" target="_blank">' +
-					'<span class="material-symbols-rounded" style="font-size: 12px; color: red;" title="Consulter l\'ATL HAZARD">handyman</span></a>';
+					'<span class="material-symbols-rounded text-danger" width="12" height="12" title="Consulter l\'ATL HAZARD">handyman</span></a>';
 			// add for engine hours using the most recent data but not for ressources
 			if (allPlanes[plane].ressource == 0) {
 				// Add FlightAware link only for members, need to stop event propagation to the TD click causing a switch of presentation
@@ -1986,7 +1982,7 @@ function refreshPlanningTable() {
 					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="https://flightaware.com/live/flight/' + allPlanes[plane].id.toUpperCase() +
 						'" onclick="event.stopPropagation();" target="_blank"><img src="fa.ico" border="0" width="12" height="12" title="Dernier vol sur Flightaware"></a>' ;
 				compteur = allPlanes[plane].compteur_pilote ;
-				planePlanningTable.rows[1 + plane].cells[0].innerHTML += '<br/>Compteur: ' + compteur + '<br/>Maint. &agrave;: ' + allPlanes[plane].entretien ;
+				planePlanningTable.rows[1 + plane].cells[0].innerHTML += '<br/>Compteur: ' + compteur + '<br/>Maint. à: ' + allPlanes[plane].entretien ;
 				if (allPlanes[plane].entretien <= compteur)
 					planePlanningTable.rows[1 + plane].cells[0].style.color = 'red' ;
 				else if (allPlanes[plane].entretien <= compteur + 5)
@@ -2007,9 +2003,13 @@ function refreshPlanningTable() {
 			instructorPlanningTable.rows[instructor].cells[0].innerHTML = instructors[instructor].name ;
 			refreshInstructorPlanningRow(instructor - 1, instructors[instructor].id, planningDay, planningMonth, planningYear) ;
 		}
+		// TEST FI
+		instructorPlanningTable.rows[instructor].cells[0].innerHTML = 'éric test' ;
+		refreshInstructorPlanningRow(instructor - 1, 62, planningDay, planningMonth, planningYear) ;
+		// END TEST FI
 	}
 	document.getElementById('planningDayOfWeek').innerHTML = (planningDayOfWeek == -1) ? '' : weekdays[planningDayOfWeek] + ': ' ; 
-	document.getElementById('planningDate').value = planningDay + '/' + planningMonth + '/' + planningYear ;
+	document.getElementById('planningDate').value = planningYear + '-' + leadingZero(planningMonth) + '-' + leadingZero(planningDay) ;
 	myLog("end refreshPlanningTable()") ;
 }
 
@@ -2045,14 +2045,9 @@ function presentationByDay(event) {
 }
 
 function initBooking() {
-	console.log("start init(), userId=" + userId + ", userName=" + userName + ', ' + navigator.userAgent) ;
 	document.onkeydown = function(event) {
 		event = event ;
 		if (event.key == 'Escape') {
-			console.log("event key == Escape onkeydown()") ;
-			// hideEditBookingDetails() ;
-			hideEditAgendaItemDetails() ;
-			// hideBookingMessage() ;
 			hidePilotDetails() ;
 		}
 	}
@@ -2116,7 +2111,6 @@ function initBooking() {
 			document.getElementById('agendaItemInstructorSelect').add(option) ; // Solo (id = -1) is not a valid option for the agenda :-)
 		}
 	}
-	myLog('in init(): calling initPlanningTable()') ;
 	planningByPlane = false ; // By default, let's start in one single day mode with one line per plane
 	initPlanningTable() ;
 	myLog('in init(): returning from initPlanningTable()') ;
@@ -2130,11 +2124,5 @@ function initBooking() {
                 spanDisplayAgenda.innerHTML = '-' + spanDisplayAgenda.innerHTML.substring(1) ;
 	toggleInstructorAgenda() ;
 	planningDate = document.getElementById('planningDate') ;
-	// Overwrite the global datepickr prototype
-	// datepickr.prototype.l10n.weekdays.longhand = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
-	datepickr('#calendarIcon', { altInput: document.getElementById('planningDate'), dateFormat: 'd/m/Y'});
-	myLog('in init(): calling refreshPlanningTable()') ;
 	refreshPlanningTable() ;
-	myLog('in init(): returning from refreshPlanningTable()') ;
-	myLog('end init()') ;
 }

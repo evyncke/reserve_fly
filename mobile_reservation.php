@@ -20,7 +20,7 @@
 ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/mobile_reservation.css>;rel=preload;as=style, </resa/datepickr.css>;rel=preload;as=style,</resa/mobile_reservation.js>;rel=preload;as=script,</resa/datepickr.js>;rel=preload;as=script') ;
+header('Link: </resa/mobile_reservation.css>;rel=preload;as=style,</resa/mobile_reservation.js>;rel=preload;as=script') ;
 header('Link: </resa/fa.ico>;rel=preload;as=image,</resa/members.js>;rel=preload;as=script') ;
 
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
@@ -28,7 +28,7 @@ require_once "dbi.php" ;
 
 MustBeLoggedIn() ;
 
-$month_names = array('N/A', 'Jan', 'F&eacute;v', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil', 'Ao&ucirc;t', 'Sept', 'Oct', 'Nov', 'D&eacute;c') ;
+$month_names = array('N/A', 'Jan', 'Fév', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc') ;
 
 for ($i = 1, $all_day_options = '' ; $i <= 31 ; $i++)
 	$all_day_options .= '<option value="' . $i . '">' . $i . "</option>\n" ;
@@ -54,17 +54,17 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['delta'] == '') { // This validity was not filled in
 		if ($row['mandatory'] != 0) {
 			$userRatingValid = false ;
-			$validity_msg .= "<span class=\"validityExpired\">Votre profil ne contient pas $row[name]. Impossible de r&eacute;server un avion. Veuillez modifier votre profil d'abord.</span><br/>" ;
+			$validity_msg .= "<span class=\"validityExpired\">Votre profil ne contient pas $row[name]. Impossible de réserver un avion. Veuillez modifier votre profil d'abord.</span><br/>" ;
 		}
 	} elseif ($row['delta'] > 0) {
 		if ($row['mandatory'] != 0) {
 			$userRatingValid = false ;
-			$validity_msg .= "<span class=\"validityExpired\">Votre $row[name] n'est plus valable depuis le $row[expire_date]. Impossible de r&eacute;server un avion.</span><br/>" ;
+			$validity_msg .= "<span class=\"validityExpired\">Votre $row[name] n'est plus valable depuis le $row[expire_date]. Impossible de réserver un avion.</span><br/>" ;
 		} else {
 			$validity_msg .= "<span class=\"validityWarning\">Votre $row[name] n'est plus valable depuis le $row[expire_date].</span><br/>" ;
 		}
 	} elseif ($row['delta'] > - $validity_warning) 
-		$validity_msg .= "<span class=\"validityWarning\">Votre $row[name] ne sera plus valable le $row[expire_date]; il vous sera alors impossible de r&eacute;server un avion.</span><br/>" ;
+		$validity_msg .= "<span class=\"validityWarning\">Votre $row[name] ne sera plus valable le $row[expire_date]; il vous sera alors impossible de réserver un avion.</span><br/>" ;
 }
 
 // Enabling below DOCTYPE has a major impact on the rendering... larger fonts, JS COM requires 'px' units for positioning, ... 
@@ -78,8 +78,6 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <meta charset="utf-8">
 <link rel="stylesheet" type="text/css" href="mobile_reservation.css">
-<!--- the script below has been modified to explicitely call jumpPlanningDate() when a date is selected -->
-<link rel="stylesheet" type="text/css" href="datepickr.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
@@ -112,7 +110,6 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <!--script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script-->
 
-<script data-cfasync="true" src="datepickr.js"></script>
 <script>
 var // was 'const' but IE does not support it !
 	// preset Javascript constant fill with the right data from db.php PHP variables
@@ -330,9 +327,9 @@ if ($userId != 0) {
 	$row = mysqli_fetch_array($result) ;
 }
 ?>
-Vos droits d'acc&egrave;s (<?=$userFullName?>): 
+Vos droits d'accès (<?=$userFullName?>): 
 <?php
-if ($userIsStudent) print(" &eacute;l&egrave;ve ") ;
+if ($userIsStudent) print(" élève ") ;
 if ($userIsPilot) print(" pilote ") ;
 if ($userIsMechanic) print(" mecano ") ;
 if ($userIsInstructor) print(" instructor ") ;
@@ -340,7 +337,7 @@ if ($userIsAdmin) print(" gestionnaire-système ") ;
 if ($userIsBoardMember) print(" administrateur-CA ") ;
 if ($userNoFlight) print(" <span style=\"color: red;\">interdit de vol</span> ") ;
 if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
-	print("<br/><font color=red>Vous devez &ecirc;tre au moins pilote pour r&eacute;server un avion.</font>") ;
+	print("<br/><font color=red>Vous devez être au moins pilote pour réserver un avion.</font>") ;
 // Check whether the user is blocked
 $result_blocked = mysqli_query($mysqli_link, "SELECT * FROM $table_blocked WHERE b_jom_id=$userId")
 	or journalise($userId, 'E', "Cannot checked whether user is blocked: " . mysqli_error($mysqli_link)) ;
@@ -348,8 +345,8 @@ $row_blocked = mysqli_fetch_array($result_blocked) ;
 if ($row_blocked) {
 	journalise($userId, "W", "This user is blocked: " . db2web($row_blocked['b_reason'])) ;
 	$userNoFlight = true ;
-	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. 
-		Contactez <a href=\"mailto:info@spa-aviation.be\">l'a&eacute;roclub info@spa-aviation.be</a>.
+	print("<div class=\"noFlyBox\">Vous êtes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. 
+		Contactez <a href=\"mailto:info@spa-aviation.be\">l'aéroclub info@spa-aviation.be</a>.
 		Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
 }
 // Check whether users have paid theirs membership fees
@@ -364,11 +361,11 @@ if (! $row_fee and ! $userIsInstructor and $userId != 294) {
 		Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
 }
 if ($userNoFlight)
-	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol (par exemple: factures non pay&eacute;es, 
+	print("<div class=\"noFlyBox\">Vous êtes interdit(e) de vol (par exemple: factures non payées, 
 		contactez <a href=\"mailto:info@spa-aviation.be\">info@spa-aviation.be</a>.
 		Un clic sur le bouton <i>Folio du mois</i> ci-dessus vous permet de visualiser votre situation comptable.</div>") ;
 if ($userId == 0) {
-	print("<br/><font color=red>Vous devez &ecirc;tre connect&eacute;(e) pour r&eacute;server un avion.</font> ") ;
+	print("<br/><font color=red>Vous devez être connecté(e) pour réserver un avion.</font> ") ;
 } else {
 	// Check for profile settings
 	$profile_count = 0 ;
@@ -381,10 +378,10 @@ if ($userId == 0) {
 	if ($row['country'] != '') $profile_count ++ ; else $missings[] = 'pays' ;
 	if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ; else $missings[] = 'genre' ;
 	if ($row['birthdate'] != '') $profile_count ++ ; else $missings[] = 'date de naissance' ;
-	if ($profile_count != 8) print("<div class=\"validityBox\">Votre profil est compl&eacute;t&eacute; &agrave; " . round(100 * $profile_count / 10) . "% seulement,
+	if ($profile_count != 8) print("<div class=\"validityBox\">Votre profil est complété à " . round(100 * $profile_count / 10) . "% seulement,
 		veuillez cliquer sur le bouton 'Mon Profil' pour mettre votre profil (" . implode(', ', $missings) . ") à jour.</div>") ;
 	if ($row['cell_phone'] == '') {
-		print("<div class=\"validityBox\">Il manque votre num&eacute;ro de GSM/mobile, impossible de r&eacute;server.
+		print("<div class=\"validityBox\">Il manque votre numéro de GSM/mobile, impossible de réserver.
 			Veuillez cliquer sur le bouton 'Mon Profil' pour mettre votre profil à jour.</div>") ;
 		$userNoFlight = true ;
 	}
@@ -416,10 +413,10 @@ if ($userId == 0) {
 		order by b.r_start desc limit 5") or die("Cannot select unlogged flights: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_num_rows($result) > 0) {
 		$missing_entries = mysqli_num_rows($result) ;
-		print("<p style=\"color: red;\">Vous avez une ou plusieurs r&eacute;servations sans entr&eacute;es dans les carnets de routes des avions, il est obligatoire de compl&eacute;ter
+		print("<p style=\"color: red;\">Vous avez une ou plusieurs réservations sans entrées dans les carnets de routes des avions, il est obligatoire de compléter
 			ces carnets sous peine de frais administratifs en fin de mois.</p><ul>") ;
 		while ($row = mysqli_fetch_array($result)) {
-			print("<li>$row[r_start]: <a href=\"IntroCarnetVol.php?id=$row[r_id]\">remplir le carnet de routes de $row[r_plane] ou annuler la r&eacute;servation</a>;") ;
+			print("<li>$row[r_start]: <a href=\"IntroCarnetVol.php?id=$row[r_id]\">remplir le carnet de routes de $row[r_plane] ou annuler la réservation</a>;") ;
 			if ($userIsInstructor) print(" <img src=\"gtk-delete.png\" onclick=\"javascript:document.getElementById('reasonTextArea').value='Old booking';cancelOldBooking($row[r_id]);\">" ) ;
 			print("</li>\n") ;
 		}
@@ -436,7 +433,7 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 </div>
 
 <div class="row">
-	<div class="col d-none d-md-block text-bg-light border rounded-3 mx-lg-3">
+	<div class="col d-none d-xl-block text-bg-light border rounded-3 mx-lg-3">
 			<table id="ephemeridesTable">
 			<tr><td>Jour aéronautique:</td><td></td>
 				<td>Coucher du soleil:</td><td></td></tr>
@@ -445,7 +442,7 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 			<tr><td>Ouverture aéroport:</td><td></td>
 				<td>Fermeture aéroport:</td><td></td></tr>
 			<tr><td colspan="4"><i><b>En heure locale de <?=$default_airport?> et pour info seulement.</b><br/>
-					Heure locale &agrave; <?=$default_airport?>:  <span id="hhmmLocal"></span><br/>
+					Heure locale à <?=$default_airport?>:  <span id="hhmmLocal"></span><br/>
 					Heure universelle:  <span id="hhmmUTC"></span>Z</i></td></tr>
 			</table>
 	</div><!-- col -->	
@@ -456,11 +453,11 @@ $result_news = mysqli_query($mysqli_link, "SELECT * FROM $table_news
 	LIMIT 0,5") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
 
 if (mysqli_num_rows($result_news) or $userIsAdmin) {
-	print('<div class="col d-none d-md-block text-bg-info border rounded-3  mx-lg-3">') ;
+	print('<div class="col d-none d-lg-block text-bg-info border rounded-3  mx-lg-3">') ;
 	while ($row_news = mysqli_fetch_array($result_news)) {
 		$subject = db2web($row_news['n_subject']) ;
 		$text = db2web(nl2br($row_news['n_text'])) ;
-		$delete_action = ($userIsAdmin) ? ' <a href="news_delete.php?id=' . $row_news['n_id'] . '"><img src="gtk-delete.png" alt="X" width="10" height="10"></a>' : '' ;
+		$delete_action = ($userIsAdmin) ? ' <a href="news_delete.php?id=' . $row_news['n_id'] . '"><i class="bi bi-trash text-danger"></i></a>' : '' ;
 		print("<li><b>$subject</b>: $text$delete_action</li>\n") ;
 	}
 	if ($userIsAdmin) print('<li><a href="news_add.php">Ajouter une nouvelle</a></li>') ;
@@ -479,16 +476,11 @@ mysqli_free_result($result_news) ;
 <br/>
 <table class="planningRuler">
 <tr stylex="vertical-align: top; background: white;">
-	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-7);">
-		<img border="0" width="32" height="32" src="gtk_media_forward_rtl.png" alt="&lt;&lt;&lt;"  onStalled="imgStalled();"></a></td>
-	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-1);">
-		<img border="0" width="32" height="32" src="gtk_media_play_rtl.png" alt="&lt;" onStalled="imgStalled();"></a></td>
-	<td class="planningRulerCellLarge"><span id="planningDayOfWeek"></span><input type="tex" size="10" maxlength="10" id="planningDate" onchange="jumpPlanningDate();"></td>
-	<td class="planningRulerCellCalendar"><img src="calendar.png" id="calendarIcon" alt="Calendar"  onStalled="imgStalled();"></td>
-	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+1);">
-		<img border="0" width="32" height="32" src="gtk_media_play_ltr.png" alt="&gt;"  onStalled="imgStalled();"></a></td>
-	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+7);">
-		<img border="0" width="32" height="32" src="gtk_media_forward_ltr.png" alt="&gt;&gt;&gt;"  onStalled="imgStalled();"></a></td>
+	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-7);"><i class="bi bi-rewind-fill"></i></a></td>
+	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-1);"><i class="bi bi-caret-left-fill"></i></a></td>
+	<td class="planningRulerCellLarge"><span id="planningDayOfWeek"></span><input type="date" sytyle="width: 100px;" id="planningDate" onchange="jumpPlanningDate();"></td>
+	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+1);"><i class="bi bi-caret-right-fill"></i></a></td>
+	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+7);"><i class="bi bi-fast-forward-fill"></i></a></td>
 </tr>
 </table>
 <table id="planePlanningTable" class="planningTable" Xborder="0">
@@ -497,11 +489,11 @@ mysqli_free_result($result_news) ;
 <table id="instructorPlanningTable" class="planningTable" Xborder="0">
 </table>
 <span class="planningLegend">
-Indications pour un avion que nous n'&ecirc;tes probablement pas en droit de r&eacute;server (sauf avec un instructeur) car:<br/>
-<img src="exclamation-icon.png" width="12" height="12" alt="!"  onStalled="imgStalled();">: vous n'avez pas vol&eacute; dessus r&eacute;cemment (sur
-base de l'entr&eacute;e des heures de vol dans votre carnet de vols).<br/>
-<img src="forbidden-icon.png" width="12" height="12" alt="X"  onStalled="imgStalled();">: vous n'avez pas les qualifications requises (sur base des validit&eacute;s de votre profil).<br/>
-V&eacute;rifiez les r&egrave;gles de r&eacute;servation et si vous les respectez: r&eacute;servez :-)<br/>
+Indications pour un avion que nous n'êtes probablement pas en droit de réserver (sauf avec un instructeur) car:<br/>
+<i class="bi bi-exclamation-triangle-fill text-danger" alt="!" width="12" height="12"></i>: vous n'avez pas volé dessus récemment (sur
+base de l'entrée des heures de vol dans votre carnet de vols).<br/>
+<i class="bi bi-ban text-danger" alt="X" width="12" height="12"></i>: vous n'avez pas les qualifications requises (sur base des validités de votre profil).<br/>
+Vérifiez les règles de réservation et si vous les respectez: réservez :-)<br/>
 <span class="material-symbols-rounded" style="font-size: 12px; color: orangeRed;">handyman</span>: il existe un Aircraft Technical Log pour ce avion à consulter.<br/>
 <img src="fa.ico" border="0" width="12" height="12">: ouvre Flight Aware avec le dernier vol de cet avion.<br/>
 </span>
@@ -547,9 +539,9 @@ Avion: <select id="planeSelect" onchange="ressourceHasChanged(this);"></select>
 <span id="planeComment"></span><span id="pilotType"><br/>
 <?php
 if ($userIsAdmin || $userIsInstructor)
-	print("Pilote/&eacute;l&egrave;ve: ") ;
+	print("Pilote/élève: ") ;
 else if ($userIsMechanic)
-	print("M&eacute;cano: ") ;
+	print("Mécano: ") ;
 else
 	print("Pilote: ") ;
 ?></span><select id="pilotSelect"> </select><br/>
@@ -574,7 +566,7 @@ Instructeur: <select id="instructorSelect"> </select><br/>
 Pilotes RAPCS: <input type="checkbox" id="crewWantedInput" value="true"> bienvenus en tant que co-pilotes.<br/>
 Membres RAPCS: <input type="checkbox" id="paxWantedInput" value="true"> bienvenus en tant que passagers.<br/>
 </span> <!-- planeSelectSpan -->
-D&eacute;but: <select id="startDaySelect"><?=$all_day_options?></select> -
+Début: <select id="startDaySelect"><?=$all_day_options?></select> -
 <select id="startMonthSelect"><?=$all_month_options?></select> -
 <select id="startYearSelect"><?=$all_year_options?></select>&nbsp;&nbsp;&nbsp;&nbsp;
 <select id="startHourSelect"></select> : 
@@ -587,7 +579,7 @@ Fin: <select id="endDaySelect"><?=$all_day_options?></select> -
 <select id="endMinuteSelect"><?=$all_minute_options?></select>
 <br/>
 <span id="flightInfo1Span">
-Temps de vol pr&eacute;vu: <input type="number" id="flightDuration" size="4" maxlength="4" min="0" max="100" oninput="javascript:durationChanged();" onchange="javascript:durationChanged();"> heure(s) <i>(arrondir &agrave; l'heure sup&eacute;rieure)</i>
+Temps de vol prévu: <input type="number" id="flightDuration" size="4" maxlength="4" min="0" max="100" oninput="javascript:durationChanged();" onchange="javascript:durationChanged();"> heure(s) <i>(arrondir à l'heure supérieure)</i>
 <br/>
 </span><!-- flightInfo1Span -->
 <span style="vertical-align: top;">
@@ -595,8 +587,8 @@ Commentaire: <textarea id="commentTextArea" rows=4 cols=40></textarea>
 </span>
 <br/>
 <span id="flightInfo2Span">
-Lieu de d&eacute;part: <input type=text id="departingAirport" size="6" maxlength="4" onKeyUp="airportChanged(this);" value="EBSP">
-d'arriv&eacute;e: <input type=text id="destinationAirport" size="6" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
+Lieu de départ: <input type=text id="departingAirport" size="6" maxlength="4" onKeyUp="airportChanged(this);" value="EBSP">
+d'arrivée: <input type=text id="destinationAirport" size="6" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
 <br/>
 Via: <input type=text id="via1Airport" size="6" maxlength="4" onKeyUp="airportChanged(this);">
 et: <input type=text id="via2Airport" size="6" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
@@ -668,33 +660,43 @@ if ($userIsInstructor) {
 </div>
 <!-- end of div for the cancel booking Modal window-->
 
-<!-- div to display the agenda item window (create, modify, cancel) -->
-<div id="agendaItemDiv">
-<center><h3 id="agendaItemTitle">Disponibilités</h3></center>
-Instructeur: <select id="agendaItemInstructorSelect"> </select><br/>
-D&eacute;but: <input type='date' id="agendaItemDateStart"> <select id="agendaItemStartHourSelect"><?=$all_hour_options?></select> : <select id="agendaItemStartMinuteSelect"><?=$all_minute_options?></select><br/>
+<!-- div to display the FI agenda item modal (create/modify/cancel) -->
+<div class="modal fade" id="agendaItemModal" tabindex="-1" role="dialog" aria-labelledby="agendaItemTitle">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="agendaItemTitle">Disponibiliés</h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Fermer">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+Instructeur: <select id="agendaItemInstructorSelect"><option value="62">éric test</option> </select><br/>
+Début: <input type='date' id="agendaItemDateStart"> <select id="agendaItemStartHourSelect"><?=$all_hour_options?></select> : <select id="agendaItemStartMinuteSelect"><?=$all_minute_options?></select><br/>
 Fin: <input type='date' id="agendaItemDateEnd"> <select id="agendaItemEndHourSelect"><?=$all_hour_options?></select> : <select id="agendaItemEndMinuteSelect"><?=$all_minute_options?></select><br/>
 <input type="radio" id="agendaItemAvailability" name="agendaItemAvailability" value="available" onchange="agendaItemChanged(false);" checked> Disponible <input type="radio" name="agendaItemAvailability" value="unavailable" onchange="agendaItemChanged(true);" > Indisponible<br/>
 <input type="checkbox" id="agendaItemOnSite"> Sur site<br/>
 <input type="checkbox" id="agendaItemEmail"> Contact par e-mail<br/>
-<input type="checkbox" id="agendaItemPhone"> Contact par t&eacute;l&eacute;phone<br/>
+<input type="checkbox" id="agendaItemPhone"> Contact par téléphone<br/>
 <input type="checkbox" id="agendaItemSMS"> Contact par SMS<br/>
-<input type="checkbox" id="agendaItemStudentOnly"> Uniquement pour &eacute;l&egrave;ves<br/>
+<input type="checkbox" id="agendaItemStudentOnly"> Uniquement pour élèves<br/>
 <span style="vertical-align: top;">
 Commentaire: <textarea id="agendaItemCommentTextArea" rows=4 cols=40></textarea>
-</span><br/>
-<center>
+	  </div><!-- class=modal-body-->
+      <div class="modal-footer">
 <?php
 if ($userIsInstructor || $userIsAdmin) {
-	print('<button id="addAgendaItemButton" onclick="javascript:confirmAgendaItem();">Ajouter</button>' . "\n") ;
-	print('<button id="cancelAgendaItemButton" onclick="javascript:cancelAgendaItem();">Annuler la disponibilit&eacute;</button>' . "\n") ;
-	print('<button id="modifyAgendaItemButton" onclick="javascript:modifyAgendaItem();">Modifier</button>' . "\n") ;
+	print('<button class="btn btn-primary" id="addAgendaItemButton" onclick="javascript:confirmAgendaItem();">Ajouter</button>' . "\n") ;
+	print('<button class="btn btn-danger"  id="cancelAgendaItemButton" onclick="javascript:cancelAgendaItem();">Annuler la disponibilité</button>' . "\n") ;
+	print('<button class="btn btn-primary" id="modifyAgendaItemButton" onclick="javascript:modifyAgendaItem();">Modifier</button>' . "\n") ;
 }
 ?>
-<button onclick="javascript:hideEditAgendaItemDetails();">Fermer la fenêtre</button>
-</center>
-</div>
-<!-- end of div for the agenda item window-->
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+		</div><!-- modal footer-->
+	</div><!-- model content -->
+  </div><!-- modal-diaglog--> 
+</div><!-- modal -->
+<!-- end of modal for FI agenda item --> 
 
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('mobile_reservation.php')) ;
