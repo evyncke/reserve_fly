@@ -20,11 +20,9 @@ var
 	planePlanningTable, instructorPlanningTable, planningDate, columnCount, allBookings, allFIAgendas, ephemerides = new Array(), nightColumn,
 	aeroSunsetHours, aeroSunsetMinutes, currentlyDisplayedBooking, currentlyDisplayedAgendaItem, timeZoneChecked = false,
 	planningByPlane = false, planningPlaneIndex, planningStartHour, planningStopHour, timestampTicks = 0,
-	planningDay = nowDay, planningMonth = nowMonth, planningYear = nowYear, id2Name = new Array(),
+	planningDay, planningMonth, planningYear, id2Name = new Array(),
 	metarHTML, metarTime = 0, metarBackgroundColor, offsetBrowserAirfield,
-	dayMessagesHTML = '' ;
-
-var // Was 'const' but IE does not support it
+	dayMessagesHTML = '',
 	weekdays = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
 	browserWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth, // This is the iframe width 950 px
 	browserHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight; // This is the iframe height 700 px
@@ -728,11 +726,11 @@ function displayPlaneDetails(planeIndex) {
 	if (thisPlane.ressource == 0) { // Engine index only valid for planes
 		span.innerHTML += 'Compteur relevé par ' + thisPlane.compteur_pilote_nom + ' en date du ' + thisPlane.compteur_pilote_date + ': ' + thisPlane.compteur_pilote + '<br/>' ;
 		if (thisPlane.actif == 2)
-			span.innerHTML += "<br/><span style=\"color: red\">\nCet avion est réservé aux instructeurs et à leurs élèves.\n</span>\n" ;
+			span.innerHTML += "<br/><span class=\"text-bg-danger\">\nCet avion est réservé aux instructeurs et à leurs élèves.\n</span>\n" ;
 		if (thisPlane.incidents == 'HAZARD')
-			span.innerHTML += "<br/><span style=\"color: red\">\nCet avion n'est pas en état de voler, consultez l'Aircraft Technical Log en cliquant sur <span class=\"material-symbols-rounded\">handyman</span>\n</span>\n" ;
+			span.innerHTML += "<br/><span class=\"text-bg-danger\">\nCet avion n'est pas en état de voler, consultez l'Aircraft Technical Log en cliquant sur <i class=\"bi bi-tools\"></i></span>\n" ;
 		else if (thisPlane.incidents == 'NOHAZARD')
-			span.innerHTML += "<br/><span style=\"color: orangeRed\">\nConsultez l'Aircraft Technical Log en cliquant sur <span class=\"material-symbols-rounded\">handyman</span>\n</span>\n" ;
+			span.innerHTML += "<br/><span class=\"text-bg-warning\">\nConsultez l'Aircraft Technical Log en cliquant sur <i class=\"bi bi-tools\"></i></span>\n" ;
 	}
 	if (thisPlane.incidents == '')
 		span.style.backgroundColor = 'lightGray' ;
@@ -1971,10 +1969,10 @@ function refreshPlanningTable() {
 			// Check for incidents ATL
 			if (allPlanes[plane].incidents == 'NOHAZARD')
 				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id + '" target="_blank">' +
-					'<span class="material-symbols-rounded text-warning" width="12" height="12" style="color: orangeRed;" title="Consulter l\'ATL NOHAZARD">handyman</span></a>';
+					'<i class="bi bi-tools text-warning" width="12" height="12" title="Consulter l\'ATL HAZARD"></i></a>';
 			else if (allPlanes[plane].incidents == 'HAZARD')
 				planePlanningTable.rows[1 + plane].cells[0].innerHTML +=  ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id + '" target="_blank">' +
-					'<span class="material-symbols-rounded text-danger" width="12" height="12" title="Consulter l\'ATL HAZARD">handyman</span></a>';
+					'<i class="bi bi-tools text-danger" width="12" height="12" title="Consulter l\'ATL HAZARD"></i></a>';
 			// add for engine hours using the most recent data but not for ressources
 			if (allPlanes[plane].ressource == 0) {
 				// Add FlightAware link only for members, need to stop event propagation to the TD click causing a switch of presentation
@@ -1997,16 +1995,10 @@ function refreshPlanningTable() {
 		}
 		// Race condition here as when a plane is booked, we display the details hence we need to ensure that all bookings have been fetched
 		// before attempting to display the instructors' agenda :-(
-//		if (waitingCount) alert('Race condition') ;
-//		while (waitingCount) xyzzy = 1 ;
 		for (var instructor = 1; instructor < instructors.length; instructor++) { // always skip the first instructor which is "solo"
 			instructorPlanningTable.rows[instructor].cells[0].innerHTML = instructors[instructor].name ;
 			refreshInstructorPlanningRow(instructor - 1, instructors[instructor].id, planningDay, planningMonth, planningYear) ;
 		}
-		// TEST FI
-		instructorPlanningTable.rows[instructor].cells[0].innerHTML = 'éric test' ;
-		refreshInstructorPlanningRow(instructor - 1, 62, planningDay, planningMonth, planningYear) ;
-		// END TEST FI
 	}
 	document.getElementById('planningDayOfWeek').innerHTML = (planningDayOfWeek == -1) ? '' : weekdays[planningDayOfWeek] + ': ' ; 
 	document.getElementById('planningDate').value = planningYear + '-' + leadingZero(planningMonth) + '-' + leadingZero(planningDay) ;
@@ -2045,6 +2037,9 @@ function presentationByDay(event) {
 }
 
 function initBooking() {
+	planningDay = nowDay ;
+	planningMonth = nowMonth ;
+	planningYear = nowYear ;
 	document.onkeydown = function(event) {
 		event = event ;
 		if (event.key == 'Escape') {

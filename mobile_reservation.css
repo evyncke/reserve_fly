@@ -25,20 +25,19 @@ body { background: #f0f0f0; color: #363636; font-family: Arial, Helvetica, sans-
 
 td { border: 1px; margin: 0px; padding: 1px;}
 
+/* TODO dimension should rather be in viewport units 1vw = 1% of viewport width */
+/* Bootstrap uses box-sizing: border-box rather than the default content-box, i.e., margin/padding are counted in width/height */
+/* Bootstrap also set border-collapse: collapse; for table */
+
 td.plane_cell { border-top-style: dotted; border-top-width: 1px; border-color: black; }
 td.header_hour { background-color: white; width: 15px; border-left-style: dotted; font-size: 0.75em; overflow-x: visible;}
 td.header_last_hour { width: 15px; border-left-style: dotted; font-size: 0.75em;}
 td.header_not_hour { background-color: white; width: 15px; }
-/* td.engine_hours {color: gray; font-size: 12;} */
-
-
-/* TODO dimension should rather be in viewport units 1vw = 1% of viewport width */
-/* Bootstrap uses box-sizing: border-box rather than the default content-box, i.e., margin/padding are counted in width/height */
 td.slot { width: 17px; max-width: 17px; height: 40px; max-height: 40px; 
 	border-spacing: 1px; border-width: 1px; border-color: white; 
 	color: black; 
 	overflow-x: visible; white-space: nowrap ;}
-td.first { border-right-width: 0px; padding-right: 0px; }
+td.first { border-right-width: 0px; padding-right: 0px;}
 td.other { border-left-width: 0px; border-right-width: 0px; padding-right: 0px; padding-left: 0px;}
 td.available { background-color: Gainsboro; }
 td.available_for_fi { background-color: MistyRose; }
@@ -57,6 +56,16 @@ td.onsite { background-color: #97F024; }
 td.oncall { background-color: yellow; }
 td.unavailable { background-color: lightblue; }
 
+.planningRuler { height: 32px ; margin-left: auto; vertical-align: text-top ;  margin-right: auto; }
+.planningRulerCell { height: 32px ; padding-left: 10px; padding-right: 10px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
+.planningRulerCellCalendar { height: 32px ; padding-left: 1px; padding-right: 1px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
+.planningRulerCellLarge { height: 32px ; width: 200px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
+span#planningDayOfWeek { width: 80px; font-size: 14; text-align: center; vertical-align: top; }
+input#planningDate { width: 90px; font-size: 14; text-align: center; vertical-align: top; }
+.planningTable { border-spacing: 1px; border-collapse: separate; border-width: 1px; 
+	margin-left: auto; margin-right: auto; 
+	font-size: /*0.75em*/ 1em; line-height: 1 ;}
+
 .bookingErrorMessage { background-color: red; }
 #bookingMessageDiv {width: 300px; z-index: 3; background-color: lightgray; border-width: 1px; border-style: solid; border-color: black;
 	padding: 5px; font-size: 1em; visibility: hidden; border-radius: 5px; box-shadow: 3px 3px 10px gray;
@@ -69,20 +78,10 @@ td.unavailable { background-color: lightblue; }
 
 .userPrivileges {color: gray; }
 .copyright {color: gray; font-size: smaller; font-style: oblique; text-align: center; border-top: 1px gray ;}
-.noFlyBox {background-color: white; margin-left: auto; margin-right: auto;  border-width: 4px; border-style: double; border-color: red;
-	padding: 10px; font-weight: bold; font-size: x-large;}
 .validityBox {background-color: white; margin-left: auto; margin-right: auto;  border-width: 4px; border-style: dashed; border-color: red; border-radius: 10px; 
 	padding: 10px; font-size: larger;}
 .validityWarning {color: orange; }
 .validityExpired {color: red; }
-
-.planningRuler { height: 32px ; margin-left: auto; vertical-align: text-top ;  margin-right: auto; }
-.planningRulerCell { height: 32px ; padding-left: 10px; padding-right: 10px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
-.planningRulerCellCalendar { height: 32px ; padding-left: 1px; padding-right: 1px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
-.planningRulerCellLarge { height: 32px ; width: 200px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
-span#planningDayOfWeek { width: 80px; font-size: 14; text-align: center; vertical-align: top; }
-input#planningDate { width: 90px; font-size: 14; text-align: center; vertical-align: top; }
-.planningTable { border-spacing: 1px; margin-left: auto; margin-right: auto; font-size: /*0.75em*/ 1em; border-width: 1px; line-height: 1 ;}
 
 #reservationDetails {border-style: dotted; background: lightgray; vertical-align: top; font-size: 1em; line-height: 1; visibility: visible;}
 

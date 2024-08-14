@@ -17,16 +17,13 @@
 
 */
 
-ob_start("ob_gzhandler");
-
-# HTTP/2 push of CSS via header()
-header('Link: </resa/mobile_reservation.css>;rel=preload;as=style,</resa/mobile_reservation.js>;rel=preload;as=script') ;
-header('Link: </resa/fa.ico>;rel=preload;as=image,</resa/members.js>;rel=preload;as=script') ;
-
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
+ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require_once "dbi.php" ;
-
-MustBeLoggedIn() ;
+if ($userId == 0) {
+	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+	exit ;
+}
 
 $month_names = array('N/A', 'Jan', 'Fév', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc') ;
 
@@ -67,83 +64,25 @@ while ($row = mysqli_fetch_array($result)) {
 		$validity_msg .= "<span class=\"validityWarning\">Votre $row[name] ne sera plus valable le $row[expire_date]; il vous sera alors impossible de réserver un avion.</span><br/>" ;
 }
 
-// Enabling below DOCTYPE has a major impact on the rendering... larger fonts, JS COM requires 'px' units for positioning, ... 
-// Possibly because it forces HTML 5 ?
-?><!DOCTYPE html>
-<html lang="fr">
-<head>
-<?
-print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
-?>
-<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-<meta charset="utf-8">
-<link rel="stylesheet" type="text/css" href="mobile_reservation.css">
-<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-<link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
-
-<!-- Facebook Open graph data -->
-<meta property="og:url"           content="https://www.spa-aviation.be/resa/mobile_reservation.php" />
-<meta property="og:type"          content="website" />
-<meta property="og:title"         content="Royal Aero Para Club de Spa ASBL" />
-<meta property="og:description"   content="Page réservée aux members pour la réservation de nos avions" />
-<meta property="og:image"         content="https://www.spa-aviation.be/logo_rapcs_256x256.png" />
-<meta property="og:image:width"	  content="256" />
-<meta property="og:image:height"  content="256" />
-<meta property="og:image:type"    content="image/png" />
-<meta property="fb:app_id"        content="<?=$fb_app_id?>" />
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Réservation des avions</title>
-
-<!-- Using latest bootstrap 5 -->
-<!-- Latest compiled and minified CSS add media="screen" would reserve it only for screen and not printers -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Latest compiled JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Glyphicon equivalent -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
-
+$header_postamble = '<link rel="stylesheet" type="text/css" href="mobile_reservation.css">
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<!--script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script-->
+<script src="ressources.js"></script>
+<script src="pilots.js"></script>
+<script src="instructors.js"></script>
+<script src="mobile_reservation.js"></script>
+' ;
+$body_attributes = 'onload="init(); initBooking();"' ;
+//unset($body_attributes) ;
+require_once 'mobile_header5.php' ;
+?>
+<div class="container-fluid">
 
 <script>
-var // was 'const' but IE does not support it !
+var
 	// preset Javascript constant fill with the right data from db.php PHP variables
-	userFullName = '<?=$userFullName?>' ,
-	userName = '<?=$userName?>' ,
-	userId = <?=$userId?> ,
-	userIsPilot = <?=($userIsPilot)? 'true' : 'false'?> ,
-	userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?> ,
-	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ,
-	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ,
-	userIsStudent = <?=($userIsStudent)? 'true' : 'false'?> ,
-	userIsNoFlight = <?=($userNoFlight)? 'true' : 'false'?> ,
-	bookingTypePilot = <?= BOOKING_PILOT?> ,
-	bookingTypeInstructor = <?= BOOKING_INSTRUCTOR?> ,
-	bookingTypeAdmin = <?= BOOKING_ADMIN?> ,
-	bookingTypeMaintenance = <?= BOOKING_MAINTENANCE ?> ,
-	bookingTypeCustomer = <?= BOOKING_CUSTOMER ?> ,
-	bookingTypeOnHold = <?= BOOKING_ON_HOLD ?> ,
-	nowDay = Number(<?=date('j')?>) ;
-	nowMonth = Number(<?=date('n')?>) ;
-	nowYear = Number(<?=date('Y')?>) ;
-	utcOffset = Number(<?=date('Z')/3600?>) ;
-	defaultMetarStation = '<?= $default_metar_station ?>' ;
-	webcamUris = [ <?php
-		for ($i = 0; $i < count($webcam_uris); $i++) {
-			if ($i != 0) print(", ") ;
-			print("'$webcam_uris[$i]'") ;
-		} ?> ] ;
-	avatarRootURI = '<?=$avatar_root_resized_uri?>' ;
-<? print("// PROFILE " . date('H:i:s') . "\n") ; ?>
+	// This is bad practice to have this in the <body> though but too complex to pass it as $header_postamble 
 	allPlanes = [
 <?
-ob_flush() ; // Attempt to push as much as HTML to the browser
-
 // Get the engine time from the mechanics  TODO no more useful as pilot logbook is now mandatory
 $result = mysqli_query($mysqli_link, "SELECT upper(id) as id, classe, compteur, compteur_vol, compteur_vol_valeur, compteur_date, entretien, photo, 
 		sous_controle, delai_reservation, commentaire, actif, compteur_vol
@@ -237,7 +176,6 @@ while ($row = mysqli_fetch_array($result)) {
 		" \"dernier_vol\": \"$l_end\", \"actif\": $row[actif], \"ressource\": 0, \"incidents\": '$incidents',\n" .
 		" \"classe\": \"$row[classe]\", \"sous_controle\": " . (($row['sous_controle'] == 0) ? 'false' : 'true') . "}\n") ;
 }
-ob_flush() ;
 // Now process the ressources (rooms, ...)
 $result = mysqli_query($mysqli_link, "SELECT id, sous_controle, commentaire, actif, photo, ressource
 	FROM $table_planes
@@ -258,8 +196,18 @@ while ($row = mysqli_fetch_array($result)) {
 
 }
 ?> ] ;
-<? print("// PROFILE " . date('H:i:s') . "\n") ; ?>
 var
+	nowDay = Number(<?=date('j')?>) ;
+	nowMonth = Number(<?=date('n')?>) ;
+	nowYear = Number(<?=date('Y')?>) ;
+	utcOffset = Number(<?=date('Z')/3600?>) ;
+	defaultMetarStation = '<?= $default_metar_station ?>' ;
+	webcamUris = [ <?php
+		for ($i = 0; $i < count($webcam_uris); $i++) {
+			if ($i != 0) print(", ") ;
+			print("'$webcam_uris[$i]'") ;
+		} ?> ] ;
+	avatarRootURI = '<?=$avatar_root_resized_uri?>' ;
 	nowHour = <?=date('G')?> ;
 	nowMinute = <?=0+date('i')?> ;  // Some PHP code to attempt to remove leading 0 as javascript does not like them...
 	nowDate = new Date(nowYear, nowMonth - 1, nowDay, nowHour, nowMinute, <?=0+date('s')?>) ;
@@ -283,61 +231,12 @@ if (!$convertToUtf8) {
 	return s ;
 }
 
-function imgStalled() {
-	console.log('Image load is stalled') ;
-}
 </script>
-<script src="planes.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<script src="ressources.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<script src="pilots.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<script src="members.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<script src="instructors.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<script src="mobile_reservation.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<!-- Matomo -->
-<script type="text/javascript">
-  var _paq = window._paq = window._paq || [];
-  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-  _paq.push(['setUserId', '<?=$userName?>']);
-  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
-  _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
-  _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
-  _paq.push(['enableHeartBeatTimer']);
-  _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
-  _paq.push(['trackPageView']);
-  _paq.push(['enableLinkTracking']);
-  (function() {
-    var u="//analytics.vyncke.org/";
-    _paq.push(['setTrackerUrl', u+'matomo.php']);
-    _paq.push(['setSiteId', '5']);
-    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-    g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
-  })();
-</script>
-<!-- End Matomo Code -->
-</head>
-<body onload="initBooking();">
 
 <h2>Réservation des avions</h2>
 <div id="logDiv" style="visibility: collapse; background-color: yellow;"></div>
 <div class="userPrivileges">
 <?php
-if ($userId != 0) {
-	$result = mysqli_query($mysqli_link, "select * from $table_users u left join $table_person p on u.id = p.jom_id where u.id = $userId")
-		or die("Erreur systeme lors de la lecture de votre profil: " . mysqli_error($mysqli_link)) ;
-	$row = mysqli_fetch_array($result) ;
-}
-?>
-Vos droits d'accès (<?=$userFullName?>): 
-<?php
-if ($userIsStudent) print(" élève ") ;
-if ($userIsPilot) print(" pilote ") ;
-if ($userIsMechanic) print(" mecano ") ;
-if ($userIsInstructor) print(" instructor ") ;
-if ($userIsAdmin) print(" gestionnaire-système ") ;
-if ($userIsBoardMember) print(" administrateur-CA ") ;
-if ($userNoFlight) print(" <span style=\"color: red;\">interdit de vol</span> ") ;
-if (! ($userIsPilot || $userIsAdmin || $userIsInstructor || $userIsMechanic))
-	print("<br/><font color=red>Vous devez être au moins pilote pour réserver un avion.</font>") ;
 // Check whether the user is blocked
 $result_blocked = mysqli_query($mysqli_link, "SELECT * FROM $table_blocked WHERE b_jom_id=$userId")
 	or journalise($userId, 'E', "Cannot checked whether user is blocked: " . mysqli_error($mysqli_link)) ;
@@ -345,9 +244,9 @@ $row_blocked = mysqli_fetch_array($result_blocked) ;
 if ($row_blocked) {
 	journalise($userId, "W", "This user is blocked: " . db2web($row_blocked['b_reason'])) ;
 	$userNoFlight = true ;
-	print("<div class=\"noFlyBox\">Vous êtes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. 
+	print("<div class=\"text-bg-danger\">Vous êtes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. 
 		Contactez <a href=\"mailto:info@spa-aviation.be\">l'aéroclub info@spa-aviation.be</a>.
-		Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
+		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
 }
 // Check whether users have paid theirs membership fees
 $result_fee = mysqli_query($mysqli_link, "SELECT * FROM $table_membership_fees 
@@ -357,74 +256,60 @@ $row_fee = mysqli_fetch_array($result_fee) ;
 if (! $row_fee and ! $userIsInstructor and $userId != 294) {
 	journalise($userId, "W", "This user has yet to pay their membership fee") ;
 //	$userNoFlight = false;
-	print("<div class=\"noFlyBox\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
-		Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
+	print("<div class=\"text-bg-danger\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
+		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
 }
 if ($userNoFlight)
-	print("<div class=\"noFlyBox\">Vous êtes interdit(e) de vol (par exemple: factures non payées, 
+	print("<div class=\"text-bg-danger\">Vous êtes interdit(e) de vol (par exemple: factures non payées, 
 		contactez <a href=\"mailto:info@spa-aviation.be\">info@spa-aviation.be</a>.
-		Un clic sur le bouton <i>Folio du mois</i> ci-dessus vous permet de visualiser votre situation comptable.</div>") ;
-if ($userId == 0) {
-	print("<br/><font color=red>Vous devez être connecté(e) pour réserver un avion.</font> ") ;
-} else {
-	// Check for profile settings
-	$profile_count = 0 ;
-	$missings = array() ;
-	if ($row['email'] != '') $profile_count ++ ; else $missings[] = 'email' ;
-	if ($row['first_name'] != '') $profile_count ++ ; else $missings[] = 'prénom' ;
-	if ($row['last_name'] != '') $profile_count ++ ; else $missings[] = 'nom de famille' ;
-	if ($row['cell_phone'] != '') $profile_count ++ ; else $missings[] = 'n° GSM/mobile' ;
-	if ($row['city'] != '') $profile_count ++ ; else $missings[] = 'ville' ;
-	if ($row['country'] != '') $profile_count ++ ; else $missings[] = 'pays' ;
-	if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ; else $missings[] = 'genre' ;
-	if ($row['birthdate'] != '') $profile_count ++ ; else $missings[] = 'date de naissance' ;
-	if ($profile_count != 8) print("<div class=\"validityBox\">Votre profil est complété à " . round(100 * $profile_count / 10) . "% seulement,
-		veuillez cliquer sur le bouton 'Mon Profil' pour mettre votre profil (" . implode(', ', $missings) . ") à jour.</div>") ;
-	if ($row['cell_phone'] == '') {
-		print("<div class=\"validityBox\">Il manque votre numéro de GSM/mobile, impossible de réserver.
-			Veuillez cliquer sur le bouton 'Mon Profil' pour mettre votre profil à jour.</div>") ;
-		$userNoFlight = true ;
-	}
-    print('<br/>');
-	print('<input type="button" class="btn btn-success" value="Mon profil" onclick="javascript:document.location.href=\'mobile_profile.php\';"> ') ;
-	print('<input type="button" class="btn btn-success"  value="Mon carnet de vols" onclick="javascript:document.location.href=\'mobile_mylog.php\';"> ') ;
-	print('<input type="button" class="btn btn-light" value="Carte de mes vols" onclick="javascript:document.location.href=\'mymap.php\';"> ') ;
-	print('<input type="button" class="btn btn-success"  value="Site mobile" onclick="javascript:document.location.href=\'mobile.php?news\';"> ') ;
-	print('<input type="button" class="btn btn-success"  value="Folio du mois" onclick="javascript:document.location.href=\'mobile_folio.php\';"> ') ;
-    print('<input type="button" class="btn btn-success"  value="TechLog" onclick="javascript:document.location.href=\'mobile_incidents.php\';"> ') ;
-	if ($userIsAdmin) print('<input  type="button" class="btn btn-success" value="Journal des opérations" onclick="javascript:document.location.href=\'mobile_journal.php\';"> ') ;
-	if ($userIsAdmin || $userIsMechanic) print('<input type="button" class="btn btn-success" value="Echéances des maintenances" onclick="javascript:document.location.href=\'plane_planning.php\';"> ') ;
-	print('<input type="button" class="btn btn-warning" style="visibility: hidden;" value="No log" id="logButton" onclick="javascript:toggleLogDisplay();"> ') ;
-	print("<a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\"><i class=\"bi bi-calendar3\"></i> lier à mon calendrier (iCal)</a>") ;
-	// Display any validity message from above
-	if ($validity_msg != '') print('<div class="validityBox">' . $validity_msg . '</div>') ;
-
+		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
+// Check for profile settings
+$result = mysqli_query($mysqli_link, "select * from $table_users u left join $table_person p on u.id = p.jom_id where u.id = $userId")
+	or die("Erreur systeme lors de la lecture de votre profil: " . mysqli_error($mysqli_link)) ;
+$row = mysqli_fetch_array($result) ;
+$profile_count = 0 ;
+$missings = array() ;
+if ($row['email'] != '') $profile_count ++ ; else $missings[] = 'email' ;
+if ($row['first_name'] != '') $profile_count ++ ; else $missings[] = 'prénom' ;
+if ($row['last_name'] != '') $profile_count ++ ; else $missings[] = 'nom de famille' ;
+if ($row['cell_phone'] != '') $profile_count ++ ; else $missings[] = 'n° GSM/mobile' ;
+if ($row['city'] != '') $profile_count ++ ; else $missings[] = 'ville' ;
+if ($row['country'] != '') $profile_count ++ ; else $missings[] = 'pays' ;
+if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ; else $missings[] = 'genre' ;
+if ($row['birthdate'] != '') $profile_count ++ ; else $missings[] = 'date de naissance' ;
+if ($profile_count != 8) print("<div class=\"validityBox\">Votre profil est complété à " . round(100 * $profile_count / 10) . "% seulement,
+	veuillez cliquer sur le bouton 'Mon Profil' pour mettre votre profil (" . implode(', ', $missings) . ") à jour.</div>") ;
+if ($row['cell_phone'] == '') {
+	print("<div class=\"validityBox\">Il manque votre numéro de GSM/mobile, impossible de réserver.
+		Veuillez cliquer sur le bouton 'Mon Profil' pour mettre votre profil à jour.</div>") ;
+	$userNoFlight = true ;
+}
+// Display any validity message from above
+if ($validity_msg != '') print('<div class="validityBox">' . $validity_msg . '</div>') ;
 
 // Verify non-logged flights in the last week
-	if (! $userIsInstructor) {
-	$result = mysqli_query($mysqli_link, "select * from $table_bookings b join $table_planes p on r_plane = p.id  
-		where p.actif = 1 and ressource = 0 and
-			(b.r_pilot = $userId or b.r_who = $userId or b.r_instructor = $userId) and
-			r_start > date_sub(curdate(), interval 1 month) and
-			r_start < now() and
-			r_cancel_date is null and
-			r_type in (" . BOOKING_PILOT . ", " . BOOKING_INSTRUCTOR . ") and
-			not exists (select * from $table_logbook l where l.l_booking = b.r_id)
-		order by b.r_start desc limit 5") or die("Cannot select unlogged flights: " . mysqli_error($mysqli_link)) ;
-	if (mysqli_num_rows($result) > 0) {
-		$missing_entries = mysqli_num_rows($result) ;
-		print("<p style=\"color: red;\">Vous avez une ou plusieurs réservations sans entrées dans les carnets de routes des avions, il est obligatoire de compléter
-			ces carnets sous peine de frais administratifs en fin de mois.</p><ul>") ;
-		while ($row = mysqli_fetch_array($result)) {
-			print("<li>$row[r_start]: <a href=\"IntroCarnetVol.php?id=$row[r_id]\">remplir le carnet de routes de $row[r_plane] ou annuler la réservation</a>;") ;
-			if ($userIsInstructor) print(" <img src=\"gtk-delete.png\" onclick=\"javascript:document.getElementById('reasonTextArea').value='Old booking';cancelOldBooking($row[r_id]);\">" ) ;
-			print("</li>\n") ;
-		}
-		print("</ul></p>\n") ;
+if (! $userIsInstructor) {
+$result = mysqli_query($mysqli_link, "select * from $table_bookings b join $table_planes p on r_plane = p.id  
+	where p.actif = 1 and ressource = 0 and
+		(b.r_pilot = $userId or b.r_who = $userId or b.r_instructor = $userId) and
+		r_start > date_sub(curdate(), interval 1 month) and
+		r_start < now() and
+		r_cancel_date is null and
+		r_type in (" . BOOKING_PILOT . ", " . BOOKING_INSTRUCTOR . ") and
+		not exists (select * from $table_logbook l where l.l_booking = b.r_id)
+	order by b.r_start desc limit 5") or die("Cannot select unlogged flights: " . mysqli_error($mysqli_link)) ;
+if (mysqli_num_rows($result) > 0) {
+	$missing_entries = mysqli_num_rows($result) ;
+	print("<p style=\"color: red;\">Vous avez une ou plusieurs réservations sans entrées dans les carnets de routes des avions, il est obligatoire de compléter
+		ces carnets sous peine de frais administratifs en fin de mois.</p><ul>") ;
+	while ($row = mysqli_fetch_array($result)) {
+		print("<li>$row[r_start]: <a href=\"IntroCarnetVol.php?id=$row[r_id]\">remplir le carnet de routes de $row[r_plane] ou annuler la réservation</a>;") ;
+		if ($userIsInstructor) print(" <img src=\"gtk-delete.png\" onclick=\"javascript:document.getElementById('reasonTextArea').value='Old booking';cancelOldBooking($row[r_id]);\">" ) ;
+		print("</li>\n") ;
 	}
-	} // Not $isInstructor
-print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
-} 
+	print("</ul></p>\n") ;
+}
+} // Not $isInstructor
 ?>
 
 <script>
@@ -671,7 +556,7 @@ if ($userIsInstructor) {
         </button>
       </div>
       <div class="modal-body">
-Instructeur: <select id="agendaItemInstructorSelect"><option value="62">éric test</option> </select><br/>
+Instructeur: <select id="agendaItemInstructorSelect"></select><br/>
 Début: <input type='date' id="agendaItemDateStart"> <select id="agendaItemStartHourSelect"><?=$all_hour_options?></select> : <select id="agendaItemStartMinuteSelect"><?=$all_minute_options?></select><br/>
 Fin: <input type='date' id="agendaItemDateEnd"> <select id="agendaItemEndHourSelect"><?=$all_hour_options?></select> : <select id="agendaItemEndMinuteSelect"><?=$all_minute_options?></select><br/>
 <input type="radio" id="agendaItemAvailability" name="agendaItemAvailability" value="available" onchange="agendaItemChanged(false);" checked> Disponible <input type="radio" name="agendaItemAvailability" value="unavailable" onchange="agendaItemChanged(true);" > Indisponible<br/>
@@ -702,7 +587,6 @@ if ($userIsInstructor || $userIsAdmin) {
 $version_php = date ("Y-m-d H:i:s.", filemtime('mobile_reservation.php')) ;
 $version_js = date ("Y-m-d H:i:s.", filemtime('mobile_reservation.js')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('mobile_reservation.css')) ;
-print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 ?>
 <div class="copyright">Réalisation: Eric Vyncke, 2014-2024 et Patrick Reginster 2020-2022, pour RAPCS, Royal Aéro Para Club de Spa, ASBL<br/>
@@ -710,5 +594,7 @@ Open Source code: <a href="https://github.com/evyncke/reserve_fly">on github</a>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, exécuté en <?=$execution_time?> sec</div>
 <br/>
 <div id="waitingDiv">Connecting to the server, please wait...<img src="spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();" width="256px" height="256px"></div>
+
+</div><!-- container -->
 </body>
 </html>
