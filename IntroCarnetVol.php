@@ -942,10 +942,10 @@ else {
         if (isset($flightRow['f_reference'])) {
             $fReference=$flightRow['f_reference'];
         }
-		print("var default_flight_reference=\"fReference\"\n");
+		print("var default_flight_reference=\"$fReference\"\n");
         $fType='';
         if (isset($flightRow['f_type'])) {
-            $fReference=$flightRow['f_type'];
+            $fType=$flightRow['f_type'];
         }
 		print("var default_flight_type=\"f_type\"\n");
 		if($fReference!='') {
