@@ -159,6 +159,8 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
 	
 	$totalMontant=0.0;
 	while ($row = mysqli_fetch_array($resultLedger)) {
+
+        $referenceText=$row['f_reference'];
 		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
 		$date=$row['fl_date'];
 		$datePaiement=$date." 12:00:00";
@@ -187,29 +189,33 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
 		else {
 			$typeVol=$typeVol."? ";
 		}
+        $checkReferencePaiement="";
 		$referencePaiement=db2web($row['fl_reference']);	
         if($odooreference!="") {
             $moyenPaiement="Virement CBC";
         }
         else {		
-		    $pos = strpos(strtoupper($referencePaiement), "FACTURE");
-		    if($pos===false) {
-			    if($dateFlown == $date) {
-				    $moyenPaiement="Bancontact";
-			    }
-			    else {
-				    $moyenPaiement="Virement non lié à odoo";	
-			    }
-		    }
-		    else {
-			    $moyenPaiement="Facture";
-		    }
+    	    $pos = strpos(strtoupper($referencePaiement), "BANCONTACT");
+    	    if($pos===false) {
+    			$moyenPaiement=$referencePaiement;
+                $checkReferencePaiement="<br><b style=\"color: red;\">Pas encore de référence odoo</b>";
+    	    }
+    	    else {
+    		    $moyenPaiement="Bancontact";
+    	    }
         }
 		$montant=$row['fl_amount'];
 		$totalMontant+=$montant;
-	
-		
-		print("<tr><td class=\"logCell\">$datePaiement</td><td class=\"logCell\">$reference</td class=\"logCell\"><td class=\"logCell\">$typeVol</td><td class=\"logCell\">$moyenPaiement</td><td class=\"logCell\">$montant</td><td class=\"logCell\">$referencePaiement</td></tr>");
+        
+        $checkDateFlown="";
+		$pos = strpos(strtoupper($referenceText), "V-");
+		if($pos===false) {
+            if($dateFlown=="") {
+               $checkDateFlown="<b style=\"color: red;\"><br>Le vol ne semble pas être correctement cloturé.<br>Pas de date de vol associé</b>" ;
+            }
+	    }
+        		
+		print("<tr><td class=\"logCell\">$datePaiement</td><td class=\"logCell\">$reference</td class=\"logCell\"><td class=\"logCell\">$typeVol</td><td class=\"logCell\">$moyenPaiement</td><td class=\"logCell\">$montant</td><td class=\"logCell\">$referencePaiement $checkDateFlown $checkReferencePaiement</td></tr>");
 	}
 	$totalMontantText=number_format($totalMontant, 2, '.', ' ') ;
 	print("<tr><td class=\"logCell\"><b>Total</b></td><td class=\"logCell\"></td class=\"logCell\"><td class=\"logCell\"></td><td class=\"logCell\"></td><td class=\"logCell\"><b>$totalMontantText</b></td><td class=\"logCell\"></td></tr>");

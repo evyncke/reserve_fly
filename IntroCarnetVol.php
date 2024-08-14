@@ -73,6 +73,7 @@ print("var default_qrcode_communication_pilote=\"\";\n");
 print("var default_fqrcode_montant_total_pilote=0;\n");	
 
 // bookingid is defined by the key "id" (coming from the booking) or by the key "cdv_booking" (coming from this page)
+$auth="";
 if (isset($_REQUEST['auth']) and $_REQUEST['auth'] != '') {
 	$auth=$_REQUEST['auth'];
 	print("var default_auth='$auth';\n");
