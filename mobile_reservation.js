@@ -1968,10 +1968,12 @@ function refreshPlanningTable() {
 			}
 			// Check for incidents ATL
 			if (allPlanes[plane].incidents == 'NOHAZARD')
-				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id + '" target="_blank">' +
+				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id.toUpperCase() + 
+					'" onclick="event.stopPropagation();" target="_blank">' +
 					'<i class="bi bi-tools text-warning" width="12" height="12" title="Consulter l\'ATL HAZARD"></i></a>';
 			else if (allPlanes[plane].incidents == 'HAZARD')
-				planePlanningTable.rows[1 + plane].cells[0].innerHTML +=  ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id + '" target="_blank">' +
+				planePlanningTable.rows[1 + plane].cells[0].innerHTML +=  ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id.toUpperCase() + 
+					'" onclick="event.stopPropagation();" target="_blank">' +
 					'<i class="bi bi-tools text-danger" width="12" height="12" title="Consulter l\'ATL HAZARD"></i></a>';
 			// add for engine hours using the most recent data but not for ressources
 			if (allPlanes[plane].ressource == 0) {

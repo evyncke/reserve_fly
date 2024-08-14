@@ -1985,11 +1985,13 @@ function refreshPlanningTable() {
 			}
 			// Check for incidents ATL
 			if (allPlanes[plane].incidents == 'NOHAZARD')
-				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id + '" target="_blank">' +
-					'<span class="material-symbols-rounded" style="font-size: 12px; color: orangeRed;" title="Consulter l\'ATL NOHAZARD">handyman</span></a>';
+				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id.toUpperCase() + 
+					'" onclick="event.stopPropagation();" target="_blank">' +
+					'<i class="bi bi-tools text-warning" width="12" height="12" title="Consulter l\'ATL HAZARD"></i></a>';
 			else if (allPlanes[plane].incidents == 'HAZARD')
-				planePlanningTable.rows[1 + plane].cells[0].innerHTML +=  ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id + '" target="_blank">' +
-					'<span class="material-symbols-rounded" style="font-size: 12px; color: red;" title="Consulter l\'ATL HAZARD">handyman</span></a>';
+				planePlanningTable.rows[1 + plane].cells[0].innerHTML +=  ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id.toUpperCase() + 
+					'" onclick="event.stopPropagation();" target="_blank">' +
+					'<i class="bi bi-tools text-danger" width="12" height="12" title="Consulter l\'ATL HAZARD"></i></a>';
 			// add for engine hours using the most recent data but not for ressources
 			if (allPlanes[plane].ressource == 0) {
 				// Add FlightAware link only for members, need to stop event propagation to the TD click causing a switch of presentation
