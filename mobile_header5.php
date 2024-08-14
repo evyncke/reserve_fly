@@ -67,6 +67,7 @@ var
 		userIsAdmin = <?= ($userIsAdmin) ? 'true' : 'false' ?>,
 		userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?>,
 		userIsStudent = <?=($userIsStudent)? 'true' : 'false'?>,
+    userIsNoFlight = <?=($userNoFlight)? 'true' : 'false'?> ,
 		bookingTypePilot = <?= BOOKING_PILOT?>,
 		bookingTypeInstructor = <?= BOOKING_INSTRUCTOR?>,
 		bookingTypeAdmin = <?= BOOKING_ADMIN?>,
@@ -221,6 +222,7 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="reservation.php">Réservations (plein écran) <i class="bi bi-box-arrow-up-right"></i></a></li>
             <li><i><a class="dropdown-item" href="mobile_reservation.php">Réservations (test Bootstrap 5) <i class="bi bi-radioactive"></i></a></i></li>
             <li><a class="dropdown-item" href="mobile.php">Mes réservations</a></li>
+            <li><a class="dropdown-item" href="webcal://ics.php?user=<?=$userId?>&auth=<?=md5($userId . $shared_secret)?>"><i class="bi bi-calendar3"></i> lier à mon calendrier (iCal)</a></li>
 <?php
 }
 ?>
@@ -293,7 +295,7 @@ if ($userId <= 0) {
               <a class="dropdown-item" href="mobile_mylog.php">Mon carnet de vols</a>
               <li><hr class="dropdown-divider"></hr></li>
               <li><h6 class="dropdown-header">Situation comptable</h6></li>
-              <a class="dropdown-item" href="mobile_folio.php">Mon folio</i></a>
+              <a class="dropdown-item" href="mobile_folio.php">Mon folio</a>
               <a class="dropdown-item" href="mobile_invoices.php">Mes factures</a>
               <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
               <li><h6 class="dropdown-header">Données personnelles</h6></li>
