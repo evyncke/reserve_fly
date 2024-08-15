@@ -65,8 +65,6 @@ if ($me['home_phone'] != '') $s .= "TEL;TYPE=HOME,VOICE:$me[home_phone]\n" ;
 if ($me['work_phone'] != '') $s .= "TEL;TYPE=WORK,VOICE:$me[work_phone]\n" ;
 if ($me['cell_phone'] != '') $s .= "TEL;TYPE=CELL,VOICE,TEXT:$me[cell_phone]\n" ;
 if ($me['skype'] != '') $s .= "IMPP:skype:$me[skype]\n" ;
-if ($me['msn'] != '') $s .= "IMPP:msn:$me[msn]\n" ;
-if ($me['aim'] != '') $s .= "IMPP:aim:$me[aim]\n" ;
 if ($me['twitter'] != '') $s .= "IMPP:twitter:$me[twitter]\n" ;
 if ($me['sex'] == 1) $s .= "GENDER:M\n" ;
 if ($me['sex'] == 2) $s .= "GENDER:F\n" ;
