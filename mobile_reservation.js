@@ -455,14 +455,14 @@ function showPilotDetails(id) {
 	var booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
 	if (booking.log_pilot != 0 && booking.log_pilot != booking.user) { // The booked pilot is not the same as in logbook and there is a logbook entry
 		span.innerHTML = '<b>' + booking.log_pilotName + "</b>" ;
-		span.innerHTML += '<a href="vcard.php?id=' + booking.log_pilot + '"><span class="material-symbols-rounded" style="font-size:18px;color:blue;">download</span></a>' ;
-		span.innerHTML += '<a href="vcard.php?id=' + booking.log_pilot + '&qr=yes"><span class="material-symbols-rounded"  style="font-size:18px;color:blue;">qr_code_2</span></a>' ;
+		span.innerHTML += ' <a href="vcard.php?id=' + booking.log_pilot + '"><i class="bi bi-download" title="Télécharger"></i></a>' ;
+		span.innerHTML += ' <a href="vcard.php?id=' + booking.log_pilot + '&qr=yes"><i class="bi bi-qr-code" title="Afficher QR-code"></i></a>' ;
 		span.innerHTML += '<br>Vol réserve par: ' + booking.name ;
 	} else { // No logbook information (possibly future reservation)
 		span.innerHTML = '<b>' + booking.name + "</b>" ;
 		if (booking.user) {
-			span.innerHTML += '<a href="vcard.php?id=' + booking.user + '"><span class="material-symbols-rounded" style="font-size:18px;color:blue;">download</span></a>' ;
-			span.innerHTML += '<a href="vcard.php?id=' + booking.user + '&qr=yes"><span class="material-symbols-rounded" style="font-size:18px;color:blue;">qr_code_2</span></a>' ;
+			span.innerHTML += ' <a href="vcard.php?id=' + booking.user + '"><i class="bi bi-download" title="Télécharger"></i></a>' ;
+			span.innerHTML += ' <a href="vcard.php?id=' + booking.user + '&qr=yes"><i class="bi bi-qr-code" title="Afficher QR-code"></i></a>' ;
 		}
 		if (booking.cell_phone)
 			span.innerHTML += '<br/>Mobile: <a href="tel:' + booking.cell_phone + '">' + booking.cell_phone + '</a>';
@@ -484,7 +484,7 @@ function showPilotDetails(id) {
 	}
 	if (booking.instructorId > 0) {
 		span.innerHTML += '<hr><b>' + booking.instructorName + "</b>" ;
-		span.innerHTML += '<a href="vcard.php?id=' + booking.instructorId + '"><span class="material-symbols-rounded"  style="font-size:18px;color:blue;">download</span></a>' ;
+		span.innerHTML += ' <a href="vcard.php?id=' + booking.instructorId + '"><i class="bi bi-download" title="Télécharger"></i></a>' ;
 		if (booking.instructorCellPhone)
 			span.innerHTML += '<br/>Mobile: <a href="tel:' + booking.instructorCellPhone + '">' + booking.instructorCellPhone + '</a>';
 		if (booking.instructorHomePhone)

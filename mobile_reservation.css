@@ -89,9 +89,5 @@ input#planningDate { width: 90px; font-size: 14; text-align: center; vertical-al
 	display: block; font-size: small; text-align: center ;
 }
 
-.planningLegend {
-	display: block; font-size: x-small; text-align: center ;
-}
-
 #waitingDiv { visibility: hidden ; z-index: 4 ; opacity: 0.8; width: 300px; height: 300px; position: absolute;}
 #waitingImage { width: 256px; height: 256px;}

@@ -373,18 +373,19 @@ mysqli_free_result($result_news) ;
 <span id="toggleInstructorAgendaSpan" class="toggleInstructorAgendaSpan" onClick="toggleInstructorAgenda();">+ Disponibilité des instructeurs</span><br/>
 <table id="instructorPlanningTable" class="planningTable" Xborder="0">
 </table>
-<span class="planningLegend">
-Indications pour un avion que nous n'êtes probablement pas en droit de réserver (sauf avec un instructeur) car:<br/>
-<i class="bi bi-exclamation-triangle-fill text-danger" alt="!" width="12" height="12"></i>: vous n'avez pas volé dessus récemment (sur
-base de l'entrée des heures de vol dans votre carnet de vols).<br/>
+<div class="text-center fw-light fs-6">
+<i class="bi bi-exclamation-triangle-fill text-danger" alt="!" width="12" height="12"></i>: vous n'avez pas volé dessus récemment (et le règlement d'ordre intérieur impose des vols récents).<br/>
 <i class="bi bi-ban text-danger" alt="X" width="12" height="12"></i>: vous n'avez pas les qualifications requises (sur base des validités de votre profil).<br/>
-Vérifiez les règles de réservation et si vous les respectez: réservez :-)<br/>
-<span class="material-symbols-rounded" style="font-size: 12px; color: orangeRed;">handyman</span>: il existe un Aircraft Technical Log pour ce avion à consulter.<br/>
+<i class="bi bi-tools text-warning" width="12" height="12"></i>: il existe un Aircraft Technical Log pour ce avion à consulter.<br/>
 <img src="fa.ico" border="0" width="12" height="12">: ouvre Flight Aware avec le dernier vol de cet avion.<br/>
-</span>
+</div>
 <center><input type="button" id="roadBookButton" value="Carnet de routes" onclick="roadBookClick();" disabled="true" style="display: none;"></center>
 <p>
-<div id="pilotDetailsDiv"><img id="pilotDetailsImage"><span id="pilotDetailsSpan"></span><hr><center><button onclick="hidePilotDetails();">OK</button></center></div>
+
+<div id="pilotDetailsDiv">
+	<img id="pilotDetailsImage"><span id="pilotDetailsSpan"></span>
+	<hr><center><button class="btn btn-primary" onclick="hidePilotDetails();">OK</button></center>
+</div><!-- pilotDetailsDiv -->
 
 <!-- model window to display the plane/ressource booking confirmation message-->
 <div class="modal fade" id="bookingMessageModal" tabindex="-1" aria-labelledby="bookingMessageLabel">
