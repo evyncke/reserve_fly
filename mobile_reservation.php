@@ -368,12 +368,12 @@ mysqli_free_result($result_news) ;
 	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+7);"><i class="bi bi-fast-forward-fill"></i></a></td>
 </tr>
 </table>
-<table id="planePlanningTable" class="planningTable" Xborder="0">
+<table id="planePlanningTable" class="planningTable" style="overflow-x: auto; display:box;">
 </table>
 <span id="toggleInstructorAgendaSpan" class="toggleInstructorAgendaSpan" onClick="toggleInstructorAgenda();">+ Disponibilité des instructeurs</span><br/>
-<table id="instructorPlanningTable" class="planningTable" Xborder="0">
+<table id="instructorPlanningTable" class="planningTable">
 </table>
-<div class="text-center fw-light fs-6">
+<div class="text-center fw-light small">
 <i class="bi bi-exclamation-triangle-fill text-danger" alt="!" width="12" height="12"></i>: vous n'avez pas volé dessus récemment (et le règlement d'ordre intérieur impose des vols récents).<br/>
 <i class="bi bi-ban text-danger" alt="X" width="12" height="12"></i>: vous n'avez pas les qualifications requises (sur base des validités de votre profil).<br/>
 <i class="bi bi-tools text-warning" width="12" height="12"></i>: il existe un Aircraft Technical Log pour ce avion à consulter.<br/>
