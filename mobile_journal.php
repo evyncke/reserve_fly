@@ -50,7 +50,8 @@ if (isset($_REQUEST['id']) and is_numeric($_REQUEST['id']))
 	$sql_filter = " AND name like '%" . web2db($_REQUEST['user']) . "%'" ;
  else if (isset($_REQUEST['msg']))
 	$sql_filter = " AND j_message like '%" . web2db($_REQUEST['msg']) . "%'" ;
-$sql = "SELECT * FROM $table_journal LEFT JOIN $table_users u ON j_jom_id = u.id
+$sql = "SELECT * FROM $table_journal 
+			LEFT JOIN $table_person p ON j_jom_id = p.jom_id
 		WHERE j_id <= $start $sql_filter
 		ORDER BY j_id desc
 		LIMIT 0, 25" ;
@@ -71,9 +72,13 @@ while ($row = mysqli_fetch_array($result)) {
 		$date = substr($date, 11) ; // Don't display today date
 	else 
 		$date = substr($date,0, 10) . '<br/>' . substr($date, 11) ; // Nice break
+	if (isset($row['last_name']) and $row['last_name'] != '')
+		$name = db2web("<b>$row[last_name]</b> $row[first_name]") ;
+	else
+		$name = db2web($row['name']) ;
 	print("<tr>
 		<td class=\"text-nowrap$specialClass\">$date</td>
-		<td$nameStyle class=\"text-nowrap$specialClass\">" . db2web($row['name']) . "</td>
+		<td$nameStyle class=\"text-nowrap$specialClass\">$name</td>
 		<td class=\"d-none d-lg-table-cell$specialClass\">$row[j_address]</td>
 		<td class=\"text-align$specialClass\">" . db2web($row['j_message']) . "</td>
 		<td class=\"text-align d-none d-lg-table-cell$specialClass\">" . db2web($row['j_uri']) . "</td>
