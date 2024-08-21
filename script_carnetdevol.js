@@ -895,6 +895,9 @@ function compute_defaultInstructorValues(theInstructorId)
 		if(default_is_pic == 1) {
 			aFunctionInput.value="PICRecheck";				
 		}
+		else if(default_is_pic == 2) {
+			aFunctionInput.value="PICSupervise";				
+		}
 		else {		
 			aFunctionInput.value="DC";	
 		}	

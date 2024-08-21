@@ -48,6 +48,7 @@ print("var default_logbookid=0;\n");
 print("var default_plane=\"\";\n");
 print("var default_pilot=0;\n");
 print("var default_instructor=0;\n");
+print("var default_isstudent=0;\n");
 print("var default_date_heure_depart=\"\";\n");
 print("var default_date_heure_arrivee=\"\";\n");
 print("var default_day_landing=1;\n");
@@ -423,6 +424,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	else if($cdv_pilot_function=="PIC") {
 		$isPICFunction=1;
 		$cdv_flight_instructor=0;
+	}
+	else if($cdv_pilot_function=="PICSupervise") {
+		$isPICFunction=2;
 	}
 	else {
 		// PICRecheck
@@ -1057,6 +1061,7 @@ else {
 <option selected="selected" value="PIC">PIC</option>
 <option value="DC">DC</option>
 <option value="PICRecheck">PIC-Recheck</option>
+<option value="PICSupervise">PIC-Supervis&eacute;</option>
 </select></td>
 </tr>
 <tr id="id_cdv_flight_instructor_row">

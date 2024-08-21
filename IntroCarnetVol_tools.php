@@ -184,4 +184,14 @@ function HasDTOFlight($theLogId) {
     //print("PRE3 HasDTOFlight: theLogId=$theLogId<br>");
     return true;
 }
+
+// Returns true is the thePilotID is a student
+function IsStudent($thePilotID) {
+    global $mysqli_link, $table_user_usergroup_map,$joomla_student_group;
+	$studentResult=mysqli_query($mysqli_link,"SELECT user_id FROM $table_user_usergroup_map WHERE user_id = '$thePilotID' and group_id='$joomla_student_group';") or die("Impossible de retrouver le user_id dans table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
+	if ($studentResult->num_rows != 0) {
+        return true;
+    }
+    return false;
+}
 ?>
