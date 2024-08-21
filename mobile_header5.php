@@ -20,7 +20,8 @@ ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
 header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image') ;
-	
+
+# Could add data-bs-theme="dark" to the HTML element see https://getbootstrap.com/docs/5.3/customize/color-modes/#javascript perhaps via a Cookie ?
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -311,8 +312,8 @@ if ($userId <= 0) {
 <?php
 }
 ?>
-        <li class="navbar-item">
-          <a class="nav-link text-white" href="mobile_metar.php?kiosk" title="Lancer un kiosque des pages publiques"><i class="bi bi-play-fill"></i></a>
+        <li class="navbar-item d-none d-md-block">
+          <a class="nav-link text-white" href="mobile_metar.php?kiosk" title="Lancer un kiosque des pages publiques"><i class="bi bi-file-slides"></i></a>
         </li>
       </ul><!-- navbar right -->
   </div>
