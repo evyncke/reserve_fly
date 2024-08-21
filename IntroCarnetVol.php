@@ -75,6 +75,7 @@ print("var default_fqrcode_montant_total_pilote=0;\n");
 
 // bookingid is defined by the key "id" (coming from the booking) or by the key "cdv_booking" (coming from this page)
 $auth="";
+$logid="";
 if (isset($_REQUEST['auth']) and $_REQUEST['auth'] != '') {
 	$auth=$_REQUEST['auth'];
 	print("var default_auth='$auth';\n");
@@ -616,16 +617,17 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
         }
         if(!HasDTOFlight($l_id)) {
     		//print("C'est aussi un eleve logid=$logid</br>");
-    		//print("Creating  also Flight</br>");
     		// Create a flight in the DTO table rapcs_dto_flight
     		$flight = new Flight() ;
     		$flight->flightLog = $l_id;
     		$flight->student= $pilotId;
-    		if($isPICFunction) {
+    		if($isPICFunction>0) {
     			$flight->flightType="Solo";
+                //print("Creating Flight DTO flightType Solo</br>");
     		}
     		else {
     			$flight->flightType="DC";			
+                //print("Creating Flight DTO flightType DC</br>");
     		}
     		$flight->save();
     		//print("FlightLog saved</br>");
