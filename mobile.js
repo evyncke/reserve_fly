@@ -41,10 +41,11 @@ function myDateGetHoursMinutes(d) {
 	return leadingZero(d.getHours()) + ':' + leadingZero(d.getMinutes()) ;
 }
 
-function displayMETAR(station) {
+function displayMobileMETAR(station) {
 	var XHR=new XMLHttpRequest();
 
-	document.getElementById('metarMessage').innerHTML = '<em style="font-size: 8wv;">... fetching data over the Internet ...</em>' ;
+	document.getElementById('metarMessage').innerHTML = '<em style="font-size: 8wv;"> <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ... fetching data over the Internet ...</em>' ;
+	document.getElementById('metarMessage').className = 'col-12 text-bg-secondary' ;
 	if (window.location.search.search('kiosk') >= 0)
 		document.getElementById('metarMessage').style.fontSize = "3vw" ;
 	else
@@ -53,6 +54,7 @@ function displayMETAR(station) {
 		if(this.readyState  == 4) {
 			if(this.status  == 200 || this.status == 304) { // OK or not modified
 				var elem = document.getElementById('metarMessage') ;
+				elem.className = 'col-12 ' ;
 				try {
 					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
@@ -67,13 +69,17 @@ function displayMETAR(station) {
 				} else {
 					setTimeout(function () { displayMETAR(station);} , 1000 * 60 * 5) ; // Refresh every 5 minutes
 					if (response.condition != null && response.condition == 'VMC')
-						elem.style.backgroundColor =  'paleGreen' ;
+						// elem.style.backgroundColor =  'paleGreen' ;
+						elem.className += 'text-bg-success' ;
 					else if (response.condition != null && response.condition == 'MMC')
-						elem.style.backgroundColor = 'orange' ;
+						//elem.style.backgroundColor = 'orange' ;
+						elem.className += 'text-bg-warning' ;
 					else if (response.condition != null && response.condition == 'IMC')
-						elem.style.backgroundColor = 'pink' ;
+						//elem.style.backgroundColor = 'pink' ;
+						elem.className += 'text-bg-danger' ;
 					else
-						elem.style.backgroundColor = 'lightGray' ;
+						elem.className += 'text-bg-secondary' ;
+						//elem.style.backgroundColor = 'lightGray' ;
 					elem.innerHTML = '<b>' + response.METAR + '</b>' ;
 					document.getElementById('sourceId').innerText = response.source ;
 					if (station == 'EBSP') {

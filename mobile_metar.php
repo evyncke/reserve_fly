@@ -55,7 +55,7 @@ $station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(s
 } // $userId > 0
 ?>
 <script>
-	displayMETAR('<?=$station?>') ;
+	displayMobileMETAR('<?=$station?>') ;
 </script>
 
 </div> <!-- container-->

@@ -508,10 +508,8 @@ function createPlanningTableHeader(planningTable) {
     rowHeader = planningTable.insertRow(0);
 	// Add the first column for the header
 	rowHeader.insertCell(0) ;
-	rowHeader.cells[0].style.display= '' ;
 	rowHeader.cells[0].innerHTML= '' ;
     // Add enough 'time' cells to this new row
-	// TODO create a tbody element???
 	nightColumn = 1 ;
     for (i = 1, hour = planningStartHour, minute = 0 ; hour < planningStopHour; i++, minute += 15) {
                rowHeader.insertCell(i) ;

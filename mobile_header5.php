@@ -22,8 +22,13 @@ ob_start("ob_gzhandler");
 header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image') ;
 
 # Could add data-bs-theme="dark" to the HTML element see https://getbootstrap.com/docs/5.3/customize/color-modes/#javascript perhaps via a Cookie ?
+$theme = (isset($_COOKIE['theme'])) ? $_COOKIE['theme'] : 'light' ;
+if (isset($_REQUEST['theme']) and $_REQUEST['theme'] != '') {
+  $theme = $_REQUEST['theme'] ;
+  setcookie('theme', $theme, time()+60*60*24*30, '/', $_SERVER['HTTP_HOST'], true) ;
+}
 ?><!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-bs-theme="<?=$theme?>">
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <meta charset="utf-8">
