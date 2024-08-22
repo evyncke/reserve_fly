@@ -22,11 +22,12 @@ ob_start("ob_gzhandler");
 header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image') ;
 
 # Could add data-bs-theme="dark" to the HTML element see https://getbootstrap.com/docs/5.3/customize/color-modes/#javascript perhaps via a Cookie ?
-$theme = (isset($_COOKIE['theme'])) ? $_COOKIE['theme'] : 'light' ;
-if (isset($_REQUEST['theme']) and $_REQUEST['theme'] != '') {
-  $theme = $_REQUEST['theme'] ;
-  setcookie('theme', $theme, time()+60*60*24*30, '/', $_SERVER['HTTP_HOST'], true) ;
-}
+if (isset($_GET['theme']) and $_GET['theme'] != '') {
+  $theme = $_GET['theme'] ;
+  journalise($userId, "D", "Switching to theme $theme") ;
+} else
+  $theme = (isset($_COOKIE['theme'])) ? $_COOKIE['theme'] : 'light' ;
+setcookie('theme', $theme, time()+60*60*24*30, '/', $_SERVER['HTTP_HOST'], true) ;
 ?><!DOCTYPE html>
 <html lang="fr" data-bs-theme="<?=$theme?>">
 <head>
@@ -298,6 +299,8 @@ if ($userId <= 0) {
           <ul class="dropdown-menu">
               <li id="logoutElem">
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
+              <a class="dropdown-item" href="?theme=dark"><i class="bi bi-moon-stars-fill"></i> Mode nuit</a>
+              <a class="dropdown-item" href="?theme=light"><i class="bi bi-sun-fill"></i> Mode jour</a>
               <a class="dropdown-item" href="mobile_mylog.php">Mon carnet de vols</a>
               <li><hr class="dropdown-divider"></hr></li>
               <li><h6 class="dropdown-header">Situation comptable</h6></li>
