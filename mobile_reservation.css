@@ -23,15 +23,24 @@ td { border: 1px; margin: 0px; padding: 1px;}
 /* Bootstrap uses box-sizing: border-box rather than the default content-box, i.e., margin/padding are counted in width/height */
 /* Bootstrap also set border-collapse: collapse; for table */
 
+
+.planningRuler { height: 32px ; margin-left: auto; vertical-align: text-top ;  margin-right: auto; }
+.planningRulerCell { height: 32px ; padding-left: 10px; padding-right: 10px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
+.planningRulerCellCalendar { height: 32px ; padding-left: 1px; padding-right: 1px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
+.planningRulerCellLarge { height: 32px ; width: 200px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
+span#planningDayOfWeek { width: 80px; font-size: 14; text-align: center; vertical-align: top; }
+input#planningDate { width: 90px; font-size: 14; text-align: center; vertical-align: top; }
+
+td.header_hour { background-color: white; width: 15px; border-left-style: dotted; font-size: 0.75em; overflow-x: visible;}
+td.newheader_hour { background-color: white; width: 0.5vw; border-left-style: dotted; font-size: 0.75em; overflow-x: visible;}
+td.header_last_hour { width: 15px; border-left-style: dotted; font-size: 0.75em;}
+td.header_not_hour { background-color: white; width: 15px; }
+
 .planningTable { border-spacing: 1px; border-collapse: separate; border-width: 1px; 
 	margin-left: auto; margin-right: auto; 
 	font-size: /*0.75em*/ 1em; line-height: 1 ;}
 
 td.plane_cell { border-top-style: dotted; border-top-width: 1px; border-color: black; }
-td.header_hour { background-color: white; width: 15px; border-left-style: dotted; font-size: 0.75em; overflow-x: visible;}
-td.newheader_hour { background-color: white; width: 0.5vw; border-left-style: dotted; font-size: 0.75em; overflow-x: visible;}
-td.header_last_hour { width: 15px; border-left-style: dotted; font-size: 0.75em;}
-td.header_not_hour { background-color: white; width: 15px; }
 td.slot { width: 17px; max-width: 17px; height: 40px; max-height: 40px; 
 	border-spacing: 1px; border-width: 1px; border-color: white; 
 	color: black; 
@@ -59,12 +68,6 @@ td.onsite { background-color: #97F024; }
 td.oncall { background-color: yellow; }
 td.unavailable { background-color: lightblue; }
 
-.planningRuler { height: 32px ; margin-left: auto; vertical-align: text-top ;  margin-right: auto; }
-.planningRulerCell { height: 32px ; padding-left: 10px; padding-right: 10px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
-.planningRulerCellCalendar { height: 32px ; padding-left: 1px; padding-right: 1px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
-.planningRulerCellLarge { height: 32px ; width: 200px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
-span#planningDayOfWeek { width: 80px; font-size: 14; text-align: center; vertical-align: top; }
-input#planningDate { width: 90px; font-size: 14; text-align: center; vertical-align: top; }
 
 .bookingErrorMessage { background-color: red; }
 #bookingMessageDiv {width: 300px; z-index: 3; background-color: lightgray; border-width: 1px; border-style: solid; border-color: black;
