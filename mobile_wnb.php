@@ -166,12 +166,12 @@ print ("<input type=\"checkbox\" id=\"id_AllColumns\" name=\"name_AllColumns\" v
 using aspect-ratio makes printing over two pages... 
 using padding-top also prints over 2 pages and makes the display ultra small-->
 <div class="col-xs-12 col-sm-12 col-lg-6" style="margin: auto;">
-<div id="chart_div" style="width: 60vw; height: 50vw; margin: auto; ">... loading ...</div>
+<div id="chart_div" style="width: 60vw; height: 50vw; margin: auto;">... loading ...</div>
 </div><!--col-->
 
 </div><!--row-->
 
-<p class="d-none d-md-block bg-warning text-bg-warning mx-auto fs-6" style="height: 20px; position: fixed; margin:0; bottom: 0px;">
+<p class="d-none d-md-block text-bg-warning mx-auto fs-6" style="height: 20px; position: fixed; margin:0; bottom: 0px;">
     <small>Ceci est un simple outil informatique, le pilote doit toujours vérifier le POH ainsi que le certificat W&B officiel de l'avion.
 </small></p>
 
@@ -279,6 +279,11 @@ print("\t[$firstArm, $firstWeight, null]\n") ;
 ?>
         ]);
         data.addRow([parseFloat(document.getElementById('arm_total').innerText), null, Math.round(parseFloat(document.getElementById('wlb_total').innerText) / 2.20462)]) ;
+        // TODO option should include change in color based on Bootstrap theme dark/light for
+        // backgroundColor, backgroundColor.fill, chartArea.backgroundColor, crosshair.color, hAxis.baselineColor, hAxis.gridlines.color, hAxis.minorGridlines.color, hAxis.textStyle.color,
+        // hAxis.titleTextStyle.color, legend.textStyle.color, series.color, titleTextStyle.color, vAxis.baselineColor, vAxis.gridlines.color, 
+        // See https://developers.google.com/chart/interactive/docs/gallery/linechart?hl=fr
+        // Possibly even apply google.charts.Bar.convertOptions
         options = {
           title: 'Flight envelope <?=$plane?>',
           hAxis: {title: 'Inches From Reference Datum', minValue: <?=$minArmValue?>, maxValue: <?=$maxArmValue?>},
