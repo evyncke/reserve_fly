@@ -368,8 +368,10 @@ mysqli_free_result($result_news) ;
 	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+7);"><i class="bi bi-fast-forward-fill"></i></a></td>
 </tr>
 </table>
-<table id="planePlanningTable" class="planningTable" style="overflow-x: auto; display:box;">
-</table>
+<div style="overflow-x: auto;">
+	<table id="planePlanningTable" class="planningTable" style="display: box;">
+	</table>
+</div>
 <span id="toggleInstructorAgendaSpan" class="toggleInstructorAgendaSpan" onClick="toggleInstructorAgenda();">+ Disponibilité des instructeurs</span><br/>
 <table id="instructorPlanningTable" class="planningTable">
 </table>

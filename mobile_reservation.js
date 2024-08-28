@@ -719,7 +719,6 @@ function makeDisplayPlaneDetails(planeIndex) {
 function displayPlaneDetails(planeIndex) {
 	var span ;
 	var thisPlane = allPlanes[planeIndex] ;
-	console.log('displayPlaneDetails') ;
 	span = document.getElementById('reservationDetails') ;
 	span.innerHTML = '<b>' + thisPlane.id + '</b><br/>' ;
 	if (thisPlane.commentaire) span.innerHTML += '<i>' + thisPlane.commentaire + '</i><hr>' ;
