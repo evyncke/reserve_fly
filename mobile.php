@@ -17,14 +17,6 @@
 */
 
 require_once "dbi.php" ;
-$header_postamble = '
-<style>
-#bookingTable { 
-	border-style: solid; border-width: 2px; 
-	box-shadow: 3px 3px 10px gray;
-}
-</style>' ;
-
 require_once 'mobile_header5.php' ;
 
 
@@ -74,7 +66,7 @@ if (isset($result) and $result) {
 	if (! $booking) {
 		print('<br/><br/><br/><br/><br/>
 <div class="row text-center">
-	<div class="col-xs-12 col-md-6 mt-4 p-5 bg-primary text-white rounded">
+	<div class="col-xs-12 col-md-6 mt-4 p-5 text-bg-warning rounded">
 		Vous n\'avez aucune réservation.
 	</div>
 </div>') ;
@@ -124,7 +116,7 @@ if ($userId <= 0 and isset($_REQUEST['logout'])) {
 ?>
 <br/><br/><br/><br/><br/>
 <div class="row text-center">
-	<div class="col-xs-12 col-md-6 mt-4 p-5 bg-primary text-white rounded">
+	<div class="col-xs-12 col-md-6 mt-4 p-5 text-bg-primary rounded">
 		Vous êtes maintenant déconnecté(e).<br/>Utilisez le bouton "Se connecter" en haut à droite.
 	</div>
 </div>
@@ -136,7 +128,7 @@ if ($userId <= 0) {
 ?>
 <br/><br/><br/><br/><br/>
 <div class="row text-center">
-	<div class="col-xs-12 col-md-6 mt-4 p-5 bg-primary text-white rounded">
+	<div class="col-xs-12 col-md-6 mt-4 p-5 text-bg-primary rounded">
 		Vous devez être connecté(e) pour voir vos réservations.<br/>Utilisez le bouton "Se connecter" en haut à droite.
 	</div>
 </div>
@@ -153,7 +145,7 @@ if (isset($_REQUEST['news'])) {
 		LIMIT 0,3") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
 	
 	if (mysqli_num_rows($result_news)) {
-		print('<div class="row"><div class="col-xs-12 col-md-6 mt-4 p-5 bg-primary text-white rounded"><ul>') ;
+		print('<div class="row"><div class="col-xs-12 col-md-6 mt-4 p-5 text-bg-primary rounded"><ul>') ;
 		while ($row_news = mysqli_fetch_array($result_news)) {
 			$subject = db2web($row_news['n_subject']) ;
 			$text = db2web(nl2br($row_news['n_text'])) ;
@@ -178,10 +170,10 @@ mysqli_free_result($result_news) ;
 		<button class="btn btn-danger" onclick="cancelConfirm(<?=$id?>, '<?=$auth?>');">Je confirme l'annulation</button>
 		<br/>
 		<br/>
-		<button class="btn btn-primary btn-default" onclick="abandonCancel();">Ne pas annuler la r&eacute;servation</button>
+		<button class="btn btn-primary btn-default" onclick="abandonCancel();">Ne pas annuler la réservation</button>
 	</div> <!-- confirmCancellation -->
 	
-<table id="bookingTable" class="table table-sm table-secondary col-sm-12 col-md-4 col-lg-3">
+<table class="table table-sm table-striped rounded shadow col-sm-12 col-md-4 col-lg-3">
 	<tr><td>Avion:</td><td><?=$booking['r_plane']?></td><tr>
 	<tr><td>Début:</td><td><?=$booking['r_start']?></td><tr>
 	<tr><td>Fin:</td><td><?=$booking['r_stop']?></td><tr>
@@ -257,7 +249,7 @@ Vous n'avez pas encore encodé les index moteurs.
 <div class="row">
 	<br/>
 	<div class="col-xs-12 text-center ">
-		<button id="newLogbookButton" class="btn btn-success" onclick="newLogbookClick(<?=$id?>, '<?=$auth?>');">Introduction dans carnet de routes</button>
+		<button id="newLogbookButton" class="btn btn-success" onclick="newLogbookClick(<?=$id?>, '<?=$auth?>');">Introduction du vol dans carnet de routes</button>
 	</div><!-- col-->
 </div> <!-- row -->
 <?php

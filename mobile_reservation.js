@@ -21,7 +21,7 @@ var
 	aeroSunsetHours, aeroSunsetMinutes, currentlyDisplayedBooking, currentlyDisplayedAgendaItem, timeZoneChecked = false,
 	planningByPlane = false, planningPlaneIndex, planningStartHour, planningStopHour, timestampTicks = 0,
 	planningDay, planningMonth, planningYear, id2Name = new Array(),
-	metarHTML, metarTime = 0, metarBackgroundColor, offsetBrowserAirfield,
+	metarHTML, metarTime = 0, metarClassName, offsetBrowserAirfield,
 	dayMessagesHTML = '',
 	weekdays = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
 	browserWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth, // This is the iframe width 950 px
@@ -169,7 +169,7 @@ function refreshPlanningTableHeader() {
 		if (isNow(planningYear, planningMonth, planningDay, hour, minute))
 			rowHeader.cells[i].style.backgroundColor = 'orange' ;
 		else
-			rowHeader.cells[i].style.backgroundColor = 'white' ;
+			rowHeader.cells[i].style.backgroundColor = '' ;
         }
 }
 
@@ -300,7 +300,7 @@ function displayDayMessages() {
 		document.getElementById('reservationDetails').style.visibility = 'hidden' ;
 	} else {
 		document.getElementById('reservationDetails').innerHTML = dayMessagesHTML ;
-		document.getElementById('reservationDetails').style.backgroundColor = 'lightBlue' ;
+		className = 'col border rounded-3 mx-lg-3 text-bg-primary' ;
 		document.getElementById('reservationDetails').style.visibility = 'visible' ;
 	}
 }
@@ -316,7 +316,7 @@ function displayMETAR() {
 	}
 	if (timeNow < metarTime + 1000 * 60) { // Allow the caching for 1 minute
 		elem.innerHTML = metarHTML ;
-		elem.style.backgroundColor = metarBackgroundColor ;
+		elem.className = metarClassName ;
 		return ;
 	}
 // TODO as this is asynchronous...
@@ -332,6 +332,7 @@ function displayMETAR() {
 					return ;
 				}
 				var elem = document.getElementById('reservationDetails') ;
+				elem.className = 'col border rounded-3 mx-lg-3 ' ;
 				if (metar_response.error != '') {
 					elem.innerHTML =  metar_response.error ;
 				} else {
@@ -352,13 +353,13 @@ function displayMETAR() {
 						elem.innerHTML += '<br/><i>Pressure altitude at ' +  metar_response.station + ': ' +  metar_response.pressure_altitude + ' ft</i>' ;
 					}
 					if (metar_response.condition != null &&  metar_response.condition == 'VMC')
-						elem.style.backgroundColor =  'paleGreen' ;
+						elem.className += ' text-bg-success' ;
 					else if ( metar_response.condition != null &&  metar_response.condition == 'MMC')
-						elem.style.backgroundColor = 'orange' ;
+						elem.className += ' text-bg-warning' ;
 					else if ( metar_response.condition != null &&  metar_response.condition == 'IMC')
-						elem.style.backgroundColor = 'pink' ;
+						elem.className += 'text-bg-danger' ;
 					else
-						elem.style.backgroundColor = 'lightGray' ;
+						elem.className += 'text-bg-secondary' ;
 					if (metar_response.wind_velocity != null &&  metar_response.wind_direction != null &&  metar_response.wind_direction != 'VRB' && runwaysQFU.length > 0) {
 						elem.innerHTML += '<br/><b>Wind components</b>' ;
 						var ul = document.createElement('ul');
@@ -398,7 +399,7 @@ function displayMETAR() {
 							else if (Math.abs(crossComponent) > 15)
 								li.innerHTML += ' <b>!Caution!</b>' ;
 							if (Math.abs(crossComponent) >= 25) {
-								elem.style.backgroundColor = 'pink' ;
+								elem.style.backgroundColor = 'pink' ; // TODO should rather be className of some sort
 							} else if (Math.abs(crossComponent) >= 15 && elem.style.backgroundColor != 'pink') { // Need to prevent changing red into orange ;-)
 								elem.style.backgroundColor = 'orange' ;
 							}
@@ -408,7 +409,8 @@ function displayMETAR() {
 						setTimeout(displayMETAR, 1000 * 60 * 5) ; // Refresh every 5 minutes
 					metarTime = timeNow ;
 					metarHTML = elem.innerHTML ;
-					metarBackgroundColor = elem.style.backgroundColor ;
+					metarClassName = elem.className ;
+					console.log('metarClassName:' + elem.className) ;
 				}
 			} // status == 200
 //			hideWaiting() ;
@@ -588,7 +590,7 @@ function initPlanningTable() {
 		instructorPlanningTable.style.visibility = 'visible' ;
 		instructorPlanningTable.style.display = 'table' ;
 		// FI TEST
-		for (var instructor = 1; instructor < instructors.length+1; instructor++) { // Instructors[0] is always 'solo'
+		for (var instructor = 1; instructor < instructors.length	; instructor++) { // Instructors[0] is always 'solo'
 			newRow = instructorPlanningTable.insertRow(-1) ;
 			newRow.insertCell(0) ;
 			newRow.cells[0].className = 'plane_cell' ;
@@ -717,7 +719,7 @@ function makeDisplayPlaneDetails(planeIndex) {
 function displayPlaneDetails(planeIndex) {
 	var span ;
 	var thisPlane = allPlanes[planeIndex] ;
-
+	console.log('displayPlaneDetails') ;
 	span = document.getElementById('reservationDetails') ;
 	span.innerHTML = '<b>' + thisPlane.id + '</b><br/>' ;
 	if (thisPlane.commentaire) span.innerHTML += '<i>' + thisPlane.commentaire + '</i><hr>' ;
@@ -731,9 +733,9 @@ function displayPlaneDetails(planeIndex) {
 			span.innerHTML += "<br/><span class=\"text-bg-warning\">\nConsultez l'Aircraft Technical Log en cliquant sur <i class=\"bi bi-tools\"></i></span>\n" ;
 	}
 	if (thisPlane.incidents == '')
-		span.style.backgroundColor = 'lightGray' ;
+		span.className = 'col border rounded-3 mx-lg-3 text-bg-light' ;
 	else
-		span.style.backgroundColor = 'lightPink' ;
+		span.className = 'col border rounded-3 mx-lg-3 text-bg-warning' ; 
 	span.style.visibility = 'visible' ;
 }
 
@@ -742,7 +744,7 @@ function displayBookingDetails(id) {
 	var span, booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
 
 	span = document.getElementById('reservationDetails') ;
-	span.style.backgroundColor = 'lightGray' ; // METAR displayed in the same span can change the color
+	span.className = 'col border rounded-3 mx-lg-3 text-bg-light' ; // METAR displayed in the same span can change the color
 	span.innerHTML = '<b>' + booking.plane + '</b><br/>' ;
 	span.innerHTML += "Réservation pour: " + booking.name ;
 	span.innerHTML += "<br/>Faite le " + booking.bookedDate + '.';
@@ -807,7 +809,7 @@ function displayAgendaItemDetails(id) {
 	var span, item = allFIAgendas[id] ;
 
 	span = document.getElementById('reservationDetails') ;
-	span.style.backgroundColor = 'lightGray' ; 
+	span.className = 'col border rounded-3 mx-lg-3 text-bg-light' ;
 	span.innerHTML = '<b>' + id2Name[allFIAgendas[id].fi] + '</b><br/>' ;
 	if (allFIAgendas[id].callType < 0) {
 		span.innerHTML += 'Est indisponible du ' + allFIAgendas[id].start + ' au ' + allFIAgendas[id].end + '<br/>' ;
@@ -1968,11 +1970,11 @@ function refreshPlanningTable() {
 			if (allPlanes[plane].incidents == 'NOHAZARD')
 				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id.toUpperCase() + 
 					'" onclick="event.stopPropagation();" target="_blank">' +
-					'<i class="bi bi-tools text-warning" width="12" height="12" title="Consulter l\'ATL HAZARD"></i></a>';
+					'<i class="bi bi-tools text-bg-warning" width="12" height="12" title="Consulter l\'ATL HAZARD"></i></a>';
 			else if (allPlanes[plane].incidents == 'HAZARD')
 				planePlanningTable.rows[1 + plane].cells[0].innerHTML +=  ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id.toUpperCase() + 
 					'" onclick="event.stopPropagation();" target="_blank">' +
-					'<i class="bi bi-tools text-danger" width="12" height="12" title="Consulter l\'ATL HAZARD"></i></a>';
+					'<i class="bi bi-tools text-bg-danger" width="12" height="12" title="Consulter l\'ATL HAZARD"></i></a>';
 			// add for engine hours using the most recent data but not for ressources
 			if (allPlanes[plane].ressource == 0) {
 				// Add FlightAware link only for members, need to stop event propagation to the TD click causing a switch of presentation
@@ -1982,13 +1984,13 @@ function refreshPlanningTable() {
 				compteur = allPlanes[plane].compteur_pilote ;
 				planePlanningTable.rows[1 + plane].cells[0].innerHTML += '<br/>Compteur: ' + compteur + '<br/>Maint. à: ' + allPlanes[plane].entretien ;
 				if (allPlanes[plane].entretien <= compteur)
-					planePlanningTable.rows[1 + plane].cells[0].style.color = 'red' ;
+					planePlanningTable.rows[1 + plane].cells[0].className += ' text-bg-danger' ;
 				else if (allPlanes[plane].entretien <= compteur + 5)
-					planePlanningTable.rows[1 + plane].cells[0].style.color = 'orange' ;
+					planePlanningTable.rows[1 + plane].cells[0].className += ' text-bg-warning' ;
 				else
-					planePlanningTable.rows[1 + plane].cells[0].style.color = 'black' ;
+					planePlanningTable.rows[1 + plane].cells[0].style.color += ' ' ; // TODO check whether a new BS class would be more suitable
 			} else
-				planePlanningTable.rows[1 + plane].cells[0].style.color = 'blue' ;
+				planePlanningTable.rows[1 + plane].cells[0].className += ' text-bg-primary' ;
 			planePlanningTable.rows[1 + plane].cells[0].id = plane ;
 			planePlanningTable.rows[1 + plane].cells[0].onclick = function () { presentationByPlane(event) ; } 
 			refreshPlanePlanningRow(plane, allPlanes[plane].id, planningDay, planningMonth, planningYear) ;

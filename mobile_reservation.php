@@ -345,13 +345,13 @@ if (mysqli_num_rows($result_news) or $userIsAdmin) {
 		$delete_action = ($userIsAdmin) ? ' <a href="news_delete.php?id=' . $row_news['n_id'] . '"><i class="bi bi-trash text-danger"></i></a>' : '' ;
 		print("<li><b>$subject</b>: $text$delete_action</li>\n") ;
 	}
-	if ($userIsAdmin) print('<li><a href="news_add.php">Ajouter une nouvelle</a></li>') ;
+	if ($userIsAdmin) print('<li><a href="news_add.php" class="text-bg-info"><i class="bi bi-plus-circle-fill"></i> Ajouter une nouvelle</a></li>') ;
 	print('</ul>
 	</div><!-- col -->') ;
 }
 mysqli_free_result($result_news) ;
 ?>
-		<div class="col border rounded-3  mx-lg-3" id="reservationDetails" style="width: 30%;"></div>
+		<div class="col border rounded-3 mx-lg-3" id="reservationDetails" style="width: 30%;"></div>
 		<div class="col d-none d-md-block" id="webcamCell">
 			<a href="" id="webcamURI" border="0"><img id="webcamImg" style="width: 256px; height: 192px;" alt="Webcam" onStalled="imgStalled();"></a>
 		</div><!--col-->
@@ -360,7 +360,7 @@ mysqli_free_result($result_news) ;
 
 <br/>
 <table class="planningRuler">
-<tr stylex="vertical-align: top; background: white;">
+<tr style="vertical-align: top;">
 	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-7);"><i class="bi bi-rewind-fill"></i></a></td>
 	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-1);"><i class="bi bi-caret-left-fill"></i></a></td>
 	<td class="planningRulerCellLarge"><span id="planningDayOfWeek"></span><input type="date" sytyle="width: 100px;" id="planningDate" onchange="jumpPlanningDate();"></td>
@@ -376,13 +376,13 @@ mysqli_free_result($result_news) ;
 <div class="text-center fw-light small">
 <i class="bi bi-exclamation-triangle-fill text-danger" alt="!" width="12" height="12"></i>: vous n'avez pas volé dessus récemment (et le règlement d'ordre intérieur impose des vols récents).<br/>
 <i class="bi bi-ban text-danger" alt="X" width="12" height="12"></i>: vous n'avez pas les qualifications requises (sur base des validités de votre profil).<br/>
-<i class="bi bi-tools text-warning" width="12" height="12"></i>: il existe un Aircraft Technical Log pour ce avion à consulter.<br/>
+<i class="bi bi-tools text-bg-warning" width="12" height="12"></i>: il existe un Aircraft Technical Log pour ce avion à consulter.<br/>
 <img src="fa.ico" border="0" width="12" height="12">: ouvre Flight Aware avec le dernier vol de cet avion.<br/>
 </div>
 <center><input type="button" id="roadBookButton" value="Carnet de routes" onclick="roadBookClick();" disabled="true" style="display: none;"></center>
 <p>
 
-<div id="pilotDetailsDiv">
+<div id="pilotDetailsDiv" class="text-bg-light">
 	<img id="pilotDetailsImage"><span id="pilotDetailsSpan"></span>
 	<hr><center><button class="btn btn-primary" onclick="hidePilotDetails();">OK</button></center>
 </div><!-- pilotDetailsDiv -->
@@ -481,7 +481,7 @@ et: <input type=text id="via2Airport" size="6" maxlength="4" onKeyUp="airportCha
 <br/>
 
 	  <hr>
-<span style="color: blue;">N'oubliez pas de vérifier la validité de votre qualification SEP, certificat médical, de votre ELP, des
+<span class="text-bg-primary">N'oubliez pas de vérifier la validité de votre qualification SEP, certificat médical, de votre ELP, des
 règles d'emport de passagers et les autres règles du club définies dans
 <a href="https://www.spa-aviation.be/index.php/fr/avions/regles-pour-la-reservation">règles pour réservation</a>.
 </span>

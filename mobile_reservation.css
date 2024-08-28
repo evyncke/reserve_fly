@@ -15,7 +15,7 @@
 
 */
 
-body { background: #f0f0f0; color: #363636; font-family: Arial, Helvetica, sans-serif; font-size: 1em;}
+body {font-family: Arial, Helvetica, sans-serif; font-size: 1em;}
 
 td { border: 1px; margin: 0px; padding: 1px;}
 
@@ -25,23 +25,23 @@ td { border: 1px; margin: 0px; padding: 1px;}
 
 
 .planningRuler { height: 32px ; margin-left: auto; vertical-align: text-top ;  margin-right: auto; }
-.planningRulerCell { height: 32px ; padding-left: 10px; padding-right: 10px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
-.planningRulerCellCalendar { height: 32px ; padding-left: 1px; padding-right: 1px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
-.planningRulerCellLarge { height: 32px ; width: 200px; vertical-align: top; background: white; vertical-align: text-top ; border: solid; border-width: 2px;}
+.planningRulerCell { height: 32px ; padding-left: 10px; padding-right: 10px; vertical-align: top; vertical-align: text-top ; border: solid; border-width: 2px;}
+.planningRulerCellCalendar { height: 32px ; padding-left: 1px; padding-right: 1px; vertical-align: top; vertical-align: text-top ; border: solid; border-width: 2px;}
+.planningRulerCellLarge { height: 32px ; width: 200px; vertical-align: top; vertical-align: text-top ; border: solid; border-width: 2px;}
 span#planningDayOfWeek { width: 80px; font-size: 14; text-align: center; vertical-align: top; }
 input#planningDate { width: 90px; font-size: 14; text-align: center; vertical-align: top; }
 
-td.header_hour { background-color: white; width: 15px; border-left-style: dotted; font-size: 0.75em; overflow-x: visible;}
-td.newheader_hour { background-color: white; width: 0.5vw; border-left-style: dotted; font-size: 0.75em; overflow-x: visible;}
-td.header_last_hour { width: 15px; border-left-style: dotted; font-size: 0.75em;}
-td.header_not_hour { background-color: white; width: 15px; }
+td.header_hour {width: 15px; border-left-style: dotted; font-size: 0.75em; overflow-x: visible;}
+td.newheader_hour {width: 0.5vw; border-left-style: dotted; font-size: 0.75em; overflow-x: visible;}
+td.header_last_hour {width: 15px; border-left-style: dotted; font-size: 0.75em;}
+td.header_not_hour {width: 15px; }
 
 .planningTable { border-spacing: 1px; border-collapse: separate; border-width: 1px; 
 	margin-left: auto; margin-right: auto; 
 	font-size: /*0.75em*/ 1em; line-height: 1 ;}
 
 td.plane_cell { border-top-style: dotted; border-top-width: 1px; border-color: black; }
-td.slot { width: 17px; max-width: 17px; height: 40px; max-height: 40px; 
+td.slot { width: 17px; min-width: 17px ; max-width: 17px; height: 40px; max-height: 40px; 
 	border-spacing: 1px; border-width: 1px; border-color: white; 
 	color: black; 
 	overflow-x: visible; white-space: nowrap ;}
@@ -74,7 +74,7 @@ td.unavailable { background-color: lightblue; }
 	padding: 5px; font-size: 1em; visibility: hidden; border-radius: 5px; box-shadow: 3px 3px 10px gray;
 	position: absolute; }
 
-#pilotDetailsDiv {width: 400px; z-index: 3; background-color: lightgray; border-width: 1px; border-style: solid; border-color: black;
+#pilotDetailsDiv {width: 400px; z-index: 3; border-width: 1px; border-style: solid; border-color: black;
 	padding: 5px; font-size: 1em; visibility: hidden; border-radius: 5px; box-shadow: 3px 3px 10px gray;
 	position: absolute; }
 #pilotDetailsImage {float: right; } 
