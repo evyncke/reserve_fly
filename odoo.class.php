@@ -120,7 +120,7 @@ class OdooClient {
         if ($response->faultCode()) {
             $ids_string = implode(',', $ids) ;
             if ($this->debug) {
-                die("<hr><b>Cannot update($model, [$ids_string]) in Odoo</b><br/>
+                die("<hr><b>Cannot update($model, [$ids_string], " . var_export($mapping) . ") in Odoo</b><br/>
                     Faultcode: " . htmlentities($response->faultCode()) . "<br/>
                     Reason: '" . nl2br($response->faultString()) . "'<hr>") ;
             } else

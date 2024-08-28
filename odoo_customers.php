@@ -297,8 +297,9 @@ while ($row = mysqli_fetch_array($result)) {
             if (in_array($joomla_board_group, $groups)  and $row['block'] == 0)
                 $tags[] = $board_member_tag ;
             if (count(array_diff($tags, $odoo_customer['category_id'])) > 0 or count(array_diff($odoo_customer['category_id'], $tags)) > 0) // Compare arrays of Odoo and Ciel tags/groups
-                // cfr https://stackoverflow.com/questions/29643834/how-to-add-tags-category-id-while-creating-customer-res-partner-in-odoo and https://www.odoo.com/documentation/12.0/developer/reference/orm.html#openerp-models-relationals-format 
-                $updates['category_id'] = (count($tags) > 0) ? array(array(6, 0, $tags)) : false ; 
+                // cfr https://stackoverflow.com/questions/29643834/how-to-add-tags-category-id-while-creating-customer-res-partner-in-odoo 
+                // and https://www.odoo.com/documentation/12.0/developer/reference/orm.html#openerp-models-relationals-format 
+                $updates['category_id'] = (count($tags) > 0) ? array(array(6, 0, $tags)) : array(array(5, 0, 0)); 
             if (count($updates) > 0) { // There were some changes, let's update the Odoo record
                 $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
                 $msg = '<span class="text-warning">Odoo updated</span> ' ;
