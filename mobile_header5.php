@@ -301,15 +301,15 @@ if ($userId <= 0) {
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
               <a class="dropdown-item" href="?theme=dark"><i class="bi bi-moon-stars-fill"></i> Mode nuit</a>
               <a class="dropdown-item" href="?theme=light"><i class="bi bi-sun-fill"></i> Mode jour</a>
-              <a class="dropdown-item" href="mobile_mylog.php">Mon carnet de vols</a>
+              <a class="dropdown-item" href="mobile_mylog.php"><i class="bi bi-journals"></i> Mon carnet de vols</a>
               <li><hr class="dropdown-divider"></hr></li>
               <li><h6 class="dropdown-header">Situation comptable</h6></li>
               <a class="dropdown-item" href="mobile_folio.php">Mon folio</a>
               <a class="dropdown-item" href="mobile_invoices.php">Mes factures</a>
               <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
               <li><h6 class="dropdown-header">Données personnelles</h6></li>
-              <a class="dropdown-item" href="mobile_groups.php">Mes groupes</a>
-              <a class="dropdown-item" href="mobile_profile.php">Mon profil</a>
+              <a class="dropdown-item" href="mobile_groups.php"><i class="bi bi-people-fill"></i> Mes groupes</a>
+              <a class="dropdown-item" href="mobile_profile.php"><i class="bi bi-person-circle"></i> Mon profil</a>
 <?php
   if ($userIsStudent)
       print("<a class=\"dropdown-item\" href=\"dto.student.php?student=$userId\">Ma progression</a>") ;
