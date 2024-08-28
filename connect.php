@@ -29,6 +29,7 @@ if ($userId > 0) {
 
 $connect_msg = '' ;
 
+// TODO should probably follow https://stackoverflow.com/questions/74343651/joomla-4-user-login-programmatically
 if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
     $result_login = JFactory::getApplication()->login(
         [
