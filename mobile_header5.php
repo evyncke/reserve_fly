@@ -227,7 +227,7 @@ if ($userId > 0) {
 ?>
             <li><a class="dropdown-item" href="mobile_book.php">Nouvelle réservation</a></li>
             <li><a class="dropdown-item" href="reservation.php">Réservations (plein écran) <i class="bi bi-box-arrow-up-right"></i></a></li>
-            <li><i><a class="dropdown-item" href="mobile_reservation.php">Réservations (test Bootstrap 5) <i class="bi bi-radioactive"></i></a></i></li>
+            <li><a class="dropdown-item" href="mobile_reservation.php">Réservations (responsive Bootstrap 5)</a></i></li>
             <li><a class="dropdown-item" href="mobile.php">Mes réservations</a></li>
             <li><a class="dropdown-item" href="webcal://ics.php?user=<?=$userId?>&auth=<?=md5($userId . $shared_secret)?>"><i class="bi bi-calendar3"></i> lier à mon calendrier (iCal)</a></li>
 <?php
