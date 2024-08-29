@@ -158,8 +158,7 @@ function insertTrackPoints(flights) {
 		thisFlight = flights[flight] ;
 		var tailNumber = ((thisFlight.tail_number == '-') ? thisFlight.icao24 : thisFlight.tail_number) ;
 		if (legendDiv) {
-//			legendDiv.innerHTML += '<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(thisFlight.tail_number) + '"></span> ' + thisFlight.tail_number + '<br/>' ;
-			legendItems.push('<span class="glyphicon glyphicon-plane" style="color:' + tailNumber2Color(thisFlight.tail_number) + ';"></span> ' + thisFlight.tail_number + ' (' + thisFlight.source + ')<br/>') ;
+			legendItems.push('<i class="bi bi-airplane-fill" style="color:' + tailNumber2Color(thisFlight.tail_number) + ';"></i> ' + thisFlight.tail_number + ' (' + thisFlight.source + ')<br/>') ;
 		}
 		// TODO add time of the first point in the comment
 		currentFeature = {type : 'Feature',
@@ -347,24 +346,26 @@ function initLocalFlights(longitudeArg, longitudeDeltaArg, latitudeArg, latitude
 	ajaxURL = ajaxURLArg ;
 	
 	
-	mapboxgl.accessToken = mapBoxToken;
-	map = new mapboxgl.Map({
+	mapboxgl.accessToken = mapBoxToken ;
+	options = {
 	    container: 'map', // container id
-	    style: 'mapbox://styles/mapbox/outdoors-v10', // stylesheet location
 	    center: [longitude, latitude], // starting position [lng, lat]
 	    zoom: zoomLevel // starting zoom was 8 then 9
-	});
+	} ;
+	// Check whether Cookie: contains theme=dark
+	if (decodeURIComponent(document.cookie).search('theme=dark') >= 0)
+		options.style = 'mapbox://styles/mapbox/dark-v9' ;
+	else
+		options.style = 'mapbox://styles/mapbox/outdoors-v10'; // stylesheet location
+	map = new mapboxgl.Map(options);
 
 	// Add zoom and rotation controls to the map.
 	map.addControl(new mapboxgl.NavigationControl());
 	map.on('load', mapAddLayers) ;
-
 		
 	// Mark the airports
 	getAirports('https://nav.vyncke.org/airports_ws.php?lat1=' + (latitude-latitudeDelta) + '&lat2=' + (latitude+latitudeDelta) + '&lng1=' + (longitude-longitudeDelta) + '&lng2=' + (longitude+longitudeDelta)) ;
-	
 
-	
 	// When run in bootstrap per https://stackoverflow.com/questions/54681826/mapbox-gl-js-canvas-not-displaying-properly-in-bootstrap-modal
 	// TODO to be done only in bootstrap mode ?
 	// TODO seems that $ does not work at all
