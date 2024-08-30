@@ -338,12 +338,17 @@ function initFleet(longitudeArg, latitudeArg, mapBoxToken, ajaxURLArg) {
 	ajaxURL = ajaxURLArg ;
 	
 	mapboxgl.accessToken = mapBoxToken;
-	map = new mapboxgl.Map({
+	options = {
 	    container: 'map', // container id
-	    style: 'mapbox://styles/mapbox/outdoors-v10', // stylesheet location
 	    center: [longitude, latitude], // starting position [lng, lat]
-	    zoom: 8 // starting zoom
-	});
+	    zoom: 8 // starting zoom was 8 then 9
+	} ;
+	// Check whether Cookie: contains theme=dark
+	if (decodeURIComponent(document.cookie).search('theme=dark') >= 0)
+		options.style = 'mapbox://styles/mapbox/dark-v9' ;
+	else
+		options.style = 'mapbox://styles/mapbox/outdoors-v10'; // stylesheet location
+	map = new mapboxgl.Map(options);
 
 	// Add zoom and rotation controls to the map.
 	map.addControl(new mapboxgl.NavigationControl());

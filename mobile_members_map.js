@@ -1,25 +1,6 @@
 // Some global variables for the mapBox
 var map ;
 
-var flightLayer = {
-	id : 'flights',
-	type : 'line', 
-	paint : {
-		// 'line-color' : '#F88',
-		// Use a get expression (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-get)
-		// to set the line-color to a feature property value.
-		'line-color': ['get', 'color'],
-		'line-width' : 2,
-	},
-	source : {
-		type : 'geojson',
-		data : {
-			type : 'FeatureCollection',
-			features : []
-		}
-	}
-} ;
-
 var locationLayer = {
 	id : 'locations',
 	type: 'symbol',
@@ -51,16 +32,20 @@ function insertMemberLocation(members) {
 	locationFeatureCollection = [] ;
  	for (var i in members) {
         currentFeature = {type : 'Feature',
-            properties : {title : '',comment : '', color: ''},
-            geometry : {type : 'LineString', coordinates : [] } } ;
-	    currentFeature.properties.title = members[i].name ;
-		currentFeature.properties.comment = "Name: " + members[i].name + '</br>City: ' + members[i].city;
-		currentFeature.geometry.coordinates =[members[i].longitude, members[i].latitude] ;
-		currentFeature.geometry.type = 'Point' ;
-		currentFeature.properties.icon = 'marker' ;
+            properties : {
+				title : members[i].name, 
+				comment : "Name: " + members[i].name + '</br>City: ' + members[i].city, 
+				icon: 'marker',
+				// color: ''
+			},
+            geometry : {
+				type: 'Point',
+	
+				coordinates : [members[i].longitude, members[i].latitude] } 
+		} ;
 		currentFeature.properties['marker-symbol'] = 'marker' ;
 		currentFeature.properties['marker-size'] = 'small' ;
-		currentFeature.properties['marker-color'] = currentFeature.properties.color ;
+		// currentFeature.properties['marker-color'] = currentFeature.properties.color ;
 		locationFeatureCollection.push(currentFeature) ;
 	} 
 			
@@ -70,7 +55,7 @@ function insertMemberLocation(members) {
 		}) ;	
 }
 
-function getTrackPoints() {
+function getMembersPoints() {
 	var XHR = new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
 		if(this.readyState  == 4) {
@@ -94,25 +79,8 @@ function mapAddLayers() {
 	locationLayer.source.data.features = locationFeatureCollection ;
 	map.addLayer(locationLayer) ;
 
-	// Change the cursor to a pointer when the it enters a feature in the 'flights' layer.
-	map.on('mouseenter', 'flights', function (e) {
-		map.getCanvas().style.cursor = 'pointer';
-		document.getElementById('flightInfo').innerHTML = e.features[0].properties.comment ;
-		document.getElementById('flightInfo').style.left = ' ' + (20 + e.originalEvent.clientX) + 'px'  ;
-		document.getElementById('flightInfo').style.top = ' ' + e.originalEvent.clientY + 'px'  ;
-		document.getElementById('flightInfo').style.display = 'block' ;
-		document.getElementById('flightInfo').style.zIndex = '10' ;
-	});
-	// Change it back to a pointer when it leaves.
-	map.on('mouseleave', 'flights', function (e) {
-		map.getCanvas().style.cursor = '';
-		document.getElementById('flightInfo').style.display = 'none' ;
-	});
-
-	// Try to do it asynchronously
-	map.addLayer(flightLayer) ;
 	// Build the track points
-	getTrackPoints(ajaxURL) ;
+	getMembersPoints(ajaxURL) ;
 }
 
 function initMap(longitudeArg, latitudeArg, mapBoxToken, ajaxURLArg) {
@@ -123,12 +91,17 @@ function initMap(longitudeArg, latitudeArg, mapBoxToken, ajaxURLArg) {
 	ajaxURL = ajaxURLArg ;
 	
 	mapboxgl.accessToken = mapBoxToken;
-	map = new mapboxgl.Map({
+	options = {
 	    container: 'map', // container id
-	    style: 'mapbox://styles/mapbox/outdoors-v10', // stylesheet location
 	    center: [longitude, latitude], // starting position [lng, lat]
-	    zoom: 8 // starting zoom
-	});
+	    zoom: 8 // starting zoom 
+	} ;
+	// Check whether Cookie: contains theme=dark
+	if (decodeURIComponent(document.cookie).search('theme=dark') >= 0)
+		options.style = 'mapbox://styles/mapbox/dark-v9' ;
+	else
+		options.style = 'mapbox://styles/mapbox/outdoors-v10'; // stylesheet location
+	map = new mapboxgl.Map(options);
 
 	// Add zoom and rotation controls to the map.
 	map.addControl(new mapboxgl.NavigationControl());
