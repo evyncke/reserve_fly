@@ -93,7 +93,7 @@ function gradeChanged(object, reference, grade) {
 </h2>
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">
-<form method="GET" action="<?=$_SERVER['PHP_SELF']?>">
+<form method="POST" action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="flight" value="<?=$flight->id?>">
 <input type="hidden" name="action" value="header">
 <div class="table-responsive">
