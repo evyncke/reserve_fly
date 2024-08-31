@@ -346,16 +346,16 @@ $final_balance_message = ($balance - $cost_grand_total >= 0) ? "" : "<br/>(vous 
 <td class="table-info text-end"><?=$duration_total_hour?></td>
 <td class="table-info text-end"><?=$duration_total_minute?></td>
 <td class="table-info" colspan="3"></td>
-<td class="table-info text-end"><?=$cost_plane_total?></td>
-<td class="table-info text-end"><?=$cost_fi_total?></td>
-<td class="table-info text-end"><?=$cost_taxes_total?></td>
-<td class="table-info text-end text-danger"><?=$cost_grand_total_text?></td>
+<td class="table-info text-end text-nowrap"><?=$cost_plane_total?></td>
+<td class="table-info text-end text-nowrap"><?=$cost_fi_total?></td>
+<td class="table-info text-end text-nowrap"><?=$cost_taxes_total?></td>
+<td class="table-info text-end text-danger text-nowrap"><?=$cost_grand_total_text?></td>
 </tr>
 <?php
 if (!isset($_REQUEST['previous'])) {
 ?>
 <tr><td colspan="15" class="<?=$final_balance_class?>">Solde du compte membre en tenant compte de ce folio<?=$final_balance_message?></td>
-<td class="<?=$final_balance_class?> text-end"> <?= numberFormat($balance - $cost_grand_total, 2, ',' , ' ', FALSE)?></td>
+<td class="<?=$final_balance_class?> text-end text-nowrap"> <?= numberFormat($balance - $cost_grand_total, 2, ',' , ' ', FALSE)?></td>
 </tr>
 <?php
 }
@@ -376,12 +376,12 @@ Le montant n'inclut aucune note de frais (par exemple carburant), note de crédi
 <?php
 
 if ($userIsInstructor)
-	print("<p>&spades; Veuillez noter qu'en tant qu'instructeur les montants négatifs de la colonne FI sont en fait des montants à facturer au club.</p>") ;
+	print("<p class=\"text-bg-info\">&spades; Veuillez noter qu'en tant qu'instructeur les montants négatifs de la colonne FI sont en fait des montants à facturer au club.</p>") ;
 
 if ($clubs_explanation)
-	print("<p><mark>&clubs;: pour cet avion, la facture sur fait sur l'index moteur mais avec une déduction de plusieurs minutes, la durée indiquée est donc la durée facturée et pas celle du carnet de routes.</mark></p>") ;
+	print("<p class=\"text-bg-info\">&clubs;: pour cet avion, la facture sur fait sur l'index moteur mais avec une déduction de plusieurs minutes, la durée indiquée est donc la durée facturée et pas celle du carnet de routes.</p>") ;
 if ($diams_explanation)
-	print("<p><mark>&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</mark></p>") ;
+	print("<p class=\"text-bg-info\">&diams;: pour cet avion, la facture se fait sur le temps de vol et pas l'index moteur.</p>") ;
 ?>
 
 <?php
