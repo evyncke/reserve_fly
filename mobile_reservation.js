@@ -410,7 +410,6 @@ function displayMETAR() {
 					metarTime = timeNow ;
 					metarHTML = elem.innerHTML ;
 					metarClassName = elem.className ;
-					console.log('metarClassName:' + elem.className) ;
 				}
 			} // status == 200
 //			hideWaiting() ;
