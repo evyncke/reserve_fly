@@ -186,17 +186,17 @@ foreach ($exercices as $exercice) {
  <td><div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" value="yes" disabled
             onChange="gradeChanged(this, '<?=$exercice->reference?>', 'demo')"
-        <?=(($exercice->grade['demo'] == 'demo') ? 'checked' : '')?>>
+        <?=((isset($exercice->grade['demo']) and $exercice->grade['demo'] == 'demo') ? 'checked' : '')?>>
     </div></td>
 <td><div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" value="yes" disabled
             onChange="gradeChanged(this, '<?=$exercice->reference?>', 'trained')"
-        <?=(($exercice->grade['trained'] == 'trained') ? 'checked' : '')?>>
+        <?=((isset($exercice->grade['trained']) and $exercice->grade['trained'] == 'trained') ? 'checked' : '')?>>
     </div></td>
 <td><div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" value="yes" disabled
             onChange="gradeChanged(this, '<?=$exercice->reference?>', 'acquired')"
-        <?=(($exercice->grade['acquired'] == 'acquired') ? 'checked' : '')?>>
+        <?=((isset($exercice->grade['acquired']) and $exercice->grade['acquired'] == 'acquired') ? 'checked' : '')?>>
     </div></td>
 </tr>
 <?php
@@ -207,8 +207,8 @@ foreach ($exercices as $exercice) {
  <td colspan="3"><div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" value="yes" disabled
             onChange="gradeChanged(this, '<?=$exercice->reference?>', 'yes')"
-        <?=(($exercice->grade['yes'] == 'yes') ? 'checked' : '')?>> 
-        <?=(($exercice->grade['yes'] == 'yes') ? '<b>Successful</b>' : 'Sucessful')?>
+        <?=((isset($exercice->grade['yes']) and $exercice->grade['yes'] == 'yes') ? 'checked' : '')?>> 
+        <?=((isset($exercice->grade['yes']) and $exercice->grade['yes'] == 'yes') ? '<b>Successful</b>' : 'Sucessful')?>
     </div></td>
  </tr>
 <?php
