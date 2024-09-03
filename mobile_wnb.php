@@ -177,7 +177,8 @@ using padding-top also prints over 2 pages and makes the display ultra small-->
 
 </div><!-- container-fluid -->
 <script type="text/javascript">
-    var rowCount = <?=$rowCount?>, maxWeight = <?=$maxWeight?>, cgAft = <?=$cgAft?>, cgFwd = <?=$cgFwd?>, density = [] ;
+    var rowCount = <?=$rowCount?>, maxWeight = <?=$maxWeight?>, cgAft = <?=$cgAft?>, cgFwd = <?=$cgFwd?>, density = [], 
+        darkMode = 	(decodeURIComponent(document.cookie).search('theme=dark') >= 0), displayDarkMode = darkMode ;
 <?php
     foreach($density as $i=>$d)
         print("\tdensity[$i] = $d ;\n") ;
@@ -250,7 +251,7 @@ function drawChart() {
     data.addColumn('number', 'CG Envelope');
     data.addColumn('number', 'Takeoff');
     data.addRows([
-<?php
+        <?php
 $result = mysqli_query($mysqli_link, "SELECT *
     FROM tp_aircraft AS a
     JOIN tp_aircraft_cg AS c ON c.tailnumber = a.id
@@ -278,13 +279,13 @@ while ($row = mysqli_fetch_array($result)) {
 print("\t[$firstArm, $firstWeight, null]\n") ;
 ?>
         ]);
-        data.addRow([parseFloat(document.getElementById('arm_total').innerText), null, Math.round(parseFloat(document.getElementById('wlb_total').innerText) / 2.20462)]) ;
-        // TODO option should include change in color based on Bootstrap theme dark/light for
-        // backgroundColor, backgroundColor.fill, chartArea.backgroundColor, crosshair.color, hAxis.baselineColor, hAxis.gridlines.color, hAxis.minorGridlines.color, hAxis.textStyle.color,
-        // hAxis.titleTextStyle.color, legend.textStyle.color, series.color, titleTextStyle.color, vAxis.baselineColor, vAxis.gridlines.color, 
-        // See https://developers.google.com/chart/interactive/docs/gallery/linechart?hl=fr
-        // Possibly even apply google.charts.Bar.convertOptions
-        options = {
+    data.addRow([parseFloat(document.getElementById('arm_total').innerText), null, Math.round(parseFloat(document.getElementById('wlb_total').innerText) / 2.20462)]) ;
+    chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+    chart.draw(data, wnbOptions());
+}
+
+function wnbOptions(width, height) { // generate the chart options based on the darkTheme and the previously computed boundaries
+    options = {
           title: 'Flight envelope <?=$plane?>',
           hAxis: {title: 'Inches From Reference Datum', minValue: <?=$minArmValue?>, maxValue: <?=$maxArmValue?>},
           vAxes: { // Serie 1 was for weigth in pounds, but, cannot manage to them 
@@ -296,33 +297,44 @@ print("\t[$firstArm, $firstWeight, null]\n") ;
             1: {lineWidth: 0, pointSize: 15, visibleInLegend: true}
           },
           legend: {position: 'bottom'},
+          backgroundColor: {fill: 'white'},
         };
-
-        chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
-      }
+    if (darkMode) {
+        options.backgroundColor.fill = '#212529' ;
+        options.legend.textStyle = {color: '#dee2e6'} ;
+        options.titleTextStyle = {color: '#dee2e6'} ;
+        options.hAxis.titleTextStyle = {color: '#dee2e6'} ;
+        options.hAxis.textStyle = {color: '#dee2e6'} ;
+        options.vAxes[0].titleTextStyle = {color: '#dee2e6'} ;
+        options.vAxes[0].textStyle = {color: '#dee2e6'} ;
+    }
+    if (typeof width !== 'undefined') options.width = width ;
+    if (typeof height !== 'undefined') options.height = height ;
+    return options ;
+}
 
 processWnB() ;
 
 window.addEventListener('beforeprint', (event) => {
+    displayDarkMode = darkMode ; // Save the dark mode
+    darkMode = false ;
+    chart.clearChart();
 // When printing, always use a fixed size for the chart
-  options.width = 1000 ;
-  options.height = 600 ;
-  chart.clearChart();
-  chart.draw(data, options);
+    chart.draw(data, wnbOptions(1000, 600));
 });
 
 window.addEventListener('afterprint', (event) => {
 // After printing, let's fall back to the screen options
     delete options.width ;
     delete options.height ;
+    darkMode = displayDarkMode ;
     chart.clearChart();
-    chart.draw(data, options);
+    chart.draw(data, wnbOptions());
 });
 
 window.addEventListener("resize", (event) => {
     chart.clearChart();
-    chart.draw(data, options);
+    chart.draw(data, wnbOptions());
 }) ;
 </script>
 </body>
