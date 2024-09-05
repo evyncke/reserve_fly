@@ -64,6 +64,25 @@ $header_postamble = '<style>
 require_once 'mobile_header5.php' ;
 
 $sql_date = date('Y-m-d') ;
+$special_date = '2024-09-07' ;
+$rows = [
+    [ '1040', 'OOALE', 'CANADAS', 'LIGOT'],
+    [ '1050', 'OOAPV', 'WARNOTTE', 'SMAL'],
+    [ '1100', 'OOALD', 'MURRAY', 'HANNAY'],
+    [ '1110', 'OOJRB', 'GROSJEAN', 'SISTERS'],
+    [ '1210', 'OOMAT', 'RAUSCH', 'DESCAMPS'],
+    [ '1220', 'OOFMX', 'MOREAU', 'MUZILLO'],
+    [ '1230', 'DELZA', 'LEFIN', 'SAUVAGE'],
+    [ '1240', 'OOFUN', 'RATY', 'ROSEWICK'],
+    [ '1310', 'OOALE', 'PENDERS', 'ALBRECHT'],
+    [ '1350', 'OOD35', 'KLIJNSMA', 'OOMS'],
+    [ '1400', 'FJXRL', 'GUILLOU', ''],
+    [ '1410', 'OOJRB', 'PACHOLIK', '& SON'],
+    [ '1420', 'OOALD', 'PAROTTO', 'LALLEMANT'],
+    [ '1430', 'OOAPV', 'WYNANDS', 'TRIOLET'],
+    [ '1540', 'OOALE', 'HENDRICKX', 'HORGNIES'],
+    [ '1550', 'OOG85', 'MALAISE', 'HIGUET']
+] ;
 // $sql_date = '2023-09-09' ; // Just for testing
 
 // Dynamic flip departure board https://codepen.io/tomgiddings/pen/yLyExxo
@@ -105,6 +124,19 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
 <div style="background: black;">
 <br/>
 <?php
+if ($sql_date == $special_date) {
+    $now = date('Gi') ;
+    foreach($rows as $row) {
+        if ($row[0] < $now) continue ; // Only display future departures
+        print('<div class="row mx-0 my-4 px-0 flex-nowrap">') ; // Set boostrap margin/padding left-right to 0 to align board characters with the black backgound div
+        boardPrint($row[0], 4, 1) ;
+        boardPrint($row[1], 5, 1) ;
+        boardPrint($row[2], 10, 1, "yellow") ;
+        boardPrint($row[3], 10, 1) ;
+        print("<br/>") ;
+        print('</div><!--row-->') ;
+    }
+} else {
     $sql = "SELECT *, i.last_name as ilast_name, i.jom_id as iid,
         pi.last_name as plast_name, pi.jom_id as pid,
         pax.p_lname as clast_name
@@ -119,7 +151,6 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
         ORDER BY r_start, r_plane ASC LIMIT 0,20" ;
 	$result = mysqli_query($mysqli_link, $sql)
 		or die("Cannot retrieve bookings: " . mysqli_error($mysqli_link)) ;
-    // TODO only retrieve flights in the future...
 	while ($row = mysqli_fetch_array($result)) {
         if ($row['r_type'] == BOOKING_MAINTENANCE) continue ;
 		if ($row['f_type'] != '') { // INIT or IF flight
@@ -141,7 +172,7 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
         }
 		// Display time only
 		$time = substr($row['r_start'], 11, 2) .  substr($row['r_start'], 14, 2);  
-        $plane = substr($row['r_plane'], 0, 2) . substr($row['r_plane'], 3, 3) ;
+        $plane = substr($row['r_plane'], 0, 2) . substr($row['r_plane'], 3, 3) ; // TODO actually remove the '-'
         print('<div class="row mx-0 my-4 px-0 flex-nowrap">') ; // Set boostrap margin/padding left-right to 0 to align board characters with the black backgound div
         boardPrint($time, 4, 1) ;
         boardPrint($plane, 5, 1) ;
@@ -150,6 +181,7 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
         print("<br/>") ;
         print('</div><!--row-->') ;
 	}
+}
 ?>
 <br/>
 </div><!-- black background -->
