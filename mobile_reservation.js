@@ -2080,20 +2080,7 @@ function initBooking() {
 		option.value = members[member].id ;
 		document.getElementById('memberSelect').add(option) ;
 	}
-	for (var pilot = 0; pilot < pilots.length; pilot++) {
-		var option = document.createElement("option");
-		if ('last_name' in pilots[pilot]) {
-			option.innerHTML = pilots[pilot].last_name + ', ' + pilots[pilot].first_name ;
-		} else {
-			option.innerHTML = pilots[pilot].name ;
-		}
-                if (pilots[pilot].student) {  // Add a student icon
-                        option.innerHTML += ' &#x1F393;' ;
-                }
-		option.value = pilots[pilot].id ;
-		document.getElementById('pilotSelect').add(option) ;
-		id2Name[pilots[pilot].id] = pilots[pilot].name ;
-	}
+	// Pilot select is initiase in the mobile.js code
 	for (var instructor = 0; instructor < instructors.length; instructor++) {
 		var option = document.createElement("option");
 		option.text = instructors[instructor].name ;
