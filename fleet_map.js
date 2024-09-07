@@ -327,7 +327,7 @@ function mapAddLayers() {
 	// Build the track points
 	getTrackPoints(ajaxURL) ;
 	// Redraw every 5 seconds
-//	setInterval(getTrackPoints, 5 * 1000) ;	
+	setInterval(getTrackPoints, 5 * 1000) ;	
 }
 
 function initFleet(longitudeArg, latitudeArg, mapBoxToken, ajaxURLArg) {
