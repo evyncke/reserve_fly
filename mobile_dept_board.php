@@ -66,22 +66,21 @@ require_once 'mobile_header5.php' ;
 $sql_date = date('Y-m-d') ;
 $special_date = '2024-09-07' ;
 $rows = [
-    [ '1040', 'OOALE', 'CANADAS', 'LIGOT'],
-    [ '1050', 'OOAPV', 'WARNOTTE', 'SMAL'],
-    [ '1100', 'OOALD', 'MURRAY', 'HANNAY'],
-    [ '1110', 'OOJRB', 'GROSJEAN', 'SISTERS'],
-    [ '1210', 'OOMAT', 'RAUSCH', 'DESCAMPS'],
-    [ '1220', 'OOFMX', 'MOREAU', 'MUZILLO'],
-    [ '1230', 'DELZA', 'LEFIN', 'SAUVAGE'],
-    [ '1240', 'OOFUN', 'RATY', 'ROSEWICK'],
-    [ '1310', 'OOALE', 'PENDERS', 'ALBRECHT'],
-    [ '1350', 'OOD35', 'KLIJNSMA', 'OOMS'],
-    [ '1400', 'FJXRL', 'GUILLOU', ''],
-    [ '1410', 'OOJRB', 'PACHOLIK', '& SON'],
-    [ '1420', 'OOALD', 'PAROTTO', 'LALLEMANT'],
-    [ '1430', 'OOAPV', 'WYNANDS', 'TRIOLET'],
-    [ '1540', 'OOALE', 'HENDRICKX', 'HORGNIES'],
-    [ '1550', 'OOG85', 'MALAISE', 'HIGUET']
+    [ '1030', 'OOAPV', 'WARNOTTE', 'SMAL'],
+    [ '1040', 'OOALD', 'MURRAY', 'HANNAY'],
+    [ '1050', 'OOJRB', 'GROSJEAN', 'SISTERS'],
+    [ '1220', 'OOMAT', 'RAUSCH', 'DESCAMPS'],
+    [ '1230', 'OOALE', 'PENDERS', 'ALBRECHT'],
+    [ '1240', 'OOFMX', 'MOREAU', 'MUZILLO'],
+    [ '1250', 'DELZB', 'LEFIN', 'SAUVAGE'],
+    [ '1300', 'OOFUN', 'RATY', 'ROSEWICK'],
+    [ '1400', 'OOD35', 'KLIJNSMA', 'OOMS'],
+    [ '1410', 'FJXRL', 'GUILLOU', 'KALLASTE'],
+    [ '1420', 'OOJRB', 'PACHOLIK', '& SON'],
+    [ '1430', 'OOALD', 'PAROTTO', 'LALLEMANT'],
+    [ '1440', 'OOAPV', 'WYNANDS', 'TRIOLET'],
+    [ '1530', 'OOALE', 'HENDRICKX', 'HORGNIES'],
+    [ '1540', 'OOG85', 'MALAISE', 'HIGUET']
 ] ;
 // $sql_date = '2023-09-09' ; // Just for testing
 
@@ -147,7 +146,7 @@ if ($sql_date == $special_date) {
         LEFT JOIN $table_flights fl ON r_id = f_booking
         LEFT JOIN $table_pax_role pr ON fl.f_id = pr.pr_flight AND pr.pr_role = 'C'
         LEFT JOIN $table_pax pax ON pax.p_id = pr.pr_pax
-        WHERE  p.actif = 1 AND p.ressource = 0 AND r_cancel_date IS NULL AND DATE(r_start) = '$sql_date' AND r_stop >= NOW()
+        WHERE  p.actif = 1 AND p.ressource = 0 AND r_cancel_date IS NULL AND DATE(r_start) = '$sql_date' AND r_start >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
         ORDER BY r_start, r_plane ASC LIMIT 0,20" ;
 	$result = mysqli_query($mysqli_link, $sql)
 		or die("Cannot retrieve bookings: " . mysqli_error($mysqli_link)) ;
