@@ -48,13 +48,13 @@ require_once 'mobile_header5.php' ;
 <?php
 if (! $latest) {
 ?>
-	<div id='flightLegend' style='display: block; position: relative; right: 5px; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.8;'></div>
+	<div id='flightLegend' style='display: block; position: relative; right: 5px; margin: 0px auto; padding: 10px; text-align: left; opacity: 0.8;'></div>
 <?php
 }
 ?>
 </div> <!-- mapContainer -->
 
-<div id='flightInfo' style='display: none; position: absolute; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.7;'></div>
+<div id='flightInfo' style='display: none; position: absolute; margin: 0px auto; padding: 10px; text-align: left; opacity: 0.7;'></div>
 
 </div><!-- row -->
 
