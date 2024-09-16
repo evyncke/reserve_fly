@@ -66,10 +66,10 @@ require_once 'mobile_header5.php' ;
 $sql_date = date('Y-m-d') ;
 $special_date = '2024-09-07' ;
 $rows = [
-    [ '1030', 'OOAPV', 'WARNOTTE', 'SMAL'],
-    [ '1040', 'OOALD', 'MURRAY', 'HANNAY'],
+    [ '1030', 'OOAPV', 'SMAL', 'WARNOTTE'],
+
     [ '1050', 'OOJRB', 'GROSJEAN', 'SISTERS'],
-    [ '1220', 'OOMAT', 'RAUSCH', 'DESCAMPS'],
+    [ '1220', 'FHABQ', 'RAUSCH', 'DESCAMPS'],
     [ '1230', 'OOALE', 'PENDERS', 'ALBRECHT'],
     [ '1240', 'OOFMX', 'MOREAU', 'MUZILLO'],
     [ '1250', 'DELZB', 'LEFIN', 'SAUVAGE'],
@@ -80,7 +80,8 @@ $rows = [
     [ '1430', 'OOALD', 'PAROTTO', 'LALLEMANT'],
     [ '1440', 'OOAPV', 'WYNANDS', 'TRIOLET'],
     [ '1530', 'OOALE', 'HENDRICKX', 'HORGNIES'],
-    [ '1540', 'OOG85', 'MALAISE', 'HIGUET']
+    [ '1540', 'OOG85', 'MALAISE', 'HIGUET'],
+    [ '1040', 'OOFMX', 'MURRAY', 'HANNAY'],
 ] ;
 // $sql_date = '2023-09-09' ; // Just for testing
 
