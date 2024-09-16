@@ -17,8 +17,8 @@
 */
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require __DIR__ . '/vendor/autoload.php' ;
-require_once "dbi.php" ;
-require_once 'odoo.class.php' ;
+require_once __DIR__ .'/dbi.php' ;
+require_once __DIR__ .'/odoo.class.php' ;
 
 class OdooFlight {
 
@@ -82,7 +82,7 @@ function OF_createPayment($theFlightID, $theOdooID, $theAmount, $thePaymentDate,
 //      theReferenceIDMap[$f_reference]=$row['f_id'];
 //============================================
 function OF_FillFlightOdooMaps(&$theOdooPaymentMap,&$thePaymentFlightMap,&$theLedgerIdMap,&$theReferenceIDMap,&$theGiftFlagMap) {
-    global $mysqli_link, $table_flights_ledger,$table_flights;
+    global $mysqli_link, $table_flights_ledger,$table_flights,$userId;
 
     $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flights_ledger JOIN $table_flights ON fl_flight=f_id")
     		or journalise($userId, "E", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
@@ -104,7 +104,7 @@ function OF_FillFlightOdooMaps(&$theOdooPaymentMap,&$thePaymentFlightMap,&$theLe
 //      theReferenceIDMap[$f_reference]=$f_id;
 //============================================
 function OF_FillFlightMaps(&$theReferenceIDMap) {
-    global $mysqli_link, $table_flights;
+    global $mysqli_link, $table_flights,$userId;
 
     $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flights")
     		or journalise($userId, "E", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
@@ -120,7 +120,7 @@ function OF_FillFlightMaps(&$theReferenceIDMap) {
 // Purpose: Create an invoice for an IF flight
 //============================================
 function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMontant, $theFlyID) {
-    global $mysqli_link, $table_logbook;
+    global $mysqli_link, $table_logbook,$userId;
     global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
     //print("OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMontant, $theFlyID):started<br>");
     
@@ -150,6 +150,8 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
     $edgerReference=OF_GetPaymentReference($theFlyID);
     //print("edgerReference=$edgerReference<br>");
 	$partner_customer_id =  OF_GetPartnerID($theFlightReference,$theFlyID);
+    //print("partner_customer_id=$partner_customer_id<br>");
+    $partnerName=OF_GetPartnerNameFromReference($theFlightReference);
     $plane_analytic=OF_GetAnalyticAccountID($plane);
     $analytic_club_init_if=OF_GetAnalyticAccountID("club_init_if");
     $journal_if=OF_GetJournalID("if");
@@ -157,7 +159,16 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
 	//print("</br>Création facture V-IF</br>");
 	// Reference facture : V-IF-24xxxx + 50€ par carte
 	$libelle_name=$flyReference." ".$date;
-	
+    $pos = strpos(strtoupper($theFlightReference), "V-");
+    if($pos===false || $pos!=0) {
+        // IF-xxxxxx 
+    }
+    else {
+        // V-IF : Add partner name
+        $libelle_name=$libelle_name." (".$partnerName.")";
+        //print("V-IF: libelle_name=$libelle_name<br>");
+    }
+
     ////journalise($userId, "I", "Odoo invoices generation started ($odoo_host)") ;			
     ini_set('display_errors', 1) ; // extensive error reporting for debugging
     $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
@@ -167,7 +178,7 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
     $invoice_lines = array() ;
     $invoice_lines[] = array(0, 0,
 		array(
-			'name' => $libelle_name,
+			'name' => db2web($libelle_name),
 			//'product_id' => $plane_if_product_id,
 			'account_id' => $code_700102,  
 			'quantity' => $duration,
@@ -179,7 +190,7 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
 	$benefice_club= $theMontant - $cost_plane_minute * $duration;
     $invoice_lines[] = array(0, 0,
 		array(
-			'name' => $libelle_name,
+			'name' => db2web($libelle_name),
 			//'product_id' => $plane_if_product_id, 
 			'account_id' => $code_700102, 
 			'quantity' => 1,
@@ -205,11 +216,13 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
 	//print("params=$params");
 	//echo var_dump($params);
     //$invoiceID=0;
-    $invoiceID = $odooClient->Create('account.move', $params) ;
-    //echo var_dump($invoiceID);
-    //print("<br>Facture IF pour " . implode(', ', $invoiceID) . "<br>") ;
-    //print("<br>Facture IF pour " . $invoiceID[0] . "<br>") ;
-    OF_SetFlightInvoiceFromFlyID($theFlyID, $invoiceID[0]);
+    if(1) {
+        $invoiceID = $odooClient->Create('account.move', $params) ;
+        //echo var_dump($invoiceID);
+        //print("<br>Facture IF pour " . implode(', ', $invoiceID) . "<br>") ;
+        //print("<br>Facture IF pour " . $invoiceID[0] . "<br>") ;
+        OF_SetFlightInvoiceFromFlyID($theFlyID, $invoiceID[0]);
+    }
     
     //***************************************************************************
     // Creation une OD pour le transfert 499002 -> 400000 (Ou 499003 -> 400000)
@@ -221,22 +234,23 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
     else {
         // Flight V-IF- -> 499002 -> 400000
         $accountCodeID=$code_499002;
-    	$reference_account499="Transfert de 4990002 ".$flyReference;
+    	$reference_account499="Transfert de 4990002 ".$flyReference." (".$partnerName.")";
 
         $valeur_compte_attente=floatval($theMontant);
+        $valeur_compte_attente=OF_GetPaymentAmount($theFlyID);
         $invoice_lines_OD = array() ;
     	// Partie debit compte attente Bon cadeau
-    	$reference_account="Transfert vers 4000000 ".$flyReference;
+    	$reference_account="Transfert vers 4000000 ".$flyReference." (".$partnerName.")";
     	$invoice_lines_OD[] = array(0, 0,
     				array(
-    					'name' => $reference_account,
+    					'name' => db2web($reference_account),
     					'account_id' => $accountCodeID, 
     					'debit' => $valeur_compte_attente
     				)) ;
     	// Partie credit compte client Bon cadeau
     	$invoice_lines_OD[] = array(0, 0,
     				array(
-    					'name' => $reference_account499,
+    					'name' => db2web($reference_account499),
     					'account_id' => $code_400000, 
     					'credit' => $valeur_compte_attente
     				)) ;
@@ -254,10 +268,12 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
                         'invoice_line_ids' => $invoice_lines_OD)) ;
     	print("</br> 2 Création OD V-IF</br>");
     	//print("params=$params");
-        echo var_dump($params);
+        //echo var_dump($params);
         //print("<br>Pousser ****** dans odoo<br>");
-        $result_OD = $odooClient->Create('account.move', $params_OD) ;
-        //print("<br>OD V-IF **** pour " . implode(', ', $result_OD) . " Name=".$name." Prix=".$valeur_compte_attente."<br>") ;
+        if(1) {
+            $result_OD = $odooClient->Create('account.move', $params_OD) ;
+            //print("<br>OD V-IF **** pour " . implode(', ', $result_OD) . " Name=".$name." Prix=".$valeur_compte_attente."<br>") ;
+        }
     }
     return true;
 }
@@ -266,7 +282,7 @@ function OF_createFactureIF($theFlightReference, $theDate, $theLogbookid, $theMo
 // Purpose: Create an invoice for an INIT flight
 //============================================
 function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $theMontant, $theFlyID) {
-    global $mysqli_link, $table_logbook;
+    global $mysqli_link, $table_logbook,$userId;
     global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
     //print("OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $theMontant, $theFlyID):started<br>");
     $result = mysqli_query($mysqli_link, "SELECT * FROM $table_logbook WHERE l_id=$theLogbookid")
@@ -296,6 +312,8 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
     $edgerReference=OF_GetPaymentReference($theFlyID);
     $cost_FI = 50.;
 	$partner_customer_id =  OF_GetPartnerID($theFlightReference,$theFlyID);
+    $partnerName=OF_GetPartnerNameFromReference($theFlightReference);
+    //print("partnerName=$partnerName<br>");
     $plane_analytic=OF_GetAnalyticAccountID($plane);
     $analytic_club_init_if=OF_GetAnalyticAccountID("club_init_if");
     $journal_if=OF_GetJournalID("init");
@@ -303,7 +321,16 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
 	//print("</br>Création facture V-INIT</br>");
 	// Reference facture : V-INIT-24xxxx 
 	$libelle_name=$flyReference." ".$date;
-	
+
+    $pos = strpos(strtoupper($theFlightReference), "V-");
+    if($pos===false || $pos!=0) {
+        // INIT-xxxxxx 
+    }
+    else {
+        // V-INIT : Add partner name
+        $libelle_name=$libelle_name." (".$partnerName.")";
+    }
+
     $FI_analytic=OF_GetAnalyticPilotID($pilot);
         
     ////journalise($userId, "I", "Odoo invoices generation started ($odoo_host)") ;			
@@ -315,7 +342,7 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
     $invoice_lines = array() ;
     $invoice_lines[] = array(0, 0,
 		array(
-			'name' => $libelle_name,
+			'name' => db2web($libelle_name),
 			'account_id' => $code_700101,  
 			'quantity' => $duration,
 			'price_unit' => $cost_plane_minute,
@@ -325,7 +352,7 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
 	// Partie FI
     $invoice_lines[] = array(0, 0,
 		array(
-			'name' => $libelle_name,
+			'name' => db2web($libelle_name),
 			'account_id' => $code_700101,  
 			'quantity' => 1,
 			'price_unit' => $cost_FI,
@@ -357,15 +384,16 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
                     'invoice_date_due' => $invoice_date_due,
                     'invoice_origin' => 'Carnets de routes',
                     'invoice_line_ids' => $invoice_lines)) ;
-	//print("</br> 1 Création facture IF invoice_date_due=$invoice_date_due</br>");
+	print("</br> 1 Création facture IF invoice_date_due=$invoice_date_due</br>");
 	//print("params=$params");
 	//echo var_dump($params);
-    $invoiceID = $odooClient->Create('account.move', $params) ;
-    //echo var_dump($invoiceID);
-    //print("<br>Facture IF pour " . implode(', ', $invoiceID) . "<br>") ;
-    //print("<br>Facture IF pour " . $invoiceID[0] . "<br>") ;
-    OF_SetFlightInvoiceFromFlyID($theFlyID, $invoiceID[0]);
-    
+    if(1) {
+        $invoiceID = $odooClient->Create('account.move', $params) ;
+        //echo var_dump($invoiceID);
+        //print("<br>Facture IF pour " . implode(', ', $invoiceID) . "<br>") ;
+        //print("<br>Facture IF pour " . $invoiceID[0] . "<br>") ;
+        OF_SetFlightInvoiceFromFlyID($theFlyID, $invoiceID[0]);
+    }
     //***************************************************************************
     // Creation une OD pour le transfert 499001 -> 400000 (Ou 499003 -> 400000)
     // Not exact: Must be managed by the type of payment
@@ -376,22 +404,23 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
     else {
         // Flight V-INIT- -> 499001 -> 400000
         $accountCodeID=$code_499001;
-    	$reference_account499="Transfert de 4990001 ".$flyReference;
+    	$reference_account499="Transfert de 4990001 ".$flyReference." (".$partnerName.")";
 
         $valeur_compte_attente=floatval($theMontant);
+        $valeur_compte_attente=OF_GetPaymentAmount($theFlyID);
         $invoice_lines_OD = array() ;
     	// Partie debit compte attente Bon cadeau
-    	$reference_account="Transfert vers 4000000 ".$flyReference;
+    	$reference_account="Transfert vers 4000000 ".$flyReference." (".$partnerName.")";
     	$invoice_lines_OD[] = array(0, 0,
     				array(
-    					'name' => $reference_account,
+    					'name' => db2web($reference_account),
     					'account_id' => $accountCodeID, 
     					'debit' => $valeur_compte_attente
     				)) ;
     	// Partie credit compte client Bon cadeau
     	$invoice_lines_OD[] = array(0, 0,
     				array(
-    					'name' => $reference_account499,
+    					'name' => db2web($reference_account499),
     					'account_id' => $code_400000, 
     					'credit' => $valeur_compte_attente
     				)) ;
@@ -407,11 +436,13 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
                         'invoice_date_due' => $invoice_date_due,
                         'invoice_origin' => 'Carnets de routes',
                         'invoice_line_ids' => $invoice_lines_OD)) ;
-    	//print("</br> 2 Création OD V-INIT</br>");
-        //echo var_dump($params);
+    	print("</br> 2 Création OD V-INIT</br>");
+        //echo var_dump($params_OD);
         //print("<br>Pousser dans odoo<br>");
-        $result_OD = $odooClient->Create('account.move', $params_OD) ;
-        //print("<br>OD V-IF **** pour " . implode(', ', $result_OD) . " Name=".$name." Prix=".$valeur_compte_attente."<br>") ;
+        if(1) {
+            $result_OD = $odooClient->Create('account.move', $params_OD) ;
+            //print("<br>OD V-IF **** pour " . implode(', ', $result_OD) . " Name=".$name." Prix=".$valeur_compte_attente."<br>") ;
+        }
     }
     return true;
 }
@@ -420,7 +451,7 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
 // Purpose: Create an invoice for an DHF flight
 //============================================
 function OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids) {
-    global $mysqli_link, $table_logbook;
+    global $mysqli_link, $table_logbook,$userId;
     global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
     //print("OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids):started<br>");
     $referencesMap= array();
@@ -518,7 +549,7 @@ function OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids) {
     
     // Store the invoice reference into each fly
     foreach ($referencesArray as $reference) {
-        print("OF_SetFlightInvoiceFromFlyReference($reference, invoiceID[0])<br>");
+        //print("OF_SetFlightInvoiceFromFlyReference($reference, invoiceID[0])<br>");
         OF_SetFlightInvoiceFromFlyReference($reference, $invoiceID[0]);
         //OF_SetFlightInvoiceFromFlyReference($reference, 1);
     }
@@ -566,7 +597,7 @@ function OF_ComputeCostPerMinute($thePlane) {
 //============================================
 function OF_GetPlaneTableRow($thePlane) 
 {
-    global $mysqli_link, $table_planes;
+    global $mysqli_link, $table_planes,$userId;
     
     $plane=strtolower($thePlane);
     $result = mysqli_query($mysqli_link, "SELECT * FROM $table_planes WHERE id='$plane'")
@@ -687,8 +718,10 @@ function OF_GetPartnerID($theFlightReference,$theFlyID)
     }
     else {
         $odooPaymentReferemce=OF_GetPaymentOdooReference($theFlyID);
+        //print("OF_GetPartnerID: theFlyID=$theFlyID,odooPaymentReferemce=$odooPaymentReferemce<br>");
         if($odooPaymentReferemce!=0) {
-            $partnerID=OF_GetPartnerFromPayment($odooPaymentReferemce);
+            $partnerID=OF_GetPartnerIDFromPayment($odooPaymentReferemce);
+            //print("OF_GetPartnerID: odooPaymentReferemce=$odooPaymentReferemce,partnerID=$partnerID<br>");
             if($partnerID!=0) {
                 return $partnerID;
             }
@@ -707,7 +740,7 @@ function OF_GetPartnerID($theFlightReference,$theFlyID)
  
 function OF_GetPaymentOdooReference($theFlyID)
 {
-    global $mysqli_link, $table_flights_ledger;
+    global $mysqli_link, $table_flights_ledger,$userId;
     //print("<br>OF_GetPaymentOdooReference:start<br>");
     $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flights_ledger WHERE fl_flight=$theFlyID")
     		or journalise($userId, "E", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
@@ -721,13 +754,35 @@ function OF_GetPaymentOdooReference($theFlyID)
     return 0;
 }
 //============================================
+// Function: OF_GetPaymentAmount
+// Purpose: Get the value associated a payment from the flight id referenced to a ODOO Reference
+//============================================
+ 
+function OF_GetPaymentAmount($theFlyID)
+{
+    global $mysqli_link, $table_flights_ledger,$userId;
+    //print("<br>OF_GetPaymentValue:start<br>");
+    $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flights_ledger WHERE fl_flight=$theFlyID")
+    		or journalise($userId, "E", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
+    $amount=0.0;
+    while ($row = mysqli_fetch_array($result)) {
+        $odooReference=$row['fl_odoo_payment_id'];
+        //print("<br>OF_GetPaymentOdooReference:odooReference=$odooReference<br>");
+        if($odooReference!=NULL && $odooReference>0) {
+            $amount=$amount+$row['fl_amount'];
+            //print("OF_GetPaymentAmount:amount=$amount<br>");
+        }
+    }
+    return $amount;
+}
+//============================================
 // Function: OF_GetPaymentReference
 // Purpose: Get the reference to a payment from the flight id
 //============================================
  
 function OF_GetPaymentReference($theFlyID)
 {
-    global $mysqli_link, $table_flights_ledger;
+    global $mysqli_link, $table_flights_ledger,$userId;
     //print("<br>OF_GetPaymentReference:start<br>");
     $result = mysqli_query($mysqli_link, "SELECT fl_reference FROM $table_flights_ledger WHERE fl_flight=$theFlyID")
     		or journalise($userId, "E", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
@@ -741,28 +796,29 @@ function OF_GetPaymentReference($theFlyID)
     return "";
 }   
 //============================================
-// Function: OF_GetPartnerFromPayment
+// Function: OF_GetPartnerIDFromPayment
 // Purpose: Get the partner odoo ID from the odoo payment
 //============================================
-function OF_GetPartnerFromPayment($odooPaymentReference)
+function OF_GetPartnerIDFromPayment($odooPaymentReference)
 {
     global $odooClient;
     global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
-    //print("<br>OF_GetPartnerFromPayment:start $odooPaymentReference<br>");
-    $partner=0;
+    //print("<br>OF_GetPartnerIDFromPayment:start $odooPaymentReference<br>");
+    $partnerID=0;
     $odooIdString=strval($odooPaymentReference);
     $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-    $odooPaymentReference=11865;
+    //$odooPaymentReference=11865;
     $result = $odooClient->SearchRead('account.move.line', array(array(array('id', '=', $odooPaymentReference))),  array('fields'=>array('id', 'name', 'move_type','account_id','debit', 'credit', 'partner_id', 'create_date'))); 
     foreach($result as $f=>$desc) {
-        //print("Account #$desc[id]: $desc[name]<br>");
-    	//print("Account #$desc[id]: $desc[name], $desc[move_type], $desc[account_id], $desc[debit], $desc[credit], " . 
-    	//	$desc['partner_id'][1] . "<br>\n") ;
+        //print("OF_GetPartnerIDFromPayment: Account #$desc[id]: $desc[name]<br>");
+    	//print("Account #$desc[id]: $desc[name], $desc[move_type], $desc[account_id], $desc[debit], $desc[credit], ".$desc['partner_id'][1] . "<br>\n") ;
+        //echo var_dump($desc);
         //echo var_dump($desc['partner_id']);
     	$partner_id = (isset($desc['partner_id'])) ? $desc['partner_id'] : '' ;
+        //print("<br>OF_GetPartnerIDFromPayment:partner_id=$partner_id<br>");
     	if(!is_bool($partner_id)) {
-    		$partner=$partner_id[1];
-            //print("<br>OF_GetPartnerFromPayment:partner=$partner<br>");
+    		$partnerID=$partner_id[0];
+            //print("<br>OF_GetPartnerIDFromPayment:partner=$partnerID<br>");
             
     	}
     }
@@ -771,7 +827,7 @@ function OF_GetPartnerFromPayment($odooPaymentReference)
     /*    $result = $odooClient->SearchRead('account.move.line', array(array('id', '=', '$odooPaymentReferemce')), 
         array('fields'=>array('id', 'name', 'move_type','account_id','debit', 'credit', 'partner_id', 'create_date'))) ;
             */
-    return $partner;
+    return $partnerID;
 }
 //============================================
 // Function: OF_GetPartnerNameFromReference
@@ -779,7 +835,7 @@ function OF_GetPartnerFromPayment($odooPaymentReference)
 //============================================
 function OF_GetPartnerNameFromReference($theReference)
 {
-    global $mysqli_link, $table_pax_role, $table_pax, $table_flight;
+    global $mysqli_link, $table_pax_role, $table_pax, $table_flight,$userId;
     //print("<br>OF_GetPartnerNameFromReference:start theReference=$theReference<br>");
     $result = mysqli_query($mysqli_link, "SELECT f_id FROM $table_flight WHERE f_reference='$theReference'")
     		or journalise($userId, "E", "Cannot read flight: " . mysqli_error($mysqli_link)) ;
@@ -826,7 +882,7 @@ function OF_SetFlightInvoiceFromFlyID($theFlightID,$theInvoiceID)
 function OF_SetFlightInvoiceFromFlyReference($theFlightReference,$theInvoiceID)
 {
     global $mysqli_link, $table_flights,$userId;
-    print("OF_SetFlightInvoiceFromFlyReference: UPDATE $table_flights SET f_invoice_ref=$theInvoiceID WHERE f_reference='$theFlightReference'<br>");
+    //print("OF_SetFlightInvoiceFromFlyReference: UPDATE $table_flights SET f_invoice_ref=$theInvoiceID WHERE f_reference='$theFlightReference'<br>");
 
 	mysqli_query($mysqli_link, "UPDATE $table_flights SET f_invoice_ref=$theInvoiceID WHERE f_reference='$theFlightReference'")
     or 

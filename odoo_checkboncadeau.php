@@ -24,30 +24,13 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
-/*
+
 $header_postamble = '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <link href="https://www.spa-aviation.be/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-<script type="text/javascript">
-// Manage Search when keyup
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>';
 
-// Manage Search when document loaded
-$(document).ready(function() {
-   $("#id_SearchInput").on("keyup", function() {
-      var value = $(this).val().toLowerCase();
-      $("#myTable tr").filter(function() {
-		  var aText=$(this).text().toLowerCase().normalize("NFD");
-        $(this).toggle(aText.indexOf(value) > -1)
-     });
-    });
-    var value = $("#id_SearchInput").val().toLowerCase();
-      $("#myTable tr").filter(function() {
-      $(this).toggle($(this).text().toLowerCase().normalize("NFD").indexOf(value) > -1)
-      });
-});
-</script>' ;
-*/
+
 
 //require_once 'flight_header.php' ;
 require_once 'odoo.class.php' ;
@@ -94,6 +77,24 @@ OF_FillFlightMaps($referenceIDFlightMap);
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 ?>
 <script type="text/javascript">
+// Manage Search when keyup
+
+// Manage Search when document loaded
+$(document).ready(function() {
+   $("#id_SearchInput").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      $("#myTable tr").filter(function() {
+		  var aText=$(this).text().toLowerCase().normalize("NFD");
+        $(this).toggle(aText.indexOf(value) > -1)
+     });
+    });
+    var value = $("#id_SearchInput").val().toLowerCase();
+      $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().normalize("NFD").indexOf(value) > -1)
+      });
+});
+</script>
+<script type="text/javascript">
     function linkPaymentFunction(PHP_Self, theFlightID, theOdooID, theLedgerID) {
 		if (confirm("Confirmer que vous voulez lier le paiement odoo avec la table flight "+theFlightID+","+ theOdooID+","+ theLedgerID ) == true) {			
    		 	var aCommand=PHP_Self+"?action=linkledgerodoo&ledgerid="+theLedgerID+"&odooid="+theOdooID;
@@ -127,7 +128,7 @@ $ids = array() ;
 $rowNumber=0;
 $accountINI=0;
 $accountIF=0;
-$accountValueINI=0.0;
+$accountValueINIT=0.0;
 $accountValueIF=0.0;
 foreach($result as $f=>$desc) {
 	//echo "f=";
