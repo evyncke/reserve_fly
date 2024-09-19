@@ -15,7 +15,10 @@ if (!is_numeric($numberofpassagers) or $numberofpassagers < 0 or $numberofpassag
 
 $firstname1=$_POST["firstname1"];
 $lastname1=$_POST["lastname1"];
-$age1=$_POST["age1"];
+$age1="";
+if(isset($_POST["age1"])) {
+	$age1=$_POST["age1"];
+}
 $weight1=$_POST["weight1"];
 if ($weight1 != '' and !is_numeric($weight1))
 	journalise(0, 'F', "SQL injection detected weight1='$weight1'") ;
@@ -26,21 +29,30 @@ if($firstname1=="James" && $lastname1=="Smith") {
 
 $firstname2=$_POST["firstname2"];
 $lastname2=$_POST["lastname2"];
-$age2=$_POST["age2"];
+$age2="";
+if(isset($_POST["age2"])) {
+	$age2=$_POST["age2"];
+}
 $weight2=$_POST["weight2"];
 if ($weight2 != '' and !is_numeric($weight2))
 	journalise(0, 'F', "SQL injection detected weight2='$weight2'") ;
 
 $firstname3=$_POST["firstname3"];
 $lastname3=$_POST["lastname3"];
-$age3=$_POST["age3"];
+$age3="";
+if(isset($_POST["age3"])) {
+	$age3=$_POST["age3"];
+}
 $weight3=$_POST["weight3"];
 if ($weight3 != '' and !is_numeric($weight3))
 	journalise(0, 'F', "SQL injection detected weight3='$weight3'") ;
 
 $contactmail=$_POST["contactmail"];
 $contactphone=$_POST["contactphone"];
-$circuitnumber=$_POST["circuit"];
+$circuitnumber="";
+if(isset($_POST["circuit"])) {
+	$circuitnumber=$_POST["circuit"];
+}
 if ($circuitnumber==NULL or $circuitnumber == '') $circuitnumber=0;
 if (!is_numeric($circuitnumber) or $circuitnumber < 0 or $circuitnumber > 100)
 	journalise(0, 'F', "SQL injection detected circuitnumber='$circuitnumber'") ;
@@ -315,9 +327,15 @@ else {
 			or journalise(0, "E", "Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
 		$contact_id = mysqli_insert_id($mysqli_link) ;
 		$tokens = explode('-', $flightdate) ;
-		$flightdate = "$tokens[2]-$tokens[1]-$tokens[0]" ;
+		$flightdate = "";
+		if(sizeof($tokens)==2) {
+			$flightdate = "$tokens[2]-$tokens[1]-$tokens[0]" ;
+		}
 		$tokens = explode('-', $flightdate2) ;
-		$flightdate2 = "$tokens[2]-$tokens[1]-$tokens[0]" ;
+		$flightdate2 = "";
+		if(sizeof($tokens)==2) {
+			$flightdate2 = "$tokens[2]-$tokens[1]-$tokens[0]" ;
+		}
 		//print("INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_gift, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_pilot)
 		//	VALUES(SYSDATE(), 0, '$flight_type', 0, $numberofpassagers, $circuitnumber, '$flightdate', '$flightdate2', '$heure', '" .
 		//	mysqli_real_escape_string($mysqli_link, web2db("$remarque")) . "', NULL)</br>");

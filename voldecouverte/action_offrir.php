@@ -32,7 +32,7 @@
 // This PHP script is fully integrated as a component of Joomla
 // Developped by Patrick Reginster in 2019
 // Updated Eric Vyncke 2022
-require_once 'flight_tools.php' ; // it also includes the load of dbi.php
+require_once __DIR__ .'/flight_tools.php' ; // it also includes the load of dbi.php
 
 $language=$_POST["form_language"];
 $typeofgift=$_POST["typeofgift"];
@@ -45,12 +45,21 @@ if($firstname1=="James" && $lastname1=="Smith") {
 }
 $firstname2=$_POST["firstname2"];
 $lastname2=$_POST["lastname2"];
-$circuitnumber=$_POST["circuit"]+1;
+$circuitnumber=0;
+if(isset($_POST["circuit"])) {
+	$circuitnumber=$_POST["circuit"]+1;
+}
 $circuit=circuit_name($circuitnumber);
-$valeur_bon=$_POST["valeur_bon"];
+$valeur_bon=0.0;
+if(isset($_POST["valeur_bon"])) {
+	$valeur_bon=$_POST["valeur_bon"];
+}
 $valeur_bon_libre=$_POST["valeur_bon_libre"];
 $valeur_versement=$_POST["valeur_virement"];
-$destinataire_option_name=$_POST["nom_destinataire"];
+$destinataire_option_name="";
+if(isset($_POST["nom_destinataire"])) {
+	$destinataire_option_name=$_POST["nom_destinataire"];
+}
 $rue=$_POST["rue"];
 $boitelettre=$_POST["boitelettre"];
 $codepostal=$_POST["codepostal"];
@@ -311,6 +320,8 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$message.="<br/>";
 		$message.="Value to transfer by bank. Name RAPCS asbl, IBAN BE64 7320 3842 1852, BIC CREGBEBB: ".htmlentities($valeur_versement) ." &euro;<br/>";
 		$message.="Communication on bank transfer: <b>Gift voucher $flight_reference for  ".htmlentities($firstname1) ." " . htmlentities($lastname1)." - Date: ".$today."</b><br/><br/>";
+		$epcURI = "BCD\n001\n1\nSCT\nCREGBEBB\nRAPCS asbl\nBE64732038421852\nEUR$valeur_versement\nBon $flight_reference $lastname1 $today\nBon $flight_reference $lastname1 $today" ;
+        $message .= "<p>Or use the above QR-code and your Bank App (<b>not</b> payconiq):<br/><img width=300 height=300 src=\"https://spa-aviation.be/resa/qr-code.php?cht=qr&chs=200x200&&chl=" . urlencode($epcURI) . "\"></p>\n" ;
 		if(count($remarques)==0 || $remarques[0]=="") {
 			$message.="No remark<br/>";
 		} else {
