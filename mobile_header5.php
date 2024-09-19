@@ -21,7 +21,7 @@ ob_start("ob_gzhandler");
 # HTTP/2 push of CSS via header()
 header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image') ;
 
-# Could add data-bs-theme="dark" to the HTML element see https://getbootstrap.com/docs/5.3/customize/color-modes/#javascript perhaps via a Cookie ?
+# Handle the toggle between dark/light themes
 if (isset($_GET['theme']) and $_GET['theme'] != '') {
   $theme = $_GET['theme'] ;
   journalise($userId, "D", "Switching to theme $theme") ;
@@ -66,7 +66,7 @@ var
 		nowTimestamp = <?=time()?>,
 		utcOffset = Number(<?=date('Z')/3600?>),
 		userId = <?=$userId?>,
-    selectedUserId = <?=(isset($_REQUEST['user']) and $_REQUEST['user'] != '') ? $_REQUEST['user'] : $userId?> ;
+		selectedUserId = <?=(isset($_REQUEST['user']) and $_REQUEST['user'] != '') ? $_REQUEST['user'] : $userId?>,
 		userName = '<?=$userName?>',
 		userFullName = '<?=$userFullName?>',
 		userIsPilot = <?= ($userIsPilot) ? 'true' : 'false' ?>,
@@ -74,13 +74,14 @@ var
 		userIsAdmin = <?= ($userIsAdmin) ? 'true' : 'false' ?>,
 		userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?>,
 		userIsStudent = <?=($userIsStudent)? 'true' : 'false'?>,
-    userIsNoFlight = <?=($userNoFlight)? 'true' : 'false'?> ,
+		userIsNoFlight = <?=($userNoFlight)? 'true' : 'false'?> ,
 		bookingTypePilot = <?= BOOKING_PILOT?>,
 		bookingTypeInstructor = <?= BOOKING_INSTRUCTOR?>,
 		bookingTypeAdmin = <?= BOOKING_ADMIN?>,
 		bookingTypeMaintenance = <?= BOOKING_MAINTENANCE ?>,
 		bookingTypeCustomer = <?= BOOKING_CUSTOMER ?> ,
 		bookingTypeOnHold = <?= BOOKING_ON_HOLD ?> ;
+
 function pilotSelectChanged() {
         window.location.href = '<?=$_SERVER['PHP_SELF']?>?user=' + document.getElementById('pilotSelect').value + 
 			'<?= ((isset($_REQUEST['previous'])) ? '&previous' : '')?>' ;
@@ -127,6 +128,14 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 <?php
 if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep this value
   print("<input type=\"hidden\" name=\"user\" value\"$_REQUEST[user]\">\n") ;
+// Add a black overlay box on the top to mimick a screen saving when airport is closed to save power
+  if (isset($_GET['kiosk'])) {
+  journalise($userId, "D", "Kiosk mode") ;
+  if (time() <= airport_opening_local_time(date('Y'), date('n'), date('j')) or airport_closing_local_time(date('Y'), date('n'), date('j')) <= time()) {
+    journalise($userId, "D", "Kiosk mode in night mode") ;
+    print('<div style="background: black; position: absolute; top: 0px; bottom: 0px; left: 0px; right: 0px; height: 100vh; width: 100vw; z-index: 99;"></div>') ;
+  }
+}
 ?>
 <div class="d-none d-print-block"><!-- Show a header on printed documents TODO use js to have the current print date and not the first display date-->
 <div class="row"> 
@@ -145,14 +154,16 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
   <hr>
 </div><!-- row -->
 </div><!-- print only -->
-<nav class="navbar navbar-expand-md bg-success text-bg-success d-print-none" id="navBarId"><!-- do not print the menu... Add fixed-top w/o destroying the layout -->
+<nav class="navbar navbar-expand-lg text-bg-success d-print-none" id="navBarId"><!-- do not print the menu... Add fixed-top w/o destroying the layout -->
   <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".multi-collapse">
         <span class="navbar-toggler-icon"></span>
       </button>
       <!-- below in the <a the navbar-collapse widen the space by adding right margin !!! -->
-      <a class="navbar-brand multi-collapse hidden-md collapse navbar-collapse" href="mobile.php?news" style="max-width: 40px;"><img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="32px" height="32px"></a>
-      <ul class="navbar-nav multi-collapse collapse navbar-collapse"><!-- nav-bar left with most of the dropdown -->
+      <a class="navbar-brand multi-collapse hidden-md collapse navbar-collapse" href="mobile.php?news" style="max-width: 40px;">
+        <img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="24px" height="24px">
+      </a>
+      <ul class="nav navbar-nav multi-collapse collapse navbar-collapse"><!-- nav-bar left with most of the dropdown -->
         <li class="navbar-item">
           <a class="nav-link text-white" href="mobile.php?news">Home</a>
         </li>
