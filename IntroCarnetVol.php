@@ -15,8 +15,8 @@
    limitations under the License.
 
 */
-require_once 'dbi.php';
-require_once 'dto.class.php';
+require_once __DIR__ .'/dbi.php';
+require_once __DIR__ .'/dto.class.php';
 
 if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year 
 	// TODO only send it when not received
@@ -35,7 +35,7 @@ if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year
 <script>
 	
 <?php
-require_once 'IntroCarnetVol_tools.php' ;
+require_once __DIR__ .'/IntroCarnetVol_tools.php' ;
 //---------------------------------------------------------------------------
 // Initialiation of default variables
 // Define all variables used by the javascript
@@ -110,6 +110,8 @@ if ($userId == 0) {
 
 print("var default_bookingid=$bookingid;\n");
 print("var default_pilot=$userId;\n");
+$aircraft_techLog=GetJSONIncidentByPlanes();
+print("var default_aircrafttechlog='$aircraft_techLog';\n");
 ?>
 </script>
 <!-- Matomo -->
@@ -718,6 +720,8 @@ if($bookingid) {
 			$MO=$row['l_start_hour'].'.'.$row['l_start_minute'];
 			$MO=$MO.'->';
 			$MO=$MO.$row['l_end_hour'].'.'.$row['l_end_minute'];
+            $Min=$row['l_end_hour']*60+$row['l_end_minute']-$row['l_start_hour']*60-$row['l_start_minute'];
+            $MO=$MO." (".$Min."min)";
 			$aSegment+=1;
 			$instructorPaid="";
 			$crew_Count=$row['l_crew_count'];
@@ -764,9 +768,9 @@ if($bookingid) {
 				<td>$row[l_day_landing]</td>
 				<td>$crew_Count / $row[l_pax_count]</td>
 				<td>$remark</td>
-				<td><button type=\"button\" value=\"Del\" onclick=\"redirectLogbookDelete('$_SERVER[PHP_SELF]',$bookingid,$logid,'$auth','$row[l_audit_time]');\">&#128465; Effacer</button>&nbsp;
-				
-				<button type=\"button\" value=\"Edit\" onclick=\"window.location.href='$_SERVER[PHP_SELF]?edit=1&id=$bookingid&logid=$logid';\">&#9998; Editer</button>");
+				<td><button type=\"button\" value=\"Del\" onclick=\"redirectLogbookDelete('$_SERVER[PHP_SELF]',$bookingid,$logid,'$auth','$row[l_audit_time]');\">&#128465; Effacer</button>&nbsp;	
+				<button type=\"button\" value=\"Edit\" onclick=\"window.location.href='$_SERVER[PHP_SELF]?edit=1&id=$bookingid&logid=$logid';\">&#9998;&nbsp; Editer</button>&nbsp;");
+			//<button type=\"button\" value=\"QRCode\" onclick=\"displayQRCode();\">&#xf029; QRCode</button>"
 				if($dtoFlightId>0) {
 					print("&nbsp;<button type=\"button\" value=\"DTO\" onclick=\"window.location.href='https://www.spa-aviation.be//resa/dto.flight.php?flight=$dtoFlightId';\">DTO</button>");
 				}
@@ -1179,8 +1183,9 @@ else {
 </tr>
 
 <tr id="id_cdv_ATL_row">
-<td class="segmentLabel"style="vertical-align: top;">Aircraft Technical Log</td>
-<td class="segmentInput">
+<td class="segmentLabel"style="vertical-align: top;">Aircraft Technical Log<br><i>(ne pas introduire 2 fois le même problème)</i>
+</td>
+<td class="segmentInput"><span class="tooltip">
 <table style="border: 0px solid black;width: 100%; margin-left: auto; margin-right: auto;" >
 <tbody>
 <tr><td class="segmentInput">
@@ -1189,7 +1194,7 @@ else {
 <option value="nothing">Nothing to Declare</option>
 <option value="nohazard">no Hazard to flight safety</option>
 <option value="hazard">Hazard to fly safety</option>
-</select>&#8505;
+</select><span class="tooltiptext" id="id_atltooltip">Log1<br>log2<br>log3</span></span>
 </td></tr>
 <tr id="id_cdv_ATL_description_row"><td class="segmentInput">
 <input id="id_cdv_ATL_description" name="cdv_ATL_description" size="35" type="text" placeholder="Description du problème" autocomplete="off" />
@@ -1281,7 +1286,7 @@ Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 
 <script src="https://www.spa-aviation.be/resa/pilots.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/CP_frais_type.js"\></script>-->
 <script src="https://www.spa-aviation.be/resa/prix.js"></script>
-<!---<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
+<!---<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>--->
 <script src="https://www.spa-aviation.be/resa/script_carnetdevol.js"></script>
 </body>
 </html>

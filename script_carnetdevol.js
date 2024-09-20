@@ -34,6 +34,7 @@ function carnetdevol_page_loaded() {
   document.getElementById("id_cdv_aircraft").onchange = function() {
 	  compute_aircraft("id_cdv_aircraft");
 	  compute_prix();
+	  displayATL(document.getElementById("id_cdv_aircraft").value);
   };
 
   //document.getElementById("id_cdv_aircraft_model_row").style.display="none";
@@ -204,6 +205,8 @@ function carnetdevol_page_loaded() {
   check_heure("id_cdv_heure_depart");
   compute_prix();
   check_techlog();
+  displayATL(document.getElementById("id_cdv_aircraft").value);
+
 
   var aSegmentCountText=document.getElementById("id_cdv_segment_count").value;
   if(default_logbookid==0) {
@@ -1462,7 +1465,37 @@ function compute_frais_CP()
 		document.getElementById("id_cdv_frais_CP_PAX").style.display="none";
 	}	
 }
-
+//==========================================
+//Display the tech logs associated to a plane
+function displayATL(thePlane)
+{
+	var ATL=default_aircrafttechlog;
+	var jsonATL=JSON.parse(ATL);
+	var ATLArray=jsonATL.ATL;
+	for(var i=0; i<ATLArray.length;i++) {
+		var logPlane=ATLArray[i];
+		if(logPlane.plane==thePlane) {
+			var logs=logPlane.logs;
+			var log="";
+			for(var k=0; k<logs.length;k++) {
+				if(k>0){
+					log+="<br>";
+				}
+				log+="("+(k+1)+") "+logs[k];
+			}
+			document.getElementById("id_atltooltip").innerHTML=log;
+			document.getElementById("id_atltooltip").style.display="";
+			return;
+		}
+	}
+	document.getElementById("id_atltooltip").innerHTML="";
+	document.getElementById("id_atltooltip").style.display="none";
+	return;
+}
+//==========================================
+function displayQRCode() {
+	var avion=document.getElementById("id_cdv_aircraft").value;
+}
 //==========================================
 function payQRCode(amount) {
 	var aValue=amount;

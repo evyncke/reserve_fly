@@ -163,7 +163,47 @@ function GetATLIncidentDescription($theIncidentId) {
     }
     return "";
 }
+// Retrieve the description associated of all open incidend for all planes
+// JSON: '{"ATL": [{"plane": "OO-ALD", "logs":["log11","log12"]},{"plane": "OO-JRB", "logs":["log21","log22","log23"]}]}'
+function GetJSONIncidentByPlanes() {
+    $planes = array('OO-ALD', 'OO-ALE', 'OO-APV', 'OO-JRB', 'OO-FMX', 'OO-SPQ', 'PH-AML') ;
+    $jsonString='{"ATL": [';
+    //loop on planes
+    $planeCount=0;
+    foreach($planes as $plane) {
+         //$plane="OO-JRB";    
+        $incidents = new Incidents($plane, ['opened', 'inprogressnoaog', 'inprogressaog', 'camonoaog', 'camoaog']) ;
+        $incidentCount=0;
+        foreach($incidents as $incident) {     
+           $incidentCount++;
+           if($incidentCount==1) {
+                $planeCount++;
+                if($planeCount>1) {
+                 $jsonString.=',';
+                }
+                $jsonString.='{"plane": "'.$plane.'", "logs": [';
+            }
+            else {
+                $jsonString.=',';  
+            }
+            $jsonString.='"'.CleanATLLog($incident->firstText).'"';
+        }
+        if($incidentCount>0) {
+          $jsonString.=']}'; 
+        }  
+    }
+    //end plane
+    $jsonString.=']}';
+    return $jsonString;
+    //return '{"ATL": [{"plane": "OO-ALD", "logs":["log11","log12"]},{"plane": "OO-JRB", "logs":["log21","log22","log23"]}]}';
+}
 
+// Remove all characters incompatible with javascript
+function CleanATLLog($logText) {
+    $text=str_replace("'"," ",$logText);
+    $text=str_replace('"'," ",$text);
+    return $text;
+}
 // Check if a DTO flight is already associated to the logbook
 function HasDTOFlight($theLogId) { 
     global $mysqli_link, $table_dto_flight;
