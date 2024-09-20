@@ -727,13 +727,14 @@ if($bookingid) {
 			$crew_Count=$row['l_crew_count'];
 			if($crew_Count==0) $crew_Count=1;
 			if ($row['instructorName'] == '')
-				$crew = $row['pilotName'] ;
+				$crew = $row['pilotName'];
 			else {
 				$crew = $row['pilotName'] . '/' . $row['instructorName'] ;
 				if($row['l_instructor_paid']==0) {
 					$instructorPaid="No DC";
 				}
 			}
+			$crew=db2web($crew);
 			if ($row['l_is_pic']==1) {
 				if ($row['instructorName'] == '')
 					$crew=$crew.' (PIC)';
