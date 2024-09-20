@@ -67,7 +67,7 @@ function displayMobileMETAR(station) {
 				if (response.error != '') {
 					elem.innerHTML = response.error ;
 				} else {
-					setTimeout(function () { displayMETAR(station);} , 1000 * 60 * 5) ; // Refresh every 5 minutes
+					setTimeout(function () { displayMobileMETAR(station);} , 1000 * 60 * 5) ; // Refresh every 5 minutes
 					if (response.condition != null && response.condition == 'VMC')
 						// elem.style.backgroundColor =  'paleGreen' ;
 						elem.className += 'text-bg-success' ;
