@@ -1193,7 +1193,7 @@ else {
 <select id="id_cdv_ATL_level" name="cdv_ATL_level">
 <option selected="select" value="select">Select</option>
 <option value="nothing">Nothing to Declare</option>
-<option value="nohazard">no Hazard to flight safety</option>
+<option value="nohazard">No Hazard to flight safety</option>
 <option value="hazard">Hazard to fly safety</option>
 </select><span class="tooltiptext" id="id_atltooltip">Log1<br>log2<br>log3</span></span>
 </td></tr>
