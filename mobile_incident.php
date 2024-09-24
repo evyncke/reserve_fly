@@ -140,6 +140,8 @@ if ($userIsBoardMember or $userIsInstructor or $userIsMechanic) {
 <?php
 } // if ($userIsBoardMember or $userIsInstructor or $userIsMechanic)
 ?>
-
+<div class="row mb-3">
+<p><input class="button" type="button" value="Back to all ATL" onclick="javascript:document.location.href='mobile_incidents.php';"></input>
+</div>
 </body>
 </html>

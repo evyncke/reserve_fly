@@ -54,7 +54,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 }
 ?>
 
-<h3>Create an Aircraft Technical Log (ATL) entry</h3>
+<h3>Create an New Aircraft Technical Log (ATL) entry</h3>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="POST" role="form" class="form-horizontal">
@@ -156,5 +156,10 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <p class="fw-light">Cliquer sur un numéro d'ATL (ou sur l'icône <i class="bi bi-pen-fill"></i>) pour consulter/modifier l'historique de cet ATL, y compris changer le statut.<br>
 Cliquer sur un avion, pour afficher uniquement les ATL de cet avion.<br><span class="badge bg-primary"><i class="bi bi-clock-fill"></i> 9</span> indique le nombre de jours depuis
 l'ouverture de l'ATL.</p>
+<?php
+if($plane != "") {
+    print("<p><input class=\"button\" type=\"button\" value=\"Display all Aircrafts\" onclick=\"javascript:document.location.href='mobile_incidents.php';\"></input>");
+}
+?>
 </body>
 </html>

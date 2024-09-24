@@ -39,10 +39,10 @@ class IncidentEvent {
             $this->status = $row['ih_status'] ;
             switch($this->status) {
                 case 'opened': $this->statusFrench = 'Ouvert' ; break ;
-                case 'inprogressnoaog': $this->statusFrench = 'En progrès: Avion au sol' ; break ;
-                case 'inprogressaog': $this->statusFrench = 'En progrès: Avion peut voler' ; break ;
-                case 'camonoaog': $this->statusFrench = 'CAMO: Avion au sol' ; break ;
-                case 'camoaog': $this->statusFrench = 'CAMO: Avion peut voler' ; break ;
+                case 'inprogressnoaog': $this->statusFrench = 'En progrès: Avion peut voler' ; break ;
+                case 'inprogressaog': $this->statusFrench = 'En progrès: Avion au sol' ; break ;
+                case 'camonoaog': $this->statusFrench = 'CAMO: Avion peut voler' ; break ;
+                case 'camoaog': $this->statusFrench = 'CAMO: Avion au sol' ; break ;
                 case 'closed': $this->statusFrench = 'Clôturé' ; break ;
                 case 'duplicate': $this->statusFrench = 'Doublon' ; break ;
                 case 'rejected': $this->statusFrench = 'Rejeté' ; break ;
