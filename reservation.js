@@ -1984,7 +1984,6 @@ function refreshPlanningTable() {
 					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <img src="exclamation-icon.png" width="12" height="12" title="Pas de vol récent" alt="!">' ;
 			}
 			// Check for incidents ATL
-			console.log(plane, allPlanes[plane].incidents ) ;
 			if (allPlanes[plane].incidents == 'NOHAZARD')
 				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="mobile_incidents.php?plane=' + allPlanes[plane].id.toUpperCase() + 
 					'" onclick="event.stopPropagation();" target="_blank">' +
