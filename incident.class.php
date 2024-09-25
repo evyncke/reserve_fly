@@ -36,7 +36,7 @@ class IncidentEvent {
             $this->whoFirstName = db2web($row['first_name']) ;
             $this->whoLastName = db2web($row['last_name']) ;
             $this->text = db2web($row['ih_text']) ;
-            $this->status = $row['ih_status'] ;
+            $this->status = strtolower($row['ih_status']) ;
             switch($this->status) {
                 case 'opened': $this->statusFrench = 'Ouvert' ; break ;
                 case 'inprogressnoaog': $this->statusFrench = 'En progrès: Avion peut voler' ; break ;
@@ -71,6 +71,7 @@ class IncidentEvent {
         } else {
             $remark = mysqli_real_escape_string($mysqli_link, web2db($this->text)) ;
             $id = $this->incident->id ;
+            $this->status = strtolower($this->status) ;
             mysqli_query($mysqli_link, "INSERT INTO $table_incident_history(ih_incident, ih_text, ih_status, ih_who, ih_when)
                 VALUES($id, '$remark','$this->status', $userId, CURRENT_TIMESTAMP())")
                 or journalise($userId, "F", "Cannot insert into $table_incident_history: " . mysqli_error($mysqli_link)) ;
@@ -107,11 +108,11 @@ class IncidentEvents implements Iterator {
         mysqli_free_result($this->result) ;
     }
 
-    public function current() {
+    public function current():mixed {
         return new IncidentEvent($this->row);
     }
     
-    public function key() {
+    public function key():mixed {
         return $this->row['ih_id'];
     }
     
@@ -165,7 +166,7 @@ class Incident {
             switch(strtolower($row['i_severity'])) {
                 case 'nohazard': 
                 case 'hazard':
-                    $this->severity = $row['i_severity'] ; break ;
+                    $this->severity = strtolower($row['i_severity']) ; break ;
                 default: $this->severity = 'unknown/unsupported' ;
             }
             $this->firstId = $row['first_id'] ;
@@ -174,7 +175,7 @@ class Incident {
             $this->firstFirstName = db2web($row['first_first_name']) ;
             $this->firstLastName = db2web($row['first_last_name']) ;
             $this->firstStatus = strtolower($row['first_status']) ;
-            switch(strtolower($this->firstStatus)) {
+            switch($this->firstStatus) {
                 case 'opened': $this->firstStatusFrench = 'Ouvert' ; break ;
                 case 'camook': $this->firstStatusFrench = 'CAMO: l\'avion peut voler' ; break ;
                 case 'accepted': $this->firstStatusFrench = 'Accepté' ; break ;
@@ -190,7 +191,7 @@ class Incident {
             $this->lastWho = $row['last_who'] ;
             $this->lastFirstName = db2web($row['last_first_name']) ;
             $this->lastLastName = db2web($row['last_last_name']) ;
-            $this->lastStatus = $row['last_status'] ;
+            $this->lastStatus = strtolower($row['last_status']) ;
             switch($this->lastStatus) {
                 case 'opened': $this->lastStatusFrench = 'Ouvert' ; break ;
                 case 'camook': $this->firstStatusFrench = 'CAMO: l\'avion peut voler' ; break ;
@@ -318,11 +319,11 @@ class Incidents implements Iterator {
         mysqli_free_result($this->result) ;
     }
 
-    public function current() {
+    public function current():mixed {
         return new Incident($this->row);
     }
     
-    public function key() {
+    public function key():mixed {
         return $this->row['i_id'];
     }
     
