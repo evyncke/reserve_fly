@@ -391,7 +391,8 @@ while ($row = mysqli_fetch_array($result)) {
 // Ajouter/enlever si nécessaire
 print(date('Y-m-d H:i:s').": checking email/name entries in $table_users and $table_person.\n") ;
 // $result = mysqli_query($mysqli_link, "select *, u.id as j_id, u.email as j_email, p.email as p_email, u.name as j_name, p.user_name as p_name
-$result = mysqli_query($mysqli_link, "select *, u.id as j_id, u.email as j_email, p.email as p_email
+$result = mysqli_query($mysqli_link, "select *, u.id as j_id, 
+		u.email as j_email, p.email as p_email, u.name as j_name, p.name as p_name
 		from $table_users u join $table_user_usergroup_map g on u.id = g.user_id and g.group_id in ($joomla_student_group, $joomla_pilot_group, $joomla_instructor_group, $joomla_admin_group, $joomla_member_group)
 		join $table_person p on u.id = p.jom_id")
 	or die(date('Y-m-d H:i:s').": cannot read $table_users and $table_person, " . mysqli_error($mysqli_link)) ;
@@ -817,7 +818,7 @@ else {
 			default: $metar_unknown++ ;
 		}
 	else
-		$metar_unknow++ ;
+		$metar_unknown++ ;
 }
 $year = intval(date('Y')) ;
 $month = intval(date('m')) ;
@@ -832,6 +833,9 @@ if (time() + 3600 >= airport_opening_local_time($year, $month, $day) and time() 
 }
 
 print(date('Y-m-d H:i:s').": End of CRON.\n") ;
-journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2], DB size $db_size.") ;
+if ($metar_unknown != 0)
+	journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2], DB size $db_size.") ;
+else
+	journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, unknown METAR, CPU load $load[0]/$load[1]/$load[2], DB size $db_size.") ;
 ?>
 </pre>
