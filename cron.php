@@ -392,7 +392,7 @@ while ($row = mysqli_fetch_array($result)) {
 print(date('Y-m-d H:i:s').": checking email/name entries in $table_users and $table_person.\n") ;
 // $result = mysqli_query($mysqli_link, "select *, u.id as j_id, u.email as j_email, p.email as p_email, u.name as j_name, p.user_name as p_name
 $result = mysqli_query($mysqli_link, "select *, u.id as j_id, u.email as j_email, p.email as p_email
-	from $table_users u join $table_user_usergroup_map g on u.id = g.user_id and g.group_id in ($joomla_student_group, $joomla_pilot_group, $joomla_instructor_group, $joomla_admin_group, $joomla_member_group)
+		from $table_users u join $table_user_usergroup_map g on u.id = g.user_id and g.group_id in ($joomla_student_group, $joomla_pilot_group, $joomla_instructor_group, $joomla_admin_group, $joomla_member_group)
 		join $table_person p on u.id = p.jom_id")
 	or die(date('Y-m-d H:i:s').": cannot read $table_users and $table_person, " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
@@ -484,17 +484,17 @@ else {
 	fwrite($f, '// Last update: ' . date('Y-m-d H:i:s') . "\n") ;
 	fwrite($f,"var pilots = [ ") ;
 	$first = true ;
-	$result = mysqli_query($mysqli_link, "select u.id as id, first_name, last_name, u.name as name, group_concat(group_id) as groups
+	$result = mysqli_query($mysqli_link, "select u.id as id, first_name, last_name, u.name as name, group_concat(group_id) as allgroups
                 from $table_users as u join $table_user_usergroup_map on u.id=user_id join $table_person as p on u.id=p.jom_id
                 where block = 0 and group_id in ($joomla_student_group, $joomla_pilot_group, $joomla_instructor_group)
                 group by user_id
-		order by last_name") 
+				order by last_name") 
 			or journalise(0, "E", "Cannot read pilots: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		$row['name'] = db2web($row['name']) ;
 		$row['first_name'] = db2web($row['first_name']) ;
 		$row['last_name'] = db2web($row['last_name']) ;
-		$groups = explode(',', $row['groups']) ;
+		$groups = explode(',', $row['allgroups']) ;
 		$student = (in_array($joomla_student_group, $groups)) ? 'true' : 'false' ;
 		if ($first)
 			$first = false ;
@@ -549,7 +549,7 @@ if (! $f) journalise(0, "E", "Cannot open members.js for writing") ;
 else {
 	$first = true ;
 	fwrite($f,"var members = [ ") ;
-	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, u.email as email, group_concat(group_id) as groups
+	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, u.email as email, group_concat(group_id) as allgroups
 		from $table_users as u join $table_user_usergroup_map on u.id=user_id join $table_person as p on u.id=p.jom_id
 		where block = 0 and group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group)
 		group by user_id
@@ -566,7 +566,7 @@ else {
 			$first = false ;
 		else
 			fwrite($f, ",\n\t") ;
-		$groups = explode(',', $row['groups']) ;
+		$groups = explode(',', $row['allgroups']) ;
 		$pilot = (in_array($joomla_pilot_group, $groups)) ? 'true' : 'false' ;
 		$student = (in_array($joomla_student_group, $groups)) ? 'true' : 'false' ;
 		fwrite($f, "{ id: $row[id], name: \"$row[name]\", first_name: \"$row[first_name]\", last_name: \"$row[last_name]\", email: \"$row[email]\", pilot: $pilot, student: $student}") ;
