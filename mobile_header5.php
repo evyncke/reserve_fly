@@ -262,7 +262,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 if ($userId > 0) {
 ?>
             <li><a class="dropdown-item" href="mobile_planelog.php?plane=OO-FMX">Carnets de routes</a></li>
-            <li><a class="dropdown-item" href="mobile_incidents.php">Aircraft Tech Log</a></li>
+            <li><a class="dropdown-item" href="mobile_incidents.php">Aircraft Tech Logs</a></li>
             <li><a class="dropdown-item" href="IntroCarnetVol.php">Encodage compteurs <i class="bi bi-box-arrow-up-right"></i></span></a></li>
             <li><a class="dropdown-item" href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
             <li><a class="dropdown-item" href="mobile_fleet_map.php?latest">Dernières localisations</a></li>
