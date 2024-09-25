@@ -194,9 +194,14 @@ class Incident {
             $this->lastStatus = strtolower($row['last_status']) ;
             switch($this->lastStatus) {
                 case 'opened': $this->lastStatusFrench = 'Ouvert' ; break ;
-                case 'camook': $this->firstStatusFrench = 'CAMO: l\'avion peut voler' ; break ;
+                case 'camook':
+                case 'camonoaog': 
+                    $this->firstStatusFrench = 'CAMO: l\'avion peut voler' ; $this->severity = 'nohazard' ; break ;
+                case 'camoaog': $this->firstStatusFrench = 'CAMO: l\'avion ne peut pas voler' ; $this->severity = 'hazard' ; break ;
                 case 'accepted': $this->lastStatusFrench = 'Accepté' ; break ;
                 case 'inprogress': $this->lastStatusFrench = 'En progrès' ; break ;
+                case 'inprogressnoaog': $this->lastStatusFrench = 'En progrès: l\'avion peut voler' ;  $this->severity = 'nohazard' ; break ;
+                case 'inprogressaog': $this->lastStatusFrench = 'En progrès: l\'avion ne peut pas voler' ;  $this->severity = 'hazard' ; break ;
                 case 'closed': $this->lastStatusFrench = 'Clôturé' ; break ;
                 case 'duplicate': $this->lastStatusFrench = 'Doublon' ; break ;
                 case 'rejected': $this->lastStatusFrench = 'Rejeté' ; break ;
