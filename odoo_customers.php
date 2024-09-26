@@ -209,7 +209,7 @@ $member_tag = GetOdooCategory('Member') ;
 $board_member_tag = GetOdooCategory('Board Member') ;
 
 // Let's look at all our members
-$result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS groups 
+$result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS allgroups 
     FROM $table_person AS p JOIN $table_users AS u ON u.id = p.jom_id
         LEFT JOIN $table_user_usergroup_map m ON u.id = m.user_id
         LEFT JOIN $table_blocked b ON b.b_jom_id = p.jom_id
@@ -230,7 +230,7 @@ while ($row = mysqli_fetch_array($result)) {
     $active_msg = ($row['block'] == 0) ? '' : ' <span class="badge rounded-pill text-bg-info">Désactivé</span>' ;
     $blocked_msg = ($row['b_reason'] == '') ? '' : ' <span class="badge rounded-pill text-bg-danger">Bloqué</span>' ;
     $groups_msg = '' ;
-    $groups = explode(',', $row['groups']) ;
+    $groups = explode(',', $row['allgroups']) ;
     if (in_array($joomla_pilot_group, $groups) and $row['block'] == 0)
         $groups_msg .= ' <span class="badge rounded-pill text-bg-warning">Pilote</span>' ;
     if (in_array($joomla_student_group, $groups) and $row['block'] == 0)

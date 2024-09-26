@@ -94,7 +94,7 @@ if (false) {
     $jom_ids = "62, 66, 348, 92, 353, 439";
     $jom_ids = "62, 66" ;
     $jom_ids = "66" ;
-    $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS groups
+    $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS allgroups
         FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id
         JOIN $table_person AS p ON u.id=p.jom_id
         WHERE p.jom_id IN ($jom_ids) 
@@ -102,7 +102,7 @@ if (false) {
         AND NOT EXISTS (SELECT * FROM $table_membership_fees AS f WHERE f.bkf_user = p.jom_id and f.bkf_year = '$membership_year')
         GROUP BY id";
 } else {
-    $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS groups
+    $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS allgroups
             FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
             JOIN $table_person AS p ON u.id=p.jom_id
             WHERE group_id IN ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
@@ -117,8 +117,8 @@ $invoiceCount = 0 ;
 while ($row = mysqli_fetch_array($result_members)) {
     if ($row['odoo_id'] == '') continue ; 
 	$member=$row['id'];
-    $groups = explode(',', $row['groups']) ;
-    print("Processing " . db2web("#$member (odoo=$row[odoo_id]): $row[last_name] $row[first_name]") . " in Joomla groups $row[groups]...<br/\n" );
+    $groups = explode(',', $row['allgroups']) ;
+    print("Processing " . db2web("#$member (odoo=$row[odoo_id]): $row[last_name] $row[first_name]") . " in Joomla groups $row[allgroups]...<br/\n" );
     $invoice_lines = array() ;
     $invoice_lines[] = array(0, 0,
         array(
