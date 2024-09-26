@@ -537,7 +537,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
 		ciel_code, odoo_id, block, bkb_amount, b_reason, u.email as email, 
 		bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_id,
-		group_concat(group_id) as groups, sum(distinct bkl_debit) as invoice_total,
+		group_concat(group_id) as allGroups, sum(distinct bkl_debit) as invoice_total,
 		datediff(current_date(), b_when) as days_blocked
 			from $table_users as u join $table_user_usergroup_map on u.id=user_id 
 			join $table_person as p on u.id=p.jom_id
@@ -587,7 +587,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			$row['last_name']="xxxxx";
 		}
 			
-		$groups = explode(',', $row['groups']) ;
+		$groups = explode(',', $row['allGroups']) ;
 		$effectif = (in_array($joomla_effectif_group, $groups)) ? $CheckMark : '' ;
 		$pilot = (in_array($joomla_pilot_group, $groups)) ? $CheckMark : '' ;
 		$student = (in_array($joomla_student_group, $groups)) ? $CheckMark : '' ;
