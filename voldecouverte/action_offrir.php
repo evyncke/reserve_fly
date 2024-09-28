@@ -144,27 +144,27 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$flight_type = '?' ;
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_street, p_zip, p_city, p_country)
 			VALUES(
-			'" . mysqli_real_escape_string($mysqli_link, web2db($lastname1)) . "',
-			'" . mysqli_real_escape_string($mysqli_link, web2db($firstname1)) . "',
+			'" . mysqli_real_escape_string($mysqli_link, $lastname1) . "',
+			'" . mysqli_real_escape_string($mysqli_link, $firstname1) . "',
 			'" . mysqli_real_escape_string($mysqli_link, $_REQUEST['contactmail']) . "',
 			'" . mysqli_real_escape_string($mysqli_link, $contactphone) . "', 
-			'" . mysqli_real_escape_string($mysqli_link, web2db("$rue $boitelettre")) . "', 
+			'" . mysqli_real_escape_string($mysqli_link, "$rue $boitelettre") . "', 
 			'" . mysqli_real_escape_string($mysqli_link, $codepostal) . "',
-			'" . mysqli_real_escape_string($mysqli_link, web2db("$ville")) . "', 
-			'" . mysqli_real_escape_string($mysqli_link, web2db("$pays")) . "')")
+			'" . mysqli_real_escape_string($mysqli_link, "$ville") . "', 
+			'" . mysqli_real_escape_string($mysqli_link, "$pays") . "')")
 			or journalise(0, "E", "Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
 	$contact_id = mysqli_insert_id($mysqli_link) ;
 	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel)
 			VALUES(
-			'" . mysqli_real_escape_string($mysqli_link, web2db($lastname2)) . "',
-			'" . mysqli_real_escape_string($mysqli_link, web2db($firstname2)) . "',
+			'" . mysqli_real_escape_string($mysqli_link, $lastname2) . "',
+			'" . mysqli_real_escape_string($mysqli_link, $firstname2) . "',
 			'" . mysqli_real_escape_string($mysqli_link, $destinatairemail) . "',
 			'" . mysqli_real_escape_string($mysqli_link, $destinatairephone) . "')")
 			or journalise(0, "E", "Cannot add pilot, system error: " . mysqli_error($mysqli_link)) ;
 	$pax_id = mysqli_insert_id($mysqli_link) ;
 	mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_gift, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_pilot)
 			VALUES(SYSDATE(), 0, '$flight_type', 1, $numberofpassagers, $circuitnumber, NULL, NULL, NULL,
-			'" . mysqli_real_escape_string($mysqli_link, web2db("$remarque\n$messageforgift")) . "',
+			'" . mysqli_real_escape_string($mysqli_link, "$remarque\n$messageforgift") . "',
 			NULL)")
 			or journalise(0, "E", "Cannot add flight, system error: " . mysqli_error($mysqli_link)) ;
 	$flight_id = mysqli_insert_id($mysqli_link) ;

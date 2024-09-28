@@ -319,8 +319,8 @@ else {
 		if ($weight1 == '') $weight1 = 0 ;
 		mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_weight)
 			VALUES(
-			'" . mysqli_real_escape_string($mysqli_link, web2db($lastname1)) . "',
-			'" . mysqli_real_escape_string($mysqli_link, web2db($firstname1)) . "',
+			'" . mysqli_real_escape_string($mysqli_link, $lastname1) . "',
+			'" . mysqli_real_escape_string($mysqli_link, $firstname1) . "',
 			'" . mysqli_real_escape_string($mysqli_link, $_REQUEST['contactmail']) . "',
 			'" . mysqli_real_escape_string($mysqli_link, $contactphone) . "',
 			$weight1)")
@@ -338,10 +338,10 @@ else {
 		}
 		//print("INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_gift, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_pilot)
 		//	VALUES(SYSDATE(), 0, '$flight_type', 0, $numberofpassagers, $circuitnumber, '$flightdate', '$flightdate2', '$heure', '" .
-		//	mysqli_real_escape_string($mysqli_link, web2db("$remarque")) . "', NULL)</br>");
+		//	mysqli_real_escape_string($mysqli_link, "$remarque") . "', NULL)</br>");
 		mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_gift, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_pilot)
 			VALUES(SYSDATE(), 0, '$flight_type', 0, $numberofpassagers, $circuitnumber, '$flightdate', '$flightdate2', '$heure', '" .
-			mysqli_real_escape_string($mysqli_link, web2db("$remarque")) . "', NULL)")
+			mysqli_real_escape_string($mysqli_link, "$remarque") . "', NULL)")
 			or journalise(0, "E", "Cannot add flight, system error: " . mysqli_error($mysqli_link)) ;
 		$flight_id = mysqli_insert_id($mysqli_link) ;
 		//print("flight_id=$flight_id</br>");
@@ -361,8 +361,8 @@ else {
 			if ($weight2 == '') $weight2 = 0 ;
 			mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_weight)
 				VALUES(
-				'" . mysqli_real_escape_string($mysqli_link, web2db($lastname2)) . "',
-				'" . mysqli_real_escape_string($mysqli_link, web2db($firstname2)) . "', 
+				'" . mysqli_real_escape_string($mysqli_link, $lastname2) . "',
+				'" . mysqli_real_escape_string($mysqli_link, $firstname2) . "', 
 				$weight2)")
 				or journalise(0, "E", "Cannot add pax2, system error: " . mysqli_error($mysqli_link)) ;
 			$pax_id = mysqli_insert_id($mysqli_link) ;
@@ -374,8 +374,8 @@ else {
 			if ($weight3 == '') $weight3 = 0 ;
 			mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_weight)
 				VALUES(
-				'" . mysqli_real_escape_string($mysqli_link, web2db($lastname3)) . "',
-				'" . mysqli_real_escape_string($mysqli_link, web2db($firstname3)) . "', 
+				'" . mysqli_real_escape_string($mysqli_link, $lastname3) . "',
+				'" . mysqli_real_escape_string($mysqli_link, $firstname3) . "', 
 				$weight3)")
 				or journalise(0, "E", "Cannot add pax3, system error: " . mysqli_error($mysqli_link)) ;
 			$pax_id = mysqli_insert_id($mysqli_link) ;
