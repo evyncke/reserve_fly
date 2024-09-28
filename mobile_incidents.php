@@ -51,6 +51,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     $event->status = 'opened' ;
     $event->text = $_REQUEST['remark'] ;
     $event->save() ;
+    $rPlane=strtoupper($_REQUEST['plane']) ;
+    $rRemark= $_REQUEST['remark'] ;
+    print("<h2 style=\"color: red;\">Incident $incident->id created: Plane: $rPlane Remark:$rRemark</h2>");
 }
 ?>
 
