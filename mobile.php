@@ -95,10 +95,13 @@ if (isset($result) and $result) {
 			order by r_start asc limit 0,1")
 			or die("Cannot access previous booking: ".mysqli_error($mysqli_link)) ;
 		$row = mysqli_fetch_array($result) ;
-		$next_id = $row['r_id'] ;
-		$next_auth = md5($next_id . $shared_secret) ;
-		$next_date = $row['r_start'] ;
-		
+		if ($row) {
+			$next_id = $row['r_id'] ;
+			$next_auth = md5($next_id . $shared_secret) ;
+			$next_date = $row['r_start'] ;
+		} else
+			$next_id = false ;
+			
 		# fix the character set issue...
 		$booking['pilot_name'] = db2web($booking['pilot_name']) ;
 		$booking['booker_name'] = db2web($booking['booker_name']) ;
@@ -204,7 +207,7 @@ if ($previous_id != '') {
 		</script>\n") ;
 
 }
-if ($next_id != '') {
+if ($next_id) {
 	print("<li class=\"page-item\"><a class=\"page-link\" href=\"$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth\">Ma réservation suivante<i class=\"bi bi-caret-right-fill\"></i><br/>$next_date</a></li>\n") ;
 	print("<script>
 		// Swipe to change to next booking
