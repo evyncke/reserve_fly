@@ -1662,7 +1662,12 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 			thisCell.innerHTML += '<br/><b><i>' + pInitials + '</i></b>' ;
 		}
 		// Add a clickable icons to display details
-		thisCell.innerHTML += '<br/><a href="javascript:showPilotDetails(\'' + booking.id + '-' + booking.log_id + '\');"><i class="bi bi-eye-fill text-white" title="Détails"></i></a>' ;
+		if (thisCell.className == 'slot first blocked') 
+			var detailTextColor = 'text-white' 
+		else
+			var detailTextColor = 'text-black' ;
+		thisCell.innerHTML += '<br/><a href="javascript:showPilotDetails(\'' + booking.id + '-' + booking.log_id + '\');"><i class="bi bi-eye-fill ' + 
+			detailTextColor + '" title="Détails"></i></a>' ;
 	}
 }
 
