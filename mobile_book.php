@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2023 Eric Vyncke
+   Copyright 2013-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 */
 
 require_once "dbi.php" ;
+
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
@@ -60,7 +61,7 @@ if ($id and is_numeric($id)) {
 	$comment = '' ;
 }
 
-$body_attributes = 'onload="init();initBook();"' ; // mobile_header.php will force this into the body tag
+$body_attributes = 'onload="init();planeSelectBook();"' ; // mobile_header.php will force this into the body tag
 
 $header_postamble = "<script>
 var
@@ -74,7 +75,6 @@ var
 require_once 'mobile_header5.php' ;
 ?> 
 
-
 <div class="container-fluid">
 
 <!-- Not a real form as mobile.js has the onclick code to submit the form -->
@@ -87,7 +87,6 @@ require_once 'mobile_header5.php' ;
 
 !!! booking.php devrait aussi annoncer 'pas de réservations endéans les XX jours'
 -->
-
 
 <div class="alert alert-info alert-dismissible" id="bookingMessageDiv" style="visibility: hidden; display: none;"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><span id="bookingMessageSpan"></span></div>
 
