@@ -73,6 +73,8 @@ require_once 'mobile_header5.php' ;
 <!-- Eric's suggestion: move all the JS code in gestionMembres.js and include this file, it will be cached on the client browser and
 and the page load will be faster -->
 <script type="text/javascript">
+	var dirSort="asc";
+	var columnSort=-1;
 // Manage Search when keyup
 
 // Manage Search when document loaded
@@ -97,76 +99,72 @@ function parseFloatEU(s) {
 
 // Based on https://www.w3schools.com/howto/howto_js_sort_table.asp
 function sortTable(n, isNumeric) {
-  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-  table = document.getElementById("myTable");
-  switching = true;
-  // Set the sorting direction to ascending:
-  dir = "asc";
-  /* Make a loop that will continue until
-  no switching has been done: */
-  while (switching) {
-    // Start by saying: no switching is done:
-    switching = false;
-    rows = table.rows;
-    /* Loop through all table rows (except the
-    first, which contains table headers): 
-	Eric: actually, the table headers are not in table.rows()
-	Eric: last row is for total, do not sort*/
-    for (i = 0; i < (rows.length - 2); i++) {
-      // Start by saying there should be no switching:
-      shouldSwitch = false;
-      /* Get the two elements you want to compare,
-      one from current row and one from the next: */
-      x = rows[i].getElementsByTagName("TD")[n];
-      y = rows[i + 1].getElementsByTagName("TD")[n];
-      /* Check if the two rows should switch place,
-      based on the direction, asc or desc: */
-      if (dir == "asc") {
+	if(columnSort!=n) {
+		dirSort="asc";
+		columnSort=n;
+	}
+	var table, rows, i, k, x, y;
+  	table = document.getElementById("myTable");
+  	rows = table.rows;
+  	const keyMap = new Map();
+  	for (i = 0; i < (rows.length - 1); i++) {
+		//Fill the Map to sort
+    	x = rows[i].getElementsByTagName("TD")[n];
+		var xText=x.innerText;
 		if (isNumeric) {
-			if (parseFloatEU(x.innerText) > parseFloatEU(y.innerText)) {
-				// If so, mark as a switch and break the loop:
-				shouldSwitch = true;
-				break;
+			// add (i*0.0001 if 2 times the same key
+			keyMap.set(parseFloatEU(xText)+(i*0.0001), i);
+		} 
+		else {
+			// add _i if 2 times the same key
+			keyMap.set(xText+"_"+i, i);
+		}
+	}
+	var sorted;
+	if(isNumeric) {
+		if(dirSort=="asc") {
+		 	sorted = [...keyMap].sort((a, b) => a[0] - b[0]);
+		}
+		else {
+			sorted = [...keyMap].sort((a, b) => b[0] - a[0]);
+		}
+	}
+	else {
+		if(dirSort=="asc") {
+		 	sorted = [...keyMap].sort();
+		}
+		else {
+			sorted = [...keyMap].sort((a, b) => b[0].localeCompare(a[0]));			
+		}
+	}
+	
+	const sortedMap = new Map(sorted);
+	let keys = Array.from(sortedMap.keys());
+	i=0;
+	for (let [key, value] of sortedMap) {
+		if(value!=i) {
+			//console.log("sortTable value="+value);
+			rows[i].parentNode.insertBefore(rows[value], rows[i]);
+			var aLen=keys.length;
+			for (k = i+1; k < aLen; k++) {
+				var aKey=keys[k];
+				var aValue=sortedMap.get(aKey);
+				if(aValue<value) {
+					sortedMap.set(aKey,aValue+1);
+					if(aValue+1>aLen-1) {
+						console.log("sortTable value="+value+";aValue="+aValue);
+					}
+				}
 			}
-	  	} else {
-			if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-          		// If so, mark as a switch and break the loop:
-          		shouldSwitch = true;
-          		break;
-        	}
-		}	
-       } else if (dir == "desc") {
-		if (isNumeric) {
-			if (parseFloatEU(x.innerText) < parseFloatEU(y.innerText)) {
-				// If so, mark as a switch and break the loop:
-				shouldSwitch = true;
-				break;
-			}
-	  	} else {
-			if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-          		// If so, mark as a switch and break the loop:
-          		shouldSwitch = true;
-          		break;
-        	}
-		}	
-      }
-    }
-    if (shouldSwitch) {
-      /* If a switch has been marked, make the switch
-      and mark that a switch has been done: */
-      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      switching = true;
-      // Each time a switch is done, increase this count by 1:
-      switchcount ++;
-    } else {
-      /* If no switching has been done AND the direction is "asc",
-      set the direction to "desc" and run the while loop again. */
-      if (switchcount == 0 && dir == "asc") {
-        dir = "desc";
-        switching = true;
-      }
-    }
-  }
+		}
+		i++;
+	}
+	if(dirSort == "asc") {
+		dirSort="desc";
+	}
+	else {
+		dirSort="asc";
+	}
 }
 
 function blockFunction(PHP_Self, theBlockedFlag, theNom, theUserId, theSolde)
@@ -268,7 +266,7 @@ function filterRows(count, blocked, sign)
 	var aSelectToggleColumn=0;
   	var aStatusColumn=16;
    	var aValueColumn=15;
-	var aCielColumn=2;
+	var aOdooColumn=2;
 	var aHidden=false;
    	for (i = 0; i < rows.length; i++) {
         var row = rows[i];
@@ -279,8 +277,8 @@ function filterRows(count, blocked, sign)
 		var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
 		var aSelectedToggle = aColumn1Row.childNodes[0];
 		
-		var aCiel = row.getElementsByTagName("TD")[aCielColumn].textContent;
-		if(aCiel.indexOf("xxxxx")!=-1) {
+		var aOdoo = row.getElementsByTagName("TD")[aOdooColumn].textContent;
+		if(aOdoo.indexOf("xxxx")!=-1) {
      		  row.hidden=true;	
 			  continue;
 		}
@@ -486,7 +484,7 @@ foreach($members as $member) {
 }
 ?>
 <h2>Table des membres du RAPCS</h2>
-  <p>&nbsp;&nbsp;Type something to search the table for first names, last names , ciel ref, ...</p>  
+  <p>&nbsp;&nbsp;Type something to search the table for first names, last names , ref, ...</p>  
 <?php	
   print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeholder=\"Search..\" value=\"$searchText\">");
 ?>
@@ -510,9 +508,8 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 	<thead style="position: sticky;">
 <tr style="text-align: Center;">
 <th class="select-checkbox" onclick="sortTable(0, true)" style="text-align: right;">#</th>
-<th onclick="sortTable(1, false)">Id</th>
-<!--<th onclick="sortTable(2, false)">Ref. Ciel</th> -->
-<th onclick="sortTable(2, false)">Ref. odoo</th>
+<th onclick="sortTable(1, true)">Id</th>
+<th onclick="sortTable(2, true)">Ref. odoo</th>
 <th onclick="sortTable(3, false)">Nom</th>
 <th onclick="sortTable(4, false)">Prénom</th>
 <th onclick="sortTable(5, false)">Adresse</th>
@@ -534,22 +531,19 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 <?php
 // The subquery should retrieve the max date for this specific user...but it burns time
 // TODO as now Odoo is well in full force, probably need to only process Odoo balance
-	$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
-		ciel_code, odoo_id, block, bkb_amount, b_reason, u.email as email, 
-		bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_id,
-		group_concat(group_id) as allGroups, sum(distinct bkl_debit) as invoice_total,
-		datediff(current_date(), b_when) as days_blocked
-			from $table_users as u join $table_user_usergroup_map on u.id=user_id 
-			join $table_person as p on u.id=p.jom_id
-			left join $table_bk_balance on ciel_code400=bkb_account
-			left join $table_bk_ledger on bkl_client = ciel_code
-			left join $table_membership_fees on bkf_user = p.jom_id
-			left join $table_blocked on u.id = b_jom_id
-			where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
-			and (bkb_date is null or bkb_date=(select max(bkb_date) from $table_bk_balance))
-			group by user_id
-			order by last_name, first_name" ;
-	//print($sql);
+$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
+odoo_id, block, b_reason, u.email as email, 
+bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_id,
+group_concat(group_id) as allGroups,
+datediff(current_date(), b_when) as days_blocked
+	from $table_users as u join $table_user_usergroup_map on u.id=user_id 
+	join $table_person as p on u.id=p.jom_id
+	left join $table_membership_fees on bkf_user = p.jom_id
+	left join $table_blocked on u.id = b_jom_id
+	where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
+	group by user_id
+	order by last_name, first_name" ;
+//print($sql);
 	$count=0;
 	$result = mysqli_query($mysqli_link, $sql)
 		or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
@@ -558,9 +552,9 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 	$studentCount=0;
 	$effectifCount=0;
 	$pilotCount=0;
-	$cielCount=0;
 	$blockedCount=0;
-	$soldeTotal=0.0;
+	$soldeTotalPositif=0.0;
+	$soldeTotalNegatif=0.0;
 	$odooCount=0;
 	$cotisationNonPayeCount=0;
 	$cotisationPayeCount=0;
@@ -624,22 +618,14 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		if($odoo) {
 			$solde=-$odoo['total_due'];
 		}
-		$soldeCiel=$row['bkb_amount'];
-		$soldeCiel=$soldeCiel*-1.00;
 		if(abs($solde)<0.01) $solde=0.0;
-		if(abs($soldeCiel)<0.01) $soldeCiel=0.0;
 		
 		//Don't display webdeactivated member if solde == 0
 		if(!$displayWebDeactivated && $blocked == 1 && $solde == 0.0) {
 		   continue;
 		}
-		//SELECT * FROM `rapcs_bk_balance`.   bkb_amount
-		//SELECT * FROM `rapcs_bk_balance` ORDER BY `rapcs_bk_balance`.`bkb_date` DESC
+
 		$count++;
-		$ciel="xxxxxxx";
-		if($row['ciel_code'] != "") {
-			$ciel="400".$row['ciel_code'];
-		}
 		$odooReference=$row['odoo_id'];
 		if ($odooReference == "") {
 			$odooReference="xxxxx";
@@ -659,13 +645,11 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			}
 			$cotisation=$cotisation." €";
 		}
-		if($solde < 0.0) $soldeTotal+=$solde;
-		// Let's do some checks on January invoice
-		if ($row['invoice_total'] == 70) {
-			if ($member != $CheckMark) $status .= '<br/> ! cotisation de 70 €' ;
-	 	}  
-		else if ($row['invoice_total'] == 255) {
-			if ($member == $CheckMark) $status .= '<br/> ! cotisation de 255 €' ;
+		if($solde < 0.0) {
+			$soldeTotalNegatif+=$solde;
+		}
+		else {
+			$soldeTotalPositif+=$solde;
 		}
 		$soldeStyle='';
 		$rowStyle="";
@@ -684,13 +668,11 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 			if($student == $CheckMark) $studentCount++;
 			if($pilot == $CheckMark) $pilotCount++;
 			if($effectif == $CheckMark) $effectifCount++;
-	    	if($ciel != '') $cielCount++;
 		}
 		if($blocked == 2) $blockedCount++;
 		print("<tr style='text-align: right'; $rowStyle>
 			<td><input type=\"checkbox\"> $count</td>
 		    <td style='text-align: right;'>$personid</td>");
-			//<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_folio.php?user=$personid\">$ciel<span class='tooltiptext'>Click pour afficher le folio</span></a></td>
 		print("<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_ledger.php?user=$personid\">$odooReference<span class='tooltiptext'>Click pour afficher les opérations comptables</span></a></td>
 			<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_profile.php?displayed_id=$personid\">$row[last_name]<span class='tooltiptext'>Click pour editer le profile</span></a></td>
 			<td style='text-align: left;'>$row[first_name]</td>
@@ -720,9 +702,6 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		if($odoo) {
 			$soldeText=number_format($solde,2,",",".")." €";
 		}
-		if(0 && $row['ciel_code'] != '') {
-			$soldeText .="</br>" . number_format($soldeCiel, 2, ",", ".") . "€(Ciel)";
-		}
 		print("<td $soldeStyle>$soldeText</td>");				
 		if($blocked==2) {
 			print("<td style='text-align: center;font-size: 17px;' class='text-danger'>
@@ -749,7 +728,6 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 	print("<tr style='text-align: center;' class='text-bg-info'>
 		<td>Total</td>
 	    <td></td>");
-		//<td>$cielCount</td>
 	print("<td>$odooCount</td>
 		<td>$count</td>
 		<td></td>
@@ -763,13 +741,9 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 		<td>$pilotCount</td>
 		<td>$effectifCount</td>
 		<td><div class='text-danger'>[$cotisationNonPayeCount]</div><div>/$cotisationPayeCount</div></td>");
-	$soldeTotalText=number_format($soldeTotal,2,",",".");
-	if($soldeTotal<0.0) {
-		print("<td style='text-align: right;' class='text-danger'>$soldeTotalText €</td>");
-	}
-	else {
-		print("<td style='text-align: right;'>$soldeTotalText €</td>");		
-	}
+		$soldeTotalPositifText=number_format($soldeTotalPositif,2,",",".");
+		$soldeTotalNegatifText=number_format($soldeTotalNegatif,2,",",".");
+		print("<td style='text-align: right;'><div>+$soldeTotalPositifText €/</div><div class='text-danger'>$soldeTotalNegatifText €<div></td>");
 	print("<td>$blockedCount</td>
 		<td></td>
 		</tr>\n");
@@ -777,10 +751,5 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 </tbody>
 </table>
 </div>
-<?php
-if(abs($cielCount-161)>15) {
-	print("<p class='text-bg-danger'><b>La table ne semble pas correcte. Il semble manquer des comptes! A vérifier.</b></p>");
-}
-?>
 </body>
 </html>
