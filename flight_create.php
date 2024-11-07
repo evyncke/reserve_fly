@@ -126,10 +126,16 @@ if ($create or $modify) {
 	$city = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['city'])) ;
 	$country = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['country'])) ;
 	if ($create) {
-		$weight = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['weight'])) ;
+		$weight='';
+		if(isset($_REQUEST['weight'])) {
+			$weight = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['weight'])) ;
+		}
 		if ($weight == '') $weight = 0 ;
 		if (!is_numeric($weight) or $weight < 0) die("Invalid weight: $weight") ;
-		$birthdate = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['birthdate'])) ;
+		$birthdate = '';
+		if(isset($_REQUEST['birthdate'])) {
+			$birthdate = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['birthdate'])) ;
+		}
 	}
 	$schedule = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['selectedSchedule'])) ;
 	$date1 = (trim($_REQUEST['date1']) != '') ? date("'Y-m-d'", strtotime(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['date1'])))) : 'NULL';
