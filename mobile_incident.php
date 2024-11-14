@@ -110,7 +110,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'addFiles' ) {
     if(CheckFileSize($_FILES, "associatedATLFiles",  $atl_maxFileSize)) {
         $ATLId=$_REQUEST['incident'];
         //print("Action addfile: $ATLId");
-        UploadFiles($_FILES, "associatedATLFiles", $atl_uploadfiles_path,GetATLPrefixName($ATLId));
+        UploadFiles($_FILES, "associatedATLFiles", $atl_uploadfiles_path,GetATLPrefixName($ATLId), $atl_maxNumberOfPixels);
     }
     else {
         $maxFileSizeString=MemoryToString($atl_maxFileSize);

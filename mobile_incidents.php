@@ -34,7 +34,7 @@ if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '') {
 $body_attributes = "onLoad=\"prefillDropdownMenus('plane', planes, '$plane');init()\"";
 require_once 'mobile_header5.php' ;
 require_once 'incident.class.php' ;
-require_once __DIR__.'/mobile_tools.php' ;
+require_once 'mobile_tools.php' ;
 
 $maxFileSizeString=MemoryToString($atl_maxFileSize);
 
@@ -59,7 +59,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     print("<h2 style=\"color: red;\">Incident $incident->id created: Plane: $rPlane Remark:$rRemark</h2>");
 
     if(CheckFileSize($_FILES, "associatedATLFiles",  $atl_maxFileSize)) {
-        if(UploadFiles($_FILES, "associatedATLFiles", $atl_uploadfiles_path,GetATLPrefixName($incident_id))) {
+        if(UploadFiles($_FILES, "associatedATLFiles", $atl_uploadfiles_path, GetATLPrefixName($incident_id), $atl_maxNumberOfPixels)) {
             print("<h2 style=\"color: red;\">Some files are uploaded</h2>");   
         }
     }

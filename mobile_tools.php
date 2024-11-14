@@ -9,7 +9,9 @@ require_once "dbi.php" ;
 // $theMaxFileSize: the max size in bytes
 // returns true if size of all files are OK
 
-function CheckFileSize($theFilesRequest, $theInputFileName, $theMaxFileSize) {
+function CheckFileSize($theFilesRequest, $theInputFileName, $theMaxFileSize) 
+{
+	$totalSize=0;
 	foreach ($theFilesRequest[$theInputFileName]["error"] as $key => $error) {
 		if ($error == UPLOAD_ERR_OK) {
 			$tmp_name = $theFilesRequest[$theInputFileName]["tmp_name"][$key];
@@ -18,7 +20,11 @@ function CheckFileSize($theFilesRequest, $theInputFileName, $theMaxFileSize) {
 			if($size>$theMaxFileSize) {
 				return false;
 			}
+			$totalSize+=$size;
 		}
+	}
+	if($totalSize>$theMaxFileSize) {
+		return false;
 	}
 	return true;
 }
@@ -29,7 +35,8 @@ function CheckFileSize($theFilesRequest, $theInputFileName, $theMaxFileSize) {
 // $theInputFileName: the input type=file name
 // $theUploadFolder: the upload folder name
 // $theFilePrefix: the uploaded file name starts with the prefix
-function UploadFiles($theFilesRequest, $theInputFileName, $theUploadFolder, $theFilePrefix) {
+function UploadFiles($theFilesRequest, $theInputFileName, $theUploadFolder, $theFilePrefix, $theMaxNumberOfPixels) 
+{
 	$returnValue=false;
 	/* $ERROR values
 	0 => 'There is no error, the file uploaded with success',
@@ -46,9 +53,10 @@ function UploadFiles($theFilesRequest, $theInputFileName, $theUploadFolder, $the
 			$tmp_name = $theFilesRequest[$theInputFileName]["tmp_name"][$key];
 			//print_r($tmp_name);
 			$name=basename($theFilesRequest[$theInputFileName]["name"][$key]);
-
-			if(move_uploaded_file($tmp_name, $theUploadFolder."/".$theFilePrefix.$name)) {
-			 	if(!$returnValue) {
+			//moveAndResizePicture($tmp_file, $upload_fileName, $maxImageSize)
+			//if(move_uploaded_file($tmp_name, $theUploadFolder."/".$theFilePrefix.$name)) {
+			if(moveAndResizePicture($tmp_name, $theUploadFolder."/".$theFilePrefix.$name, $theMaxNumberOfPixels)) {
+					if(!$returnValue) {
 					$returnValue=true;
 				}
 			}
@@ -66,7 +74,8 @@ function UploadFiles($theFilesRequest, $theInputFileName, $theUploadFolder, $the
 
 // Function UploadErrorString : returns the description of the upload error
 // ==========================
-function UploadErrorString($theError) {
+function UploadErrorString($theError) 
+{
 	$error="";
 	switch ($theError) {
 		case 0:
@@ -118,7 +127,8 @@ function HasUploadedFiles($theUploadFolder, $theFilePrefix) {
 // =====================
 // $theUploadFolder: the upload folder name
 // $theFilePrefix: the uploaded file name starts with the prefix
-function GetUploadedFileNames($theUploadFolder, $theFilePrefix) {
+function GetUploadedFileNames($theUploadFolder, $theFilePrefix) 
+{
 	$files = scandir($theUploadFolder);
 	$uploadFileNames=array();
 	foreach ($files as $file) {
@@ -138,7 +148,8 @@ function GetUploadedFileNames($theUploadFolder, $theFilePrefix) {
 // $theFileName: the file name (Without prefix)
 // return true if the file is deleted
 
-function DeleteUploadedFile($theUploadFolder, $theFilePrefix, $theFileName) {
+function DeleteUploadedFile($theUploadFolder, $theFilePrefix, $theFileName) 
+{
 	$file=$theUploadFolder."/".$theFilePrefix.$theFileName;
 	//print("DeleteUploadedFile: file=$file<br>");
 	return unlink($file);
@@ -155,7 +166,8 @@ function DeleteUploadedFile($theUploadFolder, $theFilePrefix, $theFileName) {
 // Array["date"]
 // Array["extension"]
 // Array["type"] : "picture" or extension for others
-function GetUploadedFileInfo($theUploadFolder, $theFilePrefix, $theFileName) {
+function GetUploadedFileInfo($theUploadFolder, $theFilePrefix, $theFileName) 
+{
 	$fileInfo=array();
 	$filePath=$theUploadFolder."/".$theFilePrefix.$theFileName;
 	if(file_exists($filePath)) {
@@ -177,7 +189,8 @@ function GetUploadedFileInfo($theUploadFolder, $theFilePrefix, $theFileName) {
 	return $fileInfo;
 }
 
-function IsPictureFile($theFileNameExtension) {
+function IsPictureFile($theFileNameExtension) 
+{
 	$pictureExtensions=array("jpg", "jpeg", "gif", "png", "tiff");
 	foreach($pictureExtensions as $extension) {
 		if($extension==$theFileNameExtension) {
@@ -189,13 +202,15 @@ function IsPictureFile($theFileNameExtension) {
 
 //  Function: GetATLPrefixName : Returns the prefix from a incident id
 //  ========
-function GetATLPrefixName($theIncidentId) {
+function GetATLPrefixName($theIncidentId) 
+{
 	return "ATL_".$theIncidentId."_";
 }
 
 //  Function: MemoryToString : Returns the memory size as a string
 //  ========
-function MemoryToString($theMemorySize) {
+function MemoryToString($theMemorySize) 
+{
 	$size=$theMemorySize;
 	if($size<1024) {
 		return number_format($size, 0)."b";
@@ -228,5 +243,67 @@ function MemoryToString($theMemorySize) {
 		return number_format($size, 2)."Gb";
 	}
 	return number_format($size, 1)."Gb";
+}
+
+function moveAndResizePicture($tmp_file, $upload_fileName, $maxImageSize)
+{
+	$image_size = getimagesize($tmp_file) ;
+	if ($image_size === FALSE) {
+		// The file is not a picture
+		if (!move_uploaded_file($tmp_file, $upload_fileName)) {
+			print("Impossible de déplacer le fichier $tmp_file to $upload_fileName") ;
+			return false;
+		}
+		return true;
+	}
+	$image_width = $image_size[0] ;
+	$image_height = $image_size[1] ;
+	$image_type = $image_size[2] ;
+	$image_basename = basename($tmp_file) ;
+	$image_filetype = pathinfo($tmp_file, PATHINFO_EXTENSION) ;
+	//$avatar_filename = "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/users/avatar$displayed_id.$image_filetype" ;
+	// Do we need to resize the image ?
+	if ($image_width <= $maxImageSize and $image_height <= $maxImageSize) {
+		if (!move_uploaded_file($tmp_file, $upload_fileName)) {
+			print("Impossible de déplacer le fichier $tmp_file to $upload_fileName") ;
+			return false;
+		}
+		return true;
+	} 
+	$resize_ratio = ($image_width > $image_height) ? $maxImageSize / $image_width  : $maxImageSize / $image_height;
+	switch ($image_type) {
+		case IMAGETYPE_GIF: $upload_image = imagecreatefromgif($tmp_file) ; break ;
+		case IMAGETYPE_JPEG: $upload_image = imagecreatefromjpeg($tmp_file) ; break ;
+		case IMAGETYPE_PNG: $upload_image = imagecreatefrompng($tmp_file) ; break ;
+		default:
+			if (!move_uploaded_file($tmp_file, $upload_fileName)) {
+				print("Impossible de déplacer le fichier $tmp_file to $upload_fileName") ;
+				return false;
+			}
+			return true;
+		}
+	if (! $upload_image) {
+		if (!move_uploaded_file($tmp_file, $upload_fileName)) {
+			print("Impossible de déplacer le fichier $tmp_file to $upload_fileName") ;
+			return false;
+		}
+		return true;
+	}
+	// print("<hr>" . ($image_width * $resize_ratio) . " x " . ($image_height * $resize_ratio) . " => $_SERVER[DOCUMENT_ROOT]/${avatar_root_directory}/users/avatar${displayed_id}.gif") ;
+	$new_image = imagescale($upload_image, $image_width * $resize_ratio, $image_height * $resize_ratio) ;
+	if (! $new_image) {
+		if (!move_uploaded_file($tmp_file, $upload_fileName)) {
+			print("Impossible de déplacer le fichier $tmp_file to $upload_fileName") ;
+			return false;
+		}
+		return true;
+	}
+	imagedestroy($upload_image) ;
+	switch ($image_type) {
+		case IMAGETYPE_GIF: imagegif($new_image, $upload_fileName) ; $image_filetype = 'gif' ; break ;
+		case IMAGETYPE_JPEG: imagejpeg($new_image, $upload_fileName) ; $image_filetype = 'jpg' ; break ;
+		case IMAGETYPE_PNG: imagepng($new_image, $upload_fileName) ; $image_filetype = 'png' ; break ;
+	}
+	return true;
 }
 ?>
