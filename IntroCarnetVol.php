@@ -770,7 +770,7 @@ if($bookingid) {
 				<td>$crew_Count / $row[l_pax_count]</td>
 				<td>$remark</td>
 				<td><button type=\"button\" value=\"Del\" onclick=\"redirectLogbookDelete('$_SERVER[PHP_SELF]',$bookingid,$logid,'$auth','$row[l_audit_time]');\">&#128465; Effacer</button>&nbsp;	
-				<button type=\"button\" value=\"Edit\" style=\"border-radius: 12px;\" onclick=\"window.location.href='$_SERVER[PHP_SELF]?edit=1&id=$bookingid&logid=$logid';\">&#9998;&nbsp; Editer</button>&nbsp;");
+				<button type=\"button\" value=\"Edit\" onclick=\"window.location.href='$_SERVER[PHP_SELF]?edit=1&id=$bookingid&logid=$logid';\">&#9998;&nbsp; Editer</button>&nbsp;");
 			//<button type=\"button\" value=\"QRCode\" onclick=\"displayQRCode();\">&#xf029; QRCode</button>"
 				if($dtoFlightId>0) {
 					print("&nbsp;<button type=\"button\" value=\"DTO\" onclick=\"window.location.href='https://www.spa-aviation.be//resa/dto.flight.php?flight=$dtoFlightId';\">DTO</button>");
