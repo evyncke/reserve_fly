@@ -34,7 +34,9 @@ if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '') {
 $body_attributes = "onLoad=\"prefillDropdownMenus('plane', planes, '$plane');init()\"";
 require_once 'mobile_header5.php' ;
 require_once 'incident.class.php' ;
+require_once __DIR__.'/mobile_tools.php' ;
 
+$maxFileSizeString=MemoryToString($atl_maxFileSize);
 
 if (isset($_REQUEST['closed']) and $_REQUEST['closed'] != '')
     $closed = " checked" ;
@@ -53,14 +55,24 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     $event->save() ;
     $rPlane=strtoupper($_REQUEST['plane']) ;
     $rRemark= $_REQUEST['remark'] ;
+    $incident_id=$incident->id;
     print("<h2 style=\"color: red;\">Incident $incident->id created: Plane: $rPlane Remark:$rRemark</h2>");
+
+    if(CheckFileSize($_FILES, "associatedATLFiles",  $atl_maxFileSize)) {
+        if(UploadFiles($_FILES, "associatedATLFiles", $atl_uploadfiles_path,GetATLPrefixName($incident_id))) {
+            print("<h2 style=\"color: red;\">Some files are uploaded</h2>");   
+        }
+    }
+    else {
+        print("<h1 style=\"color: red;\"> An uploaded file is too big ! Max Size=$maxFileSizeString.<br>No file uploaded</h1>");
+    }
 }
 ?>
 
 <h3>Create an New Aircraft Technical Log (ATL) entry</h3>
 
 <div class="row">
-<form action="<?=$_SERVER['PHP_SELF']?>" method="POST" role="form" class="form-horizontal">
+<form action="<?=$_SERVER['PHP_SELF']?>" method="POST" role="form" class="form-horizontal" enctype="multipart/form-data">
 <div class="row mb-3">
 	<label for="planeSelect" class="col-form-label col-sm-4 col-md-2">Aircraft:</label>
 	<div class="col-sm-4 col-md-2">
@@ -82,6 +94,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
             <option value="hazard">Hazard to fly</option>
             <option value="" selected>-- unknown --</option>
         </select>
+	</div> <!-- col -->
+</div> <!-- row -->
+<div class="row mb-3">
+	<label for="associatedATLFilesId" class="col-form-label col-sm-4 col-md-2">Associated Files:<br>(Max: <?php print($maxFileSizeString);?>)</label>
+	<div class="col-sm-12 col-md-6">
+        <!---<input type="hidden" name="MAX_FILE_SIZE" value="3000000" />-->
+        <input type="file" multiple id="associatedATLFilesId" name="associatedATLFiles[]"/>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
@@ -132,9 +151,15 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     else
         $incidents = new Incidents($plane) ;
     foreach($incidents as $incident) {
+
+        $uploadedFilesIcon="";
+        if(HasUploadedFiles($atl_uploadfiles_path,GetATLPrefixName($incident->id))) {
+            $uploadedFilesIcon="<i class=\"bi bi-files\"></i>";
+        }
+
         print("<tr>
             <td>
-                <a href=\"mobile_incident.php?incident=$incident->id\" title=\"Edit ATL\">$incident->id <i class=\"bi bi-pen-fill\"></i></a>
+                <a href=\"mobile_incident.php?incident=$incident->id\" title=\"Edit ATL\">$incident->id <i class=\"bi bi-pen-fill\"></i>$uploadedFilesIcon</a>
             </td>
             <td class=\"text-nowrap\"><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a><br/>$incident->planeType</td>
             <td>$incident->severity</td>
@@ -158,7 +183,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 </div><!-- row --> 
 <p class="fw-light">Cliquer sur un numéro d'ATL (ou sur l'icône <i class="bi bi-pen-fill"></i>) pour consulter/modifier l'historique de cet ATL, y compris changer le statut.<br>
 Cliquer sur un avion, pour afficher uniquement les ATL de cet avion.<br><span class="badge bg-primary"><i class="bi bi-clock-fill"></i> 9</span> indique le nombre de jours depuis
-l'ouverture de l'ATL.</p>
+l'ouverture de l'ATL.<br><i class="bi bi-files"></i> Signifie que des fichiers sont associés à cet ATL.</p>
 <?php
 if($plane != "") {
     print("<p><input class=\"button\" type=\"button\" value=\"Display all Aircrafts\" onclick=\"javascript:document.location.href='mobile_incidents.php';\"></input>");
