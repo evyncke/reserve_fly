@@ -271,6 +271,7 @@ function moveAndResizePicture($tmp_file, $upload_fileName, $maxImageSize)
 		return true;
 	} 
 	$resize_ratio = ($image_width > $image_height) ? $maxImageSize / $image_width  : $maxImageSize / $image_height;
+	//print("moveAndResizePicture: image_width=$image_width  image_height=$image_height resize_ratio=$resize_ratio");
 	switch ($image_type) {
 		case IMAGETYPE_GIF: $upload_image = imagecreatefromgif($tmp_file) ; break ;
 		case IMAGETYPE_JPEG: $upload_image = imagecreatefromjpeg($tmp_file) ; break ;
