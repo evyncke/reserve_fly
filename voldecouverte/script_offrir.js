@@ -206,6 +206,17 @@ function compute_tarifs(val)
    var aTypeOfGiftElement=document.getElementById("id_typeofgift");
 
     var aTypeOfGift = aTypeOfGiftElement.value;
+    if(aTypeOfGift=="vol_initiation") {
+        // Only 2 passagers for initiation flight
+        document.getElementById("id_numberofpassagers").max=2;
+        if(document.getElementById("id_numberofpassagers").value==3) {
+            document.getElementById("id_numberofpassagers").value=2;
+        }
+    }
+    else {
+        document.getElementById("id_numberofpassagers").max=3;   
+    }
+    
 
    var aNumberOfPassagers=document.getElementById("id_numberofpassagers").value;
 

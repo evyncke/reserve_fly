@@ -111,8 +111,17 @@ function compute_reservation(val)
 {
 
    var aTypeOfFlightElement=document.getElementById("id_typeofflight");
-
    var aTypeOfFlight= aTypeOfFlightElement.value;
+   if(aTypeOfFlight=="vol_initiation") {
+    // Only 2 passagers for initiation flight
+    document.getElementById("id_numberofpassagers").max=2;
+    if(document.getElementById("id_numberofpassagers").value==3) {
+        document.getElementById("id_numberofpassagers").value=2;
+    }
+   }
+   else {
+    document.getElementById("id_numberofpassagers").max=3;   
+   }
 
    var aMembre=document.getElementById("id_voldansles12mois").value;
 
