@@ -891,5 +891,88 @@ function OF_SetFlightInvoiceFromFlyReference($theFlightReference,$theInvoiceID)
     //print("OF_SetFlightInvoiceFromFlyReference theFlightID=$theFlightID,theInvoiceID=$theInvoiceID");
     return true;
 }
-    
+
+//============================================
+// Function: correctInvoiceCommunication
+// Purpose: Correct communication : To uppercase, "V INIT " -> "V-INIT-" , ...
+//============================================
+function correctInvoiceCommunication($theInvoiceCommunication)
+{
+	$communicationUppercase = strtoupper($theInvoiceCommunication);
+
+    $pos = strpos($communicationUppercase, "VINIT");
+    if ($pos !== false) {
+        $communicationUppercase=str_replace("VINIT","V-INIT",$communicationUppercase); ;
+    } 
+    $pos = strpos($communicationUppercase, "VIF");
+    if ($pos !== false) {
+        $communicationUppercase= str_replace("VIF ","V-IF",$communicationUppercase); ;
+    } 
+    $pos = strpos($communicationUppercase, "V.INIT");
+    if ($pos !== false) {
+        $communicationUppercase=str_replace("V.INIT","V-INIT",$communicationUppercase); ;
+    } 
+    $pos = strpos($communicationUppercase, "V.IF");
+    if ($pos !== false) {
+        $communicationUppercase= str_replace("V.IF ","V-IF",$communicationUppercase); ;
+    } 
+    $pos = strpos($communicationUppercase, "V INIT");
+    if ($pos !== false) {
+        $communicationUppercase=str_replace("V INIT","V-INIT",$communicationUppercase); ;
+    } 
+    $pos = strpos($communicationUppercase, "V IF");
+    if ($pos !== false) {
+        $communicationUppercase= str_replace("V IF ","V-IF",$communicationUppercase); ;
+    } 
+    $pos = strpos($communicationUppercase, "V-INIT ");
+    if ($pos !== false) {
+        $communicationUppercase=str_replace("V-INIT ","V-INIT-",$communicationUppercase); ;
+    } 
+    $pos = strpos($communicationUppercase, "V-IF ");
+    if ($pos !== false) {
+        $communicationUppercase= str_replace("V-IF ","V-IF-",$communicationUppercase); ;
+    } 
+    $pos = strpos($communicationUppercase, "V-INIT- ");
+    if ($pos !== false) {
+        return str_replace("V-INIT- ","V-INIT-",$communicationUppercase); ;
+    } 
+    $pos = strpos($communicationUppercase, "V-IF- ");
+    if ($pos !== false) {
+        return str_replace("V-IF- ","V-IF-",$communicationUppercase); ;
+    } 
+    $pos = strpos($communicationUppercase, "V-INIT-");
+    if ($pos !== false) {
+        return $communicationUppercase;
+    } 
+    $pos = strpos($communicationUppercase, "V-IF-");
+    if ($pos !== false) {
+        return $communicationUppercase;
+    } 
+    $pos = strpos($communicationUppercase, "V-INIT");
+    if ($pos !== false) {
+        return str_replace("V-INIT","V-INIT-",$communicationUppercase); ;
+    } 
+    $pos = strpos($communicationUppercase, "V-IF");
+    if ($pos !== false) {
+        return str_replace("V-IF","V-IF-",$communicationUppercase); ;
+    } 
+    return $communicationUppercase;
+}
+
+//============================================
+// Function: analyzeTypeOfFlightOnCommunication
+// Purpose: returns "?", "INIT" or "IF" after invoice communication
+//============================================
+function analyzeTypeOfFlightOnCommunication($theInvoiceCommunication)
+{
+    $pos = strpos($theInvoiceCommunication, "V-INIT-");
+    if ($pos !== false) {
+        return "INIT";
+    } 
+    $pos = strpos($theInvoiceCommunication, "V-IF-");
+    if ($pos !== false) {
+        return "IF";
+    } 
+    return "?";
+}
 ?>

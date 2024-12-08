@@ -119,7 +119,7 @@ print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeho
 <form action="<?=$_SERVER['PHP_SELF']?>" id="checkboncadeau_form">
 <table class="table table-striped table-responsive table-hover" id="allFlights">
     <thead>
-       <tr><th>#</th><th>#Odoo Id</th><th>Date</th><th>Compte</th><th>Communication</th><th>Ref. in Flight</th><th>Ref. in Odoo</th><th>Client in Odoo</th><th>Valeur Flight</th><th>Valeur Odoo</th></tr>
+       <tr><th>#</th><th>#Odoo Id</th><th>Date</th><th>Compte</th><th>Communication</th><th>Ref. in Flight</th><th>Ref. in Odoo</th><th>Client in Odoo</th><th>Value in Flight</th><th>Value in Odoo</th></tr>
     </thead>
     <tbody class="table-group-divider" id="myTable">
 <?php
@@ -152,7 +152,16 @@ foreach($result as $f=>$desc) {
 	}
     $flightReference="????";
 	if(($account=="499001" || $account=="499002") && $credit > 0.0 && $reconciled != 1) {
+        // Correct communication : To uppercase, "V INIT " -> "V-INIT-" , ...
+        $communicationUppercase=correctInvoiceCommunication($communicationUppercase);
+        // Check if it is a INIT or IF in the communication
+        $typeOfFlightInCommunication=analyzeTypeOfFlightOnCommunication($communicationUppercase);
+        $typeofFlightAccountIncorrect="";
 		if($account=="499001") {
+            //499001 : Compte attente vol INIT
+            if($typeOfFlightInCommunication=="IF") {
+                $typeofFlightAccountIncorrect="Erreur: Le compte devrait être 499002 et pas 499001 pour un vol IF";
+            }
 			++$accountINI;
             $accountValueINIT+=$credit;
             $posFlightReference = strpos($communicationUppercase, "V-INIT-");
@@ -170,7 +179,10 @@ foreach($result as $f=>$desc) {
             }
 		}
 		else {
-			++$accountIF;
+            //499002 : Compte attente vol IF
+            if($typeOfFlightInCommunication=="INIT") {
+                $typeofFlightAccountIncorrect="Erreur: Le compte devrait être 499001 et pas 499002 pour un vol INIT";
+            }			++$accountIF;
             $accountValueIF+=$credit;
             $posFlightReference = strpos($communicationUppercase, "V-IF-");
             if ($posFlightReference === false) {
@@ -232,11 +244,18 @@ foreach($result as $f=>$desc) {
    			<td>$account</td>
      	  	<td>$communication</td>");
         if (array_key_exists($referenceInFlight, $referenceIDMap)) {
-     	  	print("<td $styleRed><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight<a></td>");
+            $pos = strpos($referenceInFlight, "V-");
+            if ($pos !== false) {
+                print("<td $styleRed><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight<a></td>");
+            } 
+            else {
+                print("<td style='color: red;'><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight</a><br>La référence ne commence pas par V-</td>");               
+            }
+         
+     	  	//print("<td $styleRed><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight<a></td>");
         }
         else {
             if($referenceInFlight!="") {
-                // Le lien entre Flight et Odoo est OK
                 print("<td $styleRed>$referenceInFlight</td>");
             }
             else {
@@ -259,11 +278,19 @@ foreach($result as $f=>$desc) {
                 }
             }
         }
+        // Column Ref un Odoo
         if (array_key_exists($flightReference, $referenceIDFlightMap)) {
-     	  	print("<td $styleRed><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDFlightMap[$flightReference]\">$flightReference<a></td>");
+            // Le lien entre Flight et Odoo est OK
+            //print("<td $styleRed><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDFlightMap[$flightReference]\">$flightReference<a></td>");
+            print("<td $styleRed>OK</td>");
         }
         else {
-            print("<td $styleRed>$flightReference</td>");
+            if($typeofFlightAccountIncorrect=="") {
+                print("<td $styleRed>$flightReference</br>Communication incorrecte</td>");
+            }
+            else {
+                print("<td $styleRed>$flightReference</br>$typeofFlightAccountIncorrect</td>");                  
+            }
         }
         $styleRed="";
         if($amountFlight!="?" && ($amountFlight!=$credit)) {

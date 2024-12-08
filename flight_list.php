@@ -88,7 +88,7 @@ if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == "true") {
 
 <table class="table table-striped table-responsive table-hover" id="allFlights">
 <thead>
-<tr><th>#</th><th>Réf</th><th>Actions</th><th>Créé le</th><th>Etat</th><th>Depuis</th><th>Vol</th><th id="pilots">Pilote</th><th>Type</th><th>Client</th><th>Remarque client</th><th>Notes club</th></tr>
+<tr><th>#</th><th>Réf</th><th>Actions</th><th>Créé le</th><th>Etat</th><th>Depuis</th><th>Vol</th><th id="pilots">Pilote</th><th>Type</th><th>Client</th><th>Passager</th><th>Remarque client</th><th>Notes club</th></tr>
 </thead>
 <tbody>
 <?php
@@ -134,11 +134,25 @@ while ($row = mysqli_fetch_array($result)) {
 	else
 		$date_vol = "à déterminer" ;
 	
+	
+	$passenger="";
+
+	//print("SELECT *, SYSDATE() AS today FROM rapcs_pax_role join rapcs_pax ON p_id= pr_pax WHERE pr_flight=$row[f_id] and (pr_role='P' or pr_role='S')</br>");
+
+	$resultPassenger= mysqli_query($mysqli_link, "SELECT *, SYSDATE() AS today FROM rapcs_pax_role join rapcs_pax ON p_id= pr_pax 
+	WHERE pr_flight=$row[f_id] and (pr_role='P'or pr_role='S')")
+	or journalise($userId, "F", "Impossible de loader les passagers: " . mysqli_error($mysqli_link));
+	while ($rowPassenger = mysqli_fetch_array($resultPassenger)) {
+		$passenger=db2web($rowPassenger['p_fname']) . " <b>" . db2web($rowPassenger['p_lname']). "</b>";
+		break;
+	}
+
 	$count++;
 	print("<tr$row_style><td>$count</td><td>$reference</td><td>$edit$print$pay</td><td>$row[f_date_created]</td><td>$status</td><td>$date_vol</td>
 		<td>" . db2web($row['first_name']) . " <b>" . db2web($row['last_name']) . "</b></td>
 		<td>$type$is_gift</td>
 		<td>" . db2web($row['p_fname']) . " <b>" . db2web($row['p_lname']) . "$email$telephone</b></td>
+		<td>$passenger</td>
 		<td>$description</td>
 		<td>$notes</td></tr>\n") ;
 }
