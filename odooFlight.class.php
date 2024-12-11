@@ -310,7 +310,7 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
     $code_499003=OF_GetAccountID(499003);
     $code_400000=OF_GetAccountID(400000);
     $edgerReference=OF_GetPaymentReference($theFlyID);
-    $cost_FI = 50.;
+    $cost_FI = 60.;
 	$partner_customer_id =  OF_GetPartnerID($theFlightReference,$theFlyID);
     $partnerName=OF_GetPartnerNameFromReference($theFlightReference);
     //print("partnerName=$partnerName<br>");
