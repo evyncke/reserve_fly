@@ -107,15 +107,15 @@ souhaitons plein de succès dans vos projets à venir.</p>
     $reference = $result[0] ;
     $modulo = substr('00' . ($reference % 97), -2) ;
     $reference = substr('000000000000' . $reference . $modulo, -12) ;
+    $reference = '+++' . substr($reference, 0, 3) . '/' . substr($reference, 3, 4) . '/' . substr($reference, 7, 5) . '+++' ;
+    $amount = number_format($membership_price, 2, '.', '') ;
     // Display continue to the callback
 ?>
 <p>Merci pour votre inscription pour <?=$membership_year?>, vous allez recevoir rapidement une facture par email.
-Vous pouvez prépayer cette facture via le QR-code ci-dessous (ce code ne fonctionne peut-être pas 
-suite à un souci informatique, celui de la facture fonctionnera bien par contre).</p>
-<!-- la communication structurée pourrait être générée sur base de l'ID, par exemple:
-  +++000/0009/85457+++ pour le bkf_invoice_id = 9854 -->
+Vous pouvez prépayer cette facture via le QR-code ci-dessous ou via un virement vers le compte <?=$iban?> avec la 
+communication structurée <?=$reference?>.</p>
   <!--img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$membership_price\n\n$reference\nCotisation $membership_year $userLastName\n")?>"-->
-  <img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$membership_price\n\n$reference\n")?>">
+  <img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$amount\n\n$reference\n\n\n")?>">
 <p>Le club vous remercie pour votre fidélité.</p>
 <a href="<?=$_REQUEST['cb']?>"><button type="button" class="btn btn-primary">Continuer vers le site</button></a>
 <?php
@@ -130,7 +130,7 @@ else
     $membershipState = ' checked' ;
 ?>
 <p>Il est temps de renouveler votre cotisation au sein de notre club, sinon à partir du 1 janvier <?=$membership_year?>, il vous sera impossible de voler
-avec un de nos avions. Veuillez choisir une des deux cotisations possibles ci-dessous:</p>
+avec un de nos avions. Veuillez choisir une des trois choix possibles ci-dessous:</p>
 <form action="<?=$_SERVER['PHP_SELF']?>">
 <!-- Ugly handling as bookkeepers wanted to have a 3 choice radio control... rather than a quit button -->
 <div class="form-check">
