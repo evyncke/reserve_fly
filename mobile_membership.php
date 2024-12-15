@@ -47,11 +47,11 @@ if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'pay' and isset($_RE
     // Leaving member via a radio check box...
     if ($_REQUEST['radioMember'] == 'quit') {
         journalise($userId, "I", "Ne veut pas renouveler sa cotisation") ;
-    $smpt_headers[] = 'MIME-Version: 1.0';
-    $smpt_headers[] = 'Content-type: text/html; charset=utf-8';
-    mail('info@spa-aviation.be,ca@spa-aviation.be', "Membre $userLastName #$userId demissionaire", 
-        "Ce membre ($userFirstName $userLastName) a indiqué vouloir quitter notre club. Veuillez lui rembourser son solde.",
-        implode("\r\n", $smpt_headers)) ;
+        $smpt_headers[] = 'MIME-Version: 1.0';
+        $smpt_headers[] = 'Content-type: text/html; charset=utf-8';
+        mail('info@spa-aviation.be,ca@spa-aviation.be', "Membre $userLastName #$userId demissionaire", 
+            "Ce membre ($userFirstName $userLastName) a indiqué vouloir quitter notre club. Veuillez lui rembourser son solde.",
+            implode("\r\n", $smpt_headers)) ;
 ?>
 <p>Vous avez fait le choix de ne plus être membre du Royal Aero Para Club de
 Spa ASBL.</p>
@@ -61,6 +61,7 @@ service comptable effectuera le paiement du solde sur votre compte.</p>
 souhaitons plein de succès dans vos projets à venir.</p>
 <p>Bien cordialement.</p>
 <?php
+        exit ;
     } // Quitting member
     // Let create an invoice and display a confirmation message then redirect to original page via the call back
     journalise($userId, "D", "About to generate a membership invoice") ;
@@ -106,8 +107,9 @@ souhaitons plein de succès dans vos projets à venir.</p>
     // Display continue to the callback
 ?>
 <p>Merci pour votre inscription pour <?=$membership_year?>, vous allez recevoir rapidement une facture par email.
-Vous pouvez prépayer cette facture via le QR-code ci-dessous.</p>
-<img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$membership_price\n\nCotisation $membership_year $userLastName\nCotisation $membership_year $userLastName\n")?>">
+Vous pouvez prépayer cette facture via le QR-code ci-dessous (ce code ne fonctionne peut-être pas 
+suite à un souci informatique, celui de la facture fonctionnera bien par contre).</p>
+<img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\r\n001\r\n1\r\nSCT\r\n$bic\r\n$bank_account_name\r\n$iban\r\nEUR$membership_price\r\n\r\n\r\nCotisation $membership_year $userLastName\r\n")?>">
 <p>Le club vous remercie pour votre fidélité.</p>
 <a href="<?=$_REQUEST['cb']?>"><button type="button" class="btn btn-primary">Continuer vers le site</button></a>
 <?php
