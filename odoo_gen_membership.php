@@ -79,12 +79,6 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
-# Analytic accounts and products are harcoded
-$non_nav_membership_product = 7 ;
-$nav_membership_product = 8 ;
-$non_nav_membership_price = 70.0 ;
-$nav_membership_price = 185.0 ;
-$membership_analytic_account = 25  ;
 
 // TODO
 // Don't invoice Joomla desactivated account
