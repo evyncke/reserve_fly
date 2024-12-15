@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -83,7 +83,8 @@ $rows = [
     [ '1540', 'OOG85', 'MALAISE', 'HIGUET'],
     [ '1040', 'OOFMX', 'MURRAY', 'HANNAY'],
 ] ;
-// $sql_date = '2023-09-09' ; // Just for testing
+
+if (isset($_REQUEST['kiosk']) and date('i') == '23') journalise($userId, 'D', 'In kiosk mode') ; // Log liveness on everyhour and 23 minutes
 
 // Dynamic flip departure board https://codepen.io/tomgiddings/pen/yLyExxo
 // Using https://codepen.io/chonz0/pen/NGRbWj for now
@@ -150,7 +151,7 @@ if ($sql_date == $special_date) {
         WHERE  p.actif = 1 AND p.ressource = 0 AND r_cancel_date IS NULL AND DATE(r_start) = '$sql_date' AND r_start >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
         ORDER BY r_start, r_plane ASC LIMIT 0,20" ;
 	$result = mysqli_query($mysqli_link, $sql)
-		or die("Cannot retrieve bookings: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Cannot retrieve bookings: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
         if ($row['r_type'] == BOOKING_MAINTENANCE) continue ;
 		if ($row['f_type'] != '') { // INIT or IF flight
