@@ -22,6 +22,11 @@ if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'delay') {
     header("Location: https://$_SERVER[HTTP_HOST]/$_REQUEST[cb]") ;
 }
 
+if (isset($_REQUEST['radioMember']) and $_REQUEST['radioMember'] == 'quit') {
+    // Ugly handling as bookkeepers wanted to have a 3 choice radio control...
+    setcookie('membership', 'ignore', time() + (365 * 24 * 60 * 60), "/"); 
+}
+
 require_once "dbi.php" ;
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
@@ -33,13 +38,33 @@ require_once 'mobile_header5.php' ;
 <div class="container-fluid">
 <h2>Cotisation pour l'année <?=$membership_year?></h2>
 <?php
-if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'pay') {
-    // Let create an invoice and display a confirmation message then redirect to original page via the call back
-    journalise($userId, "D", "About to generate a membership invoice") ;
+if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'pay' and isset($_REQUEST['radioMember'])) {
     $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id=$userId")
         or journalise($userId, "F", "Cannot retrieve member information: " . mysqli_error($mysqli_link)) ;
     $row = mysqli_fetch_array($result) or journalise($userId, "F", "User not found") ;
+    $userFirstName = db2web($row['first_name']) ;
     $userLastName = db2web($row['last_name']) ;
+    // Leaving member via a radio check box...
+    if ($_REQUEST['radioMember'] == 'quit') {
+        journalise($userId, "I", "Ne veut pas renouveler sa cotisation") ;
+    $smpt_headers[] = 'MIME-Version: 1.0';
+    $smpt_headers[] = 'Content-type: text/html; charset=utf-8';
+    mail('info@spa-aviation.be,ca@spa-aviation.be', "Membre $userLastName #$userId demissionaire", 
+        "Ce membre ($userFirstName $userLastName) a indiqué vouloir quitter notre club. Veuillez lui rembourser son solde.",
+        implode("\r\n", $smpt_headers)) ;
+?>
+<p>Vous avez fait le choix de ne plus être membre du Royal Aero Para Club de
+Spa ASBL.</p>
+<p>Vous allez recevoir un email confirmant votre résiliation et notre
+service comptable effectuera le paiement du solde sur votre compte.</p>
+<p>Encore merci pour ces années passées parmi nous, et nous vous
+souhaitons plein de succès dans vos projets à venir.</p>
+<p>Bien cordialement.</p>
+<?php
+    } // Quitting member
+    // Let create an invoice and display a confirmation message then redirect to original page via the call back
+    journalise($userId, "D", "About to generate a membership invoice") ;
+
     $invoice_date = date("Y-m-d") ;
     $invoice_date_due = date("Y-m-d", strtotime("+1 week")) ;
     require_once 'odoo.class.php' ;
@@ -82,7 +107,7 @@ if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'pay') {
 ?>
 <p>Merci pour votre inscription pour <?=$membership_year?>, vous allez recevoir rapidement une facture par email.
 Vous pouvez prépayer cette facture via le QR-code ci-dessous.</p>
-<img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$membership_price\nCotisation $membership_year\n\nCotisation $membership_year $userLastName\n")?>">
+<img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$membership_price\n\nCotisation $membership_year $userLastName\nCotisation $membership_year $userLastName\n")?>">
 <p>Le club vous remercie pour votre fidélité.</p>
 <a href="<?=$_REQUEST['cb']?>"><button type="button" class="btn btn-primary">Continuer vers le site</button></a>
 <?php
@@ -99,6 +124,7 @@ else
 <p>Il est temps de renouveler votre cotisation au sein de notre club, sinon à partir du 1 janvier <?=$membership_year?>, il vous sera impossible de voler
 avec un de nos avions. Veuillez choisir une des deux cotisations possibles ci-dessous:</p>
 <form action="<?=$_SERVER['PHP_SELF']?>">
+<!-- Ugly handling as bookkeepers wanted to have a 3 choice radio control... rather than a quit button -->
 <div class="form-check">
   <input class="form-check-input" type="radio" name="radioMember" value="groundMember" id="radioMemberId"<?=$membershipState?>>
   <label class="form-check-label" for="radioMemberId">
@@ -111,8 +137,14 @@ avec un de nos avions. Veuillez choisir une des deux cotisations possibles ci-de
     Membre naviguant (élèves et pilotes) (<?=$non_nav_membership_price?> € + <?=$nav_membership_price?> €)
   </label>
 </div>
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="radioMember" value="quit" id="radioNoMemberId">
+  <label class="form-check-label" for="radioNoMemberId">
+    Je ne désire plus être membre
+  </label>
+</div>
 <input type="hidden" name="cb" value="<?=$_REQUEST['cb']?>">
-<button type="submit" class="btn btn-primary" name="invoice" value="pay">Confirmer votre inscription</button>
+<button type="submit" class="btn btn-primary" name="invoice" value="pay">Confirmer votre choix</button>
 <button type="submit" class="btn btn-secondary" name="invoice" value="delay">Ignorer pendant une heure</button>
 </form>
 </div><!-- container-fluid-->
