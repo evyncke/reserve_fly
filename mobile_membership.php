@@ -27,6 +27,9 @@ if (isset($_REQUEST['radioMember']) and $_REQUEST['radioMember'] == 'quit') {
     setcookie('membership', 'ignore', time() + (365 * 24 * 60 * 60), "/"); 
 }
 
+if (!isset($_REQUEST['cb']))
+    $_REQUEST['cb'] = 'mobile.php' ; // If the membership URL was shared by email, ...
+
 require_once "dbi.php" ;
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
@@ -130,7 +133,7 @@ else
     $membershipState = ' checked' ;
 ?>
 <p>Il est temps de renouveler votre cotisation au sein de notre club, sinon à partir du 1 janvier <?=$membership_year?>, il vous sera impossible de voler
-avec un de nos avions. Veuillez choisir une des trois choix possibles ci-dessous:</p>
+avec un de nos avions. Veuillez choisir une des trois options possibles ci-dessous:</p>
 <form action="<?=$_SERVER['PHP_SELF']?>">
 <!-- Ugly handling as bookkeepers wanted to have a 3 choice radio control... rather than a quit button -->
 <div class="form-check">
