@@ -28,7 +28,7 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 if (! $userIsAdmin && ! $userIsBoardMember)
     journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page ou vous n'êtes pas connecté.") ; 
 
-$membership_year = (isset($_REQUEST['year'])) ? $_REQUEST['year'] : date('Y') ;
+$membership_year = (isset($_REQUEST['year'])) ? $_REQUEST['year'] : ((date('m') == '12') ? date('Y', strtotime("+1 month")) : date('Y')) ;
 $invoice_date = (isset($_REQUEST['date'])) ? $_REQUEST['date'] : date("Y-m-d") ;
 $invoice_date_due = (isset($_REQUEST['dueDate'] )) ? $_REQUEST['dueDate'] : date("Y-m-d", strtotime("+1 week")) ;
 ?>
