@@ -145,6 +145,8 @@ communication structurée <?=$reference?>.</p>
 ?>
     <p>Vous avez déjà fait votre choix et une facture a été générée le <?=$row['bkf_invoice_date']?> pour un montant de <?=$row['bkf_amount']?> &euro;.</p>
 <?php
+        if ($row['bkf_payment_date'] != '')
+            print("<p>Votre paiement a été reçu le $row[bkf_payment_date]. Merci beaucoup.</p>") ;
     } else { // existing invoice
 //
 // NO ACTION: show the form
