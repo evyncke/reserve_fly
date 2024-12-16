@@ -41,13 +41,18 @@ require_once 'mobile_header5.php' ;
 <div class="container-fluid">
 <h2>Cotisation pour l'année <?=$membership_year?></h2>
 <?php
+//
+// ACTIONS TO BE TAKEN
+//
 if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'pay' and isset($_REQUEST['radioMember'])) {
     $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id=$userId")
         or journalise($userId, "F", "Cannot retrieve member information: " . mysqli_error($mysqli_link)) ;
     $row = mysqli_fetch_array($result) or journalise($userId, "F", "User not found") ;
     $userFirstName = db2web($row['first_name']) ;
     $userLastName = db2web($row['last_name']) ;
-    // Leaving member via a radio check box...
+    //
+    // ACTION: Leaving member via a radio check box...
+    //
     if ($_REQUEST['radioMember'] == 'quit') {
         journalise($userId, "I", "Ne veut pas renouveler sa cotisation") ;
         $smpt_headers[] = 'MIME-Version: 1.0';
@@ -66,6 +71,9 @@ souhaitons plein de succès dans vos projets à venir.</p>
 <?php
         exit ;
     } // Quitting member
+    //
+    // ACTION: generate an invoice
+    //
     // Let create an invoice and display a confirmation message then redirect to original page via the call back
     journalise($userId, "D", "About to generate a membership invoice") ;
     if (date('Y') != $membership_year)
@@ -114,7 +122,7 @@ souhaitons plein de succès dans vos projets à venir.</p>
     $reference = substr('000000000000' . $reference . $modulo, -12) ;
     $reference = '+++' . substr($reference, 0, 3) . '/' . substr($reference, 3, 4) . '/' . substr($reference, 7, 5) . '+++' ;
     $amount = number_format($membership_price, 2, '.', '') ;
-    // Display continue to the callback
+    // Display confirmation and continue to the callback
 ?>
 <p>Merci pour votre inscription pour <?=$membership_year?>, vous allez recevoir rapidement une facture par email.
 Vous pouvez prépayer cette facture via le QR-code ci-dessous ou via un virement vers le compte <?=$iban?> avec la 
@@ -126,6 +134,21 @@ communication structurée <?=$reference?>.</p>
 <?php
     exit ;
 }
+//
+// NO ACTION but already invoiced
+//
+    $result = mysqli_query($mysqli_link, "SELECT * FROM $table_membership_fees WHERE bkf_user=$userId AND bkf_year='$membership_year'")
+        or journalise($userId, "E", "Cannot find back any previously issued invoice") ;
+    $row = mysqli_fetch_array($result) ;
+    if ($row) {
+        journalise($userId, "I", "Affichage cotisation alors que facture déjà générée") ;
+?>
+    <p>Vous avez déjà fait votre choix et une facture a été générée le <?=$row['bkf_invoice_date']?> pour un montant de <?=$row['bkf_amount']?> &euro;.</p>
+<?php
+    } else { // existing invoice
+//
+// NO ACTION: show the form
+//
 // Prepare the radio button state...
 $fullMembershipState = '' ;
 $membershipState = '' ;
@@ -157,9 +180,13 @@ avec un de nos avions. Veuillez choisir une des trois options possibles ci-desso
   </label>
 </div>
 <input type="hidden" name="cb" value="<?=$_REQUEST['cb']?>">
+<br/>
 <button type="submit" class="btn btn-primary" name="invoice" value="pay">Confirmer votre choix</button>
 <button type="submit" class="btn btn-secondary" name="invoice" value="delay">Ignorer pendant une heure</button>
 </form>
+<?php
+    } // non existing invoice
+?>
 </div><!-- container-fluid-->
 </body>
 </html>
