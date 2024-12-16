@@ -49,26 +49,28 @@ la base des membres Joomla n'ayant pas encore reçu de factures pour l'année <?
 
 <table class="w-auto table-responsive table table-striped table-bordered table-sm">
     <thead>
-        <tr><th>Date paiement</th><th class="text-end">Cotisation(s) payée(s)</th></tr>
+        <tr><th>Date paiement</th><th class="text-end">Cotisation(s) payée(s)</th><th>Montant payé</th></tr>
 </thead>
 <tbody class="table-divider">
 <?php    
-$sql = "SELECT bkf_payment_date, COUNT(*) as n
+$sql = "SELECT bkf_payment_date, COUNT(*) AS n, SUM(bkf_amount) AS s
     FROM $table_membership_fees
     WHERE bkf_year = '$membership_year'
     GROUP by bkf_payment_date
     ORDER BY bkf_payment_date ASC" ;
 $fees_count = 0 ;
+$fees_total = 0 ;
 $result = mysqli_query($mysqli_link, $sql) or journalise($userId, "E", "Cannot get paid fees: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
     if ($row['bkf_payment_date'] == '') $row['bkf_payment_date'] = 'Pas payé' ;
     $fees_count += $row['n'] ;
-    print("<tr><td>$row[bkf_payment_date]</td><td class=\"text-end\">$row[n]</td>\n") ;
+    $fees_total += $row['s'] ;
+    print("<tr><td>$row[bkf_payment_date]</td><td class=\"text-end\">$row[n]</td><td class=\"text-end\">$row[s] &euro;</td></tr>\n") ;
 }
 ?>
 </tbody>
 <tfoot class="table-divider">
-    <tr class="table-info"><td>Total</td><td class="text-end"><?=$fees_count?></td></tr>
+    <tr class="table-info"><td>Total</td><td class="text-end"><?=$fees_count?></td><td class="text-end"><?=$fees_total?> &euro;</td></tr>
 </tfoot>
 </table>
 <?php
