@@ -11,7 +11,6 @@ Mobile_Detect.php
 cache*
 calc_da.php
 curl.php
-dbi.php
 email.*
 fpdf.*
 htaccess.txt
@@ -47,4 +46,4 @@ htaccess-root
 composer.lock
 flight_create_InProgress.php
 odoo.php
-odoo.php
+auth.php
