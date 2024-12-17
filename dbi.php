@@ -59,30 +59,6 @@ $non_nav_membership_price = 70.0 ;
 $nav_membership_price = 200.0 ;
 $membership_analytic_account = 25  ;
 
-// Newer test site by Patrick
-if (!isset($_COOKIE['odoo']) or (isset($_COOKIE['odoo']) and $_COOKIE['odoo'] == 'default')) {
-	$odoo_host = 'spa-aviation.odoo.com' ;
-	$odoo_db = 'spa-aviation' ;
-	$odoo_username = "compta@spa-aviation.be" ;
-	$odoo_password = '99cd0fe3b659e60af7b28cc38925a48a66655f56' ; // API key
-} else if ($_COOKIE['odoo'] == 'spa-aviation-eric') {
-	$odoo_host = 'spa-aviation-eric.odoo.com' ;
-	$odoo_db = 'spa-aviation-eric' ;
-	$odoo_username = "compta@spa-aviation.be" ;
-	$odoo_password = '3a6b53d48867453eedcd274ccc3bdfb887b08071' ;
-	$odoo_password = 'Ph1n@n$$3s' ;
-} else if ($_COOKIE['odoo'] == 'rapcs') {
-	$odoo_host = 'rapcs.odoo.com' ;
-	$odoo_db = 'rapcs' ;
-	$odoo_username = "compta@spa-aviation.be" ;
-	$odoo_password = 'Ph1n@n$$3s' ;
-} else if ($_COOKIE['odoo'] == 'spa-aviation') {
-	$odoo_host = 'spa-aviation.odoo.com' ;
-	$odoo_db = 'spa-aviation' ;
-	$odoo_username = "compta@spa-aviation.be" ;
-	$odoo_password = '99cd0fe3b659e60af7b28cc38925a48a66655f56' ; // API key
-}
-
 $tracked_planes = array('OOALD', 'OOALE', 'OOAPV', 'OOJRB', 'OOFMX', 'OOSPQ', 'PHAML') ;
 // array_push($tracked_planes, 'OOFUN', 'OOMAT', 'FHABQ', 'OOD35', 'OOG85', 'DELZA', 'DELZB', 'FJXRL') ; // For Air Spa Rallye
 // array_push($tracked_planes, 'OOCEK', 'FAZMX', 'FAYAC', 'GIIIG') ; // For 75 ans avions externes
