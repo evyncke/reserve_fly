@@ -62,16 +62,19 @@ $fees_count = 0 ;
 $fees_total = 0 ;
 $result = mysqli_query($mysqli_link, $sql) or journalise($userId, "E", "Cannot get paid fees: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
-    if ($row['bkf_payment_date'] == '') $row['bkf_payment_date'] = 'Pas payé' ;
-    $fees_count += $row['n'] ;
-    $fees_total += $row['s'] ;
+    if ($row['bkf_payment_date'] == '') 
+        $row['bkf_payment_date'] = 'Pas payé' ;
+    else {
+        $fees_count += $row['n'] ;
+        $fees_total += $row['s'] ;
+    }
     print("<tr><td>$row[bkf_payment_date]</td><td class=\"text-end\">$row[n]</td><td class=\"text-end\">" .
         number_format($row['s'], 0, ',', '.') . " &euro;</td></tr>\n") ;
 }
 ?>
 </tbody>
 <tfoot class="table-divider">
-    <tr class="table-info"><td>Total</td><td class="text-end"><?=$fees_count?></td><td class="text-end"><?=number_format($fees_total, 0, ',', '.')?> &euro;</td></tr>
+    <tr class="table-info"><td>Total payé</td><td class="text-end"><?=$fees_count?></td><td class="text-end"><?=number_format($fees_total, 0, ',', '.')?> &euro;</td></tr>
 </tfoot>
 </table>
 <?php
