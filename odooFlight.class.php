@@ -30,6 +30,19 @@ class OdooFlight {
     }
 }
 //============================================
+// Function: OF_GetOdooClient
+// Purpose: Returns the odooClient
+//============================================
+function OF_GetOdooClient()
+{
+    global $odooClient;
+    global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
+    if(!isset($odooClient)) {
+        $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+    }
+    return $odooClient;
+}
+//============================================
 // Function: OF_LinkOdooLedger
 // Purpose: Change the value of fl_odoo_payment_id of table_flights_ledger with the InvoiceOdooID (invoice.move.line of compte 799001 or 799002)
 //============================================
@@ -560,6 +573,97 @@ function OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids) {
     
     return true;
 }
+//============================================
+// Function: OF_DeactiveBon
+// Purpose: Creation d'une OD pour transferer la valeur du compte d'attente 499001-2 -> 765000 (Produit exeptionel)
+//============================================
+function OF_DeactiveBon($theFlightID) {
+    //print("OF_DeactiveBon: Start: $theFlightID");
+
+    $code_765000=OF_GetAccountID(765000);
+    $code_499001=OF_GetAccountID(499001);
+    $code_499002=OF_GetAccountID(499002);
+ 
+    //rapcs_flight : f_reference (f_id==t$heFlightID)
+    $flyReference=OF_GetFlyReference($theFlightID);
+
+    if(OF_IsExpiredFlight($theFlightID)) {
+        return "This flight $flyReference is already expired!";
+    }
+
+    $partner_customer_id =  OF_GetPartnerID($flyReference,$theFlightID);
+    $partnerName=OF_GetPartnerNameFromReference($flyReference);
+
+    //Communication associated to the 499001-2 account
+    $odooPaymentReference=OF_GetPaymentOdooReference($theFlightID);
+    if($odooPaymentReference==0) {
+        return "This flight $flyReference is unknown for ODOO (No ODOO reference) !";    
+    }
+    $communication49900x=OF_GetCommunicationFromOdooReference($odooPaymentReference);
+
+    // table: rapcs_flight : f_type
+    $flightType=OF_GetFlyType($theFlightID);
+    $invoice_date_due = date("Y-m-d") ;
+    if($flightType=="D") {
+        // Flight V-IF-   -> 499002 -> 76500
+        $accountCodeID=$code_499002;
+        $reference_account499="Transfert de 4990002 ".$flyReference." (".$partnerName.")";
+
+    }
+    else if($flightType=="I") {
+        // Flight V-INIT- -> 499001 -> 765000
+        $accountCodeID=$code_499001;
+        $reference_account499="Transfert de 4990001 ".$flyReference." (".$partnerName.")";
+    }
+    else if($flightType=="B") {
+        // Flight V-INIT- -> 499002 -> 765000
+        $accountCodeID=$code_499002;
+        $reference_account499="Transfert de 4990002 (BON) ".$flyReference." (".$partnerName.")";
+    }
+    else {
+        return "Type de vol inconnu: $flightType";
+    }
+
+    $valeur_compte_attente=OF_GetPaymentAmount($theFlightID);
+    $invoice_lines_OD = array() ;
+    // Partie debit compte attente Bon cadeau
+    $reference_account=$communication49900x;
+    $invoice_lines_OD[] = array(0, 0,
+                array(
+                    'name' => db2web($reference_account),
+                    'account_id' => $accountCodeID, 
+                    'debit' => $valeur_compte_attente
+                )) ;
+    // Partie credit compte client Bon cadeau
+    $invoice_lines_OD[] = array(0, 0,
+                array(
+                    'name' => db2web($reference_account499),
+                    'account_id' => $code_765000, 
+                    'credit' => $valeur_compte_attente
+                )) ;
+        
+    // Invoice creation	account.move
+    $journal_transfert_init_if=OF_GetJournalID("trf");
+    $params_OD =  array(array('partner_id' => intval($partner_customer_id),
+                    'ref' => db2web($flyReference),
+                    'move_type' => 'entry',
+                    'journal_id'=> $journal_transfert_init_if,
+                    'invoice_date_due' => $invoice_date_due,
+                    'invoice_origin' => 'Gestion Bons',
+                    'invoice_line_ids' => $invoice_lines_OD)) ;
+    print("</br>Création OD V-INIT/If vers compte produit exceptionnel 765000</br>");
+    //echo var_dump($params_OD);
+    //print("<br>Pousser dans odoo<br>");
+    if(1) {
+        $odooClient=OF_GetOdooClient();
+        $result_OD = $odooClient->Create('account.move', $params_OD) ;
+        //print("<br>OD V-IF **** pour " . implode(', ', $result_OD) . " Name=".$name." Prix=".$valeur_compte_attente."<br>") ;
+        // Rename the fly to "D-"+Reference and set as expired
+        OF_SetFlightExpired($theFlightID,$flyReference);
+    }
+
+    return "";
+}
 
 //============================================
 // Function: OF_ComputeDurationToBeInvoiced
@@ -622,7 +726,8 @@ function OF_GetAccountID($theAccountNumber)
         700000 => 315, //RAPCS - Club - Cotisation Club
         700101 => 942, //RAPCS - Avions - Ventes Heures de vols initiations
         700102 => 943, //RAPCS - Avions - Ventes Heures de vols decouvertes
-        702002 => 949  //RAPCS - Instructions en vols - Initiations
+        702002 => 949,  //RAPCS - Instructions en vols - Initiations
+        765000 => 957  //Produit exceptionnel
     );
     if (array_key_exists($theAccountNumber, $codes)) {
         return $codes["$theAccountNumber"];
@@ -630,7 +735,32 @@ function OF_GetAccountID($theAccountNumber)
     print("<h2 style=\"color: red;\">ERROR:OF_GetAccountID: Unknown AccountNumber $theAccountNumber</h2>");
     return 0;
 }
-    
+//============================================
+// Function: OF_GetAccountNumberFromAccountID
+// Purpose: Get the Account number from account ID (896=>499001): see Model account.account 
+//============================================
+function OF_GetAccountNumberFromAccountID($theAccountID) 
+{
+    global $of_accountIDNumberMap;
+    if(is_null($of_accountIDNumberMap)) {
+        $of_accountIDNumberMap=array();
+    }
+ 
+    if (array_key_exists($theAccountID, $of_accountIDNumberMap)) {
+        return $of_accountIDNumberMap[$theAccountID];
+    }
+
+    $odooClient=OF_GetOdooClient();
+    $resultCode= $odooClient->SearchRead('account.account', array(array(array('id', '=', $theAccountID))),  array('fields'=>array('id', 'code'))); 
+    $accountNumber="";
+    foreach($resultCode as $fCode=>$desc) {
+        $accountNumber=$desc['code'];
+        $of_accountIDNumberMap[$theAccountID]=$accountNumber;
+        break;
+    }
+    return $accountNumber;
+}
+
 //============================================
 // Function: OF_GetJournalID
 // Purpose: Get the Journal ID: see Model account.journal
@@ -753,6 +883,7 @@ function OF_GetPaymentOdooReference($theFlyID)
     }
     return 0;
 }
+
 //============================================
 // Function: OF_GetPaymentAmount
 // Purpose: Get the value associated a payment from the flight id referenced to a ODOO Reference
@@ -794,19 +925,155 @@ function OF_GetPaymentReference($theFlyID)
         }
     }
     return "";
-}   
+}  
+
+//============================================
+// Function: OF_GetFlyReference
+// Purpose: Get the reference of a flight from the flight id (241234 -> "V-IF-241234")
+//============================================
+ 
+function OF_GetFlyReference($theFlyID)
+{
+    global $mysqli_link, $table_flights,$userId;
+    //print("<br>OF_GetPaymentReference:start<br>");
+    $result = mysqli_query($mysqli_link, "SELECT f_reference FROM $table_flights WHERE f_id=$theFlyID")
+    		or journalise($userId, "E", "Cannot read flight: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        $reference=$row['f_reference'];
+        //print("<br>OF_GetPaymentReference:odooReference=$$edgerReference<br>");
+        if($reference!=NULL) {
+            return $reference;
+        }
+    }
+    return "";
+}
+
+//============================================
+// Function: OF_GetFlightIdFromReference
+// Purpose: returns the flight id (241234) from flight reference ("V-IF-241234")
+//============================================
+ 
+function OF_GetFlightIdFromReference($theFlightReference)
+{
+    global $mysqli_link, $table_flights,$userId;
+    //print("<br>OF_GetFlightIdFromReference:start<br>");
+    $id=0;
+    $result = mysqli_query($mysqli_link, "SELECT f_id FROM $table_flights WHERE f_reference='$theFlightReference'")
+    		or journalise($userId, "E", "Cannot read flight: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        $id=$row['f_id'];
+    break;
+    }
+    return $id;
+}
+//============================================
+// Function: OF_GetFlyType
+// Purpose: Get the type of a flight from the flight id (241234 -> "D")
+//============================================
+ 
+function OF_GetFlyType($theFlyID)
+{
+    global $mysqli_link, $table_flights,$userId;
+    //print("<br>OF_GetPaymentReference:start<br>");
+    $result = mysqli_query($mysqli_link, "SELECT f_type FROM $table_flights WHERE f_id=$theFlyID")
+    		or journalise($userId, "E", "Cannot read flight: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        $type=$row['f_type'];
+        //print("<br>OF_GetPaymentReference:odooReference=$$edgerReference<br>");
+        if($type!=NULL) {
+            return $type;
+        }
+    }
+    return "";
+}
+//============================================
+// Function: OF_IsExpiredFlight
+// Purpose: returns true if the flight is expired
+//============================================
+ 
+function OF_IsExpiredFlight($theFlightID)
+{
+    global $mysqli_link, $table_flights,$userId;
+    //print("<br>OF_GetPaymentReference:start<br>");
+    $result = mysqli_query($mysqli_link, "SELECT f_expired FROM $table_flights WHERE f_id=$theFlightID")
+    		or journalise($userId, "E", "Cannot read flight: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        $expired=$row['f_expired'];
+        return $expired;
+    }
+    return 0;
+}
+
+//============================================
+// Function: OF_GetAccountNumberFromPayment
+// Purpose: Get the account Number from the odoo payment (499001, 499002, ...)
+//============================================
+function OF_GetAccountNumberFromPayment($odooPaymentReference)
+{
+    //global $odooClient;
+    //global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
+    //print("<br>OF_GetAccountIDFromPayment:start $odooPaymentReference<br>");
+
+    $accountNumber='';
+    $odooIdString=strval($odooPaymentReference);
+    $odooClient=OF_GetOdooClient();
+    //if(!isset($odooClient)) {
+    //    print("OF_GetAccountIDFromPayment:INIT odooClient<br>");
+    //    $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+    //}
+    //if(1) return "xxxxxx";
+       //$odooPaymentReference=11865;
+
+    $result = $odooClient->SearchRead('account.move.line', array(array(array('id', '=', $odooPaymentReference))),  array('fields'=>array('id', 'name', 'move_type','account_id','debit', 'credit', 'partner_id', 'create_date'))); 
+    foreach($result as $f=>$desc) {
+        //print("OF_GetPartnerIDFromPayment: Account #$desc[id]: $desc[name]<br>");
+    	//print("Account #$desc[id]: $desc[name], $desc[move_type], $desc[account_id], $desc[debit], $desc[credit], ".$desc['partner_id'][1] . "<br>\n") ;
+        //echo var_dump($f);
+        //echo "<br>";
+        //echo var_dump($desc['account_id']);
+    	$account_id = (isset($desc['account_id'])) ? $desc['account_id'] : '' ;
+        //print("<br>OF_GetAccountIDFromPayment:account_id=$account_id<br>");
+    	if(!is_bool($account_id)) {
+    		$accountID=$account_id[0];
+            $accountNumber=OF_GetAccountNumberFromAccountID($accountID);
+    	}
+    }
+    //print("Account= $<br>");
+    return $accountNumber;
+}
+
+//============================================
+// Function: OF_GetCommunicationFromOdooReference
+// Purpose: Get the communication (Libellé - Field name) from the odoo payment reference
+//============================================
+function OF_GetCommunicationFromOdooReference($odooPaymentReference)
+{
+    $communication="";
+    $odooIdString=strval($odooPaymentReference);
+    $odooClient=OF_GetOdooClient();
+    $result = $odooClient->SearchRead('account.move.line', array(array(array('id', '=', $odooPaymentReference))),  array('fields'=>array('id', 'name'))); 
+    foreach($result as $f=>$desc) {
+     	$communication= (isset($desc['name'])) ? $desc['name'] : '';
+        //print("<br>OF_GetCommunicationFromOdooReference:communication=$communication<br>");
+        break;
+    }
+     return $communication;
+}
+
+
 //============================================
 // Function: OF_GetPartnerIDFromPayment
 // Purpose: Get the partner odoo ID from the odoo payment
 //============================================
 function OF_GetPartnerIDFromPayment($odooPaymentReference)
 {
-    global $odooClient;
-    global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
+    //global $odooClient;
+    //global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
     //print("<br>OF_GetPartnerIDFromPayment:start $odooPaymentReference<br>");
     $partnerID=0;
     $odooIdString=strval($odooPaymentReference);
-    $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+    $odooClient=OF_GetOdooClient();
+    //$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
     //$odooPaymentReference=11865;
     $result = $odooClient->SearchRead('account.move.line', array(array(array('id', '=', $odooPaymentReference))),  array('fields'=>array('id', 'name', 'move_type','account_id','debit', 'credit', 'partner_id', 'create_date'))); 
     foreach($result as $f=>$desc) {
@@ -872,6 +1139,40 @@ function OF_SetFlightInvoiceFromFlyID($theFlightID,$theInvoiceID)
     or 
 		journalise($userId, "F", "Impossible de mettre à jour le flights_ledger: " . mysqli_error($mysqli_link)) ;	
     //print("OF_SetFlightInvoiceFromFlyID theFlightID=$theFlightID,theInvoiceID=$theInvoiceID");
+    return true;
+}
+
+//============================================
+// Function: OF_SetFlightExpired
+// Purpose: Set a flight as Expired: the column t_expired is set to 1 and f_reference in the table flight for a flightID (2423456) Ex: V-INIT2423456 -> D-INIT2423456
+//============================================
+function OF_SetFlightExpired($theFlightID,$theReferenceName)
+{
+    global $mysqli_link, $table_flights,$userId;
+    //print("OF_SetFlightExpired($theFlightID,$theReferenceName)<br>");
+    $newReferenceName=$theReferenceName;
+    $pos = strpos($newReferenceName, "V-");
+    if($pos==0) {
+        $newReferenceName="D-".substr($newReferenceName,2);
+    }
+    //print("UPDATE $table_flights SET f_reference='$newReferenceName' , f_expired=1 WHERE f_id=$theFlightID<br>");
+ 
+	mysqli_query($mysqli_link, "UPDATE $table_flights SET f_reference='$newReferenceName', f_expired=1 WHERE f_id=$theFlightID")
+    or 
+		journalise($userId, "F", "Impossible de mettre à jour le rapcs_flights: " . mysqli_error($mysqli_link)) ;	
+ 
+    return true;
+}
+//============================================
+// Function: OF_SetFlightReference
+// Purpose: Set the column f_reference in the table flight for a flightID (2423456) Ex: V-INIT2423456 -> D-V-INIT2423456
+//============================================
+function OF_SetFlightReference($theFlightID,$theNewReferenceName)
+{
+    global $mysqli_link, $table_flights,$userId;
+	mysqli_query($mysqli_link, "UPDATE $table_flights SET f_reference='$theNewReferenceName' WHERE f_id=$theFlightID")
+    or 
+		journalise($userId, "F", "Impossible de mettre à jour le flights_flights: " . mysqli_error($mysqli_link)) ;	
     return true;
 }
 

@@ -110,6 +110,7 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : '' ;
             <li><a href="flight_list.php?completed=true">Vols terminés</a></li>
             <li><a href="odoo_checkboncadeau.php">Bons cadeaux payés</a></li>
             <li><a href="if_init_folio.php">Folio vols IF-INIT</a></li>
+            <li><a href="flight_bon_management.php">Désactiver bons</a></li>
             <li><a href="flight_odoo.php">Export des bons vers Odoo</a></li>
             <li><a href="flight_stats.php">Statistiques mensuelles</a></li>
             <li><a href="https://www.tripadvisor.fr/Attraction_Review-g230026-d26689532-Reviews-Spa_Aviation-Spa_Liege_Province_The_Ardennes_Wallonia.html"><img src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg" height="15px"> &boxbox;</a></li>

@@ -19,7 +19,7 @@
 ob_start("ob_gzhandler");
 require_once 'flight_header.php' ;
 require_once "dbi.php" ;
-require_once "odooFlight.class.php" ;
+require_once "odooFlight_InProgress.class.php" ;
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;

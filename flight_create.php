@@ -420,7 +420,11 @@ if (isset($flight_id) and $flight_id != 0) {
 		// As flight manager wants to use another manual process
 		$flight_number = sprintf("#%03d", $flight_id) ;
 	}
-	$title = "Modification d'une réservation de vol $flight_number" ;
+	$expiredFlight="";
+	if ($row_flight['f_expired'] == 1) {
+		$expiredFlight=" (Bon expiré!)";
+	}
+	$title = "Modification d'une réservation de vol $flight_number$expiredFlight" ;
 } else
 	$title = "Création d'une réservation de vol" ;
 ?>

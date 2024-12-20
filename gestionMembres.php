@@ -16,7 +16,8 @@
 
 */
 require_once 'dbi.php';
-
+// Cotisation computed for year 
+$cotisationYear=2025;
 if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor) 
 	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
 
@@ -484,6 +485,9 @@ foreach($members as $member) {
 }
 ?>
 <h2>Table des membres du RAPCS</h2>
+<?php
+print("<b>Cotisation pour l'année $cotisationYear</b><br>");
+?>
   <p>&nbsp;&nbsp;Type something to search the table for first names, last names , ref, ...</p>  
 <?php	
   print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeholder=\"Search..\" value=\"$searchText\">");
@@ -529,6 +533,7 @@ print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitS
 </thead>
 <tbody id="myTable">
 <?php
+
 // The subquery should retrieve the max date for this specific user...but it burns time
 // TODO as now Odoo is well in full force, probably need to only process Odoo balance
 $sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
@@ -538,12 +543,13 @@ group_concat(group_id) as allGroups,
 datediff(current_date(), b_when) as days_blocked
 	from $table_users as u join $table_user_usergroup_map on u.id=user_id 
 	join $table_person as p on u.id=p.jom_id
-	left join $table_membership_fees on bkf_user = p.jom_id
+	left join $table_membership_fees on bkf_user = p.jom_id and bkf_year = $cotisationYear
 	left join $table_blocked on u.id = b_jom_id
 	where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
 	group by user_id
 	order by last_name, first_name" ;
 //print($sql);
+//print("<br>");
 	$count=0;
 	$result = mysqli_query($mysqli_link, $sql)
 		or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
@@ -558,6 +564,8 @@ datediff(current_date(), b_when) as days_blocked
 	$odooCount=0;
 	$cotisationNonPayeCount=0;
 	$cotisationPayeCount=0;
+	$cotisationNonRenouveleeCount=0;
+	$cotisationRenouveleeCount=0;
 	
 	$CheckMark="&#9989;";
 	
@@ -644,6 +652,12 @@ datediff(current_date(), b_when) as days_blocked
 				$status.=" (&#10071;Cotisation non payée)";
 			}
 			$cotisation=$cotisation." €";
+			$cotisationRenouveleeCount+=1;
+		}
+		else {
+			$cotisation="?";
+			$status.=" (&#10071;Cotisation non renouvelée)";
+			$cotisationNonRenouveleeCount+=1;
 		}
 		if($solde < 0.0) {
 			$soldeTotalNegatif+=$solde;
@@ -740,7 +754,7 @@ datediff(current_date(), b_when) as days_blocked
 		<td>$studentCount</td>
 		<td>$pilotCount</td>
 		<td>$effectifCount</td>
-		<td><div class='text-danger'>[$cotisationNonPayeCount]</div><div>/$cotisationPayeCount</div></td>");
+		<td><div class='text-danger'>[$cotisationNonRenouveleeCount]</div><div>/$cotisationRenouveleeCount</div></td>");
 		$soldeTotalPositifText=number_format($soldeTotalPositif,2,",",".");
 		$soldeTotalNegatifText=number_format($soldeTotalNegatif,2,",",".");
 		print("<td style='text-align: right;'><div>+$soldeTotalPositifText €/</div><div class='text-danger'>$soldeTotalNegatifText €<div></td>");

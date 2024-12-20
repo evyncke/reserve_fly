@@ -117,6 +117,9 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['f_date_cancelled']) {
 		$status = "Annulé</td><td>$row[f_date_cancelled]" ;
 		$row_style = ' style="color: lightgray;"' ;
+	} else if ($row['f_expired']) {
+		$status = "Bon expiré</td><td>" ;
+		$row_style = ' style="color: lightgray;"' ;
 	} else if ($row['f_date_flown'])
 		$status = "Accompli</td><td>$row[f_date_flown]" ;
 	else if ($row['f_date_linked'])
