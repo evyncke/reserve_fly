@@ -76,11 +76,13 @@ souhaitons plein de succès dans vos projets à venir.</p>
     //
     // Let create an invoice and display a confirmation message then redirect to original page via the call back
     journalise($userId, "D", "About to generate a membership invoice") ;
-    if (date('Y') != $membership_year)
+    if (date('Y') != $membership_year) {
         $invoice_date = date("Y-01-01", strtotime("+ 1 year")) ;
-    else 
+        $invoice_date_due = $invoice_date ; // no differed due date
+    } else {
         $invoice_date = date("Y-m-d") ;
-    $invoice_date_due = date("Y-m-d", strtotime("$invoice_date +1 week")) ;
+        $invoice_date_due = date("Y-m-d", strtotime("$invoice_date +1 week")) ;
+    }
     require_once 'odoo.class.php' ;
     $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
     $invoice_lines = array() ;
