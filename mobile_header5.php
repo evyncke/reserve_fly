@@ -28,6 +28,12 @@ if (isset($_GET['theme']) and $_GET['theme'] != '') {
 } else
   $theme = (isset($_COOKIE['theme'])) ? $_COOKIE['theme'] : 'light' ;
 setcookie('theme', $theme, time()+60*60*24*30, '/', $_SERVER['HTTP_HOST'], true) ;
+
+$today_month = date('m') ;
+$today_day = date('d') ;
+
+$christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_month == '01' and $today_day <= '08') ;
+
 ?><!DOCTYPE html>
 <html lang="fr" data-bs-theme="<?=$theme?>">
 <head>
@@ -57,9 +63,14 @@ setcookie('theme', $theme, time()+60*60*24*30, '/', $_SERVER['HTTP_HOST'], true)
 <!-- Glyphicon equivalent -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
+<?php
+if ($christmas_theme) {
+?>
 <!-- Christmas theme -->
 <link rel="stylesheet" href="mobile_christmas.css">
-
+<?php
+} // $christmas theme
+?>
 <!-- Allow the swipe events on phones & tablets -->
 <!-- TODO should only be loaded when required -->
 <script src="swiped-events.js"></script>
@@ -155,6 +166,9 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
   <hr>
 </div><!-- row -->
 </div><!-- print only -->
+<?php
+if ($christmas_theme) {
+?>
 <!-- Christmas theme to be removed outside of season of course -->
 <div class="snowflakes" aria-hidden="true">
 		<div class="snowflake">
@@ -195,6 +209,9 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
 		</div>
 	</div>
 <!-- end of Christmas theme -->
+<?php
+} // $christmas theme
+?>
 <nav class="navbar navbar-expand-lg text-bg-success d-print-none" id="navBarId"><!-- do not print the menu... Add fixed-top w/o destroying the layout -->
   <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".multi-collapse">
@@ -278,8 +295,8 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 if ($userId > 0) {
 ?>
             <li><a class="dropdown-item" href="mobile_book.php">Nouvelle réservation</a></li>
-            <li><a class="dropdown-item" href="reservation.php">Réservations (plein écran) <i class="bi bi-box-arrow-up-right"></i></a></li>
-            <li><a class="dropdown-item" href="mobile_reservation.php">Réservations (responsive Bootstrap 5)</a></i></li>
+            <li><a class="dropdown-item" href="reservation.php">Réservations (plein écran, ancienne version) <i class="bi bi-box-arrow-up-right"></i></a></li>
+            <li><a class="dropdown-item" href="mobile_reservation.php">Réservations</a></i></li>
             <li><a class="dropdown-item" href="mobile.php">Mes réservations</a></li>
             <li><a class="dropdown-item" href="webcal://ics.php?user=<?=$userId?>&auth=<?=md5($userId . $shared_secret)?>"><i class="bi bi-calendar3"></i> lier à mon calendrier (iCal)</a></li>
 <?php
