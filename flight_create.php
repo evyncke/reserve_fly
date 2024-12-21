@@ -17,6 +17,32 @@
 */
 
 require_once 'flight_header.php' ;
+
+// Check if the f_bbokingid is correctly defined.
+// sometimes, the f_bookingid is set but it is canceled. It means the f_bbokingid must be set to NULL 
+function checkBookingIDField( $theFlightID, $the_f_bookingid) {
+	global $mysqli_link, $table_bookings, $table_flight, $userId ;
+	if(is_null($the_f_bookingid)) {
+		return true;
+	}
+	// There is a bookingid.
+	// Now check if the booking is canceled or not
+	$result = mysqli_query($mysqli_link, "SELECT r_cancel_date FROM $table_bookings where r_id = $the_f_bookingid")
+	or journalise($userId, "F", "Cannot retrieve booking  $the_f_bookingid: " . mysqli_error($mysqli_link)) ;
+	$row = mysqli_fetch_array($result) ;
+	if ($row) {
+		if(!is_null($row['r_cancel_date'])) {
+			// the field f_bookingid has no meaning because the booking was canceled Must be set to null
+			mysqli_query($mysqli_link, "UPDATE $table_flight
+			SET f_booking=NULL
+			WHERE f_id=$theFlightID")
+			or journalise($userId, "F", "Impossible de délier le vol $theFlightID: " . mysqli_error($mysqli_link)) ;
+			return true;
+		}
+	}
+	return false;
+}
+
 $modify = (isset($_REQUEST['modify']) and $_REQUEST['modify'] != '') ? TRUE : FALSE ;
 $delete = (isset($_REQUEST['delete']) and $_REQUEST['delete'] != '') ? TRUE : FALSE ;
 $create = (isset($_REQUEST['create']) and $_REQUEST['create'] != '') ? TRUE : FALSE ;
@@ -622,7 +648,8 @@ if ($flight_id == '') {
 	if (isset($flight_id) and $flight_id != 0) {
 		print('<input type="hidden" name="flight_id" value="' . $flight_id . '">') ;
 		print('<button type="submit" class="btn btn-primary" name="modify" value="modify">Modifier la demande</button>') ;
-		if ($row_flight['f_booking'] == '')
+	
+		if (checkBookingIDField($flight_id, $row_flight['f_booking']))
 			print('<button type="submit" class="btn btn-danger" name="delete" value="delete">Annuler la demande</button>') ;
 		$result = mysqli_query($mysqli_link, "SELECT * 
 				FROM $table_flight JOIN $table_pax_role ON pr_flight = f_id LEFT JOIN $table_pax ON pr_pax = p_id
