@@ -57,6 +57,9 @@ setcookie('theme', $theme, time()+60*60*24*30, '/', $_SERVER['HTTP_HOST'], true)
 <!-- Glyphicon equivalent -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
+<!-- Christmas theme -->
+<link rel="stylesheet" href="mobile_christmas.css">
+
 <!-- Allow the swipe events on phones & tablets -->
 <!-- TODO should only be loaded when required -->
 <script src="swiped-events.js"></script>
@@ -152,6 +155,46 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
   <hr>
 </div><!-- row -->
 </div><!-- print only -->
+<!-- Christmas theme to be removed outside of season of course -->
+<div class="snowflakes" aria-hidden="true">
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+	</div>
+<!-- end of Christmas theme -->
 <nav class="navbar navbar-expand-lg text-bg-success d-print-none" id="navBarId"><!-- do not print the menu... Add fixed-top w/o destroying the layout -->
   <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".multi-collapse">
