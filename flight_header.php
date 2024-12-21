@@ -24,6 +24,10 @@ MustBeLoggedIn() ;
 
 if (! ($userIsFlightPilot or $userIsFlightManager)) 
 	journalise($userId, "F", "Vous n'êtes pas autorisé(e) sur cette page: il faut avoir les bons droits d'accès.") ;
+  $today_month = date('m') ;
+  $today_day = date('d') ;
+  
+  $christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_month == '01' and $today_day <= '08') ;  
 ?>
 <html>
 <head>
@@ -43,6 +47,14 @@ if (! ($userIsFlightPilot or $userIsFlightManager))
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<?php
+if ($christmas_theme) {
+?>
+<!-- Christmas theme -->
+<link rel="stylesheet" href="mobile_christmas.css">
+<?php
+} // $christmas theme
+?>
 <title>Vols découvertes et d'initiation</title>
 <script>
 var
@@ -87,7 +99,52 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : '' ;
 ?>
 </head>
 <body <?=$body_attributes?>>
-
+<?php
+if ($christmas_theme) {
+?>
+<!-- Christmas theme to be removed outside of season of course -->
+<div class="snowflakes" aria-hidden="true">
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+		<div class="snowflake">
+			❅
+		</div>
+		<div class="snowflake">
+			❆
+		</div>
+	</div>
+<!-- end of Christmas theme -->
+<?php
+} // $christmas theme
+?>
 <nav class="navbar navbar-inverse bg-light navbar-light">
   <div class="container-fluid">
     <div class="navbar-header">
