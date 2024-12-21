@@ -53,8 +53,8 @@ la base des membres Joomla n'ayant pas encore reçu de factures pour l'année <?
 </thead>
 <tbody class="table-divider">
 <?php    
-$sql = "SELECT bkf_payment_date, COUNT(*) AS n, SUM(bkf_amount) AS s
-    FROM $table_membership_fees
+$sql = "SELECT bkf_payment_date, COUNT(*) AS n, SUM(bkf_amount) AS s, GROUP_CONCAT(last_name SEPARATOR ', ') AS names
+    FROM $table_membership_fees JOIN $table_person ON bkf_user = jom_id
     WHERE bkf_year = '$membership_year'
     GROUP by bkf_payment_date
     ORDER BY bkf_payment_date ASC" ;
@@ -69,7 +69,7 @@ while ($row = mysqli_fetch_array($result)) {
         $fees_count += $row['n'] ;
         $fees_total += $row['s'] ;
     }
-    print("<tr><td>$row[bkf_payment_date]</td><td class=\"text-end\">$row[n]</td><td class=\"text-end\">" .
+    print("<tr><td><span title=\"$row[names]\">$row[bkf_payment_date]</span></td><td class=\"text-end\">$row[n]</td><td class=\"text-end\">" .
         number_format($row['s'], 0, ',', '.') . " &euro;</td></tr>\n") ;
 }
 ?>
