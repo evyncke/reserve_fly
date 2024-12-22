@@ -78,6 +78,7 @@ while ($row = mysqli_fetch_array($result)) {
     <tr class="table-info"><td>Total factures payées</td><td class="text-end"><?=$fees_count?></td><td class="text-end"><?=number_format($fees_total, 0, ',', '.')?> &euro;</td></tr>
 </tfoot>
 </table>
+<p class="small">Laissez la souris quelques secondes sur une date pour visualiser qui a payé à cette date.</p>
 <?php
 if (!isset($_REQUEST['confirm']) or $_REQUEST['confirm'] != 'y') exit ; // Nothing to do
 
