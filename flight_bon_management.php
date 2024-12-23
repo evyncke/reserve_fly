@@ -86,6 +86,7 @@ if (isset($_REQUEST['init_only'])) {
 	$init_only = '' ;
 	$init_only_filter = '' ;
 }
+$completed_filter = ' AND f_date_flown IS NULL' ;
 $title = '(Expirés)' ;
 
 if (isset($_REQUEST['action'])) {
@@ -222,7 +223,7 @@ $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() AS today, SUM(fl_amoun
 	FROM $table_flight JOIN $table_pax_role ON f_id = pr_flight JOIN $table_pax ON pr_pax = p_id LEFT JOIN $table_person ON f_pilot = jom_id
 	LEFT JOIN $table_bookings AS b ON f_booking = b.r_id
 	LEFT JOIN $table_flights_ledger AS fl on fl_flight = f_id
-	WHERE pr_role = 'C' and f_gift=1 $other_filter $deleted_filter $if_only_filter $init_only_filter
+	WHERE pr_role = 'C' and f_gift=1 $other_filter $deleted_filter $completed_filter $if_only_filter $init_only_filter
 	GROUP BY f_id
 	ORDER BY f_id DESC") 
 	or journalise($userId, "F", "Impossible de lister les vols: " . mysqli_error($mysqli_link));
