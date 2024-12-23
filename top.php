@@ -15,5 +15,9 @@
    limitations under the License.
 
 */
+// Everything is now moved to mobile_profile
+include('dbi.php') ;
+journalise($userId, "D", "Using old link for top.php, refererer: $_SERVER[HTTP_REFERER]") ;
+
 header("Location: https://" .  $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/mobile_top.php") ;
 ?>
