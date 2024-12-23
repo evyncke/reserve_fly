@@ -215,7 +215,7 @@ foreach ($all_rows as $row) {
 		de t&eacute;l&eacute;phone mobile</b> (ceci afin de vous contacter si n&eacute;cessaire); les autres informations sont simplement
 		pour permettre de nous conna&icirc;tre au sein de notre club.</p>
 		<p>Veuillez visiter le lien ci-dessous et compl&eacute;ter les donn&eacute;es manquantes ($missing_items_string):\n" ;
-	$email_message .= "<a href=https://www.spa-aviation.be/resa/profile.php>profil r&eacute;servation</a>.</p>\n" ;
+	$email_message .= "<a href=https://www.spa-aviation.be/resa/mobile_profile.php>profil r&eacute;servation</a>.</p>\n" ;
 	$email_message .= "<p>Pour rappel, votre identifiant est <b>$row[username]</b> et vous devez &ecirc;tre connect&eacute;(e) pour changer votre profil.</p>\r\n" ;
 	$email_message .= "<hr>Ceci est un message automatique envoy&eacute; tous les mois tant que votre profil n'est pas complet." ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
