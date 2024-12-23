@@ -208,7 +208,7 @@ function getReason(theSolde)
 
 function filterSelected()
 {
-	for(i=1;i<=4;i++){
+	for(i=1;i<=9;i++){
 	    var aToggleComponentId="id_FilterRows"+i.toString();
 		var blockedToggle = document.getElementById(aToggleComponentId);
 		blockedToggle.checked=false;
@@ -244,15 +244,28 @@ function submitSelect(theSelect)
 		var row = rows[i];
 		var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
 		var aSelectedToggle = aColumn1Row.childNodes[0];
-		aSelectedToggle.checked=false;
+		if(theSelect=="SelectVisible") {
+			// Select all visible rows
+			if(row.hidden) {
+				aSelectedToggle.checked=false;
+			}
+			else {
+				aSelectedToggle.checked=true;
+			}
+		}
+		else {
+			// Unselect all rows
+			aSelectedToggle.checked=false;
+		}
 	}
 }
 
 function filterRows(count, blocked, sign)
 {
+	// Untoggle other checkboxs
 	var blockedToggle = document.getElementById("id_FilterSelected");
 	blockedToggle.checked=false;
-	for(i=1;i<=4;i++){
+	for(i=1;i<=9;i++){
 		if(i!=count) {
 	    	var aToggleComponentId="id_FilterRows"+i.toString();
 			blockedToggle = document.getElementById(aToggleComponentId);
@@ -265,11 +278,16 @@ function filterRows(count, blocked, sign)
     var table = document.getElementById("myTable");
     var rows = table.rows;
 	var aSelectToggleColumn=0;
-  	var aStatusColumn=16;
-   	var aValueColumn=15;
+	var aStatusColumn=16;
+	var aNonNaviguantColumn=10;
+	var aEleveColumn=11;
+	var aPiloteColumn=12;
+	var aEffectifColumn=13;
+	var aValueColumn=15;
+  	var aCotisationColumn=14;
 	var aOdooColumn=2;
 	var aHidden=false;
-   	for (i = 0; i < rows.length; i++) {
+   	for (i = 0; i < rows.length-1; i++) {
         var row = rows[i];
 		if(!aCheckedValue) {
    		  row.hidden=false;
@@ -283,7 +301,68 @@ function filterRows(count, blocked, sign)
      		  row.hidden=true;	
 			  continue;
 		}
-
+		// Display rows without cotisation
+		if(blocked=="membre") {
+			if(sign=="sanscotisation") {
+				var aCotisation=row.getElementsByTagName("TD")[aCotisationColumn].textContent;
+				if(aCotisation=="[?]") {
+					row.hidden=false;	
+					continue;
+				}
+				else {
+					row.hidden=true;	
+					continue;
+				}
+			}
+			else if(sign=="nonnaviguant") {
+				var aCotisation=row.getElementsByTagName("TD")[aNonNaviguantColumn].textContent;
+				if(aCotisation!="") {
+					row.hidden=false;	
+					continue;
+				}
+				else {
+					row.hidden=true;	
+					continue;
+				}
+			}
+			else if(sign=="eleve") {
+				var aCotisation=row.getElementsByTagName("TD")[aEleveColumn].textContent;
+				if(aCotisation!="") {
+					row.hidden=false;	
+					continue;
+				}
+				else {
+					row.hidden=true;	
+					continue;
+				}
+			}
+			else if(sign=="pilote") {
+				var aCotisation=row.getElementsByTagName("TD")[aPiloteColumn].textContent;
+				if(aCotisation!="") {
+					row.hidden=false;	
+					continue;
+				}
+				else {
+					row.hidden=true;	
+					continue;
+				}
+			}
+			else if(sign=="effectif") {
+				var aCotisation=row.getElementsByTagName("TD")[aEffectifColumn].textContent;
+				if(aCotisation!="") {
+					row.hidden=false;	
+					continue;
+				}
+				else {
+					row.hidden=true;	
+					continue;
+				}
+			}
+			else {
+				alert("ERROR: unknown action "+sign);
+				return;
+			}
+		}
 	   	var aStatus=row.getElementsByTagName("TD")[aStatusColumn].textContent;
 		var aBlockedRow=!(aStatus.indexOf("DEBLOQUER")==-1);		
 		if(aStatus.indexOf("BLOQUER")==-1) {
@@ -379,7 +458,37 @@ function submitBlocked(PHP_Self, blocked) {
 		}		
 	}
 }
-
+function submitDownloadMail(PHP_Self, action) {
+	var table = document.getElementById("myTable");
+    var rows = table.rows;
+	var aSelectToggleColumn=0;
+	var aMailColumn=9;
+	var aListOfMails="";
+	var aCount=0;
+   	for (i = 0; i < rows.length-1; i++) {
+        var row = rows[i];
+		if(!row.hidden) {
+			var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
+			var aSelectedToggle = aColumn1Row.childNodes[0];
+			if(aSelectedToggle.checked) {
+				aCount++;
+				var aValueText=row.getElementsByTagName("TD")[aMailColumn].textContent;
+				if(aListOfMails!="") {
+					aListOfMails+=",";
+				}
+				aListOfMails+=aValueText;
+			}
+		}
+	}
+	if(aCount==0) {
+		alert("Pour copier des mails, vous devez d'abord selectionner des lignes dans la table!");
+		return;
+	}
+	if(action=="CopyMail") {
+		navigator.clipboard.writeText(aListOfMails);
+		alert(aCount+" adresses mails sont copiées dans le clipboard. Utiliser le Paste (Cmd+V) pour le copier dans un document !");
+	}
+}
 </script>
 <?php
 // Display or not Web deActicated member (Must be managed by a toggle button)
@@ -492,18 +601,26 @@ print("<b>Cotisation pour l'année $cotisationYear</b><br>");
 <?php	
   print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeholder=\"Search..\" value=\"$searchText\">");
 ?>
-  <br>&nbsp;&nbsp;Display only
+  <br>&nbsp;&nbsp;Display only:
   &nbsp;&nbsp;<input type="checkbox" id="id_FilterSelected" name="name_FilterSelected" value="Selected" onclick="filterSelected();" ><label for="name_FilterSelected">&nbsp;Selected</label>
   &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows1" name="name_FilterRows1" value="Blocked" onclick="filterRows(1,'Blocked','');" ><label for="name_Blocked">&nbsp;Blocked</label>
   &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows2" name="name_FilterRows2" value="negativeValue" onclick="filterRows(2,'','<');" ><label for="name_negativeValue">&nbsp;Negative Value</label>
   &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows3" name="name_FilterRows3" value="negativeValue" onclick="filterRows(3,'NotBlocked','<');" ><label for="name_negativeValue">&nbsp;Negative Value & Not Blocked</label>
-    &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows4" name="name_FilterRows4" value="negativeValue" onclick="filterRows(4,'Blocked','>');" ><label for="name_negativeValue">&nbsp;Positive Value & Blocked</label>
+  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows4" name="name_FilterRows4" value="negativeValue" onclick="filterRows(4,'Blocked','>');" ><label for="name_negativeValue">&nbsp;Positive Value & Blocked</label>
+  <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows5" name="name_FilterRows5" value="sanscotisation" onclick="filterRows(5,'membre','sanscotisation');" ><label for="name_sanscotisation">&nbsp;Sans Cotisation</label>
+  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows6" name="name_FilterRows6" value="membre" onclick="filterRows(6,'membre','nonnaviguant');" ><label for="name_nonnaviguant">&nbsp;Membres non naviguant</label>
+  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows7" name="name_FilterRows7" value="membre" onclick="filterRows(7,'membre','eleve');" ><label for="name_eleve">&nbsp;Elèves</label>
+  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows8" name="name_FilterRows8" value="membre" onclick="filterRows(8,'membre','pilote');" ><label for="name_pilote">&nbsp;Pilotes</label>
+  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows9" name="name_FilterRows9" value="membre" onclick="filterRows(9,'membre','effectif');" ><label for="name_effectif">&nbsp;Membres effectifs</label>
   <br>
-     &nbsp;&nbsp;
 <?php
-print("&nbsp;&nbsp;<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitSelect\" onclick=\"submitSelect('Unselect')\")> &nbsp;&nbsp;
+print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
+	<input type=\"submit\" value=\"Select all visible\" id=\"id_SubmitSelect\" onclick=\"submitSelect('SelectVisible')\")> &nbsp;&nbsp;
+	<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitSelect\" onclick=\"submitSelect('Unselect')\")> &nbsp;&nbsp;
 	<input type=\"submit\" value=\"Block\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[PHP_SELF]','Block')\")> &nbsp;&nbsp;
-    <input type=\"submit\" value=\"Unblock\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[PHP_SELF]', 'NotBlock')\">");
+    <input type=\"submit\" value=\"Unblock\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[PHP_SELF]', 'NotBlock')\">&nbsp;&nbsp;
+	<input type=\"submit\" value=\"Copy Mails\" id=\"id_SubmitDownloadMail\" onclick=\"submitDownloadMail('$_SERVER[PHP_SELF]', 'CopyMail')\">");
 ?>
 </br>
 	<p></p>
