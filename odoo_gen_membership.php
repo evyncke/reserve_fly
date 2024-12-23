@@ -53,7 +53,7 @@ la base des membres Joomla n'ayant pas encore reçu de factures pour l'année <?
 </thead>
 <tbody class="table-divider">
 <?php    
-$sql = "SELECT bkf_payment_date, COUNT(*) AS n, SUM(bkf_amount) AS s, GROUP_CONCAT(last_name SEPARATOR ', ') AS names
+$sql = "SELECT bkf_payment_date, COUNT(*) AS n, SUM(bkf_amount) AS s, GROUP_CONCAT(last_name ORDER BY last_name SEPARATOR ', ') AS names
     FROM $table_membership_fees JOIN $table_person ON bkf_user = jom_id
     WHERE bkf_year = '$membership_year'
     GROUP by bkf_payment_date
@@ -63,7 +63,7 @@ $fees_total = 0 ;
 $result = mysqli_query($mysqli_link, $sql) or journalise($userId, "E", "Cannot get paid fees: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
     if ($row['bkf_payment_date'] == '') {
-        $row['bkf_payment_date'] = 'Pas payé' ;
+        $row['bkf_payment_date'] = '<i>Pas payé</i>' ;
         $row['n'] = "<i>$row[n]</i>" ;
     } else {
         $fees_count += $row['n'] ;

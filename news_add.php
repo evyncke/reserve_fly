@@ -40,7 +40,6 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'news_add') {
 ?><html>
 <head>
 <!-- TODO trim the CSS -->
-<link rel="stylesheet" type="text/css" href="profile.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <meta charset="utf-8">
