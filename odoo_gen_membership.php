@@ -45,7 +45,7 @@ $invoice_date_due = (isset($_REQUEST['dueDate'] )) ? $_REQUEST['dueDate'] : date
 la base des membres Joomla n'ayant pas encore reçu de factures pour l'année <?=$membership_year?>.
 </form>
 
-<h3 class="my-5">Paiements des cotisation <?=$membership_year?></h3>
+<h3 class="my-5">Paiements des cotisations <?=$membership_year?> facturées</h3>
 
 <table class="w-auto table-responsive table table-striped table-bordered table-sm">
     <thead>
