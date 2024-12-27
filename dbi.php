@@ -328,10 +328,12 @@ if ($userId > 0 and $userId != 294) { // Only for logged-in users and not for SP
 	if (!$row_fee) {
 		$cb = urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) ;
 		if ($_SERVER['PHP_SELF'] != '/resa/mobile_journal.php' && $_SERVER['PHP_SELF'] != '/resa/mobile_membership.php')
-		if (!isset($_COOKIE['membership']))
-				header("Location: https://www.spa-aviation.be/resa/mobile_membership.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+			if (!isset($_COOKIE['membership'])) {
+					journalise($userId, "I", "Unpaid membership, redirecting to membership page") ;
+					header("Location: https://www.spa-aviation.be/resa/mobile_membership.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+			}
 	}
-} // $userId > 0
+} else $row_fee = NULL ;// $userId > 0
 
 // IP addresses are fetched from the X-Forwarded-For HTTP header
 function getClientAddress() {

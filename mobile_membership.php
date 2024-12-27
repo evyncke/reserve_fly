@@ -20,6 +20,7 @@
 if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'delay') {
     setcookie('membership', 'ignore', time() + (1 * 60 * 60), "/"); 
     header("Location: https://$_SERVER[HTTP_HOST]/$_REQUEST[cb]") ;
+    exit ;
 }
 
 if (isset($_REQUEST['radioMember']) and $_REQUEST['radioMember'] == 'quit') {
@@ -119,6 +120,7 @@ souhaitons plein de succès dans vos projets à venir.</p>
     mysqli_query($mysqli_link, "INSERT INTO $table_membership_fees(bkf_user, bkf_year, bkf_amount, bkf_invoice_id, bkf_invoice_date)
         VALUES($userId, '$membership_year', $membership_price, $result[0], '$invoice_date')")
         or journalise($userId, "F", "Cannot insert into $table_membership_fees: " . mysqli_error($mysqli_link)) ;
+    journalise($userId, "D", "Membership invoice stored in MySQL") ;
     $reference = $result[0] ;
     $modulo = substr('00' . ($reference % 97), -2) ;
     $reference = substr('000000000000' . $reference . $modulo, -12) ;
@@ -139,16 +141,13 @@ communication structurée <?=$reference?>.</p>
 //
 // NO ACTION but already invoiced
 //
-    $result = mysqli_query($mysqli_link, "SELECT * FROM $table_membership_fees WHERE bkf_user=$userId AND bkf_year='$membership_year'")
-        or journalise($userId, "E", "Cannot find back any previously issued invoice") ;
-    $row = mysqli_fetch_array($result) ;
-    if ($row) {
+    if ($row_fee) {
         journalise($userId, "I", "Affichage cotisation alors que facture déjà générée") ;
 ?>
-    <p>Vous avez déjà fait votre choix et une facture a été générée le <?=$row['bkf_invoice_date']?> pour un montant de <?=$row['bkf_amount']?> &euro;.</p>
+    <p>Vous avez déjà fait votre choix et une facture a été générée le <?=$row_fee['bkf_invoice_date']?> pour un montant de <?=$row_fee['bkf_amount']?> &euro;.</p>
 <?php
-        if ($row['bkf_payment_date'] != '')
-            print("<p>Votre paiement a été reçu le $row[bkf_payment_date]. Merci beaucoup.</p>") ;
+        if ($row_fee['bkf_payment_date'] != '')
+            print("<p>Votre paiement a été reçu le $row_fee[bkf_payment_date]. Merci beaucoup.</p>") ;
     } else { // existing invoice
 //
 // NO ACTION: show the form
