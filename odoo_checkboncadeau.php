@@ -19,7 +19,7 @@
 ob_start("ob_gzhandler");
 require_once 'flight_header.php' ;
 require_once "dbi.php" ;
-require_once "odooFlight_InProgress.class.php" ;
+require_once "odooFlight.class.php" ;
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
@@ -150,6 +150,7 @@ foreach($result as $f=>$desc) {
 	if(!is_bool($partner_id)) {
 		$partner=$partner_id[1];
 	}
+     
     $flightReference="????";
 	if(($account=="499001" || $account=="499002") && $credit > 0.0 && $reconciled != 1) {
         // Correct communication : To uppercase, "V INIT " -> "V-INIT-" , ...
@@ -209,10 +210,26 @@ foreach($result as $f=>$desc) {
             //$idText="<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"linkFunction('$_SERVER[PHP_SELF]','Block')\">&#x2714; ".$idText."<span class='tooltiptext'>Click pour LIER</span></a>";
             $idText=$idText;
         }
+   
         $styleRed="";
         if($referenceInFlight!="" && ($referenceInFlight!=$flightReference)) {
             $styleRed="style='color: red;'";
         }
+
+        if (array_key_exists($referenceInFlight, $paymentFlightMap)) {
+            $amountFlight=$paymentFlightMap[$referenceInFlight];
+        }
+        else {
+            if (array_key_exists($flightReference, $paymentFlightMap)) {
+             $amountFlight=$paymentFlightMap[$flightReference];
+            }
+            else {
+                $amountFlight="?";
+            }
+        }
+
+
+/*
         if (array_key_exists($flightReference, $paymentFlightMap)) {
             $amountFlight=$paymentFlightMap[$flightReference];
         }
@@ -224,6 +241,14 @@ foreach($result as $f=>$desc) {
                 $amountFlight="?";
             }
         }
+            */
+        // Check if the flight is already done
+        $dateFlown=OF_GetFlownDateReference($referenceInFlight);
+        if($dateFlown!="") {
+            $dateFlown="<br>(Vol Accompli!)";
+            $styleRed="style='color: red;'";
+        }
+ 
         $giftFlagWarning="";
         if(strpos($referenceInFlight,"V-") !== false) {
             if (array_key_exists($flightReference, $giftFlagMap)) {
@@ -237,6 +262,7 @@ foreach($result as $f=>$desc) {
                 }
             }
         }
+
     	print("<tr>
       	 	<td>$rowNumber</td>
 		    <td>$idText$giftFlagWarning</td>
@@ -246,17 +272,17 @@ foreach($result as $f=>$desc) {
         if (array_key_exists($referenceInFlight, $referenceIDMap)) {
             $pos = strpos($referenceInFlight, "V-");
             if ($pos !== false) {
-                print("<td $styleRed><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight<a></td>");
+                print("<td $styleRed><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight</a>$dateFlown</td>");
             } 
             else {
-                print("<td style='color: red;'><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight</a><br>La référence ne commence pas par V-</td>");               
+                print("<td style='color: red;'><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight</a><br>La référence ne commence pas par V-$dateFlown</td>");               
             }
          
      	  	//print("<td $styleRed><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight<a></td>");
         }
         else {
             if($referenceInFlight!="") {
-                print("<td $styleRed>$referenceInFlight</td>");
+                print("<td $styleRed>$referenceInFlight</td>");      
             }
             else {
                 if (array_key_exists($flightReference, $referenceIDMap)) {
