@@ -209,10 +209,16 @@ if ($christmas_theme) {
 			❆
 		</div>
 	</div>
+  <?php
+  if (date('i') == '00') { // Sound only one minute per hour
+  ?>
   <audio autoplay>
     <!-- free sound from https://orangefreesounds.com/santa-claus-sleigh-flyby-sound/ -->
     <source src="Santa-claus-sleigh-flyby-sound.mp3" type="audio/mpeg">
   </audio>
+  <?php
+  } // Sound only one minute per hour
+  ?>
 <!-- end of Christmas theme -->
 <?php
 } // $christmas theme
