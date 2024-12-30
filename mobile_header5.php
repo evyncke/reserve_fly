@@ -146,6 +146,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
   if (isset($_GET['kiosk'])) {
     if (time() <= airport_opening_local_time(date('Y'), date('n'), date('j')) or airport_closing_local_time(date('Y'), date('n'), date('j')) <= time()) {
       print('<div style="background: black; position: absolute; top: 0px; bottom: 0px; left: 0px; right: 0px; height: 100vh; width: 100vw; z-index: 99;"></div>') ;
+      $_GET['kiosk'] = 'powersave' ;
     }
 }
 ?>
@@ -269,7 +270,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?> 
 <?php
 } // $userIsAdmin or $userIsInstructor or $userIsBoardMember
-	if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
+if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">École<span class="caret"></span></a>
@@ -292,6 +293,26 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
   </li> <!-- dropdown Ecole-->
 <?php
 }
+if ($userIsFlightManager) {
+?>
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Vols IF/INIT<span class="caret"></span></a>
+    <ul class="dropdown-menu">
+    <li><h6 class="dropdown-header">Réservé admins des vols IF/INIT</h6></li>
+    <li><h6 class="dropdown-header">En cours de migration par Eric NE PAS UTILISER</h6></li>
+    <li><a class="dropdown-item" href="flight_create.php">Nouveau</a></li>
+    <li><a class="dropdown-item" href="flight_list.php?completed=false">Vols prévus</a></li>
+    <li><a class="dropdown-item" href="flight_list.php?completed=true">Vols terminés</a></li>
+    <li><a class="dropdown-item" href="odoo_checkboncadeau.php">Bons cadeaux payés</a></li>
+    <li><a class="dropdown-item" href="if_init_folio.php">Folio vols IF-INIT</a></li>
+    <li><a class="dropdown-item" href="flight_bon_management.php">Désactiver bons</a></li>
+    <li><a class="dropdown-item" href="flight_odoo.php">Export des bons vers Odoo</a></li>
+    <li><a class="dropdown-item" href="flight_stats.php">Statistiques mensuelles</a></li>
+    <li><a class="dropdown-item" href="https://www.tripadvisor.fr/Attraction_Review-g230026-d26689532-Reviews-Spa_Aviation-Spa_Liege_Province_The_Ardennes_Wallonia.html"><img src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg" height="15px"> &boxbox;</a></li>
+    </ul>
+  </li> <!-- dropdown vols IF/INIT-->
+<?php  
+}
 ?>         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Réservations<span class="caret"></span></a>
           <ul class="dropdown-menu">
@@ -307,6 +328,7 @@ if ($userId > 0) {
 }
 ?>
             <li><a class="dropdown-item" href="mobile_today.php">Réservations de ce jour</a></li>
+            <li><a class="dropdown-item" href="mobile_top.php">Top-10 des vols</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
