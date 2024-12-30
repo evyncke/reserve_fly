@@ -448,9 +448,13 @@ if (isset($flight_id) and $flight_id != 0) {
 	}
 	$expiredFlight="";
 	if ($row_flight['f_expired'] == 1) {
-		$expiredFlight=" (Bon expiré!)";
+		$expiredFlight="(Bon expiré!)";
 	}
-	$title = "Modification d'une réservation de vol $flight_number$expiredFlight" ;
+	$cancelled="";
+	if(!is_null($row_flight['f_date_cancelled'])) {
+		$cancelled="(Vol annulé)";
+	}
+	$title = "Modification d'une réservation de vol $flight_number $cancelled $expiredFlight" ;
 } else
 	$title = "Création d'une réservation de vol" ;
 ?>
