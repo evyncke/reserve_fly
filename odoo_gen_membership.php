@@ -63,13 +63,15 @@ $fees_total = 0 ;
 $result = mysqli_query($mysqli_link, $sql) or journalise($userId, "E", "Cannot get paid fees: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
     if ($row['bkf_payment_date'] == '') {
-        $row['bkf_payment_date'] = '<i>Pas payé</i>' ;
+        $row['bkf_payment_date'] = '<i>Facturé et pas payé</i>' ;
         $row['n'] = "<i>$row[n]</i>" ;
+        $td_class = ' text-bg-warning' ;
     } else {
         $fees_count += $row['n'] ;
         $fees_total += $row['s'] ;
+        $td_class = '' ;
     }
-    print("<tr><td><span title=\"$row[names]\">$row[bkf_payment_date]</span></td><td class=\"text-end\">$row[n]</td><td class=\"text-end\">" .
+    print("<tr><td class=\"$td_class\"><span title=\"$row[names]\">$row[bkf_payment_date]</span></td><td class=\"text-end$td_class\">$row[n]</td><td class=\"text-end$td_class\">" .
         number_format($row['s'], 0, ',', '.') . " &euro;</td></tr>\n") ;
 }
 ?>
