@@ -106,7 +106,13 @@ function OF_FillFlightOdooMaps(&$theOdooPaymentMap,&$thePaymentFlightMap,&$theLe
             $theOdooPaymentMap[$fl_odoo_payment_id]=$f_reference;
          }
          $theReferenceIDMap[$f_reference]=$row['f_id'];
-         $thePaymentFlightMap[$f_reference]=$row['fl_amount'];
+         if(array_key_exists($f_reference,$thePaymentFlightMap)) {
+            // More than one payment associated to a flight
+            $thePaymentFlightMap[$f_reference]=$thePaymentFlightMap[$f_reference]+$row['fl_amount'];
+         }
+         else {
+            $thePaymentFlightMap[$f_reference]=$row['fl_amount'];
+         }
          $theLedgerIdMap[$f_reference]=$row['fl_id'];
          $theGiftFlagMap[$f_reference]=$row['f_gift'];
     }
@@ -962,9 +968,29 @@ function OF_GetFlightIdFromReference($theFlightReference)
     		or journalise($userId, "E", "Cannot read flight: " . mysqli_error($mysqli_link)) ;
     while ($row = mysqli_fetch_array($result)) {
         $id=$row['f_id'];
-    break;
+        break;
     }
     return $id;
+}
+
+//============================================
+// Function: OF_GetFlownDateReference
+// Purpose: returns the flown date from flight reference ("V-IF-241234")
+//============================================
+ 
+function OF_GetFlownDateReference($theFlightReference)
+{
+    global $mysqli_link, $table_flights,$userId;
+    //print("<br>OF_GetFlownDateReference:start $theFlightReference<br>");
+    $date="";
+    $result = mysqli_query($mysqli_link, "SELECT f_date_flown FROM $table_flights WHERE f_reference='$theFlightReference'")
+    		or journalise($userId, "E", "Cannot read flight: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        $date=$row['f_date_flown'];
+        //print("<br>OF_GetFlownDateReference:date- $date<br>");
+        break;
+    }
+    return $date;
 }
 //============================================
 // Function: OF_GetFlyType
