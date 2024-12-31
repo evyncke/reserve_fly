@@ -35,6 +35,8 @@ $folio_start = (isset($_REQUEST['start'] )) ?
 $folio_end = (isset($_REQUEST['end'] )) ? 
     new DateTime($_REQUEST['end'], new DateTimeZone('UTC')) :
     new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
+$invoice_date =  $folio_end->sub(new DateInterval('P1D'))->format('Y-m-d') ;
+
 $sql_filter = ($invoice_jom_id != '' and is_numeric($invoice_jom_id)) ? "AND jom_id = $invoice_jom_id" : '' ;
 ?>
 <h2>Génération des factures dans Odoo sur base des carnets de vol@<?=$odoo_host?></h2>
@@ -98,7 +100,7 @@ $pax_telia_analytic = 40; // Centre de cout telia taxe passager
 
 // Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198
 if (false) {
-    $jom_ids = "438";
+    $jom_ids = "66";
 //    $jom_ids = "62, 66" ;
     $sql = "SELECT u.id AS id, last_name, first_name, odoo_id
         FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
@@ -193,11 +195,19 @@ while ($row = mysqli_fetch_array($result_members)) {
         $params =  array(array('partner_id' => intval($row['odoo_id']), // Must be of INT type else Odoo does not accept
                     'ref' => db2web("Vols de $row[last_name] $row[first_name]"),
                     'move_type' => 'out_invoice',
+                    'invoice_date' => $invoice_date,
                     'invoice_date_due' => $invoice_date_due,
                     'invoice_origin' => 'Carnets de routes',
                     'invoice_line_ids' => $invoice_lines)) ;
-        $result = $odooClient->Create('account.move', $params) ;
-        print("Facture pour Odoo ID #$row[odoo_id] $total_folio &euro;: facture n° " . implode(', ', $result) . "<br/>\n") ;
+        if(1) {
+            $result = $odooClient->Create('account.move', $params) ;
+            print("Facture pour Odoo ID #$row[odoo_id] $total_folio &euro;: facture n° " . implode(', ', $result) . "<br/>\n") ;
+        }
+        else {
+            print("Facture pour Odoo ID #$row[odoo_id] $total_folio &euro;: facture n° xxx <br/>\n") ;
+            var_dump($params);
+            print("<br>");
+        }
         $invoiceCount++ ;
 	} else
         print("Total de la facture: $total_folio, aucune facture générée.<br/>\n") ;
