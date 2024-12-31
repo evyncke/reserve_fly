@@ -113,7 +113,7 @@ souhaitons plein de succès dans vos projets à venir.</p>
                     'move_type' => 'out_invoice',
                     'invoice_date' => $invoice_date,
                     'invoice_date_due' => $invoice_date_due,
-                    'invoice_origin' => 'Liste des membres',
+                    'invoice_origin' => 'Formulaire web ' . date("Y-m-d"),
                     'invoice_line_ids' => $invoice_lines)) ;
     $result = $odooClient->Create('account.move', $params) ;
     journalise($userId, "I", "Membership invoice created for odoo#$row[odoo_id]: $membership_price &euro;, invoice_id: $result[0]") ;
