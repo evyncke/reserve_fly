@@ -16,6 +16,12 @@
 
 */
 
+/*
+  Changement d'année: Le numéro du  vols INIT et IF commence par l'année (Ex:252692 en 2025)
+  ==================  Pour cela, il suffit de créer un vol IF et INIT le 1 janvier et editer ce nouveau vol dans la table RAPCS_FLIGHT et changer la valeur dans la colonne f_id
+                      de 242692 -> 252692. Tous les autres flights auront un f_id=f_id+1
+*/
+
 require_once 'flight_header.php' ;
 
 // Check if the f_bbokingid is correctly defined.
@@ -46,6 +52,7 @@ function checkBookingIDField( $theFlightID, $the_f_bookingid) {
 $modify = (isset($_REQUEST['modify']) and $_REQUEST['modify'] != '') ? TRUE : FALSE ;
 $delete = (isset($_REQUEST['delete']) and $_REQUEST['delete'] != '') ? TRUE : FALSE ;
 $create = (isset($_REQUEST['create']) and $_REQUEST['create'] != '') ? TRUE : FALSE ;
+$reactivate = (isset($_REQUEST['reactivate']) and $_REQUEST['reactivate'] != '') ? TRUE : FALSE ;
 $pay_open = (isset($_REQUEST['pay_open']) and $_REQUEST['pay_open'] != '') ? TRUE : FALSE ;
 $pay = (isset($_REQUEST['pay']) and $_REQUEST['pay'] != '') ? TRUE : FALSE ;
 $addPayment = (isset($_REQUEST['addPayment']) and $_REQUEST['addPayment'] == 'Y') ? TRUE : FALSE ;
@@ -243,6 +250,15 @@ if ($delete) {
 		or journalise($userId, "F", "Cannot cancel flight $flight_id: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "W", "Flight $flight_id cancelled") ;
 }
+if($reactivate) {
+	print("REACTIVATE the flight<br>");
+	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
+	$result = mysqli_query($mysqli_link, "UPDATE $table_flight SET f_date_cancelled = NULL, f_who_cancelled = NULL
+		WHERE f_id = $flight_id")
+		or journalise($userId, "F", "Cannot reactivate flight $flight_id: " . mysqli_error($mysqli_link)) ;
+	journalise($userId, "W", "Flight $flight_id reactivated") ;
+
+}
 
 if ($assign_pilot) {
 	if ($flight_id <= 0) die("Invalid flight_id ($flight_id)") ;
@@ -426,7 +442,7 @@ if ($deletePayment) {
 		or journalise($userId, "F", "Impossible d'effacer un paiement: " . mysqli_error($mysqli_link)) ;
 	journalise($userId, "I", "Flight $flight_id payment information deleted $amount") ;
 }
-
+$cancelled="";
 if (isset($flight_id) and $flight_id != 0) {
 	$result = mysqli_query($mysqli_link, "SELECT * 
 			FROM $table_flight JOIN $table_pax_role ON pr_flight = f_id 
@@ -450,7 +466,6 @@ if (isset($flight_id) and $flight_id != 0) {
 	if ($row_flight['f_expired'] == 1) {
 		$expiredFlight="(Bon expiré!)";
 	}
-	$cancelled="";
 	if(!is_null($row_flight['f_date_cancelled'])) {
 		$cancelled="(Vol annulé)";
 	}
@@ -653,14 +668,19 @@ if ($flight_id == '') {
 		print('<input type="hidden" name="flight_id" value="' . $flight_id . '">') ;
 		print('<button type="submit" class="btn btn-primary" name="modify" value="modify">Modifier la demande</button>') ;
 	
-		if (checkBookingIDField($flight_id, $row_flight['f_booking']))
+		if ($cancelled=="" && checkBookingIDField($flight_id, $row_flight['f_booking'])) {
 			print('<button type="submit" class="btn btn-danger" name="delete" value="delete">Annuler la demande</button>') ;
+		}
 		$result = mysqli_query($mysqli_link, "SELECT * 
 				FROM $table_flight JOIN $table_pax_role ON pr_flight = f_id LEFT JOIN $table_pax ON pr_pax = p_id
 				WHERE f_id = $flight_id and pr_role = 'C'")
 			or journalise($userId, "F", "Cannot retrieve contact role $flight_id: " . mysqli_error($mysqli_link)) ;
 		$row_contact = mysqli_fetch_array($result) ;
 		mysqli_free_result($result) ;
+		if ($cancelled!="") {
+			print('<button type="submit" class="btn btn-danger" name="reactivate" value="reactivate">Réactiver la demande</button>') ;
+		}
+
 ?>
 	</div>
 </div>

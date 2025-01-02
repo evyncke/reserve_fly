@@ -47,7 +47,7 @@ $pcnq_merchant_id = '64e3577b9ba65103267cdee6' ;
 // Some costs
 $cost_fi_minute = 0.83 ;
 $revenue_fi_minute = 0.75 ;
-$revenue_fi_initiation = 50.0 ; // Initiation flight when shareCode = -3
+$revenue_fi_initiation = 60.0 ; // Initiation flight when shareCode = -3
 $code_initiation = -3 ; // Hard coded :-(
 $tax_per_pax = 10.0 ;
 
@@ -55,8 +55,8 @@ $tax_per_pax = 10.0 ;
 // Analytic accounts and products are harcoded
 $non_nav_membership_product = 7 ;
 $nav_membership_product = 8 ;
-$non_nav_membership_price = 70.0 ;
-$nav_membership_price = 200.0 ;
+$non_nav_membership_price = 70.0 ; //2025
+$nav_membership_price = 200.0 ; //2025
 $membership_analytic_account = 25  ;
 
 $tracked_planes = array('OOALD', 'OOALE', 'OOAPV', 'OOJRB', 'OOFMX', 'OOSPQ', 'PHAML') ;

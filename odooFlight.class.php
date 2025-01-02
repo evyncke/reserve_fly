@@ -93,6 +93,7 @@ function OF_createPayment($theFlightID, $theOdooID, $theAmount, $thePaymentDate,
 //      thePaymentFlightMap[$f_reference]=$row['fl_amount'];
 //      theLedgerIdMap[$f_reference]=$row['fl_id'];
 //      theReferenceIDMap[$f_reference]=$row['f_id'];
+//      theGiftFlagMap[$f_reference]=$row['f_gift'];
 //============================================
 function OF_FillFlightOdooMaps(&$theOdooPaymentMap,&$thePaymentFlightMap,&$theLedgerIdMap,&$theReferenceIDMap,&$theGiftFlagMap) {
     global $mysqli_link, $table_flights_ledger,$table_flights,$userId;
@@ -132,6 +133,72 @@ function OF_FillFlightMaps(&$theReferenceIDMap) {
         $theReferenceIDMap[$f_reference]=$row['f_id'];
     }
     //echo var_dump($theReferenceIDMap);
+}
+
+//============================================
+// Function: OF_CreateFactureCotisation
+// Purpose: Create an invoice for a member cotisation 
+//           CotisationType="naviguant","nonnaviguant"
+//============================================
+function OF_CreateFactureCotisation($thePersonID, $theCotisationType,$theMembership_year) {
+    global $mysqli_link, $table_membership_fees,$userId;
+    global $non_nav_membership_product,$non_nav_membership_price,$membership_analytic_account;
+    global $nav_membership_product,$nav_membership_price,$membership_analytic_account;
+    //print("OF_createFactureCotisation($thePersonID, $theCotisationType):started<br>");
+
+    $invoice_date =  date("Y-m-d") ;
+    $invoice_date_due =  date("Y-m-d", strtotime("+1 week")) ;
+     // Retrieve the odooid from joom_id
+    $odoo_id=OF_GetPartnerIDFromJomID($thePersonID);
+    if( $odoo_id==0) {
+        //print("OF_createFactureCotisation 3 ($thePersonID, $theCotisationType)<br>");
+        return false;
+    }
+    print("OF_createFactureCotisation 2 ($thePersonID, $theCotisationType, $odoo_id)<br>");
+
+    $odooClient = OF_GetOdooClient();
+    $invoice_lines = array() ;
+    $invoice_lines[] = array(0, 0,
+        array(
+            'name' => "Cotisation club pour l'année $theMembership_year",
+            'product_id' => $non_nav_membership_product, 
+            'quantity' => 1,
+            'price_unit' => $non_nav_membership_price,
+            'analytic_distribution' => array($membership_analytic_account => 100)
+    )) ;
+    $membership_price=$non_nav_membership_price;
+    if($theCotisationType=="naviguant") {
+        $invoice_lines[] = array(0, 0,
+            array(
+                'name' => "Cotisation membre naviguant pour l'année $theMembership_year",
+                'product_id' => $nav_membership_product, 
+                'quantity' => 1,
+                'price_unit' => $nav_membership_price,
+                'analytic_distribution' => array($membership_analytic_account => 100)
+            )) ;
+        $membership_price+=$nav_membership_price;
+    }
+    $params =  array(array('partner_id' => intval($odoo_id), // Must be of INT type else Odoo does not accept
+    // Should the state set to 'posted' rather than 'draft' which is the default it seems?
+    //                'state' => 'posted', // Returns Vous ne pouvez pas créer une écriture déjà dans l'état comptabilisé. Veuillez créer un brouillon d'écriture et l'enregistrer après.
+                    'ref' => 'Cotisation club '.$theMembership_year,
+                    'move_type' => 'out_invoice',
+                    'invoice_date' => $invoice_date,
+                    'invoice_date_due' => $invoice_date_due,
+                    'invoice_origin' => 'Liste des membres',
+                    'invoice_line_ids' => $invoice_lines)) ;
+    if(1) {
+        $result = $odooClient->Create('account.move', $params) ;
+        print("Invoicing result for #$odoo_id: $membership_price &euro;, " . implode(', ', $result) . "<br/>\n") ;
+        mysqli_query($mysqli_link, "INSERT INTO $table_membership_fees(bkf_user, bkf_year, bkf_amount, bkf_invoice_id, bkf_invoice_date)
+         VALUES($thePersonID, '$theMembership_year', $membership_price, $result[0], '$invoice_date')")
+         or journalise($userId, "F", "Cannot insert into $table_membership_fees: " . mysqli_error($mysqli_link)) ;
+    }
+    else {
+        var_dump($params);
+        print("<br>");
+    }
+    return true;
 }
 
 //============================================
@@ -1085,7 +1152,23 @@ function OF_GetCommunicationFromOdooReference($odooPaymentReference)
     }
      return $communication;
 }
-
+//============================================
+// Function: OF_GetPartnerIDFromJomID
+// Purpose: Get the partner odoo ID from the joom_id (Table_Person)
+//          returns 0 if the JoomID doesn't exist
+//============================================
+function OF_GetPartnerIDFromJomID($jomID)
+{
+    global $mysqli_link, $table_person,$userId;
+    //print("<br>OF_GetPartnerIDFromJoomID:start jomID=$jomID<br>");
+    $odoo_id=0;
+    $result = mysqli_query($mysqli_link, "SELECT odoo_id FROM $table_person WHERE jom_id='$jomID'")
+    		or journalise($userId, "E", "Cannot read person: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        $odoo_id=$row['odoo_id'];
+    }
+    return $odoo_id;
+}
 
 //============================================
 // Function: OF_GetPartnerIDFromPayment
