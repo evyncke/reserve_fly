@@ -143,11 +143,12 @@ $body_attributes = (isset($body_attributes)) ? $body_attributes : 'onload="init(
 if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep this value
   print("<input type=\"hidden\" name=\"user\" value\"$_REQUEST[user]\">\n") ;
 // Add a black overlay box on the top to mimick a screen saving when airport is closed to save power
-  if (isset($_GET['kiosk'])) {
+  if (isset($_REQUEST['kiosk'])) {
     if (time() <= airport_opening_local_time(date('Y'), date('n'), date('j')) or airport_closing_local_time(date('Y'), date('n'), date('j')) <= time()) {
       print('<div style="background: black; position: absolute; top: 0px; bottom: 0px; left: 0px; right: 0px; height: 100vh; width: 100vw; z-index: 99;"></div>') ;
-      $_GET['kiosk'] = 'powersave' ;
-    }
+      $_REQUEST['kiosk'] = 'powersave' ;
+    } else 
+      $_REQUEST['kiosk'] = 'display active' ;
 }
 ?>
 <div class="d-none d-print-block"><!-- Show a header on printed documents TODO use js to have the current print date and not the first display date-->
