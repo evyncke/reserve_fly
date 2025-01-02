@@ -249,10 +249,7 @@ if ($row_blocked) {
 		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
 }
 // Check whether users have paid theirs membership fees
-$result_fee = mysqli_query($mysqli_link, "SELECT * FROM $table_membership_fees 
-	WHERE bkf_user=$userId AND bkf_payment_date IS NOT NULL AND bkf_year = '" . date('Y') . "'")
-	or journalise($userId, 'E', "Cannot check whether user has paid membership fee: " . mysqli_error($mysqli_link)) ;
-$row_fee = mysqli_fetch_array($result_fee) ;
+// $row_fee is set in dbi.php
 if (! $row_fee and ! $userIsInstructor and $userId != 294) { // 294 = SPW
 	journalise($userId, "W", "This user has yet to pay their membership fee") ;
 //	$userNoFlight = false;
