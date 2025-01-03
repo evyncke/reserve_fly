@@ -111,23 +111,25 @@ while ($row = mysqli_fetch_array($result)) {
 		case 'VNC': $journal = 'Note de crédit' ; break ;
 		default : $journal = $row['bkl_journal'] ;
 	}
-	if ($row['bki_file_name'])
+	$dummy_move = ($row['bkl_journal'] == 'OD' or $row['bkl_journal'] == 'OPD') ;
+	$tr_class = ($dummy_move) ? ' class="fw-lighter fst-italic"' : '' ;
+ 	if ($row['bki_file_name'])
 		$reference = '<a href="' . $row['bki_file_name'] . '" target="_blank">' . $row['bki_id'] . ' <i class="bi bi-box-arrow-up-right" title="Ouvrir la pièce comptable dans une autre fenêtre"></i></a>' ;
 	else
 		$reference = $row['bkl_reference'] ;
 	$debit="";
 	if ($row['bkl_debit']) {
 		$debit="-".number_format($row['bkl_debit'], 2, ",", ".") ;
-		$total_debit += $row['bkl_debit'] ;
+		if (!$dummy_move) $total_debit += $row['bkl_debit'] ;
 	}
 	$credit="";
 	if ($row['bkl_credit']){ 
 		$credit="+".number_format($row['bkl_credit'], 2, ",", ".") ;
-		$total_credit += $row['bkl_credit'] ;
+		if (!$dummy_move) $total_credit += $row['bkl_credit'] ;
 	}
 	$solde=$total_credit-$total_debit;
 	$solde=number_format($solde,2,",",".");
-	print("<tr><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td style=\"text-align: right;\">$debit</td><td style=\"text-align: right;\">$credit</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
+	print("<tr$tr_class><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td style=\"text-align: right;\">$debit</td><td style=\"text-align: right;\">$credit</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
 }
 
 // Now let's access Odoo ledger moves
@@ -137,76 +139,43 @@ if ($odooId != '') {
 	require_once 'odoo.class.php' ;
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 	if ($originalUserId == 62) $odooClient->debug= true ; //EVY
-	if (false) {
-	$moves = $odooClient->SearchRead('account.move', array(
+	print("</tbody>
+	<tbody class=\"table-group-divider\">") ;
+	$moves = $odooClient->SearchRead('account.move.line', array(
 		array(
-			array('state', '=', 'posted'),
 			array('date', '>' , '2023-12-31'),
 			'|', // Reverse Polish notation for OR...
 			array('partner_id', '=', intval($odooId)),
-			array('commercial_partner_id', '=', intval($odooCommercialId))
+			array('partner_id', '=', intval($odooCommercialId)),
+			'|', // Should include liability_payable (for incoming bills) and liability_payable (for payment of incoming bills)
+			array('account_type', '=', 'liability_payable'),
+			array('account_type', '=', 'asset_receivable'),
 			)), 
 		array(
-			'fields' => array('id', 'date', 'type_name', 'amount_total', 'name', 'partner_id', 'commercial_partner_id', 'direction_sign', 'journal_id', 'access_url', 'access_token'),
-			'order' => 'date,name')) ;
-	foreach ($moves as $move) {
-		print("<tr><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
-			if ($move['access_token'] != '')
-				print("<td><a href=\"https://$odoo_host$move[access_url]?access_token=$move[access_token]\"target=\"_blank\">$move[name]
-				<i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td>") ;
-			else
-				print("<td>$move[name]</td>") ;
-			print("<td>$move[type_name]</td>" ) ;
-			$amount = number_format($move['amount_total'], 2, ",", ".") ;
-			if ($move['direction_sign'] == -1) { // outgoing (invoice)
-				print("<td style=\"text-align: right;\">-$amount</td><td></td>") ;
-				$total_debit += $move['amount_total'] ;
-			} else { // Incoming (payment)
-				print("<td></td><td style=\"text-align: right;\">+$amount</td>") ;
-				$total_credit += $move['amount_total'] ;
-			}
+			'fields' => array('id', 'date', 'move_type', 'journal_id','account_type',
+			'move_id', 'parent_state', 'debit', 'credit'),
+			'order' => 'date,id')) ;
+		foreach ($moves as $move) {
+			if ($move['parent_state'] == 'cancel') continue ;
+			$dummy_move = ($move['journal_id'][1] == 'Miscellaneous Operations') ;
+			$tr_class = ($dummy_move) ? ' class="fw-lighter fst-italic"' : '' ;
+			print("<tr$tr_class><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
+				print("<td>" . $move['move_id'][1] . '<br/>' . $move['move_id'][0] . "</td>") ;
+				print("<td>$move[move_type]<br/>$move[account_type]<br>$move[id]<br/>$move[parent_state]</td>" ) ;
+			if ($move['debit'] > 0) {
+				$debit = number_format($move['debit'], 2, ",", ".") ;
+				print("<td style=\"text-align: right;\">-$debit</td><td></td>") ;
+				if (!$dummy_move) $total_debit += $move['debit'] ;
+			} 
+			if ($move['credit'] > 0) {
+				$credit = number_format($move['credit'], 2, ",", ".") ;
+				print("<td></td><td style=\"text-align: right;\">+$credit</td>") ;
+				if (!$dummy_move) $total_credit += $move['credit'] ;
+			} 
 			$solde=$total_credit-$total_debit;
 			$solde=number_format($solde,2,".",",");
 			print("<td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
 	}
-} // if false
-		print("</tbody>
-		<tbody class=\"table-group-divider\">") ;
-		$moves = $odooClient->SearchRead('account.move.line', array(
-			array(
-				array('date', '>' , '2023-12-31'),
-				'|', // Reverse Polish notation for OR...
-				array('partner_id', '=', intval($odooId)),
-				array('partner_id', '=', intval($odooCommercialId)),
-				'|', // Should include liability_payable (for incoming bills) and liability_payable (for payment of incoming bills)
-				array('account_type', '=', 'liability_payable'),
-				array('account_type', '=', 'asset_receivable'),
-				)), 
-			array(
-				'fields' => array('id', 'date', 'move_type', 'journal_id','account_type',
-				'move_id', 'debit', 'credit'
-			),
-				'order' => 'date,id')) ;
-			foreach ($moves as $move) {
-				$dummy_move = ($move['journal_id'][1] == 'Miscellaneous Operations') ;
-				$tr_class = ($dummy_move) ? ' class="fw-lighter fst-italic"' : '' ;
-				print("<tr$tr_class><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
-					print("<td>" . $move['move_id'][1] . "</td>") ;
-					print("<td>$move[move_type]<!--<br/>$move[account_type]--></td>" ) ;
-				if ($move['debit'] > 0) {
-					$debit = number_format($move['debit'], 2, ",", ".") ;
-					print("<td style=\"text-align: right;\">-$debit</td><td></td>") ;
-					if (!$dummy_move) $total_debit += $move['debit'] ;
-				} 
-				if ($move['credit'] > 0) {
-					$credit = number_format($move['credit'], 2, ",", ".") ;
-					print("<td></td><td style=\"text-align: right;\">+$credit</td>") ;
-					if (!$dummy_move) $total_credit += $move['credit'] ;
-				} 
-				$solde=$total_credit-$total_debit;
-				$solde=number_format($solde,2,".",",");
-				print("<td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
-		}
 }
 ?>
 </tbody>
