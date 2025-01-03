@@ -16,6 +16,7 @@
 
 */
 require_once 'dbi.php';
+require_once 'odooFlight.class.php';
 // Cotisation computed for year 
 $cotisationYear=2025;
 if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor) 
@@ -305,7 +306,8 @@ function filterRows(count, blocked, sign)
 		if(blocked=="membre") {
 			if(sign=="sanscotisation") {
 				var aCotisation=row.getElementsByTagName("TD")[aCotisationColumn].textContent;
-				if(aCotisation=="[?]") {
+				var aPos=aCotisation.search("[?]");
+				if(aPos!=-1) {
 					row.hidden=false;	
 					continue;
 				}
@@ -326,8 +328,8 @@ function filterRows(count, blocked, sign)
 				}
 			}
 			else if(sign=="eleve") {
-				var aCotisation=row.getElementsByTagName("TD")[aEleveColumn].textContent;
-				if(aCotisation!="") {
+				var aMemberType=row.getElementsByTagName("TD")[aEleveColumn].textContent;
+				if(aMemberType!="") {
 					row.hidden=false;	
 					continue;
 				}
@@ -337,8 +339,8 @@ function filterRows(count, blocked, sign)
 				}
 			}
 			else if(sign=="pilote") {
-				var aCotisation=row.getElementsByTagName("TD")[aPiloteColumn].textContent;
-				if(aCotisation!="") {
+				var aMemberType=row.getElementsByTagName("TD")[aPiloteColumn].textContent;
+				if(aMemberType!="") {
 					row.hidden=false;	
 					continue;
 				}
@@ -348,8 +350,8 @@ function filterRows(count, blocked, sign)
 				}
 			}
 			else if(sign=="effectif") {
-				var aCotisation=row.getElementsByTagName("TD")[aEffectifColumn].textContent;
-				if(aCotisation!="") {
+				var aMemberType=row.getElementsByTagName("TD")[aEffectifColumn].textContent;
+				if(aMemberType!="") {
 					row.hidden=false;	
 					continue;
 				}
@@ -489,6 +491,25 @@ function submitDownloadMail(PHP_Self, action) {
 		alert(aCount+" adresses mails sont copiées dans le clipboard. Utiliser le Paste (Cmd+V) pour le copier dans un document !");
 	}
 }
+
+function createCotisationFunction(PHP_Self,action,theName,thePersonid,theMember, theStudent, thePilot) {
+	var aSearchText=document.getElementById("id_SearchInput").value;
+	aCotisationValue=270.0;
+	aCotisationTypeString="membre naviguant";
+	aCotisationType="naviguant";
+	if(theMember!="") {
+		aCotisationValue=70.0;
+		aCotisationTypeString="membre non naviguant";
+		aCotisationType="nonnaviguant";
+	}
+	if (confirm("Confirmer que vous voulez créer une facture de cotisation " +aCotisationTypeString+" de "+ aCotisationValue.toString() +" € à " + theName+" (id="+thePersonid+")?") == true) {
+      		var aCommand=PHP_Self+"?createcotisation=true&personid="+thePersonid+"&cotisationtype="+aCotisationType;
+ 			if(aSearchText!="")	 {
+ 				aCommand+="&search="+aSearchText;
+ 			}
+      		 window.location.href = aCommand;
+	}
+}
 </script>
 <?php
 // Display or not Web deActicated member (Must be managed by a toggle button)
@@ -569,6 +590,32 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 			}
 		}
 	}
+}
+//Create Cotisation invoice
+if (isset($_REQUEST['createcotisation'])) {
+	$personid="";
+	//print("Action: createcotisation<br>");
+	if (isset($_REQUEST['personid']) and $_REQUEST['personid'] != '') {
+		$personid=$_REQUEST['personid'];
+		if (isset($_REQUEST['cotisationtype']) and $_REQUEST['cotisationtype'] != '') {
+			$cotisationtype=$_REQUEST['cotisationtype'];
+			$membership_year=date("Y");
+			if(OF_CreateFactureCotisation($personid, $cotisationtype,$membership_year)) {
+				print("<b>La facture de cotisation pour $personid de type $cotisationtype pour $membership_year a été créée dans ODOO!</b></br>");	
+			}
+			else {
+				print("<b style='color: red;'>La facture de cotisation pour $personid de type $cotisationtype pour $membership_year  n'a pas été créée dans ODOO!</b></br>");	
+			
+			}
+		}
+		else {
+			print("<b style='color: red;'>Impossible de créer une cotisation: Pas de cotisation type sélectionné!</b></br>");	
+		}
+	}
+	else  {
+		print("<b style='color: red;'>Impossible de créer une cotisation: Personne n'est sélectionné!</b></br>");	
+	}
+	//print("Action end: createcotisation<br>");
 }
 
 // Let's get some data from Odoo
@@ -655,7 +702,7 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 // TODO as now Odoo is well in full force, probably need to only process Odoo balance
 $sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
 odoo_id, block, b_reason, u.email as email, 
-bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_id,
+bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_date, bkf_invoice_id,
 group_concat(group_id) as allGroups,
 datediff(current_date(), b_when) as days_blocked
 	from $table_users as u join $table_user_usergroup_map on u.id=user_id 
@@ -759,7 +806,10 @@ datediff(current_date(), b_when) as days_blocked
 			$odooCount+=1;			
 		}
 		$cotisation=$row['bkf_amount'];
-		$cotisationPaymentDate=$row['bkf_payment_date'];
+		$cotisationInvoiceDate="";
+		if(isset($row['bkf_invoice_date'])) $cotisationInvoiceDate=$row['bkf_invoice_date'];
+		$cotisationPaymentDate="";
+		if(isset($row['bkf_payment_date'])) $cotisationPaymentDate=$row['bkf_payment_date'];
 		if($cotisation!="") {
 			if($cotisationPaymentDate!="") {
 				$cotisationPayeCount+=1;	
@@ -772,9 +822,12 @@ datediff(current_date(), b_when) as days_blocked
 			$cotisationRenouveleeCount+=1;
 		}
 		else {
-			$cotisation="?";
-			$status.=" (&#10071;Cotisation non renouvelée)";
-			$cotisationNonRenouveleeCount+=1;
+			if($blocked!=1) {
+				// Web non désactivé
+				$cotisation="?";
+				$status.=" (&#10071;Cotisation non renouvelée)";
+				$cotisationNonRenouveleeCount+=1;
+			}
 		}
 		if($solde < 0.0) {
 			$soldeTotalNegatif+=$solde;
@@ -816,14 +869,23 @@ datediff(current_date(), b_when) as days_blocked
 			<td style='text-align: center;'>$student</td>
 			<td style='text-align: center;'>$pilot</td>
 			<td style='text-align: center;'>$effectif</td>");
-		if($cotisationPaymentDate!="") {
-			print("<td style='text-align: center;'>$cotisation</td>");
+
+		// Cotisation column. Nothing if web déactivé
+		if($blocked!=1) {
+			if($cotisationInvoiceDate!="") {
+				print("<td style='text-align: center;'>$cotisation</td>");
+			}
+			else {
+				if($cotisation!="") {
+					$cotisation="[".$cotisation."]";
+				}
+				print("<td style='text-align: center;' class='text-danger'><a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"createCotisationFunction('$_SERVER[PHP_SELF]','Cotisation','$nom $prenom','$personid','$member','$student','$pilot')\">$cotisation<span class='tooltiptext'>Click pour facturer une cotisation</span></a>
+				</td>");			
+			}
 		}
 		else {
-			if($cotisation!="") {
-				$cotisation="[".$cotisation."]";
-			}
-			print("<td style='text-align: center;' class='text-danger'>$cotisation</td>");			
+			// Nothing if web déactivé
+			print("<td></td>");
 		}
 		$soldeText="";
 		$soldeStyle="";
@@ -840,6 +902,7 @@ datediff(current_date(), b_when) as days_blocked
 				<span class=\"badge text-bg-info\">$row[days_blocked]</span></a></td>");
 		}
 		else if($blocked==1){
+			// X rouge
 			print("<td style='text-align: center;font-size: 15px;' class='text-danger'>&#10060;</td>");		
 		}
 		else {

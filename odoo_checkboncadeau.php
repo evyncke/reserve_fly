@@ -290,13 +290,15 @@ foreach($result as $f=>$desc) {
                     // On autorise l'utilisateur à lier le paiement à odoo
                     $var1=$referenceIDMap[$flightReference];
                     $var3=$ledgerIdMap[$flightReference];
-                    print("<td $styleRed><a href=\"javascript:void(0);\" onclick=\"linkPaymentFunction('$_SERVER[PHP_SELF]', '$var1', '$id', '$var3')\">Lier Odoo&Flight</a></td>");
+                    print("<td $styleRed><a href=\"javascript:void(0);\" onclick=\"linkPaymentFunction('$_SERVER[PHP_SELF]', '$var1', '$id', '$var3')\">Lier Odoo&Flight</a><br>avec<br>
+                    <a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$flightReference]\">$flightReference</a></td>");
                 }
                 else if (array_key_exists($flightReference, $referenceIDFlightMap)) {
                     $var1=$referenceIDFlightMap[$flightReference];
                     $varRef=$flightReference." ".$partner." (odoo)";
                     $varDate=$date;
-                    print("<td $styleRed><a href=\"javascript:void(0);\" onclick=\"createPaymentFunction('$_SERVER[PHP_SELF]', '$var1', '$id', '$credit', '$varDate', '$varRef')\">Créer paiement</a></td>");
+                    print("<td $styleRed><a href=\"javascript:void(0);\" onclick=\"createPaymentFunction('$_SERVER[PHP_SELF]', '$var1', '$id', '$credit', '$varDate', '$varRef')\">Créer paiement</a><br>dans<br>
+                    <a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDFlightMap[$flightReference]\">$flightReference</a></td>");
                 }
                 else {
                     // On ne trouve pas en automatique un lien entre le paiement odoo et un vol dans Flight
