@@ -29,7 +29,7 @@ if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	if (! is_numeric($displayed_id)) journalise($userId, "F", "Numero d'utilisateur invalide: $displayed_id") ;
 	$read_only = ! ($userIsAdmin or $userIsInstructor or $displayed_id == $userId) ;
 	if ($displayed_id != $userId)
-		mysqli_query($mysqli_link, "update jom_kunena_users set uhits = uhits + 1 where userid = $displayed_id")
+		mysqli_query($mysqli_link, "UPDATE jom_kunena_users SET uhits = uhits + 1 WHERE userid = $displayed_id")
 			or journalise($userId, "E", "Erreur systeme lors de la mise a jour de jom_kunena_users (uhits): " . mysqli_error($mysqli_link)) ;
 } else {
 	$displayed_id = $userId ;
@@ -51,6 +51,7 @@ $result = mysqli_query($mysqli_link, "SELECT *,u.username as username,u.email as
 	WHERE u.id = $displayed_id") or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) or journalise($userId, "F", "Utilisateur inconnu") ;
 $me['name'] = db2web($me['name']) ; 
+$me['username'] = db2web($me['username']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
 $me['address'] = db2web($me['address']) ; 
@@ -265,6 +266,7 @@ $result = mysqli_query($mysqli_link, "SELECT *,u.username as username,u.email as
 	WHERE u.id = $displayed_id") or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) or journalise($userId, "F", "Utilisateur inconnu") ;
 $me['name'] = db2web($me['name']) ; 
+$me['username'] = db2web($me['username']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
 $me['address'] = db2web($me['address']) ; 

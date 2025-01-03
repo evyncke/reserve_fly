@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2023 Eric Vyncke
+   Copyright 2023-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ class DTOMember {
     public $country ;
     public $blocked ;
     public $blockedMessage ;
+    public $membershipPaid ;
     public $groupMembership ;
 
     function __construct($row = NULL) {
@@ -57,6 +58,7 @@ class DTOMember {
             $this->country = db2web($row['country']) ;
             $this->blocked = ($row['b_reason'] != '') ;
             $this->blockedMessage = db2web($row['b_reason']) ;
+            $this->membershipPaid = ($row['bkf_payment_date'] != '') ;
             $this->groupMembership = $row['group_ids'] ;
         }
     }
@@ -125,7 +127,8 @@ class DTOMembers implements Iterator {
     private $row ;
 
     function __construct ($group, $fi = NULL) {
-        global $mysqli_link, $table_users, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $table_blocked, $userId ;
+        global $mysqli_link, $table_users, $table_person, $table_dto_flight, $table_user_usergroup_map, 
+            $table_logbook, $table_blocked, $table_membership_fees, $membership_year, $userId ;
 
         $this->group = $group ; // FI, TKI, Student, ...
         if ($fi)
@@ -141,7 +144,8 @@ class DTOMembers implements Iterator {
                     LEFT JOIN $table_dto_flight ON df_student = jom_id
                     LEFT JOIN $table_logbook ON df_flight_log = l_id
                     LEFT JOIN $table_blocked ON b_jom_id = jom_id
-                WHERE group_id = $this->group AND block = 0 $fi_condition
+                    LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = $membership_year
+                WHERE group_id = $this->group AND block = 0  $fi_condition
                 GROUP BY jom_id
                 ORDER BY last_name, first_name" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
@@ -154,7 +158,7 @@ class DTOMembers implements Iterator {
         mysqli_free_result($this->result) ;
     }
 
-    public function current() {
+    public function current(): mixed {
         global $joomla_instructor_group, $joomla_student_group ;
 
         switch ($this->group) {
@@ -164,7 +168,7 @@ class DTOMembers implements Iterator {
         }
     }
     
-    public function key() {
+    public function key(): mixed {
         return $this->row['jom_id'];
     }
     
@@ -365,11 +369,11 @@ class Flights implements Iterator {
         mysqli_free_result($this->result) ;
     }
 
-    public function current() {
+    public function current():mixed {
         return new Flight($this->row);
     }
     
-    public function key() {
+    public function key():mixed {
         return $this->row['df_id'];
     }
     
@@ -422,11 +426,11 @@ class Exercices implements Iterator {
         mysqli_free_result($this->result) ;
     }
 
-    public function current() {
+    public function current():mixed {
         return new Exercice($this->row);
     }
     
-    public function key() {
+    public function key():mixed {
         return $this->row['de_id'];
     }
     
@@ -536,11 +540,11 @@ class StudentExercices implements Iterator {
         mysqli_free_result($this->result) ;
     }
 
-    public function current() {
+    public function current():mixed {
         return new StudentExercice($this->row);
     }
     
-    public function key() {
+    public function key():mixed {
         return $this->row['de_id'];
     }
     
@@ -647,11 +651,11 @@ class StudentDocuments implements Iterator {
         mysqli_free_result($this->result) ;
     }
 
-    public function current() {
+    public function current():mixed {
         return new StudentDocument($this->row);
     }
     
-    public function key() {
+    public function key():mixed {
         return $this->row['da_id'];
     }
     

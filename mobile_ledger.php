@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2024 Eric Vyncke, Patrick Reginster
+   Copyright 2022-2025 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -188,18 +188,20 @@ if ($odooId != '') {
 			),
 				'order' => 'date,id')) ;
 			foreach ($moves as $move) {
-			print("<tr><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
-				print("<td>" . $move['move_id'][1] . "</td>") ;
-				print("<td>$move[move_type]<!--<br/>$move[account_type]--></td>" ) ;
+				$dummy_move = ($move['journal_id'][1] == 'Miscellaneous Operations') ;
+				$tr_class = ($dummy_move) ? ' class="fw-lighter fst-italic"' : '' ;
+				print("<tr$tr_class><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
+					print("<td>" . $move['move_id'][1] . "</td>") ;
+					print("<td>$move[move_type]<!--<br/>$move[account_type]--></td>" ) ;
 				if ($move['debit'] > 0) {
 					$debit = number_format($move['debit'], 2, ",", ".") ;
 					print("<td style=\"text-align: right;\">-$debit</td><td></td>") ;
-					$total_debit += $move['debit'] ;
+					if (!$dummy_move) $total_debit += $move['debit'] ;
 				} 
 				if ($move['credit'] > 0) {
 					$credit = number_format($move['credit'], 2, ",", ".") ;
 					print("<td></td><td style=\"text-align: right;\">+$credit</td>") ;
-					$total_credit += $move['credit'] ;
+					if (!$dummy_move) $total_credit += $move['credit'] ;
 				} 
 				$solde=$total_credit-$total_debit;
 				$solde=number_format($solde,2,".",",");

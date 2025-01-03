@@ -213,6 +213,7 @@ $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS allg
     FROM $table_person AS p JOIN $table_users AS u ON u.id = p.jom_id
         LEFT JOIN $table_user_usergroup_map m ON u.id = m.user_id
         LEFT JOIN $table_blocked b ON b.b_jom_id = p.jom_id
+        LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = $membership_year
     WHERE jom_id IS NOT NULL
     GROUP BY jom_id
     ORDER BY last_name, first_name") 
@@ -229,13 +230,18 @@ while ($row = mysqli_fetch_array($result)) {
     $email = strtolower($row['email']) ;
     $active_msg = ($row['block'] == 0) ? '' : ' <span class="badge rounded-pill text-bg-info">Désactivé</span>' ;
     $blocked_msg = ($row['b_reason'] == '') ? '' : ' <span class="badge rounded-pill text-bg-danger">Bloqué</span>' ;
+
     $groups_msg = '' ;
     $groups = explode(',', $row['allgroups']) ;
     if (in_array($joomla_pilot_group, $groups) and $row['block'] == 0)
         $groups_msg .= ' <span class="badge rounded-pill text-bg-warning">Pilote</span>' ;
     if (in_array($joomla_student_group, $groups) and $row['block'] == 0)
         $groups_msg .= ' <span class="badge rounded-pill text-bg-success">Élève</span>' ;
-    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "$active_msg$blocked_msg$groups_msg</td>
+    if ($row['bkf_payment_date'] != '')
+        $membership_msg = '<i class="bi bi-person-check-fill text-success" title="Membership paid"><i>' ;
+    else
+        $membership_msg = '<i class="bi bi-person-fill-exclamation text-danger" title="Membership NOT paid"><i>' ;
+    print("<tr><td>" . db2web("<b>$row[last_name]</b> $row[first_name]") . "$active_msg$blocked_msg$groups_msg$membership_msg</td>
         <td><a href=\"mobile_profile.php?displayed_id=$row[jom_id]\">$row[jom_id]</a></td>
         <td class=\"text-center\"><a href=\"mailto:$row[email]\">$row[email]</a></td>") ;
     if (isset($odoo_customers[$email]) or ($row['odoo_id'] != '' and isset($odoo_customers[$row['odoo_id']]))) {
