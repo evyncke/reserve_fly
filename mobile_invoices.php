@@ -53,9 +53,8 @@ if ($userIsInstructor or $userIsAdmin) {
         print("</select></p>") ;
 }
 ?>
-<h2>Factures récentes de <?=$userName?></h2>
-<p class="lead">Voici quelques pièces comptables récentes (mises à jour une fois par semaine environ par nos bénévoles).</p>
-<p class="small">Accès au folio et opérations comptables via le menu déroulant en cliquant sur votre nom en haut à droite ou via les onglets ci-dessous.</p>
+<h2>Factures de <?=$userName?></h2>
+<p class="lead">Voici quelques factures (mises à jour plusieurs fois par semaine environ par nos bénévoles).</p>
 
 <!-- using tabs -->
 <ul class="nav nav-tabs">
@@ -91,9 +90,11 @@ $sql = "SELECT *, DATE(bki_date) AS bki_date
 $result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Erreur systeme a propos de l'access factures: " . mysqli_error($mysqli_link)) ;
 $count = 0 ;
 $total = 0.0 ;
+$first_date = null ;
 while ($row = mysqli_fetch_array($result)) {
 	// Using the invoice date from the email import as the general ledger is in the future
 	$action = "<a href=\"$row[bki_file_name]\" target=\"_blank\"> <i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a>" ;
+	if (!$first_date) $first_date = $row['bki_date'] ;
     print("<tr><td>$row[bki_date]</td>
 		<td><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_id] <i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td>") ;
 	if ($row['bkl_debit'] != '') {
@@ -128,6 +129,7 @@ if ($odooId != '') {
 			array('fields' => array('id', 'invoice_date', 'type_name', 'amount_total', 'name', 'payment_reference', 'payment_state', 'access_url', 'access_token'),
 				'order' => 'date')) ;
 	foreach ($invoices as $invoice) {
+		if (!$first_date) $first_date = $invoice['invoice_date'] ;
 		switch ($invoice['payment_state']) {
 			case 'paid': $paid_msg = '<span class="badge rounded-pill text-bg-success">Payé</span>'; break ;
 			case 'reversed': $paid_msg = '<span class="badge rounded-pill text-bg-info">Extourné</span>' ; break ;
@@ -149,7 +151,8 @@ if ($odooId != '') {
 <?php
 if ($count > 0) {
 	print('<tfoot class="table-group-divider">
-		<tr class="text-primary"><td colspan="3">Total facturé</td><td class="text-end">' . $total . '&euro;</td></tr>
+		<tr class="bg-info"><td colspan="3">Total facturé depuis le ' . $first_date . 
+		'</td><td class="text-end">' . $total . '&euro;</td></tr>
 	</tfoot>') ;	
 }
 ?>
