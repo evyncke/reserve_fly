@@ -62,7 +62,6 @@ if ($userIsInstructor or $userIsAdmin) {
 <h2>Grand livre comptable de <?=$ledgerOwner?></h2>
 <p class="lead">Voici une vue comptable de votre compte membre RAPCS (mise à jour plusieurs fois par semaine par nos bénévoles voire plusieurs
 	fois par jour ouvrable en utilisant un virement immédiat avec la communication structurée des factures).</p>
-<p class="small">Accès au folio et aux factures via le menu déroulant en cliquant sur votre nom en haut à droite ou les onglets ci-dessous.</p>
 
 <!-- using tabs -->
 <ul class="nav nav-tabs">
@@ -89,79 +88,40 @@ if ($userIsInstructor or $userIsAdmin) {
 </thead>
 <tbody class="table-group-divider">
 <?php
-$sql = "SELECT *
-	FROM $table_person JOIN $table_bk_ledger ON ciel_code = bkl_client
-		LEFT JOIN $table_bk_invoices ON bki_id = bkl_reference
-	WHERE jom_id = $userId
-	ORDER BY bkl_date ASC, bkl_posting ASC" ;
-$result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
 $total_debit = 0.0 ;
 $total_credit = 0.0 ;
 $solde = 0.0 ;
-while ($row = mysqli_fetch_array($result)) {
-	switch ($row['bkl_journal']) {
-		case 'ANX': $journal = 'Report année précédente' ; break ;
-		case 'F01': $journal = 'Banque de la Poste' ; break ;
-		case 'F06': $journal = 'BNP Fortis' ; break ;
-		case 'F08': $journal = 'CBC' ; break ;
-		case 'OD':
-		case 'OPD': $journal = 'Opérations diverses' ; break ;
-		case 'V':
-		case 'VEN': $journal = 'Facture' ; break ;
-		case 'VNC': $journal = 'Note de crédit' ; break ;
-		default : $journal = $row['bkl_journal'] ;
-	}
-	$dummy_move = ($row['bkl_journal'] == 'OD' or $row['bkl_journal'] == 'OPD') ;
-	$tr_class = ($dummy_move) ? ' class="fw-lighter fst-italic"' : '' ;
- 	if ($row['bki_file_name'])
-		$reference = '<a href="' . $row['bki_file_name'] . '" target="_blank">' . $row['bki_id'] . ' <i class="bi bi-box-arrow-up-right" title="Ouvrir la pièce comptable dans une autre fenêtre"></i></a>' ;
-	else
-		$reference = $row['bkl_reference'] ;
-	$debit="";
-	if ($row['bkl_debit']) {
-		$debit="-".number_format($row['bkl_debit'], 2, ",", ".") ;
-		if (!$dummy_move) $total_debit += $row['bkl_debit'] ;
-	}
-	$credit="";
-	if ($row['bkl_credit']){ 
-		$credit="+".number_format($row['bkl_credit'], 2, ",", ".") ;
-		if (!$dummy_move) $total_credit += $row['bkl_credit'] ;
-	}
-	$solde=$total_credit-$total_debit;
-	$solde=number_format($solde,2,",",".");
-	print("<tr$tr_class><td>$row[bkl_date]</td><td>$journal</td><td>$reference</td><td>" . db2web($row['bkl_label']) . "</td><td style=\"text-align: right;\">$debit</td><td style=\"text-align: right;\">$credit</td><td style=\"text-align: right;\">$solde&nbsp;&euro;</td></tr>\n") ;
-}
 
 // Now let's access Odoo ledger moves
 if ($odooId != '') {
-	print("</tbody>
-	<tbody class=\"table-group-divider\">") ;
 	require_once 'odoo.class.php' ;
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 	if ($originalUserId == 62) $odooClient->debug= true ; //EVY
-	print("</tbody>
-	<tbody class=\"table-group-divider\">") ;
+	print("<tbody class=\"table-group-divider\">") ;
 	$moves = $odooClient->SearchRead('account.move.line', array(
 		array(
-			array('date', '>' , '2023-12-31'),
+			array('date', '>' , '2023-12-30'), // To get the balance of the previous accounting system...
 			'|', // Reverse Polish notation for OR...
 			array('partner_id', '=', intval($odooId)),
 			array('partner_id', '=', intval($odooCommercialId)),
 			'|', // Should include liability_payable (for incoming bills) and liability_payable (for payment of incoming bills)
 			array('account_type', '=', 'liability_payable'),
 			array('account_type', '=', 'asset_receivable'),
+			// TODO should probably avoid 'cancel' parent_state or only 'posted' parent_state
 			)), 
 		array(
 			'fields' => array('id', 'date', 'move_type', 'journal_id','account_type',
-			'move_id', 'parent_state', 'debit', 'credit'),
-			'order' => 'date,id')) ;
+			'move_id', 'name', 'parent_state', 'debit', 'credit'),
+			'order' => 'date,id')) ; // The balance from Ciel were imported *after* some invoices... hence this 'weird' ordering
 		foreach ($moves as $move) {
 			if ($move['parent_state'] == 'cancel') continue ;
+			if ($move['parent_state'] != 'posted') journalise($userId, "I", "Unknown Odoo parent state=$move[parent_state] for account.move.line#$move[id]") ;
 			$dummy_move = ($move['journal_id'][1] == 'Miscellaneous Operations') ;
 			$tr_class = ($dummy_move) ? ' class="fw-lighter fst-italic"' : '' ;
+			$dummy_move = false ; //test evyncke
 			print("<tr$tr_class><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
-				print("<td>" . $move['move_id'][1] . '<br/>' . $move['move_id'][0] . "</td>") ;
-				print("<td>$move[move_type]<br/>$move[account_type]<br>$move[id]<br/>$move[parent_state]</td>" ) ;
+				print("<td>" . $move['move_id'][1] . '<!--br/>' . $move['move_id'][0] . "--></td>") ;
+				print("<td><!--$move[move_type]--><br/>$move[name]</td>" ) ;
 			if ($move['debit'] > 0) {
 				$debit = number_format($move['debit'], 2, ",", ".") ;
 				print("<td style=\"text-align: right;\">-$debit</td><td></td>") ;
@@ -187,6 +147,7 @@ if ($odooId != '') {
 	?>
 </tfoot>
 </table>
+<p class="small">Les lignes en italiques sont des opérations comptables que vous pouvez ignorer si vous n'êtes pas expert comptable ;-)</p>
 </div><!-- table-responsive-->
 </div><!-- col -->
 </div><!-- row -->
