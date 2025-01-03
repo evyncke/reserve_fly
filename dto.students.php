@@ -82,6 +82,10 @@ foreach($members as $member) {
             $blocked = '<span class="text-danger">Ce membre n\'est pas lié à un compte dans la comptabilité</span>' ;
             $bank_filled = '' ;
         }
+        if ($student->membershipPaid)
+            $membership_filled = '<i class="bi bi-person-check-fill text-success" title="Membership paid"><i>' ;
+        else
+            $membership_filled = '<i class="bi bi-person-fill-exclamation text-danger" title="Membership NOT paid"><i>' ;
         if ($student->mobilePhone == '')
             $mobile_phone = "<i class=\"bi bi-telephone-fill text-danger\" title=\"Pas de téléphone mobile spécifié\">" ;
         else
@@ -96,7 +100,7 @@ foreach($members as $member) {
             <td>
                 <a href=\"dto.student.php?student=$student->jom_id\" title=\"Display all flights\">$student->lastName, $student->firstName <i class=\"bi bi-binoculars-fill\"></i></a>
                     <a href=\"mailto:$student->email\"><i class=\"bi bi-envelope-fill\" title=\"Send email\"></i></a>
-                    $mobile_phone $blocked $bank_filled
+                    $mobile_phone $membership_filled $blocked $bank_filled
             </td>
             <td>$student->firstFlight <span class=\"badge text-bg-info\" title=\"Number of flights\"><i class=\"bi bi-airplane-fill\"></i> $student->countFlights</span><br/>
                 $student->lastFlight <span class=\"badge $daysColor\" title=\"Days since last flight\"><i class=\"bi bi-calendar3\"></i> $student->daysSinceLastFlight</span></td>
