@@ -90,16 +90,24 @@ $sql = "SELECT *, DATE(bki_date) AS bki_date
 
 $result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Erreur systeme a propos de l'access factures: " . mysqli_error($mysqli_link)) ;
 $count = 0 ;
+$total = 0.0 ;
 while ($row = mysqli_fetch_array($result)) {
 	// Using the invoice date from the email import as the general ledger is in the future
 	$action = "<a href=\"$row[bki_file_name]\" target=\"_blank\"> <i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a>" ;
     print("<tr><td>$row[bki_date]</td>
 		<td><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_id] <i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td>") ;
-	if ($row['bkl_debit'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td><a href=\"#\"  
-		onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bkl_debit]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
-	else if ($row['bki_amount'] != '') print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td><a href=\"#\" 
-		 onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bki_amount]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
-	else if ($row['bkl_credit'] != '') print("<td>Note de crédit</td><td  style=\"text-align: right;\">" . (0.0 - $row['bkl_credit']) . " &euro;</td><td></td>") ;
+	if ($row['bkl_debit'] != '') {
+		print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td><a href=\"#\"  
+			onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bkl_debit]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
+		$total += $row['bkl_debit'] ;
+	} else if ($row['bki_amount'] != '') {
+		print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td><a href=\"#\" 
+			 onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bki_amount]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
+		$total += $row['bkl_amount'] ;
+	} else if ($row['bkl_credit'] != '') {
+		print("<td>Note de crédit</td><td  style=\"text-align: right;\">" . (0.0 - $row['bkl_credit']) . " &euro;</td><td></td>") ;
+		$total -= $row['bkl_credit'] ;
+	}
 	print("</tr>\n") ;
     $count ++ ;
 }
@@ -138,6 +146,13 @@ if ($odooId != '') {
 } // if ($odooId != '')
 ?>
 </tbody>
+<?php
+if ($count > 0) {
+	print('<tfoot class="table-group-divider">
+		<tr class="text-primary"><td colspan="3">Total facturé</td><td class="text-end">' . $total . '&euro;</td></tr>
+	</tfoot>') ;	
+}
+?>
 </table>
 </div><!-- table responsive -->
 </div><!-- col -->
