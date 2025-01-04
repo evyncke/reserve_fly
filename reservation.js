@@ -1635,12 +1635,12 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 			thisCell.onmouseenter = function () { displayBookingDetails(booking.id + '-' + booking.log_id) ; } ;
 			thisCell.onmouseleave = function () { clearBookingDetails() ; } ;
 			if (!isInThePast(displayYear, displayMonth, displayDay, hour, minute) &&
-					(userIsAdmin || userIsMechanic || userIsInstructor || (userId == booking.user && booking.instructorId == 0) || userId == booking.bookedById)) {
+					(userIsAdmin || userIsMechanic || userIsInstructor || (userId == booking.user && booking.instructorId <= 0) || userId == booking.bookedById)) {
 				thisCell.id = booking.id + '-' + booking.log_id ;
 				thisCell.removeEventListener('click', newBookingDetails) ;
 				thisCell.addEventListener('click', editBookingDetails) ;
 			} else if (isInThePast(displayYear, displayMonth, displayDay, hour, minute) &&
-					(userIsAdmin || (userId == booking.user && booking.instructorId == 0) || userId == booking.instructorId || userId == booking.bookedById)) {
+					(userIsAdmin || (userId == booking.user && booking.instructorId <= 0) || userId == booking.instructorId || userId == booking.bookedById)) {
 				thisCell.id = booking.id + '-' + booking.log_id ;
 				thisCell.removeEventListener('click', newBookingDetails) ;
 				thisCell.addEventListener('click', redirectLogBook) ;
