@@ -209,7 +209,8 @@ $validity_warning = 30 ; // Number of days before validity expiration to flag as
 
 // List of webcam to display... should be at least two (can repeat one of course)
 //$webcam_uris = array("https://www.skydivespa.be/webcam/cam2/image.jpg", "https://www.spa-aviation.be/webcam.php") ;
-$webcam_uris = array("https://www.spa-aviation.be/webcam.php", "https://s24.ipcamlive.com/streams/18rerbje6iohwnfjw/snapshot.jpg") ;
+// $webcam_uris = array("https://www.spa-aviation.be/webcam.php", "https://s24.ipcamlive.com/streams/18rerbje6iohwnfjw/snapshot.jpg") ; 2025-01-04
+$webcam_uris = array("https://www.spa-aviation.be/webcam.php") ;
 $favicon = "https://www.spa-aviation.be/favicon32x32.ico" ;// The usual web browser favicon + also used in Calendar
 $ical_name = "Calendrier réservations et événements RAPCS" ; // Name of the iCAL calendar
 $ical_organizer = "RAPCS asbl" ; // Name of the organizer of the iCAL calendar

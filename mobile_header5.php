@@ -382,7 +382,7 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_wx_map.php">Météo des environs</a></li>
             <li><a class="dropdown-item" href="mobile_dept_board.php?cam=0">Départs</a></li> 
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam Apron</a></li>
-            <li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam SOWAER (station météo)</a></li>
+            <!--li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam SOWAER (station météo)</a></li-->
           </ul>
         </li>
       </ul><!-- navbar left-->
