@@ -133,6 +133,7 @@ if ($odooId != '') {
 		switch ($invoice['payment_state']) {
 			case 'paid': $paid_msg = '<span class="badge rounded-pill text-bg-success">Payé</span>'; break ;
 			case 'reversed': $paid_msg = '<span class="badge rounded-pill text-bg-info">Extourné</span>' ; break ;
+			// state 'draft'
 			default: $paid_msg = '<span class="badge rounded-pill text-bg-warning">Non payé</span>' ;
 		}
 		$amount = number_format($invoice['amount_total'], 2, ',', '.') ;

@@ -114,7 +114,7 @@ if ($odooId != '') {
 			'move_id', 'name', 'parent_state', 'debit', 'credit'),
 			'order' => 'date,id')) ; // The balance from Ciel were imported *after* some invoices... hence this 'weird' ordering
 		foreach ($moves as $move) {
-			if ($move['parent_state'] == 'cancel') continue ;
+			if ($move['parent_state'] == 'cancel' or $move['parent_state'] == 'draft') continue ; // Could also be 'draft'
 			if ($move['parent_state'] != 'posted') journalise($userId, "I", "Unknown Odoo parent state=$move[parent_state] for account.move.line#$move[id]") ;
 			$dummy_move = ($move['journal_id'][1] == 'Miscellaneous Operations') ;
 			$tr_class = ($dummy_move) ? ' class="fw-lighter fst-italic"' : '' ;
