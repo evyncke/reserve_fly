@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2024-2024 Eric Vyncke
+   Copyright 2024-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ require_once 'mobile_header5.php' ;
 //
 // ACTIONS TO BE TAKEN
 //
-if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'pay' and isset($_REQUEST['radioMember'])) {
+if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'pay' and isset($_REQUEST['radioMember']) and !$row_fee) { // $row_fee != NULL in dbi.php iff invoice already created
     $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id=$userId")
         or journalise($userId, "F", "Cannot retrieve member information: " . mysqli_error($mysqli_link)) ;
     $row = mysqli_fetch_array($result) or journalise($userId, "F", "User not found") ;
@@ -77,7 +77,7 @@ souhaitons plein de succès dans vos projets à venir.</p>
     //
     // Let create an invoice and display a confirmation message then redirect to original page via the call back
     journalise($userId, "D", "About to generate a membership invoice") ;
-    if (date('Y') != $membership_year) {
+    if (date('Y') != $membership_year) { // Renewing before the actual year (e.g., in December)
         $invoice_date = date("Y-01-01", strtotime("+ 1 year")) ;
         $invoice_date_due = $invoice_date ; // no differed due date
     } else {
