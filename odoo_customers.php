@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2023 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -195,7 +195,9 @@ function geoCode($address) {
     //      "status" : "REQUEST_DENIED" }
     $json = json_decode($content, true) ; // Get an associative array
     if ($json['status'] != 'OK') {
-        journalise($userId, 'E', "GeoCode($address) return $json[error_message]") ;
+        journalise($userId, 'E', "GeoCode($address) return status=$json[status]") ;
+        if (isset($json['error_message']))
+            journalise($userId, 'E', "GeoCode($address) return error_message=$json[error_message]") ;
         return false ;
     }
     $result = $json['results'][0]['geometry']['location'] ;
