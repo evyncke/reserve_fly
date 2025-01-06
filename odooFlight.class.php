@@ -140,8 +140,8 @@ function OF_FillFlightMaps(&$theReferenceIDMap) {
 // Purpose: Create an invoice for a member cotisation 
 //           CotisationType="naviguant","nonnaviguant"
 //============================================
-function OF_CreateFactureCotisation($thePersonID, $theCotisationType,$theMembership_year) {
-    global $mysqli_link, $table_membership_fees,$userId;
+function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMembership_year) {
+    global $mysqli_link, $table_membership_fees, $userId, $userFullName;
     global $non_nav_membership_product,$non_nav_membership_price,$membership_analytic_account;
     global $nav_membership_product,$nav_membership_price,$membership_analytic_account;
     //print("OF_createFactureCotisation($thePersonID, $theCotisationType):started<br>");
@@ -184,7 +184,7 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType,$theMembers
                     'move_type' => 'out_invoice',
                     'invoice_date' => $invoice_date,
                     'invoice_date_due' => $invoice_date_due,
-                    'invoice_origin' => 'Liste des membres',
+                    'invoice_origin' => "Manuel par $userFullName " . date("Y-m-d"),
                     'invoice_line_ids' => $invoice_lines)) ;
     if(1) {
         $result = $odooClient->Create('account.move', $params) ;

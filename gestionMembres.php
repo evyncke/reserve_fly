@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2024 Patrick Reginster (and partially Eric Vyncke)
+   Copyright 2022-2025 Patrick Reginster (and partially Eric Vyncke)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 require_once 'dbi.php';
 require_once 'odooFlight.class.php';
 // Cotisation computed for year 
-$cotisationYear=2025;
+$cotisationYear=$membership_year; // Set in dbi.php
 if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor) 
 	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
 
@@ -502,7 +502,7 @@ function createCotisationFunction(PHP_Self,action,theName,thePersonid,theMember,
 		aCotisationTypeString="membre non naviguant";
 		aCotisationType="nonnaviguant";
 	}
-	if (confirm("Confirmer que vous voulez créer une facture de cotisation " +aCotisationTypeString+" de "+ aCotisationValue.toString() +" € à " + theName+" (id="+thePersonid+")?") == true) {
+	if (confirm("Confirmer que vous voulez créer une facture de cotisation " + aCotisationTypeString + " de " + aCotisationValue.toString() + " € à " + theName + " (id="+thePersonid+")?") == true) {
       		var aCommand=PHP_Self+"?createcotisation=true&personid="+thePersonid+"&cotisationtype="+aCotisationType;
  			if(aSearchText!="")	 {
  				aCommand+="&search="+aSearchText;
@@ -599,13 +599,13 @@ if (isset($_REQUEST['createcotisation'])) {
 		$personid=$_REQUEST['personid'];
 		if (isset($_REQUEST['cotisationtype']) and $_REQUEST['cotisationtype'] != '') {
 			$cotisationtype=$_REQUEST['cotisationtype'];
-			$membership_year=date("Y");
-			if(OF_CreateFactureCotisation($personid, $cotisationtype,$membership_year)) {
+			// $membership_year=date("Y"); // Already set in dbi.php
+			if(OF_CreateFactureCotisation($personid, $cotisationtype, $membership_year)) {
 				print("<b>La facture de cotisation pour $personid de type $cotisationtype pour $membership_year a été créée dans ODOO!</b></br>");	
 			}
 			else {
 				print("<b style='color: red;'>La facture de cotisation pour $personid de type $cotisationtype pour $membership_year  n'a pas été créée dans ODOO!</b></br>");	
-			
+				journalise($userId, "E", "La facture de cotisation pour $personid de type $cotisationtype pour $membership_year  n'a pas été créée dans ODOO!") ;
 			}
 		}
 		else {

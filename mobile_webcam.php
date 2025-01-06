@@ -37,7 +37,13 @@ require_once 'mobile_header5.php' ;
 
 <script>
 function refreshWebcam() {
-	document.getElementById('webcamImg').src = "<?=$webcam_uris[$cam]?>" + "?random=" + new Date().getTime() ;
+    var webCamURI = '<?=$webcam_uris[$cam]?>' ;
+
+    // Add a random number to force a refresh
+    if (webCamURI.indexOf('?') > -1)
+        document.getElementById('webcamImg').src = "<?=$webcam_uris[$cam]?>" + "&random=" + new Date().getTime() ;
+    else
+        document.getElementById('webcamImg').src = "<?=$webcam_uris[$cam]?>" + "?random=" + new Date().getTime() ;
 }
 refreshWebcam() ;
 setInterval(refreshWebcam, 1000 * 30) ; // Refresh every 30 seconds
