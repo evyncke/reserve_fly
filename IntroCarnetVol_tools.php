@@ -82,7 +82,7 @@ function GetFullRemarks( $theFraisCP,  $thePAX, $theRemarque, $theFraisDC) {
 // Add an incident in the Aircraft Technical Log 
 function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
     global $mysqli_link, $table_incident_history, $userId ;
-
+    //print("AddATLIncident:Started: theLogId=$theLogId, thePlane=$thePlane, theSeverity=$theSeverity, theRemark=$theRemark<br>");
     if(GetATLIncidentID($theLogId) == 0) {
         if($theSeverity != "nothing") {
             // No incident associated to the logid $$ severity = hazard or nohazard
@@ -96,38 +96,60 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
             $event->status = 'opened' ;
             $event->text = $theRemark ;
             $event->save() ;
-            return true;
+            return false;
+        }
+        else {
+            return false;
         }
     }
     else {
           // An incident is already associated to the logid then edit the incident
-          $incident = new Incident() ; 
-          $incident->getByLogId($theLogId) ;
-          $incident->plane = $thePlane ;
-          $aPreviousSeverity=$incident->severity;
-          $incident->severity = $theSeverity ;
-          $firstId=$incident->firstId;
-          $incident->save() ;
-          
-          $event = new IncidentEvent() ;
-          $event->getById($firstId) ;
-          $status=$event->status;
-          if($theSeverity != "nothing") {
-              $event->text = $theRemark ;
-          }
-          else {
-              $aPreviousRemark=$event->text;
-              $event->text = "Event removed by the pilot: ".$aPreviousRemark." (".$aPreviousSeverity.")";
-              $status="closed";
-          }
-          //$event->save() ;
-          $text=web2db($event->text);
-          mysqli_query($mysqli_link, "UPDATE $table_incident_history
-             SET ih_text = '$text', ih_status = '$status', ih_who = $userId, ih_when=CURRENT_TIMESTAMP()
-                 WHERE ih_id = $firstId")
-             or journalise($userId, "F", "Cannot update $table_incident_history: " . mysqli_error($mysqli_link)) ;
-          
-          return true;
+            $incident = new Incident() ; 
+            $incident->getByLogId($theLogId) ;
+            $aPreviousPlane=$incident->plane;
+            $aPreviousSeverity=$incident->severity;
+            $aPreviousRemark=$incident->lastText;
+
+            if($aPreviousPlane==$thePlane && $aPreviousSeverity==$theSeverity && $aPreviousRemark==$theRemark) {
+                // nothing changed for the ATL. Nothing to do.
+                //print("AddATLIncident: Same ATL nothing to do!<br>");
+                return false;
+            }
+            if($theSeverity == "nothing") {
+                //print("AddATLIncident: The pilot removes its ATL Log -> Close the Event!<br>");
+                // The pilot removes its ATL Log -> Close the Event
+
+                $event = new IncidentEvent() ;
+                $event->incident = $incident ;
+                $event->status = "closed";
+                $event->text = "Event removed by the pilot. Nothing more to declare!";
+                $event->save() ;
+                return true;
+            }
+            if($aPreviousRemark==$theRemark) {
+                // Same remark but severity or plane changed ! No new event
+                //print("AddATLIncident: Same remark but serverity or plane changed!<br>");
+                $incident->plane = $thePlane ;
+                $incident->severity = $theSeverity ;
+                $incident->save();
+                return true;
+            }
+            else {
+                //print("AddATLIncident: the remark has changed!<br>");
+ 
+                // the remark has changed. Create a new event with the new remark. 
+                // We are not allowed to update the event. Only create a new one.
+                $incident->plane = $thePlane ;
+                $incident->severity = $theSeverity ;
+                $incident->save();
+
+                $event = new IncidentEvent() ;
+                $event->incident = $incident ;
+                $event->status = "opened";
+                $event->text = trim(web2db($theRemark));
+                $event->save() ;
+                return true;
+            }
     }
     return false;
 }
@@ -159,9 +181,22 @@ function GetATLIncidentDescription($theIncidentId) {
     $incident = new Incident() ;
     $incident->getById($theIncidentId) ;
     if($incident!=NULL) {
-        return $incident->firstText;
+        return $incident->lastText;
     }
     return "";
+}
+// Returns true is the incident is closed
+function IsATLIncidentClosed($theIncidentId) {
+    
+    $incident = new Incident() ;
+    $incident->getById($theIncidentId) ;
+    if($incident!=NULL) {
+        $status=$incident->lastStatus;
+        if($status=="closed") {
+            return true;
+        }
+    }
+    return false;
 }
 // Retrieve the description associated of all open incidend for all planes
 // JSON: '{"ATL": [{"plane": "OO-ALD", "logs":["log11","log12"]},{"plane": "OO-JRB", "logs":["log21","log22","log23"]}]}'
@@ -206,6 +241,7 @@ function CleanATLLog($logText) {
 }
 // Check if a DTO flight is already associated to the logbook
 function HasDTOFlight($theLogId) { 
+    global $userId;
     global $mysqli_link, $table_dto_flight;
     //print("PRE HasDTOFlight: theLogId=$theLogId<br>");
     if(!isset($theLogId)) {

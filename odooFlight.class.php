@@ -154,7 +154,6 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType,$theMembers
         //print("OF_createFactureCotisation 3 ($thePersonID, $theCotisationType)<br>");
         return false;
     }
-    print("OF_createFactureCotisation 2 ($thePersonID, $theCotisationType, $odoo_id)<br>");
 
     $odooClient = OF_GetOdooClient();
     $invoice_lines = array() ;
