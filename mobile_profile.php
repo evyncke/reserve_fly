@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -168,13 +168,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'validity' and !$read_
 	$log = '' ;
 	while ($row =  mysqli_fetch_array($result)) {
 		$type = $row['id'] ;
-		$ident_value = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['ident_value'][$type])) ;
-		$grant_date = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['grant_date'][$type])) ;
-		$expire_date = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['expire_date'][$type])) ;
+		$ident_value = (isset($_REQUEST['ident_value'][$type])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['ident_value'][$type])) : '' ;
+		$grant_date = (isset($_REQUEST['grant_date'][$type])) ?mysqli_real_escape_string($mysqli_link, trim($_REQUEST['grant_date'][$type])) : '' ;
+		$expire_date = (isset($_REQUEST['expire_date'][$type])) ?mysqli_real_escape_string($mysqli_link, trim($_REQUEST['expire_date'][$type])) : '' ;
 		if ($ident_value == '' and $grant_date == '' and $expire_date == '') continue ;
 		if ($ident_value == '' and $grant_date == '' and $expire_date == '') continue ;
-		$sql_statement = "replace into $table_validity(jom_id, validity_type_id, ident_value, grant_date, expire_date)
-			values($displayed_id, $type, '$ident_value', '$grant_date', '$expire_date')"; 
+		$sql_statement = "REPLACE INTO $table_validity(jom_id, validity_type_id, ident_value, grant_date, expire_date)
+			VALUES($displayed_id, $type, '$ident_value', '$grant_date', '$expire_date')"; 
 		mysqli_query($mysqli_link, $sql_statement)
 			or journalise($userId, "F","Impossible de mettre à jour les validités/annotations: " . mysqli_error($mysqli_link)) ;
 		$affected_rows += mysqli_affected_rows($mysqli_link) ;
