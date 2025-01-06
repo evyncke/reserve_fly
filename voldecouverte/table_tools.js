@@ -6,11 +6,11 @@ function round_tarif(theTarif) {
 }
 
 function retrieve_tarif(theTypeOfGift, theNumberOfPassenger)  {
-    for (var i = 0;  i < my_tarifs.length; i++) {
-      var aType=  my_tarifs[i].type ; 
-      var aNumberOfPassenger =  my_tarifs[i].passenger ;
+    for (var i = 0;  i < myTarifs.length; i++) {
+      var aType=  myTarifs[i].type ; 
+      var aNumberOfPassenger =  myTarifs[i].passenger ;
       if(aType==theTypeOfGift && theNumberOfPassenger == aNumberOfPassenger) {
-          return my_tarifs[i].tarif ; 
+          return myTarifs[i].tarif ; 
       }
     }
   return 0;

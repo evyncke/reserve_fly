@@ -1,0 +1,19 @@
+{
+    "initiation_1_passager": {"id" : 1,"tarif" : 240.0, "name" : "Initiation 1 passager", "type" :"initiation", "passager" :1},
+    "initiation_2_passager": {"id" : 2,"tarif" : 285.0, "name" : "Initiation 2 passagers", "type" :"initiation", "passager" :2},
+    "initiation_3_passager": {"id" : 3,"tarif" : 295.0, "name" : "Initiation 3 passagers", "type" :"initiation", "passager" :3},
+    "decouverte_1_passager": {"id" : 4,"tarif" : 3.7, "name" : "Decouverte 1 passager", "type" :"decouverte", "passager" :1},
+    "decouverte_2_passager": {"id" : 5,"tarif" : 5.1, "name" : "Decouverte 2 passagers", "type" :"decouverte", "passager" :2},
+    "decouverte_3_passager": {"id" : 6,"tarif" : 5.1, "name" : "Decouverte 3 passagers", "type" :"decouverte", "passager" :3},
+    "dhf_1_passager": {"id" : 4,"tarif" : 200.0, "name" : "DHF 1 passager", "type" :"dhf", "passager" :1},
+    "dhf_2_passager": {"id" : 5,"tarif" : 210.0, "name" : "DHF 2 passagers", "type" :"dhf", "passager" :2},
+    "dhf_3_passager": {"id" : 6,"tarif" : 220.0, "name" : "DHF 3 passagers", "type" :"dhf", "passager" :3},
+    "membre_1_passager": {"id" : 7,"tarif" : 3.0, "name" : "Membre 1 passager", "type" :"membre", "passager" :1},
+    "membre_2_passager": {"id" : 8,"tarif" : 4.4, "name" : "Membre 2 passagers", "type" :"membre", "passager" :2},
+    "membre_3_passager": {"id" : 9,"tarif" : 4.4, "name" : "Membre 3 passagers", "type" :"membre", "passager" :3},
+    "cotisation_membre": {"id" : 10,"tarif" : 70.0, "name" : "Cotisation membre non navigant", "type" :"cotisation"},
+    "cotisation_navigant": {"id" : 10,"tarif" : 200.0, "name" : "Cotisation  menbre navigant", "type" :"cotisation"},
+    "OO-ALD": {"id" : 11,"tarif" : 2.19, "name" : "OO-ALD", "type" :"pilote", "passager" :1},
+    "OO-FMX": {"id" : 12,"tarif" : 3.37, "name" : "OO-FMX", "type" :"pilote", "passager" :3},
+    "OO-ALE": {"id" : 13,"tarif" : 3.46, "name" : "OO-ALE", "type" :"pilote", "passager" :3}
+}

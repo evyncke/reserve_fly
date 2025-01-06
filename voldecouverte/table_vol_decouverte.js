@@ -27,10 +27,10 @@ for (var i = 0;  i < my_offrir_circuits.length; i++) {
   document.write("<td>"+aName+"</td>");
   var aTime =  my_offrir_circuits[i].tarif;
   document.write("<td style='text-align: right;'>"+aTime+"\47</td>");
-  document.write("<td style='text-align: right;'>"+compute_tarif("decouverte", aName, aTime, 1)+"&euro;</td>");
-  document.write("<td style='text-align: right;'>"+compute_tarif("decouverte", aName, aTime, 2)+"&euro;</td>");
-  document.write("<td style='text-align: right;'>"+compute_tarif("membre", aName, aTime, 1)+"&euro;</td>");
-  document.write("<td style='text-align: right;'>"+compute_tarif("membre", aName, aTime, 2)+"&euro;</td>");
+  document.write("<td style='text-align: right;'>"+compute_tarif("decouverte_1_passager", aTime)+"&euro;</td>");
+  document.write("<td style='text-align: right;'>"+compute_tarif("decouverte_2_passager", aTime)+"&euro;</td>");
+  document.write("<td style='text-align: right;'>"+compute_tarif("membre_1_passager", aTime)+"&euro;</td>");
+  document.write("<td style='text-align: right;'>"+compute_tarif("membre_2_passager", aTime)+"&euro;</td>");
   document.write("</tr>");
 }		
 document.write("</tbody>");
