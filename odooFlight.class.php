@@ -184,7 +184,7 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMember
                     'move_type' => 'out_invoice',
                     'invoice_date' => $invoice_date,
                     'invoice_date_due' => $invoice_date_due,
-                    'invoice_origin' => "Manuel par $userFullName " . date("Y-m-d"),
+                    'invoice_origin' => "Manuellement par $userFullName " . date("Y-m-d"),
                     'invoice_line_ids' => $invoice_lines)) ;
     if(1) {
         $result = $odooClient->Create('account.move', $params) ;
