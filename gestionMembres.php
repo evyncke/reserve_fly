@@ -582,7 +582,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 						or journalise($userId, 'F', "Impossible d'ajouter dans les blocked: " . mysqli_error($mysqli_link)) ;
 
 					print("<b>Le membre $personid a été bloqué :</b> Raison \"$reasonWeb\"</br>");
-					journalise($userId, "W", "Member $persid is now blocked, $reasonWeb") ;
+					journalise($userId, "W", "Member $personid is now blocked, $reasonWeb") ;
 				}
 				else {
 				    print("<b>Le membre $personid est déjà bloqué !</b></br>");	
