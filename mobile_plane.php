@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2023 Eric Vyncke
+   Copyright 2013-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -75,14 +75,55 @@ function generateMaintenanceClass($entretien, $compteur) {
 		return ' class="warning"' ;
 	return '' ;
 }
-	$class = generateMaintenanceClass($plane_row['entretien'], $plane_row['compteur']) ;
-	print("<tr$class><td>Dernier compteur par le club<span class=\"hidden-xs\"> ($plane_row[compteur_date])</span></td><td>$plane_row[compteur]</td></tr>\n") ;
 	$class = generateMaintenanceClass($plane_row['entretien'], $row2['compteur_pilote']) ;
 	print("<tr$class><td>Dernier compteur pilote<span class=\"hidden-xs\"> ($row2[compteur_pilote_date])</span></td><td>$row2[compteur_pilote]</td></tr>\n") ;
 	if ($plane_row['poh'])
 		print("<tr><td>POH </td><td><a href=\"$plane_row[poh]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
 	if ($plane_row['checklist'])
 		print("<tr><td>Checklist</td><td><a href=\"$plane_row[checklist]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
+// TEST MODE	
+if (true or $userIsAdmin or $userIsInstructor or $userId == 71) {
+	if ($userId != 62) journalise($userId, "D", "Trying for $plane") ;
+	print("<tr><td>Liste des équipements pour plan de vol OACI 
+		<a data-bs-toggle=\"collapse\" href=\"#collapseDoc\" title=\"Cliquez pour voir la liste et les manuels\"><i class=\"bi bi-collection-fill\"></i></a>
+  		</td><td>") ;
+	$result_equipment = mysqli_query($mysqli_link, "SELECT *
+		FROM $table_plane_device
+			JOIN $table_device on d_name = pd_device
+		WHERE pd_plane = '$plane' AND d_fpl_code IS NOT NULL
+		ORDER BY d_fpl_code")
+		or journalise($userId, "F", "Cannot read equipments list: " . mysqli_error($mysqli_link)) ;
+	if (mysqli_num_rows($result_equipment) > 0) {
+		while ($row_equipment = mysqli_fetch_array($result_equipment))
+			print("<span title=\"$row_equipment[d_type]\">$row_equipment[d_fpl_code]</span> ") ;	
+	} else
+		print("Inconnue\n") ;
+	mysqli_free_result($result_equipment) ;
+	print("</td></tr>
+	<tr class=\"collapse\" id=\"collapseDoc\">
+		<td colspan=2>
+			<table class=\"table table-responsive table-striped\">
+				<thead><tr><th>Équipement</th><th>Type</th><th>Fabricant<th>Titre</th></tr></thead>
+				<tbody>") ;
+	$result_doc = mysqli_query($mysqli_link, "SELECT *
+		FROM $table_plane_device
+			JOIN $table_device ON d_name = pd_device
+			JOIN $table_device_doc ON d_name = dd_model 
+		WHERE pd_plane = '$plane'
+		ORDER BY d_name, dd_title")
+		or journalise($userId, "E", "Cannot fetch device doc: " . mysqli_error($mysqli_link)) ;
+	while ($row_doc = mysqli_fetch_assoc($result_doc)) {
+		print("<tr><td>$row_doc[d_name]</td><td>$row_doc[d_type]</td><td>$row_doc[d_manufacturer]</td>
+			<td><a href=\"$row_doc[dd_url]\" target=\"_blank\">$row_doc[dd_title] <i class=\"bi bi-box-arrow-up-right\"></i></a></td>
+			</tr>\n") ;
+	}
+	print("</tbody>
+			</table>
+		</td>
+	</tr>\n");
+	print("</tr>\n") ;
+} 
+// test mode
 	print("<tr><td>Dernier vol sur FlightAware  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"https://flightaware.com/live/flight/" . strtoupper($plane_row['id']) . "\" target=\"_blank\"><img src=\"fa.ico\" border=\"0\" width=\"24\" height=\"24\"></a></td></tr>
 	<tr><td>Carnet de routes</td><td><a href=\"mobile_planelog.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-journal\"></i></a></td></tr>
 	<tr><td>Masse et centrage</i></td><td><a href=\"mobile_wnb.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-rulers\"></i></a></td></tr>\n") ;
