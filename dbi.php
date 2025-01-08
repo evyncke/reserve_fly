@@ -268,6 +268,9 @@ $table_incident_history = 'rapcs_incident_history' ;
 $table_company = 'rapcs_company' ;
 $table_company_member = 'rapcs_company_member' ;
 $table_membership_fees = 'rapcs_bk_fees' ;
+$table_device = 'rapcs_device' ;
+$table_device_doc = 'rapcs_device_doc' ;
+$table_plane_device = 'rapcs_plane_device' ;
 
 // Joomla specific table names
 $table_user_usergroup_map = 'jom_user_usergroup_map' ;
