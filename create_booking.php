@@ -103,6 +103,7 @@ if ($membership_year == date('Y') and (!isset($row_fee) or $row_fee['bkf_payment
 	$response['error'] .= "Vous n'&ecirc;tes pas en r&egrave;gle de cotisation." ;
 	$blocked_user = true ;
 	$blocked_msg = "<p>Vous n'&ecirc;tes pas en r&egrave;gle de cotisation." ;
+	journalise($userId, "E", "Unpaid membership fee") ;
 }
 
 // Check whether userId is the assigned pilot !
