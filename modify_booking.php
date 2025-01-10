@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -110,6 +110,13 @@ if ($row_blocked) {
 	journalise($userId, "W", "This pilot $pilot_id is blocked: $row_blocked[b_reason]") ;
 	$response['error'] .= "Vous &ecirc;tes interdit(e) de vol: " . db2web($row_blocked['b_reason']) . ". Contactez info@spa-aviation.be" ;
 	$blocked_user = true ;
+}
+
+// Check whether membership fee is paid
+if ($membership_year == date('Y') and (!isset($row_fee) or $row_fee['bkf_payment_date'] == '')) {
+	$response['error'] .= "Vous n'&ecirc;tes pas en r&egrave;gle de cotisation." ;
+	$blocked_user = true ;
+	$blocked_msg = "<p>Vous n'&ecirc;tes pas en r&egrave;gle de cotisation." ;
 }
 
 // TODO check that:

@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -96,6 +96,13 @@ if ($row_blocked) {
 	$response['error'] .= "Vous &ecirc;tes interdit(e) de vol: " . db2web($row_blocked['b_reason']) . ". Contactez info@spa-aviation.be" ;
 	$blocked_user = true ;
 	$blocked_msg =  "<p>Vous &ecirc;tes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. Contactez info@spa-aviation.be.</p>\n" ;
+}
+
+// Check whether membership fee is paid
+if ($membership_year == date('Y') and (!isset($row_fee) or $row_fee['bkf_payment_date'] == '')) {
+	$response['error'] .= "Vous n'&ecirc;tes pas en r&egrave;gle de cotisation." ;
+	$blocked_user = true ;
+	$blocked_msg = "<p>Vous n'&ecirc;tes pas en r&egrave;gle de cotisation." ;
 }
 
 // Check whether userId is the assigned pilot !
