@@ -60,7 +60,7 @@ if ($userIsInstructor or $userIsAdmin) {
 }
 ?>
 <h2>Grand livre comptable de <?=$ledgerOwner?></h2>
-<p class="lead">Voici une vue comptable de votre compte membre RAPCS (mise à jour plusieurs fois par semaine par nos bénévoles voire plusieurs
+<p class="lead">Voici une vue comptable de votre compte membre RAPCS<br>(mise à jour plusieurs fois par semaine par nos bénévoles voire plusieurs
 	fois par jour ouvrable en utilisant un virement immédiat avec la communication structurée des factures).</p>
 
 <!-- using tabs -->
@@ -80,7 +80,7 @@ if ($userIsInstructor or $userIsAdmin) {
 </ul> <!-- tabs -->
 
 <div class="row">
-<div class="col-sm-12 col-md-9 col-lg-7">
+<div class="col-sm-12 col-md-12 col-lg-12">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
