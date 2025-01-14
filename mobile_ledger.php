@@ -113,18 +113,20 @@ if ($odooId != '') {
 			// TODO should probably avoid 'cancel' parent_state or only 'posted' parent_state
 			)), 
 		array(
-			'fields' => array('id', 'date', 'move_type', 'journal_id','account_type',
+			'fields' => array('id', 'date', 'move_type', 'journal_id','account_type', 'ref', 'partner_id',
 			'move_id', 'name', 'parent_state', 'debit', 'credit'),
 			'order' => 'date,id')) ; // The balance from Ciel were imported *after* some invoices... hence this 'weird' ordering
 		foreach ($moves as $move) {
 			if ($move['parent_state'] == 'cancel' or $move['parent_state'] == 'draft') continue ; // Could also be 'draft'
 			if ($move['parent_state'] != 'posted') journalise($userId, "I", "Unknown Odoo parent state=$move[parent_state] for account.move.line#$move[id]") ;
-			// var_dump($move) ;
+			// Check whether partner_id != '' (the OR in the SearchRead is probably too open when $odooCommercialId == '')
+			if (! is_array($move['partner_id'])) continue ; 	
 			$dummy_move = ($move['journal_id'][1] == 'Miscellaneous Operations') ;
 			$tr_class = ($dummy_move) ? ' class="fw-lighter fst-italic"' : '' ;
 			$dummy_move = false ; //test evyncke to count misc operations anyway
 			print("<tr$tr_class><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
-				print("<td>" . $move['move_id'][1] . '<br/>move_id: ' . $move['move_id'][0] . '<br/>line id: ' . $move['id'] . "</td>") ;
+				print("<td>" . $move['move_id'][1] . '<!--br/>move_id: ' . $move['move_id'][0] . '<br/>line id: ' . $move['id'] . 
+					'<br/>partner id[1]: ' . $move['partner_id'][1] ."--></td>") ;
 				print("<td>$move[move_type]<br/>$move[name]</td>" ) ;
 			if ($move['debit'] > 0) {
 				$debit = number_format($move['debit'], 2, ",", ".") ;
