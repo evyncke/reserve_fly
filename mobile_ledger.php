@@ -57,10 +57,7 @@ print("<div class=\"container-fluid\">") ;
 if ($userIsInstructor or $userIsAdmin) {
         print("<p>En tant qu'instructeur/administrateur, vous pouvez consulter les situations comptables des autres membres: <select id=\"pilotSelect\" onchange=\"pilotSelectChanged();\">" ) ;
         print("</select></p>") ;
-} else {
-	print("<p>Suite à une upgrade Odoo qui a cassé la DB, cette page n'est plus disponible.</p>") ;
-	exit ;
-}
+} 
 ?>
 <h2>Grand livre comptable de <?=$ledgerOwner?></h2>
 <p class="lead">Voici une vue comptable de votre compte membre RAPCS<br/>(mise à jour plusieurs fois par semaine par nos bénévoles voire plusieurs
