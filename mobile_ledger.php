@@ -57,10 +57,13 @@ print("<div class=\"container-fluid\">") ;
 if ($userIsInstructor or $userIsAdmin) {
         print("<p>En tant qu'instructeur/administrateur, vous pouvez consulter les situations comptables des autres membres: <select id=\"pilotSelect\" onchange=\"pilotSelectChanged();\">" ) ;
         print("</select></p>") ;
+} else {
+	print("<p>Suite à une upgrade Odoo qui a cassé la DB, cette page n'est plus disponible.</p>") ;
+	exit ;
 }
 ?>
 <h2>Grand livre comptable de <?=$ledgerOwner?></h2>
-<p class="lead">Voici une vue comptable de votre compte membre RAPCS<br>(mise à jour plusieurs fois par semaine par nos bénévoles voire plusieurs
+<p class="lead">Voici une vue comptable de votre compte membre RAPCS<br/>(mise à jour plusieurs fois par semaine par nos bénévoles voire plusieurs
 	fois par jour ouvrable en utilisant un virement immédiat avec la communication structurée des factures).</p>
 
 <!-- using tabs -->
@@ -116,12 +119,13 @@ if ($odooId != '') {
 		foreach ($moves as $move) {
 			if ($move['parent_state'] == 'cancel' or $move['parent_state'] == 'draft') continue ; // Could also be 'draft'
 			if ($move['parent_state'] != 'posted') journalise($userId, "I", "Unknown Odoo parent state=$move[parent_state] for account.move.line#$move[id]") ;
+			// var_dump($move) ;
 			$dummy_move = ($move['journal_id'][1] == 'Miscellaneous Operations') ;
 			$tr_class = ($dummy_move) ? ' class="fw-lighter fst-italic"' : '' ;
-			$dummy_move = false ; //test evyncke
+			$dummy_move = false ; //test evyncke to count misc operations anyway
 			print("<tr$tr_class><td>$move[date]</td><td>" . $move['journal_id'][1] . "</td>") ;
-				print("<td>" . $move['move_id'][1] . '<!--br/>' . $move['move_id'][0] . "--></td>") ;
-				print("<td><!--$move[move_type]--><br/>$move[name]</td>" ) ;
+				print("<td>" . $move['move_id'][1] . '<br/>move_id: ' . $move['move_id'][0] . '<br/>line id: ' . $move['id'] . "</td>") ;
+				print("<td>$move[move_type]<br/>$move[name]</td>" ) ;
 			if ($move['debit'] > 0) {
 				$debit = number_format($move['debit'], 2, ",", ".") ;
 				print("<td style=\"text-align: right;\">-$debit</td><td></td>") ;

@@ -196,7 +196,7 @@ $fmt = datefmt_create(
 ) ;
 ?>
 <h2><?=$document_title?>  du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?></h2>
-<p class="lead">Voici un folio (estimation de vos factures de vos vols).<br>Le solde de votre compte membre est de <b style="color: red;"><?=$balance?>&euro;</b>.</p>
+<p class="lead">Voici un folio (estimation de vos factures de vos vols).<br/>Le solde de votre compte membre est de <b style="color: red;"><?=$balance?>&euro;</b>.</p>
 <p class="small">Accès aux factures et opérations comptables via les onglets ci-dessous.</p>
 
 <!-- using tabs -->
