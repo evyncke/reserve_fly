@@ -148,11 +148,12 @@ if ($odooId != '') {
 			array('fields' => array('id', 'total_due'))) ;
 	$balance = -1.0 * $accounts[0]['total_due'] ;
 	if ($balance < 0) {
-		$balance_text = "<span class=\"text-danger\"> $balance &euro; (vous devez de l'argent au RAPCS ASBL)</span>" ;
+		//$balance_text = "<span class=\"text-danger\"> $balance &euro; (vous devez de l'argent au RAPCS ASBL)</span>" ;
+		$balance_text = number_format($balance,2,",",".");
 		$invoice_total = -1.0 * $balance ;
 		$invoice_reason = 'solde' ;
 	} else
-		$balance_text = "$balance &euro;" ;
+		$balance_text = "+".number_format($balance,2,",",".");
 } else { // Odoo account does not exist
 	$balance = 0 ;
 	$invoice_total = 0 ;
@@ -196,7 +197,7 @@ $fmt = datefmt_create(
 ) ;
 ?>
 <h2><?=$document_title?>  du <?=$folio_start->format('d-m-Y')?> au <?=$folio_end_title->format('d-m-Y')?></h2>
-<p class="lead">Voici un folio (estimation de vos factures de vos vols).<br/>Le solde de votre compte membre est de <b style="color: red;"><?=$balance?>&euro;</b>.</p>
+<p class="lead">Voici un folio (estimation de vos factures de vos vols).<br/>Le solde de votre compte membre est de <b style="color: red;"><?=$balance_text?>&euro;</b>.</p>
 <p class="small">Accès aux factures et opérations comptables via les onglets ci-dessous.</p>
 
 <!-- using tabs -->
