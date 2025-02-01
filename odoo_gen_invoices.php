@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2024 Eric Vyncke
+   Copyright 2023-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ $folio_start = (isset($_REQUEST['start'] )) ?
 $folio_end = (isset($_REQUEST['end'] )) ? 
     new DateTime($_REQUEST['end'], new DateTimeZone('UTC')) :
     new DateTime(date('Y-m-01'), new DateTimeZone('UTC')) ;
-$invoice_date =  $folio_end->sub(new DateInterval('P1D'))->format('Y-m-d') ;
-
+$folio_end_copy = clone $folio_end ; // As the subsequent sub has a side effect
+$invoice_date =  $folio_end_copy->sub(new DateInterval('P1D'))->format('Y-m-d') ;
 $sql_filter = ($invoice_jom_id != '' and is_numeric($invoice_jom_id)) ? "AND jom_id = $invoice_jom_id" : '' ;
 ?>
 <h2>Génération des factures dans Odoo sur base des carnets de vol@<?=$odoo_host?></h2>
@@ -118,6 +118,7 @@ if (false) {
 $result_members = mysqli_query($mysqli_link, $sql)
 			or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
 $invoiceCount = 0 ;
+print("<p>Génération des factures pour les vols membres depuis le " . $folio_start->format('Y-m-d') . " (compris) et avant le " . $folio_end->format('Y-m-d') . " (non compris).</p>") ;
 while ($row = mysqli_fetch_array($result_members)) {
 	$member=$row['id'];
     if ($row['odoo_id'] == '') continue ; 
