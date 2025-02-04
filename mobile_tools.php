@@ -307,4 +307,154 @@ function moveAndResizePicture($tmp_file, $upload_fileName, $maxImageSize)
 	}
 	return true;
 }
+//  Function: getCompteurValueInMinute : Returns the compteur time of a aircraft for a date filter
+//  ======== 
+//  $thePlane: ex "OO-ALD"
+//  $theDateFilter: ex "2024-%" all flights of 2024 of the plane
+//                     "2024-01-%" all flights of janauary 2024
+function getCompteurValueInMinute($thePlane, $theDateFilter)
+{
+	global $mysqli_link, $table_logbook;
+	//print("getCompteurValueInMinute thePlane=$thePlane theDateFiltert=$theDateFilter<br>");
+	$minHour=0;
+	$minMinute=0;
+	$maxHour=0;
+	$maxMinute=0;
+	$sql="SELECT l_plane,l_start, l_start_hour , l_start_minute FROM $table_logbook WHERE l_start like '$theDateFilter' and l_plane='$thePlane' ORDER BY l_start asc LIMIT 1";
+	$result = mysqli_query($mysqli_link, $sql) ;
+	while ($row = mysqli_fetch_array($result)) {
+		$minHour=$row['l_start_hour'];
+		$minMinute=$row['l_start_minute'];
+		//print("$plane $minHour : $minMinute  startdate=$row[l_start]<br>\n") ;
+	}
+	$sql="SELECT l_plane,l_end, l_end_hour , l_end_minute FROM $table_logbook WHERE l_end like '$theDateFilter' and l_plane='$thePlane' ORDER BY l_end desc LIMIT 1";
+	$result = mysqli_query($mysqli_link, $sql) ;
+	while ($row = mysqli_fetch_array($result)) {
+		$maxHour=$row['l_end_hour'];
+		$maxMinute=$row['l_end_minute'];
+		//print("$plane $maxHour : $maxMinute  startdate=$row[l_end]<br>\n") ;
+	}
+	
+	$timeInMinute=($maxHour-$minHour)*60+$maxMinute-$minMinute;
+	$timeHour=intval($timeInMinute/60);
+	$timeMinute=$timeInMinute-$timeHour*60;
+	//print("timeInMinute=$timeInMinute  timeHour=$timeHour:$timeMinute <br>");
+	return $timeInMinute;
+}
+
+//  Function: convertMinuteToHour : Returns the time in minutes into time in hours:Minutes
+//  ======== 
+//  $theTimeInMinute: ex 135
+//  returns 2:15
+function convertMinuteToHour($theTimeInMinute)
+{
+	$timeHour=intval(abs($theTimeInMinute)/60);
+	$timeMinute=abs($theTimeInMinute)-$timeHour*60;
+	$timeString="";
+	if($timeMinute<10) {
+		$timeString= "$timeHour:0$timeMinute";
+	}
+	else {
+		$timeString= "$timeHour:$timeMinute";
+	}
+	if($timeHour<10) {
+		$timeString="0".$timeString;
+	}
+	if($theTimeInMinute<0) {
+		$timeString="-".$timeString;
+	}
+	return $timeString;
+}
+
+//  Function: getCompteurIFValueInMinute : Returns the total compteur time for IF flight of a aircraft for a date filter
+//  ======== 
+//  $thePlane: ex "OO-ALD"
+//  $theDateFilter: ex "2024-%" all IF flights of 2024 of the plane
+//                     "2024-01-%" all IF flights of janauary 2024
+function getCompteurIFValueInMinute($thePlane, $theDateFilter)
+{
+	return getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "IF");
+}
+
+//  Function: getCompteurDHFValueInMinute : Returns the total compteur time for DHF flight of a aircraft for a date filter
+//  ======== 
+//  $thePlane: ex "OO-ALD"
+//  $theDateFilter: ex "2024-%" all IF flights of 2024 of the plane
+//                     "2024-01-%" all IF flights of janauary 2024
+function getCompteurDHFValueInMinute($thePlane, $theDateFilter)
+{
+	return getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "DHF");
+}
+
+//  Function: getCompteurINITValueInMinute : Returns the total compteur time for INIT flight of a aircraft for a date filter
+//  ======== 
+//  $thePlane: ex "OO-ALD"
+//  $theDateFilter: ex "2024-%" all IF flights of 2024 of the plane
+//                     "2024-01-%" all IF flights of janauary 2024
+function getCompteurINITValueInMinute($thePlane, $theDateFilter)
+{
+	return getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "INIT");
+}
+
+//  Function: getCompteurIfInitDhfValueInMinute : Returns the total compteur time for IF-DHF-INIT flights of a aircraft for a date filter
+//  ======== 
+//  $thePlane: ex "OO-ALD"
+//  $theDateFilter: ex "2024-%" all IF flights of 2024 of the plane
+//                     "2024-01-%" all IF flights of janauary 2024
+//  $theFlightType= {"IF", "DHF", "INIT"}
+function getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, $theFlightType)
+{
+		global $mysqli_link, $table_logbook,  $table_flight, $table_person, $table_flights_ledger,$table_bookings,$userId ;
+	$filterType = 'f_type ="D"' ;
+	if($theFlightType=="INIT") {
+		$filterType = 'f_type ="I"' ;
+	}
+	$sql="SELECT DISTINCT l_start, l_start_hour, l_start_minute, l_end_hour, l_end_minute, f_invoice_ref, 
+	l_plane, f_date_flown, first_name, last_name, r_plane, f_reference 
+	FROM rapcs_flight AS f 
+	JOIN rapcs_person ON f.f_pilot = jom_id 
+	JOIN rapcs_bookings AS b ON f.f_booking = b.r_id 
+	JOIN rapcs_logbook AS l ON f.f_booking = l.l_booking 
+	WHERE l_plane='$thePlane' AND $filterType AND f_date_flown IS NOT NULL 
+	AND f_date_flown like '$theDateFilter' ORDER BY f_date_flown";
+
+	//print("getCompteurIFValueInMinute $thePlane, $theDateFilter sql=$sql<br>");
+
+	//print("sql=$sql<br>");
+	$montantTotal=0.0;
+
+	$result = mysqli_query($mysqli_link, $sql) 
+			or journalise($userId, "F", "Impossible de lister les vols IF: " . mysqli_error($mysqli_link));
+
+	$timeTotal=0;
+	while ($row = mysqli_fetch_array($result)) {
+       $invoiceRef=$row['f_invoice_ref'];
+        $referenceFlight=$row['f_reference'];
+		$toBeUsed=true;
+		$pos = strpos(strtoupper($referenceFlight), "DHF-");
+		if($pos===false) {
+			if($theFlightType=="DHF") {
+				$toBeUsed=false;
+			}
+		}
+		else {
+			if($theFlightType!="DHF") {
+				$toBeUsed=false;
+			}
+		}
+		//print("getCompteurIfInitDhfValueInMinute $thePlane  $theDateFilter, $theFlightType $referenceFlight $pos=$pos toBeUsed=$toBeUsed<br>");
+		if($toBeUsed) {
+			$minHour=$row['l_start_hour'];
+			$minMinute=$row['l_start_minute'];
+			$maxHour=$row['l_end_hour'];
+			$maxMinute=$row['l_end_minute'];
+			$timeInMinute=($maxHour-$minHour)*60+$maxMinute-$minMinute;
+			$timeHour=intval($timeInMinute/60);
+			$timeMinute=$timeInMinute-$timeHour*60;
+			$timeTotal+=$timeMinute;
+		}
+	}
+	
+	return $timeTotal;
+}
 ?>

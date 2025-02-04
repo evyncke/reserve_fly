@@ -357,6 +357,7 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_planelog.php?plane=OO-FMX">Carnets de routes</a></li>
             <li><a class="dropdown-item" href="mobile_incidents.php">Aircraft Tech Logs</a></li>
             <li><a class="dropdown-item" href="IntroCarnetVol.php">Encodage compteurs <i class="bi bi-box-arrow-up-right"></i></span></a></li>
+            <li><a class="dropdown-item" href="mobile_logbook_summary.php">Résumé vols club</a></li>
             <li><a class="dropdown-item" href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
             <li><a class="dropdown-item" href="mobile_fleet_map.php?latest">Dernières localisations</a></li>
             <!-- init() in mobile.js will insert all active planes -->
