@@ -375,8 +375,8 @@ if ($userId == 0) {
 	}
     print('<br>');
 	print('<input type="button" style="background-color: green; color: white;" value="Mon profil" onclick="javascript:document.location.href=\'mobile_profile.php\';"> ') ;
-	print('<input type="button" style="background-color: green; color: white;"value="Mon carnet de vols" onclick="javascript:document.location.href=\'mobile_mylog.php\';"> ') ;
-	print('<input type="button" value="Carte de mes vols" onclick="javascript:document.location.href=\'mymap.php\';"> ') ;
+	print('<input type="button" style="background-color: green; color: white;" value="Mon carnet de vols" onclick="javascript:document.location.href=\'mobile_mylog.php\';"> ') ;
+	print('<input type="button" style="background-color: green; color: white;" value="Carte de mes vols" onclick="javascript:document.location.href=\'mobile_mymap.php\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;" value="Site mobile" onclick="javascript:document.location.href=\'mobile_reservation.php\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;" value="Folio du mois" onclick="javascript:document.location.href=\'mobile_folio.php\';"> ') ;
     print('<input type="button" style="background-color: green; color: white;" value="TechLog" onclick="javascript:document.location.href=\'mobile_incidents.php\';"> ') ;
