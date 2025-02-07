@@ -81,19 +81,11 @@ function mymapSelectChanged() {
 
 function initMyMap(longitude, latitude, pilot, period, mapbox_token) {
 	var pilotSelect = document.getElementById('pilotSelect') ;
-	if (false) {
-	// Initiliaze pilotSelect from member.js
-    for (var member = 0; member < members.length; member++) {
-		var option = document.createElement("option");
-		option.text = members[member].name ;
-		option.value = members[member].id ;
-		document.getElementById('mymapPilotSelect').add(option) ;
-	}
-	} // false
-	if (pilot == 'all') 
-		pilotSelect.value = 'all' ;
-	else
-		pilotSelect.value = pilot ;
+	if (pilotSelect) // When the link is shared, the pilotSelect does not exist
+		if (pilot == 'all') 
+			pilotSelect.value = 'all' ;
+		else
+			pilotSelect.value = pilot ;
 	var periodSelect = document.getElementById('periodSelect') ;
 	if (periodSelect) periodSelect.value = period ;
 	mapboxgl.accessToken = mapbox_token;

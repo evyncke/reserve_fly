@@ -31,26 +31,30 @@ if (isset($_REQUEST['user']) && is_numeric($_REQUEST['user'])) {
 	$row = mysqli_fetch_array($result) 
 		or die("Unknown pilot") ;
 	$pilot_name = db2web($row['name']) ;
+	$pilot_arg = $pilot ;
 	$sql_filter[] = "(l_pilot = $pilot or l_instructor = $pilot)" ;
-} elseif (isset($_REQUEST['pilot']) && ($_REQUEST['pilot'] == 'all')) {
-	$pilot =  $_REQUEST['pilot'] ;
-	$pilot_name = "tous les pilotes" ;
+} elseif (isset($_REQUEST['user']) && ($_REQUEST['user'] == 'all')) {
+	$pilot =  'all' ;
+	$_REQUEST['user'] = $userId ; // As the mobile_header.php will generate some JS based on $_REQUEST[user] being numeric...
+	$pilot_name = "tous les membres" ;
+	$pilot_arg = "'all'" ;
 } else {
 	$pilot = $userId ;
 	$pilot_name = $userFullName ;
+	$pilot_arg = $pilot ;
 	$sql_filter[] = "(l_pilot = $pilot or l_instructor = $pilot)" ;
 }
 
 if (isset($_REQUEST['period'])) {
 	$period = $_REQUEST['period'] ;
 	switch ($_REQUEST['period']) {
-		case '2y': $sql_filter[] = 'l_start > date_sub(now(), interval 2 year)' ; break ;
-		case '1y': $sql_filter[] = 'l_start > date_sub(now(), interval 1 year)' ; break ;
-		case '3m': $sql_filter[] = 'l_start > date_sub(now(), interval 3 month)' ; break ;
-		case '1m': $sql_filter[] = 'l_start > date_sub(now(), interval 1 month)' ; break ;
+		case '2y': $sql_filter[] = 'l_start > date_sub(now(), interval 2 year)' ; $period_string = '2 ans' ; break ;
+		case '1y': $sql_filter[] = 'l_start > date_sub(now(), interval 1 year)' ; $period_string = '1 an' ; break ;
+		case '3m': $sql_filter[] = 'l_start > date_sub(now(), interval 3 month)' ; $period_string = '3 mois' ; break ;
+		case '1m': $sql_filter[] = 'l_start > date_sub(now(), interval 1 month)' ; $period_string = '1 mois' ; break ;
 	}	
 } else {
-	$period = 'always' ; 
+	$period = 'always' ; $period_string = 'toujours' ;
 }
 
 $header_postamble = '<!-- Load the MAP BOX scripts & CSS -->
@@ -59,10 +63,10 @@ $header_postamble = '<!-- Load the MAP BOX scripts & CSS -->
 <script src="arc.js"></script> <!-- GreatCircles for geodesic lines -->
 <script src="mymap.js"></script>
 ' ;
-$body_attributes=" onload=\"initMyMap($apt_longitude, $apt_latitude, $pilot, '$period', '$mapbox_token');init();\"" ;
+$body_attributes="onload=\"initMyMap($apt_longitude, $apt_latitude, $pilot_arg, '$period', '$mapbox_token');init();\"" ;
 require_once 'mobile_header5.php' ;
 
-if ($userId != 62) journalise($userId, 'I', "Map displayed for $pilot_name ($period)") ;
+if ($userId != 62 and ! isset($_REQUEST['kiosk'])) journalise($userId, 'I', "Map displayed for $pilot_name ($period)") ;
 
 $sql_filters = implode(' and ', $sql_filter) ;
 if ($sql_filters != '') $sql_filters = "where $sql_filters" ;
@@ -145,7 +149,7 @@ foreach ($featured_airports as $code => $airport) {
 <div class="container-fluid">
 
 <div class="page-header">
-<h2>Les vols de <?=$pilot_name?> sur une carte</h2>
+<h2>Les vols de <?=$pilot_name?> sur une carte depuis <?=$period_string?></h2>
 </div><!-- page-header -->
 
 <?php
@@ -162,7 +166,7 @@ if ($userId != 0) { // Only logged-in user can change the options
 
 En tant que membre connecté(e), vous pouvez voir les vols des autres membres: 
 <select id="pilotSelect" onchange="mymapSelectChanged();">
-<option value="all">Tous les pilotes</option>
+<option value="all">Tous les membres</option>
 </select>. A partager via ce <a href=<?=$_SERVER['PHP_SELF'] . "?user=$pilot&period=$period&auth=" . md5($pilot . $period . $shared_secret)?>>lien</a>
 avec des non-membres y compris réseaux sociaux.
 </div><!-- row -->
@@ -172,7 +176,7 @@ avec des non-membres y compris réseaux sociaux.
 
 <div class="row">
 <div id='mapContainer' style='position: relative;'>
-	<div id='map' style='width: 100vw; height: 90vh;'></div>
+	<div id='map' style='width: 95vw; height: 90vh;'></div>
 <!--div id='airportInfo' style='display: none; position: absolute; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.7;'></div-->
 </div> <!-- mapContainer -->
 </div><!-- row -->

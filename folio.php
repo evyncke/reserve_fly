@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2024 Eric Vyncke
+   Copyright 2023-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -114,10 +114,14 @@ class FolioLine{
         if ($row['l_instructor'] and $row['l_instructor'] > 0)
             if ($row['l_instructor'] != $userId) { // The user is not the FI
                 $this->cost_fi = $row['l_instructor_paid'] * $cost_fi_minute * $this->duration ;
+                if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] != $userId)
+                    $this->cost_fi = 0 ;
             } else {
-                if ( $row['l_instructor_paid']) 
+                if ($row['l_instructor_paid']) {
                     $this->cost_fi = - $revenue_fi_minute * $this->duration ;
-                else // NoDC
+                    if ($row['l_share_type'] == 'CP1' and $row['l_share_member'] != $userId)
+                        $this->cost_fi = 0 ;
+                } else // NoDC
                     // continue ;
                     $this->cost_fi = 0 ; // Should go to the next row... via a thrown exception ? 
         } else {
@@ -329,11 +333,11 @@ class Folio implements Iterator {
         mysqli_free_result($this->result) ;
     }
 
-    public function current() {
+    public function current():mixed {
         return new FolioLine($this->row, $this->pilot);
     }
     
-    public function key() {
+    public function key():mixed {
         return $this->row['l_id'];
     }
     
