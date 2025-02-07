@@ -35,18 +35,6 @@ else
 
 $sinceDate = new DateTime($since) ;
 $yearAfter = new DateTime($since) ;
-$today = new DateTime() ;
-$yearAfterForTitle = new DateTime($since) ;
-$yearBefore = new DateTime($since) ;
-$yearInterval = new DateInterval('P1Y') ; // One year
-$yearBefore = $yearBefore->sub($yearInterval) ;
-$yearBeforeString = $yearBefore->format('Y-m-d') ;
-$yearAfter = $yearAfter->add($yearInterval) ; // Then request is from 01-01-2024 0h00 to 01-01-2025 0h00
-$yearAfterString = $yearAfter->format('Y-m-d') ;
-$yearAfterForTitle = $yearAfterForTitle->add($yearInterval) ;
-$yearAfterForTitle = $yearAfterForTitle->sub(new DateInterval('P1D')) ;
-$yearAfterForTitleString = $yearAfterForTitle->format('Y-m-d') ; // Then Title is 31-12-2023 and not 01-01-2024
-// Display today in the local language in human language
 $fmt = datefmt_create(
     'fr_BE',
     IntlDateFormatter::FULL,
@@ -56,12 +44,40 @@ $fmt = datefmt_create(
     'yyyy' // See https://unicode-org.github.io/icu/userguide/format_parse/datetime/ !
 ) ;
 $yearName = datefmt_format($fmt, $sinceDate) ;
+$thisYearName = datefmt_format($fmt, new DateTime()) ;
+
+$today = new DateTime() ;
+//$yearAfterForTitle = new DateTime($since) ;
+//$yearBefore = new DateTime($since) ;
+$since = $yearName."-01-01";
+$yearAfterForTitle = new DateTime($yearName."-01-01") ;
+$yearBefore = new DateTime($yearName."-01-01") ;
+$yearInterval = new DateInterval('P1Y') ; // One year
+$yearBefore = $yearBefore->sub($yearInterval) ;
+$yearBeforeString = $yearBefore->format('Y-m-d') ;
+if($yearBeforeString<"2023") {
+	//Before 2023, the logbook table is not fill
+	$yearBeforeString="";
+}
+$yearAfter = $yearAfter->add($yearInterval) ; // Then request is from 01-01-2024 0h00 to 01-01-2025 0h00
+$yearAfterString = $yearAfter->format('Y-m-d') ;
+$yearAfterForTitle = $yearAfterForTitle->add($yearInterval) ;
+$yearAfterForTitle = $yearAfterForTitle->sub(new DateInterval('P1D')) ;
+$yearAfterForTitleString = $yearAfterForTitle->format('Y-m-d') ; // Then Title is 31-12-2023 and not 01-01-2024
+// Display today in the local language in human language
+
+$comparaisonYearName=$thisYearName;
+if($thisYearName==$yearName) {
+	$comparaisonYearName=datefmt_format($fmt, $yearBefore);
+}
 ?>
 <div class="container-fluid">
 <h2>Résumé du logbook du <?=$since?> au <?=$yearAfterForTitleString?></h2>
 <?php
-$planes=array("OO-ALD"=>0, "OO-JRB"=> 0, "OO-APV" => 0, "OO-FMX" =>0, "OO-ALE" => 0, "PH-AML" => 0, "OO-SHC" => 0, "OO-SPQ" => 0);
-$planesFlight=array("OO-ALD"=>0, "OO-JRB"=> 0, "OO-APV" => 0, "OO-FMX" =>0, "OO-ALE" => 0, "PH-AML" => 0, "OO-SHC" => 0, "OO-SPQ" => 0);
+$SumTotalByMonthString="";
+$planes=array("OO-ALD"=>0, "OO-JRB"=> 0, "OO-APV" => 0, "OO-FMX" =>0, "OO-ALE" => 0, "PH-AML" => 0, "OO-SHC" => 0, "OO-SPQ" => 0, "DUMMY" => 0);
+$planesFlight=array("OO-ALD"=>0, "OO-JRB"=> 0, "OO-APV" => 0, "OO-FMX" =>0, "OO-ALE" => 0, "PH-AML" => 0, "OO-SHC" => 0, "OO-SPQ" => 0, "DUMMY" => 0);
+$planesComparaison=array("OO-ALD"=>0, "OO-JRB"=> 0, "OO-APV" => 0, "OO-FMX" =>0, "OO-ALE" => 0, "PH-AML" => 0, "OO-SHC" => 0, "OO-SPQ" => 0, "DUMMY" => 0);
 //print("yearName=$yearName<br>");
 $monthsFilter = array("01"=>$yearName."-01-%",
 		"02"=>$yearName."-02-%",
@@ -90,14 +106,19 @@ $monthsForecast = array("01"=>1.3,
 
 $yearFilter=$yearName."-%";
 $totalTimeInMinute=0;
+$totalTimeInMinuteComparaison=0; // Year befor
 $SumTotalByMonth=0;
 foreach ($planes as $plane_id => &$planeTimeRef) {
 	$timeInMinute=getCompteurValueInMinute($plane_id, $yearFilter);
 	$timeString=convertMinuteToHour($timeInMinute);
 	$totalTimeInMinute+=$timeInMinute;
 	$planeTimeRef=$timeInMinute;
-	//$planes['$plane_id']=$timeInMinute;
-	//print("$plane_id: $planes[$plane_id]<br>");
+
+	$timeInMinute=getCompteurValueInMinute($plane_id, $comparaisonYearName."-%");
+	$timeString=convertMinuteToHour($timeInMinute);
+	$totalTimeInMinuteComparaison+=$timeInMinute;
+	$planesComparaison[$plane_id]=$timeInMinute;
+	//print("$plane_id: $comparaisonYearName  $planesComparaison[$plane_id]<br>");
 }
 ?>
 <div class="row">
@@ -128,9 +149,10 @@ foreach ($planes as $plane_id=>$planeTime) {
 	print("<th class=\"text-center border-bottom-0\">$plane_id</th>");
 }
 ?>
-<th class="text-center border-bottom-0">Total</th>
-<th class="text-center border-bottom-0">Total cumulé</th>
-<th class="text-center border-bottom-0">Prévision année</th>
+<th class="text-center border-bottom-0">Total<br><?=$yearName?></th>
+<th class="text-center border-bottom-0">Total<br><?=$comparaisonYearName?></th>
+<th class="text-center border-bottom-0">Total cumulé<br><?=$yearName?></th>
+<th class="text-center border-bottom-0">Prévision année<br><?=$yearName?></th>
 </tr>
 </thead>
 <tbody>
@@ -167,6 +189,25 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 	else {
 		print("<td class=\"text-center border-bottom-0\"></td>");
 	}
+
+	//Total column for comparaison
+	// loop on plane
+	$totalTimeMonthInMinuteComparaison=0;
+	foreach ($planesComparaison as $plane_id => $planeTime) {
+		if($planeTime==0) {
+			continue;
+		}	
+		$timeInMinute=getCompteurValueInMinute($plane_id,  $comparaisonYearName.substr($monthFilter,4));
+		$totalTimeMonthInMinuteComparaison+=$timeInMinute;
+	}
+	if($totalTimeMonthInMinuteComparaison>0) {
+		$totalByMonthComparaisonString=convertMinuteToHour($totalTimeMonthInMinuteComparaison);
+		print("<td class=\"text-center border-bottom-0\">$totalByMonthComparaisonString</td>");
+	}
+	else {
+		print("<td class=\"text-center border-bottom-0\"></td>");
+	}
+
 	// Total cummule
 	$SumTotalByMonth+=$totalTimeMonthInMinute;
 	if($totalTimeMonthInMinute>0) {
@@ -176,6 +217,9 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 	else {
 		print("<td class=\"text-center border-bottom-0\"></td>");
 	}
+
+
+
 
 	// Forecast for the year
 	$yearForecastString="";
@@ -199,23 +243,43 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 
 <?php
 	print("<tr class=\"table-info\">");
-	print("<td><strong>Total</strong></td>");
+	print("<td><strong>Total $yearName</strong></td>");
 	// loop on plane
 	foreach ($planes as $plane_id => $planeTime) {
 		if($planeTime==0) {
 			continue;
 		}	
-		//$timeInMinute=$planes['$plane_id'];
 		$timeInMinute=$planeTime;
 		$timeString=convertMinuteToHour($timeInMinute);
-		//$totalTimeInMinute+=$timeInMinute;
 		print("<td class=\"text-center border-bottom-0\"><strong>$timeString</strong></td>");
 	}
 	$totalTimeInString=convertMinuteToHour($totalTimeInMinute);
 	print("<td class=\"text-center border-bottom-0\"><strong>$totalTimeInString</strong></td>");
+	print("<td class=\"text-center border-bottom-0\"><strong></strong></td>");
 	print("<td class=\"text-center border-bottom-0\"><strong>$SumTotalByMonthString</strong></td>");
-	print("<td class=\"text-center border-bottom-0\"><strong>-</strong></td>");
+	print("<td class=\"text-center border-bottom-0\"><strong></strong></td>");
 	print("</tr>");
+
+	//Comparaison year
+	$planesComparaison[$plane_id]=$timeInMinute;
+	print("<tr class=\"table-info\">");
+	print("<td><strong>Total $comparaisonYearName</strong></td>");
+	// loop on plane
+	foreach ($planes as $plane_id => $planeTime) {
+		if($planeTime==0) {
+			continue;
+		}	
+		$timeInMinute=$planesComparaison[$plane_id];
+		$timeString=convertMinuteToHour($timeInMinute);
+		print("<td class=\"text-center border-bottom-0\"><strong>$timeString</strong></td>");
+	}
+	$totalTimeInString=convertMinuteToHour($totalTimeInMinuteComparaison);
+	print("<td class=\"text-center border-bottom-0\"><strong></strong></td>");
+	print("<td class=\"text-center border-bottom-0\"><strong>$totalTimeInString</strong></td>");
+	print("<td class=\"text-center border-bottom-0\"><strong></strong></td>");
+	print("<td class=\"text-center border-bottom-0\"><strong></strong></td>");
+	print("</tr>");
+
 ?>
 </tfoot>
 </table>
@@ -249,8 +313,8 @@ foreach ($planes as $plane_id=>$planeTime) {
 	print("<th class=\"text-center border-bottom-0\">$plane_id</th>");
 }
 ?>
-<th class="text-center border-bottom-0">Total</th>
-<th class="text-center border-bottom-0">Total cumulé</th>
+<th class="text-center border-bottom-0">Total<br><?=$yearName?></th>
+<th class="text-center border-bottom-0">Total cumulé<br><?=$yearName?></th>
 </tr>
 </thead>
 <tbody>
@@ -349,8 +413,8 @@ foreach ($planes as $plane_id=>$planeTime) {
 	print("<th class=\"text-center border-bottom-0\">$plane_id</th>");
 }
 ?>
-<th class="text-center border-bottom-0">Total</th>
-<th class="text-center border-bottom-0">Total cumulé</th>
+<th class="text-center border-bottom-0">Total<br><?=$yearName?></th>
+<th class="text-center border-bottom-0">Total cumulé<br><?=$yearName?></th>
 </tr>
 </thead>
 <tbody>
@@ -451,13 +515,14 @@ foreach ($planes as $plane_id=>$planeTime) {
 	print("<th class=\"text-center border-bottom-0\">$plane_id</th>");
 }
 ?>
-<th class="text-center border-bottom-0">Total</th>
-<th class="text-center border-bottom-0">Total cumulé</th>
+<th class="text-center border-bottom-0">Total<br><?=$yearName?></th>
+<th class="text-center border-bottom-0">Total cumulé<br><?=$yearName?></th>
 </tr>
 </thead>
 <tbody>
 <?php
 // loop on month
+$SumTotalByMonthString="";
 foreach ($monthsFilter as $month=>$monthFilter) {
 	print("<tr>");
 	print("<td class=\"text-center border-bottom-0\">$month</td>");
