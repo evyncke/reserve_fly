@@ -122,7 +122,7 @@ function tailNumber2Color(str) {
     return trackColors[Math.abs(hash) % trackColors.length] ;
 }
 
-function insertTrackPoints (flights) {
+function insertTrackPoints(flights) {
 	var currentId = '' ;
 	var currentFeature ;
 	var legendDiv = document.getElementById('flightLegend') ;
@@ -131,12 +131,15 @@ function insertTrackPoints (flights) {
 
 	flightFeatureCollection = [] ;
 	locationFeatureCollection = [] ;
+	var flightCount = 0 ;
+	if (flights.len == 0) return ;
 	for (var flight in flights) {
 		if (flight == 'sql' || flight == 'log') continue ;
 		if (flight == 'error') {
 			console.log(flights['error']) ;
 			continue ;
 		}
+		flightCount ++ ;
 		thisFlight = flights[flight] ;
 		planeColor = tailNumber2Color(flight) ;
 		if (legendDiv) {
@@ -198,7 +201,8 @@ function insertTrackPoints (flights) {
 			locationFeatureCollection.push(currentPositionFeature) ;
 		}
 	}
-
+	if (flightCount == 0) return ; // Else the map is zoomed out to the whole Earth!
+	
 	if (legendDiv) {
 		var x = legendItems.sort(function (a,b) {
 				var firstA = a.match(/.*\/(.+)\/.*\/.*/)[1] ;
@@ -222,7 +226,7 @@ function insertTrackPoints (flights) {
 			type : 'FeatureCollection',
 			features : locationFeatureCollection,
 		}) ;	
-	// bound the map to fit all flights
+	// bound the map to fit all flights if there were flights (else the display is whole Earth!)
 	map.fitBounds([[westCorner, southCorner],
 		[eastCorner, northCorner]],
 		{padding: {top: 20, bottom: 20, left: 20, right: 20}}
