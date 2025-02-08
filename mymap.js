@@ -89,12 +89,17 @@ function initMyMap(longitude, latitude, pilot, period, mapbox_token) {
 	var periodSelect = document.getElementById('periodSelect') ;
 	if (periodSelect) periodSelect.value = period ;
 	mapboxgl.accessToken = mapbox_token;
-	map = new mapboxgl.Map({
+	options = {
 	    container: 'map', // container id
-	    style: 'mapbox://styles/mapbox/outdoors-v10', // stylesheet location
 	    center: [longitude, latitude], // starting position [lng, lat]
-	    zoom: 7 // starting zoom
-	});
+	    zoom: 7 
+	} ;
+	// Check whether Cookie: contains theme=dark
+	if (decodeURIComponent(document.cookie).search('theme=dark') >= 0)
+		options.style = 'mapbox://styles/mapbox/dark-v9' ;
+	else
+		options.style = 'mapbox://styles/mapbox/outdoors-v10'; // stylesheet location
+	map = new mapboxgl.Map(options) ;
 
 	// Add zoom and rotation controls to the map.
 	map.addControl(new mapboxgl.NavigationControl());
