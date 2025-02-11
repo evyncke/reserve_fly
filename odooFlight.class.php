@@ -1415,7 +1415,7 @@ function OF_LastInvoiceDueDate($theOdooPartnerReference)
 {
     //print("OF_LastInvoiceDueDate($theOdooPartnerReference)<br>");
     $odooClient=OF_GetOdooClient();
-    $result= $odooClient->SearchRead('account.move', array(array(array('partner_id.id', '=', $theOdooPartnerReference))),  array('fields'=>array('id', 'partner_id', 'move_type', 'invoice_date_due', 'amount_total', 'status_in_payment','payment_state'))); 
+    $result= $odooClient->SearchRead('account.move', array(array(array('partner_id.id', '=', $theOdooPartnerReference),array('move_type', '=', 'out_invoice'))),  array('fields'=>array('id', 'partner_id', 'move_type', 'invoice_date_due', 'amount_total', 'status_in_payment','payment_state'))); 
     $DueDate="";
     foreach($result as $f=>$desc) {
       // echo var_dump($desc);
@@ -1427,17 +1427,16 @@ function OF_LastInvoiceDueDate($theOdooPartnerReference)
         }
         $status_in_payment=(isset($desc['status_in_payment'])) ? $desc['status_in_payment'] : '' ;
         if($status_in_payment=="paid") {
-            // Already paid
+            // Already paid => not_paid and partial
             continue;
         }
         $invoiceDueDate=(isset($desc['invoice_date_due'])) ? $desc['invoice_date_due'] : '' ;
         $invoiceDate=(isset($desc['invoice_date'])) ? $desc['invoice_date'] : '' ;
-        $id=(isset($desc['id'])) ? $desc['id'] : '' ;
         if($DueDate=="" || $invoiceDueDate<$DueDate) {
             $DueDate=$invoiceDueDate;
         }
         //$payment_state=(isset($desc['payment_state'])) ? $desc['payment_state'] : '' ;
-      
+        //$id=(isset($desc['id'])) ? $desc['id'] : '' ; 
         //print("theOdooPartnerReference=$theOdooPartnerReference id=$id invoiceDueDate=$invoiceDueDate  DueDate=$DueDate move_type=$move_type payment_state=$payment_state status_in_payment=$status_in_payment<br>");
     }
     return $DueDate;
