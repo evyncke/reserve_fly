@@ -1385,4 +1385,61 @@ function analyzeTypeOfFlightOnCommunication($theInvoiceCommunication)
     } 
     return "?";
 }
+
+//============================================
+// Function: OF_InvoiceDueDays
+// Purpose: returns the number of days after the invoice due date for a partner id
+//============================================
+function OF_InvoiceDueDays($theOdooPartnerReference)
+{
+    $dueDays=-1;
+    $dueDate=OF_LastInvoiceDueDate($theOdooPartnerReference);
+    if($dueDate=="") {
+        return $dueDays;
+    }
+    $dueDateTime = new DateTime($dueDate) ;
+    $today = new DateTime() ;
+
+    $diff=date_diff($dueDateTime,$today);
+    $dueDays=number_format($diff->format("%a"));
+    if($today<$dueDateTime) {
+        $dueDays*=-1;
+    }
+    return $dueDays;
+}
+//============================================
+// Function: OF_LastInvoiceDueDate
+// Purpose: returns the invoice due date for a partner id
+//============================================
+function OF_LastInvoiceDueDate($theOdooPartnerReference)
+{
+    //print("OF_LastInvoiceDueDate($theOdooPartnerReference)<br>");
+    $odooClient=OF_GetOdooClient();
+    $result= $odooClient->SearchRead('account.move', array(array(array('partner_id.id', '=', $theOdooPartnerReference))),  array('fields'=>array('id', 'partner_id', 'move_type', 'invoice_date_due', 'amount_total', 'status_in_payment','payment_state'))); 
+    $DueDate="";
+    foreach($result as $f=>$desc) {
+      // echo var_dump($desc);
+        //print('<br>');
+        $move_type=(isset($desc['move_type'])) ? $desc['move_type'] : '' ;
+        if($move_type!="out_invoice") {
+            // it is not an invoice
+            continue;
+        }
+        $status_in_payment=(isset($desc['status_in_payment'])) ? $desc['status_in_payment'] : '' ;
+        if($status_in_payment=="paid") {
+            // Already paid
+            continue;
+        }
+        $invoiceDueDate=(isset($desc['invoice_date_due'])) ? $desc['invoice_date_due'] : '' ;
+        $invoiceDate=(isset($desc['invoice_date'])) ? $desc['invoice_date'] : '' ;
+        $id=(isset($desc['id'])) ? $desc['id'] : '' ;
+        if($DueDate=="" || $invoiceDueDate<$DueDate) {
+            $DueDate=$invoiceDueDate;
+        }
+        //$payment_state=(isset($desc['payment_state'])) ? $desc['payment_state'] : '' ;
+      
+        //print("theOdooPartnerReference=$theOdooPartnerReference id=$id invoiceDueDate=$invoiceDueDate  DueDate=$DueDate move_type=$move_type payment_state=$payment_state status_in_payment=$status_in_payment<br>");
+    }
+    return $DueDate;
+}
 ?>

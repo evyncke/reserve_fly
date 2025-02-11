@@ -796,7 +796,6 @@ datediff(current_date(), b_when) as days_blocked
 		if(!$displayWebDeactivated && $blocked == 1 && $solde == 0.0) {
 		   continue;
 		}
-
 		$count++;
 		$odooReference=$row['odoo_id'];
 		if ($odooReference == "") {
@@ -805,6 +804,25 @@ datediff(current_date(), b_when) as days_blocked
 		else {
 			$odooCount+=1;			
 		}
+		// If solde <0, number of day after the last invoice due date
+		$dueDays=-1;
+		$invoiceDueDate="";
+		$dueDaysText="";
+	
+		if($solde<0.0) {
+			$dueDays=OF_InvoiceDueDays($odooReference);	
+			if($dueDays>0) {
+				$dueDaysText="<span class=\"badge bg-danger\">$dueDays</span>";
+				$invoiceDueDate="&#10071;Echéance facture dépassée: ".OF_LastInvoiceDueDate($odooReference)."$dueDaysText<br>";
+			}
+			else {
+				$dueDaysText="<span class=\"badge bg-warning text-dark\">$dueDays</span>";
+				$invoiceDueDate="Echéance facture: ".OF_LastInvoiceDueDate($odooReference)."$dueDaysText<br>";
+			}
+
+			//print("nom=$nom odooReference=$odooReference dueDayTime=$dueDays<br>");
+		}
+
 		$cotisation=$row['bkf_amount'];
 		$cotisationInvoiceDate="";
 		if(isset($row['bkf_invoice_date'])) $cotisationInvoiceDate=$row['bkf_invoice_date'];
@@ -889,6 +907,7 @@ datediff(current_date(), b_when) as days_blocked
 		}
 		$soldeText="";
 		$soldeStyle="";
+	
 		if($solde<0.0) {
 			$soldeStyle=' class="text-danger" ';
 		}
@@ -909,7 +928,7 @@ datediff(current_date(), b_when) as days_blocked
 			print("<td style='text-align: center;font-size: 17px;' class='text-success'>
 				<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Block','$nom $prenom','$personid','$solde')\">&#x2714;<span class='tooltiptext'>Click pour BLOQUER</span></a></td>");		
 		}
-		print("<td style='text-align: left;'>$status</td>");
+		print("<td style='text-align: left;'>$invoiceDueDate$status</td>");
 		/*
 		print("<td style='text-align: left;'><select id='id_blocked_$personid' name='blocked_$personid'>
 			<option value='OK'>$status</option>
