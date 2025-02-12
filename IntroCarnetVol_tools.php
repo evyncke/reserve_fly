@@ -83,6 +83,7 @@ function GetFullRemarks( $theFraisCP,  $thePAX, $theRemarque, $theFraisDC) {
 function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
     global $mysqli_link, $table_incident_history, $userId ;
     //print("AddATLIncident:Started: theLogId=$theLogId, thePlane=$thePlane, theSeverity=$theSeverity, theRemark=$theRemark<br>");
+    if($theLogId==0) return false;
     if(GetATLIncidentID($theLogId) == 0) {
         if($theSeverity != "nothing") {
             // No incident associated to the logid $$ severity = hazard or nohazard
@@ -269,5 +270,25 @@ function IsStudent($thePilotID) {
         return true;
     }
     return false;
+}
+
+// Is a segment flight already introduced?
+function IsSegmentAlreadyIntroduced($planeId,$startDayTime,$pilotId)
+{
+    global $userId;
+    global $mysqli_link, $table_logbook;
+
+    //print("IsSegmentAlreadyIntroduced:start $planeId , $startDayTime , $pilotId<br>");
+    $result = mysqli_query($mysqli_link, "SELECT l_plane
+    FROM $table_logbook 
+    WHERE l_plane = '$planeId' AND l_start = '$startDayTime' AND l_pilot= $pilotId")
+    or journalise($userId, "F", "Cannot read from $table_logbook for l_start = $startDayTime: " . mysqli_error($mysqli_link)) ;
+    $row = mysqli_fetch_array($result) ;
+    if (! $row) {
+       // print("IsSegmentAlreadyIntroduced n existe pas<br>");
+        return false ;
+    }
+    //print("IsSegmentAlreadyIntroduced existe<br>");
+    return true;
 }
 ?>

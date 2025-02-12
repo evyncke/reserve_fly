@@ -524,27 +524,35 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		// =====================
 		// -------------------------------------------
 		//print("Insert a segment</br>");
-		mysqli_query($mysqli_link, "insert into $table_logbook(l_plane, l_model, l_booking, l_from, l_to,
-				l_start_hour, l_start_minute, l_end_hour, l_end_minute, l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
-				l_start, l_end, l_flight_type, l_remark, l_pax_count, l_crew_count, l_pilot, l_is_pic, l_instructor, l_instructor_paid, l_day_landing, l_night_landing, 
-				l_share_type, l_share_member, l_audit_who, l_audit_ip, l_audit_time)
-				values ('$planeId', '$planeModel', $bookingidPage, '$fromAirport', '$toAirport',
-				$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute, $flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
-				'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
-				'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
-//			or die("(1)Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link). " Vol déjà introduit") ;
-			or journalise($userId, 'F', "<p style=\"color: red;\"><b>Impossible d'ajouter le segment dans le logbook:Vol déjà introduit.</br>Erreur SQL=" . mysqli_error($mysqli_link)."</br>9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.</br>Faite un Back avec votre Browser et corrigé l'heure de départ.</b></p>") ;			
-		$l_id = mysqli_insert_id($mysqli_link) ; 
-		$logid=$l_id;
-	
-	    journalise($userId, "I", "New Logbook entry added for $planeId, engine from $engineStartHour: $engineStartMinute to $engineEndHour:$engineEndMinute flight $startDayTime@$fromAirport to $endDayTime@$toAirport");
+		//print("Insert a segment</br>");
+		if(IsSegmentAlreadyIntroduced($planeId,$startDayTime,$pilotId)) {
+			print("<script>alert('Ce vol semble déjà introduit. Un segment commencant à $startDayTime existe déjà. Vous devez l éditer s il n est pas correct.');</script>");
+			$logid=0;
+			$l_id=0;
+		}
+		else {
+			mysqli_query($mysqli_link, "insert into $table_logbook(l_plane, l_model, l_booking, l_from, l_to,
+					l_start_hour, l_start_minute, l_end_hour, l_end_minute, l_flight_start_hour, l_flight_start_minute, l_flight_end_hour, l_flight_end_minute,
+					l_start, l_end, l_flight_type, l_remark, l_pax_count, l_crew_count, l_pilot, l_is_pic, l_instructor, l_instructor_paid, l_day_landing, l_night_landing, 
+					l_share_type, l_share_member, l_audit_who, l_audit_ip, l_audit_time)
+					values ('$planeId', '$planeModel', $bookingidPage, '$fromAirport', '$toAirport',
+					$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute, $flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
+					'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
+					'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
+	//			or die("(1)Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link). " Vol déjà introduit") ;
+				or journalise($userId, 'F', "<p style=\"color: red;\"><b>Impossible d'ajouter le segment dans le logbook:Vol déjà introduit.</br>Erreur SQL=" . mysqli_error($mysqli_link)."</br>9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.</br>Faite un Back avec votre Browser et corrigé l'heure de départ.</b></p>") ;			
+			$l_id = mysqli_insert_id($mysqli_link) ; 
+			$logid=$l_id;
 		
-		// Table resume ajoute
-		print('<p></p><center><table width=100%" border-spacing="0px"><tbody>
-		   <tr><td style="background-color: LightSalmon; text-align: center;" colspan="8">Un vol enregistré: Résumé (Heure UTC)</td></tr>
-		   <tr><td>Avion</td><td>Pilote</td><td>De</td><td>Heure</td><td>A</td><td>Heure</td><td>Durée</td></tr>') ;
-		   
-   }
+			journalise($userId, "I", "New Logbook entry added for $planeId, engine from $engineStartHour: $engineStartMinute to $engineEndHour:$engineEndMinute flight $startDayTime@$fromAirport to $endDayTime@$toAirport");
+			
+			// Table resume ajoute
+			print('<p></p><center><table width=100%" border-spacing="0px"><tbody>
+			<tr><td style="background-color: LightSalmon; text-align: center;" colspan="8">Un vol enregistré: Résumé (Heure UTC)</td></tr>
+			<tr><td>Avion</td><td>Pilote</td><td>De</td><td>Heure</td><td>A</td><td>Heure</td><td>Durée</td></tr>') ;
+			
+		}
+	}
    else {
 		// -----------------------------------------
 		// Edit a  segment
