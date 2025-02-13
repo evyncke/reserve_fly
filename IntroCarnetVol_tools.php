@@ -84,7 +84,28 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
     global $mysqli_link, $table_incident_history, $userId ;
     //print("AddATLIncident:Started: theLogId=$theLogId, thePlane=$thePlane, theSeverity=$theSeverity, theRemark=$theRemark<br>");
     if($theLogId==0) return false;
-    if(GetATLIncidentID($theLogId) == 0) {
+    if(!CheckIncidentCoherency($theLogId)){
+        // The incident table is corrected!
+        print("<p style=\"color: red;\"><b>ERROR:AddATLIncident($theLogId): Incident table corrected.</b></p><br>");
+        //return false;
+    }
+    /*
+    if(1) {
+        $toto=GetATLIncidentID($theLogId);
+         print("AddATLIncident:GetATLIncidentID($theLogId)=$toto<br>");
+         if($toto=="") {
+            print("AddATLIncident:GetATLIncidentID($theLogId)=$toto no string<br>");
+         }
+         if($toto==0) {
+            print("AddATLIncident:GetATLIncidentID($theLogId)=$toto O<br>");
+         }
+         if($toto==NULL) {
+            print("AddATLIncident:GetATLIncidentID($theLogId)=$toto NULL<br>");
+         }
+    }
+         */
+    $incidentID=GetATLIncidentID($theLogId);
+    if($incidentID == 0) {
         if($theSeverity != "nothing") {
             // No incident associated to the logid $$ severity = hazard or nohazard
             $incident = new Incident() ;
@@ -97,7 +118,7 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
             $event->status = 'opened' ;
             $event->text = $theRemark ;
             $event->save() ;
-            return false;
+            return true;
         }
         else {
             return false;
@@ -155,20 +176,51 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
     return false;
 }
 
+// Check if the two table rapcs_incident and rapcs_incident_history are coherent
+function CheckIncidentCoherency($theLogid)
+{
+    global $userId, $mysqli_link, $table_incident, $table_incident_history ;
+
+    $sql = "SELECT * FROM $table_incident WHERE i_log = $theLogid";
+    $result = mysqli_query($mysqli_link, $sql)
+        or  journalise($userId, "F", "Cannot retrieve incident by log id ($theLogid): " . mysqli_error($mysqli_link)) ;
+    $row = mysqli_fetch_array($result) ;
+    if ($row) {
+        $id=$row['i_id'];
+        $sql = "SELECT * FROM $table_incident_history WHERE ih_incident = $id";
+        $result = mysqli_query($mysqli_link, $sql)
+            or  journalise($userId, "F", "Cannot retrieve incident history by id ($id): " . mysqli_error($mysqli_link)) ;
+            $row = mysqli_fetch_array($result) ;
+        if(!$row) {
+            // Incoherent: no history associated to an incident
+            print("<p style=\"color: red;\"><b>ERROR:CheckIncidentCoherency($theLogid): No history associated to incident id=$id. Deleting this entry.</b></p><br>");
+            $sql = "delete from $table_incident where i_log = $theLogid";
+            mysqli_query($mysqli_link, $sql) or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
+            return false;
+        }
+    }
+    return true;
+}
+
 // Retrieve the IncidentId associated to the logID
 // Returns 0 if no incident associated to the loggID
 function GetATLIncidentID($theLogid) {
+    //print("GetATLIncidentID($theLogid)<br>");
     $incident = new Incident() ;
     $incident->getByLogId($theLogid) ;
     if($incident!=NULL) {
+        //print("GetATLIncidentID($theLogid) incident.id=$incident->id<br>");
+        if($incident->id==NULL) {
+            return 0;
+        }
         return $incident->id;
     }
+    //print("GetATLIncidentID($theLogid) return 0<br>");
     return 0;
 }
 
 // Retrieve the severity associated to an incidentId
 function GetATLIncidentSeverity($theIncidentId) {
-    
     $incident = new Incident() ;
     $incident->getById($theIncidentId) ;
     if($incident!=NULL) {

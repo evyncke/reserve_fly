@@ -912,6 +912,7 @@ if (isset($_REQUEST['edit']) and $_REQUEST['edit'] != '') {
 
             //Edit Aircraft Techical log
             $ATLIncidentId=GetATLIncidentID($logid);
+			//print("(1) GetATLIncidentID($logid) ATLIncidentId=$ATLIncidentId<br>");
             if( $ATLIncidentId != 0)	{
                 // An incident was associated to the segment
                 $ATLSeverity=GetATLIncidentSeverity($ATLIncidentId);
