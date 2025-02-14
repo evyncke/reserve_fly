@@ -182,6 +182,7 @@ if ($christmas_theme) {
             <li><a href="flight_list_mine.php">Mes vols à venir</a></li>
           </ul><!-- dropdown-menu -->
         </li><!-- dropdown -->
+        <li><a href="mobile_reservation.php">Mobile</a></li>
         <li><a href="flight_help.php">Aide</a></li>
       </ul><!-- av navbar-nav -->
     </div><!-- myNavbar -->
