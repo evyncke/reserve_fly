@@ -224,6 +224,9 @@ function GetATLIncidentSeverity($theIncidentId) {
     $incident = new Incident() ;
     $incident->getById($theIncidentId) ;
     if($incident!=NULL) {
+        if($incident->lastStatus=="closed") {
+            return "nothing";
+        }
         return $incident->severity;
     }
     return "select";
@@ -234,6 +237,9 @@ function GetATLIncidentDescription($theIncidentId) {
     $incident = new Incident() ;
     $incident->getById($theIncidentId) ;
     if($incident!=NULL) {
+        if($incident->lastStatus=="closed") {
+            return "";
+        }
         return $incident->lastText;
     }
     return "";
