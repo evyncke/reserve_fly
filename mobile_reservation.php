@@ -142,7 +142,8 @@ while ($row = mysqli_fetch_array($result)) {
 	$sql = "SELECT GROUP_CONCAT(DISTINCT UPPER(i_severity)) AS severities
 		FROM $table_incident AS i
 		LEFT JOIN $table_incident_history AS ih ON i_id = ih_incident
-		WHERE i_plane = '$row[id]' AND NOT EXISTS (SELECT * FROM $table_incident_history AS ih2 WHERE ih2.ih_incident = ih.ih_incident AND ih_status IN ('closed', 'rejected'))" ;
+		WHERE i_plane = '$row[id]' AND NOT EXISTS (SELECT * FROM $table_incident_history AS ih2 WHERE ih2.ih_incident = ih.ih_incident AND ih_status IN ('closed', 'rejected', 'duplicate'))" ;
+
 	$result_incident = mysqli_query($mysqli_link, $sql) or journalise($userId, "E", "Cannot read incident for $row[id]: " . mysqli_error($mysqli_link)) ;
 	$row_incident = mysqli_fetch_assoc($result_incident) ;
 	// if ($userId == 62) var_dump($row_incident) ;
