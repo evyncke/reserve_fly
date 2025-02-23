@@ -20,6 +20,7 @@
 */
 
 require_once "dbi.php" ;
+require_once "IntroCarnetVol_tools.php" ;
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
@@ -65,6 +66,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
     }
     else {
         print("<h1 style=\"color: red;\"> An uploaded file is too big ! Max Size=$maxFileSizeString.<br>No file uploaded</h1>");
+    }
+    if(SentIncidentMail($incident->id, $incident->plane, $incident->severity, $event->text)) {
+        print("<h1 style=\"color: red;\"> A mail is sent to FIs and fleet team</h1>");
     }
 }
 ?>
@@ -137,6 +141,12 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
         var anEntry=document.getElementById("id_createatlentry");
         
 		var severity=document.getElementById("severityId").value;
+        if(severity=="hazard") {
+            if (confirm("Vous avez choisi un ATL report de type HAZARD TO FLY.\nL'avion sera donc bloqué jusqu'à l'intervention d'un mécanicien.\nConfirmez que vous voulez bien bloquer l'avion?") == false) {
+			    document.getElementById("severityId").value="nohazard";
+                severity="nohazard";
+		    }
+        }
         if(severity=="hazard" || severity =="nohazard") {
             document.getElementById("id_createatlentry").disabled=false;
         }

@@ -291,7 +291,9 @@ function CleanATLLog($logText) {
 function SentIncidentMail($theATLId, $thePlane, $theSeverity, $theRemark) 
 {
     global $userId,$fleetEmail,$userFullName;
-    if($theSeverity=="hazard") {
+    //print("SentIncidentMail($theATLId, $thePlane, $theSeverity, $theRemark)");
+    $severity=strtoupper($theSeverity);
+    if($severity=="HAZARD") {
         $replyto="patrick.reginster@gmail.com";
         //$mailto="patrick.reginster@gmail.com";
         $mailto=$fleetEmail.",fis@spa-aviation.be";
@@ -299,7 +301,7 @@ function SentIncidentMail($theATLId, $thePlane, $theSeverity, $theRemark)
         $subject="Nouvel ATL report numero $theATLId de type HAZARD pour ".$thePlane;
         $remark= remove_accents($theRemark);
         $message="Un nouvel ATL report num&eacute;ro $theATLId de type HAZARD a &eacute;t&eacute; introduit par ".$userFullName.
-        " pour l'avion ".$thePlane."<br>Description du probl&egrave;me: ".$remark."<br>Il faut peut &ecirc;tre bloquer l'avion.<br><br>Mail g&eacute;n&eacute;r&eacute; automatiquement lors de l'introduction du vol"; 
+        " pour l'avion ".$thePlane."<br>Description du probl&egrave;me: ".$remark."<br>Il faut peut &ecirc;tre bloquer l'avion.<br><br>Mail g&eacute;n&eacute;r&eacute; automatiquement lors de l'introduction du vol ou via la page TechLog"; 
 
         $headers="";
         if($from_mail != "") {
