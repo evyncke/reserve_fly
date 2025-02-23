@@ -607,9 +607,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
     //Manage Aircraft Technical Log
 	//----------------------------------------------------
     if($ATLLevel!="" && $ATLLevel!="select") {
-        if(AddATLIncident($l_id, $planeId, $ATLLevel, $ATLDescription)) {
-    		print("<p style=\"color: red;\"><b>An entry is introduced in the Technical Log: $ATLLevel </b></p>") ;
-        }
+		$ATLId=AddATLIncident($l_id, $planeId, $ATLLevel, $ATLDescription);
+        if($ATLId>0) {
+			print("<p style=\"color: red;\"><b>An entry $ATLId is introduced in the Technical Log: $ATLLevel </b></p>") ;
+			if(SentIncidentMail($ATLId, $planeId, $ATLLevel, $ATLDescription)) {
+				print("<p style=\"color: red;\"><b>A mail is send to FI and the fleet team</b></p>") ;
+			}
+    	}
     }
     
 		
@@ -994,8 +998,18 @@ else {
 		print("var default_instructor=0;\n");
 		print("var default_date_heure_depart=\"\";\n");
 		print("var default_flight_reference=\"\"\n");
-	    print("var default_flight_id=\"$flightRow[f_id]\"\n");
-	    print("var default_flight_type=\"$flightRow[f_type]\"\n");
+		if (isset($flightRow['f_id'])) {
+    	   print("var default_flight_id=\"$flightRow[f_id]\"\n");
+		}
+		else{
+			print("var default_flight_id=\"\"\n");
+		}
+		if (isset($flightRow['f_type'])) {
+			print("var default_flight_type=\"$flightRow[f_type]\"\n");
+		}
+		else {
+			print("var default_flight_type=\"\"\n");
+		}
 	}
 
 	if($bookingid!='0') {		
@@ -1297,7 +1311,7 @@ Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 
 <script src="https://www.spa-aviation.be/resa/pilots.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/CP_frais_type.js"\></script>-->
 <script src="https://www.spa-aviation.be/resa/prix.js"></script>
-<!---<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>--->
+<!---<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
 <script src="https://www.spa-aviation.be/resa/script_carnetdevol.js"></script>
 </body>
 </html>

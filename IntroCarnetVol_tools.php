@@ -1,5 +1,6 @@
 <?php
 require_once 'incident.class.php' ;
+require_once "dbi.php" ;
 
 function GetCompteurHour($Compteur) {
 	$aPos=strpos($Compteur,".");
@@ -82,6 +83,7 @@ function GetFullRemarks( $theFraisCP,  $thePAX, $theRemarque, $theFraisDC) {
 // Add an incident in the Aircraft Technical Log 
 function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
     global $mysqli_link, $table_incident_history, $userId ;
+    //if(1) return 76;
     //print("AddATLIncident:Started: theLogId=$theLogId, thePlane=$thePlane, theSeverity=$theSeverity, theRemark=$theRemark<br>");
     if($theLogId==0) return false;
     if(!CheckIncidentCoherency($theLogId)){
@@ -89,21 +91,7 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
         print("<p style=\"color: red;\"><b>ERROR:AddATLIncident($theLogId): Incident table corrected.</b></p><br>");
         //return false;
     }
-    /*
-    if(1) {
-        $toto=GetATLIncidentID($theLogId);
-         print("AddATLIncident:GetATLIncidentID($theLogId)=$toto<br>");
-         if($toto=="") {
-            print("AddATLIncident:GetATLIncidentID($theLogId)=$toto no string<br>");
-         }
-         if($toto==0) {
-            print("AddATLIncident:GetATLIncidentID($theLogId)=$toto O<br>");
-         }
-         if($toto==NULL) {
-            print("AddATLIncident:GetATLIncidentID($theLogId)=$toto NULL<br>");
-         }
-    }
-         */
+
     $incidentID=GetATLIncidentID($theLogId);
     if($incidentID == 0) {
         if($theSeverity != "nothing") {
@@ -118,10 +106,10 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
             $event->status = 'opened' ;
             $event->text = $theRemark ;
             $event->save() ;
-            return true;
+            return $incident->id;
         }
         else {
-            return false;
+            return 0;
         }
     }
     else {
@@ -135,7 +123,7 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
             if($aPreviousPlane==$thePlane && $aPreviousSeverity==$theSeverity && $aPreviousRemark==$theRemark) {
                 // nothing changed for the ATL. Nothing to do.
                 //print("AddATLIncident: Same ATL nothing to do!<br>");
-                return false;
+                return 0;
             }
             if($theSeverity == "nothing") {
                 //print("AddATLIncident: The pilot removes its ATL Log -> Close the Event!<br>");
@@ -146,7 +134,7 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
                 $event->status = "closed";
                 $event->text = "Event removed by the pilot. Nothing more to declare!";
                 $event->save() ;
-                return true;
+                return $incident->id;;
             }
             if($aPreviousRemark==$theRemark) {
                 // Same remark but severity or plane changed ! No new event
@@ -154,7 +142,7 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
                 $incident->plane = $thePlane ;
                 $incident->severity = $theSeverity ;
                 $incident->save();
-                return true;
+                return $incident->id;;
             }
             else {
                 //print("AddATLIncident: the remark has changed!<br>");
@@ -170,10 +158,10 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
                 $event->status = "opened";
                 $event->text = trim(web2db($theRemark));
                 $event->save() ;
-                return true;
+                return $incident->id;;
             }
     }
-    return false;
+    return 0;
 }
 
 // Check if the two table rapcs_incident and rapcs_incident_history are coherent
@@ -298,6 +286,50 @@ function CleanATLLog($logText) {
     $text=str_replace('"'," ",$text);
     return $text;
 }
+
+// Send a mail for an HAZARD incident 
+function SentIncidentMail($theATLId, $thePlane, $theSeverity, $theRemark) 
+{
+    global $userId,$fleetEmail,$userFullName;
+    if($theSeverity=="hazard") {
+        $replyto="patrick.reginster@gmail.com";
+        //$mailto="patrick.reginster@gmail.com";
+        $mailto=$fleetEmail.",fis@spa-aviation.be";
+        $from_mail="fleet@spa-aviation.be";
+        $subject="Nouvel ATL report numero $theATLId de type HAZARD pour ".$thePlane;
+        $remark= remove_accents($theRemark);
+        $message="Un nouvel ATL report num&eacute;ro $theATLId de type HAZARD a &eacute;t&eacute; introduit par ".$userFullName.
+        " pour l'avion ".$thePlane."<br>Description du probl&egrave;me: ".$remark."<br>Il faut peut &ecirc;tre bloquer l'avion.<br><br>Mail g&eacute;n&eacute;r&eacute; automatiquement lors de l'introduction du vol"; 
+
+        $headers="";
+        if($from_mail != "") {
+           $headers .= "From: ".$from_mail."\r\n";
+        }
+        //$headers .= "Cc: ".$replyto."\r\n";
+        $headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+        //echo("mailto=$mailto subject=$subject message=$message headers=$headers<br/>");
+        if(smtp_mail($mailto, $subject, $message, $headers)) {
+            return true;
+        } 
+        else {
+            echo("mail SentIncidentMail() send ... ERROR!<br/>");
+        }
+    }
+    return false;   
+}
+function remove_accents($text) {
+	$from = explode(" ",""
+		." À Á Â Ã Ä Å Ç È É Ê Ë Ì Í Î Ï Ñ Ò Ó Ô Õ Ö Ø Ù Ú Û Ü Ý à á â"
+		." ã ä å ç è é ê ë ì í î ï ñ ò ó ô õ ö ø ù ú û ü ý ÿ Ā ā Ă ă Ą"
+		." ą Ć ć Ĉ ĉ Ċ ċ Č č Ď ď Đ đ Ē ē Ĕ ĕ Ė ė Ę ę Ě ě Ĝ ĝ Ğ ğ Ġ ġ Ģ");
+	$to = explode(" ",""
+		." A A A A A A C E E E E I I I I N O O O O O O U U U U Y a a a"
+		." a a a c e e e e i i i i n o o o o o o u u u u y y A a A a A"
+		." a C c C c C c C c D d D d E e E e E e E e E e G g G g G g G");
+	return str_replace( $from, $to, $text);
+}
+
 // Check if a DTO flight is already associated to the logbook
 function HasDTOFlight($theLogId) { 
     global $userId;

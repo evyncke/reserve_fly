@@ -185,11 +185,11 @@ function carnetdevol_page_loaded() {
 
 // Check Aircraft Techlog
   document.getElementById("id_cdv_ATL_level").onchange = function() {
-	  	check_techlog();
+	  	check_techlog("id_cdv_ATL_level");
         compute_prix();
   };
   document.getElementById("id_cdv_ATL_description").onchange = function() {
-	  	check_techlog();
+	  	check_techlog("id_cdv_ATL_description");
         compute_prix();
   };
 
@@ -204,7 +204,7 @@ function carnetdevol_page_loaded() {
   compute_frais_CP();
   check_heure("id_cdv_heure_depart");
   compute_prix();
-  check_techlog();
+  check_techlog("");
   displayATL(document.getElementById("id_cdv_aircraft").value);
 
 
@@ -240,7 +240,7 @@ function carnetdevol_page_after_loaded() {
 // Purpose: Check the Aircraft Techiical log 
 //==============================================
 
-function check_techlog()
+function check_techlog(theEntryID)
 {
     /*
     if(default_pilot!= 66 && default_pilot!= 62 && default_pilot!= 118 && default_pilot!= 92) {
@@ -250,6 +250,11 @@ function check_techlog()
     }
     */
     var aLevel=document.getElementById("id_cdv_ATL_level").value;
+	if(aLevel=="hazard" && theEntryID=="id_cdv_ATL_level") {
+		if (confirm("Vous avez choisi un ATL report de type HAZARD TO FLY.\nL'avion sera donc bloqué jusqu'à l'intervention d'un mécanicien.\nConfirmez que vous voulez bien bloquer l'avion?") == false) {
+			document.getElementById("id_cdv_ATL_level").value="nohazard";
+		}
+	}
     if(aLevel=="select" || aLevel=="nothing") {
         document.getElementById("id_cdv_ATL_description_row").style.display="none";
     }
