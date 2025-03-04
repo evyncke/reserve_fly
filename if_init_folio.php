@@ -195,13 +195,19 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
             $moyenPaiement="Virement CBC";
         }
         else {		
-    	    $pos = strpos(strtoupper($referencePaiement), "BANCONTACT");
-    	    if($pos===false) {
-    			$moyenPaiement=$referencePaiement;
+    	    $pos = strpos(strtoupper($referencePaiement), "TERMINAL");
+    	    //if($pos===false) {
+			if($typeVol=="Bon") {
+				$moyenPaiement=$referencePaiement;
                 $checkReferencePaiement="<br><b style=\"color: red;\">Pas encore de référence odoo</b>";
     	    }
     	    else {
-    		    $moyenPaiement="Bancontact";
+    	      if($pos===false) {
+				$moyenPaiement="";
+			  }
+			  else {
+				$moyenPaiement="Bancontact";
+			  }
     	    }
         }
 		$montant=$row['fl_amount'];

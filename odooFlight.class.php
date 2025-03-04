@@ -539,6 +539,7 @@ function OF_createFactureINIT($theFlightReference, $theDate, $theLogbookid, $the
 function OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids) {
     global $mysqli_link, $table_logbook,$userId;
     global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
+    global $non_nav_membership_product,$non_nav_membership_price,$membership_analytic_account;
     //print("OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids):started<br>");
     $referencesMap= array();
 
@@ -612,7 +613,7 @@ function OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids) {
         			'account_id' => $code_700000, 
         			'quantity' => 1,
         			'price_unit' => $cotisation,
-                    'analytic_distribution' => array($analytic_club_init_if => 100)
+                    'analytic_distribution' => array($membership_analytic_account => 100)
         		)) ;
         }
     }
