@@ -716,6 +716,7 @@ function makeDisplayPlaneDetails(planeIndex) {
 
 // Called when mouse is over a plane having some information to be displayed
 function displayPlaneDetails(planeIndex) {
+	console.log('displayPlaneDetails:' + planeIndex) ;
 	var span ;
 	var thisPlane = allPlanes[planeIndex] ;
 	span = document.getElementById('reservationDetails') ;
@@ -835,6 +836,7 @@ function displayAgendaItemDetails(id) {
 
 // Called when mouse is leaving an existing reservation
 function clearBookingDetails() {
+	console.log("clearBookingDetails()") ;
 	if (! isToday()) { // If today, leave the DIV open for METAR, else display any 'crew/pax wanted' list
 		displayDayMessages() ;
 	} else
@@ -1312,8 +1314,11 @@ function redirectLogBook(event) {
 
 function editBookingDetails(event) {
 	var ressource ; // Whether it is a plane (0) or another ressource (1)
+	console.log("start of editBookingDetails() event.currentTarget.id=", event.currentTarget.id) ;
+	console.log(event) ;
 	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
 	var id = event.target.id ;
+	console.log("id=", id) ;
 	if (id == 0) return ; // When clicking on pilot details, this event is also triggered :-(
 	currentlyDisplayedBooking = bookingFromID(id)  ;
 	var booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
