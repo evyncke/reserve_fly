@@ -16,7 +16,7 @@
 
 */
 
-$code = 'XyzzY' ;
+$code = '0hFuN' ;
 
 require_once "dbi.php" ;
 if ($userId == 0) {
