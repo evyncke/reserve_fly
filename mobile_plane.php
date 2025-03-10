@@ -75,8 +75,9 @@ function generateMaintenanceClass($entretien, $compteur) {
 		return ' class="warning"' ;
 	return '' ;
 }
-	$class = generateMaintenanceClass($plane_row['entretien'], $row2['compteur_pilote']) ;
-	print("<tr$class><td>Dernier compteur pilote<span class=\"hidden-xs\"> ($row2[compteur_pilote_date])</span></td><td>$row2[compteur_pilote]</td></tr>\n") ;
+	$class = (isset($plane_row['entretien']) and isset($row2['compteur_pilote'])) ? generateMaintenanceClass($plane_row['entretien'], $row2['compteur_pilote']) : '';
+	if (isset($row2['compteur_pilote_date']))
+		print("<tr$class><td>Dernier compteur pilote<span class=\"hidden-xs\"> ($row2[compteur_pilote_date])</span></td><td>$row2[compteur_pilote]</td></tr>\n") ;
 	if ($plane_row['poh'])
 		print("<tr><td>POH </td><td><a href=\"$plane_row[poh]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
 	if ($plane_row['checklist'])
