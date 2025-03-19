@@ -75,9 +75,9 @@ if($thisYearName==$yearName) {
 <h2>Résumé du logbook du <?=$since?> au <?=$yearAfterForTitleString?></h2>
 <?php
 $SumTotalByMonthString="";
-$planes=array("OO-ALD"=>0, "OO-JRB"=> 0, "OO-APV" => 0, "OO-FMX" =>0, "OO-ALE" => 0, "PH-AML" => 0, "OO-SHC" => 0, "OO-SPQ" => 0, "DUMMY" => 0);
-$planesFlight=array("OO-ALD"=>0, "OO-JRB"=> 0, "OO-APV" => 0, "OO-FMX" =>0, "OO-ALE" => 0, "PH-AML" => 0, "OO-SHC" => 0, "OO-SPQ" => 0, "DUMMY" => 0);
-$planesComparaison=array("OO-ALD"=>0, "OO-JRB"=> 0, "OO-APV" => 0, "OO-FMX" =>0, "OO-ALE" => 0, "PH-AML" => 0, "OO-SHC" => 0, "OO-SPQ" => 0, "DUMMY" => 0);
+$planes=array("OO-ALD"=>0, "OO-JRB"=> 0, "OO-FUN"=> 0, "OO-APV" => 0, "OO-FMX" =>0, "OO-ALE" => 0, "PH-AML" => 0, "OO-SHC" => 0, "OO-SPQ" => 0, "DUMMY" => 0);
+$planesFlight=array("OO-ALD"=>0, "OO-JRB"=> 0, "OO-FUN"=> 0, "OO-APV" => 0, "OO-FMX" =>0, "OO-ALE" => 0, "PH-AML" => 0, "OO-SHC" => 0, "OO-SPQ" => 0, "DUMMY" => 0);
+$planesComparaison=array("OO-ALD"=>0, "OO-JRB"=> 0, "OO-FUN"=> 0, "OO-APV" => 0, "OO-FMX" =>0, "OO-ALE" => 0, "PH-AML" => 0, "OO-SHC" => 0, "OO-SPQ" => 0, "DUMMY" => 0);
 //print("yearName=$yearName<br>");
 $monthsFilter = array("01"=>$yearName."-01-%",
 		"02"=>$yearName."-02-%",

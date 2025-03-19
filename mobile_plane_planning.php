@@ -35,7 +35,7 @@ if (!($userIsAdmin or $userIsInstructor)) journalise($userId, "F", "Vous devez √
 ?>
 <div class="container-fluid">
 <h2>Ech√©ances des avions</h2>
-<table class="col-sm-12 col-lg-8 table table-hover table-bordered">
+<table class="col-sm-12 col-lg-8 table table-hover table-bordered table-striped">
 <thead>
 <tr class="text-center"><th>Plane</th> <th>Last index</th> <th colspan="3">Inspections</th>        <th colspan="2">Time limit</th> <th>Circ. Equip 4 ed5</th>    <th>&lt; 30 days</th>            <th>Mag.</th> <th>Pesage</th><th>PLB</th><th>Instruments</th></tr>
 <tr class="text-center"><th>     </th> <th>                       </th> <th>50h</th><th>100h</th><th>200h</th>  <th>Eng</th><th>Prop</th>       <th>ATC -Enc. - Alti</th>    <th>CN</th>                      <th>500h</th> <th>10 y </th><th>Date</th><th>Date</th></tr>
@@ -79,7 +79,26 @@ while ($row = mysqli_fetch_array($result)) {
 		or die("Cannot get pilote engine time:" . mysqli_error($mysqli_link)) ;
 
 	$row2 = mysqli_fetch_array($result2) ;
-	$current_value_pilot = $row2['compteur_pilote'] ;
+	$current_value_pilot=0;
+	if (isset($row2['compteur_pilote'])) {
+		$current_value_pilot = $row2['compteur_pilote'] ;
+	}
+
+	$cnDateString=$row['cn'];
+	$year=date('Y');
+	if(strlen($cnDateString)==5) {
+		$today=date('Y-m-d');
+		$cnDateString=$year."-".substr($row['cn'],3,2)."-".substr($row['cn'],0,2);
+		if($today>$cnDateString) {
+			$cnDate=new DateTime($cnDateString);
+			$yearInterval = new DateInterval('P1Y');
+			$cnDate=$cnDate->add($yearInterval);
+    		$cnDateString=$cnDate->format('Y-m-d') ;
+		}
+	}
+	else {
+		$cnDateString="?".$cnDateString."?";
+	}
 
 	print("<tr class=\"text-center\"><td><a href=\"plane_chart.php?id=$row[id]\">" . strtoupper($row['id']) . "</a></td><td>$current_value_pilot</td>") ;
 	// Type_entretien... human encoding :-( 50h, 50h->200h, 100h
@@ -91,9 +110,10 @@ while ($row = mysqli_fetch_array($result)) {
 		print("<td></td><td></td>". GenCell($row['entretien'])) ;
 	else // Assuming 50h
 		print("<td>$row[entretien] ????</td><td></td><td></td>") ;
-	print("<td>$row[limite_moteur_heure]<br/>$row[limite_moteur_12ans]</td>" . GenCell($row['limite_helice']) . 
+	print("<td><table><tbody><tr><td>".GenCell($row['limite_moteur_heure'])."</td></tr><tr><td>".GenCellDate($row['limite_moteur_12ans'],100,30)."</td></tr></tbody></table></td>" .
+		GenCell($row['limite_helice']) . 
 		GenCellDate($row['instrument_date_limite'], 100, 30). 
-		"<td>$row[cn]</td>" . 
+		GenCellDate($cnDateString, 100, 30).
 		GenCell($row['limite_magnetos']) .
 	    GenCellDate($row['pesage'], 100, 30).
 		GenCellDate($row['plb_date_limite'], 100, 30).
