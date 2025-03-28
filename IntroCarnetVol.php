@@ -12,7 +12,7 @@
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
-   limitations under the License. 
+   limitations under the License.
 
 */
 require_once __DIR__ .'/dbi.php';
@@ -178,6 +178,25 @@ if ($userIsAdmin or $userIsInstructor) {
 		print("</table></center><p></p>\n") ;
 	}
 }
+$compteurTypeByPlane= array();
+$cars["color"] = "Red";
+print("<script>\n");
+print("var planes_properties=[\n");	
+	$result=mysqli_query($mysqli_link,"SELECT upper(id) as name,  cout, l_end_hour, l_end_minute, l_flight_end_hour, l_flight_end_minute, compteur_vol, compteur_type, model
+	FROM rapcs_planes p JOIN rapcs_logbook l ON p.id = l_plane 
+	WHERE l_id = (SELECT MAX(ll.l_id) FROM rapcs_logbook ll WHERE ll.l_plane = l.l_plane)
+	and ressource = 0 and actif=1");
+	
+	while($row=mysqli_fetch_array($result)) {
+		print("{ id: \"$row[name]\" , name: \"$row[name]\" , compteur_type: \"$row[compteur_type]\" , 
+			compteur: \"$row[l_end_hour].$row[l_end_minute]\", 
+		compteur_vol: \"$row[compteur_vol]\", compteur_vol_valeur: \"$row[l_flight_end_hour].$row[l_flight_end_minute]\", prix: \"$row[cout]\" , model: \"$row[model]\"},\n");
+        $compteurTypeByPlane[$row["name"]]=$row["compteur_type"];
+	}
+print("];\n");
+print("</script>\n");
+var_dump($compteurTypeByPlane);
+print("<br>");
 
 //---------------------------------------------------------------------------
 // Management of previous and next booking
@@ -487,9 +506,14 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	}
 	$flightStartHour = mysqli_real_escape_string($mysqli_link, $flightStartHour) ;
 	$instructorId = mysqli_real_escape_string($mysqli_link, $instructorId) ;
-	if($planeId=="OO-APV") {
-		$engineStartMinute=strval(intval($engineStartMinute)*6);
-		$engineEndMinute=strval(intval($engineEndMinute)*6);
+	//if($planeId=="OO-APV") {
+
+	if (array_key_exists($planeId,$compteurTypeByPlane)) {
+		if($compteurTypeByPlane[$planeId]=="6") {
+			print("Compteur decimal<br>");
+			$engineStartMinute=strval(intval($engineStartMinute)*6);
+			$engineEndMinute=strval(intval($engineEndMinute)*6);
+		}
 	}
 	if($bookingid == 0){
 		// -----------------------------------------
@@ -804,22 +828,6 @@ else {
 	print('<center><table border-spacing="0px"><tbody>
 	<tr><td style="background-color: GreenYellow; text-align: center;" colspan="8">Introduction vol sans  réservation</td></tr></tbody></table></center>');		
 }
-
-
-print("<script>\n");
-print("var planes_properties=[\n");	
-	$result=mysqli_query($mysqli_link,"SELECT upper(id) as name,  cout, l_end_hour, l_end_minute, l_flight_end_hour, l_flight_end_minute, compteur_vol, compteur_type, model
-	FROM rapcs_planes p JOIN rapcs_logbook l ON p.id = l_plane 
-	WHERE l_id = (SELECT MAX(ll.l_id) FROM rapcs_logbook ll WHERE ll.l_plane = l.l_plane)
-	and ressource = 0 and actif=1");
-	
-	while($row=mysqli_fetch_array($result)) {
-		print("{ id: \"$row[name]\" , name: \"$row[name]\" , compteur_type: \"$row[compteur_type]\" , 
-			compteur: \"$row[l_end_hour].$row[l_end_minute]\", 
-		compteur_vol: \"$row[compteur_vol]\", compteur_vol_valeur: \"$row[l_flight_end_hour].$row[l_flight_end_minute]\", prix: \"$row[cout]\" , model: \"$row[model]\"},\n");
-	}
-print("];\n");
-print("</script>\n");
 
 $editFlag=0;
 //---------------------------------------------------------------------------
