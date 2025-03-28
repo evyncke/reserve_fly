@@ -751,11 +751,23 @@ if($bookingid) {
 			$end_Time=$row['l_end'];
 			//$MOStart=$row['l_start_hour'].'.'.$row['l_start_minute'];
 			//$MOEnd=$row['l_end_hour'].'.'.$row['l_end_minute'];
+		
 			$MO=$row['l_start_hour'].'.'.$row['l_start_minute'];
 			$MO=$MO.'->';
 			$MO=$MO.$row['l_end_hour'].'.'.$row['l_end_minute'];
             $Min=$row['l_end_hour']*60+$row['l_end_minute']-$row['l_start_hour']*60-$row['l_start_minute'];
             $MO=$MO." (".$Min."min)";
+			if (array_key_exists($row["l_plane"],$compteurTypeByPlane)) {
+				if($compteurTypeByPlane[$row["l_plane"]]=="6") {	
+					$minValue=	$row['l_start_minute']/6;
+					$MO=$row['l_start_hour'].'.'.$minValue;
+					$MO=$MO.'->';
+					$minValue=	$row['l_end_minute']/6;
+					$MO=$MO.$row['l_end_hour'].'.'.$minValue;
+					$Min=$row['l_end_hour']*60+$row['l_end_minute']-$row['l_start_hour']*60-$row['l_start_minute'];
+					$MO=$MO." (".$Min."min)";
+				}
+			}
 			$aSegment+=1;
 			$instructorPaid="";
 			$crew_Count=$row['l_crew_count'];
