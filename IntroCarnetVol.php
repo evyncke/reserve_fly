@@ -195,8 +195,6 @@ print("var planes_properties=[\n");
 	}
 print("];\n");
 print("</script>\n");
-var_dump($compteurTypeByPlane);
-print("<br>");
 
 //---------------------------------------------------------------------------
 // Management of previous and next booking
