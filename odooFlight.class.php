@@ -878,6 +878,7 @@ function OF_GetAnalyticPilotID($thePilotID)
 //============================================
 function OF_GetAnalyticAccountID($theAnalyticAccount) 
 {
+    //account.analytic.account
     $accounts= array(
         'OO-ALD' => 26, 
         'OO-ALE' => 27, 
@@ -886,6 +887,7 @@ function OF_GetAnalyticAccountID($theAnalyticAccount)
         'OO-JRB' => 30, 
         'OO-SPQ' => 31, 
         'PH-AML' => 32,
+        'OO-FUN' => 46, 
         "Benoît Mendes" => 36,    // FI Benoît Mendes
         "Luc Wynand" => 34,       // FI Luc Wynand
         "Nicolas Claessen" => 35, // FI Nicolas Claessen

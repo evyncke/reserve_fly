@@ -89,6 +89,7 @@ $plane_analytic = array('OO-ALD' => 26,
     'OO-APV' => 28, 
     'OO-FMX' => 29, 
     'OO-JRB' => 30, 
+    'OO-FUN' => 46, 
     'OO-SPQ' => 31, 
     'PH-AML' => 32) ;
 $fi_analytic = array(46 => 36, // Benoît Mendes

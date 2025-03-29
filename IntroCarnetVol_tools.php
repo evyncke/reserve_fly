@@ -248,7 +248,7 @@ function IsATLIncidentClosed($theIncidentId) {
 // Retrieve the description associated of all open incidend for all planes
 // JSON: '{"ATL": [{"plane": "OO-ALD", "logs":["log11","log12"]},{"plane": "OO-JRB", "logs":["log21","log22","log23"]}]}'
 function GetJSONIncidentByPlanes() {
-    $planes = array('OO-ALD', 'OO-ALE', 'OO-APV', 'OO-JRB', 'OO-FMX', 'OO-SPQ', 'PH-AML') ;
+    $planes = array('OO-ALD', 'OO-ALE', 'OO-APV', 'OO-FUN', 'OO-JRB', 'OO-FMX', 'OO-SPQ', 'PH-AML') ;
     $jsonString='{"ATL": [';
     //loop on planes
     $planeCount=0;
