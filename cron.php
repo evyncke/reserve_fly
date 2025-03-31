@@ -793,7 +793,7 @@ mysqli_query($mysqli_link, "DELETE FROM jom_redirect_links WHERE published = 0")
 	or journalise(0, "E", "Cannot purge unpublished entries in jom_redirect_links: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_redirect_links")
 	or journalise(0, "E", "Cannot optimize jom_redirect_links: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "DELETE FROM jom_ucm_history WHERE save_date < DATE_SUB(NOW(), INTERVAL 36 MONTH)")
+mysqli_query($mysqli_link, "DELETE FROM jom_ucm_history WHERE save_date < DATE_SUB(NOW(), INTERVAL 24 MONTH)")
 	or journalise(0, "E", "Cannot purge old revisions in jom_ucm_history: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_ucm_history")
 	or journalise(0, "E", "Cannot optimize jom_ucm_history: " . mysqli_error($mysqli_link)) ;
