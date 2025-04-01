@@ -1,7 +1,7 @@
 <pre>
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@
 
 // TODO: every month, if no connection in the last month & if pilot/student/instructor => send reminder about the userid
 // TODO: send the list of other pilots on the plane on the same day with mobile and email
-// TODO: purge entries in journal older than XXX days
 
 putenv('LANG=') ;
 
@@ -752,42 +751,31 @@ if (count($ids) > 0) { // If there are still blocked members
 print(date('Y-m-d H:i:s').": purging old journal entries.\n") ;
 mysqli_query($mysqli_link, "DELETE FROM $table_journal WHERE j_datetime < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
 	or journalise(0, "E", "Cannot purge old entries in journal: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_journal")
+mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_journal") and mysqli_query($mysqli_link, "ALTER TABLE $table_journal ENGINE=INNODB")
 	or journalise(0, "E", "Cannot optimize $table_journal: " . mysqli_error($mysqli_link)) ;
 
 mysqli_query($mysqli_link, "DELETE FROM $table_local_tracks WHERE lt_timestamp < DATE_SUB(CONVERT_TZ(NOW(), 'Europe/Paris', 'UTC'), INTERVAL 30 MINUTE)")
 	or journalise(0, "E", "Cannot purge old entries in $table_local_tracks: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_local_tracks")
+mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_local_tracks") and mysqli_query($mysqli_link, "ALTER TABLE $table_local_tracks ENGINE=INNODB")
 	or journalise(0, "E", "Cannot optimize $table_local_tracks: " . mysqli_error($mysqli_link)) ;
 		
 mysqli_query($mysqli_link, "DELETE FROM $table_tracks WHERE t_time < DATE_SUB(NOW(), INTERVAL 1 WEEK)")
 	or journalise(0, "E", "Cannot purge old entries in $table_tracks: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_tracks")
+mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_tracks") and mysqli_query($mysqli_link, "ALTER TABLE $table_tracks ENGINE=INNODB")
 	or journalise(0, "E", "Cannot optimize $table_tracks: " . mysqli_error($mysqli_link)) ;
 
-// Get some system parameters
-
-$result = mysqli_query($mysqli_link, "SELECT round(SUM(data_length + index_length) / 1024 / 1024, 0) 
-	FROM information_schema.TABLES where table_schema = 'spaaviation';") 
-	or journalise(0, "E", "Cannot get DB size: " . mysqli_error($mysqli_link)) ;
-$row = mysqli_fetch_row($result) ;
-$db_size = $row[0] ;
-
-$load = sys_getloadavg(); 
-// TODO also use http://php.net/manual/fr/function.getrusage.php
-
 // Clean-up Joomla session table (growing for ever...)
-print(date('Y-m-d H:i:s').": purging datebase.\n") ;
+print(date('Y-m-d H:i:s').": purging database.\n") ;
 mysqli_query($mysqli_link, "DELETE FROM $table_session WHERE userid = 0")
 	or journalise(0, "E", "Cannot purge anonymous entries in $table_session: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_session")
+mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_session") and mysqli_query($mysqli_link, "ALTER TABLE $table_session ENGINE=INNODB")
 	or journalise(0, "E", "Cannot optimize $table_session: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "DELETE FROM jom_action_logs WHERE log_date < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
 	or journalise(0, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "DELETE FROM jom_action_logs 
 		WHERE message_language_key = 'PLG_ACTIONLOG_JOOMLA_USER_LOGIN_FAILED' AND log_date < DATE_SUB(NOW(), INTERVAL 1 WEEK)") // Be more aggressive in case of dictionnary attacks
 	or journalise(0, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_action_logs")
+mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_action_logs") and mysqli_query($mysqli_link, "ALTER TABLE jom_action_logs ENGINE=INNODB")
 	or journalise(0, "E", "Cannot optimize jom_action_logs: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "DELETE FROM jom_redirect_links WHERE published = 0")
 	or journalise(0, "E", "Cannot purge unpublished entries in jom_redirect_links: " . mysqli_error($mysqli_link)) ;
@@ -795,8 +783,19 @@ mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_redirect_links")
 	or journalise(0, "E", "Cannot optimize jom_redirect_links: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "DELETE FROM jom_ucm_history WHERE save_date < DATE_SUB(NOW(), INTERVAL 24 MONTH)")
 	or journalise(0, "E", "Cannot purge old revisions in jom_ucm_history: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_ucm_history")
+mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_ucm_history") and mysqli_query($mysqli_link, "ALTER TABLE jom_ucm_history ENGINE=INNODB")
 	or journalise(0, "E", "Cannot optimize jom_ucm_history: " . mysqli_error($mysqli_link)) ;
+
+// Get some system parameters
+
+$load = sys_getloadavg(); 
+// TODO also use http://php.net/manual/fr/function.getrusage.php
+
+$result = mysqli_query($mysqli_link, "SELECT round(SUM(data_length + index_length) / 1024 / 1024, 0) 
+	FROM information_schema.tables where table_schema = '$db_name';") 
+	or journalise(0, "E", "Cannot get DB size: " . mysqli_error($mysqli_link)) ;
+$row = mysqli_fetch_row($result) ;
+$db_size = $row[0] ;
 
 // Historique des METAR (move to the end as vyncke.org tends to be too slow and cause a mySql disconnect
 print(date('Y-m-d H:i:s').": building METAR history.\n") ;
@@ -834,8 +833,8 @@ if (time() + 3600 >= airport_opening_local_time($year, $month, $day) and time() 
 
 print(date('Y-m-d H:i:s').": End of CRON.\n") ;
 if ($metar_unknown != 0)
-	journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2], DB size $db_size.") ;
+	journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2], DB size $db_size MB.") ;
 else
-	journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, unknown METAR, CPU load $load[0]/$load[1]/$load[2], DB size $db_size.") ;
+	journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, unknown METAR, CPU load $load[0]/$load[1]/$load[2], DB size $db_size MB.") ;
 ?>
 </pre>
