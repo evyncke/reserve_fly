@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -91,15 +91,6 @@ $sql = "select r_plane, count(*), sum(r_duration)
 	group by r_plane" ;
 
 print_plane_table("R&eacute;servations du dernier mois", $sql, ['Avion', 'Nbr r&eacute;servations', 'Dur&eacute;e pr&eacute;vue<br/>en heures']) ;
-
-$sql = "select name, count(*), sum(r_duration) as total_duration  
-	from $table_users p left join $table_bookings on p.id = r_pilot
-	where r_plane = 'PH-AML' and r_cancel_date is null and r_start > date_sub(sysdate(), interval 1 month) and r_type != " . BOOKING_MAINTENANCE . "
-	group by r_pilot
-	order by total_duration desc
-	limit 0,10" ;
-
-print_plane_table("R&eacute;servations PH-AML top-10 du dernier mois", $sql, ['Pilote', 'Nbr r&eacute;servations', 'Dur&eacute;e pr&eacute;vue<br/>en heures']) ;
 
 $sql = "select name, count(*), sum(r_duration) as total_duration  
 	from $table_users p left join $table_bookings on p.id = r_pilot
