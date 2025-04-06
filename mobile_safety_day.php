@@ -30,11 +30,11 @@ $this_year = 0 + date('Y') ;
 <div class="row">
 <h2>Votre attestation de suivi du Safety Day de <?=$this_year?></h2>
 <?php
-if (isset($_REQUEST['code']) and  $_REQUEST['code'] != '' and $_REQUEST['code'] != $code) {
-    journalise($userId, "E", "Mauvais code: $_REQUEST[code]") ;
-    print('<div class="text-danger">Code invalide, veuillez recommencer.</div>') ;
+if (isset($_REQUEST['code']) and  $_REQUEST['code'] != '' and trim($_REQUEST['code']) != $code) {
+    journalise($userId, "E", "Mauvais code: '$_REQUEST[code]'") ;
+    print("<div class=\"text-danger\">Code '$_REQUEST[code]' invalide, veuillez recommencer.</div>") ;
 }
-if (! isset($_REQUEST['code']) or $_REQUEST['code'] != $code) {
+if (! isset($_REQUEST['code']) or trim($_REQUEST['code']) != $code) {
 ?>
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET">
 <div class="mb-3">
@@ -44,7 +44,7 @@ if (! isset($_REQUEST['code']) or $_REQUEST['code'] != $code) {
 <p><mark>En cliquant sur le bouton ci-dessous, vous signez numériquement que vous avez suivi (ou lu) et compris les 
     présentations du Safety Day <?=$this_year?> organisé par le RAPCS ASBL. Ceci est une obligation de la DGTA.
 </mark></p>
-<button type="submit" class="btn btn-primary">J'ai suivi (ou lu) et compris les présentations du Safety Day de <?=$this_year?></button>
+<button type="submit" class="btn btn-primary" name="action" value="manuel">J'ai suivi (ou lu) et compris les présentations du Safety Day de <?=$this_year?></button>
 </form>
 <?php
 } else {
