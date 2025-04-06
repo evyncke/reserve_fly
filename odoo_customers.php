@@ -117,7 +117,7 @@ if ($account == 'joomla') {
 
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="account" value="joomla">
-<button type="submit" class="btn btn-primary">Copier les infos de ciel/réservation vers Odoo</button>
+<button type="submit" class="btn btn-primary">Copier les infos du site réservations vers Odoo</button>
 </form>
 <?php
 } # ($account == 'ciel') 
@@ -216,7 +216,7 @@ $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS allg
         LEFT JOIN $table_user_usergroup_map m ON u.id = m.user_id
         LEFT JOIN $table_blocked b ON b.b_jom_id = p.jom_id
         LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = $membership_year
-    WHERE jom_id IS NOT NULL
+    WHERE jom_id IS NOT NULL AND u.block = 0
     GROUP BY jom_id
     ORDER BY last_name, first_name") 
     or journalise($userId, "F", "Cannot list all members: " . mysqli_error($mysqli_link)) ;
@@ -252,25 +252,29 @@ while ($row = mysqli_fetch_array($result)) {
         $name_from_db= db2web("$row[last_name] $row[first_name]") ;
         if ($account == "joomla") { // Master is Joomla
             $updates = array() ; 
-            // TODO should also copy first_name and last_name in complete_name ?    
-            if ($odoo_customer['street'] != db2web($row['address']) and $row['address'] != '') {
-                $updates['street'] = db2web($row['address']) ;
-                $odoo_customer['partner_latitude'] = 0.0 ;
-            }
-            if ($odoo_customer['zip'] != db2web($row['zipcode']) and $row['zipcode'] != '') {
-                $updates['zip'] = db2web($row['zipcode']) ;
-                $odoo_customer['partner_latitude'] = 0.0 ;
-            }
-            if ($odoo_customer['city'] != db2web($row['city']) and $row['city'] != '') {
-                $updates['city'] = db2web($row['city']) ;
-                $odoo_customer['partner_latitude'] = 0.0 ;
-            } 
-            // If coordinates have changed, let's redo them
-            if ($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) {
-                $coordinates = geoCode(db2web($row['address']) . "," . db2web($row['city']) . ', ' . db2web($row['country'])) ;
-                if ($coordinates and count($coordinates) == 2) { 
-                    $updates['partner_latitude'] = $coordinates['lat'] ;
-                    $updates['partner_longitude'] = $coordinates['lng'] ;
+            // TODO should also copy first_name and last_name in complete_name ?
+            if ($row['address'] == '' or $row['city'] == '')
+                journalise($userId, "W", "No address/city for $name_from_db") ;
+            else {  
+                if ($odoo_customer['street'] != db2web($row['address']) and $row['address'] != '') {
+                    $updates['street'] = db2web($row['address']) ;
+                    $odoo_customer['partner_latitude'] = 0.0 ;
+                }
+                if ($odoo_customer['zip'] != db2web($row['zipcode']) and $row['zipcode'] != '') {
+                    $updates['zip'] = db2web($row['zipcode']) ;
+                    $odoo_customer['partner_latitude'] = 0.0 ;
+                }
+                if ($odoo_customer['city'] != db2web($row['city']) and $row['city'] != '') {
+                    $updates['city'] = db2web($row['city']) ;
+                    $odoo_customer['partner_latitude'] = 0.0 ;
+                } 
+                // If coordinates have changed, let's redo them
+                if ($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) {
+                    $coordinates = geoCode(db2web($row['address']) . "," . db2web($row['city']) . ', ' . db2web($row['country'])) ;
+                    if ($coordinates and count($coordinates) == 2) { 
+                        $updates['partner_latitude'] = $coordinates['lat'] ;
+                        $updates['partner_longitude'] = $coordinates['lng'] ;
+                    }
                 }
             }
             if ($odoo_customer['email'] != $row['email'] and $row['email'] != '')
