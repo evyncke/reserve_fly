@@ -267,9 +267,9 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 	if (!$reservation_permise or !$userRatingValid or $blocked_user) {
 		journalise($pilot_id, "E", "Check club: Cette réservation pour $plane devrait être refusée...") ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
-		$email_header .= "To: $fleetName <$fleetEmail>, $pilot[name] <$pilot[email]>\r\n" ;
+		$email_header .= "To: fis@spa-aviation.be, $pilot[name] <$pilot[email]>\r\n" ;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
-		$email_recipients = "$fleetEmail,fis@spa-aviation.be,$pilot[email]" ;
+		$email_recipients = "fis@spa-aviation.be,$pilot[email]" ;
 		if (!$userRatingValid) {
 			$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>, $managerName <$managerEmail>\r\n" ;
 			$email_recipients .= ",$managerEmail" ;
