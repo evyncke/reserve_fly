@@ -83,6 +83,7 @@ if ($booking_type == BOOKING_MAINTENANCE) {
 $blocked_user = false ;
 $blocked_msg = '' ;
 if ($userNoFlight) {
+	journalise($userId, "W", "This pilot $pilot_id is blocked: in userNoFlight group") ;
 	$response['error'] .= "Vous &ecirc;tes interdit(e) de vol. Contactez l'a&eacute;roclub." ;
 	$blocked_user = true ;
 	$blocked_msg =  "<p>Vous &ecirc;tes interdit(e) de vol. Contactez l'a&eacute;roclub.</p>\n" ;
@@ -238,7 +239,8 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 	$userRatingValid = true ;
 	$userValidities = array() ;
 	$result = mysqli_query($mysqli_link, "SELECT *,DATEDIFF('$end', expire_date) AS delta
-		FROM $table_validity_type t LEFT JOIN $table_validity v ON validity_type_id = t.id AND jom_id = $pilot_id")
+		FROM $table_validity_type t 
+		LEFT JOIN $table_validity v ON validity_type_id = t.id AND jom_id = $pilot_id")
 		or journalise($pilot_id, "E", "Erreur systeme lors de la lecture de des validites: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		$userValidities[$row['validity_type_id']] = true ;
@@ -265,7 +267,7 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 		$validity_msg = "<h2>Certificats et ratings</h2><p>$validity_msg</p>" ;
 //	if (!$userRatingValid) $reservation_permise = false ;
 	if (!$reservation_permise or !$userRatingValid or $blocked_user) {
-		journalise($pilot_id, "E", "Check club: Cette réservation pour $plane devrait être refusée...") ;
+		journalise($pilot_id, "E", "Check club: Cette réservation pour $plane devrait être refusée...(P=$reservation_permise/R=$userRatingValid/B=$blocked_user") ;
 		$email_header = "From: $managerName <$smtp_from>\r\n" ;
 		$email_header .= "To: fis@spa-aviation.be, $pilot[name] <$pilot[email]>\r\n" ;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
