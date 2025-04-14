@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -148,6 +148,10 @@ if ($student->blocked)
     print("<p class=\"mt-2 p-4 bg-danger text-bg-danger rounded\">$student->blockedMessage</p>") ;
 if (! $student->isStudent())
     print("<p class=\"mt-2 p-4 bg-warning text-bg-warning rounded\">$student->lastName $student->firstName is no more registered as a student.</p>") ;
+if (!$student->membershipPaid)
+    print("<p class=\"mt-2 p-4 bg-danger text-bg-danger rounded\">Membership fee unpaid.</p>") ;
+if ($student->mobilePhone == '')
+    print("<p class=\"mt-2 p-4 bg-danger text-bg-danger rounded\">Mobile phone number unknown.</p>") ;
 ?>
 <p><ul>
 <li>Email: <a href="mailto:<?=$student->email?>"  title="Send email"><?=$student->email?> <i class="bi bi-envelope-fill"></i></a></li>
@@ -226,8 +230,9 @@ foreach ($exercices as $exercice) {
 <div class="tab-pane fade" id="documents" role="tabpanel">
 
 <div class="row">
-    <p>Here are all documents linked to this student.
-    </p>
+    <p><a href="dto.flight.php?flight=all&student=<?=$student_id?>">Print</a> all flights of this student (under development).</p>
+    <p>Here are all documents linked to this student.</p>
+</div><!--"row -->    
 <div class="col-sm-12 col-md-9 col-lg-7">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
