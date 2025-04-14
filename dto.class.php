@@ -64,12 +64,13 @@ class DTOMember {
     }
 
     function getById($jom_id) {
-        global $mysqli_link, $table_blocked, $table_person, $table_user_usergroup_map, $userId ;
+        global $mysqli_link, $table_blocked, $table_person, $table_user_usergroup_map, $table_membership_fees, $userId, $membership_year;
 
         $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(group_id) AS group_ids 
                 FROM $table_person
                 LEFT JOIN $table_blocked ON b_jom_id = jom_id
                 JOIN $table_user_usergroup_map ON jom_id = user_id  
+                LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = $membership_year
                 WHERE jom_id = $jom_id")
             or journalise($userId, "F", "Cannot read from $table_person for $jom_id: " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
