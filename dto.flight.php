@@ -23,19 +23,33 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
+
+$header_postamble = '<style>
+@media print {
+	.page-break {
+	  page-break-before: always; /* ou page-break-after: always; */
+	}
+}
+</style>' ;
+
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 
-if (isset($_REQUEST['flight']) and is_numeric($_REQUEST['flight']) and $_REQUEST['flight'] != '') {
-    $flight_id = $_REQUEST['flight'] ;
-    $flight = new Flight() ;
-    $flight->getById($flight_id) ;
-    if (! $flight->id) {
-        journalise($userId, "F", "The flight #$flight_id does not exist") ;
-    }
-} else {
-    journalise($userId, 'F', "Invalid or missing parameter flight=$_REQUEST[flight].") ;
-}
+if (isset($_REQUEST['flight']))
+    if ($_REQUEST['flight'] == 'all' and isset($_REQUEST['student']) and is_numeric($_REQUEST['student'])) {
+        $flights = new Flights($_REQUEST['student']) ;
+    } else if (is_numeric($_REQUEST['flight']) and $_REQUEST['flight'] != '') {
+        $flight_id = $_REQUEST['flight'] ;
+        $flight = new Flight() ;
+        $flight->getById($flight_id) ;
+        if (! $flight->id) {
+            journalise($userId, "F", "The flight #$flight_id does not exist") ;
+        }
+        $flights = array($flight) ;
+    }  else {
+        journalise($userId, 'F', "Invalid parameter flight=$_REQUEST[flight].") ;
+} else
+    journalise($userId, 'F', "Missing parameter flight.") ;
 
 if (! ($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == $flight->student))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
@@ -77,6 +91,7 @@ if ($action == 'header') {
     $exercice->save() ;
 }
 
+if (isset($flight)) { // Changes allowed only when a single flight is displayed TODO
 ?>
 <script type="text/javascript">
 function gradeChanged(object, reference, grade) {
@@ -87,10 +102,16 @@ function gradeChanged(object, reference, grade) {
     window.location.href = "https://www.spa-aviation.be/resa/dto.flight.php?flight=<?=$flight->id?>&action=exercice&exercice=" + reference + "&grade=" + grade + "&value=" + value;
 }
 </script>
-
 <?php
+}
+
 require_once('dto.print.flight.php') ;
-printDtoFlight($flight) ;
+foreach($flights as $flight) {
+    printDtoFlight($flight) ;
+    print('
+        <div class="page-break"></div>
+    ') ;
+}
 ?>
 </body>
 </html>

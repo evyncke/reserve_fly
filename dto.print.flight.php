@@ -19,7 +19,7 @@
 function printDtoFlight($flight) {
 ?>
 <h2>Flight N° <?=$flight->flightId?> of <?=$flight->studentLastName?> <?=$flight->studentFirstName?>
-    <a href="dto.student.php?student=<?=$flight->student?>"><i class="bi bi-folder" title="Back to the list of flights"></i></a>
+    <a href="dto.student.php?student=<?=$flight->student?>"><i class="bi bi-folder" title="Back to the list of all flights"></i></a>
     <i class="bi bi-printer link-primary" onclick="window.print();" title="Print this page"></i>
 </h2>
 <div class="row">

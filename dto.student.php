@@ -79,6 +79,7 @@ if (isset($_POST['action']) and $_POST['action'] == 'upload') {
 
 <div class="tab-pane fade" id="flights" role="tabpanel">
 <div class="row">
+<p><a href="dto.flight.php?flight=all&student=<?=$student_id?>">Print</a> all flights of this student.</p>
 <div class="col-sm-12 col-md-9 col-lg-7">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
@@ -230,7 +231,7 @@ foreach ($exercices as $exercice) {
 <div class="tab-pane fade" id="documents" role="tabpanel">
 
 <div class="row">
-    <p><a href="dto.flight.php?flight=all&student=<?=$student_id?>">Print</a> all flights of this student (under development).</p>
+    <p><a href="dto.flight.php?flight=all&student=<?=$student_id?>">Print</a> all flights of this student.</p>
     <p>Here are all documents linked to this student.</p>
 </div><!--"row -->    
 <div class="col-sm-12 col-md-9 col-lg-7">
