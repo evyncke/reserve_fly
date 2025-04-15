@@ -82,9 +82,6 @@ function generateMaintenanceClass($entretien, $compteur) {
 		print("<tr><td>POH </td><td><a href=\"$plane_row[poh]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
 	if ($plane_row['checklist'])
 		print("<tr><td>Checklist</td><td><a href=\"$plane_row[checklist]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
-// TEST MODE	
-if (true or $userIsAdmin or $userIsInstructor or $userId == 71) {
-	if ($userId != 62) journalise($userId, "D", "Trying for $plane") ;
 	print("<tr><td>Liste des équipements pour plan de vol OACI 
 		<a data-bs-toggle=\"collapse\" href=\"#collapseDoc\" title=\"Cliquez pour voir la liste et les manuels\"><i class=\"bi bi-collection-fill\"></i></a>
   		</td><td>") ;
@@ -123,8 +120,6 @@ if (true or $userIsAdmin or $userIsInstructor or $userId == 71) {
 		</td>
 	</tr>\n");
 	print("</tr>\n") ;
-} 
-// test mode
 	print("<tr><td>Dernier vol sur FlightAware  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"https://flightaware.com/live/flight/" . strtoupper($plane_row['id']) . "\" target=\"_blank\"><img src=\"fa.ico\" border=\"0\" width=\"24\" height=\"24\"></a></td></tr>
 	<tr><td>Carnet de routes</td><td><a href=\"mobile_planelog.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-journal\"></i></a></td></tr>
 	<tr><td>Masse et centrage</i></td><td><a href=\"mobile_wnb.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-rulers\"></i></a></td></tr>\n") ;
