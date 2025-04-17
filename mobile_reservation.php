@@ -282,11 +282,12 @@ if (! $row_fee and ! $userIsInstructor and $userId != 294) { // 294 = SPW
 		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
 }
 // Check whether account balance > 0
-$odooStatus = $odooClient->Read('res.partner', ($row['odoo_id']), array('fields' => array('id', 'total_due'))) ; 
+$odooStatus = $odooClient->Read('res.partner', (intval($row['odoo_id'])), array('fields' => array('id', 'total_due'))) ; 
 if (isset($odooStatus[0]) and $odooStatus[0]['total_due'] > 0) {
 	$userNoFlight = true ;
-	journalise($userId, "W", "This user balance is negative: $odooStatus[0][total_due] EUR") ;
-	print("<div class=\"text-bg-danger\">Vous avez des factures non payées, par conséquent vous ne pouvez pas réserver un avion.
+	$total_due = $odooStatus[0]['total_due'] ;
+	journalise($userId, "W", "This user balance is negative: $total_due EUR") ;
+	print("<div class=\"text-bg-danger\">Vous avez des factures non payées pour $total_due EUR, par conséquent vous ne pouvez pas réserver un avion.
 		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.<.</div>") ;
 }
 if ($userNoFlight)

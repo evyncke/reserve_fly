@@ -1418,16 +1418,19 @@ function OF_LastInvoiceDueDate($theOdooPartnerReference)
 {
     //print("OF_LastInvoiceDueDate($theOdooPartnerReference)<br>");
     $odooClient=OF_GetOdooClient();
-    $result= $odooClient->SearchRead('account.move', array(array(array('partner_id.id', '=', $theOdooPartnerReference),array('move_type', '=', 'out_invoice'))),  array('fields'=>array('id', 'partner_id', 'move_type', 'invoice_date_due', 'amount_total', 'status_in_payment','payment_state'))); 
+    $result= $odooClient->SearchRead('account.move', 
+        array(array(
+            array('partner_id.id', '=', $theOdooPartnerReference),
+            array('move_type', '=', 'out_invoice'),
+            array('state', '=', 'posted'),
+            '|', array('payment_state', '=', 'not_paid'), array('payment_state', '=', 'partial'),
+        )),  
+        array('fields'=>array('id', 'partner_id', 'invoice_date_due', 'status_in_payment','payment_state'))); 
     $DueDate="";
     foreach($result as $f=>$desc) {
       // echo var_dump($desc);
         //print('<br>');
-        $move_type=(isset($desc['move_type'])) ? $desc['move_type'] : '' ;
-        if($move_type!="out_invoice") {
-            // it is not an invoice
-            continue;
-        }
+
         $status_in_payment=(isset($desc['status_in_payment'])) ? $desc['status_in_payment'] : '' ;
         if($status_in_payment=="paid") {
             // Already paid => not_paid and partial
