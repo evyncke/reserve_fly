@@ -14,6 +14,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+   TODO:
+   ChatGPT: génère le code PHP et Javascript pour lier un compte Facebook à un utilisateur déjà authentifié par l'application
 */
 
 ob_start("ob_gzhandler");
