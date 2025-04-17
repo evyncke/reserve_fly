@@ -521,7 +521,7 @@ if (isset($_REQUEST['search']) and $_REQUEST['search'] != '') {
 }
 if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 	if(!$userIsBoardMember) {
-		print("<p class=\"text-danger\"><b>Vous n'êtes pas autorisés à débloquer un membre.<br/>Seuls les membres du CA peuvent débloquer un membre !</b></p>");
+		print("<p class=\"text-danger\"><b>Vous n'êtes pas autorisés à débloquer un membre.<br/>Seuls les membres de l'OA peuvent débloquer un membre !</b></p>");
 		journalise($userId, "I", "One FI try to unblock a member $personid. Not allowed") ;
 	}
 	else {
