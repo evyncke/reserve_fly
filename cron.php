@@ -714,6 +714,7 @@ if (count($ids) > 0) { // If there are still unpaid membership fees
 		journalise($userId, "I", "There are $newly_paid newly paid membership fees") ;
 }
 
+if (false) { // Will move the block into reservation as members can be blocked for other reasons
 // Check if blocked members have now a positive balance
 $result = mysqli_query($mysqli_link, "SELECT odoo_id
 	FROM $table_blocked 
@@ -746,6 +747,8 @@ if (count($ids) > 0) { // If there are still blocked members
 	if ($unblocked_members > 0)
 		journalise($userId, "I", "There are $unblocked_members unblocked members") ;
 }
+}
+
 
 // Some SQL clean-up
 print(date('Y-m-d H:i:s').": purging old journal entries.\n") ;

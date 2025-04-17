@@ -1,7 +1,7 @@
 <?php
 // Some icons (fast forward & co) by Snowish Icon Pack by Alexander Moore 
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
 require_once "dbi.php" ;
 
 MustBeLoggedIn() ;
+
+require_once "odoo.class.php" ;
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
 $month_names = array('N/A', 'Jan', 'F&eacute;v', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil', 'Ao&ucirc;t', 'Sept', 'Oct', 'Nov', 'D&eacute;c') ;
 
@@ -268,9 +271,6 @@ if (!$convertToUtf8) {
 	return s ;
 }
 
-function imgStalled() {
-	console.log('Image load is stalled') ;
-}
 </script>
 <script src="planes.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
 <script src="ressources.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
@@ -318,7 +318,7 @@ if ($userId != 0) {
 	$row = mysqli_fetch_array($result) ;
 }
 ?>
-Vos droits d'acc&egrave;s (<?=$userFullName?>): 
+Vos droits d'accès (<?=$userFullName?>): 
 <?php
 if ($userIsStudent) print(" &eacute;l&egrave;ve ") ;
 if ($userIsPilot) print(" pilote ") ;
@@ -348,6 +348,15 @@ if (! $row_fee and ! $userIsInstructor and $userId != 294) { // 294 = SPW
 	print("<div class=\"noFlyBox\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
 		Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
 }
+// Check whether account balance > 0
+$odooStatus = $odooClient->Read('res.partner', ($row['odoo_id']), array('fields' => array('id', 'total_due'))) ; 
+if (isset($odooStatus[0]) and $odooStatus[0]['total_due'] > 0) {
+	$userNoFlight = true ;
+	journalise($userId, "W", "This user balance is negative: $odooStatus[0][total_due] EUR") ;
+	print("<div class=\"noFlyBox\">Vous avez des factures non payées, par conséquent vous ne pouvez pas réserver un avion.
+	Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
+}
+
 if ($userNoFlight)
 	print("<div class=\"noFlyBox\">Vous &ecirc;tes interdit(e) de vol (par exemple: factures non pay&eacute;es, 
 		contactez <a href=\"mailto:info@spa-aviation.be\">info@spa-aviation.be</a>.
@@ -387,7 +396,6 @@ if ($userId == 0) {
 	// Display any validity message from above
 	if ($validity_msg != '') print('<div class="validityBox">' . $validity_msg . '</div>') ;
 
-
 // Verify non-logged flights in the last week
 	if (! $userIsInstructor) {
 	$result = mysqli_query($mysqli_link, "select * from $table_bookings b join $table_planes p on r_plane = p.id  
@@ -413,12 +421,7 @@ if ($userId == 0) {
 	} // Not $isInstructor
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 } // ($userId == 0)
-// Facebook log-in
 ?>
-<!--div class="fb-login-button" data-max-rows="1" data-size="small" data-show-faces="true" data-button-type="continue_with" data-auto-logout-link="false" data-use-continue-as="true" scope="public_profile" onlogin="checkLoginState();"></div--> <span id="helloFBUser"></span>
-
-
-
 <script>
 	var userRatingValid = <?=($userRatingValid) ? 'true' : 'false' ?> ; // Was 'const' but IE does not support it
 </script>
@@ -460,7 +463,7 @@ mysqli_free_result($result_news) ;
 ?>
 		<td id="reservationDetails" style="width: 30%;"></td>
 		<td id="webcamCell" class="hidden-phone">
-			<a href="" id="webcamURI" border="0"><img id="webcamImg" style="width: 256px; height: 192px;" alt="Webcam" onStalled="imgStalled();"></a>
+			<a href="" id="webcamURI" border="0"><img id="webcamImg" style="width: 256px; height: 192px;" alt="Webcam"></a>
 		</td>
 	</tr>
 </table>
@@ -471,15 +474,15 @@ D&egrave;s que le probl&eacute;me chez OVH est r&eacute;solu, tout refonctionner
 <table class="planningRuler">
 <tr stylex="vertical-align: top; background: white;">
 	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-7);">
-		<img border="0" width="32" height="32" src="gtk_media_forward_rtl.png" alt="&lt;&lt;&lt;"  onStalled="imgStalled();"></a></td>
+		<img border="0" width="32" height="32" src="gtk_media_forward_rtl.png" alt="&lt;&lt;&lt;"></a></td>
 	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-1);">
-		<img border="0" width="32" height="32" src="gtk_media_play_rtl.png" alt="&lt;" onStalled="imgStalled();"></a></td>
+		<img border="0" width="32" height="32" src="gtk_media_play_rtl.png" alt="&lt;"></a></td>
 	<td class="planningRulerCellLarge"><span id="planningDayOfWeek"></span><input type="tex" size="10" maxlength="10" id="planningDate" onchange="jumpPlanningDate();"></td>
-	<td class="planningRulerCellCalendar"><img src="calendar.png" id="calendarIcon" alt="Calendar"  onStalled="imgStalled();"></td>
+	<td class="planningRulerCellCalendar"><img src="calendar.png" id="calendarIcon" alt="Calendar"></td>
 	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+1);">
-		<img border="0" width="32" height="32" src="gtk_media_play_ltr.png" alt="&gt;"  onStalled="imgStalled();"></a></td>
+		<img border="0" width="32" height="32" src="gtk_media_play_ltr.png" alt="&gt;"></a></td>
 	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+7);">
-		<img border="0" width="32" height="32" src="gtk_media_forward_ltr.png" alt="&gt;&gt;&gt;"  onStalled="imgStalled();"></a></td>
+		<img border="0" width="32" height="32" src="gtk_media_forward_ltr.png" alt="&gt;&gt;&gt;"></a></td>
 </tr>
 </table>
 <table id="planePlanningTable" class="planningTable" border="0">
@@ -489,9 +492,9 @@ D&egrave;s que le probl&eacute;me chez OVH est r&eacute;solu, tout refonctionner
 </table>
 <span class="planningLegend">
 Indications pour un avion que nous n'&ecirc;tes probablement pas en droit de r&eacute;server (sauf avec un instructeur) car:<br/>
-<img src="exclamation-icon.png" width="12" height="12" alt="!"  onStalled="imgStalled();">: vous n'avez pas vol&eacute; dessus r&eacute;cemment (sur
+<img src="exclamation-icon.png" width="12" height="12" alt="!">: vous n'avez pas vol&eacute; dessus r&eacute;cemment (sur
 base de l'entr&eacute;e des heures de vol dans votre carnet de vols).<br/>
-<img src="forbidden-icon.png" width="12" height="12" alt="X"  onStalled="imgStalled();">: vous n'avez pas les qualifications requises (sur base des validit&eacute;s de votre profil).<br/>
+<img src="forbidden-icon.png" width="12" height="12" alt="X">: vous n'avez pas les qualifications requises (sur base des validit&eacute;s de votre profil).<br/>
 V&eacute;rifiez les r&egrave;gles de r&eacute;servation et si vous les respectez: r&eacute;servez :-)<br/>
 <span class="material-symbols-rounded" style="font-size: 12px; color: orangeRed;">handyman</span>: il existe un Aircraft Technical Log pour ce avion à consulter.<br/>
 <img src="fa.ico" border="0" width="12" height="12">: ouvre Flight Aware avec le dernier vol de cet avion.<br/>
@@ -658,6 +661,6 @@ $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 Open Source code: <a href="https://github.com/evyncke/reserve_fly">on github</a><br/>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, ex&eacute;cut&eacute en <?=$execution_time?> sec</div>
 <br/>
-<div id="waitingDiv">Connecting to the server, please wait...<img src="spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();" width="256px" height="256px"></div>
+<div id="waitingDiv">Connecting to the server, please wait...<img src="spinner.gif" id="waitingImage" alt="Waiting..."width="256px" height="256px"></div>
 </body>
 </html>

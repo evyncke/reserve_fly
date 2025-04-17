@@ -25,6 +25,9 @@ if ($userId == 0) {
 	exit ;
 }
 
+require_once "odoo.class.php" ;
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+
 $month_names = array('N/A', 'Jan', 'Fév', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc') ;
 
 for ($i = 1, $all_day_options = '' ; $i <= 31 ; $i++)
@@ -238,6 +241,27 @@ if (!$convertToUtf8) {
 <div id="logDiv" style="visibility: collapse; background-color: yellow;"></div>
 <div class="userPrivileges">
 <?php
+// Check for profile settings
+$result = mysqli_query($mysqli_link, "select * from $table_users u left join $table_person p on u.id = p.jom_id where u.id = $userId")
+	or die("Erreur systeme lors de la lecture de votre profil: " . mysqli_error($mysqli_link)) ;
+$row = mysqli_fetch_array($result) ;
+$profile_count = 0 ;
+$missings = array() ;
+if ($row['email'] != '') $profile_count ++ ; else $missings[] = 'email' ;
+if ($row['first_name'] != '') $profile_count ++ ; else $missings[] = 'prénom' ;
+if ($row['last_name'] != '') $profile_count ++ ; else $missings[] = 'nom de famille' ;
+if ($row['cell_phone'] != '') $profile_count ++ ; else $missings[] = 'n° GSM/mobile' ;
+if ($row['city'] != '') $profile_count ++ ; else $missings[] = 'ville' ;
+if ($row['country'] != '') $profile_count ++ ; else $missings[] = 'pays' ;
+if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ; else $missings[] = 'genre' ;
+if ($row['birthdate'] != '') $profile_count ++ ; else $missings[] = 'date de naissance' ;
+if ($profile_count != 8) print("<div class=\"text-bg-warning\">>Votre profil est complété à " . round(100 * $profile_count / 10) . "% seulement,
+	vous pouvez visualiser et modifier votre profile en cliquant sur votre nom en haut à droite.</div>") ;
+if ($row['cell_phone'] == '') {
+	print("<div class=\"text-bg-danger\">Il manque votre numéro de GSM/mobile, impossible de réserver.
+		Vous pouvez visualiser et modifier votre profile en cliquant sur votre nom en haut à droite.</div>") ;
+	$userNoFlight = true ;
+}
 // Check whether the user is blocked
 $result_blocked = mysqli_query($mysqli_link, "SELECT * FROM $table_blocked WHERE b_jom_id=$userId")
 	or journalise($userId, 'E', "Cannot checked whether user is blocked: " . mysqli_error($mysqli_link)) ;
@@ -257,31 +281,19 @@ if (! $row_fee and ! $userIsInstructor and $userId != 294) { // 294 = SPW
 	print("<div class=\"text-bg-danger\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
 		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
 }
+// Check whether account balance > 0
+$odooStatus = $odooClient->Read('res.partner', ($row['odoo_id']), array('fields' => array('id', 'total_due'))) ; 
+if (isset($odooStatus[0]) and $odooStatus[0]['total_due'] > 0) {
+	$userNoFlight = true ;
+	journalise($userId, "W", "This user balance is negative: $odooStatus[0][total_due] EUR") ;
+	print("<div class=\"text-bg-danger\">Vous avez des factures non payées, par conséquent vous ne pouvez pas réserver un avion.
+		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.<.</div>") ;
+}
 if ($userNoFlight)
 	print("<div class=\"text-bg-danger\">Vous êtes interdit(e) de vol (par exemple: factures non payées, 
 		contactez <a href=\"mailto:info@spa-aviation.be\">info@spa-aviation.be</a>.
 		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
-// Check for profile settings
-$result = mysqli_query($mysqli_link, "select * from $table_users u left join $table_person p on u.id = p.jom_id where u.id = $userId")
-	or die("Erreur systeme lors de la lecture de votre profil: " . mysqli_error($mysqli_link)) ;
-$row = mysqli_fetch_array($result) ;
-$profile_count = 0 ;
-$missings = array() ;
-if ($row['email'] != '') $profile_count ++ ; else $missings[] = 'email' ;
-if ($row['first_name'] != '') $profile_count ++ ; else $missings[] = 'prénom' ;
-if ($row['last_name'] != '') $profile_count ++ ; else $missings[] = 'nom de famille' ;
-if ($row['cell_phone'] != '') $profile_count ++ ; else $missings[] = 'n° GSM/mobile' ;
-if ($row['city'] != '') $profile_count ++ ; else $missings[] = 'ville' ;
-if ($row['country'] != '') $profile_count ++ ; else $missings[] = 'pays' ;
-if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ; else $missings[] = 'genre' ;
-if ($row['birthdate'] != '') $profile_count ++ ; else $missings[] = 'date de naissance' ;
-if ($profile_count != 8) print("<div class=\"validityBox\">Votre profil est complété à " . round(100 * $profile_count / 10) . "% seulement,
-	veuillez cliquer sur le bouton 'Mon Profil' pour mettre votre profil (" . implode(', ', $missings) . ") à jour.</div>") ;
-if ($row['cell_phone'] == '') {
-	print("<div class=\"validityBox\">Il manque votre numéro de GSM/mobile, impossible de réserver.
-		Veuillez cliquer sur le bouton 'Mon Profil' pour mettre votre profil à jour.</div>") ;
-	$userNoFlight = true ;
-}
+
 // Display any validity message from above
 if ($validity_msg != '') print('<div class="validityBox">' . $validity_msg . '</div>') ;
 
