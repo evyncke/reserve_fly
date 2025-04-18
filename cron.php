@@ -714,42 +714,6 @@ if (count($ids) > 0) { // If there are still unpaid membership fees
 		journalise($userId, "I", "There are $newly_paid newly paid membership fees") ;
 }
 
-if (false) { // Will move the block into reservation as members can be blocked for other reasons
-// Check if blocked members have now a positive balance
-$result = mysqli_query($mysqli_link, "SELECT odoo_id
-	FROM $table_blocked 
-	JOIN $table_person ON b_jom_id = jom_id
-	JOIN jom_users u ON u.id = b_jom_id
-	WHERE u.block = 0")
-	or journalise($userId, "E", "Cannot retrieve blocked members" . mysqli_error($mysqli_link)) ;
-$ids = array() ;
-while ($row = mysqli_fetch_array($result)) {
-	$ids[] = intval($row['odoo_id']) ;
-}
-
-if (count($ids) > 0) { // If there are still blocked members
-	$members = $odooClient->Read('res.partner', 
-		$ids, 
-		array('fields' => array('id', 'name', 'email', 'total_due'))) ; // TODO could filter on total_due <= 0
-	$unblocked_members = 0 ;
-	foreach($members as $member) {
-		if ($member['total_due'] <= 0) {
-			print("Should unblock $member[name] $member[total_due] <br/>\n") ;
-			mysqli_query($mysqli_link, "DELETE $table_blocked
-				FROM $table_blocked 
-				JOIN $table_person ON b_jom_id = jom_id
-				WHERE odoo_id = $member[id]")
-				or journalise($userId, "E", "Cannot unblock members: " . mysqli_error($mysqli_link)) ;
-			journalise($userId, "I", "Membre $member[name] débloqué(e) car le solde dû est de: $member[total_due]") ;
-			$unblocked_members++ ;
-		}
-	}
-	if ($unblocked_members > 0)
-		journalise($userId, "I", "There are $unblocked_members unblocked members") ;
-}
-}
-
-
 // Some SQL clean-up
 print(date('Y-m-d H:i:s').": purging old journal entries.\n") ;
 mysqli_query($mysqli_link, "DELETE FROM $table_journal WHERE j_datetime < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
