@@ -54,17 +54,17 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['delta'] == '') { // This validity was not filled in
 		if ($row['mandatory'] != 0) {
 			$userRatingValid = false ;
-			$validity_msg .= "<span class=\"validityExpired\">Votre profil ne contient pas $row[name]. Impossible de réserver un avion. Veuillez modifier votre profil d'abord.</span><br/>" ;
+			$validity_msg .= "<span class=\"text-danger\">Votre profil ne contient pas $row[name]. Impossible de réserver un avion. Veuillez modifier votre profil d'abord.</span><br/>" ;
 		}
 	} elseif ($row['delta'] > 0) {
 		if ($row['mandatory'] != 0) {
 			$userRatingValid = false ;
-			$validity_msg .= "<span class=\"validityExpired\">Votre $row[name] n'est plus valable depuis le $row[expire_date]. Impossible de réserver un avion.</span><br/>" ;
+			$validity_msg .= "<span class=\"text-danger\">Votre $row[name] n'est plus valable depuis le $row[expire_date]. Impossible de réserver un avion.</span><br/>" ;
 		} else {
-			$validity_msg .= "<span class=\"validityWarning\">Votre $row[name] n'est plus valable depuis le $row[expire_date].</span><br/>" ;
+			$validity_msg .= "<span class=\"text-warning\">Votre $row[name] n'est plus valable depuis le $row[expire_date].</span><br/>" ;
 		}
 	} elseif ($row['delta'] > - $validity_warning) 
-		$validity_msg .= "<span class=\"validityWarning\">Votre $row[name] ne sera plus valable le $row[expire_date]; il vous sera alors impossible de réserver un avion.</span><br/>" ;
+		$validity_msg .= "<span class=\"text-warning\">Votre $row[name] ne sera plus valable le $row[expire_date]; il vous sera alors impossible de réserver un avion.</span><br/>" ;
 }
 
 $header_postamble = '<link rel="stylesheet" type="text/css" href="mobile_reservation.css">
@@ -281,17 +281,26 @@ if (! $row_fee and ! $userIsInstructor and $userId != 294) { // 294 = SPW
 	print("<div class=\"text-bg-danger\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
 		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
 }
-// Check whether account balance > 0
-$odooStatus = $odooClient->Read('res.partner', (intval($row['odoo_id'])), array('fields' => array('id', 'total_due'))) ; 
-if (isset($odooStatus[0]) and $odooStatus[0]['total_due'] > 0) {
+// Check whether there are unpaid due invoices
+$due_invoices = $odooClient->SearchRead('account.move', 
+	array(array(
+		array('partner_id.id', '=', intval($row['odoo_id'])),
+		array('invoice_date_due', '<', date('Y-m-d')),
+		array('move_type', '=', 'out_invoice'),
+		array('state', '=', 'posted'),
+		'|', array('payment_state', '=', 'not_paid'), array('payment_state', '=', 'partial'),
+)),  
+	array('fields'=>array('partner_id', 'invoice_date_due', 'amount_total'))); 
+
+if (isset($due_invoices) and count($due_invoices) > 0) {
 	$userNoFlight = true ;
-	$total_due = $odooStatus[0]['total_due'] ;
-	journalise($userId, "W", "This user balance is negative: $total_due EUR") ;
-	print("<div class=\"text-bg-danger\">Vous avez des factures non payées pour $total_due EUR, par conséquent vous ne pouvez pas réserver un avion.
-		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.<.</div>") ;
+	journalise($userId, "W", "This user has unpaid due invoices") ;
+	print("<div class=\"text-bg-danger\">Vous avez des factures échues et non payées, par conséquent vous ne pouvez pas réserver un avion.
+	Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
 }
+
 if ($userNoFlight)
-	print("<div class=\"text-bg-danger\">Vous êtes interdit(e) de vol (par exemple: factures non payées, 
+	print("<div class=\"text-bg-danger\">Vous êtes interdit(e) de vol (par exemple: factures non payées), 
 		contactez <a href=\"mailto:info@spa-aviation.be\">info@spa-aviation.be</a>.
 		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
 

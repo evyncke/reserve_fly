@@ -348,13 +348,21 @@ if (! $row_fee and ! $userIsInstructor and $userId != 294) { // 294 = SPW
 	print("<div class=\"noFlyBox\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
 		Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
 }
-// Check whether account balance > 0
-$odooStatus = $odooClient->Read('res.partner', (intval($row['odoo_id'])), array('fields' => array('id', 'total_due'))) ; 
-if (isset($odooStatus[0]) and $odooStatus[0]['total_due'] > 0) {
+// Check whether there are due invoices
+$due_invoices = $odooClient->SearchRead('account.move', 
+	array(array(
+		array('partner_id.id', '=', intval($row['odoo_id'])),
+		array('invoice_date_due', '<', date('Y-m-d')),
+		array('move_type', '=', 'out_invoice'),
+		array('state', '=', 'posted'),
+		'|', array('payment_state', '=', 'not_paid'), array('payment_state', '=', 'partial'),
+)),  
+	array('fields'=>array('partner_id', 'invoice_date_due', 'amount_total'))); 
+
+if (isset($due_invoices) and count($due_invoices) > 0) {
 	$userNoFlight = true ;
-	$total_due = $odooStatus[0]['total_due'] ;
-	journalise($userId, "W", "This user balance is negative: $total_due EUR") ;
-	print("<div class=\"noFlyBox\">Vous avez des factures non payées pour $total_due EUR, par conséquent vous ne pouvez pas réserver un avion.
+	journalise($userId, "W", "This user has unpaid due invoices") ;
+	print("<div class=\"noFlyBox\">Vous avez des factures échues et non payées, par conséquent vous ne pouvez pas réserver un avion.
 	Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
 }
 
