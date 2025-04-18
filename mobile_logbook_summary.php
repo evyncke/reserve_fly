@@ -290,6 +290,8 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 <?php
 $totalTimeInMinute=0;
 $SumTotalByMonth=0;
+$totalFlightCount=0;
+$SumTotalFlightCountByMounth=0;
 foreach ($planes as $plane_id => $planeTime) {
 	$timeInMinute=getCompteurIFValueInMinute($plane_id, $yearFilter);
 	$timeString=convertMinuteToHour($timeInMinute);
@@ -324,6 +326,7 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 	print("<tr>");
 	print("<td class=\"text-center border-bottom-0\">$month</td>");
 	$totalTimeMonthInMinute=0;
+	$totalMounthFlightCount=0;
 	// loop on plane
 	foreach ($planes as $plane_id => $planeTime) {
 		if($planeTime==0) {
@@ -333,7 +336,11 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 		if($timeInMinute>0) {
 			$timeString=convertMinuteToHour($timeInMinute);
 			$totalTimeMonthInMinute+=$timeInMinute;
-			print("<td class=\"text-center border-bottom-0\">$timeString</td>");
+
+			$flightCount=getIFFlightCount($plane_id, $monthFilter);
+			$totalMounthFlightCount+=$flightCount;
+
+			print("<td class=\"text-center border-bottom-0\">$timeString ($flightCount)</td>");
 		}
 		else {
 			print("<td class=\"text-center border-bottom-0\"></td>");
@@ -342,7 +349,7 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 	// Total column
 	if($totalTimeMonthInMinute>0) {
 		$totalTimeMonthInString=convertMinuteToHour($totalTimeMonthInMinute);
-		print("<td class=\"text-center border-bottom-0\"><strong>$totalTimeMonthInString</strong></td>");
+		print("<td class=\"text-center border-bottom-0\"><strong>$totalTimeMonthInString ($totalMounthFlightCount)</strong></td>");
 	}
 	else {
 		print("<td class=\"text-center border-bottom-0\"><strong></strong></td>");
@@ -352,7 +359,8 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 	if($totalTimeMonthInMinute>0) {
 		$SumTotalByMonth+=$totalTimeMonthInMinute;
 		$SumTotalByMonthString=convertMinuteToHour($SumTotalByMonth);	
-		print("<td class=\"text-center border-bottom-0\"><strong>$SumTotalByMonthString</strong></td>");
+		$SumTotalFlightCountByMounth+=$totalMounthFlightCount;
+		print("<td class=\"text-center border-bottom-0\"><strong>$SumTotalByMonthString ($SumTotalFlightCountByMounth)</strong></td>");
 	}
 	else {
 		print("<td class=\"text-center border-bottom-0\"><strong></strong></td>");
@@ -390,6 +398,8 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 <?php
 $totalTimeInMinute=0;
 $SumTotalByMonth=0;
+$totalFlightCount=0;
+$SumTotalFlightCountByMounth=0;
 foreach ($planes as $plane_id => $planeTime) {
 	$timeInMinute=getCompteurINITValueInMinute($plane_id, $yearFilter);
 	$timeString=convertMinuteToHour($timeInMinute);
@@ -424,6 +434,7 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 	print("<tr>");
 	print("<td class=\"text-center border-bottom-0\">$month</td>");
 	$totalTimeMonthInMinute=0;
+	$totalMounthFlightCount=0;
 	// loop on plane
 	foreach ($planes as $plane_id => $planeTime) {
 		if($planeTime==0) {
@@ -433,7 +444,11 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 		if($timeInMinute>0) {
 			$timeString=convertMinuteToHour($timeInMinute);
 			$totalTimeMonthInMinute+=$timeInMinute;
-			print("<td class=\"text-center border-bottom-0\">$timeString</td>");
+
+			$flightCount=getINITFlightCount($plane_id, $monthFilter);
+			$totalMounthFlightCount+=$flightCount;
+
+			print("<td class=\"text-center border-bottom-0\">$timeString ($flightCount)</td>");
 		}
 		else {
 			print("<td class=\"text-center border-bottom-0\"></td>");
@@ -442,7 +457,7 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 	// Total column
 	if($totalTimeMonthInMinute>0) {
 		$totalTimeMonthInString=convertMinuteToHour($totalTimeMonthInMinute);
-		print("<td class=\"text-center border-bottom-0\"><strong>$totalTimeMonthInString</strong></td>");
+		print("<td class=\"text-center border-bottom-0\"><strong>$totalTimeMonthInString ($totalMounthFlightCount)</strong></td>");
 	}
 	else {
 		print("<td class=\"text-center border-bottom-0\"><strong></strong></td>");
@@ -452,7 +467,8 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 	if($totalTimeMonthInMinute>0) {
 		$SumTotalByMonth+=$totalTimeMonthInMinute;
 		$SumTotalByMonthString=convertMinuteToHour($SumTotalByMonth);	
-		print("<td class=\"text-center border-bottom-0\"><strong>$SumTotalByMonthString</strong></td>");
+		$SumTotalFlightCountByMounth+=$totalMounthFlightCount;
+		print("<td class=\"text-center border-bottom-0\"><strong>$SumTotalByMonthString ($SumTotalFlightCountByMounth)</strong></td>");
 	}
 	else {
 		print("<td class=\"text-center border-bottom-0\"><strong></strong></td>");
@@ -492,6 +508,8 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 <?php
 $totalTimeInMinute=0;
 $SumTotalByMonth=0;
+$totalFlightCount=0;
+$SumTotalFlightCountByMounth=0;
 foreach ($planes as $plane_id => $planeTime) {
 	$timeInMinute=getCompteurDHFValueInMinute($plane_id, $yearFilter);
 	$timeString=convertMinuteToHour($timeInMinute);
@@ -527,6 +545,7 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 	print("<tr>");
 	print("<td class=\"text-center border-bottom-0\">$month</td>");
 	$totalTimeMonthInMinute=0;
+	$totalMounthFlightCount=0;
 	// loop on plane
 	foreach ($planes as $plane_id => $planeTime) {
 		if($planeTime==0) {
@@ -536,7 +555,10 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 		if($timeInMinute>0) {
 			$timeString=convertMinuteToHour($timeInMinute);
 			$totalTimeMonthInMinute+=$timeInMinute;
-			print("<td class=\"text-center border-bottom-0\">$timeString</td>");
+
+			$flightCount=getDHFFlightCount($plane_id, $monthFilter);
+			$totalMounthFlightCount+=$flightCount;
+			print("<td class=\"text-center border-bottom-0\">$timeString ($flightCount)</td>");
 		}
 		else {
 			print("<td class=\"text-center border-bottom-0\"></td>");
@@ -545,7 +567,7 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 	// Total column
 	if($totalTimeMonthInMinute>0) {
 		$totalTimeMonthInString=convertMinuteToHour($totalTimeMonthInMinute);
-		print("<td class=\"text-center border-bottom-0\"><strong>$totalTimeMonthInString</strong></td>");
+		print("<td class=\"text-center border-bottom-0\"><strong>$totalTimeMonthInString ($totalMounthFlightCount)</strong></td>");
 	}
 	else {
 		print("<td class=\"text-center border-bottom-0\"><strong></strong></td>");
@@ -555,7 +577,8 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 	if($totalTimeMonthInMinute>0) {
 		$SumTotalByMonth+=$totalTimeMonthInMinute;
 		$SumTotalByMonthString=convertMinuteToHour($SumTotalByMonth);	
-		print("<td class=\"text-center border-bottom-0\"><strong>$SumTotalByMonthString</strong></td>");
+		$SumTotalFlightCountByMounth+=$totalMounthFlightCount;
+		print("<td class=\"text-center border-bottom-0\"><strong>$SumTotalByMonthString ($SumTotalFlightCountByMounth)</strong></td>");
 	}
 	else {
 		print("<td class=\"text-center border-bottom-0\"><strong></strong></td>");

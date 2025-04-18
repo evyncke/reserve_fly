@@ -373,7 +373,20 @@ function convertMinuteToHour($theTimeInMinute)
 //                     "2024-01-%" all IF flights of janauary 2024
 function getCompteurIFValueInMinute($thePlane, $theDateFilter)
 {
-	return getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "IF");
+	$aNbrOfFlights=0;
+	return getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "IF", $aNbrOfFlights);
+}
+
+//  Function: getIFFlightCount : Returns the total count of DHF flights of a aircraft for a date filter
+//  ======== 
+//  $thePlane: ex "OO-ALD"
+//  $theDateFilter: ex "2024-%" all IF flights of 2024 of the plane
+//                     "2024-01-%" all IF flights of janauary 2024
+function getIFFlightCount($thePlane, $theDateFilter)
+{
+	$aNbrOfFlights=0;
+	getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "IF", $aNbrOfFlights);
+	return $aNbrOfFlights;
 }
 
 //  Function: getCompteurDHFValueInMinute : Returns the total compteur time for DHF flight of a aircraft for a date filter
@@ -383,7 +396,20 @@ function getCompteurIFValueInMinute($thePlane, $theDateFilter)
 //                     "2024-01-%" all IF flights of janauary 2024
 function getCompteurDHFValueInMinute($thePlane, $theDateFilter)
 {
-	return getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "DHF");
+	$aNbrOfFlights=0;
+	return getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "DHF", $aNbrOfFlights);
+}
+
+//  Function: getDHFFlightCount : Returns the total count of DHF flights of a aircraft for a date filter
+//  ======== 
+//  $thePlane: ex "OO-ALD"
+//  $theDateFilter: ex "2024-%" all IF flights of 2024 of the plane
+//                     "2024-01-%" all IF flights of janauary 2024
+function getDHFFlightCount($thePlane, $theDateFilter)
+{
+	$aNbrOfFlights=0;
+	getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "DHF", $aNbrOfFlights);
+	return $aNbrOfFlights;
 }
 
 //  Function: getCompteurINITValueInMinute : Returns the total compteur time for INIT flight of a aircraft for a date filter
@@ -393,7 +419,20 @@ function getCompteurDHFValueInMinute($thePlane, $theDateFilter)
 //                     "2024-01-%" all IF flights of janauary 2024
 function getCompteurINITValueInMinute($thePlane, $theDateFilter)
 {
-	return getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "INIT");
+	$aNbrOfFlights=0;
+	return getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "INIT", $aNbrOfFlights);
+}
+
+//  Function: getINITFlightCount : Returns the total count of INIT flights of a aircraft for a date filter
+//  ======== 
+//  $thePlane: ex "OO-ALD"
+//  $theDateFilter: ex "2024-%" all IF flights of 2024 of the plane
+//                     "2024-01-%" all IF flights of janauary 2024
+function getINITFlightCount($thePlane, $theDateFilter)
+{
+	$aNbrOfFlights=0;
+	getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, "INIT", $aNbrOfFlights);
+	return $aNbrOfFlights;
 }
 
 //  Function: getCompteurIfInitDhfValueInMinute : Returns the total compteur time for IF-DHF-INIT flights of a aircraft for a date filter
@@ -402,9 +441,11 @@ function getCompteurINITValueInMinute($thePlane, $theDateFilter)
 //  $theDateFilter: ex "2024-%" all IF flights of 2024 of the plane
 //                     "2024-01-%" all IF flights of janauary 2024
 //  $theFlightType= {"IF", "DHF", "INIT"}
-function getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, $theFlightType)
+//  $theNbrOfFlight : returns the number of flights
+function getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, $theFlightType, &$theNbrOfFlight)
 {
-		global $mysqli_link, $table_logbook,  $table_flight, $table_person, $table_flights_ledger,$table_bookings,$userId ;
+	global $mysqli_link, $table_logbook,  $table_flight, $table_person, $table_flights_ledger,$table_bookings,$userId ;
+	$theNbrOfFlight=0;
 	$filterType = 'f_type ="D"' ;
 	if($theFlightType=="INIT") {
 		$filterType = 'f_type ="I"' ;
@@ -420,8 +461,7 @@ function getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, $theFlight
 
 	//print("getCompteurIFValueInMinute $thePlane, $theDateFilter sql=$sql<br>");
 
-	//print("sql=$sql<br>");
-	$montantTotal=0.0;
+
 
 	$result = mysqli_query($mysqli_link, $sql) 
 			or journalise($userId, "F", "Impossible de lister les vols IF: " . mysqli_error($mysqli_link));
@@ -452,6 +492,7 @@ function getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, $theFlight
 			$timeHour=intval($timeInMinute/60);
 			$timeMinute=$timeInMinute-$timeHour*60;
 			$timeTotal+=$timeMinute;
+			$theNbrOfFlight++;
 		}
 	}
 	
