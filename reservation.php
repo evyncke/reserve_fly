@@ -29,7 +29,7 @@ require_once "dbi.php" ;
 MustBeLoggedIn() ;
 
 require_once "odoo.class.php" ;
-$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password, FALSE) ;
 
 $month_names = array('N/A', 'Jan', 'F&eacute;v', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil', 'Ao&ucirc;t', 'Sept', 'Oct', 'Nov', 'D&eacute;c') ;
 
@@ -94,7 +94,7 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 <meta property="og:image:width"	  content="256" />
 <meta property="og:image:height"  content="256" />
 <meta property="og:image:type"    content="image/png" />
-<meta property="fb:app_id"        content="<?=$fb_app_id?>" />
+<meta property="fb:app_id"        content="=$ fb_app_id " />
 
 <title>Réservation des avions</title>
 <script data-cfasync="true" src="datepickr.js"></script>
@@ -348,6 +348,7 @@ if (! $row_fee and ! $userIsInstructor and $userId != 294) { // 294 = SPW
 	print("<div class=\"noFlyBox\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
 		Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
 }
+
 // Check whether there are due invoices
 $due_invoices = $odooClient->SearchRead('account.move', 
 	array(array(
