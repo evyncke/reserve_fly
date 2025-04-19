@@ -28,8 +28,10 @@ class OdooClient {
     public $user ;
     public $password ;
     public $debug ;
+    public $exitOnError ; // if true, then die/journalise(, 'F') on PhpXmlRpc error 
+    public $errorMessage ;
 
-    function __construct($host, $db, $user, $password) {
+    function __construct($host, $db, $user, $password, $exitOnError = TRUE) {
         global $originUserId ;
 
         $this->host = $host ;
@@ -38,6 +40,7 @@ class OdooClient {
         $this->password = $password ;
         $this->encoder = new PhpXmlRpc\Encoder() ;
         $this->debug = false ;
+        $this->exitOnError = $exitOnError ;
 
         $this->common = new PhpXmlRpc\Client("https://$host/xmlrpc/2/common");
         $this->common->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
@@ -49,31 +52,40 @@ class OdooClient {
         if (!$response->faultCode()) {
             $this->uid = $response->value() ;
         } else {
+                $this->errorMessage = "Cannot connect to Odoo $host as $user. Reason: '" . $response->faultString() ;
                 if ($this->debug)
-                    die("<hr><b>Cannot connect to Odoo $host as $user:</b><br/>
-                        Reason: '" . nl2br($response->faultString()) . "'<hr>") ;
-                else
-                    journalise($originUserId, "F", "Cannot connect to Odoo $host as $user. " . 
-                        "Reason: '" . htmlentities($response->faultString()));
+                    die("<hr><b>$this->errorMessage</b><hr>") ;
+                else if ($this->exitOnError)
+                    journalise($originUserId, "F", $this->errorMessage);
+                else { // ! $exitOnError
+                    journalise($originUserId, "E", $this->errorMessage);
+                    $this->models = NULL ;
+                    $this->uid = NULL ;
+                    return NULL ; 
+                }
         }
         $this->models = new PhpXmlRpc\Client("https://$host/xmlrpc/2/object");
         $this->models->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
+        $this->errorMessage = NULL ;
     }
 
     # Read return all records from one model based on their IDs
     function Read($model, $ids, $display) {
         global $originUserId ;
 
+        if (!$this->models) return NULL ; // If connection failed...
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'read', array($ids), $display)) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
+            $this->errorMessage = "Cannot read in Odoo model $model @ $this->host. Reason: " . htmlentities($response->faultString()) ;
             if ($this->debug)
-                die("<hr><b>Cannot read in Odoo model $model @ $this->host</b><br/>
-                    Faultcode: " . htmlentities($response->faultCode()) . "<br/>
-                    Reason: '" . nl2br($response->faultString()) . "'<hr>") ;
-            else
-                journalise($originUserId, "F", "Cannot read in Odoo model $model @ $this->host: " . 
-                    htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
+                die("<hr>$this->errorMessage<hr>") ;
+            else if ($this->exitOnError)
+                journalise($originUserId, "F", $this->errorMessage);
+            else { // ! $exitOnError
+                journalise($originUserId, "E", $this->errorMessage);
+                return NULL ;
+            }        
         }
         return $response->value() ;
     }
@@ -90,16 +102,20 @@ class OdooClient {
     function SearchRead($model, $domain_filter, $display) {
         global $originUserId ;
 
+        if (!$this->models) return NULL ; // If connection failed...
         $params = $this->encoder->encode(array($this->db, $this->uid, $this->password, $model, 'search_read', $domain_filter, $display)) ;
         $response = $this->models->send(new PhpXmlRpc\Request('execute_kw', $params));
         if ($response->faultCode()) {
+            $this->errorMessage = "Cannot search_read in Odoo model $model @ $this->host: " . 
+                htmlentities($response->faultCode()) . "Reason: '" . htmlentities($response->faultString()) ;
             if ($this->debug)
-                die("<hr><b>Cannot search_read in Odoo model $model @ $this->host</b><br/>
-                    Faultcode: " . htmlentities($response->faultCode()) . "<br/>
-                    Reason: '" . nl2br($response->faultString()) . "'<hr>") ;
-            else
-                journalise($originUserId, "F", "Cannot search_read in Odoo model $model @ $this->host: " . 
-                    htmlentities($response->faultCode()) . "\n" . "Reason: '" . htmlentities($response->faultString()));
+                die("<hr><b>$this->errorMessage</b><hr>") ;
+            else if ($this->exitOnError)
+                journalise($originUserId, "F", $this->errorMessage);
+            else { // ! $exitOnError
+                journalise($originUserId, "E", $this->errorMessage);
+                return NULL ;
+            }       
         }
         
         return $response->value() ;
