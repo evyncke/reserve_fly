@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+   TODO:
+   - if synthetic booking is done for a multi-day trip, then none of the flights are returned except the one of the first day
+   
 */
 ob_start("ob_gzhandler");
 
@@ -32,14 +35,14 @@ $month = $_REQUEST['month'] ;
 if (!is_numeric($month) or $month < 1 or 12 < $month) $error_message = "Bien essaye... (month)" ;
 $year = $_REQUEST['year'] ;
 if (!is_numeric($year) or $year < 2014 or 3000 < $year) $error_message = "Bien essaye...(year)" ;
-$date = date_format(date_create("$year-$month-$day"), 'Y-m-d H:i:s') ; // Let's make a nice SQL format date
+$date = date_format(date_create("$year-$month-$day"), 'Y-m-d') ; // Let's make a nice SQL format date
 
 
 if ($error_message != '') {
 	$bookings['errorMessage'] = $error_message ;
 } else {
 	// TODO sometime the booked plane is replaced on the field by another one... tried 2024-04-30
-	$result = mysqli_query($mysqli_link, "SELECT r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
+	$sql = "SELECT r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
 		CONVERT(r_comment USING UTF8) AS r_comment, r_from, r_via1, r_via2, r_to, r_duration, r_crew_wanted, r_pax_wanted,
 		p.username as username, p.name as name, w.username AS username2, w.name AS name2,
 		p.email as email, home_phone, work_phone, cell_phone, avatar, ressource, r.id AS plane_id,
@@ -52,9 +55,12 @@ if ($error_message != '') {
 		$table_users AS w, $table_person
 		WHERE (r_plane = '$plane' OR l.l_plane = '$plane') AND DATE(r_start) <= '$date' AND '$date' <= DATE(r_stop) AND
 		r_who = w.id AND jom_id = p.id AND r_cancel_date IS NULL
-		ORDER BY r_plane, r_start") ;
+		ORDER BY r_plane, r_start" ;
+	$result = mysqli_query($mysqli_link, $sql) ;
 	if ($result)  {
+		$debugMsg  = '' ;
 		while ($row = mysqli_fetch_array($result)) {
+			$debugMsg .= " $row[r_plane]/$row[log_plane]/$row[log_id]/$row[log_start] " ;
 			// If flown plane is different than booked plane, then only return the flown one
 			if ($row['log_plane'] != '' and  $row['log_plane'] !=  $row['r_plane'])
 				if ($row['log_plane'] != $plane) continue ;
@@ -176,6 +182,8 @@ if ($error_message != '') {
 }
 // Let's send the data back
 @header('Content-type: application/json');
+//$bookings['debug'] = $debugMsg ;
+//if ($userId == 62) $bookings['sql'] = $sql ;
 $json_encoded = json_encode($bookings) ;
 if ($json_encoded === FALSE) {
 	journalise($userId, 'E', "Cannot JSON_ENCODE(), error code: " . json_last_error_msg()) ;
