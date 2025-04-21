@@ -18,6 +18,38 @@ $odooClient->debug = true ;
 
 print("Connect with UID: $uid\n") ;
 
+$result= $odooClient->SearchRead('account.move', 
+	array(array(
+//		array('partner_id.id', '=', 755),
+//array('status_in_payment', '!=', 'paid'),
+		array('invoice_date_due', '<', date('Y-m-d')),
+		array('move_type', '=', 'out_invoice'),
+		array('state', '=', 'posted'),
+		'|', array('payment_state', '=', 'not_paid'), array('payment_state', '=', 'partial'),
+)),  
+	array('fields'=>array('partner_id', 'invoice_date_due', 'amount_total', 'payment_state'))); 
+
+print("Length = " . count($result) . "\n") ;
+$DueDate = '' ;
+foreach($result as $f=>$desc) {
+       var_dump($desc);
+       print('<br>');
+        $status_in_payment=(isset($desc['status_in_payment'])) ? $desc['status_in_payment'] : '' ;
+        if($status_in_payment=="paid") {
+            // Already paid => not_paid and partial
+            continue;
+        }
+        $invoiceDueDate=(isset($desc['invoice_date_due'])) ? $desc['invoice_date_due'] : '' ;
+        $invoiceDate=(isset($desc['invoice_date'])) ? $desc['invoice_date'] : '' ;
+		print("invoideDueDate = $invoiceDueDate, invoiceDate = $invoiceDate
+		") ;
+        if($DueDate=="" || $invoiceDueDate<$DueDate) {
+            $DueDate=$invoiceDueDate;
+        }
+}
+print('</pre>') ;
+exit ;
+
 # Display all members with coordinates
 
 function GetOdooCategory($role) {
