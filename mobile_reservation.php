@@ -1,7 +1,7 @@
 <?php
 // Some icons (fast forward & co) by Snowish Icon Pack by Alexander Moore 
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ if ($userId == 0) {
 }
 
 require_once "odoo.class.php" ;
-$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password, FALSE) ;
 
 $month_names = array('N/A', 'Jan', 'Fév', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc') ;
 
@@ -281,6 +281,7 @@ if (! $row_fee and ! $userIsInstructor and $userId != 294) { // 294 = SPW
 	print("<div class=\"text-bg-danger\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
 		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
 }
+
 // Check whether there are unpaid due invoices
 $due_invoices = $odooClient->SearchRead('account.move', 
 	array(array(
@@ -295,8 +296,7 @@ $due_invoices = $odooClient->SearchRead('account.move',
 if (isset($due_invoices) and count($due_invoices) > 0) {
 	$userNoFlight = true ;
 	journalise($userId, "W", "This user has unpaid due invoices") ;
-	print("<div class=\"text-bg-danger\">Vous avez des factures échues et non payées, par conséquent vous ne pouvez pas réserver un avion.
-	Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
+	print("<div class=\"text-bg-danger\">Vous avez des factures échues et non payées, par conséquent vous ne pouvez pas réserver un avion.</div>") ;
 }
 
 if ($userNoFlight)
