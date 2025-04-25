@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2023 Eric Vyncke
+   Copyright 2013-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -351,11 +351,11 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
           <li><i><a class="dropdown-item" href="mobile_plane_planning.php">Echéances des avions</a></i></li>
           <li><i><a class="dropdown-item" href="mobile_plane_4_camo.php">Rapport hebdomadaire des avions pour CAMO</a></i></li>
           <li><i><a class="dropdown-item" href="mobile_shared_flights.php">Vols en codes partagés</a></i></li>
-          <li><h6 class="dropdown-header">Disponible pour tous les membres</h6></li>
 <?php
 }
 if ($userId > 0) {
 ?>
+            <li><h6 class="dropdown-header">Disponible pour tous les membres</h6></li>
             <li><a class="dropdown-item" href="mobile_planelog.php?plane=OO-FMX">Carnets de routes</a></li>
             <li><a class="dropdown-item" href="mobile_incidents.php">Aircraft Tech Logs</a></li>
             <li><a class="dropdown-item" href="IntroCarnetVol.php">Encodage compteurs <i class="bi bi-box-arrow-up-right"></i></span></a></li>
