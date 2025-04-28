@@ -1416,6 +1416,7 @@ function OF_InvoiceDueDays($theOdooPartnerReference)
 //============================================
 function OF_LastInvoiceDueDate($theOdooPartnerReference)
 {
+    // TODO added by evyncke 2025-04-28: new Odoo seems to use invoice_payment_term_id rather than invoice_date_due
     //print("OF_LastInvoiceDueDate($theOdooPartnerReference)<br>");
     $odooClient=OF_GetOdooClient();
     $result= $odooClient->SearchRead('account.move', 
