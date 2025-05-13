@@ -1,5 +1,4 @@
 <?php
-// Some icons (fast forward & co) by Snowish Icon Pack by Alexander Moore 
 /*
    Copyright 2014-2025 Eric Vyncke
 
