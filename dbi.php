@@ -59,8 +59,8 @@ $non_nav_membership_price = 70.0 ; //2025
 $nav_membership_price = 200.0 ; //2025
 $membership_analytic_account = 25  ;
 
-$tracked_planes = array('OOALD', 'OOALE', 'OOAPV', 'OOFUN', 'OOJRB', 'OOFMX', 'OOSPQ', 'PHAML') ;
-// array_push($tracked_planes, 'OOFUN', 'OOMAT', 'FHABQ', 'OOD35', 'OOG85', 'DELZA', 'DELZB', 'FJXRL') ; // For Air Spa Rallye
+$tracked_planes = array('OOALD', 'OOALE', 'OOAPV', 'OOFUN', 'OOJRB', 'OOFMX', 'OOSPQ') ;
+array_push($tracked_planes, 'OOADO', 'OOG85', 'OOPEG', 'OOVMS', 'DELZA', 'DELZB', 'FJXRL') ; // For Air Spa Rallye
 // array_push($tracked_planes, 'OOCEK', 'FAZMX', 'FAYAC', 'GIIIG') ; // For 75 ans avions externes
 
 $bccTo = "eric.vyncke@edpnet.be" ;
