@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2024 Eric Vyncke
+   Copyright 2023-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -64,24 +64,36 @@ $header_postamble = '<style>
 require_once 'mobile_header5.php' ;
 
 $sql_date = date('Y-m-d') ;
-$special_date = '2024-09-07' ;
+$special_date = '2025-05-17' ;
 $rows = [
-    [ '1030', 'OOAPV', 'SMAL', 'WARNOTTE'],
-
-    [ '1050', 'OOJRB', 'GROSJEAN', 'SISTERS'],
-    [ '1220', 'FHABQ', 'RAUSCH', 'DESCAMPS'],
-    [ '1230', 'OOALE', 'PENDERS', 'ALBRECHT'],
-    [ '1240', 'OOFMX', 'MOREAU', 'MUZILLO'],
-    [ '1250', 'DELZB', 'LEFIN', 'SAUVAGE'],
-    [ '1300', 'OOFUN', 'RATY', 'ROSEWICK'],
-    [ '1400', 'OOD35', 'KLIJNSMA', 'OOMS'],
-    [ '1410', 'FJXRL', 'GUILLOU', 'KALLASTE'],
+    [ '0910', 'OOJRB', 'NIHOUL', 'GASPAR'],
+    [ '0920', 'OOAPV', 'REGINSTER', 'VINTENS'],
+    [ '1030', 'OOALE', 'HENDRICKX', 'POLAT'],
+    [ '1040', 'OOFUN', 'MOREAU', 'LALLEMANT'],
+    [ '1150', 'DELZB', 'ROSANT', 'LIEVENS'],
+    [ '1200', 'OOG85', 'MALAISE', 'VAN HEES'],
+    [ '1210', 'OOFUN', 'DELFOSSE', 'BARBIER'],
+    [ '1220', 'OOJRB', 'LENOM', 'FERNANDEZ'],
+    [ '1230', 'OOALD', 'DOPPAGNE', 'MENDES'],
+    [ '1310', 'OOADO', 'HARTMANN', 'FRAIKIN'],
+    [ '1320', 'OOALE', 'PENDERS', 'ALBRECHT'],
+    [ '1330', 'OOFMX', 'MICHOTTE', 'EVERAETS'],
+    [ '1340', 'OOPEG', 'MATHIEU', 'RAOUT'],
+    [ '1350', 'OOVMS', 'SAUVAGE', 'LEFIN'],
+    [ '1400', 'FJXRL', 'GUILLOU', ''],
+    [ '1410', 'OOALD', 'HANNAY', 'MENDES'],
     [ '1420', 'OOJRB', 'PACHOLIK', '& SON'],
-    [ '1430', 'OOALD', 'PAROTTO', 'LALLEMANT'],
-    [ '1440', 'OOAPV', 'WYNANDS', 'TRIOLET'],
-    [ '1530', 'OOALE', 'HENDRICKX', 'HORGNIES'],
-    [ '1540', 'OOG85', 'MALAISE', 'HIGUET'],
-    [ '1040', 'OOFMX', 'MURRAY', 'HANNAY'],
+    [ '1510', 'OOALE', 'VYNCKE', 'DEHOUSSE'],
+    [ '1530', 'DELZB', 'VANHEYSTE', 'ROBA'],
+    [ '1540', 'OOFMX', 'WARNOTTE', 'SMAL'],
+    [ '1550', 'OOFUN', 'CANADAS', 'ERNST'],
+    [ '1200', 'OOSPQ', 'GASPAR', ''],
+    [ '0900', 'OOALD', 'SONKES', 'MENDES'],
+    [ '1545', 'OOJRB', 'MAGHFOUL', 'MENDES'],
+    [ '1700', 'OOALE', 'GADZJIEV', 'MENDES'],
+    [ '', '', '', ''],
+    [ '', '', '', ''],
+    [ '', '', '', ''],
 ] ;
 
 if (isset($_REQUEST['kiosk']) and date('i') == '23') journalise($userId, 'D', "In kiosk mode: $_REQUEST[kiosk]") ; // Log liveness on everyhour and 23 minutes
@@ -125,8 +137,15 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
 <div style="background: black;">
 <br/>
 <?php
+
+// Ancilliary function to sort based on departure time
+function cmp($a, $b) {
+    return strcmp($a[0], $b[0]) ;
+}
+
 if ($sql_date == $special_date) {
     $now = date('Gi') ;
+    usort($rows, 'cmp') ; // ensure that the array is sorted by time of departure
     foreach($rows as $row) {
         if ($row[0] < $now) continue ; // Only display future departures
         print('<div class="row mx-0 my-4 px-0 flex-nowrap">') ; // Set boostrap margin/padding left-right to 0 to align board characters with the black backgound div
