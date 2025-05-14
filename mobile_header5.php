@@ -332,11 +332,11 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_reservation.php">Toutes les réservations (calendrier)</a></i></li>
             <li><a class="dropdown-item" href="reservation.php">Réservations (plein écran, ancienne version) <i class="bi bi-box-arrow-up-right"></i></a></li>
             <li><a class="dropdown-item" href="mobile.php">Mes réservations</a></li>
+            <li><a class="dropdown-item" href="mobile_today.php">Réservations de ce jour</a></li>
             <li><a class="dropdown-item" href="webcal://ics.php?user=<?=$userId?>&auth=<?=md5($userId . $shared_secret)?>"><i class="bi bi-calendar3"></i> lier à mon calendrier (iCal)</a></li>
 <?php
 }
 ?>
-            <li><a class="dropdown-item" href="mobile_today.php">Réservations de ce jour</a></li>
             <li><a class="dropdown-item" href="mobile_top.php">Top-10 des vols</a></li>
           </ul>
         </li>
@@ -376,14 +376,13 @@ if ($userId > 0) {
 if ($userId > 0) {
 ?> 
             <li><a class="dropdown-item" href="mobile_team.php">Équipe SPW</a></li>
-
+            <li><a class="dropdown-item" href="mobile_dept_board.php">Départs</a></li> 
 <?php
 }
 ?>
             <li><a class="dropdown-item" href="mobile_local_flights.php">Vols proches</a></li>
             <li><a class="dropdown-item" href="mobile_metar.php">METAR</a></li>
             <li><a class="dropdown-item" href="mobile_wx_map.php">Météo des environs</a></li>
-            <li><a class="dropdown-item" href="mobile_dept_board.php?cam=0">Départs</a></li> 
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">NEW Webcam RAPCS (Apron)</a></li>
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=2"><i>OLD Webcam RAPCS (Apron)</i></a></li>
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam SOWAER (station météo)</a></li>
