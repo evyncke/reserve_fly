@@ -72,7 +72,7 @@ if (in_array($metar_station, $belgocontrol_automated_stations)) { // Special cas
 		'timeout' => 1.0,
 		'user_agent' => 'Mozilla')) ;
 	$context = stream_context_create($opts) ;
-	$f = @fopen("https://www.vyncke.org/$metar_station.TXT", "r", false, $context) ;
+	$f = @fopen("https://nav.vyncke.org/$metar_station.TXT", "r", false, $context) ;
 	if (! $f) {
 		$error_message = error_get_last() ;
 		$reply['error'] = "Cannot access METAR for $metar_station on the Internet: " . $error_message['message'] ;
