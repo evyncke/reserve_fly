@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ if (isset($_REQUEST['id']) and $_REQUEST['id'] != '') {
 if ($userId < 0 or $userId == '') die("Vous devez être connecté") ;
 
 // Fetch all information about the user
-$result = mysqli_query($mysqli_link, "select *,u.username as username,u.email as email, date(p.birthdate) as birthdate
+$result = mysqli_query($mysqli_link, "select *,u.username as username,u.email as email
 	from $table_person p join $table_users u on p.jom_id = u.id left join jom_kunena_users k on k.userid=u.id
 	where u.id = $displayed_id") or die("Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) ;
@@ -37,7 +37,6 @@ $name_db = $me['name'] ;
 $me['name'] = db2web($me['name']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
-$me['city'] = db2web($me['city']) ; 
 // Be paranoid
 foreach($me as $key => $value)
 	$me[$key] = htmlspecialchars($value, ENT_QUOTES) ;
@@ -51,7 +50,6 @@ N;charset=utf-8:$me[last_name];$me[first_name];;;
 FN;charset=utf-8:$me[name]
 LOGO;MEDIATYPE=image/x-icon:https://www.spa-aviation.be/favicon32x32.ico
 ORG;charset=utf-8:RAPCS\n" ;
-if ($me['birthdate'] && $me['birthdate'] != '0000-00-00') $s .= "BDAY:$me[birthdate]\n" ;
 if (!isset($_REQUEST['qr']) and $me['avatar'] != '') {
 	$file_name = '../media/kunena/avatars/' . $me['avatar'] ;
 	$f = fopen($file_name, 'rb') ;
@@ -94,6 +92,4 @@ if (isset($_REQUEST['qr']) and $_REQUEST['qr'] != '') {
         print($s) ;
 		journalise($userId, 'I', "Downloading of vcard for $me[name]") ;
 }
-
-
 ?>

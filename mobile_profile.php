@@ -54,16 +54,18 @@ $me['name'] = db2web($me['name']) ;
 $me['username'] = db2web($me['username']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
-$me['address'] = db2web($me['address']) ; 
-$me['zipcode'] = db2web($me['zipcode']) ; 
-$me['city'] = db2web($me['city']) ; 
-$me['country'] = db2web($me['country']) ;
-$me['company_name'] = db2web($me['c_name']) ; 
-$me['company_address'] = db2web($me['c_address']) ; 
-$me['company_zipcode'] = db2web($me['c_zipcode']) ; 
-$me['company_city'] = db2web($me['c_city']) ; 
-$me['company_country'] = db2web($me['c_country']) ;
-$me['company_bce'] = db2web($me['c_bce']) ;
+if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) {
+	$me['address'] = db2web($me['address']) ; 
+	$me['zipcode'] = db2web($me['zipcode']) ; 
+	$me['city'] = db2web($me['city']) ; 
+	$me['country'] = db2web($me['country']) ;
+	$me['company_name'] = db2web($me['c_name']) ; 
+	$me['company_address'] = db2web($me['c_address']) ; 
+	$me['company_zipcode'] = db2web($me['c_zipcode']) ; 
+	$me['company_city'] = db2web($me['c_city']) ; 
+	$me['company_country'] = db2web($me['c_country']) ;
+	$me['company_bce'] = db2web($me['c_bce']) ;
+}
 
 // Be paranoid
 foreach($me as $key => $value)
@@ -269,16 +271,18 @@ $me['name'] = db2web($me['name']) ;
 $me['username'] = db2web($me['username']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
-$me['address'] = db2web($me['address']) ; 
-$me['zipcode'] = db2web($me['zipcode']) ; 
-$me['city'] = db2web($me['city']) ; 
-$me['country'] = db2web($me['country']) ;
-$me['company_name'] = db2web($me['c_name']) ; 
-$me['company_address'] = db2web($me['c_address']) ; 
-$me['company_zipcode'] = db2web($me['c_zipcode']) ; 
-$me['company_city'] = db2web($me['c_city']) ; 
-$me['company_country'] = db2web($me['c_country']) ;
-$me['company_bce'] = db2web($me['c_bce']) ;
+if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) { // Private information only for admins & FI
+	$me['address'] = db2web($me['address']) ; 
+	$me['zipcode'] = db2web($me['zipcode']) ; 
+	$me['city'] = db2web($me['city']) ; 
+	$me['country'] = db2web($me['country']) ;
+	$me['company_name'] = db2web($me['c_name']) ; 
+	$me['company_address'] = db2web($me['c_address']) ; 
+	$me['company_zipcode'] = db2web($me['c_zipcode']) ; 
+	$me['company_city'] = db2web($me['c_city']) ; 
+	$me['company_country'] = db2web($me['c_country']) ;
+	$me['company_bce'] = db2web($me['c_bce']) ;
+}
 
 // Be paranoid
 foreach($me as $key => $value)
@@ -387,7 +391,7 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label for="home_phoneId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Téléphone priv&eacute;:</label>
+        <label for="home_phoneId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Téléphone privé:</label>
         <div class="col-sm-4">
                 <input type="tel" class="form-control" name="home_phone" id="home_phoneId" value="<?=$me['home_phone']?>" autocomplete="home tel" <?=$read_only_attribute?>>
 	</div> <!-- col -->
@@ -398,6 +402,9 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
                 <input type="tel" class="form-control" name="work_phone" id="work_phoneId" value="<?=$me['work_phone']?>" autocomplete="work tel" <?=$read_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- row -->
+<?php
+if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
+?>
 <div class="row mb-3">
         <label for="addressId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Rue:</label>
         <div class="col-sm-4">
@@ -452,6 +459,9 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
             </div><!-- input group -->
 	</div> <!-- col -->
 </div> <!-- row -->
+<?php
+} // Private information 
+?>
 <div class="row mb-3">
         <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Heures de vol:</label>
         <div class="col-sm-4">
