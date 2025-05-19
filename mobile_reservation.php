@@ -505,7 +505,7 @@ et: <input type=text id="via2Airport" size="6" maxlength="4" onKeyUp="airportCha
 <br/>
 
 	  <hr>
-<span class="text-bg-primary">N'oubliez pas de vérifier la validité de votre qualification SEP, certificat médical, de votre ELP, des
+<span class="text-info">N'oubliez pas de vérifier la validité de votre qualification SEP, certificat médical, de votre ELP, des
 règles d'emport de passagers et les autres règles du club définies dans
 <a href="https://www.spa-aviation.be/index.php/fr/avions/regles-pour-la-reservation">règles pour réservation</a>.
 </span>

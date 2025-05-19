@@ -421,22 +421,21 @@ function init() {
 	var pilotSelect = document.getElementById('pilotSelect') ;
 	if (pilotSelect) {
 	// Dropdown selected the pilot
-		if (userIsInstructor || userIsAdmin || window.location.pathname == '/resa/mobile_profile.php') {
-				// Initiliaze pilotSelect from members.js
-				for (var member = 0; member < members.length; member++) {
-						var option = document.createElement("option");
-						if (members[member].last_name == '')
-								option.innerHTML = members[member].name ;
-						else
-								option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
-						if (members[member].student) {  // Add a student icon was &#x1f4da;
-								option.innerHTML += ' &#x1F393;' ;
-						}
-						option.value = members[member].id ;
-						pilotSelect.add(option) ;
+		// Initiliaze pilotSelect from members.js
+		for (var member = 0; member < members.length; member++) {
+				var option = document.createElement("option");
+				if (members[member].last_name == '')
+						option.innerHTML = members[member].name ;
+				else
+						option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
+				if (members[member].student) {  // Add a student icon was &#x1f4da;
+						option.innerHTML += ' &#x1F393;' ;
 				}
+				option.value = members[member].id ;
+				pilotSelect.add(option) ;
 		}
 		pilotSelect.value = selectedUserId ;
+		pilotSelect.disabled = ! (userIsAdmin || userIsInstructor || window.location.pathname == '/resa/mobile_profile.php') ;
 	}
 
 	// Replace the generic HTML title but a more specific one based on the 2nd <h2> tag (the first one is used by the banner)
