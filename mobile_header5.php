@@ -383,8 +383,14 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_local_flights.php">Vols proches</a></li>
             <li><a class="dropdown-item" href="mobile_metar.php">METAR</a></li>
             <li><a class="dropdown-item" href="mobile_wx_map.php">Météo des environs</a></li>
-            <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">NEW Webcam RAPCS (Apron)</a></li>
-            <li><a class="dropdown-item" href="mobile_webcam.php?cam=2"><i>OLD Webcam RAPCS (Apron)</i></a></li>
+            <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam RAPCS (Apron)</a></li>
+<?php
+if ($userId > 0) {
+?>
+            <li><a class="dropdown-item" href="mobile_streaming.php">Webcam RAPCS (Apron) streaming décalé et basse résolution</a></li>
+<?php
+}
+?>
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam SOWAER (station météo)</a></li>
           </ul>
         </li>

@@ -1,0 +1,19 @@
+[Unit]
+Description=FFmpeg Service for RAPCS snapshot
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+#  Stream #0:0: Video: h264 (High), yuv420p(progressive), 2304x1296, 15 fps, 50 tbr, 90k tbn
+#  Stream #0:1: Audio: pcm_alaw, 8000 Hz, mono, s16, 64 kb/s
+ExecStart=/usr/bin/ffmpeg -loglevel quiet -i rtsp://user:password@kiosk.spa-aviation.be:554/stream1 -vf "fps=1/5"  -q:v 2 -update 1 -y /var/www/nav/rapcs/snapshot.jpg
+WorkingDirectory=/var/www/nav
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+

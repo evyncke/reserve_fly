@@ -1,0 +1,21 @@
+[Unit]
+Description=FFmpeg Service for RAPCS HLS streaming
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+# even with 4 sec for hls_time, it seems that the source video does not have so frequent key frames... could be forced possible with "-g 100" (group of frame every 100 frames)
+# stream2 characteristics
+#  Stream #0:0: Video: h264 (High), yuv420p(progressive), 1280x720, 15 fps, 24.83 tbr, 90k tbn
+#  Stream #0:1: Audio: pcm_alaw, 8000 Hz, mono, s16, 64 kb/s
+ExecStart=/usr/bin/ffmpeg -loglevel quiet -i rtsp://user:password@kiosk.spa-aviation.be:554/stream2 -c:v libx264 -c:a aac -f hls -hls_time 5 -g 75 -hls_list_size 3 -hls_flags delete_segments /var/www/nav/rapcs/stream.m3u8
+WorkingDirectory=/var/www/nav
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
