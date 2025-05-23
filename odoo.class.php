@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2024 Eric Vyncke
+   Copyright 2023-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,6 +14,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+TODO move from the complex XML-RPC to the simpler JSON-RPC API 
+https://stackoverflow.com/questions/64907011/what-is-the-difference-between-odoo-rpc-xml-rpc-json-rpc-and-rest-api-in-odoo
+https://www.odoo.com/documentation/17.0/developer/howtos/web_services.html
+https://www.postman.com/odoo44/odoo-api/documentation/fsmajyp/odoo-jsonrpc-over-rest
+https://www.odoo.com/fr_FR/event/odoo-experience-2024-4662/track/how-to-integrate-odoo-through-json-rpc-services-664 (video...)
 */
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require __DIR__ . '/vendor/autoload.php' ;
