@@ -28,6 +28,7 @@ require_once 'mobile_header5.php' ;
 
 ?> 
 <div class="container-fluid">
+<h2 style="display: none;">Webcam #<?=$cam?></h2>
 <figure class="figure">
     <a href="<?=$webcam_uris[$cam]?>">
     <img class="figure-img img-fluid" style="width: 80vw;" src="<?=$webcam_uris[$cam]?>" id="webcamImg">

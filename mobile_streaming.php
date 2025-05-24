@@ -25,6 +25,7 @@ if ($userId == 0) {
 }
 ?> 
 <div class="container-fluid">
+<h2 style="display: none;">Live Apron Webcam</h2>
 <video id="hls-video" controls autoplay width="1280" height="720"></video>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
