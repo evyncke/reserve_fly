@@ -226,10 +226,11 @@ if ($christmas_theme) {
 <?php
 } // $christmas theme
 ?>
-<nav class="navbar navbar-expand-lg text-bg-success d-print-none" id="navBarId"><!-- do not print the menu... Add fixed-top w/o destroying the layout -->
+<nav class="navbar navbar-expand-lg text-bg-success d-print-none" id="navBarId"><!-- do not print the menu... 
+   TODO:  add 'fixed-top' w/o destroying the layout, e.g., do not eat METAR box -->
   <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".multi-collapse">
-        <span class="navbar-toggler-icon"></span>
+        <i class="navbar-toggler-icon"></i>
       </button>
       <!-- below in the <a the navbar-collapse widen the space by adding right margin !!! -->
       <a class="navbar-brand multi-collapse hidden-md collapse navbar-collapse" href="mobile.php?news" style="max-width: 40px;">
