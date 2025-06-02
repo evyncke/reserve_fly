@@ -19,6 +19,7 @@ https://stackoverflow.com/questions/64907011/what-is-the-difference-between-odoo
 https://www.odoo.com/documentation/17.0/developer/howtos/web_services.html
 https://www.postman.com/odoo44/odoo-api/documentation/fsmajyp/odoo-jsonrpc-over-rest
 https://www.odoo.com/fr_FR/event/odoo-experience-2024-4662/track/how-to-integrate-odoo-through-json-rpc-services-664 (video...)
+
 */
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require __DIR__ . '/vendor/autoload.php' ;
@@ -49,6 +50,12 @@ class OdooClient {
 
         $this->common = new PhpXmlRpc\Client("https://$host/xmlrpc/2/common");
         $this->common->setOption(PhpXmlRpc\Client::OPT_RETURN_TYPE, PhpXmlRpc\Helper\XMLParser::RETURN_PHP);
+        // Horrible hack to hard code the IPv4 (!!) address to the Odoo server in an attempt to bypass the fatal error
+        // CURL error: getaddrinfo() thread failed to start
+        $curl_options = array(
+          CURLOPT_RESOLVE => array("spa-aviation.odoo.com:443:91.134.4.201"),
+        );
+        $this->common->setOption(PhpXmlRpc\Client::OPT_EXTRA_CURL_OPTS, $curl_options);
         $params = array(new PhpXmlRpc\Value($db), 
             new PhpXmlRpc\Value($user), 
             new PhpXmlRpc\Value($password),
