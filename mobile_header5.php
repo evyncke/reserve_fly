@@ -388,7 +388,9 @@ if ($userId > 0) {
 <?php
 if ($userId > 0) {
 ?>
-            <li><a class="dropdown-item" href="mobile_streaming.php">Webcam RAPCS (Apron) streaming décalé et basse résolution</a></li>
+            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=apron">Webcam RAPCS (Apron) streaming décalé et basse résolution</a></li>
+            <li><a class="dropdown-item" href="mobile_webcam.php?cam=2">Webcam RAPCS (Hangars)</a></li>
+            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=hangars">Webcam RAPCS (Hangars) streaming décalé et basse résolution</a></li>
 <?php
 }
 ?>
