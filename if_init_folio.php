@@ -269,7 +269,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
 		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
 		$date=$row['f_date_flown'];
 		$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
-		$plane=$row['r_plane'];
+		$plane=$row['l_plane'];
 		$pilote=db2web($row['first_name'])." ".db2web($row['last_name']) ;
 		$montant=$row['prix'];
 		$montantTotal+=$montant;
@@ -452,7 +452,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
  			$reference = db2web($reference)."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
 			$date=$row['f_date_flown'];
 			$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
-			$plane=$row['r_plane'];
+			$plane=$row['l_plane'];
 			$pilote=db2web($row['first_name'])." ".db2web($row['last_name']) ;
 			$montant=$row['prix'];
 			$montantTotal+=$montant;

@@ -45,6 +45,53 @@ function CheckFileSize($theFilesRequest, $theInputFileName, $theMaxFileSize)
 	return true;
 }
 
+// Function UploadFile : Upload one file in a upload folder 
+// =====================
+// $theFileRequest: often $_Files
+// $theInputFileName: the input type=file name
+// $theUploadFolder: the upload folder name
+// $theFilePrefix: the uploaded file name starts with the prefix
+// returns the file name
+function UploadFile($theFileRequest, $theInputFileName, $theUploadFolder, $theFilePrefix, $theMaxNumberOfPixels) 
+{
+	$returnValue="";
+	/* $ERROR values
+	0 => 'There is no error, the file uploaded with success',
+	1 => 'The uploaded file exceeds the upload_max_filesize directive in php.ini',
+	2 => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form',
+	3 => 'The uploaded file was only partially uploaded',
+	4 => 'No file was uploaded',
+	6 => 'Missing a temporary folder',
+	7 => 'Failed to write file to disk.',
+	8 => 'A PHP extension stopped the file upload.'
+	*/
+	print("UploadFile:theInputFileName=$theInputFileName, theFileRequest=");
+	var_dump($theFileRequest);
+	print("<br>");
+	var_dump($theFileRequest[$theInputFileName]["error"]);
+	print("<br>");
+		
+	$error=$theFileRequest[$theInputFileName]["error"];
+	if ($error == UPLOAD_ERR_OK) {
+		$tmp_name = $theFileRequest[$theInputFileName]["tmp_name"];
+		//print_r($tmp_name);
+		$name=basename($theFileRequest[$theInputFileName]["name"]);
+		//moveAndResizePicture($tmp_file, $upload_fileName, $maxImageSize)
+		//if(move_uploaded_file($tmp_name, $theUploadFolder."/".$theFilePrefix.$name)) {
+		if(moveAndResizePicture($tmp_name, $theUploadFolder."/".$theFilePrefix.$name, $theMaxNumberOfPixels)) {
+			$returnValue=$theFilePrefix.$name;
+		}
+	}
+	else if($error == UPLOAD_ERR_NO_FILE) {
+		//print_r("UploadFiles: No file to upload!");
+	}
+	else {
+		$errorString=UploadErrorString($error);
+		print_r("UploadFile: Upload Error: $errorString !!");
+	}
+	return $returnValue;
+}
+
 // Function UploadFiles : Upload files in a upload folder 
 // =====================
 // $theFilesRequest: often $_Files
@@ -64,6 +111,7 @@ function UploadFiles($theFilesRequest, $theInputFileName, $theUploadFolder, $the
 	7 => 'Failed to write file to disk.',
 	8 => 'A PHP extension stopped the file upload.'
 	*/
+		
 	foreach ($theFilesRequest[$theInputFileName]["error"] as $key => $error) {
 		if ($error == UPLOAD_ERR_OK) {
 			$tmp_name = $theFilesRequest[$theInputFileName]["tmp_name"][$key];
@@ -472,19 +520,17 @@ function getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, $theFlight
 	JOIN rapcs_person ON f.f_pilot = jom_id 
 	JOIN rapcs_bookings AS b ON f.f_booking = b.r_id 
 	JOIN rapcs_logbook AS l ON f.f_booking = l.l_booking 
-	WHERE l_plane='$thePlane' AND $filterType AND f_date_flown IS NOT NULL 
+	WHERE l_plane='$thePlane' AND $filterType AND f_date_flown IS NOT NULL AND f_invoice_ref IS NOT NULL
 	AND f_date_flown like '$theDateFilter' ORDER BY f_date_flown";
 
-	//print("getCompteurIFValueInMinute $thePlane, $theDateFilter sql=$sql<br>");
-
-
+	//if($theDateFilter=="2025-05-%") print("getCompteurIFValueInMinute $thePlane, $theDateFilter sql=$sql<br>");
 
 	$result = mysqli_query($mysqli_link, $sql) 
 			or journalise($userId, "F", "Impossible de lister les vols IF: " . mysqli_error($mysqli_link));
 
 	$timeTotal=0;
 	while ($row = mysqli_fetch_array($result)) {
-       $invoiceRef=$row['f_invoice_ref'];
+        $invoiceRef=$row['f_invoice_ref'];
         $referenceFlight=$row['f_reference'];
 		$toBeUsed=true;
 		$pos = strpos(strtoupper($referenceFlight), "DHF-");
@@ -509,6 +555,12 @@ function getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, $theFlight
 			$timeMinute=$timeInMinute-$timeHour*60;
 			$timeTotal+=$timeMinute;
 			$theNbrOfFlight++;
+			/*
+			if($theDateFilter=="2025-05-%") {
+				$startDate=$row['l_start'];
+				print("getCompteurIfInitDhfValueInMinute $thePlane , $theDateFilter, $startDate theNbrOfFlight=$theNbrOfFlight<br>");
+			}
+			*/
 		}
 	}
 	
