@@ -87,7 +87,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <div class="row mb-3">
 	<label for="remarkId" class="col-form-label col-sm-4 col-md-2">Description:</label>
 	<div class="col-sm-12 col-md-6">
-		<input type="text" class="form-control" name="remark" id="remarkId" placeholder="Short description of the techlog entry" >
+		<input type="text" class="form-control" name="remark" id="remarkId" placeholder="Short description of the techlog entry" onchange="selectRemark();" >
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
@@ -137,22 +137,41 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <script type="text/javascript">
     //var anEntry=document.getElementById("id_createatlentry");
     //anEntry.disabled=true;        
+    function selectRemark() {
+        var anEntry=document.getElementById("id_createatlentry");
+		var remark =document.getElementById("remarkId").value;
+        if(remark=="") {
+            document.getElementById("id_createatlentry").disabled=true;  
+            return;
+        }
+ 		var severity=document.getElementById("severityId").value;
+        if(severity!="hazard" && severity !="nohazard") {
+            document.getElementById("id_createatlentry").disabled=true;
+            return;
+        }
+        document.getElementById("id_createatlentry").disabled=false;            
+    }
+
     function selectSeverity() {
         var anEntry=document.getElementById("id_createatlentry");
-        
-		var severity=document.getElementById("severityId").value;
+        var disabledButton=true;
+		var remark =document.getElementById("remarkId").value;
+      	var severity=document.getElementById("severityId").value;
         if(severity=="hazard") {
             if (confirm("Vous avez choisi un ATL report de type HAZARD TO FLY.\nL'avion sera donc bloqué jusqu'à l'intervention d'un mécanicien.\nConfirmez que vous voulez bien bloquer l'avion?") == false) {
 			    document.getElementById("severityId").value="nohazard";
                 severity="nohazard";
 		    }
         }
-        if(severity=="hazard" || severity =="nohazard") {
-            document.getElementById("id_createatlentry").disabled=false;
+        if(severity!="hazard" && severity !="nohazard") {
+            document.getElementById("id_createatlentry").disabled=true;
+            return;
         }
-        else {
-            document.getElementById("id_createatlentry").disabled=true;            
+        if(remark=="") {
+            document.getElementById("id_createatlentry").disabled=true;  
+            return;
         }
+        document.getElementById("id_createatlentry").disabled=false;            
     }
 </script>
 <?php
