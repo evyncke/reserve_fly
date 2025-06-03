@@ -18,15 +18,15 @@
 
 require_once "dbi.php" ;
 require_once 'mobile_header5.php' ;
+if ($userId == 0) {
+	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+	exit ;
+}
 if (isset($_REQUEST['webcam']))
   $webcam = '-' . $_REQUEST['webcam'] ;
 else
   $webcam = '' ;
 if ($userId != 62) journalise($userId, "D", "Start of live streaming #$webcam") ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
 ?> 
 <div class="container-fluid">
 <h2 style="display: none;">Live Webcam<?=$webcam?></h2>
