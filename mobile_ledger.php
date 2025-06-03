@@ -96,7 +96,6 @@ $solde = 0.0 ;
 if ($odooId != '') {
 	require_once 'odoo.class.php' ;
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-	if ($originalUserId == 62) $odooClient->debug= true ; //EVY
 	print("<tbody class=\"table-group-divider\">") ;
 	$moves = $odooClient->SearchRead('account.move.line', array(
 		array(
