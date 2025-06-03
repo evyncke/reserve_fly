@@ -24,8 +24,8 @@ if ($userId == 0) {
 }
 if (isset($_REQUEST['webcam']))
   $webcam = '-' . $_REQUEST['webcam'] ;
-else
-  $webcam = '' ;
+else // Use the default
+  $webcam = '-apron' ;
 if ($userId != 62) journalise($userId, "D", "Start of live streaming #$webcam") ;
 ?> 
 <div class="container-fluid">
