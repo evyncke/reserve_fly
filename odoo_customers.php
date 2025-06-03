@@ -27,7 +27,6 @@ $body_attributes = 'onload="filterRows(); init(); "' ;
 require_once 'mobile_header5.php' ;
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-$odooClient->debug = true ;
 
 if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) journalise($userId, "F", "This admin page is reserved to administrators") ;
 
