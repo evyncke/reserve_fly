@@ -700,7 +700,7 @@ while ($row = mysqli_fetch_array($result)) {
 
 if (count($ids) > 0) { // If there are still unpaid membership fees
 	$moves = $odooClient->Read('account.move', 
-		$ids, 
+		[$ids], 
 		array('fields' => array('id', 'name', 'state', 'payment_state'))) ;
 	$newly_paid = 0 ;
 	foreach($moves as $move) {
