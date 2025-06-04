@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2024 Eric Vyncke
+   Copyright 2023-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -54,7 +54,8 @@ if ($userIsInstructor or $userIsAdmin) {
 }
 ?>
 <h2>Factures de <?=$userName?></h2>
-<p class="lead">Voici quelques factures (mises à jour plusieurs fois par semaine environ par nos bénévoles).</p>
+<p class="lead">Voici vos factures (leur état payé/à payer est mis à jour plusieurs fois par jour si vous utilisez la communication
+	structurée ou le QR-code de la facture).</p>
 
 <!-- using tabs -->
 <ul class="nav nav-tabs">
@@ -131,10 +132,10 @@ if ($odooId != '') {
 	foreach ($invoices as $invoice) {
 		if (!$first_date) $first_date = $invoice['invoice_date'] ;
 		switch ($invoice['payment_state']) {
-			case 'paid': $paid_msg = '<span class="badge rounded-pill text-bg-success">Payé</span>'; break ;
+			case 'paid': $paid_msg = '<span class="badge rounded-pill text-bg-success">Payé</span>'; $total += $invoice['amount_total'] ; break ;
 			case 'reversed': $paid_msg = '<span class="badge rounded-pill text-bg-info">Extourné</span>' ; break ;
 			// state 'draft'
-			default: $paid_msg = '<span class="badge rounded-pill text-bg-warning">Non payé</span>' ;
+			default: $paid_msg = '<span class="badge rounded-pill text-bg-warning">Non payé</span>'; $total += $invoice['amount_total'] ;
 		}
 		$amount = number_format($invoice['amount_total'], 2, ',', '.') ;
 		// TODO QR code BCD/002/1/SCT//Royal Aéro Para Club de Spa asbl/BE647.../EUR70.00//++000....+++
@@ -145,6 +146,7 @@ if ($odooId != '') {
 			<td style=\"text-align: right;\">$paid_msg$amount&nbsp;&euro;</td>
 			</tr>\n") ;
 		$count++ ;
+		
 	}
 } // if ($odooId != '')
 ?>
@@ -153,7 +155,7 @@ if ($odooId != '') {
 if ($count > 0) {
 	print('<tfoot class="table-group-divider">
 		<tr class="bg-info"><td colspan="3">Total facturé depuis le ' . $first_date . 
-		'</td><td class="text-end">' . $total . '&euro;</td></tr>
+		'</td><td class="text-end">' . number_format($total, 2, ',', '.')  . ' &euro;</td></tr>
 	</tfoot>') ;	
 }
 ?>
