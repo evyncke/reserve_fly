@@ -282,7 +282,7 @@ if (! $row_fee and ! $userIsInstructor and $userId != 294) { // 294 = SPW
 }
 
 // Check whether there are unpaid due invoices
-// TODO added by evyncke 2025-04-28: new Odoo seems to use invoice_payment_term_id rather than invoice_date_due (link to account.payment.term)
+// TODO added by evyncke 2025-06-04 only check unpaid due balance if balance is < 0, else if balance >= 0, then all is good
 $due_invoices = $odooClient->SearchRead('account.move', 
 	array(array(
 		array('partner_id.id', '=', intval($row['odoo_id'])),
