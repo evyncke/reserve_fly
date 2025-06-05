@@ -17,6 +17,7 @@
 */
 
 require_once "dbi.php" ;
+$header_postamble = '<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>' ;
 require_once 'mobile_header5.php' ;
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
@@ -30,8 +31,33 @@ if ($userId != 62) journalise($userId, "D", "Start of live streaming #$webcam") 
 ?> 
 <div class="container-fluid">
 <h2 style="display: none;">Live Webcam<?=$webcam?></h2>
+<?php
+if ($webcam == '-both') {
+?>
+<video id="hls-video-1" controls autoplay width="50%"></video>
+<video id="hls-video-2" controls autoplay width="50%"></video>
+<script>
+  if (Hls.isSupported()) {
+    var video1 = document.getElementById('hls-video-1');
+    var video2 = document.getElementById('hls-video-2');
+    var hls1 = new Hls();
+    var hls2 = new Hls();
+    hls1.loadSource('https://nav.vyncke.org/rapcs/stream-apron.m3u8?nhls=<?=$userId?>');
+    hls2.loadSource('https://nav.vyncke.org/rapcs/stream-hangars.m3u8?nhls=<?=$userId?>');
+    hls1.attachMedia(video1);
+    hls2.attachMedia(video2);
+  } else if (video1.canPlayType('application/vnd.apple.mpegurl')) {
+    // Fallback pour Safari
+    video1.src = 'https://nav.vyncke.org/rapcs/stream-apron.m3u8?hls=<?=$userId?>';
+    video2.src = 'https://nav.vyncke.org/rapcs/stream-hangars.m3u8?hls=<?=$userId?>';
+  } else {
+    alert("Ce navigateur ne supporte pas HLS");
+  }
+</script>
+<?php
+} else {
+?>
 <video id="hls-video" controls autoplay width="1280" height="720"></video>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
   if (Hls.isSupported()) {
     var video = document.getElementById('hls-video');
@@ -45,6 +71,9 @@ if ($userId != 62) journalise($userId, "D", "Start of live streaming #$webcam") 
     alert("Ce navigateur ne supporte pas HLS");
   }
 </script>
+<?php
+}
+?>
 </div> <!-- container-->
 </body>
 </html>

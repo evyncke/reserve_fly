@@ -388,9 +388,14 @@ if ($userId > 0) {
 <?php
 if ($userId > 0) {
 ?>
-            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=apron">Webcam RAPCS (Apron) streaming décalé</a></li>
+            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=apron">Webcam RAPCS (Apron) streaming</a></li>
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=2">Webcam RAPCS (Hangars)</a></li>
-            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=hangars">Webcam RAPCS (Hangars) streaming décalé</a></li>
+            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=hangars">Webcam RAPCS (Hangars) streaming</a></li>
+<?php
+}
+if ($userIsAdmin or $userIsBoardMember or $userIsInstructor) {
+?>
+            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=both">Webcams RAPCS (Apron and hangars) streaming décalé</a></li>
 <?php
 }
 ?>
