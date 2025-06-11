@@ -125,7 +125,7 @@ if (isset($_REQUEST['pilotlog']) and $_REQUEST['pilotlog'] != '') {
 	header('Content-Type: text/csv');
 	header('Content-Disposition: attachment;filename="pilotlog-' . $folio_start->format('Y-m-d') . '.csv"');
 	header('Cache-Control: max-age=0');
-	print("PILOTLOG_DATE;AF_DEP;TIME_DEP;AF_ARR;TIME_ARR;AC_MODEL;AC_REG;TIME_TOTAL;PILOT1_NAME;PILOT2_NAME\n") ;
+	print("PILOTLOG_DATE;AF_DEP;TIME_DEP;AF_ARR;TIME_ARR;AC_MODEL;AC_REG;TIME_TOTAL;PILOT1_NAME;PILOT2_NAME;TIME_PIC;TIME_INSTRUCTOR\n") ;
 
 	//print("Date;From;Start;To;End;Model;Plane;Hours;Minutes;PIC;Pax;\"Cost Sharing\";\"Plane Cost\";\"FI Cost\";\"Tax Cost\"\n") ;
 
@@ -142,10 +142,22 @@ if (isset($_REQUEST['pilotlog']) and $_REQUEST['pilotlog'] != '') {
 			$duration.=$line->duration_mm;
 
 		print("$date;$line->from;$line->time_start;$line->to;$line->time_end;$line->model;$line->plane;$duration;") ;
-		if($userId == $line->pilot_code)
-			print("\"SELF\";");
-		else 
-			print("\"$line->pilot_name $line->pilot_fname\";\"SELF\"");
+		$pilotName="SELF";
+		$pilotDC="";
+		if($userId != $line->pilot_code) {
+			$pilotName=$line->pilot_name." ".$line->pilot_fname;
+			$pilotDC="SELF";
+		}
+		print("\"$pilotName\";\"$pilotDC\";");
+		$durationDC="";
+		if($pilotName=="SELF" && $line->share_member==-3) {
+			$durationDC=$duration;
+		}
+		if($pilotName!="SELF" && $line->share_member==0) {
+			$durationDC=$duration;
+		}
+		
+		PRINT("$duration;$durationDC");
 		print("\n") ;
 	}
 	exit ;
