@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2024 Eric Vyncke
+   Copyright 2023-2025 Patrick Reginster, Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,15 +20,6 @@ require __DIR__ . '/vendor/autoload.php' ;
 require_once __DIR__ .'/dbi.php' ;
 require_once __DIR__ .'/odoo.class.php' ;
 
-class OdooFlight {
-
-    function __construct() {
-    }
-
-    # Read return all records from one model based on their IDs
-    function Read() {
-    }
-}
 //============================================
 // Function: OF_GetOdooClient
 // Purpose: Returns the odooClient
@@ -1416,8 +1407,11 @@ function OF_InvoiceDueDays($theOdooPartnerReference)
 //============================================
 function OF_LastInvoiceDueDate($theOdooPartnerReference)
 {
+    static $allDueDates = array() ;
     // TODO added by evyncke 2025-04-28: new Odoo seems to use invoice_payment_term_id rather than invoice_date_due (link to account.payment.term)
     //print("OF_LastInvoiceDueDate($theOdooPartnerReference)<br>");
+
+    if (isset($allDueDates[$theOdooPartnerReference])) return $allDueDates[$theOdooPartnerReference] ; // If the due dates was already computed, re-use it
     $odooClient=OF_GetOdooClient();
     $result= $odooClient->SearchRead('account.move', 
         array(array(
@@ -1426,7 +1420,7 @@ function OF_LastInvoiceDueDate($theOdooPartnerReference)
             array('state', '=', 'posted'),
             '|', array('payment_state', '=', 'not_paid'), array('payment_state', '=', 'partial'),
         )),  
-        array('fields'=>array('id', 'partner_id', 'invoice_date_due', 'status_in_payment','payment_state'))); 
+        array('fields'=>array('invoice_date_due', 'status_in_payment'))); 
     $DueDate="";
     foreach($result as $f=>$desc) {
       // echo var_dump($desc);
@@ -1438,7 +1432,6 @@ function OF_LastInvoiceDueDate($theOdooPartnerReference)
             continue;
         }
         $invoiceDueDate=(isset($desc['invoice_date_due'])) ? $desc['invoice_date_due'] : '' ;
-        $invoiceDate=(isset($desc['invoice_date'])) ? $desc['invoice_date'] : '' ;
         if($DueDate=="" || $invoiceDueDate<$DueDate) {
             $DueDate=$invoiceDueDate;
         }
@@ -1446,6 +1439,7 @@ function OF_LastInvoiceDueDate($theOdooPartnerReference)
         //$id=(isset($desc['id'])) ? $desc['id'] : '' ; 
         //print("theOdooPartnerReference=$theOdooPartnerReference id=$id invoiceDueDate=$invoiceDueDate  DueDate=$DueDate move_type=$move_type payment_state=$payment_state status_in_payment=$status_in_payment<br>");
     }
+    $allDueDates[$theOdooPartnerReference] = $DueDate ; // Cache the result
     return $DueDate;
 }
 ?>
