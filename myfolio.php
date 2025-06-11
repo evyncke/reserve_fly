@@ -113,10 +113,42 @@ if (isset($_REQUEST['csv']) and $_REQUEST['csv'] != '') {
 			print(";") ;
 		print(number_format($line->cost_plane, 2, ',', '') . ";" . 
 			number_format($line->cost_fi, 2, ',', '') . ";" . 
-			number_format($line->cost_tax, 2, ',', '') . "\n") ;
+			number_format($line->cost_taxes, 2, ',', '') . "\n") ;
 	}
 	exit ;
 } // CSV output
+
+
+// Is a PILOT Log file request ?
+if (isset($_REQUEST['pilotlog']) and $_REQUEST['pilotlog'] != '') {
+	header('Content-Type: text/csv');
+	header('Content-Disposition: attachment;filename="pilotlog-' . $folio_start->format('Y-m-d') . '.csv"');
+	header('Cache-Control: max-age=0');
+	print("PILOTLOG_DATE;AF_DEP;TIME_DEP;AF_ARR;TIME_ARR;AC_MODEL;AC_REG;TIME_TOTAL;PILOT1_NAME;PILOT2_NAME\n") ;
+
+	//print("Date;From;Start;To;End;Model;Plane;Hours;Minutes;PIC;Pax;\"Cost Sharing\";\"Plane Cost\";\"FI Cost\";\"Tax Cost\"\n") ;
+
+	$folio = new Folio($userId, $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) 
+		or journalise($originalUserId, "F", "Cannot get access to the folio");
+	foreach ($folio as $line)	{
+		//01-02-25
+		$date=$line->date;
+		$date="20".substr($date,6,2)."-".substr($date,3,2)."-".substr($date,0,2);
+		$duration=$line->duration_hh.":";
+		if(intval($line->duration_mm)<10)
+			$duration.="0".$line->duration_mm;
+		else
+			$duration.=$line->duration_mm;
+
+		print("$date;$line->from;$line->time_start;$line->to;$line->time_end;$line->model;$line->plane;$duration;") ;
+		if($userId == $line->pilot_code)
+			print("\"SELF\";");
+		else 
+			print("\"$line->pilot_name $line->pilot_fname\";\"SELF\"");
+		print("\n") ;
+	}
+	exit ;
+} // pilotlog output
 ?><!doctype html><html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>

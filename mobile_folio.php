@@ -118,6 +118,38 @@ if (isset($_REQUEST['csv']) and $_REQUEST['csv'] != '') {
 	}
 	exit ;
 } // CSV output
+//print("PILOTLOG_DATE;AF_DEP;TIME_DEP;AF_ARR;TIME_ARR;AC_MODEL;AC_REG;TIME_TOTAL;PILOT1_NAME;PILOT2_NAME\n") ;
+
+// Is a PilotLog file request ?
+if (isset($_REQUEST['pilotlog']) and $_REQUEST['pilotlog'] != '') {
+	header('Content-Type: text/csv');
+	header('Content-Disposition: attachment;filename="pilotlog-' . $folio_start->format('Y-m-d') . '.csv"');
+	header('Cache-Control: max-age=0');
+	print("PILOTLOG_DATE;AF_DEP;TIME_DEP;AF_ARR;TIME_ARR;AC_MODEL;AC_REG;TIME_TOTAL;PILOT1_NAME;PILOT2_NAME\n") ;
+
+	//print("Date;From;Start;To;End;Model;Plane;Hours;Minutes;PIC;Pax;\"Cost Sharing\";\"Plane Cost\";\"FI Cost\";\"Tax Cost\"\n") ;
+
+	$folio = new Folio($userId, $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) 
+		or journalise($originalUserId, "F", "Cannot get access to the folio");
+	foreach ($folio as $line)	{
+		//01-02-25
+		$date=$line->date;
+		$date="20".substr($date,6,2)."-".substr($date,3,2)."-".substr($date,0,2);
+		$duration=$line->duration_hh.":";
+		if(intval($line->duration_mm)<10)
+			$duration.="0".$line->duration_mm;
+		else
+			$duration.=$line->duration_mm;
+
+		print("$date;$line->from;$line->time_start;$line->to;$line->time_end;$line->model;$line->plane;$duration;") ;
+		if($userId == $line->pilot_code)
+			print("\"SELF\";");
+		else 
+			print("\"$line->pilot_name $line->pilot_fname\";\"SELF\"");
+		print("\n") ;
+	}
+	exit ;
+} // PilotLog output
 ?><script>
 
 function valueOfField(suffix, name) {
@@ -343,7 +375,8 @@ $final_balance_message = ($balance - $cost_grand_total >= 0) ? "" : "<br/>(vous 
 ?>
 </tbody>
 <tfoot  class="table-group-divider">
-<tr><td colspan="7" class="table-info">Total du folio <a href="myfolio.php?csv=true&<?=$_SERVER['QUERY_STRING']?>"><i class="bi bi-filetype-csv" title="Télécharger au format CSV"></i></a></td>
+<tr><td colspan="7" class="table-info">Total du folio <a href="myfolio.php?csv=true&<?=$_SERVER['QUERY_STRING']?>"><i class="bi bi-filetype-csv" title="Télécharger au format CSV"></i></a>
+ <a href="myfolio.php?pilotlog=true&<?=$_SERVER['QUERY_STRING']?>"><i class="bi bi-airplane" title="Télécharger au format CrewLounge PILOTLOG"></i></a></td>
 <td class="table-info text-end"><?=$duration_total_hour?></td>
 <td class="table-info text-end"><?=$duration_total_minute?></td>
 <td class="table-info" colspan="3"></td>
