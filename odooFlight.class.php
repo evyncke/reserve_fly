@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2025 Patrick Reginster, Eric Vyncke
+   Copyright 2023-2024 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,18 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require __DIR__ . '/vendor/autoload.php' ;
 require_once __DIR__ .'/dbi.php' ;
 require_once __DIR__ .'/odoo.class.php' ;
+require_once __DIR__.'/mobile_tools.php';
+require_once __DIR__.'/notedefraisPDF.php';
 
+class OdooFlight {
+
+    function __construct() {
+    }
+
+    # Read return all records from one model based on their IDs
+    function Read() {
+    }
+}
 //============================================
 // Function: OF_GetOdooClient
 // Purpose: Returns the odooClient
@@ -638,6 +649,326 @@ function OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids) {
     
     return true;
 }
+
+//============================================
+// Function: OF_createNoteDeFrais
+// Purpose: Creation d'une note de frais
+//============================================
+function OF_createNoteDeFrais($theMemberID, $theNoteDeFraisJSON, $theRemboursable, $theAttachedFiles , &$theUploadFolder, &$theFactureMailTo)
+{
+    //account.move RINV/2024/00023  6735
+    // move_type	out_refund
+    // type_name	Note de crédit
+
+
+    // documents.document
+    // 1803 Note de frais 250516.pdf
+    //attachment_name	Note de frais 250516.pdf
+    //url	Note de frais 250516.pdf
+    //attachment_type	binary
+    //type binary
+    //file_size	148650
+    // raw binary
+    // name
+    //access_url	https://spa-aviation.odoo.com/odoo/documents/AW8Aoj5iSliqf3kQ0MKbRQo70b
+    //partner_id	[46, Mortier Alain]
+    // attachment_id
+    // voir odoo_avatar.php encripter base64
+
+    //ir.attachment
+    // id
+    // res_id = documentid
+
+    global $mysqli_link, $table_person,$userId;
+    global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
+    global $atl_maxNumberOfPixels;
+    //print("<br>OF_createNoteDeFrais: Start theMemberID=$theMemberID theRemboursable=$theRemboursable<br>");
+
+   /*
+    if(0) {
+         print("<br>OF_createNoteDeFrais: Correction DB 1863<br>");
+         // correction manuel de la BD odoo
+          $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+          // Dossier 1866 : "Touche pas a ca petit c**"
+          $response = $odooClient->Update('documents.document', array(1863), array('folder_id' => 1866)) ;
+          var_dump($response) ;
+
+        return 0;
+    }   
+    */
+    if($theMemberID=="") {
+        print("<h2 style=\"color: red;\">ERROR:OF_createNoteDeFrais: Pas de membre sélectionné</h2>");
+        return "";
+    }
+    // Create Note de Frais directly in ODOO
+  
+    //print("Attached Files;");
+    //var_dump($theAttachedFiles);
+    //print("<br>");
+
+    $notedefraislines = json_decode($theNoteDeFraisJSON, true) ;
+    $notedefraisSize=sizeof($notedefraislines);
+
+    //print("OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids):started<br>");
+
+    /*
+        {"name":"Achat carburant", "type":"carburant", "description": "Décrire la destination et la raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "600000"},
+        {"name":"Frais déplacement", "type":"deplacement", "description": "Decrire la destination et la raison", "quantity": 1, "unitaryprice": 0.45, "odooreference": "610300"},
+        {"name":"Frais d expédition", "type":"expedition", "description": "Description de l expédition", "quantity": 1, "unitaryprice": 0.0,"odooreference": "610400"},
+        {"name":"Manisfestation et repas", "type":"repas", "description": "Endroit de refuelling", "quantity": 1, "unitaryprice": 0.0,"odooreference": "610600"},
+        {"name":"Achat accésoires", "type":"accessoire", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "600002"},
+        {"name":"Achat Timbres poste", "type":"timbre", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "600106"},
+        {"name":"Atterrissage et Parking", "type":"atterrissage", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "610100"},
+        {"name":"Vol de nuit - contrôle aérien", "type":"vol_nuit", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "610101"}
+    */
+
+    $partner_customer_id=0;
+    $partnerName="";
+    $partner= array();
+    $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id=$theMemberID")
+        		or journalise($userId, "E", "Cannot read table_person: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+            $partnerName=$row['first_name']." ".$row['last_name'];
+            $partner["name"]=$row['first_name']." ".$row['last_name'];
+            $partner["address"]=$row['address'];
+            $partner["city"]=$row['zipcode']." ".$row['city'];;
+            $partner["country"]=$row['country'];
+            $partner["email"]=$row['email'];
+            $partner_customer_id=$row['odoo_id'];
+    }
+    if($partner_customer_id==0) {
+           print("<h2 style=\"color: red;\">ERROR:OF_createNoteDeFrais: Unknown partner</h2>");
+        return "";
+    }
+    $journal_ndf=OF_GetJournalID("client");
+    $moveType="out_refund";
+    if($theRemboursable=="") {
+        print("<h2 style=\"color: red;\">ERROR:OF_createNoteDeFrais: Remboursable not defined</h2>");
+        return "";
+   }
+    if($theRemboursable=="1") {
+        $journal_ndf=OF_GetJournalID("fournisseur");
+        $moveType="in_invoice";
+    }
+    //print("moveType=$moveType, journal_ndf=$journal_ndf<br>");
+    $uploadFolder="uploads/notedefrais";
+    $attachedFileName=UploadFile($_FILES, "notedefrais_input_justificatif", $uploadFolder,"", $atl_maxNumberOfPixels);
+    $invoice_date= date("Y-m-d") ;
+    $invoice_date_due = date("Y-m-d", strtotime("+1 week")) ;
+	
+    // Version note de frais PDF
+    if(1) {
+        //print("<br>OF_createNoteDeFrais: PDF Version 2<br>");
+        return PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $invoice_date, $partner,$attachedFileName, $theUploadFolder, $theFactureMailTo);
+    }
+    // ======== DEACTIVATED ============================================================================================
+    // Version creation directement dans ODOO
+    // Deactive car cela crache les documents.
+    // Il faudrait faire des essais sur une BD oddo de test et chercher le probleme
+
+    $attachementID=OF_createAttachedDocument("Note de frais test patrick", $attachedFileName, $uploadFolder, $partner_customer_id);
+    $attachementsID=array($attachementID);
+
+    ini_set('display_errors', 1) ; // extensive error reporting for debugging
+    $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+    $invoice_lines = array() ;
+
+    //$referencesMap= array();
+    //OF_FillFlightMaps($referencesMap);
+
+    $count=-1;
+    for($i=0;$i<$notedefraisSize;$i++) {
+        $nodedefraisLine=$notedefraislines[$i];
+        $date=$nodedefraisLine["date"];
+        $name=$nodedefraisLine["name"];
+        $description=$nodedefraisLine["description"];
+        $type=$nodedefraisLine["type"];
+        $quantity=$nodedefraisLine["quantity"];
+        $unitaryprice=$nodedefraisLine["unitary"];
+        $montant=$nodedefraisLine["total"];
+        $odooreference=$nodedefraisLine["odoo"];
+        $odooanalytic=$nodedefraisLine["analytic"];
+        print("name=$name, type=$type, description=$description, quantity=$quantity, unitaryprice=$unitaryprice, montant=$montant, odooreference=$odooreference, odooanalytic=$odooanalytic<br>");
+ 
+        $count++;
+
+        $code_600000=OF_GetAccountID($odooreference);
+        if($code_600000==0) {
+            return false;
+        }
+        $odoo_analytic=OF_GetAnalyticAccountID($odooanalytic) ;
+        if($odoo_analytic==0) {
+            return false;
+        }
+        //$plane_analytic=OF_GetAnalyticAccountID($plane);
+        $libelle_name=$date."-".$description;
+        print("libelle_name=$libelle_name, code_600000=$code_600000 , partner_customer_id=$partner_customer_id <br>");     
+        // Partie Avion
+        $invoice_lines[] = array(0, 0,
+            array(
+                'name' => db2web($libelle_name),
+                //'product_id' => $plane_dhf_product_id,
+                'account_id' => $code_600000,  
+                'quantity' => $quantity,
+                'price_unit' => $unitaryprice,
+                'analytic_distribution' => array($odoo_analytic => 100)
+            )) ;
+    }
+
+ 	// Invoice creation	
+    $nbfReference="Note de frais ". date("d-m-Y");
+    $params =  array(array('partner_id' => intval($partner_customer_id), //(Must be of INT type else Odoo does not accept)
+                    'ref' => db2web($nbfReference),
+					'payment_reference' => db2web($nbfReference),
+                    'move_type' => $moveType,
+					'journal_id'=> $journal_ndf,
+                    //cela bug la BD : 'attachment_ids'=>$attachementsID,
+                    'invoice_date' => $invoice_date,
+                    'invoice_origin' => 'Notes de frais',
+                    'invoice_line_ids' => $invoice_lines)) ;
+	print("</br> 1 Création node de frais invoice_date_due=$invoice_date_due</br>");
+	echo var_dump($params);
+    echo "</br>";
+    if(1) {
+        $invoiceID = $odooClient->Create('account.move', $params) ;
+        echo var_dump($invoiceID);
+        print("<br>Note de Frais pour " . implode(', ', $invoiceID) . "<br>") ;
+    }
+    else {
+        print("<br>Note de Frais pas généerée dans ODOO <br>") ;
+       
+    }
+    //print("<br>Note de Frais pour " . $invoiceID[0] . "<br>") ;
+
+    return true;
+}
+
+//============================================
+// Function: OF_createAttachedDocument
+// Purpose: Creation d'un document dans ODOO et retourne le document ID
+//============================================
+function OF_createAttachedDocument($theLibelleName, $theAttachedFileName, $theUploadFolder, $thePartnerId)
+{
+    // documents.document
+    // 1803 Note de frais 250516.pdf
+    //attachment_name	Note de frais 250516.pdf
+    //url	Note de frais 250516.pdf
+    //attachment_type	binary
+    //type binary
+    //file_size	148650
+    // raw binary
+    // name
+    //access_url	https://spa-aviation.odoo.com/odoo/documents/AW8Aoj5iSliqf3kQ0MKbRQo70b
+    //partner_id	[46, Mortier Alain]
+    // datas 
+    // description
+    // mimetype application/pdf image/jpeg application/o-spreadsheet
+    // access_internal edit
+    // voir odoo_avatar.php encripter base64
+
+    global $mysqli_link, $userId;
+    global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
+
+
+    print("<br>OF_createAttachedDocument: Start theLibelleName=$theLibelleName, theAttachedFileName=$theAttachedFileName, theUploadFolder=$theUploadFolder, thePartnerId=$thePartnerId<br>");
+ 
+    $fname = $theUploadFolder.'/'.$theAttachedFileName;
+	if (!file_exists($fname)) {
+		print("OF_createAttachedDocument: Skipping, file $fname does not exist.<br>") ;
+		return 0 ;
+	}
+    else {
+  		print("OF_createAttachedDocument: file $fname exists.<br>") ;      
+    }
+    echo mime_content_type($fname)."<br>";
+    $mimetype=mime_content_type($fname);
+    if( $mimetype =="application/pdf") {
+        $datas=base64_encode(file_get_contents($fname));
+    }
+    else {
+        list($width, $height, $type, $attr) = getimagesize($fname) ;
+        print("OF_createAttachedDocument: Image size W x H: $width x $height type=$type <br>") ;
+        return 0;
+        // TODO also support PNG based on $type (both in code below but also in the above SELECT)
+        if ($type == IMAGETYPE_JPEG )
+            $image = imagecreatefromjpeg($fname) ;
+        elseif ($type == IMAGETYPE_GIF)
+            $image = imagecreatefromgif($fname) ;
+        elseif ($type == IMAGETYPE_PNG)
+            $image = imagecreatefrompng($fname) ;
+        else {
+            print("OF_createAttachedDocument: Unknown image type ($type) for $fname<br>") ;
+            return 0 ;
+        }
+        if (!$image) {
+            print("OF_createAttachedDocument: $fname is not a valid image !! Skipping<br>") ;
+            return 0 ;
+        }
+        $updates = array() ;
+	    $updates['image_128'] = base64_encode(resize($image, $width, $height, 128));
+
+        $datas=base64_encode(file_get_contents($fname));
+	}
+    // documents.document
+    // 1803 Note de frais 250516.pdf
+    //attachment_name	Note de frais 250516.pdf
+    //url	Note de frais 250516.pdf
+    //attachment_type	binary
+    //type binary
+    //file_size	148650
+    // raw binary
+    // datas 
+    // name
+    //access_url	https://spa-aviation.odoo.com/odoo/documents/AW8Aoj5iSliqf3kQ0MKbRQo70b
+    //partner_id	[46, Mortier Alain]
+    // description
+    // mimetype application/pdf image/jpeg application/o-spreadsheet
+    // access_internal edit
+	// Document creation	
+    $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+    $nbfReference="Note de frais test patrick ". date("d-m-Y");
+    $params =  array(array('partner_id' => intval($thePartnerId), //(Must be of INT type else Odoo does not accept)
+                    'name' => db2web($nbfReference),
+                    //'attachment_name' => $theAttachedFileName,  
+                    'datas' => $datas,
+                    'mimetype' => $mimetype,
+                    // folder_if 1285 Note de credit membre, 1273 note de frais remboursable
+                    'description' => db2web($theAttachedFileName)
+                    )) ;
+	print("</br> 1 Création node de frais Document $nbfReference</br>");
+	echo var_dump($params);
+    echo "</br>";
+    if(1) {
+        $documentID = $odooClient->Create('documents.document', $params) ;
+        echo var_dump($documentID);
+        print("<br>Note de Frais document pour " . implode(', ', $documentID) . "<br>") ;
+        $attachementID=OF_GetAttachementIDFromDocumentID($documentID) ;
+        print("attachementID=");
+        var_dump($attachementID);
+        print("<br>Note de Frais attachement $attachementID[0]<br>") ;
+        return $attachementID[0];
+    }
+    else {
+        print("<br>Note de Frais pas généerée dans ODOO <br>") ;
+       
+    }
+    return 0;
+}
+//============================================
+// Function: OF_GetAttachementIDFromDocumentID
+// Purpose: Get the attachement number from document ID (8918596=>9976): see Model documents.document
+//============================================
+function OF_GetAttachementIDFromDocumentID($theDocumentID) 
+{
+    $odooClient=OF_GetOdooClient();
+    $resultCode= $odooClient->SearchRead('documents.document', array(array(array('id', '=', $theDocumentID))),  array('fields'=>array('id', 'attachment_id'))); 
+    $attachementID=0;
+    foreach($resultCode as $fCode=>$desc) {
+        $attachementID=$desc['attachment_id'];
+        break;
+    }
+    return $attachementID;
+}
 //============================================
 // Function: OF_DeactiveBon
 // Purpose: Creation d'une OD pour transferer la valeur du compte d'attente 499001-2 -> 765000 (Produit exeptionel)
@@ -783,6 +1114,7 @@ function OF_GetPlaneTableRow($thePlane)
 //============================================
 function OF_GetAccountID($theAccountNumber) 
 {
+    //account.account
     $codes=array(
         400000 => 158, //RAPCS - Clients
         499001 => 896, //RAPCS- Comptes d'attente - Initiations à réaliser
@@ -791,8 +1123,71 @@ function OF_GetAccountID($theAccountNumber)
         700000 => 315, //RAPCS - Club - Cotisation Club
         700101 => 942, //RAPCS - Avions - Ventes Heures de vols initiations
         700102 => 943, //RAPCS - Avions - Ventes Heures de vols decouvertes
-        702002 => 949,  //RAPCS - Instructions en vols - Initiations
-        765000 => 957  //Produit exceptionnel
+        702002 => 949, //RAPCS - Instructions en vols - Initiations
+        765000 => 957, //Produit exceptionnel
+
+        600000 => 230,//RAPCS - Avion - Achat Carburant	
+        600001 => 898,//RAPCS - Avion - Achat Lubrifiants
+        600002 => 979,//RAPCS - Avions - Achats accessoires	
+        600106 => 969,//RAPCS - Club - Achats de timbres poste	
+        601000 => 231,//RAPCS - Club - Achats de fournitures de bureau	
+        601001 => 899,//RAPCS - Club - Achats de fournitures Informatiques	
+        601002 => 900,//RAPCS - Club - Achats de fournitures autres	
+        601003 => 901,//RAPCS - Boutique - Achats de fournitures Boutique	
+        601004 => 902,//RAPCS - Boutique - Achats des manuels	
+        601005 => 903,//RAPCS - Boutique - Frais expédition manuels	
+        602000 => 232,//RAPCS - Instructeurs au sol - Indemnités	
+        602001 => 904,//RAPCS - Instructeurs en vol - Instruction	
+        602002 => 905,//RAPCS - Instructeurs en vol - Initiations	
+        602003 => 906,//RAPCS - Instructeurs en vol - Revalidation	
+        602004 => 907,//RAPCS - Achats de services - Autres formations Aéronautiques	
+        602005 => 908,//RAPCS - Achats de services - Autres formations Non Aéronautique	
+        603000 => 233,//RAPCS - Avion - Maintenance Avion - Maintenance Périodique	
+        603001 => 909,//RAPCS - Avion - Maintenance Avion - Non périodique Moteur	
+        603002 => 910,//RAPCS - Avion - Maintenance Avion - Non périodique Avionique	
+        603003 => 911,//RAPCS - Avion - Maintenance Avion - Non périodique Helice	
+        603004 => 912,//RAPCS - Avion - Maintenance Avion - Non périodique Cellule	
+        603005 => 913,//RAPCS - Avion - Maintenance Avion - Pesée et Centrage	
+        603006 => 914,//RAPCS - Avion - Maintenance Avion - Redevance CAMO	
+        603007 => 915,//RAPCS - Avion - Maintenance Avion - Redevance Certificat de Navigabilité	
+        603008 => 916,//RAPCS - Avion - Maintenance Avion - Frais de convoyage	
+        603009 => 972,//RAPCS - Avion - Maintenance Avion - AMP-Cardex	
+        603010 => 990,//RAPCS - Avion - Maintenance Avion - Extension ARC	
+        604000 => 234,//RAPCS - Avion - Achats de Pièces	
+        604010 => 917,//RAPCS - Avion - Achats de Pneus	
+        605000 => 35,//Purchases of Immovable Property for Resale	
+        608000 => 36,//Discounts, Allowance and Rebates Received (-)	
+        609000 => 37,//Decrease (Increase) in Stocks of Raw Materials	
+        609100 => 38,//Decrease (Increase) in Stocks of Consumables	
+        609400 => 39,//Decrease (Increase) in Stocks of Goods Purchased for Resale	
+        609500 => 40,//Decrease (Increase) in Respect of Immovable Property for Resale	
+        610000 => 41,//RAPCS - Locaux - Location Club House	
+        610001 => 918,//RAPCS - Locaux - Hangar Avion	
+        610002 => 919,//RAPCS - Locaux - Location de Salle	
+        610003 => 920,//RAPCS - Locaux - Nettoyage des locaux, Réparation et Fournitures	
+        610100 => 921,//RAPCS - Redevance à refacturer - Atterrissage et Parking	
+        610101 => 922,//RAPCS - Redevances à refacturer - Vol de nuit et control aérien	
+        610102 => 923,//RAPCS - Redevance à refacturer - TILEA	
+        610103 => 967,//RAPCS - Avions - Redevance Radio Avion PH-AML	
+        610104 => 989,//RAPCS - Club - Headset	
+        610105 => 991,//RAPCS - Avions - Redevances Radio	
+        610200 => 924,//RAPCS - Club - Assurance RC Club	
+        610201 => 925,//RAPCS - Avions - Assurance	
+        610202 => 926,//RAPCS - Club - Assurance RC Dirigeants	
+        610203 => 927,//RAPCS - Club - Assurance RC Bénévoles	
+        610300 => 928,//RAPCS - Club - Frais de déplacements	
+        610400 => 929,//RAPCS - Club - Frais d'expédition (poste)	
+        610500 => 930,//RAPCS - Club - Evacuation des déchets	
+        610600 => 931,//RAPCS - Club - Manifestations et repas	
+        610700 => 932,//RAPCS - Club - Cotisation federations	
+        612100 => 933,//RAPCS - Club - Téléphonie et internet	
+        612101 => 959,//RAPCS - Club - Services informatiques	
+        612110 => 985,//RAPCS - Club - Publicités et Sponsoring	
+        613200 => 971,//RAPCS - HONORAIRES COMPTABLES & EXPERTISES	
+        615100 => 968,//RAPCS - Entretien réparation matériel informatique	
+        615200 => 992,//RAPCS - Avions - Produits d'entretien	
+        616000 => 963//RAPCS - Club - Publications légales, changements de status	
+
     );
     if (array_key_exists($theAccountNumber, $codes)) {
         return $codes["$theAccountNumber"];
@@ -835,7 +1230,9 @@ function OF_GetJournalID($theJournal)
     $journals=array(
         "if" => 17,   //Factures Clients (Vols Découvertes)
         "init" => 18, //Factures Clients (Vols Initiations)
-        "trf" => 16   //Trf 499001/499002 vers 400000
+        "trf" => 16,  //Trf 499001/499002 vers 400000
+        "client" => 8, // Clients
+        "fournisseur" => 9 // Fournisseur
     );
     if (array_key_exists($theJournal, $journals)) {
         return $journals["$theJournal"];
@@ -883,8 +1280,11 @@ function OF_GetAnalyticAccountID($theAnalyticAccount)
         "Luc Wynand" => 34,       // FI Luc Wynand
         "Nicolas Claessen" => 35, // FI Nicolas Claessen
         "David Gaspar" => 33,     // FI David Gaspar
-        "club"=> 25,              // Aeroclub
-        "club_init_if" => 41.     // INIT-IF
+        "club"=> 25,              // Aeroclub Cotisation
+        "club_init_if" => 41.,    // INIT-IF
+        "ecole" => 43.,           // Aeroclub Ecole
+        "cotisation" => 25.,      // Aeroclub Cotisation
+        "gestion" => 44.          // Aeroclub Gestion
     ); 
     if (array_key_exists($theAnalyticAccount, $accounts)) {
         return $accounts["$theAnalyticAccount"];
@@ -1407,11 +1807,8 @@ function OF_InvoiceDueDays($theOdooPartnerReference)
 //============================================
 function OF_LastInvoiceDueDate($theOdooPartnerReference)
 {
-    static $allDueDates = array() ;
     // TODO added by evyncke 2025-04-28: new Odoo seems to use invoice_payment_term_id rather than invoice_date_due (link to account.payment.term)
     //print("OF_LastInvoiceDueDate($theOdooPartnerReference)<br>");
-
-    if (isset($allDueDates[$theOdooPartnerReference])) return $allDueDates[$theOdooPartnerReference] ; // If the due dates was already computed, re-use it
     $odooClient=OF_GetOdooClient();
     $result= $odooClient->SearchRead('account.move', 
         array(array(
@@ -1420,7 +1817,7 @@ function OF_LastInvoiceDueDate($theOdooPartnerReference)
             array('state', '=', 'posted'),
             '|', array('payment_state', '=', 'not_paid'), array('payment_state', '=', 'partial'),
         )),  
-        array('fields'=>array('invoice_date_due', 'status_in_payment'))); 
+        array('fields'=>array('id', 'partner_id', 'invoice_date_due', 'status_in_payment','payment_state'))); 
     $DueDate="";
     foreach($result as $f=>$desc) {
       // echo var_dump($desc);
@@ -1432,6 +1829,7 @@ function OF_LastInvoiceDueDate($theOdooPartnerReference)
             continue;
         }
         $invoiceDueDate=(isset($desc['invoice_date_due'])) ? $desc['invoice_date_due'] : '' ;
+        $invoiceDate=(isset($desc['invoice_date'])) ? $desc['invoice_date'] : '' ;
         if($DueDate=="" || $invoiceDueDate<$DueDate) {
             $DueDate=$invoiceDueDate;
         }
@@ -1439,7 +1837,6 @@ function OF_LastInvoiceDueDate($theOdooPartnerReference)
         //$id=(isset($desc['id'])) ? $desc['id'] : '' ; 
         //print("theOdooPartnerReference=$theOdooPartnerReference id=$id invoiceDueDate=$invoiceDueDate  DueDate=$DueDate move_type=$move_type payment_state=$payment_state status_in_payment=$status_in_payment<br>");
     }
-    $allDueDates[$theOdooPartnerReference] = $DueDate ; // Cache the result
     return $DueDate;
 }
 ?>

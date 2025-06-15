@@ -65,11 +65,11 @@ function UploadFile($theFileRequest, $theInputFileName, $theUploadFolder, $theFi
 	7 => 'Failed to write file to disk.',
 	8 => 'A PHP extension stopped the file upload.'
 	*/
-	print("UploadFile:theInputFileName=$theInputFileName, theFileRequest=");
-	var_dump($theFileRequest);
-	print("<br>");
-	var_dump($theFileRequest[$theInputFileName]["error"]);
-	print("<br>");
+	//print("UploadFile:theInputFileName=$theInputFileName, theFileRequest=");
+	//var_dump($theFileRequest);
+	//print("<br>");
+	//var_dump($theFileRequest[$theInputFileName]["error"]);
+	//print("<br>");
 		
 	$error=$theFileRequest[$theInputFileName]["error"];
 	if ($error == UPLOAD_ERR_OK) {
@@ -257,7 +257,7 @@ function IsPictureFile($theFileNameExtension)
 {
 	$pictureExtensions=array("jpg", "jpeg", "gif", "png", "tiff");
 	foreach($pictureExtensions as $extension) {
-		if($extension==$theFileNameExtension) {
+		if($extension==strtolower($theFileNameExtension)) {
 			return true;
 		}
 	}
@@ -565,5 +565,35 @@ function getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, $theFlight
 	}
 	
 	return $timeTotal;
+}
+
+// Function: Returns the list of Note de frais and attached file
+function MT_GetNoteDeFraisFiles(&$theNotesDeFrais, &$theAttachedFiles, &$theUploadFolder)
+{
+	//print("MT_GetNoteDeFraisFile:start<br>");
+	$theUploadFolder="uploads/notedefrais";
+	$fileList = scandir($theUploadFolder);
+	$previousFile="";
+	$count=-1;
+	foreach ($fileList as $file) {
+		if($file=="." || $file==".." || $file=="notedefrais_number.txt") continue;
+		if($previousFile==""){
+			$count++;
+			$previousFile=$file;
+			$theNotesDeFrais[$count]=$file;
+			$theAttachedFiles[$count]="";
+		}
+		else if(strcmp(substr($previousFile,0,17),substr($file,0,17))==0) {
+			$theAttachedFiles[$count]=$file;
+		}
+		else {
+			$count++;
+			$previousFile=$file;
+			$theNotesDeFrais[$count]=$file;
+			$theAttachedFiles[$count]="";
+		}
+		//echo "$count file=$theNotesDeFrais[$count] : Attached=$theAttachedFiles[$count] <br>";
+	}
+	return $count+1;
 }
 ?>

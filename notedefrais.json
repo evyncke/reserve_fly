@@ -1,0 +1,12 @@
+{
+    "notedefrais": [
+        {"name":"Achat carburant", "type":"carburant", "description": "Décrire la destination et la raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "600000", "analytic": "gestion"},
+        {"name":"Frais déplacement", "type":"deplacement", "description": "Decrire la destination et la raison", "quantity": 1, "unitaryprice": 0.45, "odooreference": "610300", "analytic": "gestion"},
+        {"name":"Frais d expédition", "type":"expedition", "description": "Description de l expédition", "quantity": 1, "unitaryprice": 0.0,"odooreference": "610400", "analytic": "gestion"},
+        {"name":"Manisfestation et repas", "type":"repas", "description": "Endroit de refuelling", "quantity": 1, "unitaryprice": 0.0,"odooreference": "610600", "analytic": "gestion"},
+        {"name":"Achat accesssoires", "type":"accessoire", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "600002", "analytic": "gestion"},
+        {"name":"Achat Timbres poste", "type":"timbre", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "600106", "analytic": "gestion"},
+        {"name":"Atterrissage et Parking", "type":"atterrissage", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "610100", "analytic": "gestion"},
+        {"name":"Vol de nuit - contrôle aérien", "type":"vol_nuit", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "610101", "analytic": "gestion"}
+    ]
+}
