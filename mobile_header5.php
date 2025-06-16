@@ -116,7 +116,7 @@ if (!isset($_REQUEST['kiosk'])) { // No matomo analytics in kiosk mode
 // If user is logged-in then call 'setUserId'
 // $userId variable must be set by the server when the user has successfully authenticated to your app.
 	if (isset($userId) and $userId > 0) {
-     print("_paq.push(['setUserId', '$userName']);\n");
+     print("  _paq.push(['setUserId', '$userName']);\n");
 }
 ?>
   /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
@@ -136,9 +136,9 @@ if (!isset($_REQUEST['kiosk'])) { // No matomo analytics in kiosk mode
   })();
 </script>
 <!-- End Matomo Code -->
- <?php
+<?php
  } // No matomo code if in kiosk mode
- ?>
+?>
 <?php  // Output any page specific header
 if (isset($header_postamble))
 	print($header_postamble) ;
