@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2025 Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -103,12 +103,12 @@ if ($userIsAdmin or $userIsBoardMember) $selectorDisabled="";
 
 //print("<script>var notedefraisJSONString='toto';</script>");
 ?>
-<h1>Introduction d'une note de frais</h1>
+<h2>Introduction d'une note de frais</h2>
 <br>
 <form action="<?=$_SERVER['PHP_SELF']?>" method="post" role="form" class="form-horizontal" enctype="multipart/form-data">
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-7">
-Bénéficiare: 
+Bénéficiaire: 
 <select id="id_member_name" name="member_name" <?=$selectorDisabled?>>
 <option selected="selected" value=""></option>
 </select>
@@ -184,7 +184,7 @@ print("<button id=\"id_submit_notedefrais\" name=\"submit_notedefrais\" class=\"
 ?>
 <div <?=$hiddenGestion?>>
 <p></p>
-<h1>Gestion des fichiers associés aux notes de frais sur le serveur du club</h1>
+<h2>Gestion des fichiers associés aux notes de frais sur le serveur du club</h2>
 <br>
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-7">
@@ -227,7 +227,7 @@ print("<button id=\"id_submit_notedefrais\" name=\"submit_notedefrais\" class=\"
 </div>  <!--hidden-->
 <div class="mb-3">
 
-<script src="https://www.spa-aviation.be/resa/members.js"></script>
+<!-- already loaded in by mobile_header5.php script src="https://www.spa-aviation.be/resa/members.js"></script-->
 <script src="https://www.spa-aviation.be/resa/notedefrais.js"></script>
 </body>
 </html>
