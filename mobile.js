@@ -453,7 +453,7 @@ function init() {
 		// TODO the duration is not the display time of the current page but how long the previous one is displayed
 		var kioskURIs = [ 
 			{ path: 'mobile_metar.php', duration: 10},			
-			{ path: 'mobile_webcam.php?cam=1', duration: 10},
+//			{ path: 'mobile_webcam.php?cam=1', duration: 10}, // Seems to often cause time-out
 			{ path: 'mobile_fleet_map.php', duration: 10},
 			{ path: 'mobile_ephemerides.php', duration: 10},
 			{ path: 'mobile_dept_board.php', duration: 15},
