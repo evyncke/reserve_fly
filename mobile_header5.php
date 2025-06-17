@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2025 Eric Vyncke
+   Copyright 2013-2025 Eric Vyncke & Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -106,6 +106,9 @@ function pilotSelectChanged() {
 <script src="mobile.js"></script>
 <script src="planes.js"></script>
 <script src="members.js"></script> <!-- TODO load only if pilotSelect is active -->
+<?php
+if (!isset($_REQUEST['kiosk'])) { // No matomo analytics in kiosk mode
+?>
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
@@ -113,7 +116,7 @@ function pilotSelectChanged() {
 // If user is logged-in then call 'setUserId'
 // $userId variable must be set by the server when the user has successfully authenticated to your app.
 	if (isset($userId) and $userId > 0) {
-     print("_paq.push(['setUserId', '$userName']);\n");
+     print("  _paq.push(['setUserId', '$userName']);\n");
 }
 ?>
   /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
@@ -133,6 +136,9 @@ function pilotSelectChanged() {
   })();
 </script>
 <!-- End Matomo Code -->
+<?php
+ } // No matomo code if in kiosk mode
+?>
 <?php  // Output any page specific header
 if (isset($header_postamble))
 	print($header_postamble) ;
@@ -393,9 +399,9 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_streaming.php?webcam=hangars">Webcam RAPCS (Hangars) streaming</a></li>
 <?php
 }
-if ($userIsAdmin or $userIsBoardMember or $userIsInstructor) {
+if ($userIsAdmin or $userIsInstructor) {
 ?>
-            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=both">Webcams RAPCS (Apron and hangars) streaming décalé</a></li>
+            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=both">Webcams RAPCS (Apron and hangars) streaming</a></li>
 <?php
 }
 ?>
