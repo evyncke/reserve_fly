@@ -67,7 +67,7 @@ $remboursable=0;
 if (isset($_REQUEST['notedefrais_input_remboursable'])) {
     $remboursable = $_REQUEST['notedefrais_input_remboursable'] ;
 }
-$memberID="";
+$memberID=$userId;
 if (isset($_REQUEST['member_name'])) {
     $memberID = $_REQUEST['member_name'] ;
     //print("memberID=$memberID<br>");
@@ -81,7 +81,8 @@ if (isset($_REQUEST['notedefrais_json'])) {
     $noteDeFraisPDF=OF_createNoteDeFrais($memberID, $ndfJSON, $remboursable,$_FILES, $uploadFileFolder, $factureMailTo);
     if($noteDeFraisPDF!="") {
     	print("<h2 style=\"color: red;\"><b>La note de frais <a href=\"$uploadFileFolder/$noteDeFraisPDF\">$noteDeFraisPDF</a> est créée et envoyée à $factureMailTo</b></h2>");
-    }
+     	print("<h3>Download de la note de frais: <b><a href=\"$uploadFileFolder/$noteDeFraisPDF\" download>DOWNLOAD</a></b></h3><p></p>");
+   }
     else {
 	    print("<h2 style=\"color: red;\"><b>Erreur lors de la creation de la note de frais</b></h2>");
     }
@@ -108,7 +109,7 @@ if ($userIsAdmin or $userIsBoardMember) $selectorDisabled="";
 <form action="<?=$_SERVER['PHP_SELF']?>" method="post" role="form" class="form-horizontal" enctype="multipart/form-data">
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-7">
-Bénéficiare: 
+Bénéficiaire: 
 <select id="id_member_name" name="member_name" <?=$selectorDisabled?>>
 <option selected="selected" value=""></option>
 </select>
@@ -117,8 +118,8 @@ Bénéficiare:
     <label class="form-label">Type de note de frais :</label>
     <select id="id_notedefrais_input_remboursable" name="notedefrais_input_remboursable">
             <option selected="selected" value=""></option>
-            <option value="1">remboursable</option>
-            <option value="0">non remboursable</option>
+            <option value="1">remboursable sur compte bancaire</option>
+            <option value="0">remboursable sur compte pilote</option>
     </select>
  </div>
 <div>

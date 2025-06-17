@@ -30,11 +30,11 @@ function PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $expenseRepo
 	$communication="communication ???";
 	$entrepriseName="";
 	$bce="";
-	$remboursable="NON REMBOURSABLE";
+	$remboursable="REMBOURSABLE SUR COMPTE PILOTE";
 	$facturesMail="note_de_frais_nr@spa-aviation.odoo.com";
 	if($theRemboursable==1) {
 		// Note de frais remboursable
-		$remboursable="REMBOURSABLE";
+		$remboursable="REMBOURSABLE SUR COMPTE BANCAIRE";
 		$nextExpenseReport="BILL-NF-2025-".$nextExpenseReport;
 		$facturesMail="note_de_frais_r@spa-aviation.odoo.com";
 	}

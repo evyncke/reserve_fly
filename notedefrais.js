@@ -102,7 +102,12 @@ function updateSubmitButton()
         return;
     }
     if(document.getElementById("id_notedefrais_input_justificatif").value=="") {
-        return;
+        // Check if type = TKI => pas besoin de fiches justificatives
+        for(var i=0;i<nodedefrais_size;i++){
+            if(notedefrais_type[i]!="TKI") {
+                return;
+            }
+        }
     }
     document.getElementById("id_submit_notedefrais").disabled=false;
 }
@@ -118,6 +123,7 @@ function deleteNoteDeFraisLine(theRowIndex)
         document.getElementById("id_notedefrais_rowinput").style.display="none";
         document.getElementById("id_add_row").disabled=false;       
         document.getElementById("id_add_row").style.display="";
+        aLineIndex=nodedefrais_size-1;
     }
     else {
         for(var i=0; i<nodedefrais_size; i++) {
@@ -127,21 +133,25 @@ function deleteNoteDeFraisLine(theRowIndex)
             }
         }
         if(aLineIndex>=0) {
-            // delete a table row
-            notedefrais_date.splice(aLineIndex, 1);
-            notedefrais_type.splice(aLineIndex, 1);
-            notedefrais_description.splice(aLineIndex, 1);
-            notedefrais_unitary.splice(aLineIndex, 1);
-            notedefrais_quantity.splice(aLineIndex, 1);
-            notedefrais_total.splice(aLineIndex, 1);
-            notedefrais_odooreference.splice(aLineIndex, 1);
-            notedefrais_odooanalytic.splice(aLineIndex, 1);
-            notedefrais_index.splice(aLineIndex, 1);
+            // Hide input row
             var table = document.getElementById("id_table_notedefrais");
             var rows = table.rows;
             var row = rows[theRowIndex+1];
             row.hidden=true;
         }
+    }
+    if(aLineIndex>=0) {
+        // delete a table row
+        notedefrais_date.splice(aLineIndex, 1);
+        notedefrais_type.splice(aLineIndex, 1);
+        notedefrais_description.splice(aLineIndex, 1);
+        notedefrais_unitary.splice(aLineIndex, 1);
+        notedefrais_quantity.splice(aLineIndex, 1);
+        notedefrais_total.splice(aLineIndex, 1);
+        notedefrais_odooreference.splice(aLineIndex, 1);
+        notedefrais_odooanalytic.splice(aLineIndex, 1);
+        notedefrais_index.splice(aLineIndex, 1);
+        nodedefrais_size--;
     }
     updateSubmitButton();
 }

@@ -7,6 +7,7 @@
         {"name":"Achat accesssoires", "type":"accessoire", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "600002", "analytic": "gestion"},
         {"name":"Achat Timbres poste", "type":"timbre", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "600106", "analytic": "gestion"},
         {"name":"Atterrissage et Parking", "type":"atterrissage", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "610100", "analytic": "gestion"},
-        {"name":"Vol de nuit - contrôle aérien", "type":"vol_nuit", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "610101", "analytic": "gestion"}
+        {"name":"Vol de nuit - contrôle aérien", "type":"vol_nuit", "description": "Description achat et raison", "quantity": 1, "unitaryprice": 0.0,"odooreference": "610101", "analytic": "gestion"},
+        {"name":"Cours TKI", "type":"TKI", "description": "Cours TKI", "quantity": 1, "unitaryprice": 60.0,"odooreference": "602000", "analytic": "gestion"}
     ]
 }
