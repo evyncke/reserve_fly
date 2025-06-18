@@ -433,7 +433,7 @@ if ($userId <= 0) {
               <a class="dropdown-item" href="mobile_folio.php">Mon folio</a>
               <a class="dropdown-item" href="mobile_invoices.php">Mes factures</a>
               <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
-              <a class="dropdown-item" href="notedefrais.php">Note de Frais</a>
+              <a class="dropdown-item" href="notedefrais.php">Note de frais</a>
               <li><hr class="dropdown-divider"></hr></li>
               <li><h6 class="dropdown-header">Données personnelles</h6></li>
               <a class="dropdown-item" href="mobile_groups.php"><i class="bi bi-people-fill"></i> Mes groupes</a>
