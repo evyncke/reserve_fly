@@ -74,7 +74,7 @@ if ($userIsInstructor or $userIsAdmin) {
 </ul> <!-- tabs -->
 
 <div class="row">
-<div class="col-sm-12 col-md-6 col-lg-4">
+<div class="col-sm-12 col-md-8 col-lg-6">
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 	<thead>
@@ -82,38 +82,9 @@ if ($userIsInstructor or $userIsAdmin) {
 	</thead>
 <tbody class="table-group-divider">
 <?php
-$sql = "SELECT *, DATE(bki_date) AS bki_date 
-		FROM $table_person JOIN $table_bk_invoices ON bki_email = email 
-		LEFT JOIN $table_bk_ledger ON ciel_code = bkl_client AND bki_id = bkl_reference
-        WHERE jom_id = $userId
-		ORDER BY bki_date" ;
-
-$result = mysqli_query($mysqli_link, $sql) or journalise($originalUserId, "F", "Erreur systeme a propos de l'access factures: " . mysqli_error($mysqli_link)) ;
 $count = 0 ;
 $total = 0.0 ;
 $first_date = null ;
-while ($row = mysqli_fetch_array($result)) {
-	// Using the invoice date from the email import as the general ledger is in the future
-	$action = "<a href=\"$row[bki_file_name]\" target=\"_blank\"> <i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a>" ;
-	if (!$first_date) $first_date = $row['bki_date'] ;
-    print("<tr><td>$row[bki_date]</td>
-		<td><a href=\"$row[bki_file_name]\" target=\"_blank\">$row[bki_id] <i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td>") ;
-	if ($row['bkl_debit'] != '') {
-		print("<td>Facture</td><td style=\"text-align: right;\">$row[bkl_debit] &euro;</td><td><a href=\"#\"  
-			onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bkl_debit]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
-		$total += $row['bkl_debit'] ;
-	} else if ($row['bki_amount'] != '') {
-		print("<td>Facture</td><td style=\"text-align: right;\">$row[bki_amount] &euro;</td><td><a href=\"#\" 
-			 onClick=\"pay('$row[bki_id] 400$codeCiel $userLastName', $row[bki_amount]);\"><i class=\"bi bi-qr-code-scan\" title=\"Payer la facture\"></i></a></td>") ;
-		$total += $row['bkl_amount'] ;
-	} else if ($row['bkl_credit'] != '') {
-		print("<td>Note de crédit</td><td  style=\"text-align: right;\">" . (0.0 - $row['bkl_credit']) . " &euro;</td><td></td>") ;
-		$total -= $row['bkl_credit'] ;
-	}
-	print("</tr>\n") ;
-    $count ++ ;
-}
-
 // Now let's access Odoo invoices
 if ($odooId != '') {
 	print("</tbody>
@@ -122,12 +93,14 @@ if ($odooId != '') {
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 	$invoices = $odooClient->SearchRead('account.move', array(array(
 		// TODO also list out_refund for credit notes ? like this without any move_type filter https://www.spa-aviation.be/resa/mobile_ledger.php?user=182
+				'|',
 				array('move_type','=','out_invoice'),
+				array('move_type','=','out_refund'),
 				array('state', '=', 'posted'),
 				array('date', '>' , '2023-12-31'),
 				array('partner_id', '=', intval($odooId))
 			)), 
-			array('fields' => array('id', 'invoice_date', 'type_name', 'amount_total', 'name', 'payment_reference', 'payment_state', 'access_url', 'access_token'),
+			array('fields' => array('id', 'invoice_date', 'move_type', 'type_name', 'amount_total', 'name', 'payment_reference', 'payment_state', 'access_url', 'access_token'),
 				'order' => 'date')) ;
 	foreach ($invoices as $invoice) {
 		if (!$first_date) $first_date = $invoice['invoice_date'] ;
