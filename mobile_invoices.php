@@ -106,7 +106,7 @@ if ($odooId != '') {
 		if (!$first_date) $first_date = $invoice['invoice_date'] ;
 		switch ($invoice['payment_state']) {
 			case 'paid': $paid_msg = '<span class="badge rounded-pill text-bg-success">Payé</span>'; $total += $invoice['amount_total'] ; break ;
-			case 'reversed': $paid_msg = '<span class="badge rounded-pill text-bg-info">Extourné</span>' ; break ;
+			case 'reversed': $paid_msg = '<span class="badge rounded-pill text-bg-info">Extourné</span>' ; $total -= $invoice['amount_total'] ; break ;
 			// state 'draft'
 			default: $paid_msg = '<span class="badge rounded-pill text-bg-warning">Non payé</span>'; $total += $invoice['amount_total'] ;
 		}
