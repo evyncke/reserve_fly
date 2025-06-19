@@ -27,7 +27,7 @@ $originalUserId = $userId ;
 
 if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
 	if ($userId != 62) journalise($userId, "I", "Start of myinvoices, setting user to $_REQUEST[user]") ;
-	$userId = $_REQUEST['user'] ;
+	$userId = intval($_REQUEST['user']) ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
 } else
 	if ($userId != 62) journalise($userId, "I", "Start of myinvoices") ;
@@ -43,7 +43,7 @@ mysqli_free_result($result) ;
 
 function numberFormat($n, $decimals = 2, $decimal_separator = ',', $thousand_separator = ' ') {
 	if ($n == 0) return '' ;
-	return substr('        ' + number_format($n, $decimals, $decimal_separator, $thousand_separator) . '&nbsp;&euro;', -10, 10);
+	return substr('        ' . number_format($n, $decimals, $decimal_separator, $thousand_separator) . '&nbsp;&euro;', -10, 10);
 }
 
 print("<div class=\"container-fluid\">") ;
@@ -137,15 +137,15 @@ if ($count > 0) {
 </div><!-- col -->
 </div><!-- row -->
 <?php
-if ($count == 0) print("<p class=\"alter-info\">Hélas, pas encore de facture à votre nom dans le système.</p>\n") ;
+if ($count == 0) print("<p class=\"alert-info\">Hélas, pas encore de facture à votre nom dans le système.</p>\n") ;
 ?>
 <span id="payment" style="display: none;">
 <h2>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
 <p>Le QR-code contient votre identifiant au niveau de la comptabilité
 RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
 et pas Payconiq (ce dernier étant payant pour le commerçant).</p>
-<img id="payment_qr_code" width="300" height="300" src="qr-code.php?chs=300x300&&chl=<?=urlencode($epcString)?>">
-</span id="payment">
+<img id="payment_qr_code" width="300" height="300" src="qr-code.php?chs=300x300&chl=<?=urlencode($epcString)?>">
+</span>
 <script>
 var 
 	epcBic = '<?=$bic?>' ;
