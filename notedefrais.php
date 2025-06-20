@@ -36,7 +36,7 @@ require_once 'dto.class.php' ;
 //var_dump($_REQUEST);
 //print("<br>");
 if (isset($_REQUEST['delete'])) {
-    $deleteFile = $_REQUEST['delete'] ;
+    $deleteFile = $_REQUEST['delete'] ; // TODO by EVY ;-) être sûr que le nom de fichier n'est pas un fichier système avec des ../../... 
     $deleteAttachedFile=substr($deleteFile,0,strlen($deleteFile)-4);
     //print("deleteFile=$deleteFile deleteAttachedFile=$deleteAttachedFile<br>");
     $uploadNoteDeFraisFolder="uploads/notedefrais";
@@ -45,7 +45,7 @@ if (isset($_REQUEST['delete'])) {
     if(file_exists($deleteFile)) {
         //print("1unlink($deleteFile)<br>");
         unlink($deleteFile);
-        $flag=true;;
+        $flag=true;
  
     }
     $files = scandir($uploadNoteDeFraisFolder);
@@ -53,7 +53,7 @@ if (isset($_REQUEST['delete'])) {
         if(substr($file,0,strlen($deleteAttachedFile))==$deleteAttachedFile){
             //print("2unlink($uploadNoteDeFraisFolder/$file)<br>");
             unlink($uploadNoteDeFraisFolder."/".$file);
-            $flag=true;;
+            $flag=true;
         }
     }
     if($flag) {
@@ -175,7 +175,7 @@ print("<button id=\"id_submit_notedefrais\" name=\"submit_notedefrais\" class=\"
 </div><!-- col -->
 </div><!-- row --> 
 <?php
-    $hiddenGestion="hidden";
+    $hiddenGestion='class="d-none"';
     if ($userIsAdmin or $userIsBoardMember) $hiddenGestion="";
     require_once "mobile_tools.php" ;
     $theNotesDeFrais=array();
@@ -190,7 +190,7 @@ print("<button id=\"id_submit_notedefrais\" name=\"submit_notedefrais\" class=\"
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-7">
 <div>
-<table style="width:100%;" class="table table-striped" name="table_notedefrais" id="id_table_notedefrais">
+<table style="width:100%;" class="table table-striped" name="table_notedefrais" id="id_table_notedefrais2">
 <thead style="text-align: Center;">
 <th>Action</th>
 <th>Note de frais</th>
