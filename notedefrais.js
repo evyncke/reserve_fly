@@ -525,8 +525,6 @@ function prefillDropdownMenus(selectName, valuesArray, theDefaultId) {
 //===============================================
 // Main
 var ReadOnlyColor="AliceBlue";
-
-//prefillDropdownMenus('id_cdv_aircraft', planes) ;
 const notedefrais_date=[];
 const notedefrais_type=[];
 const notedefrais_description=[];
@@ -543,5 +541,8 @@ var index_max=-1;
 var notedefraisJSON=JSON.parse(notedefraisJSONString);
 var notedefraisTypes=notedefraisJSON.notedefrais;
 
-prefillDropdownMenus('id_member_name', members, default_member) ;
-window.onload=notedefrais_page_loaded();
+
+function notedefraisMain() {
+    prefillDropdownMenus('id_member_name', members, default_member) ;
+    notedefrais_page_loaded();
+}

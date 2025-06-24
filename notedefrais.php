@@ -30,6 +30,18 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
+$notedefraisJSONcontent = file_get_contents('notedefrais.json') ;
+$notedefraisJSONcontent = str_replace("\n","",$notedefraisJSONcontent);
+
+$header_postamble = "
+<script>
+  var notedefraisJSONString='$notedefraisJSONcontent';
+  var default_member=$userId;
+</script>
+<script src=\"notedefrais.js\"></script>" ;
+
+$body_attributes = 'onload=init();notedefraisMain();' ;
+
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 //print("REQUEST=");
@@ -91,12 +103,6 @@ if (isset($_REQUEST['notedefrais_json'])) {
     $ndf = NULL ;
 }
 
-$notedefraisJSONcontent = file_get_contents('https://www.spa-aviation.be/resa/notedefrais.json') ;
-$notedefraisJSONcontent = str_replace("\n","",$notedefraisJSONcontent);
-//print("Notedefrais json fileJSON=$notedefraisJSONcontent");
-print("<script>\nvar notedefraisJSONString='$notedefraisJSONcontent';");
-print("var default_member=$userId;\n");
-print("</script>\n");
 
 $selectorDisabled="disabled";
 if ($userIsAdmin or $userIsBoardMember) $selectorDisabled="";
@@ -228,8 +234,5 @@ print("<button id=\"id_submit_notedefrais\" name=\"submit_notedefrais\" class=\"
 </div><!-- table responsive -->
 </div>  <!--hidden-->
 <div class="mb-3">
-
-<!-- already loaded in by mobile_header5.php script src="https://www.spa-aviation.be/resa/members.js"></script-->
-<script src="https://www.spa-aviation.be/resa/notedefrais.js"></script>
 </body>
 </html>
