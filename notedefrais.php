@@ -145,9 +145,10 @@ Bénéficiaire:
         <option selected="selected" value=""></option>
     </select></td>
     <td><input type="text" id="id_notedefrais_input_description" name="notedefrais_input_description" ></input></td>
-    <td><input type="number" id="id_notedefrais_input_quantity" name="notedefrais_input_quantity"></input></td>
+    <td><input type="number" id="id_notedefrais_input_quantity" name="notedefrais_input_quantity" min="0.0" 
+        max="5000.0" step="1.0"></input></td>
     <td><input type="number" id="id_notedefrais_input_unitaryprice" name="notedefrais_input_unitaryprice" min="0.00" 
-        max="5000.00" step="0.01"></input></td>
+        max="5000.00" step="1.00"></input></td>
     <td><input type="number" id="id_notedefrais_input_total" name="notedefrais_input_total"></input></td>
     <td><input type="text" id="id_notedefrais_input_odooreference" name="notedefrais_input_odooreference"></input></td>
     <td><input type="text" id="id_notedefrais_input_odooanalytic" name="notedefrais_input_odooanalytic"></input></td>

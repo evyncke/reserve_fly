@@ -1,4 +1,4 @@
-// JavaScript used by nodedefrais.php to manage the page
+// JavaScript used by nodedefrais.php to manage the page 
 //
 function notedefrais_page_loaded() {
 
@@ -153,6 +153,7 @@ function deleteNoteDeFraisLine(theRowIndex)
         notedefrais_index.splice(aLineIndex, 1);
         nodedefrais_size--;
     }
+    updateGrandTotal();
     updateSubmitButton();
 }
 //==============================================
@@ -299,7 +300,7 @@ function updateTotal()
     var aQuantity=document.getElementById("id_notedefrais_input_quantity").value;
     var aUnitaryPrice=document.getElementById("id_notedefrais_input_unitaryprice").value;
     var aTotal=aQuantity*aUnitaryPrice;
-    document.getElementById("id_notedefrais_input_total").value=aTotal;
+    document.getElementById("id_notedefrais_input_total").value=aTotal.toFixed(2);
     notedefrais_total[nodedefrais_size-1]=aTotal;
     updateGrandTotal();
 }
