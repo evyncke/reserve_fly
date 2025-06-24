@@ -379,24 +379,27 @@ mysqli_free_result($result_news) ;
 </div><!-- row -->
 
 <br/>
-<table class="planningRuler">
-<tr style="vertical-align: top;">
-	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-7);"><i class="bi bi-rewind-fill"></i></a></td>
-	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-1);"><i class="bi bi-caret-left-fill"></i></a></td>
-	<td class="planningRulerCellLarge"><span id="planningDayOfWeek"></span><input type="date" sytyle="width: 100px;" id="planningDate" onchange="jumpPlanningDate();"></td>
-	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+1);"><i class="bi bi-caret-right-fill"></i></a></td>
-	<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+7);"><i class="bi bi-fast-forward-fill"></i></a></td>
-</tr>
-</table>
-<div style="overflow-x: auto;">
-	<table id="planePlanningTable" class="planningTable" style="display: box;">
-	</table>
-</div>
-<span id="toggleInstructorAgendaSpan" class="toggleInstructorAgendaSpan" onClick="toggleInstructorAgenda();">+ Disponibilité des instructeurs</span><br/>
-<div style="overflow-x: auto;">
-	<table id="instructorPlanningTable" class="planningTable" style="display: box;">
-	</table>
-</div>
+
+
+<div class="row justify-content-center">
+ <div class="col-auto">
+  <table class="planningRuler">
+	<tr style="vertical-align: top;">
+		<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-7);"><i class="bi bi-rewind-fill"></i></a></td>
+		<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-1);"><i class="bi bi-caret-left-fill"></i></a></td>
+		<td class="planningRulerCellLarge"><span id="planningDayOfWeek"></span><input type="date" sytyle="width: 100px;" id="planningDate" onchange="jumpPlanningDate();"></td>
+		<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+1);"><i class="bi bi-caret-right-fill"></i></a></td>
+		<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+7);"><i class="bi bi-fast-forward-fill"></i></a></td>
+	</tr>
+  </table>
+
+ <div class="d-flex flex-column align-items-end">
+	<table id="planePlanningTable" class="planningTable" style="display: box;"></table>
+	<table id="instructorPlanningTable" class="planningTable" style="display: box;"></table>
+  </div><!-- d-flex justify-content-end -->
+ </div><!-- col-auto -->
+</div><!-- row justify-content-center -->
+
 <div class="text-center fw-light small">
 <i class="bi bi-exclamation-triangle-fill text-danger" alt="!" width="12" height="12"></i>: vous n'avez pas volé dessus récemment (et le règlement d'ordre intérieur impose des vols récents).<br/>
 <i class="bi bi-ban text-danger" alt="X" width="12" height="12"></i>: vous n'avez pas les qualifications requises (sur base des validités de votre profil).<br/>

@@ -36,8 +36,8 @@ td.newheader_hour {width: 0.5vw; border-left-style: dotted; font-size: 0.75em; o
 td.header_last_hour {width: 15px; border-left-style: dotted; font-size: 0.75em;}
 td.header_not_hour {width: 15px; }
 
-.planningTable { border-spacing: 1px; border-collapse: separate; border-width: 1px; 
-	margin-left: auto; margin-right: auto; 
+.planningTable { border-spacing: 1px; 
+	border-collapse: separate; border-width: 1px; 
 	font-size: /*0.75em*/ 1em; line-height: 1 ;}
 
 td.plane_cell { border-top-style: dotted; border-top-width: 1px; border-color: black; font-size: calc(0.5vw + 0.75vh); }

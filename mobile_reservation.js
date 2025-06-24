@@ -224,22 +224,6 @@ function toggleLogDisplay () {
 	}
 }
 
-function toggleInstructorAgenda() {
-	var span = document.getElementById('toggleInstructorAgendaSpan') ;
-
-	if (span.innerHTML[0] == '-') {
-		span.innerHTML = '+' + span.innerHTML.substr(1) ;
-               // hide instructorPlanningTable
-                instructorPlanningTable.style.visibility = 'hidden' ;
-                instructorPlanningTable.style.display = 'none' ;
-	} else {
-		span.innerHTML = '-' + span.innerHTML.substr(1) ;
-               // hide instructorPlanningTable
-                instructorPlanningTable.style.visibility = 'visible' ;
-                instructorPlanningTable.style.display = 'table' ;
-	}
-}
-
 function myLog(msg) {
 	var currentDate = new Date();
 	var timeString = currentDate.getHours() + ':' + currentDate.getMinutes() + ":" + currentDate.getSeconds() + '.' + currentDate.getMilliseconds() + ': ' ;
@@ -2110,11 +2094,6 @@ function initBooking() {
 	hidePilotDetails() ;
 	// Display/Hide instructors agenda
     var spanDisplayAgenda = document.getElementById('toggleInstructorAgendaSpan') ;
-	if (userIsStudent || userIsInstructor)
-                spanDisplayAgenda.innerHTML = '+' + spanDisplayAgenda.innerHTML.substring(1) ;
-	else
-                spanDisplayAgenda.innerHTML = '-' + spanDisplayAgenda.innerHTML.substring(1) ;
-	toggleInstructorAgenda() ;
 	planningDate = document.getElementById('planningDate') ;
 	refreshPlanningTable() ;
 }
