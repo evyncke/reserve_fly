@@ -1677,19 +1677,10 @@ function displayAgenda(row, item, displayDay, displayMonth, displayYear) {
 		if (startDate <= workDate && workDate < endDate) {
 			thisCell.className = 'slot available first' ; // A default class, just in case...
 			// Simple case: FI is not available because he is flying ;-)
-			if (item.booking) { // A little tricky because the allBookings[] is built asynchronously... so we need to handle this case
-				// TODO CHECK WITH LOGGING part
-				var booking ;
-				if (allBookings[item.booking] === undefined) {
-					thisCell.className = 'slot booked' ;	
-					booking = undefined ;				
-				} else {
-					booking = allBookings[item.booking][0] ;
-					if (booking !== undefined && item.fi == booking.instructorId) 
-						thisCell.className = 'slot booked_dc' ;
-					else
-						thisCell.className = 'slot booked' ;
-				}
+			if (item.booking) { // A little tricky because the allBookings[] is built asynchronously... so we need to handle this case TODO no more the case
+				thisCell.className = 'slot booked' ;	
+//					if (booking !== undefined && item.fi == booking.instructorId) 
+//						thisCell.className = 'slot booked_dc' ;
 				if (nameDisplayed) {
 					widthInColumn++ ;
 					thisCell.className += ' other' ; 
@@ -1697,7 +1688,7 @@ function displayAgenda(row, item, displayDay, displayMonth, displayYear) {
 					nameDisplayed = true ;
 					firstColumn = i ;
 					widthInColumn = 1 ;
-					thisCell.innerHTML = (booking !== undefined) ? booking.name : 'Unavailable' ;
+					thisCell.innerHTML = item.name ;
 					thisCell.className += ' first' ; 
 				}
 				// As it is linked to a plane booking, neither adding nor modifying on this cell

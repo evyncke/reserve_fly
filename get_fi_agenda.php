@@ -66,8 +66,8 @@ if ($error_message != '') {
 	} else
 		$agenda['errorMessage'] =  "Cannot read FI_agenda: " . mysqli_error($mysqli_link);
 	// All plane booking where the instructor is instructor or pilot is ovbviously also an item in the agenda ;-)
-	$result = mysqli_query($mysqli_link, "SELECT r_id, r_plane, r_start, r_stop, r_comment, r_pilot, r_instructor, timestampdiff(minute, r_start, r_stop) AS duration
-		FROM $table_bookings 
+	$result = mysqli_query($mysqli_link, "SELECT r_id, r_plane, r_start, r_stop, r_comment, r_pilot, r_instructor, timestampdiff(minute, r_start, r_stop) AS duration, name
+		FROM $table_bookings JOIN $table_users AS p ON r_pilot = p.id
 		WHERE date(r_start) <= '$date' AND '$date' <= date(r_stop) AND ($fi = r_pilot OR $fi = r_instructor) AND r_cancel_date IS NULL AND r_type != " . BOOKING_MAINTENANCE . 
 		" ORDER BY r_start") ;
 	if ($result)  {
@@ -79,6 +79,7 @@ if ($error_message != '') {
 			$item['end'] = str_replace('-', '/', $row['r_stop']) ; // Safari javascript does not like - in dates !!!
 			$item['duration'] = $row['duration'] ;
 			$item['comment'] = $row['r_plane'] ;
+			$item['name'] = db2web($row['name']) ;
 			// To allow asynchronous AJAX calls, we need to pass back an argument...
 			if ($_REQUEST['arg'] != '') $item['arg'] = $_REQUEST['arg'] ;
 			// Be paranoid and prevent XSS
