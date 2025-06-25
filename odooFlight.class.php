@@ -738,12 +738,14 @@ function OF_createNoteDeFrais($theMemberID, $theNoteDeFraisJSON, $theRemboursabl
     }
     if($partner_customer_id==0) {
            print("<h2 style=\"color: red;\">ERROR:OF_createNoteDeFrais: Unknown partner</h2>");
+           journalise($userId, "E", "OF_createNoteDeFrais: Unknown partner for member $theMemberID") ;
         return "";
     }
     $journal_ndf=OF_GetJournalID("client");
     $moveType="out_refund";
     if($theRemboursable=="") {
         print("<h2 style=\"color: red;\">ERROR:OF_createNoteDeFrais: Remboursable not defined</h2>");
+        journalise($userId, "E", "OF_createNoteDeFrais: Remboursable not defined for member $theMemberID") ;
         return "";
    }
     if($theRemboursable=="1") {

@@ -57,22 +57,23 @@ if (isset($_REQUEST['delete'])) {
     if(file_exists($deleteFile)) {
         //print("1unlink($deleteFile)<br>");
         unlink($deleteFile);
+        journalise($userId, "I", "Suppression d'un fichier note de frais $_REQUEST[delete]==$deleteFile");
         $flag=true;
- 
-    }
+     }
     $files = scandir($uploadNoteDeFraisFolder);
     foreach($files as $file) {
         if(substr($file,0,strlen($deleteAttachedFile))==$deleteAttachedFile){
             //print("2unlink($uploadNoteDeFraisFolder/$file)<br>");
             unlink($uploadNoteDeFraisFolder."/".$file);
+            journalise($userId, "I", "Suppression d'un fichier note de frais $uploadNoteDeFraisFolder/$file");
             $flag=true;
         }
     }
     if($flag) {
-   	    print("<h2 style=\"color: red;\"><b>La note de frais $_REQUEST[delete] est supprimée sur le serveur du club (Pas dans ODOO).</b></h2> <p></p>");
-    }
-    else {
-   	    print("<h2 style=\"color: red;\"><b>ERREUR: La note de frais $_REQUEST[delete] n'est pas supprimée sur le serveur du club.</b></h2> <p></p>");       
+   	    print("<div class=\"text-bg-warning\"><b>La note de frais $_REQUEST[delete] est supprimée sur le serveur du club (Pas dans ODOO).</b></div> <p></p>");
+    } else {
+   	    print("<div class=\"text-bg-danger\"><b>ERREUR: La note de frais $_REQUEST[delete] n'est pas supprimée sur le serveur du club.</b></div> <p></p>");
+        journalise($userId, "E", "Erreur lors de la suppression d'une note de frais $_REQUEST[delete], fichiers non trouvés");
     }
 }
 $remboursable=0;
@@ -91,12 +92,13 @@ if (isset($_REQUEST['notedefrais_json'])) {
     $factureMailTo="";
     //print("ndf in JSON=$ndfJSON<br>");
     $noteDeFraisPDF=OF_createNoteDeFrais($memberID, $ndfJSON, $remboursable,$_FILES, $uploadFileFolder, $factureMailTo);
-    if($noteDeFraisPDF!="") {
-    	print("<h2 style=\"color: red;\"><b>La note de frais <a href=\"$uploadFileFolder/$noteDeFraisPDF\">$noteDeFraisPDF</a> est créée et envoyée à $factureMailTo</b></h2>");
+    if($noteDeFraisPDF!="") { // TODO proposed by eric: to check whether "" or false is returned in the call function.
+    	print("<div class=\"text-bg-info\">La note de frais <a href=\"$uploadFileFolder/$noteDeFraisPDF\">$noteDeFraisPDF</a> est créée et envoyée à $factureMailTo</div>");
      	print("<h3>Download de la note de frais: <b><a href=\"$uploadFileFolder/$noteDeFraisPDF\" download>DOWNLOAD</a></b></h3><p></p>");
    }
     else {
-	    print("<h2 style=\"color: red;\"><b>Erreur lors de la creation de la note de frais</b></h2>");
+	    print("<div class=\"text-bg-danger\">Erreur lors de la creation de la note de frais</div>");
+        journalise($userId, "E", "Erreur lors de la creation d'une note de frais");
     }
 
 } else {
