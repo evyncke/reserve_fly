@@ -21,7 +21,7 @@
 ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image') ;
+header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
 
 # Handle the toggle between dark/light themes
 if (isset($_GET['theme']) and $_GET['theme'] != '') {
@@ -30,6 +30,11 @@ if (isset($_GET['theme']) and $_GET['theme'] != '') {
 } else
   $theme = (isset($_COOKIE['theme'])) ? $_COOKIE['theme'] : 'light' ;
 setcookie('theme', $theme, time()+60*60*24*30, '/', $_SERVER['HTTP_HOST'], true) ;
+
+# Check the value of user
+if (isset($_REQUEST['user']) and $_REQUEST['user'] != '') {
+  $_REQUEST['user'] = intval($_REQUEST['user']) ;
+} 
 
 $today_month = date('m') ;
 $today_day = date('d') ;
@@ -75,7 +80,7 @@ if ($christmas_theme) {
 ?>
 <!-- Allow the swipe events on phones & tablets -->
 <!-- TODO should only be loaded when required -->
-<script src="swiped-events.js"></script>
+<script src="swiped-events.js" defer></script>
 <script>
 var
 		runwaysQFU = [ <?php print(implode(', ', $runways_qfu)) ; ?> ],
@@ -83,8 +88,8 @@ var
 		utcOffset = Number(<?=date('Z')/3600?>),
 		userId = <?=$userId?>,
 		selectedUserId = <?=(isset($_REQUEST['user']) and $_REQUEST['user'] != '') ? $_REQUEST['user'] : $userId?>,
-		userName = '<?=$userName?>',
-		userFullName = '<?=$userFullName?>',
+		userName = '<?=json_encode($userName)?>',
+		userFullName = '<?=json_encode($userFullName)?>',
 		userIsPilot = <?= ($userIsPilot) ? 'true' : 'false' ?>,
 		userIsInstructor = <?= ($userIsInstructor) ? 'true' : 'false' ?>,
 		userIsAdmin = <?= ($userIsAdmin) ? 'true' : 'false' ?>,
@@ -116,7 +121,7 @@ if (!isset($_REQUEST['kiosk'])) { // No matomo analytics in kiosk mode
 // If user is logged-in then call 'setUserId'
 // $userId variable must be set by the server when the user has successfully authenticated to your app.
 	if (isset($userId) and $userId > 0) {
-     print("  _paq.push(['setUserId', '$userName']);\n");
+     print("  _paq.push(['setUserId', '" . json_encode($userName) . "']);\n");
 }
 ?>
   /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
@@ -173,7 +178,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
     <p class="fw-light">This page was printed by <?="$userFullName ($userName)"?> on <?=date('l jS \o\f F Y')?>.</p>
     <p class="fw-light">URL: <?="https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"?></p>
   </div><!-- col -->
-  <hr>
+  <hr/>
 </div><!-- row -->
 </div><!-- print only -->
 <?php
@@ -309,7 +314,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
   </li> <!-- dropdown Ecole-->
 <?php
 }
-if ($userIsFlightManager) {
+if ($userIsFlightManager && $userId == 62) {
 ?>
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Vols IF/INIT<span class="caret"></span></a>
@@ -355,9 +360,9 @@ if ($userId > 0) {
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
           <li><h6 class="dropdown-header">Disponible pour les FIs et administrateurs</h6></li>
-          <li><i><a class="dropdown-item" href="mobile_plane_planning.php">Echéances des avions</a></i></li>
-          <li><i><a class="dropdown-item" href="mobile_plane_4_camo.php">Rapport hebdomadaire des avions pour CAMO</a></i></li>
-          <li><i><a class="dropdown-item" href="mobile_shared_flights.php">Vols en codes partagés</a></i></li>
+          <li><i><a class="dropdown-item text-warning" href="mobile_plane_planning.php">Echéances des avions</a></i></li>
+          <li><i><a class="dropdown-item text-warning" href="mobile_plane_4_camo.php">Rapport hebdomadaire des avions pour CAMO</a></i></li>
+          <li><i><a class="dropdown-item text-warning" href="mobile_shared_flights.php">Vols en codes partagés</a></i></li>
 <?php
 }
 if ($userId > 0) {
@@ -391,9 +396,12 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_metar.php">METAR</a></li>
             <li><a class="dropdown-item" href="mobile_wx_map.php">Météo des environs</a></li>
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam RAPCS (Apron)</a></li>
+            <li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam SOWAER (station météo)</a></li>
 <?php
 if ($userId > 0) {
 ?>
+            <li><hr class="dropdown-divider"/></li>
+            <li><h6 class="dropdown-header">Réservé aux membres</h6></li>
             <li><a class="dropdown-item" href="mobile_streaming.php?webcam=apron">Webcam RAPCS (Apron) streaming</a></li>
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=2">Webcam RAPCS (Hangars)</a></li>
             <li><a class="dropdown-item" href="mobile_streaming.php?webcam=hangars">Webcam RAPCS (Hangars) streaming</a></li>
@@ -401,12 +409,14 @@ if ($userId > 0) {
 }
 if ($userIsAdmin or $userIsInstructor) {
 ?>
-            <li><a class="dropdown-item text-warning" href="mobile_streaming.php?webcam=both">Webcams RAPCS (Apron and hangars) streaming></a></li>
+            <li><hr class="dropdown-divider"/></li>
+            <li><h6 class="dropdown-header">Pour les admins & FI</h6></li>
+            <li><a class="dropdown-item text-warning" href="mobile_streaming.php?webcam=both">Webcams RAPCS (Apron and hangars) streaming</a></li>
             <li><a class="dropdown-item text-warning" href="http://kiosk.spa-aviation.be:8001/hls/" target="_blank">Webcam RAPCS (hangars) 24 heures fort lent<i class="bi bi-box-arrow-up-right"></i></a></li>
 <?php
 }
 ?>
-            <li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam SOWAER (station météo)</a></li>
+
           </ul>
         </li>
       </ul><!-- navbar left-->
@@ -429,13 +439,13 @@ if ($userId <= 0) {
               <a class="dropdown-item" href="?theme=light"><i class="bi bi-sun-fill"></i> Mode jour</a>
               <a class="dropdown-item" href="mobile_mylog.php"><i class="bi bi-journals"></i> Mon carnet de vols</a>
               <a class="dropdown-item" href="mobile_mymap.php"><i class="bi bi-globe-europe-africa"></i> Mes vols sur une carte</a>
-              <li><hr class="dropdown-divider"></hr></li>
+              <li><hr class="dropdown-divider"/></li>
               <li><h6 class="dropdown-header">Situation comptable</h6></li>
               <a class="dropdown-item" href="mobile_folio.php">Mon folio</a>
               <a class="dropdown-item" href="mobile_invoices.php">Mes factures</a>
               <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
               <a class="dropdown-item" href="notedefrais.php">Note de frais</a>
-              <li><hr class="dropdown-divider"></hr></li>
+              <li><hr class="dropdown-divider"/></li>
               <li><h6 class="dropdown-header">Données personnelles</h6></li>
               <a class="dropdown-item" href="mobile_groups.php"><i class="bi bi-people-fill"></i> Mes groupes</a>
               <a class="dropdown-item" href="mobile_profile.php"><i class="bi bi-person-circle"></i> Mon profil</a>
