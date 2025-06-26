@@ -401,7 +401,8 @@ if ($userId > 0) {
 }
 if ($userIsAdmin or $userIsInstructor) {
 ?>
-            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=both">Webcams RAPCS (Apron and hangars) streaming</a></li>
+            <li><a class="dropdown-item text-warning" href="mobile_streaming.php?webcam=both">Webcams RAPCS (Apron and hangars) streaming></a></li>
+            <li><a class="dropdown-item text-warning" href="http://kiosk.spa-aviation.be:8001/hls/" target="_blank">Webcam RAPCS (hangars) 24 heures fort lent<i class="bi bi-box-arrow-up-right"></i></a></li>
 <?php
 }
 ?>
