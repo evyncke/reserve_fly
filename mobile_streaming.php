@@ -34,8 +34,14 @@ if ($userId != 62) journalise($userId, "D", "Start of live streaming #$webcam") 
 <?php
 if ($webcam == '-both') {
 ?>
-<video id="hls-video-1" controls autoplay width="50%"></video>
-<video id="hls-video-2" controls autoplay width="50%"></video>
+<div class="row">
+  <div class="col-lg-6 col-sm-12">
+    <video id="hls-video-1" controls autoplay width="100%"></video>
+  </div>
+  <div class="col-lg-6 col-sm-12">
+    <video id="hls-video-2" controls autoplay width="100%"></video>
+  </div>
+</div>  
 <script>
   if (Hls.isSupported()) {
     var video1 = document.getElementById('hls-video-1');
