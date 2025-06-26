@@ -48,3 +48,4 @@ flight_create_InProgress.php
 odoo.php
 auth.php
 odoo.php
+odooFlight_InProgress.class.php
