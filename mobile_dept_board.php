@@ -96,7 +96,7 @@ $rows = [
     [ '', '', '', ''],
 ] ;
 
-if (isset($_REQUEST['kiosk']) and date('i') == '23') journalise($userId, 'D', "In kiosk mode: $_REQUEST[kiosk]") ; // Log liveness on everyhour and 23 minutes
+if (isset($_REQUEST['kiosk']) and (date('i') == '23' or date('i') == '24')) journalise($userId, 'D', "In kiosk mode: $_REQUEST[kiosk]") ; // Log liveness on everyhour and 23 minutes
 
 // Dynamic flip departure board https://codepen.io/tomgiddings/pen/yLyExxo
 // Using https://codepen.io/chonz0/pen/NGRbWj for now
