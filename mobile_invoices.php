@@ -112,14 +112,14 @@ if ($odooId != '') {
 		}
 		$amount = number_format($invoice['amount_total'], 2, ',', '.') ;
 		// TODO QR code BCD/002/1/SCT//Royal Aéro Para Club de Spa asbl/BE647.../EUR70.00//++000....+++
+		$invoice_name = ($invoice['access_token']) ? "<a href=\"https://$odoo_host$invoice[access_url]?access_token=$invoice[access_token]\"target=\"_blank\">$invoice[name]
+				<i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a>" : $invoice['name'] ;
 		print("<tr><td>$invoice[invoice_date]</td>
-			<td><a href=\"https://$odoo_host$invoice[access_url]?access_token=$invoice[access_token]\"target=\"_blank\">$invoice[name]
-				<i class=\"bi bi-box-arrow-up-right\" title=\"Ouvrir la pièce comptable dans une autre fenêtre\"></i></a></td>
+			<td>$invoice_name</td>
 			<td>$invoice[type_name]</td>
 			<td style=\"text-align: right;\">$paid_msg$amount&nbsp;&euro;</td>
 			</tr>\n") ;
-		$count++ ;
-		
+		$count++ ;		
 	}
 } // if ($odooId != '')
 ?>
