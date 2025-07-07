@@ -412,8 +412,8 @@ if ($userIsAdmin or $userIsInstructor) {
             <li><hr class="dropdown-divider"/></li>
             <li><h6 class="dropdown-header">Pour les admins & FI</h6></li>
             <li><a class="dropdown-item text-warning" href="mobile_streaming.php?webcam=both">Webcams RAPCS (Apron and hangars) streaming</a></li>
-            <li><a class="dropdown-item text-warning" href="http://kiosk.spa-aviation.be:8001/hls/" target="_blank">Webcam RAPCS (hangars) 24 heures fort lent <i class="bi bi-box-arrow-up-right"></i></a></li>
-            <li><a class="dropdown-item text-warning" href="http://192.168.1.37:8001/hls/" target="_blank">Webcam RAPCS (hangars) 24 heures depuis le club <i class="bi bi-box-arrow-up-right"></i></a></li>
+            <li><a class="dropdown-item text-warning" href="http://kiosk.spa-aviation.be:8001/hls/index-lowres.html" target="_blank">Webcams RAPCS 24 heures basse résolution <i class="bi bi-box-arrow-up-right"></i></a></li>
+            <li><a class="dropdown-item text-warning" href="http://192.168.1.37:8001/hls/index-highres.html" target="_blank">Webcams RAPCS 24 heures depuis le club <i class="bi bi-box-arrow-up-right"></i></a></li>
 <?php
 }
 ?>
