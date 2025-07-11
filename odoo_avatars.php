@@ -9,11 +9,7 @@ print("Library loaded\n") ;
 
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
-# For dirty attempts...
-$common = $odooClient->common;
-$models = $odooClient->models ;
 $uid = $odooClient->uid ;
-$encoder = $odooClient->encoder ;
 
 function resize($img, $width, $height, $size) {
 	$width_resize = $width / $size ;
@@ -38,7 +34,7 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	WHERE k.avatar IS NOT NULL AND p.odoo_id IS NOT NULL")
 //	WHERE k.avatar IS NOT NULL AND p.odoo_id IS NOT NULL AND j.block = 0 AND k.avatar NOT LIKE '%.jp%g'")
 	or print(mysqli_error($mysqli_link)) ;
-while (false and $row = mysqli_fetch_array($result)) {
+while ($row = mysqli_fetch_array($result)) {
 	print("Processing #$row[jom_id], " . db2web($row['name']) . ": $row[avatar]\n") ;
 	$fname = '../media/kunena/avatars/' . $row['avatar'] ;
 	// TODO process gravatars ! https://www.gravatar.com/avatar/" . md5(strtolower(trim($row['email']))) . "?s=200&d=blank&r=pg\"
@@ -78,7 +74,7 @@ while (false and $row = mysqli_fetch_array($result)) {
 	print("   Odoo response: $response\n") ;
 }
 
-// exit ;
+exit ;
 
 $result = mysqli_query($mysqli_link, "SELECT * 
 	FROM jom_kunena_users k 
