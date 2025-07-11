@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2024 Eric Vyncke, Patrick Reginster
+   Copyright 2022-2025 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ $originalUserId = $userId ;
 
 if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember or $userIsInstructor)) {
 	if ($userId != 62) journalise($userId, "I", "Start of myfolio, setting user to $_REQUEST[user]") ;
-	$userId = $_REQUEST['user'] ;
+	$userId = intval($_REQUEST['user']) ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
 }
 
@@ -118,7 +118,6 @@ if (isset($_REQUEST['csv']) and $_REQUEST['csv'] != '') {
 	}
 	exit ;
 } // CSV output
-//print("PILOTLOG_DATE;AF_DEP;TIME_DEP;AF_ARR;TIME_ARR;AC_MODEL;AC_REG;TIME_TOTAL;PILOT1_NAME;PILOT2_NAME\n") ;
 
 // Is a PilotLog file request ?
 if (isset($_REQUEST['pilotlog']) and $_REQUEST['pilotlog'] != '') {
@@ -126,9 +125,6 @@ if (isset($_REQUEST['pilotlog']) and $_REQUEST['pilotlog'] != '') {
 	header('Content-Disposition: attachment;filename="pilotlog-' . $folio_start->format('Y-m-d') . '.csv"');
 	header('Cache-Control: max-age=0');
 	print("PILOTLOG_DATE;AF_DEP;TIME_DEP;AF_ARR;TIME_ARR;AC_MODEL;AC_REG;TIME_TOTAL;PILOT1_NAME;PILOT2_NAME;TIME_PIC;TIME_INSTRUCTOR\n") ;
-
-	//print("Date;From;Start;To;End;Model;Plane;Hours;Minutes;PIC;Pax;\"Cost Sharing\";\"Plane Cost\";\"FI Cost\";\"Tax Cost\"\n") ;
-
 	$folio = new Folio($userId, $folio_start->format('Y-m-d'), $folio_end->format('Y-m-d')) 
 		or journalise($originalUserId, "F", "Cannot get access to the folio");
 	foreach ($folio as $line)	{
@@ -157,16 +153,12 @@ if (isset($_REQUEST['pilotlog']) and $_REQUEST['pilotlog'] != '') {
 			$durationDC=$duration;
 		}
 		
-		PRINT("$duration;$durationDC");
+		print("$duration;$durationDC");
 		print("\n") ;
 	}
 	exit ;
 } // PilotLog output
 ?><script>
-
-function valueOfField(suffix, name) {
-	return name + '=' + document.getElementById(name + suffix.charAt(0).toUpperCase() + suffix.slice(1)).value ;
-}
 
 function findMember(a, m) {
         for (let i = 0 ; i < a.length ; i++)
@@ -289,6 +281,7 @@ $fmt = datefmt_create(
 <th class="text-center">FI<?=($userIsInstructor)? ' &spades' : ''?></th>
 <th class="text-center">Taxes <!--&ddagger;--></th>
 <th class="text-center">Total</th>
+</tr>
 </thead>
 <tbody class="table-group-divider">
 <?php
@@ -411,8 +404,7 @@ Le montant n'inclut aucune note de frais (par exemple carburant), note de crédi
 <p>Les heures sont les heures UTC. </p>
 <p>Ces informations sont mises à jour plusieurs fois par semaine par nos bénévoles et dans le cas des paiements
 	avec QR-code, plusieurs fois par jour ouvrable.
-</p >
-<!-- p>&ddagger;: depuis le 1er novembre 2022, le CA a décidé de ne plus faire payer les taxes en avance.</p-->
+</p>
 <?php
 
 if ($userIsInstructor)
@@ -428,20 +420,17 @@ if ($diams_explanation)
 if (isset($_REQUEST['previous']))  {
 	$invoice_reason = 'folio de ' . datefmt_format($fmt, $previous_month_pager) ;
 	$invoice_total = round($cost_grand_total, 2)  ;
-	
 } else {
 	$invoice_reason = 'solde selon folio' ;
 	$invoice_total = round($cost_grand_total - $balance, 2) ;
-	
 }
-
 ?>
 <span id="payment">
 <h3>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
 <p>Le QR-code est à utiliser avec une application bancaire
 et pas encore Payconiq (ce dernier étant payant pour le commerçant).</p>
 <img id="payment_qr_code" width="200" height="200" src="qr-code.php?chs=200x200&&chl=<?=urlencode($epcString)?>">
-</span id="payment">
+</span>
 <script>
 var 
 	invoice_reason = '<?=$invoice_reason?>' ;
@@ -463,7 +452,7 @@ function pay(reason, amount) {
 	// There should be 2 reasons, first one is structured, the second one is free text
 	var epcPurpose = '' ; // No clue what to put in this 4-char field
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + epcPurpose + "\n" + "\n" + reason + " " + userLastName + "\n";
-	document.getElementById('payment_qr_code').src = "qr-code.php?chs=200x200&&chl=" + encodeURI(epcURI) ;
+	document.getElementById('payment_qr_code').src = "qr-code.php?chs=200x200&chl=" + encodeURI(epcURI) ;
 }
 
 pay(invoice_reason, invoice_total) ;
