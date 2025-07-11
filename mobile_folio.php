@@ -192,7 +192,6 @@ if ($odooId != '') {
 			array('fields' => array('id', 'total_due'))) ;
 	$balance = -1.0 * $accounts[0]['total_due'] ;
 	if ($balance < 0) {
-		//$balance_text = "<span class=\"text-danger\"> $balance &euro; (vous devez de l'argent au RAPCS ASBL)</span>" ;
 		$balance_text = number_format($balance,2,",",".");
 		$invoice_total = -1.0 * $balance ;
 		$invoice_reason = 'solde' ;
@@ -209,12 +208,6 @@ if ($odooId != '') {
 // Let's warn the used if he is blocked
 if ($blocked_reason != '') {
 	print("<p class=\"mt-2 p-4 bg-danger text-bg-danger rounded\">$blocked_reason</p>") ;
-//	if ($userIsBoardMember and $row['bkb_amount'] > 0) { // Test mode
-//		print("<p>EN TEST !!!! Si vous êtes bloqué(e) pour un solde négatif ($row[bkb_amount] &euro;), vous pouvez payer ce solde via 
-//			<a href=\"payconiq/pay.php?amount=$row[bkb_amount]&reference=Solde%20$codeCiel&description=Solde%20courant%20$codeCiel&cb=$_SERVER[PHP_SELF]\">
-//			l'application mobile payconiq (ou votre app bancaire) <img src=\"payconiq/payconiq_by_Bancontact-logo-app-pos-shadow.png\" width=88 height=88>
-//			</a> et votre compte membre sera débloqué endéans quelques secondes.</p>") ;
-//	}	
 }
 
 if ($userIsInstructor or $userIsAdmin or $userIsBoardMember) {
@@ -416,7 +409,8 @@ carnet de routes des avions et en utilisant le prix des avions/instructeurs/taxe
 donc il peut y avoir une différence si les prix par minute ont changé depuis vos vols.
 Le montant n'inclut aucune note de frais (par exemple carburant), note de crédit, ainsi que d'autres frais (par exemple, cotisations, ou taxes d'atterrissage).</p>
 <p>Les heures sont les heures UTC. </p>
-<p>Ces informations sont mises à jour environ une fois par semaine par nos bénévoles.
+<p>Ces informations sont mises à jour plusieurs fois par semaine par nos bénévoles et dans le cas des paiements
+	avec QR-code, plusieurs fois par jour ouvrable.
 </p >
 <!-- p>&ddagger;: depuis le 1er novembre 2022, le CA a décidé de ne plus faire payer les taxes en avance.</p-->
 <?php
@@ -441,11 +435,6 @@ if (isset($_REQUEST['previous']))  {
 	
 }
 
-/*
-as Google Charts API is about to be deprecated, alternatives could be:
-http://image-charts.com/
-https://github.com/typpo/quickchart
-*/
 ?>
 <span id="payment">
 <h3>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
