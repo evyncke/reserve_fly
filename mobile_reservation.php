@@ -74,7 +74,7 @@ $header_postamble = '<link rel="stylesheet" type="text/css" href="mobile_reserva
 <script src="mobile_reservation.js"></script>
 ' ;
 $body_attributes = 'onload="init(); initBooking();"' ;
-//unset($body_attributes) ;
+$need_swiped_events = true ; // Allow swipe events on this page
 require_once 'mobile_header5.php' ;
 ?>
 <div class="container-fluid">

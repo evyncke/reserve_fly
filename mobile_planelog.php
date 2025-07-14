@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ if ($userId == 0) {
 
 $header_postamble = '<script src="shareCodes.js"></script>' ;
 $body_attributes=' onload="initPlaneLog();init();" ' ;
+$need_swiped_events = true ; // Allow swipe events on this page
 require_once 'mobile_header5.php' ;
 
 if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '')
@@ -397,6 +398,12 @@ if ($plane == 'TOUS') {
 <p><em>Sur base des données entrées après les vols dans le
 carnet de route des avions. Heure affichée en heure universelle.</em></p>
 </div><!-- container -->
+<script>
+// Swipe to change to next month/next plane
+document.addEventListener('swiped-left', function(e) {location.href='<?="$_SERVER[PHP_SELF]?plane=$plane&since=$monthAfterString"?>' }) ;
+document.addEventListener('swiped-right', function(e) {location.href='<?="$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString"?>' }) ;
+</script>
+</div> <!-- container-fluid -->
 </body>
 </html>
 

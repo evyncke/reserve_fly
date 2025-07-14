@@ -24,7 +24,8 @@ if ($userId == 0) {
 	exit ;
 }
 
-//$header_postamble = '<script src="shareCodes.js"></script>' ;
+
+$need_swiped_events = true ; // Allow swipe events on this page
 //$body_attributes=' onload="initPlaneLog();init();" ' ;
 require_once 'mobile_header5.php' ;
 
@@ -47,8 +48,6 @@ $yearName = datefmt_format($fmt, $sinceDate) ;
 $thisYearName = datefmt_format($fmt, new DateTime()) ;
 
 $today = new DateTime() ;
-//$yearAfterForTitle = new DateTime($since) ;
-//$yearBefore = new DateTime($since) ;
 $since = $yearName."-01-01";
 $yearAfterForTitle = new DateTime($yearName."-01-01") ;
 $yearBefore = new DateTime($yearName."-01-01") ;
@@ -118,7 +117,6 @@ foreach ($planes as $plane_id => &$planeTimeRef) {
 	$timeString=convertMinuteToHour($timeInMinute);
 	$totalTimeInMinuteComparaison+=$timeInMinute;
 	$planesComparaison[$plane_id]=$timeInMinute;
-	//print("$plane_id: $comparaisonYearName  $planesComparaison[$plane_id]<br>");
 }
 ?>
 <div class="row">
@@ -611,8 +609,11 @@ foreach ($monthsFilter as $month=>$monthFilter) {
 ?>
 </tfoot>
 </table>
-
-
+</div> <!-- container-fluid -->
+<script>
+	// Swipe to change to next webcam
+	document.addEventListener('swiped-right', function(e) {location.href='<?="$_SERVER[PHP_SELF]?since=$yearBeforeString"?>' }) ;
+	document.addEventListener('swiped-left', function(e) {location.href='<?="$_SERVER[PHP_SELF]?since=$yearAfterString"?>' }) ;
+</script>
 </body>
 </html>
-

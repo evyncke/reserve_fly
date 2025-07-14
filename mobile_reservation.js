@@ -1,4 +1,4 @@
-//   Copyright 2014-2024 Eric Vyncke
+//   Copyright 2014-2025 Eric Vyncke
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -700,7 +700,6 @@ function makeDisplayPlaneDetails(planeIndex) {
 
 // Called when mouse is over a plane having some information to be displayed
 function displayPlaneDetails(planeIndex) {
-	console.log('displayPlaneDetails:' + planeIndex) ;
 	var span ;
 	var thisPlane = allPlanes[planeIndex] ;
 	span = document.getElementById('reservationDetails') ;
@@ -820,7 +819,6 @@ function displayAgendaItemDetails(id) {
 
 // Called when mouse is leaving an existing reservation
 function clearBookingDetails() {
-	console.log("clearBookingDetails()") ;
 	if (! isToday()) { // If today, leave the DIV open for METAR, else display any 'crew/pax wanted' list
 		displayDayMessages() ;
 	} else
@@ -2087,4 +2085,7 @@ function initBooking() {
     var spanDisplayAgenda = document.getElementById('toggleInstructorAgendaSpan') ;
 	planningDate = document.getElementById('planningDate') ;
 	refreshPlanningTable() ;
+	// Swipe to change to next days
+	document.addEventListener('swiped-right', function(e) {bumpPlanningBy(-1); }) ;
+	document.addEventListener('swiped-left', function(e) {bumpPlanningBy(+1);}) ;
 }

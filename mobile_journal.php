@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2023 Eric Vyncke
+   Copyright 2014-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
+$need_swiped_events = true ; // Allow swipe events on this page
 require_once 'mobile_header5.php' ;
 
 if (!($userIsAdmin or $userIsBoardMember))
@@ -97,5 +98,10 @@ $last_id -= 1 ;
 </div> <!-- table responsive -->
 Les heures sont en heures locales.<br/>
 </div><!-- container -->
+<script>
+	// Swipe to change to next webcam
+	document.addEventListener('swiped-right', function(e) {location.href='<?="$_SERVER[PHP_SELF]?start=$last_id"?>' }) ;
+	document.addEventListener('swiped-left', function(e) {location.href='<?="$_SERVER[PHP_SELF]?start=$first_id"?>' }) ;
+</script>
 </body>
 </html>
