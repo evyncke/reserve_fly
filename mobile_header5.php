@@ -77,10 +77,14 @@ if ($christmas_theme) {
 <link rel="stylesheet" href="mobile_christmas.css">
 <?php
 } // $christmas theme
+if (isset($need_swiped_events) and $need_swiped_events) {
 ?>
 <!-- Allow the swipe events on phones & tablets -->
-<!-- TODO should only be loaded when required -->
+<!-- only be loaded when required -->
 <script src="swiped-events.js" defer></script>
+<?php
+} // $need_swiped_events
+?>  
 <script>
 var
 		runwaysQFU = [ <?php print(implode(', ', $runways_qfu)) ; ?> ],

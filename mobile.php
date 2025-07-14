@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2023 Eric Vyncke
+   Copyright 2013-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 */
 
 require_once "dbi.php" ;
+$need_swiped_events = true ;
 require_once 'mobile_header5.php' ;
 
 

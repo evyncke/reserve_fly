@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2023 Eric Vyncke
+   Copyright 2013-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ if ($cam >= count($webcam_uris)) die("Invalid camera ID") ;
 $previous_cam = ($cam-1 < 0) ? count($webcam_uris) - 1 : $cam - 1 ;
 $next_cam = ($cam+1 >= count($webcam_uris)) ? 0 : $cam + 1 ;
 
+$need_swiped_events = true ; // Allow swipe events on this pag
 require_once 'mobile_header5.php' ;
 
 ?> 
