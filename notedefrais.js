@@ -427,9 +427,11 @@ function addRow(theIndex, theDate, theType, theDescription, theQuantity, thePric
     // OdooCode
     var cellOdooCode = row.insertCell(7);
     cellOdooCode.innerHTML = theOdooCode;
-    // OdooAnalytic
+    cellOdooCode.style.display="none";
+   // OdooAnalytic
     var cellOdooAnalytic= row.insertCell(8);
     cellOdooAnalytic.innerHTML = theOdooAnalytic;
+    cellOdooAnalytic.style.display="none";
 }
 
 //==============================================

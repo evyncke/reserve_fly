@@ -56,7 +56,7 @@ if (isset($_REQUEST['delete'])) {
     $flag=false;
     if(file_exists($deleteFile)) {
         //print("1unlink($deleteFile)<br>");
-        unlink($deleteFile);
+         unlink($deleteFile);
         journalise($userId, "I", "Suppression d'un fichier note de frais $_REQUEST[delete]==$deleteFile");
         $flag=true;
      }
@@ -64,9 +64,16 @@ if (isset($_REQUEST['delete'])) {
     foreach($files as $file) {
         if(substr($file,0,strlen($deleteAttachedFile))==$deleteAttachedFile){
             //print("2unlink($uploadNoteDeFraisFolder/$file)<br>");
-            unlink($uploadNoteDeFraisFolder."/".$file);
-            journalise($userId, "I", "Suppression d'un fichier note de frais $uploadNoteDeFraisFolder/$file");
-            $flag=true;
+            $extension=strtolower(pathinfo($uploadNoteDeFraisFolder."/".$file)["extension"]);
+            if($extension!="pdf"&&$extension!="png"&&$extension!="jpg"&&$extension!="jpeg") {
+                print("<div class=\"text-bg-danger\">Erreur lors de la suppression des fichiers associés à une note de frais: extension non valide $extension</div>");
+                journalise($userId, "E", "Erreur lors de la suppression des fichiers associés à une note de frais: extension non valide $extension");
+            }  
+            else { 
+                unlink($uploadNoteDeFraisFolder."/".$file);
+                journalise($userId, "I", "Suppression d'un fichier note de frais $uploadNoteDeFraisFolder/$file");
+                $flag=true;
+            }
         }
     }
     if($flag) {
@@ -140,8 +147,8 @@ Bénéficiaire:
 <th>Quantité</th>
 <th>Prix unitaire €</th>
 <th>Montant €</th>
-<th>Imputation</th>
-<th>Analytique</th>
+<th style="visibility: collapse">Imputation</th>
+<th style="visibility: collapse">Analytique</th>
 </thead>
 <tbody class="table-group-divider">
 <tr id="id_notedefrais_rowinput">
@@ -154,15 +161,15 @@ Bénéficiaire:
     </select></td>
     <td><input type="text" id="id_notedefrais_input_description" name="notedefrais_input_description" ></input></td>
     <td><input type="number" id="id_notedefrais_input_quantity" name="notedefrais_input_quantity" min="0.0" 
-        max="5000.0" step="1.0"></input></td>
+        max="5000.00" step="1.0"></input></td>
     <td><input type="number" id="id_notedefrais_input_unitaryprice" name="notedefrais_input_unitaryprice" min="0.00" 
-        max="5000.00" step="1.00"></input></td>
+        max="5000.00" step="0.01"></input></td>
     <td><input type="number" id="id_notedefrais_input_total" name="notedefrais_input_total"></input></td>
-    <td><input type="text" id="id_notedefrais_input_odooreference" name="notedefrais_input_odooreference"></input></td>
-    <td><input type="text" id="id_notedefrais_input_odooanalytic" name="notedefrais_input_odooanalytic"></input></td>
+    <td style="visibility: collapse"><input type="text" id="id_notedefrais_input_odooreference" name="notedefrais_input_odooreference"></input></td>
+    <td style="visibility: collapse"><input type="text" id="id_notedefrais_input_odooanalytic" name="notedefrais_input_odooanalytic"></input></td>
     </tr>
 <tr><td></td>
-<td colspan="3"><a role="button" href="#" name="add_row" id="id_add_row">Ajouter une ligne</a><td></td><td>Montant Total:</td><td><span id="id_notedefrais_input_grandtotal">0.00€</span></td><td></td><td></td></tr>
+<td colspan="3"><a role="button" href="#" name="add_row" id="id_add_row">Ajouter une ligne</a><td></td><td>Montant Total:</td><td><span id="id_notedefrais_input_grandtotal">0.00€</span></td><td style="visibility: collapse"></td><td style="visibility: collapse"></td></tr>
 </tbody>
 </table>
 </div><!-- table responsive -->
