@@ -161,7 +161,7 @@ Bénéficiaire:
     </select></td>
     <td><input type="text" id="id_notedefrais_input_description" name="notedefrais_input_description" ></input></td>
     <td><input type="number" id="id_notedefrais_input_quantity" name="notedefrais_input_quantity" min="0.0" 
-        max="5000.00" step="1.0"></input></td>
+        max="5000.00" step="0.01"></input></td>
     <td><input type="number" id="id_notedefrais_input_unitaryprice" name="notedefrais_input_unitaryprice" min="0.00" 
         max="5000.00" step="0.01"></input></td>
     <td><input type="number" id="id_notedefrais_input_total" name="notedefrais_input_total"></input></td>

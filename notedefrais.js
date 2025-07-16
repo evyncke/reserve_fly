@@ -101,6 +101,16 @@ function updateSubmitButton()
     if(nodedefrais_size==0) {
         return;
     }
+    
+   // Check if Non Remboursable if carburant
+    var remboursable=document.getElementById("id_notedefrais_input_remboursable").value;
+    for(var i=0;i<nodedefrais_size;i++) {
+        if(notedefrais_type[i]=="carburant" && remboursable==1) {
+            alert("Pour une note de frais carburant, le type de note de frais remboursement être \"Remboursable sur le compte pilote\"");
+            return;
+        }
+    }
+
     if(document.getElementById("id_notedefrais_input_justificatif").value=="") {
         // Check if type = TKI => pas besoin de fiches justificatives
         for(var i=0;i<nodedefrais_size;i++){
@@ -109,6 +119,7 @@ function updateSubmitButton()
             }
         }
     }
+ 
     document.getElementById("id_submit_notedefrais").disabled=false;
 }
 //==============================================
