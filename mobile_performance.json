@@ -2,6 +2,11 @@
     "performance": {
         "OO-ALD": {
             "takeoff": {
+                "inputs": 
+                {
+                   "weight": { "value": 1600, "unit":"lb", "unittype":"mass", "readonly": 1}, 
+                   "flaps": { "value": 0, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                },
                 "IAS_roll":
                 {
                     "value": {"function_type": "constant", "values": [64], "units": ["MPH"], "unittypes":"speed"},
@@ -42,14 +47,18 @@
                         1600, 10, 5000,  505,
                         1600, 10, 7500,  640]
                         },
-                    "runwaytype__coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
-                    "temperature_coefficiant": {"function_type": "linear", "xvalues": [0, 35], 
-                           "values": [1.0, 1.1],  
-                           "columns": ["temperature_delta_isa","value"], 
-                           "units":[ "F", "none"],
-                           "unittypes":[ "temperature_delta", "unitless"]
-                        },
-                    "pilotskill__coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]},
+                    "coefficiant" : 
+                    {
+                        "aircraft__coefficiant":{"function_type": "constant", "values": [1.0], "units": [""], "unittypes":"unitless"},
+                        "runwaytype__coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
+                        "temperature_coefficiant": {"function_type": "linear", "xvalues": [0, 35], 
+                            "values": [1.0, 1.1],  
+                            "columns": ["temperature_delta_isa","value"], 
+                            "units":[ "F", "none"],
+                            "unittypes":[ "temperature_delta", "unitless"]
+                            },
+                        "pilotskill__coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                    },
                     "unitdisplay":"m"
                 },
                 "distance_50ft":
@@ -70,19 +79,71 @@
                         1600, 10, 2500,  890,
                         1600, 10, 5000, 1090,
                         1600, 10, 7500, 1375]},
-                    "runwaytype__coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
-                    "temperature_coefficiant": {"function_type": "linear", 
-                           "xvalues": [0, 35], 
-                           "values": [1.0, 1.1],  
-                           "columns": ["temperature_delta_isa","value"], 
-                           "units":[ "F", "none"],
-                           "unittypes":[ "temperature_delta", "unitless"]
-                        },
-                    "pilotskill__coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]},
+                    "coefficiant" : 
+                    {
+                        "aircraft__coefficiant":{"function_type": "constant", "values": [1.0], "units": [""], "unittypes":"unitless"},
+                        "runwaytype__coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
+                        "temperature_coefficiant": {"function_type": "linear", 
+                            "xvalues": [0, 35], 
+                            "values": [1.0, 1.1],  
+                            "columns": ["temperature_delta_isa","value"], 
+                            "units":[ "F", "none"],
+                            "unittypes":[ "temperature_delta", "unitless"]
+                            },
+                        "pilotskill__coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                    },
                     "unitdisplay":"m"
+                },
+                "Max_ROC": 
+                {
+                    "value": {"function_type": "table",
+                        "columns": [ "weight", "density_altitude", "value"],
+                        "units" : [ "lb", "ft","ft/min"],
+                        "values": [
+                        1600,    0,  580,
+                        1600, 5000,  370,
+                        1600,10000,  160]
+                        },
+                    "additional" : 
+                    {
+                        "temperature_additional": {"function_type": "linear", 
+                            "xvalues": [0, 10], 
+                            "values": [0.0, -10.0],  
+                            "columns": ["temperature_delta_isa","value"], 
+                            "units":[ "F", "none"],
+                            "unittypes":[ "temperature_delta", "speed"]
+                        }
+                    },
+                    "unitdisplay":"ft/min"
+                },
+                "IAS_Max_ROC": 
+                {
+                    "value": {"function_type": "table",
+                        "columns": [ "density_altitude", "value"],
+                        "units" : [ "ft","MPH"],
+                        "values": [
+                            0,  72,
+                         5000,  69,
+                        10000,  66]
+                        },
+                  "unitdisplay":"MPH"
                 }
             },
             "landing": {}
-         }
+         },
+         "OO-JRB": 
+         { 
+            "takeoff" : { "IAS_roll":
+                {
+                    "value": {"function_type": "constant", "values": [10], "units": ["MPH"], "unittypes":"speed"},
+                    "unitdisplay":"MPH"
+                }},
+            "landing" :{}
+        },
+         "OO-FMX": 
+         { 
+            "takeoff" : {},
+            "landing" :{}
+        }
     }
 }

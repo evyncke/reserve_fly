@@ -39,12 +39,26 @@ function mobile_performance_page_loaded() {
     document.getElementById("id_takeoff_i_flaps").onchange = function() {
         flapsChanged();
     };
- 
+    document.getElementById("id_plane_select").onchange = function() {
+        planeChanged();
+    };
+    
     //document.getElementById("id_notedefrais_rowinput").style.display="none";
     //document.getElementById("id_submit_notedefrais").disabled=true;
     updateAll();
+    setToolTip();
 }
 
+//==============================================
+// Function: planeChanged
+// Purpose: 
+//==============================================
+function planeChanged()
+{
+    var plane=document.getElementById("id_plane_select").value;
+    performance_plane_takeoffJSON=performanceJSON.performance[plane].takeoff;
+    updateAll();
+}
 //==============================================
 // Function: QNHChanged
 // Purpose: 
@@ -136,6 +150,8 @@ function updateAll()
     updateIAS50ft();
     updateDistance50ft();
     updateIASBestAngle();
+    updateMaxRoC();
+    updateTakeoffDisplay();
 }
 //==============================================
 // Function: updateTemperature
@@ -149,8 +165,8 @@ function updateTemperature()
     var temperatureDeltaISA=temperature - temperatureISA
     takeoffOutputs["temperature_isa"]=temperatureISA;
     takeoffOutputs["temperature_delta_isa"]=temperatureDeltaISA;
-    document.getElementById("id_takeoff_o_temperature_isa").value=temperatureISA.toFixed(0);
-    document.getElementById("id_takeoff_o_temperature_delta_isa").value=temperatureDeltaISA.toFixed(0);
+    document.getElementById("id_takeoff_o_temperature_isa").innerHTML=temperatureISA.toFixed(0);
+    document.getElementById("id_takeoff_o_temperature_delta_isa").innerHTML=temperatureDeltaISA.toFixed(0);
 }
 //==============================================
 // Function: updatePressureAltitude
@@ -162,7 +178,8 @@ function updatePressureAltitude()
     var altitude=takeoffInputs["altitude"];
     var altitudePressure=computePressureAltitude(altitude, qnh);
     takeoffOutputs["pressure_altitude"]=altitudePressure;
-    document.getElementById("id_takeoff_o_pressure_altitude").value=altitudePressure.toFixed(0);
+    //document.getElementById("id_takeoff_o_pressure_altitude").value=altitudePressure.toFixed(0);
+    document.getElementById("id_takeoff_o_pressure_altitude").innerHTML=altitudePressure.toFixed(0);
 }
 
 //==============================================
@@ -177,7 +194,7 @@ function updateDensityAltitude()
     var altitudeDensity=computeDensityAltitude(altitude, qnh, temperature);
     takeoffOutputs["density_altitude"]=altitudeDensity;
  
-    document.getElementById("id_takeoff_o_density_altitude").value=altitudeDensity.toFixed(0);
+    document.getElementById("id_takeoff_o_density_altitude").innerHTML=altitudeDensity.toFixed(0);
 }
 //==============================================
 // Function: updateWind
@@ -193,8 +210,8 @@ function updateWind()
     var windCrossSpeed=computeWindCrossSpeed(runway_direction, wind_speed, windDirection);
     takeoffOutputs["head_wind_speed"]=windHeadSpeed;
     takeoffOutputs["cross_wind_speed"]=windCrossSpeed;
-    document.getElementById("id_takeoff_o_head_wind_speed").value=windHeadSpeed.toFixed(0);
-    document.getElementById("id_takeoff_o_cross_wind_speed").value=windCrossSpeed.toFixed(0);
+    document.getElementById("id_takeoff_o_head_wind_speed").innerHTML=windHeadSpeed.toFixed(0);
+    document.getElementById("id_takeoff_o_cross_wind_speed").innerHTML=windCrossSpeed.toFixed(0);
 }
 //==============================================
 // Function: updateIASRoll
@@ -204,7 +221,7 @@ function updateIASRoll()
 {
     var rollSpeed=computeIASRoll(takeoffInputs);
     takeoffOutputs["ias_roll"]=rollSpeed;
-    document.getElementById("id_takeoff_o_ias_roll").value=rollSpeed.toFixed(0);   
+    document.getElementById("id_takeoff_o_ias_roll").innerHTML=rollSpeed.toFixed(0);   
 }
 //==============================================
 // Function: updateDistanceRoll
@@ -214,7 +231,7 @@ function updateDistanceRoll()
 {
     var rollDistance=computeDistanceRoll(takeoffInputs, takeoffOutputs);
     takeoffOutputs["distance_roll"]=rollDistance;
-    document.getElementById("id_takeoff_o_distance_roll").value=convertUnit(rollDistance,"length","ft","m").toFixed(0);   
+    document.getElementById("id_takeoff_o_distance_roll").innerHTML=convertUnit(rollDistance,"length","ft","m").toFixed(0);   
 }
 //==============================================
 // Function: updateIAS50ft
@@ -224,7 +241,7 @@ function updateIAS50ft()
 {
     var ias50ftSpeed=computeIAS50ft(takeoffInputs);
     takeoffOutputs["ias_50ft"]=ias50ftSpeed;
-    document.getElementById("id_takeoff_o_ias_50ft").value=ias50ftSpeed.toFixed(0);   
+    document.getElementById("id_takeoff_o_ias_50ft").innerHTML=ias50ftSpeed.toFixed(0);   
 }
 //==============================================
 // Function: updateDistance50ft
@@ -233,8 +250,8 @@ function updateIAS50ft()
 function updateDistance50ft()
 {
     var distance50ft=computeDistance50ft(takeoffInputs, takeoffOutputs);
-    takeoffOutputs["distance_roll"]=distance50ft;
-    document.getElementById("id_takeoff_o_distance_50ft").value=convertUnit(distance50ft,"length","ft","m").toFixed(0);   
+    takeoffOutputs["distance_50ft"]=distance50ft;
+    document.getElementById("id_takeoff_o_distance_50ft").innerHTML=convertUnit(distance50ft,"length","ft","m").toFixed(0);   
 }
 
 //==============================================
@@ -253,7 +270,225 @@ function updateIASBestAngle()
 {
     var speed=computeIASBestAngle(takeoffInputs, takeoffOutputs);
     takeoffOutputs["ias_best_angle"]=speed;
-    document.getElementById("id_takeoff_o_ias_best_angle").value=speed.toFixed(0);   
+    document.getElementById("id_takeoff_o_ias_best_angle").innerHTML=speed.toFixed(0);   
+}
+//==============================================
+// Function: updateMaxRoC
+// Purpose:  use foncion IASRoll
+//==============================================
+function updateMaxRoC()
+{
+    var speed=computeMaxRoC(takeoffInputs, takeoffOutputs);
+    takeoffOutputs["max_roc"]=speed;
+    document.getElementById("id_takeoff_o_max_roc").innerHTML=speed.toFixed(0);   
+    speed=computeIASMaxRoC(takeoffInputs, takeoffOutputs);
+    takeoffOutputs["ias_max_roc"]=speed;
+    document.getElementById("id_takeoff_o_ias_max_roc").innerHTML=speed.toFixed(0);   
+}
+//==============================================
+// Function: updateTakeoffDisplay
+// Purpose:  update the display
+//==============================================
+function updateTakeoffDisplay()
+{
+    var canvas = document.getElementById("id_takeoff_o_canvas");
+    var ctx = canvas.getContext("2d");
+    var canvasWidth=canvas.width;
+    var canvasHeight=canvas.height;
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+ // RunwayLength=799m
+    var runwayLength=799.0;
+    var runwayWidth=50.0;
+    var runwayInclinaison=25.0;
+    var treeDistance=1500.;// 1700 m
+    var treeHeight=100.0; // 60 ft
+    var xInfo=10.; // Where to put additional info
+    var yInfo=0.0;
+    var xSpeedInfo=xBegin;
+
+// Tree 23: 1700m
+// Tree 05: 1130m
+    var sizeX=1800.0;//m
+    var sizeY=500.0; //ft
+    var scaleX=canvasWidth/sizeX; //Pixel by m
+    var scaleY=canvasHeight/sizeY; //Pixel by ft
+    ctx.setLineDash([]);
+    var yFont=15.0;
+    ctx.font = "15px Arial";
+    var xBegin=30.0;
+    var yBegin=50.0;
+    var xSpeedInfo=xBegin;
+    var ySpeedInfo=canvasHeight-yFont/2.0;
+
+    var yTree=treeHeight*scaleY;
+    //Draw runway
+    var xRunway=xBegin;
+    var yRunway=canvasHeight-yBegin;
+    var x2=xRunway+runwayLength*scaleX;
+    var y2=yRunway;
+    var x3=x2 + runwayInclinaison;
+    var y3=yRunway-runwayWidth*scaleY;
+    var x4=xRunway + runwayInclinaison;
+    var y4=y3;
+    var x1CenterLine=xRunway+runwayInclinaison/2.0;
+    var y1CenterLine=yRunway-runwayWidth*scaleY/2.0;
+    var x2CenterLine=x2+runwayInclinaison/2.0;
+    var y2CenterLine=y2-runwayWidth*scaleY/2.0;
+    var centerLineDashLength=50.0*scaleX;// 50m
+    var xTree=x1CenterLine+treeDistance*scaleX;
+    ctx.beginPath();
+    ctx.fillStyle = "LightGrey";
+    ctx.moveTo(xRunway,yRunway);
+    ctx.lineTo(x2,y2);
+    ctx.lineTo(x3,y3);
+    ctx.lineTo(x4,y4);
+    ctx.lineTo(xRunway,yRunway);
+    ctx.fill();
+    //ctx.stroke();
+    ctx.beginPath();
+    ctx.setLineDash([centerLineDashLength, centerLineDashLength]);
+    ctx.moveTo(x1CenterLine,y1CenterLine);
+    ctx.lineTo(x2CenterLine,y2CenterLine);
+    ctx.stroke();
+
+
+    // Roll Distance 
+    // 50ft Distance
+    var rollDistance=convertUnit(takeoffOutputs["distance_roll"],"length","ft","m");
+    var distance50ft=convertUnit(takeoffOutputs["distance_50ft"],"length","ft","m");
+    var xRollDistance=rollDistance*scaleX;
+    var x50ftDistance=distance50ft*scaleX;
+    var y50ftDistance=50.0*scaleY;
+    ctx.beginPath();
+    ctx.setLineDash([]);
+    ctx.moveTo(x1CenterLine+x50ftDistance,y2CenterLine);
+    ctx.lineTo(x1CenterLine+x50ftDistance,y2CenterLine-y50ftDistance);
+    ctx.lineTo(x1CenterLine+xRollDistance,y2CenterLine);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+    ctx.fillStyle = "red";
+
+    ctx.fillText(rollDistance.toFixed(0)+"m",x1CenterLine+xRollDistance/2.0,y2CenterLine+20-2);
+    //ctx.fillText("Roll "+iasRoll+"MPH",x1CenterLine+xRollDistance,y2CenterLine-2);
+    drawArrow(ctx,x1CenterLine,y2CenterLine+20,x1CenterLine+xRollDistance,y2CenterLine+20,1,"red");
+ 
+    ctx.fillStyle = "green";
+    ctx.fillText(distance50ft.toFixed(0)+"m",x1CenterLine+x50ftDistance/2.0,y2CenterLine-y50ftDistance-10-2);
+    ctx.fillText("50ft",x1CenterLine+x50ftDistance,y2CenterLine-2);
+    drawArrow(ctx,x1CenterLine,y2CenterLine-y50ftDistance-12,x1CenterLine+x50ftDistance,y2CenterLine-y50ftDistance-12,1,"green");
+
+    // Draw Tree
+    const image = new Image(); // Create new img element
+    image.onload = () => {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(image, xTree-yTree/2.0, y2CenterLine-yTree,yTree,yTree);
+    };
+    image.src = "images/mobile_performance_sapin.png"; // Set source path
+
+    // Display main info
+    ctx.fillStyle = "black";
+    var density_altitude=convertUnit(takeoffOutputs["density_altitude"],"pressure","hPa","hPa");
+    var head_wind_speed=convertUnit(takeoffOutputs["head_wind_speed"],"speed","kt","kt");
+    var ias_roll=convertUnit(takeoffOutputs["ias_roll"],"speed","MPH","MPH");
+    var ias_50ft=convertUnit(takeoffOutputs["ias_50ft"],"speed","MPH","MPH");
+    var ias_best_angle=convertUnit(takeoffOutputs["ias_best_angle"],"speed","MPH","MPH");
+    var max_roc=convertUnit(takeoffOutputs["max_roc"],"speed","ft/min","ft/min");
+    var ias_max_roc= convertUnit(takeoffOutputs["ias_max_roc"],"speed","MPH","MPH");
+ 
+    // Height over tree (ft)= 50ft + MaxRoc*time(min)= MaxROC (ft/min)* distanceToTree/speed (ft/min)
+    // Height = 50ft +MaxRoc+ (DistanceTree(m)-Distance50ft(m))*3.281/(Speed MPH * 5279.987/60.0)
+    var heightOverTree= 50.0+max_roc*convertUnit(treeDistance-distance50ft,"length","m","ft")/convertUnit(ias_max_roc,"speed","MPH","ft/min");
+
+    // Additional info
+    var yInfo=5;
+    yInfo+=yFont;
+    ctx.fillText("Density Altitude:"+density_altitude.toFixed(0)+"hPa",xInfo,yInfo);
+    yInfo+=yFont;
+    ctx.fillText("Max RoC:"+max_roc.toFixed(0)+"ft/min",xInfo,yInfo);
+ 
+    //Speed
+    var text="IAS: Roll="+ias_roll.toFixed(0)+"MPH";
+    ctx.fillText(text,xSpeedInfo,ySpeedInfo);
+    xSpeedInfo+=text.length*yFont*0.6;
+
+    text="50ft="+ias_50ft.toFixed(0)+"MPH";
+    ctx.fillText(text,xSpeedInfo,ySpeedInfo);
+    xSpeedInfo+=text.length*yFont*0.6;
+
+    text="Max RoC="+ias_max_roc.toFixed(0)+"MPH";
+    ctx.fillText(text,xSpeedInfo,ySpeedInfo);
+    xSpeedInfo+=text.length*yFont*0.6+10.0;
+
+    text="Best Angle RoC="+ias_best_angle.toFixed(0)+"MPH";
+    ctx.fillText(text,xSpeedInfo,ySpeedInfo);
+    xSpeedInfo+=text.length*yFont*0.6;
+    
+    // Display from 50ft to Tree
+    ctx.beginPath();
+    ctx.setLineDash([]);
+    ctx.moveTo(x1CenterLine+x50ftDistance,y2CenterLine-y50ftDistance);
+    ctx.lineTo(xTree,y2CenterLine-heightOverTree*scaleY);
+    ctx.lineTo(xTree,y2CenterLine-yTree);
+    ctx.stroke();
+    ctx.fillText(heightOverTree.toFixed(0)+"ft",xTree-4.0*yFont*0.6,y2CenterLine-yTree-20.0);
+ 
+
+}
+//==============================================
+// Function: updateMaxRoC
+// Purpose:  use foncion IASRoll
+//==============================================
+
+function drawArrow(ctx, fromx, fromy, tox, toy, arrowWidth, color)
+{
+    //variables to be used when creating the arrow
+    var headlen = 10;
+    var angle = Math.atan2(toy-fromy,tox-fromx);
+ 
+    ctx.save();
+    ctx.strokeStyle = color;
+ 
+    //starting path of the arrow from the start square to the end square
+    //and drawing the stroke
+    ctx.beginPath();
+    ctx.moveTo(fromx, fromy);
+    ctx.lineTo(tox, toy);
+    ctx.lineWidth = arrowWidth;
+    ctx.stroke();
+ 
+    //starting a new path from the head of the arrow to one of the sides of
+    //the point
+    ctx.beginPath();
+    ctx.moveTo(fromx, toy);
+    ctx.lineTo(fromx+headlen*Math.cos(angle-Math.PI/7),
+               fromy+headlen*Math.sin(angle-Math.PI/7));
+    ctx.stroke();
+    ctx.fillStyle = color;
+    //path from the side point of the arrow, to the other side point
+    ctx.lineTo(fromx+headlen*Math.cos(angle+Math.PI/7),
+               fromy+headlen*Math.sin(angle+Math.PI/7));
+    ctx.fill();
+    //path from the side point back to the tip of the arrow, and then
+    //again to the opposite side point
+    ctx.beginPath();
+    ctx.lineTo(tox, toy);
+    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),
+               toy-headlen*Math.sin(angle-Math.PI/7));
+ 
+    //path from the other side point of the arrow, to the other side point
+    ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/7),
+               toy-headlen*Math.sin(angle+Math.PI/7));
+ 
+    //path from the side point back to the tip of the arrow, and then
+    //again to the opposite side point
+    ctx.lineTo(tox, toy);
+    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),
+               toy-headlen*Math.sin(angle-Math.PI/7));
+ 
+    //draws the paths created above
+    ctx.fill();
+    ctx.restore();
 }
 //==============================================
 // Function: convertUnit
@@ -273,12 +508,33 @@ function convertUnit(value, unitType, unitInput, unitOutput)
             return value*3.28084;
         }
     }
-    else if(unitType=="temperature_delta") {
+    else if(unitType=="speed") {
+        if(unitInput=="MPH" && unitOutput=="ft/min") {
+            return value*5279.98687656/60.0;
+        }
+    }
+   else if(unitType=="temperature") {
+        if(unitInput=="C" && unitOutput=="F") {
+            return value*9.0/5.0+32.0;
+        }
+        if(unitInput=="F" && unitOutput=="C") {
+            return value*5./9.-32.0;
+        }
+    }
+   else if(unitType=="temperature_delta") {
         if(unitInput=="C" && unitOutput=="F") {
             return value*9.0/5.0;
         }
         if(unitInput=="F" && unitOutput=="C") {
             return value*5./9.;
+        }
+    }
+    else if(unitType=="mass") {
+        if(unitInput=="lb" && unitOutput=="kg") {
+            return value*0.453592;
+        }
+        if(unitInput=="kg" && unitOutput=="lb") {
+            return value*2.20462;
         }
     }
     else {
@@ -337,6 +593,9 @@ function computeWindCrossSpeed(runway_direction, wind_speed, windDirection) {
 //==============================================
 function computeIASRoll(theTakeoffInputs, theTakeoffOutputs)
 {
+    if(!performance_plane_takeoffJSON.hasOwnProperty("IAS_roll")) {
+        return 0.0;
+    }
     var iasrollFct=performance_plane_takeoffJSON.IAS_roll;
     return computeValue(iasrollFct, theTakeoffInputs, theTakeoffOutputs);
 }
@@ -347,6 +606,9 @@ function computeIASRoll(theTakeoffInputs, theTakeoffOutputs)
 //==============================================
 function computeDistanceRoll(theTakeoffInputs, theTakeoffOutputs)
 {
+    if(!performance_plane_takeoffJSON.hasOwnProperty("distance_roll")) {
+        return 0.0;
+    }
     var distanceRollFct=performance_plane_takeoffJSON.distance_roll;
     return computeValue(distanceRollFct, theTakeoffInputs, theTakeoffOutputs);
 }
@@ -357,6 +619,9 @@ function computeDistanceRoll(theTakeoffInputs, theTakeoffOutputs)
 //==============================================
 function computeIAS50ft(theTakeoffInputs, theTakeoffOutputs)
 {
+    if(!performance_plane_takeoffJSON.hasOwnProperty("IAS_50ft")) {
+        return 0.0;
+    }
     var ias50ftFct=performance_plane_takeoffJSON.IAS_50ft;
     return computeValue(ias50ftFct, theTakeoffInputs, theTakeoffOutputs);
 }
@@ -367,16 +632,49 @@ function computeIAS50ft(theTakeoffInputs, theTakeoffOutputs)
 //==============================================
 function computeDistance50ft(theTakeoffInputs, theTakeoffOutputs)
 {
+    if(!performance_plane_takeoffJSON.hasOwnProperty("distance_50ft")) {
+        return 0.0;
+    }
     var distance50ftFct=performance_plane_takeoffJSON.distance_50ft;
     return computeValue(distance50ftFct, theTakeoffInputs, theTakeoffOutputs);
 }
+
 //==============================================
 // Function: computeIASBestAngle
 // Purpose: Compute Best Angle IAS from JSON Info ("Performance/plane/takeoff/IAS_best_angle")
 //==============================================
 function computeIASBestAngle(theTakeoffInputs, theTakeoffOutputs)
 {
+    if(!performance_plane_takeoffJSON.hasOwnProperty("IAS_best_angle")) {
+        return 0.0;
+    }
     var iasFct=performance_plane_takeoffJSON.IAS_best_angle;
+    return computeValue(iasFct, theTakeoffInputs, theTakeoffOutputs);
+}
+
+//==============================================
+// Function: computeIASMaxRoC
+// Purpose: Compute Max RoC IAS from JSON Info ("Performance/plane/takeoff/IAS_Max_ROC")
+//==============================================
+function computeIASMaxRoC(theTakeoffInputs, theTakeoffOutputs)
+{
+    if(!performance_plane_takeoffJSON.hasOwnProperty("IAS_Max_ROC")) {
+        return 0.0;
+    }
+    var iasFct=performance_plane_takeoffJSON.IAS_Max_ROC
+    return computeValue(iasFct, theTakeoffInputs, theTakeoffOutputs);
+}
+
+//==============================================
+// Function: computeMaxRoC
+// Purpose: Compute max roc from JSON Info ("Performance/plane/takeoff/Max_ROC")
+//==============================================
+function computeMaxRoC(theTakeoffInputs, theTakeoffOutputs)
+{
+    if(!performance_plane_takeoffJSON.hasOwnProperty("Max_ROC")) {
+        return 0.0;
+    }
+    var iasFct=performance_plane_takeoffJSON.Max_ROC
     return computeValue(iasFct, theTakeoffInputs, theTakeoffOutputs);
 }
 
@@ -389,17 +687,17 @@ function computeValue(theFeature, theTakeoffInputs, theTakeoffOutputs)
     var aValueFct=theFeature.value;
     var value=0.0;
     value=computeFunction(aValueFct,theTakeoffInputs, theTakeoffOutputs);
-    if(theFeature.hasOwnProperty("runwaytype__coefficiant")) {
-        var aRunwayTypeFct=theFeature.runwaytype__coefficiant;
-        value*=computeFunction(aRunwayTypeFct, theTakeoffInputs, theTakeoffOutputs);
+    if(theFeature.hasOwnProperty("coefficiant")) {
+        var coefficiants=theFeature.coefficiant;
+        for (const [key, fct] of Object.entries(coefficiants)) {
+            value*=computeFunction(fct, theTakeoffInputs, theTakeoffOutputs);
+        }
     }
-    if(theFeature.hasOwnProperty("pilotskill__coefficiant")) {
-        var aPilotSkillFct=theFeature.pilotskill__coefficiant;
-        value*=computeFunction(aPilotSkillFct, theTakeoffInputs, theTakeoffOutputs);
-    }
-    if(theFeature.hasOwnProperty("temperature_coefficiant")) {
-        var aTemperatureFct=theFeature.temperature_coefficiant;
-        value*=computeFunction(aTemperatureFct, theTakeoffInputs, theTakeoffOutputs);
+    if(theFeature.hasOwnProperty("additional")) {
+        var additional=theFeature.additional;
+        for (const [key, fct] of Object.entries(additional)) {
+            value+=computeFunction(fct, theTakeoffInputs, theTakeoffOutputs);
+        }
     }
     return value;
 }
@@ -471,13 +769,6 @@ function computeEnumerationFunction(theFunction, theTakeoffInputs, theTakeoffOut
 //==============================================
 function computeLinearFunction(theFunction, theTakeoffInputs, theTakeoffOutputs)
 {
-    /*
-    {"function_type": "linear", "xvalue": [0, 35], 
-                           "values": [0, 1.1],  
-                           "columns": ["temperature_delta_isa","value"], 
-                           "units":[ "delta_F", "none"],
-                           "unit_types":[ "delta_temperature", "unitless"]}
-    */
     var x_name=theFunction.columns[0];
     var xValue=0;
     var xUnit="";
@@ -718,7 +1009,31 @@ function interpolateMapTable(columnIndex, columnInputValues, columnMap)
     }
     return value;
 }
- 
+
+//==============================================
+// Function: setToolTip
+// Purpose: Set the tooltip associated to an output
+//==============================================
+function setToolTip()
+ {
+    // loop on all outputs
+    for (var key in takeoffOutputs) {
+        if(key.search("/")==-1) {
+            var tooltip=takeoffOutputs[key+"/tooltip"];
+            if(tooltip!="") {
+                if(tooltip.search("JSON/")==0) {
+                    tooltip=tooltip.substring(5);
+                    tooltipJSON=performance_plane_takeoffJSON[tooltip];    
+                    tooltip=JSON.stringify(tooltipJSON);
+                    tooltip=tooltip.replace("},", "},<br>");
+                    tooltip=tooltip.replace(":{", ":<br>{");
+                }
+                document.getElementById("id_takeoff_o_"+key+"/tooltip").innerHTML=tooltip;
+            }
+        }
+    }   
+ }
+
 //==============================================
 // Function: updateDisplayTakeoffOuputs
 // Purpose: update the display of take-off outputs
@@ -729,10 +1044,14 @@ function updateDisplayTakeoffOuputs() {
     for (var key in takeoffOutputs) {
         if(key.search("/")==-1) {
             var value=takeoffOutputs[key];
-            document.getElementById("id_takeoff_o_"+key).value=value.toFixed(0);
+            //document.getElementById("id_takeoff_o_"+key).value=value.toFixed(0);
+            document.getElementById("id_takeoff_o_"+key).innerHTML=convertUnit(value,
+                    takeoffOutputs[key+"/unittype"],
+                    takeoffOutputs[key+"/unit"],
+                    takeoffOutputs[key+"/displayedunit"]).toFixed(0);  
+            document.getElementById("id_takeoff_o_"+key+"/unit").innerHTML=takeoffOutputs[key+"/displayedunit"]; 
             document.getElementById("id_takeoff_o_"+key).readOnly=true;
             document.getElementById("id_takeoff_o_"+key).style.backgroundColor = ReadOnlyColor;
-
         }
     }
 }
@@ -750,9 +1069,14 @@ function updateDisplayTakeoffInputs() {
             var unitType=takeoffInputs[key+"/unittype"];
             if(unitType=="string") {
                 document.getElementById("id_takeoff_i_"+key).value=value;
+                document.getElementById("id_takeoff_i_"+key+"/unit").innerHTML="";
             }
             else {
-                document.getElementById("id_takeoff_i_"+key).value=value.toFixed(0);               
+                document.getElementById("id_takeoff_i_"+key).value=convertUnit(value,
+                    takeoffInputs[key+"/unittype"],
+                    takeoffInputs[key+"/unit"],
+                    takeoffInputs[key+"/displayedunit"]).toFixed(0);  
+                document.getElementById("id_takeoff_i_"+key+"/unit").innerHTML=takeoffInputs[key+"/displayedunit"];           
             }
          }
     }
@@ -786,25 +1110,31 @@ takeoffInputs["qnh"]=1013;
 takeoffInputs["qnh/unit"]="hPa";
 takeoffInputs["qnh/displayedunit"]="hPa";
 takeoffInputs["qnh/unittype"]="pressure";
-takeoffInputs["altitude"]=3750;
+takeoffInputs["altitude"]=1542;
 takeoffInputs["altitude/unit"]="ft";
 takeoffInputs["altitude/displayedunit"]="ft";
 takeoffInputs["altitude/unittype"]="length";
 takeoffInputs["temperature"]=12;
-takeoffInputs["temperature/unit"]="celsius";
-takeoffInputs["temperature/displayedunit"]="celsius";
+takeoffInputs["temperature/unit"]="C";
+takeoffInputs["temperature/displayedunit"]="C";
 takeoffInputs["temperature/unittype"]="temperature";
 takeoffInputs["runway_number"]=23;
-takeoffInputs["runway_number/unittype"]="none";
+takeoffInputs["runway_number/unittype"]="unitless";
+takeoffInputs["runway_number/unit"]="";
+takeoffInputs["runway_number/displayedunit"]="";
 takeoffInputs["runway_type"]="Asphalt";
 takeoffInputs["runway_type/unittype"]="string";
+takeoffInputs["runway_slope"]=0;
+takeoffInputs["runway_slope/unittype"]="unitless";
+takeoffInputs["runway_slope/unit"]="%";
+takeoffInputs["runway_slope/displayedunit"]="%";
 takeoffInputs["pilot_skill"]="Advanced";
 takeoffInputs["pilot_skill/unittype"]="string";
 takeoffInputs["wind_direction"]=230;
 takeoffInputs["wind_direction/unit"]="degree";
 takeoffInputs["wind_direction/displayedunit"]="degree";
 takeoffInputs["wind_direction/unittype"]="planeangle";
-takeoffInputs["wind_speed"]=7.5;
+takeoffInputs["wind_speed"]=0.0;
 takeoffInputs["wind_speed/unit"]="kt";
 takeoffInputs["wind_speed/displayedunit"]="kt";
 takeoffInputs["wind_speed/unittype"]="speed";
@@ -817,67 +1147,90 @@ takeoffInputs["flaps/unit"]="degree";
 takeoffInputs["flaps/displayedunit"]="degree";
 takeoffInputs["flaps/unittype"]="planeangle";
 
-updateDisplayTakeoffInputs();
-//Init outputs
+//Init outputs 
 var takeoffOutputs=Array();
 takeoffOutputs["temperature_isa"]=0;
 takeoffOutputs["temperature_isa/unit"]="C";
 takeoffOutputs["temperature_isa/displayedunit"]="C";
 takeoffOutputs["temperature_isa/unittype"]="temperature";
+takeoffOutputs["temperature_isa/tooltip"]="Temperature ISA(C)=15.(C) - 2.(C)* Altitude(ft)/1000.(ft)";
 takeoffOutputs["temperature_delta_isa"]=0;
 takeoffOutputs["temperature_delta_isa/unit"]="C";
 takeoffOutputs["temperature_delta_isa/displayedunit"]="C";
 takeoffOutputs["temperature_delta_isa/unittype"]="temperature_delta";
+takeoffOutputs["temperature_delta_isa/tooltip"]="Delta Temperature=Temperature ISA - Temperature";
 takeoffOutputs["pressure_altitude"]=0;
 takeoffOutputs["pressure_altitude/unit"]="hPa";
 takeoffOutputs["pressure_altitude/displayedunit"]="hPa";
 takeoffOutputs["pressure_altitude/unittype"]="pressure";
+takeoffOutputs["pressure_altitude/tooltip"]="Altitude Pression(ft)=Altitude Terrain(ft) + (1013-QNH)*30ft/hPa";
 takeoffOutputs["density_altitude"]=0;
 takeoffOutputs["density_altitude/unit"]="hPa";
 takeoffOutputs["density_altitude/displayedunit"]="hPa";
 takeoffOutputs["density_altitude/unittype"]="pressure";
+takeoffOutputs["density_altitude/tooltip"]="Altitude Densité(ft) : Altitude pression(ft) + 118.8(ft/C) * (T(C) - T ISA(C))";
 takeoffOutputs["head_wind_speed"]=0;
 takeoffOutputs["head_wind_speed/unit"]="kt";
-takeoffOutputs["temperature_isa/displayedunit"]="kt";
+takeoffOutputs["head_wind_speed/displayedunit"]="kt";
 takeoffOutputs["head_wind_speed/unittype"]="speed";
+takeoffOutputs["head_wind_speed/tooltip"]="Head Wind=Wind Speeed*cos(Piste Number- Wind Direction)";
 takeoffOutputs["cross_wind_speed"]=0;
 takeoffOutputs["cross_wind_speed/unit"]="kt";
 takeoffOutputs["cross_wind_speed/displayedunit"]="kt";
 takeoffOutputs["cross_wind_speed/unittype"]="speed";
+takeoffOutputs["cross_wind_speed/tooltip"]="Head Wind=Wind Speeed*sin(Piste Number- Wind Direction)";
 takeoffOutputs["distance_roll"]=0;
 takeoffOutputs["distance_roll/unit"]="m";
 takeoffOutputs["distance_roll/displayedunit"]="m";
 takeoffOutputs["distance_roll/unittype"]="length";
+takeoffOutputs["distance_roll/tooltip"]="JSON/distance_roll";
 takeoffOutputs["distance_50ft"]=0;
 takeoffOutputs["distance_50ft/unit"]="m";
 takeoffOutputs["distance_50ft/displayedunit"]="m";
 takeoffOutputs["distance_50ft/unittype"]="length";
+takeoffOutputs["distance_50ft/tooltip"]="JSON/distance_50ft";
 takeoffOutputs["ias_roll"]=0;
 takeoffOutputs["ias_roll/unit"]="MPH";
 takeoffOutputs["ias_roll/displayedunit"]="MPH";
 takeoffOutputs["ias_roll/unittype"]="speed";
+takeoffOutputs["ias_roll/tooltip"]="JSON/IAS_roll";
 takeoffOutputs["ias_50ft"]=0;
 takeoffOutputs["ias_50ft/unit"]="MPH";
 takeoffOutputs["ias_50ft/displayedunit"]="MPH";
 takeoffOutputs["ias_50ft/unittype"]="speed";
+takeoffOutputs["ias_50ft/tooltip"]="JSON/IAS_50ft";
 takeoffOutputs["ias_best_angle"]=0;
 takeoffOutputs["ias_best_angle/unit"]="MPH";
 takeoffOutputs["ias_best_angle/displayedunit"]="MPH";
 takeoffOutputs["ias_best_angle/unittype"]="speed";
+takeoffOutputs["ias_best_angle/tooltip"]="JSON/IAS_best_angle";
 takeoffOutputs["max_roc"]=0;
 takeoffOutputs["max_roc/unit"]="ft/min";
 takeoffOutputs["max_roc/displayedunit"]="ft/min";
 takeoffOutputs["max_roc/unittype"]="speed";
-
-updateDisplayTakeoffOuputs();
+takeoffOutputs["max_roc/tooltip"]="JSON/Max_ROC";
+takeoffOutputs["ias_max_roc"]=0;
+takeoffOutputs["ias_max_roc/unit"]="MPH";
+takeoffOutputs["ias_max_roc/displayedunit"]="MPH";
+takeoffOutputs["ias_max_roc/unittype"]="speed";
+takeoffOutputs["ias_max_roc/tooltip"]="JSON/IAS_Max_ROC";
 
 // Decode notedefrais json file
 var performanceJSON=JSON.parse(performanceJSONcontent);
-var planes=Array("OO-ALD","OO-JRB");
+var planes=Array();
+for (const key in performanceJSON.performance) {
+    planes.push(key);
+}
 prefillDropdownMenus("id_plane_select", planes, planes[0]);
 var pilotSkills=Array("Student","Normal","Advanced");
 prefillDropdownMenus("id_takeoff_i_pilot_skill", pilotSkills, takeoffInputs["pilot_skill"]);
-var runwayType=Array("Alphast","Grass");
+var runwayType=Array("Asphalt","Grass");
 prefillDropdownMenus("id_takeoff_i_runway_type", runwayType, takeoffInputs["runway_type"]);
-var performance_plane_takeoffJSON=performanceJSON.performance["OO-ALD"].takeoff;
+var performance_plane_takeoffJSON=performanceJSON.performance[planes[0]].takeoff;
+
+updateDisplayTakeoffInputs();
+updateDisplayTakeoffOuputs();
+
+//jQuery("#bookingMessageModal").modal('show') ;
+
 window.onload=mobile_performance_page_loaded();
