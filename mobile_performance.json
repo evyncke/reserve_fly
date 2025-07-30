@@ -49,15 +49,15 @@
                         },
                     "coefficiant" : 
                     {
-                        "aircraft__coefficiant":{"function_type": "constant", "values": [1.0], "units": [""], "unittypes":"unitless"},
-                        "runwaytype__coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
+                        "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                        "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
                         "temperature_coefficiant": {"function_type": "linear", "xvalues": [0, 35], 
                             "values": [1.0, 1.1],  
                             "columns": ["temperature_delta_isa","value"], 
                             "units":[ "F", "none"],
                             "unittypes":[ "temperature_delta", "unitless"]
                             },
-                        "pilotskill__coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
                     },
                     "unitdisplay":"m"
                 },
@@ -81,8 +81,8 @@
                         1600, 10, 7500, 1375]},
                     "coefficiant" : 
                     {
-                        "aircraft__coefficiant":{"function_type": "constant", "values": [1.0], "units": [""], "unittypes":"unitless"},
-                        "runwaytype__coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
+                        "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                        "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
                         "temperature_coefficiant": {"function_type": "linear", 
                             "xvalues": [0, 35], 
                             "values": [1.0, 1.1],  
@@ -90,7 +90,7 @@
                             "units":[ "F", "none"],
                             "unittypes":[ "temperature_delta", "unitless"]
                             },
-                        "pilotskill__coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
                     },
                     "unitdisplay":"m"
                 },
@@ -129,7 +129,19 @@
                   "unitdisplay":"MPH"
                 }
             },
-            "landing": {}
+            "landing": 
+            {
+                "inputs": 
+                {
+                   "weight": { "value": 1600, "unit":"lb", "unittype":"mass", "readonly": 1}, 
+                   "flaps": { "value": 40, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                },
+                "IAS_50ft": 
+                {
+                    "value": {"function_type": "constant", "values": [58], "units": ["MPH"], "unittypes":"speed"},
+                    "unitdisplay":"MPH"
+                }
+            }
          },
          "OO-JRB": 
          { 

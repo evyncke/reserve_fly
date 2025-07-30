@@ -21,15 +21,7 @@ if ($userId == 0) {
 	//header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	//exit ;
 }
-$displayAllColumns=false;
-$hiddenTag="hidden";
-$itemWidth="width=\"50%\"";
 $plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['plane'])) : 'OO-ALD' ;
-$displayAllColumns = (isset($_REQUEST['displayallcolumns'])) ? $_REQUEST['displayallcolumns']: 'false' ;
-if($displayAllColumns=='true') {
-    $hiddenTag="";
-    $itemWidth="width=\"25%\"";
-}
 $body_attributes = "style=\"height: 100%; min-height: 100%; width:100%;\" onload=\"init();\"" ;
 $header_postamble = "
 <script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>
@@ -42,6 +34,7 @@ $performanceJSONcontent = file_get_contents('https://www.spa-aviation.be/resa/mo
 $performanceJSONcontent = str_replace("\n","",$performanceJSONcontent);
 print("<script>\nvar performanceJSONcontent='$performanceJSONcontent';");
 print("var default_member=$userId;\n");
+print("var default_plane=\"$plane\";\n");
 print("</script>\n");
 ?>
 <h2 class="d-none d-md-block">Aircraft Performance</h2>
@@ -70,68 +63,67 @@ if ($plane == '') {
 
 <div id="Take-off" class="tabcontent">
     <div class="container-fluid">
-        <!--div class="container-fluid" style="height: 100%!important;overflow:auto;top:0;bottom:0;left:0;right:0;position:fixed;"-->
-        <!--div class="container-fluid" style="height: 100%!important;"-->
-        <!--div class="container vh-90" style="height: 80vh!important;width: 100vw!important;bottom:0!important;left:0!important;right:0!important;"-->
-
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-lg-6"> <!--- col -->
-                <h2 class="d-none d-md-block">Performance Take-off:  <?=$plane?></h2>
+                <h2 class="d-none d-md-block">Take-off: <span id="id_takeoff_plane">Plane OO-XXX</span></h2>
                 <table class="table table-striped table-hover table-bordered table-condensed w-auto" style="margin-bottom: 0rem;">
                 <thead>
                 <tr><th class="text-end py-0 py-md-1">Input</th>
-                    <th class="py-0 py-md-1 py-md-1" >Value</th>
+                    <th class="py-0 py-md-1 py-md-1">Value</th>
                 </tr>
                 </thead>
                 <tbody class="table-divider">
                 <?php
-                    //$readonly = 'oninput="processPerformance();"' ;
                     $readonly = '' ;
                     //QNH
                     print("<tr><td class=\"text-end py-0 py-md-1\">QNH</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_qnh\" class=\"text-end py-0 py-md-1\" value=\"1013\" style=\"width: 80%;\" $readonly>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_qnh\" class=\"text-end py-0 py-md-1\" value=\"1013\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_qnh/unit\">xx</span></td>") ;
                     //Altitude
                     print("<tr><td class=\"text-end py-0 py-md-1\">Altitude</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_altitude\" class=\"text-end py-0 py-md-1\" value=\"1600\" style=\"width: 80%;\" $readonly>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_altitude\" class=\"text-end py-0 py-md-1\" value=\"1600\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_altitude/unit\">xx</span></td>") ;
                     //Température
                     print("<tr><td class=\"text-end py-0 py-md-1\">Température</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_temperature\" class=\"text-end py-0 py-md-1\" value=\"20\" style=\"width: 80%;\" $readonly>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_temperature\" class=\"text-end py-0 py-md-1\" value=\"20\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_temperature/unit\">xx</span></td>") ;
                     //Piste
                     print("<tr><td class=\"text-end py-0 py-md-1\">Piste</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_runway_number\" class=\"text-end py-0 py-md-1\" value=\"23\" style=\"width: 80%;\" $readonly>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_runway_number\" class=\"text-end py-0 py-md-1\" value=\"23\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_runway_number/unit\">xx</span></td>") ;
                     //Type Piste
                     print("<tr><td class=\"text-end py-0 py-md-1\">Type Piste</td>") ;
-                    print("<td class=\"py-0\"><select id=\"id_takeoff_i_runway_type\"  name=\"takeoff_i_runway_type\" $readonly></select>");
+                    print("<td class=\"py-0\"><select id=\"id_takeoff_i_runway_type\"  name=\"takeoff_i_runway_type\" style=\"width: 60%;\" $readonly></select>");
                     //print("<td class=\"py-0\"><input type=\"text\" id=\"id_takeoff_i_runway_type\" class=\"text-end py-0 py-md-1\" value=\"asphalt\" style=\"width: 80%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_runway_type/unit\">xx</span></td>") ;
                     //Pente Piste
                     print("<tr><td class=\"text-end py-0 py-md-1\">Pente Piste</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_runway_slope\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 80%;\" $readonly>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_runway_slope\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_runway_slope/unit\">xx</span></td>") ;
                     //Direction Vent
                     print("<tr><td class=\"text-end py-0 py-md-1\">Direction vent</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_wind_direction\" class=\"text-end py-0 py-md-1\" value=\"230\" style=\"width: 80%;\" $readonly>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_wind_direction\" class=\"text-end py-0 py-md-1\" value=\"230\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_wind_direction/unit\">xx</span></td>") ;
                     //Vitesse Vent
                     print("<tr><td class=\"text-end py-0 py-md-1\">Vitesse vent</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_wind_speed\" class=\"text-end py-0 py-md-1\" value=\"10\" style=\"width: 80%;\" $readonly>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_wind_speed\" class=\"text-end py-0 py-md-1\" value=\"10\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_wind_speed/unit\">xx</span></td>") ;
                 //Poids
                     print("<tr><td class=\"text-end py-0 py-md-1\">Poids</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_weight\" class=\"text-end py-0 py-md-1\" value=\"720\" style=\"width: 80%;\" $readonly>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_weight\" class=\"text-end py-0 py-md-1\" value=\"720\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_weight/unit\">xx</span></td>") ;
                 //Flaps
                     print("<tr><td class=\"text-end py-0 py-md-1\">Flaps</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_flaps\" class=\"text-end py-0 py-md-1\" value=\"0\" style=\"width: 80%;\" $readonly>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_flaps\" class=\"text-end py-0 py-md-1\" value=\"0\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_flaps/unit\">xx</span></td>") ;
                 //Pilot skill
                     print("<tr><td class=\"text-end py-0 py-md-1\">Pilot Skill</td>") ;
-                    print("<td class=\"py-0\"><select id=\"id_takeoff_i_pilot_skill\"  name=\"id_takeoff_i_pilot_skill\" $readonly></select>");
+                    print("<td class=\"py-0\"><select id=\"id_takeoff_i_pilot_skill\"  name=\"id_takeoff_i_pilot_skill\" style=\"width: 60%;\" $readonly></select>");
                     print("&nbsp;<span id=\"id_takeoff_i_pilot_skill/unit\">xx</span></td>") ;
+                //Aircraft Coefficiant
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Aircraft Coefficiant</td>") ;
+                    print("<td class=\"py-0\"><select id=\"id_takeoff_i_aircraft_coefficiant\"  name=\"id_takeoff_i_aircraft_coefficiant\" style=\"width: 60%;\" $readonly></select>");
+                    print("&nbsp;<span id=\"id_takeoff_i_aircraft_coefficiant/unit\">xx</span></td>") ;
                 ?>
                 </tbody>
                 <tfoot class="table-divider">
@@ -139,19 +131,10 @@ if ($plane == '') {
                     </tr>
                 </tfoot>
                 </table>
-                <span class="d-none d-md-block py-0" >
-                <?php
-                $checkedItem="";
-                if($displayAllColumns=='true') {
-                $checkedItem="checked";
-                }
-                ?>
-                </span>
 
                 <div id="chart_div">
                     <p></p>
                     <canvas id="id_takeoff_o_canvas" width="600" height="150" style="border:1px solid #686868ff;">
-                    <!---<canvas id="id_takeoff_o_canvas" style="width: 60vw; height: 50vw; margin: auto;border:1px solid #000000;">-->
                     </canvas>
                     <p></p>
                 </div>

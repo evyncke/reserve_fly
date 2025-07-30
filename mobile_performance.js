@@ -33,6 +33,9 @@ function mobile_performance_page_loaded() {
     document.getElementById("id_takeoff_i_pilot_skill").onchange = function() {
         pilotSkillChanged();
     };
+    document.getElementById("id_takeoff_i_aircraft_coefficiant").onchange = function() {
+        aircraftCoefficiantChanged();
+    };
     document.getElementById("id_takeoff_i_weight").onchange = function() {
         weightChanged();
     };
@@ -45,7 +48,7 @@ function mobile_performance_page_loaded() {
     
     //document.getElementById("id_notedefrais_rowinput").style.display="none";
     //document.getElementById("id_submit_notedefrais").disabled=true;
-    updateAll();
+    planeChanged();
     setToolTip();
 }
 
@@ -57,6 +60,7 @@ function planeChanged()
 {
     var plane=document.getElementById("id_plane_select").value;
     performance_plane_takeoffJSON=performanceJSON.performance[plane].takeoff;
+    document.getElementById("id_takeoff_plane").innerHTML=plane;
     updateAll();
 }
 //==============================================
@@ -115,6 +119,15 @@ function runwayTypeChanged()
 function pilotSkillChanged()
 {
     takeoffInputs["pilot_skill"]=document.getElementById("id_takeoff_i_pilot_skill").value;
+    updateAll();
+}
+//==============================================
+// Function: pilotSkillChanged
+// Purpose: 
+//==============================================
+function aircraftCoefficiantChanged()
+{
+    takeoffInputs["aircraft_coefficiant"]=document.getElementById("id_takeoff_i_aircraft_coefficiant").value;
     updateAll();
 }
 //==============================================
@@ -432,8 +445,6 @@ function updateTakeoffDisplay()
     ctx.lineTo(xTree,y2CenterLine-yTree);
     ctx.stroke();
     ctx.fillText(heightOverTree.toFixed(0)+"ft",xTree-4.0*yFont*0.6,y2CenterLine-yTree-20.0);
- 
-
 }
 //==============================================
 // Function: updateMaxRoC
@@ -763,6 +774,7 @@ function computeEnumerationFunction(theFunction, theTakeoffInputs, theTakeoffOut
     alert("ERROR:computeEnumerationFunction: unknown enum name "+anEnum+" in the enumerations for "+ field);
     return value;
 }
+
 //==============================================
 // Function: computeLinearFunction
 // Purpose: Compute a value from a linear function
@@ -1061,7 +1073,7 @@ function updateDisplayTakeoffOuputs() {
 // Purpose: update the display of take-off outputs
 //==============================================
 
-function updateDisplayTakeoffInputs() {
+function updateDisplayTakeoffInputs(takeoffInputsDefault) {
     // loop on all outputs
     for (var key in takeoffInputs) {
         if(key.search("/")==-1) {
@@ -1079,6 +1091,28 @@ function updateDisplayTakeoffInputs() {
                 document.getElementById("id_takeoff_i_"+key+"/unit").innerHTML=takeoffInputs[key+"/displayedunit"];           
             }
          }
+    }
+    // Default values in Inputs
+    for (var key in takeoffInputsDefault) {
+        var value=takeoffInputsDefault[key].value;
+        var unit=takeoffInputsDefault[key].unit;
+        var unittype=takeoffInputsDefault[key].unittype;
+        var readonly=takeoffInputsDefault[key].readonly;
+        if(unitType=="string") {
+            document.getElementById("id_takeoff_i_"+key).value=value;
+            document.getElementById("id_takeoff_i_"+key+"/unit").innerHTML="";
+        }
+        else {
+            document.getElementById("id_takeoff_i_"+key).value=convertUnit(value,
+                unittype,
+                unit,
+                takeoffInputs[key+"/displayedunit"]).toFixed(0);  
+            document.getElementById("id_takeoff_i_"+key+"/unit").innerHTML=takeoffInputs[key+"/displayedunit"];           
+        }
+        if(readonly==1) {
+            document.getElementById("id_takeoff_i_"+key).readOnly=true;
+            document.getElementById("id_takeoff_i_"+key).style.backgroundColor = ReadOnlyColor;
+        }
     }
 }
 //==============================================
@@ -1130,6 +1164,8 @@ takeoffInputs["runway_slope/unit"]="%";
 takeoffInputs["runway_slope/displayedunit"]="%";
 takeoffInputs["pilot_skill"]="Advanced";
 takeoffInputs["pilot_skill/unittype"]="string";
+takeoffInputs["aircraft_coefficiant"]="POH";
+takeoffInputs["aircraft_coefficiant/unittype"]="string";
 takeoffInputs["wind_direction"]=230;
 takeoffInputs["wind_direction/unit"]="degree";
 takeoffInputs["wind_direction/displayedunit"]="degree";
@@ -1138,7 +1174,7 @@ takeoffInputs["wind_speed"]=0.0;
 takeoffInputs["wind_speed/unit"]="kt";
 takeoffInputs["wind_speed/displayedunit"]="kt";
 takeoffInputs["wind_speed/unittype"]="speed";
-takeoffInputs["weight"]=1600;
+takeoffInputs["weight"]=0.0;
 takeoffInputs["weight/unit"]="lb";
 takeoffInputs["weight/displayedunit"]="kg";
 takeoffInputs["weight/unittype"]="mass";
@@ -1226,9 +1262,19 @@ var pilotSkills=Array("Student","Normal","Advanced");
 prefillDropdownMenus("id_takeoff_i_pilot_skill", pilotSkills, takeoffInputs["pilot_skill"]);
 var runwayType=Array("Asphalt","Grass");
 prefillDropdownMenus("id_takeoff_i_runway_type", runwayType, takeoffInputs["runway_type"]);
-var performance_plane_takeoffJSON=performanceJSON.performance[planes[0]].takeoff;
+var aircraftCoefficiant=Array("POH","Measured");
+prefillDropdownMenus("id_takeoff_i_aircraft_coefficiant", aircraftCoefficiant, takeoffInputs["aircraft_coefficiant"]);
 
-updateDisplayTakeoffInputs();
+// Init plane
+document.getElementById("id_plane_select").value=default_plane;
+var performance_plane_takeoffJSON="";
+var takeoffInputsDefault="";
+if(performanceJSON.performance.hasOwnProperty(default_plane)) {
+    performance_plane_takeoffJSON=performanceJSON.performance[default_plane].takeoff;
+    takeoffInputsDefault=performanceJSON.performance[default_plane].takeoff.inputs;
+}
+        
+updateDisplayTakeoffInputs(takeoffInputsDefault);
 updateDisplayTakeoffOuputs();
 
 //jQuery("#bookingMessageModal").modal('show') ;
