@@ -48,7 +48,7 @@ function refreshWebcam() {
         document.getElementById('webcamImg').src = "<?=$webcam_uris[$cam]?>" + "?random=" + new Date().getTime() ;
 }
 refreshWebcam() ;
-setInterval(refreshWebcam, 1000 * 30) ; // Refresh every 30 seconds
+setInterval(refreshWebcam, 1000 * 10) ; // Refresh every 10 was 30 seconds (July 2025 snapshot refresh every 5 seconds)
 // Swipe to change to next webcam
 document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?cam=' . $previous_cam?>' }) ;
 document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?cam=' . $next_cam?>' }) ;
