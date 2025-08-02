@@ -128,6 +128,9 @@ $email_header = "From: $managerName <$smtp_from>\r\n" ;
 $email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 $email_header .= "To: info@spa-aviation.be, ca@spa-aviation.be\r\n" ;
 $email_header .= "Cc: fis@spa-aviation.be\r\n" ;
+$email_header .= "MIME-Version: 1.0\r\n";
+$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
+$email_header .= "Content-Transfer-Encoding: quoted-printable\r\n" ;
 if ($bccTo != '') {
 	$email_header .= "Bcc: $bccTo\r\n" ;
 	$email_recipients .= ", $bccTo" ;
@@ -213,6 +216,8 @@ foreach ($all_rows as $row) {
 	$email_header = "From: $managerName <$smtp_from>\r\n" ;
 	$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 	$email_header .= "To: $full_name <$row[email]>\r\n" ;
+	$email_header .= "MIME-Version: 1.0\r\n";
+	$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
 	$email_recipients = $row['email'] ;
 	if ($bccTo != '') {
 		$email_header .= "Bcc: $bccTo\r\n" ;
@@ -244,7 +249,7 @@ print(date('Y-m-d H:i:s').": preparing lists of pilots/students/members.\n") ; o
 $email_body = "<p>Voici la liste mensuelle des divers utilisateurs du site RAPCS.</p>" ;
 
 function print_table($title, $sql) {
-	global $email_body, $mysqli_link, $convertToUtf8 ;
+	global $email_body, $mysqli_link ;
 
 	$email_body .= "<h2>$title</h2>\n<table border='1'><tr><th>Username</th><th>Nom</th><th>Email</th></tr>\n" ;
 	print(date('Y-m-d H:i:s') . ": ($title) executing: $sql\n") ; ob_flush() ;
@@ -339,6 +344,8 @@ $email_header = "From: $managerName <$smtp_from>\r\n" ;
 $email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 $email_header .= "To: info@spa-aviation.be, ca@spa-aviation.be\r\n" ;
 $email_header .= "Cc: fis@spa-aviation.be, webmaster@spa-aviation.be\r\n" ;
+$email_header .= "Content-Type: text/html; charset=\"UTF-8\"\r\n" ;
+$email_header .= "MIME-Version: 1.0\r\n";
 $email_recipients = "info@spa-aviation.be, ca@spa-aviation.be, fis@spa-aviation.be, webmaster@spa-aviation.be" ;
 if ($bccTo != '') {
 	$email_header .= "Bcc: $bccTo\r\n" ;
@@ -346,15 +353,16 @@ if ($bccTo != '') {
 }
 if ($test_mode) {
 	$smtp_info['debug'] = True;
-	smtp_mail("eric.vyncke@ulg.ac.be", "Listes diverses (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
+#	smtp_mail("eric-list@lists.vyncke.org", "Listes diverses (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
+	smtp_mail("evyncke@cisco.com", "Listes diverses (test)", $email_body, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 } else
 	smtp_mail($email_recipients, "Listes diverses", $email_body, $email_header) ;
-	mysqli_close($mysqli_link) ; // Sometimes OVH times out ...
-	$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
-	if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
-	if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
-	journalise(0, "I", "Cron-monthly: misc lists sent") ;
-}
+mysqli_close($mysqli_link) ; // Sometimes OVH times out ...
+$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
+if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
+if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
+journalise(0, "I", "Cron-monthly: misc lists sent") ;
+} // End of actions e
 
 print(date('Y-m-d H:i:s').": end of job.\n") ; ob_flush() ;
 journalise(0, "I", "End of monthly cron job (actions=$actions)") ;
