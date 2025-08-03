@@ -56,7 +56,7 @@ while ($row = mysqli_fetch_array($result)) {
 			$validity_msg .= "<span class=\"text-danger\">Votre profil ne contient pas $row[name]. Impossible de réserver un avion. Veuillez modifier votre profil d'abord.</span><br/>" ;
 		}
 	} elseif ($row['delta'] > 0) {
-		if ($row['mandatory'] != 0) {
+		if ($row['mandatory'] > 0) {
 			$userRatingValid = false ;
 			$validity_msg .= "<span class=\"text-danger\">Votre $row[name] n'est plus valable depuis le $row[expire_date]. Impossible de réserver un avion.</span><br/>" ;
 		} else {

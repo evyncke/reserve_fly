@@ -55,7 +55,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$userValidities[$row['validity_type_id']] = true ;
 	$row['name'] = db2web($row['name']) ;
 	if ($row['delta'] == '') { // This validity was not filled in
-		if ($row['mandatory'] != 0) {
+		if ($row['mandatory'] > 0) {
 			$userRatingValid = false ;
 			$validity_msg .= "<span class=\"validityExpired\">Votre profil ne contient pas $row[name]. Impossible de r&eacute;server un avion. Veuillez modifier votre profil d'abord.</span><br/>" ;
 		}
