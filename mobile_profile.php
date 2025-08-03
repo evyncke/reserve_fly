@@ -636,8 +636,8 @@ if (! $read_only) {
 if (! $read_only) {
 ?>
 <div class="row">
-<div class="jumbotron">ATTENTION, ces validit&eacute;s ne sont pas tenues en compte lors des r&eacute;servations dans le futur.
-<br/><b>LE PILOTE DOIT TOUJOURS LES VERIFIER</b>
+<div class="jumbotron">ATTENTION, ces validités ne sont pas tenues en compte pour des réservations dans le futur.
+<br/><b>LE PILOTE DOIT TOUJOURS LES VÉRIFIER</b>
 </div> <!-- col -->
 </div> <!-- row -->
 
@@ -667,10 +667,12 @@ while ($row = mysqli_fetch_array($result)) {
 			$delete = " <a href=\"$_SERVER[PHP_SELF]?displayed_id=$displayed_id&validity_id=$row[id]&action=delete_rating\"><i class=\"bi bi-trash-fill text-danger\"></i></a>" ;
 		else
 			$delete = '' ;
+		if ($row['mandatory_access_control'] < 0) # No more in use
+			continue ;
 		if ($row['mandatory_access_control'] == 0)
 			$private_validity = '' ;
-		else if ($userId == $displayed_id or $userIsInstructor)
-			$private_validity = ' (seuls le pilote et les instructeurs voient cette ligne) ' ;
+		else if ($userId == $displayed_id or $userIsInstructor or $userIsAdmin)
+			$private_validity = ' (seuls le pilote, les administrateurs, et les instructeurs voient cette ligne) ' ;
 		else
 			continue ;
 		print("<tr><td class=\"validityNameCell\">" . db2web($row['name']) . "$private_validity$delete</td>\n") ;
@@ -679,7 +681,10 @@ while ($row = mysqli_fetch_array($result)) {
 			print("<td class=\"validityCell\"><input type=\"text\" name=\"ident_value[$row[id]]\" value=\"" . db2web($row['ident_value']) . "\"$readonly></td>\n") ;
 		else	
 			print("<td class=\"validityCell\"></td>\n") ;
-		print("<td class=\"validityCell\"><input type=\"date\" name=\"grant_date[$row[id]]\" value=\"$row[grant_date]\"$readonly></td>\n") ;
+		if ($row['mandatory_access_control'] == 0)
+			print("<td class=\"validityCell\"><input type=\"date\" name=\"grant_date[$row[id]]\" value=\"$row[grant_date]\"$readonly></td>\n") ;
+		else
+			print("<td class=\"validityCell\"></td>\n") ;
 		if ($row['time_limitation'])
 			print("<td class=\"validityCell\"><input type=\"date\" name=\"expire_date[$row[id]]\" value=\"$row[expire_date]\"$readonly></td>\n") ;
 		else	
