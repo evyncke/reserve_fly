@@ -1279,4 +1279,4 @@ updateDisplayTakeoffOuputs();
 
 //jQuery("#bookingMessageModal").modal('show') ;
 
-window.onload=mobile_performance_page_loaded();
+// window.onload=mobile_performance_page_loaded(); // Added to <body onload="mobile_performance_page_loaded();">
