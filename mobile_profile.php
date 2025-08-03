@@ -671,7 +671,7 @@ while ($row = mysqli_fetch_array($result)) {
 			continue ;
 		if ($row['mandatory_access_control'] == 0)
 			$private_validity = '' ;
-		else if ($userId == $displayed_id or $userIsInstructor or $userIsAdmin)
+		else if ($userId == $displayed_id or $userIsInstructor or $userIsBoardMember)
 			$private_validity = ' (seuls le pilote, les administrateurs, et les instructeurs voient cette ligne) ' ;
 		else
 			continue ;
