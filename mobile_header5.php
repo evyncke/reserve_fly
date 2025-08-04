@@ -430,6 +430,7 @@ if ($userIsAdmin or $userIsInstructor) {
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">À propos<span class="caret"></span></a>
             <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="mobile_help.php"><i class="bi bi-question-circle"></i> Aide</a></li>
               <li>
                 <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dynamicModal" 
                   data-bs-target="#dynamicModal" data-modal-title="Rapporter un Bug" data-content-url="<?=$base_url?>mobile_modal_bug_report.html">
