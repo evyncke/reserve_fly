@@ -54,7 +54,7 @@ $me['name'] = db2web($me['name']) ;
 $me['username'] = db2web($me['username']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
-if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) {
+if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) {
 	$me['address'] = db2web($me['address']) ; 
 	$me['zipcode'] = db2web($me['zipcode']) ; 
 	$me['city'] = db2web($me['city']) ; 
@@ -271,7 +271,7 @@ $me['name'] = db2web($me['name']) ;
 $me['username'] = db2web($me['username']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
-if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) { // Private information only for admins & FI
+if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information only for admins & FI
 	$me['address'] = db2web($me['address']) ; 
 	$me['zipcode'] = db2web($me['zipcode']) ; 
 	$me['city'] = db2web($me['city']) ; 
@@ -403,7 +403,7 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 	</div> <!-- col -->
 </div> <!-- row -->
 <?php
-if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
+if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
 ?>
 <div class="row mb-3">
         <label for="addressId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Rue:</label>
