@@ -183,12 +183,12 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 
         $uploadedFilesIcon="";
         if(HasUploadedFiles($atl_uploadfiles_path,GetATLPrefixName($incident->id))) {
-            $uploadedFilesIcon="<i class=\"bi bi-files\"></i>";
+            $uploadedFilesIcon="&nbsp;<i class=\"bi bi-files\"></i>";
         }
 
         print("<tr>
-            <td>
-                <a href=\"mobile_incident.php?incident=$incident->id\" title=\"Edit ATL\">$incident->id <i class=\"bi bi-pen-fill\"></i>$uploadedFilesIcon</a>
+            <td class=\"text-nowrap\">
+                <a href=\"mobile_incident.php?incident=$incident->id\" title=\"Edit ATL\">$incident->id&nbsp;<i class=\"bi bi-pen-fill\"></i></a>$uploadedFilesIcon
             </td>
             <td class=\"text-nowrap\"><a href=\"mobile_incidents.php?plane=$incident->plane\">$incident->plane</a><br/>$incident->planeType</td>
             <td>$incident->severity</td>
