@@ -88,48 +88,49 @@ function ImprovedTableHeader($header) {
     // Header
     
     $this->SetFont('','B');
-    for($i=0; $i<count($header); $i++)
+    for($i = 0; $i < count($header); $i++)
  	   $this->CellUtf8($this->column_width[$i], 4, $header[$i], 1, 0, 'C');
  	$this->SetFont('','');
 	$this->Ln();
 }
 
-function ImprovedTableSingleRow($row) {
+function ImprovedTableRow($row) {
     // Data
-    for($i=0; $i<count($row); $i++)
+    for($i = 0; $i < count($row); $i++)
         $this->CellUtf8($this->column_width[$i], 4, $row[$i], 1, 0, 'C');
     $this->Ln();
 }
 
-function ImprovedTableMultiLineRow($line_count, $row) {
-    // Data
+function ImprovedTableMultiLineRow($line_count, $row) { // Each row is a multi-line cell
 	if ($line_count == 1) {
-		$this->ImprovedTableSingleRow($row)  ;
+		$this->ImprovedTableRow($row)  ;
 		return ;
 	}
-	// Emit first line with top lines
-	for($i=0; $i<count($row); $i++) {
+	// Emit first line of all cells with left-top-right border lines
+	for($i = 0; $i < count($row); $i++) {
 		$lines = explode("\n", $row[$i]) ;
 		$this->CellUtf8($this->column_width[$i], 4, $lines[0], 'LTR', 0, 'C');
 	}
 	$this->Ln();
-	// Emit middle lines
+	// Emit all cells of all middle lines
 	for ($line = 1; $line < $line_count-1; $line++) {
-		for($i=0; $i<count($row); $i++) {
+		for($i = 0; $i < count($row); $i++) {
 			$lines = explode("\n", $row[$i]) ;
-			$this->CellUtf8($this->column_width[$i], 4, $lines[$line], 'LR', 0, 'C');
+			$text = (isset($lines[$line])) ? $lines[$line] : '' ;
+			$this->CellUtf8($this->column_width[$i], 4, $text, 'LR', 0, 'C');
 		}
 		$this->Ln();
 	}
-	// Emit first line with top lines
-	for($i=0; $i<count($row); $i++) {
+	// Emit last line with left-bottom-right border lines
+	for($i = 0; $i < count($row); $i++) {
 		$lines = explode("\n", $row[$i]) ;
-		$this->CellUtf8($this->column_width[$i], 4, $lines[$line_count-1], 'LBR', 0, 'C');
+		$text = (isset($lines[$line_count-1])) ? $lines[$line_count-1] : '' ;
+		$this->CellUtf8($this->column_width[$i], 4, $text, 'LBR', 0, 'C');
 	}
 	$this->Ln();
 }
 
-}
+} // Class PDF
 
 function getSpecificPilotLicence($pilot, $rating) {
 	global $mysqli_link, $table_validity_type, $table_validity ;
@@ -271,8 +272,8 @@ function RecentLandings($plane, $userId) {
 }
 
 $pdf = new PDF('P','mm','A4');
-$pdf->AliasNbPages(); // Prepare the page numbering
 
+$pdf->AliasNbPages(); // Prepare the page numbering
 $pdf->SetFont('Arial','B',16);
 
 $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today 
@@ -294,13 +295,13 @@ $flight_type = ($row_flight['f_type'] == 'D') ? 'découverte' : "d'initiation" ;
 $flight_reference = ($row_flight['f_gift']) ? 'V-' : '' ;
 $flight_reference .= ($row_flight['f_type'] == 'D') ? 'IF-' : "INIT-" ;
 // in 2022, numbers from 0 to 80 were used, since 2023 it is more like 23xxxx
-$flight_reference .= ($fligh_id < 1000) ? sprintf("%03d", $flight_id) : sprintf("%06d", $flight_id) ;
+$flight_reference .= ($flight_id < 1000) ? sprintf("%03d", $flight_id) : sprintf("%06d", $flight_id) ;
 
 // Unsure why the manager insists on using his manual numbers...
 if ($row_flight['f_reference'] != '')
 	$flight_reference = db2web($row_flight['f_reference']) . ' (' . sprintf("#%06d", $flight_id) . ')';
 
-	// Get the circuit names
+// Get the circuit names
 $circuits = json_decode(file_get_contents("../voldecouverte/script/circuits.js"), true);
 $circuit_name = (isset($circuits[$row_flight['f_circuit']])) ? $circuits[$row_flight['f_circuit']] : "Circuit #$row_flight[f_circuit] inconnu" ;
 
@@ -481,7 +482,7 @@ function passengerWB($i) {
 // Weight and balance
 //
 if ($row_flight['r_plane']) { // No W&B when plane is unknown 
-$pdf->NouveauChapitre("Masse et centrage $row_flight[r_plane] pour le vol $flight_reference ($row_flight[p_lname]$scheduled)") ;
+$pdf->NouveauChapitre("Masse et centrage $row_flight[r_plane] pour le vol $flight_reference ($row_flight[p_lname]$scheduled_date)") ;
 $pdf->SetColumnsWidth(array(80, 30, 30, 30)) ;
 $pdf->ImprovedTableHeader(array("Poste", "Poids (lbs.)", "Bras (in.)", "Moment")) ; 
 $totmoment_to = 0 ;
@@ -541,7 +542,7 @@ while ($row = mysqli_fetch_array($result)) {
 mysqli_free_result($result) ;
 $totarm_to = round($totmoment_to/$totwt_to, 2) ;
 $totarm_ldg = round($totmoment_ldg/$totwt_ldg, 2) ;
-$checked = ($totwt_to <= $maxwt and $cgarnfwd <= $totarm_to and $totarm_to <= $cgwarnaft) ? ', checked' : ' !!! WARNING !!!' ;
+$checked = ($totwt_to <= $maxwt and $cgwarnfwd <= $totarm_to and $totarm_to <= $cgwarnaft) ? ', checked' : ' !!! WARNING !!!' ;
 $pdf->ImprovedTableRow(array("Total décollage$checked", $totwt_to, $totarm_to, $totmoment_to)) ;
 $pdf->ImprovedTableRow(array("Total atterrissage$checked", $totwt_ldg, $totarm_ldg, $totmoment_ldg)) ;
 $pdf->Ln(30) ;
@@ -561,7 +562,7 @@ $pdf->Write(4, $url, $url) ;
 //
 // Description 
 //
-$pdf->NouveauChapitre("Description du vol $flight_type $flight_reference ($row_flight[p_lname]$scheduled)") ;
+$pdf->NouveauChapitre("Description du vol $flight_type $flight_reference ($row_flight[p_lname]$scheduled_date)") ;
 $pdf->MulticellUtf8(0, 5, "La personne de contact pour ce vol est: $row_flight[p_fname] $row_flight[p_lname], numéro de téléphone: $row_flight[p_tel], email: $row_flight[p_email].") ;
 if ($row_flight['f_description'] != '') {
 	$pdf->Ln(5) ;
