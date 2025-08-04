@@ -27,7 +27,7 @@ if ($userId == 0) {
 if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	$displayed_id = $_REQUEST['displayed_id'] ;
 	if (! is_numeric($displayed_id)) journalise($userId, "F", "Numero d'utilisateur invalide: $displayed_id") ;
-	$read_only = ! ($userIsAdmin or $userIsInstructor or $displayed_id == $userId) ;
+	$read_only = ! ($userIsBoardMember or $userIsInstructor or $displayed_id == $userId) ;
 	if ($displayed_id != $userId)
 		mysqli_query($mysqli_link, "UPDATE jom_kunena_users SET uhits = uhits + 1 WHERE userid = $displayed_id")
 			or journalise($userId, "E", "Erreur systeme lors de la mise a jour de jom_kunena_users (uhits): " . mysqli_error($mysqli_link)) ;
@@ -659,6 +659,7 @@ if (! $read_only) {
 <?php
 $result = mysqli_query($mysqli_link, "select *
 	from $table_validity_type t left join $table_validity v on validity_type_id = t.id and jom_id = $displayed_id
+	where mandatory >= 0
 	order by t.name") or journalise($userId, "F", "Erreur systeme a propos de l'access a validity: " . mysqli_error($mysqli_link)) ;
 $options = '<option value="-1" style=\"background-color: #cccccc;\" disabled selected> -- validité/annotation à ajouter et remplir les cases sur cette ligne--</option>' ;
 while ($row = mysqli_fetch_array($result)) {
@@ -667,7 +668,7 @@ while ($row = mysqli_fetch_array($result)) {
 			$delete = " <a href=\"$_SERVER[PHP_SELF]?displayed_id=$displayed_id&validity_id=$row[id]&action=delete_rating\"><i class=\"bi bi-trash-fill text-danger\"></i></a>" ;
 		else
 			$delete = '' ;
-		if ($row['mandatory_access_control'] < 0) # No more in use
+		if ($row['mandatory'] < 0) # No more in use
 			continue ;
 		if ($row['mandatory_access_control'] == 0)
 			$private_validity = '' ;
@@ -681,7 +682,7 @@ while ($row = mysqli_fetch_array($result)) {
 			print("<td class=\"validityCell\"><input type=\"text\" name=\"ident_value[$row[id]]\" value=\"" . db2web($row['ident_value']) . "\"$readonly></td>\n") ;
 		else	
 			print("<td class=\"validityCell\"></td>\n") ;
-		if ($row['mandatory_access_control'] == 0)
+		if ($row['mandatory_access_control'] == 0)  # Grant date is visible only for non privacy-related validities (e.g. non medical)
 			print("<td class=\"validityCell\"><input type=\"date\" name=\"grant_date[$row[id]]\" value=\"$row[grant_date]\"$readonly></td>\n") ;
 		else
 			print("<td class=\"validityCell\"></td>\n") ;
