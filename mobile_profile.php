@@ -65,6 +65,10 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) {
 	$me['company_city'] = db2web($me['c_city']) ; 
 	$me['company_country'] = db2web($me['c_country']) ;
 	$me['company_bce'] = db2web($me['c_bce']) ;
+	$me['contact_name'] = db2web($me['contact_name']) ;
+	$me['contact_relationship'] = db2web($me['contact_relationship']) ;
+	$me['contact_phone'] = db2web($me['contact_phone']) ;
+	$me['contact_email'] = db2web($me['contact_email']) ;
 }
 
 // Be paranoid
@@ -258,6 +262,22 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 			db2web($first_name) . ", nom: " . db2web($last_name)) ;
 }
 
+// Apply any change before fetching all displayed_id information
+if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'alt_contact' and !$read_only) {
+	$contactName = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_name'])) ;
+	$contactRelationship = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_relationship'])) ;
+	$contactPhone = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_phone'])) ;
+	$contactEmail = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_email'])) ;
+	mysqli_query($mysqli_link, "update $table_person set contact_name='$contactName', contact_relationship='$contactRelationship',
+		contact_phone='$contactPhone', contact_email='$contactEmail' where jom_id = $displayed_id")
+		or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_person: " . mysqli_error($mysqli_link)) ;
+	$affected_rows = mysqli_affected_rows($mysqli_link) ;
+	$change_profile_message = ($affected_rows > 0) ? "Changement(s) effectué(s).<br/>" : "Aucun changement effectué.<br/>" ;
+	if ($affected_rows > 0) 
+		journalise($userId, 'I', "Changement de contact alternatif($me[username]/$displayed_id): nom: " . db2web($contactName) . 
+			", relation: " . db2web($contactRelationship) . ", téléphone: " . db2web($contactPhone) .", email: " . db2web($contactEmail));
+}
+
 // Fetch AGAIN all information about the user since they may have been modified by the above...
 $result = mysqli_query($mysqli_link, "SELECT *,u.username as username,u.email as email, date(p.birthdate) as birthdate
 	FROM $table_person p 
@@ -282,6 +302,10 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	$me['company_city'] = db2web($me['c_city']) ; 
 	$me['company_country'] = db2web($me['c_country']) ;
 	$me['company_bce'] = db2web($me['c_bce']) ;
+	$me['contact_name'] = db2web($me['contact_name']) ;
+	$me['contact_relationship'] = db2web($me['contact_relationship']) ;
+	$me['contact_phone'] = db2web($me['contact_phone']) ;
+	$me['contact_email'] = db2web($me['contact_email']) ;
 }
 
 // Be paranoid
@@ -321,8 +345,17 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 <br/>
 <ul class="nav nav-tabs" role="tablist">
 	<li class="nav-item">
-  		<a class="nav-link active" role="presentation" data-bs-toggle="tab" data-bs-target="#main" aria-current="page" href="#main">Contact</a>
+  		<a class="nav-link active" role="presentation" data-bs-toggle="tab" data-bs-target="#main" aria-current="page" href="#main">Contact membre</a>
 	</li>
+<?php
+if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
+?>
+	<li class="nav-item">
+  		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#emergency_contact" aria-current="page" href="#main">Contact alternatif</a>
+	</li>
+<?php
+} // end of private information tab
+?>
 	<li class="nav-item">
   		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#validity" aria-current="page" href="#validity">Validités / annotations club</a>
 	</li>
@@ -481,7 +514,7 @@ if (! $read_only) {
 }
 ?>
 </form>
-</div> <!-- id=main -->
+</div> <!-- tabpanel id=main -->
 
 <div id="log" class="tab-pane fade" role="tabpanel">
 <div class="row mb-5">
@@ -531,7 +564,7 @@ if (! $read_only) {
 }
 ?>
 </form>
-</div> <!-- tab id = log -->
+</div> <!-- tabpanel id = log -->
 
 <div id="photo" class="tab-pane fade" role="tabpanel">
 <?php
@@ -558,17 +591,69 @@ if (! $read_only) {
 	</div> <!-- row -->') ;
 }
 ?>
-</div> <!-- id=photo -->
+</div> <!-- tabpanel id=photo -->
+
+<?php
+if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
+?>
+<div id="emergency_contact" class="tab-pane fade" role="tabpanel">
+<div class="row">
+<p>Veuillez introduire les informations de contact alternatif (famille, ami, ...). Ces informations sont visibles par les instructeurs et les membres
+	de l'Organisme d'Administration du club, mais pas par les autres membres.
+	Ces informations sont importantes pour nous permettre de vous contacter en cas d'urgence, par exemple si vous avez un accident
+	ou si le club ne parvient pas à vous joindre pour une raison quelconque
+	et que nous devons contacter votre famille ou vos proches.</p>
+<p>Si vous avez des questions ou des préoccupations concernant la confidentialité de ces informations, n'hésitez pas à 
+	<a href="mailto:privacy@spa-aviation.be">privacy@spa-aviation.be</a>.</p>
+</p>
+</div> <!-- row -->
+<div class="row">
+<form action="<?=$_SERVER['PHP_SELF']?>" method="post" role="form" class="form-horizontal">
+<input type="hidden" name="action" value="alt_contact">
+<input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
+<div class="input-group mb-3">
+	<label for="contactNameId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Nom du contact:</label>
+	<div class="col-sm-4">
+		<input type="text" class="form-control" name="c_name" id="contactNameId" value="<?=$me['contact_name']?>"<?=$read_only_attribute?>>
+	</div> <!-- col -->
+</div> <!-- input-group -->
+<div class="input-group mb-3">
+	<label for="contactRelationshipId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Relation:</label>
+	<div class="col-sm-4">
+		<input type="text" class="form-control" name="c_relationship" id="contactRelationshipId" value="<?=$me['contact_relationship']?>" placeholder="Conjoint(e), parent, partenaire, ..."<?=$read_only_attribute?>>
+	</div> <!-- col -->
+</div> <!-- input-group -->
+<div class="input-group mb-3">
+	<label for="contactPhoneId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Téléphone:</label>
+	<div class="col-sm-4">
+		<input type="text" class="form-control" name="c_phone" id="contactRelationshipId" value="<?=$me['contact_phone']?>" placeholder="Sous la forme +32471234567 sans les 0 ou les '.'"<?=$read_only_attribute?>>
+	</div> <!-- col -->
+</div> <!-- input-group -->
+<div class="input-group mb-3">
+	<label for="contactEmailId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Adresse e-mail:</label>
+	<div class="col-sm-4">
+		<input type="email" class="form-control" name="c_email" id="contactEmailId" value="<?=$me['contact_email']?>"<?$read_only_attribute?>>
+	</div> <!-- col -->
+</div> <!-- input-group -->
+<?php
+if (! $read_only) {
+	print('<div class="form-group"><button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Enregistrer les changements</button></div>') ;
+}
+?>
+</form>
+</div> <!-- row -->
+</div> <!-- tabpanel id=emergency_contact -->
+<?php
+} // end of private information tab
+?>
 
 <div id="social_network" class="tab-pane fade" role="tabpanel">
 <div class="row">
-	Les adresses Internet des pages des r&eacute;seaux sociaux de ce membre. Les logos, si pr&eacute;sents, sont cliquables.
+	Les adresses Internet des pages des réseaux sociaux de ce membre. Les logos, si présents, sont cliquables.
 </div> <!-- row -->
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
 <?php
-if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'social' and !$read_only) {
-}
 $facebook_img = ($me['facebook'] != '') ? "<a href=\"https://www.facebook.com/$me[facebook]\" target=\"_blank\"><img src=\"facebook_blue_100.png\" width=\”15\" height=\"15\"></a>\n" : '' ;
 $linkedin_img = ($me['linkedin'] != '') ? "<a href=\"https://www.linkedin.com/in/$me[linkedin]\" target=\"_blank\"><img src=\"linkedin.jpg\"></a>\n" : "" ;
 $skype_img = ($me['skype'] != '') ? "<a href=\"skype:$me[skype]\"><img src=\"skype.png\"></a>\n" : "" ;
@@ -628,7 +713,7 @@ if (! $read_only) {
 	<hr>
 	<p>Pour changer ces données, veuillez contacter par email: <a href="mailto:eric.vyncke@spa-aviation.be">eric.vyncke@spa-aviation.be</a>.</p>
 </div>
-</div> <!-- id=social_network -->
+</div> <!-- id=company -->
 
 <div id="validity" class="tab-pane fade">
 
