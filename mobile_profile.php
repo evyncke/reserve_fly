@@ -28,12 +28,14 @@ if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	$displayed_id = $_REQUEST['displayed_id'] ;
 	if (! is_numeric($displayed_id)) journalise($userId, "F", "Numero d'utilisateur invalide: $displayed_id") ;
 	$read_only = ! ($userIsBoardMember or $userIsInstructor or $displayed_id == $userId) ;
+	$user_only = ($displayed_id == $userId) ;
 	if ($displayed_id != $userId)
 		mysqli_query($mysqli_link, "UPDATE jom_kunena_users SET uhits = uhits + 1 WHERE userid = $displayed_id")
 			or journalise($userId, "E", "Erreur systeme lors de la mise a jour de jom_kunena_users (uhits): " . mysqli_error($mysqli_link)) ;
 } else {
 	$displayed_id = $userId ;
 	$read_only = false ;
+	$user_only = true ;
 }
 $body_attributes = "onload=\"selectedUserId=$displayed_id;init();\"" ;
 $header_postamble = '<script data-cfasync="true" src="profile.js"></script>' ;
@@ -338,6 +340,8 @@ foreach($me as $key => $value)
 <?php
 print($change_profile_message) ; // Display any error message
 $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
+$user_only_attribute = (! $user_only) ? ' readonly disabled' : '' ;
+
 ?>
 </div> <!-- col -->
 </div> <!-- row -->
@@ -376,7 +380,10 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 <div class="tab-content">
 
 <div id="main" class="tab-pane fade show active" role="tabpanel">
-
+<?php
+	$phoneIcon = ($me['cell_phone'] != '') ? "&nbsp;<a href=\"tel:$me[cell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Appeler\"></i></a>&nbsp;" : '' ;
+	$emailIcon = ($me['email'] != '') ? "&nbsp;<a href=\"mailto:$me[email]\"><i class=\"bi bi-envelope-fill\" title=\"Envoyer email\"></i></a>&nbsp;" : '' ;
+?>
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="Xform-horizontal">
 <input type="hidden" name="action" value="profile">
 <input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
@@ -406,7 +413,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label for="emailId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Adresse e-mail:</label>
+        <label for="emailId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Adresse e-mail<?=$emailIcon?>:</label>
         <div class="col-sm-4">
 	       	<div class="input-group">
                 <input type="email" class="form-control" name="email" id="emailId" value="<?=$me['email']?>" autocomplete="email" <?=$read_only_attribute?>>
@@ -415,7 +422,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label for="cell_phoneId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Téléphone mobile:</label>
+        <label for="cell_phoneId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Téléphone mobile<?=$phoneIcon?>:</label>
         <div class="col-sm-4">
 	       	<div class="input-group">
                 <input type="tel" class="form-control" name="cell_phone" id="cell_phoneId" value="<?=$me['cell_phone']?>" autocomplete="mobile tel" <?=$read_only_attribute?>>
@@ -474,7 +481,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
         <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Date de naissance:</label>
         <div class="col-sm-4">
         	<div class="input-group">
-                <input type="date" class="form-control" name="birthdate" placeholder="AAAA-MM-JJ" value="<?=$me['birthdate']?>" autocomplete="bday" <?=$read_only_attribute?>>
+                <input type="date" class="form-control" name="birthdate" placeholder="AAAA-MM-JJ" value="<?=$me['birthdate']?>" autocomplete="bday" <?=$user_only_attribute?>>
                 <span class="input-group-addon">(optionnel)</span>
             </div><!-- input group -->
 	</div> <!-- col -->
@@ -483,7 +490,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
         <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Genre:</label>
         <div class="col-sm-4">
         	<div class="input-group">
-				<select class="form-control" name="sex" <?=$read_only_attribute?>>
+				<select class="form-control" name="sex" <?=$user_only_attribute?>>
 					<option value="0" <?=($me['sex'] == 0) ? 'selected':''?>>Inconnu</option>
 					<option value="1" <?=($me['sex'] == 1) ? 'selected':''?>>Masculin</option>
 					<option value="2" <?=($me['sex'] == 2) ? 'selected':''?>>Féminin</option>
@@ -499,7 +506,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
         <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Heures de vol:</label>
         <div class="col-sm-4">
         	<div class="input-group">
-				<select class="form-control" name="hide_flight" <?=$read_only_attribute?>>
+				<select class="form-control" name="hide_flight" <?=$user_only_attribute?>>
 					<option value="0" <?=($me['hide_flight_time'] == 0) ? 'selected':''?>>Montrer</option>
 					<option value="1" <?=($me['hide_flight_time'] == 1) ? 'selected':''?>>Cacher</option>
 				</select>
@@ -595,6 +602,8 @@ if (! $read_only) {
 
 <?php
 if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
+	$phoneIcon = ($me['contact_phone'] != '') ? "&nbsp;<a href=\"tel:$me[contact_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Appeler\"></i></a>&nbsp;" : '' ;
+	$emailIcon = ($me['contact_email'] != '') ? "&nbsp;<a href=\"mailto:$me[contact_email]\"><i class=\"bi bi-envelope-fill\" title=\"Envoyer email\"></i></a>&nbsp;" : '' ;
 ?>
 <div id="emergency_contact" class="tab-pane fade" role="tabpanel">
 <div class="row">
@@ -614,29 +623,29 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 <div class="input-group mb-3">
 	<label for="contactNameId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Nom du contact:</label>
 	<div class="col-sm-4">
-		<input type="text" class="form-control" name="c_name" id="contactNameId" value="<?=$me['contact_name']?>"<?=$read_only_attribute?>>
+		<input type="text" class="form-control" name="c_name" id="contactNameId" value="<?=$me['contact_name']?>" <?=$user_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- input-group -->
 <div class="input-group mb-3">
 	<label for="contactRelationshipId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Relation:</label>
 	<div class="col-sm-4">
-		<input type="text" class="form-control" name="c_relationship" id="contactRelationshipId" value="<?=$me['contact_relationship']?>" placeholder="Conjoint(e), parent, partenaire, ..."<?=$read_only_attribute?>>
+		<input type="text" class="form-control" name="c_relationship" id="contactRelationshipId" value="<?=$me['contact_relationship']?>" placeholder="Conjoint(e), parent, partenaire, ..." <?=$user_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- input-group -->
 <div class="input-group mb-3">
-	<label for="contactPhoneId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Téléphone:</label>
+	<label for="contactPhoneId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Téléphone<?=$phoneIcon?>:</label>
 	<div class="col-sm-4">
-		<input type="text" class="form-control" name="c_phone" id="contactRelationshipId" value="<?=$me['contact_phone']?>" placeholder="Sous la forme +32471234567 sans les 0 ou les '.'"<?=$read_only_attribute?>>
+		<input type="text" class="form-control" name="c_phone" id="contactRelationshipId" value="<?=$me['contact_phone']?>" placeholder="Sous la forme +32471234567 sans les 0 ou les '.'" <?=$user_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- input-group -->
 <div class="input-group mb-3">
-	<label for="contactEmailId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Adresse e-mail:</label>
+	<label for="contactEmailId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Adresse e-mail<?=$emailIcon?>:</label>
 	<div class="col-sm-4">
-		<input type="email" class="form-control" name="c_email" id="contactEmailId" value="<?=$me['contact_email']?>"<?$read_only_attribute?>>
+		<input type="email" class="form-control" name="c_email" id="contactEmailId" value="<?=$me['contact_email']?>" <?=$user_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- input-group -->
 <?php
-if (! $read_only) {
+if ($user_only) {
 	print('<div class="form-group"><button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Enregistrer les changements</button></div>') ;
 }
 ?>
@@ -793,7 +802,7 @@ print("</tbody>
 </table>
 </div> <!-- table responsive-->
 </div> <!-- row -->\n") ;
-if ($userId == $displayed_id) {
+if ($user_only) {
 ?>
 <div class="checkbox col-sd-offset-2">
 	<label>
