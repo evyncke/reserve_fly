@@ -322,7 +322,7 @@ foreach($me as $key => $value)
 
 <form>
 <div class="row">
-		<label for="pilotSelect" class="col-form-label col-sm-6 col-md-4 col-lg-3">En tant que membre, vous pouvez choisir le membre à afficher:</label>
+		<label for="pilotSelect" class="col-form-label col-sm-6 col-md-4 col-lg-3">En tant que membre connecté(e), vous pouvez choisir le membre à afficher:</label>
 		<div class="col-sm-6 col-md-3 col-lg-2">
 			<select id="pilotSelect" name="displayed_id" class="form-select" onchange="pilotChange('<?=$_SERVER['PHP_SELF']?>', this);">
 			</select>
@@ -607,14 +607,12 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 ?>
 <div id="emergency_contact" class="tab-pane fade" role="tabpanel">
 <div class="row">
-<p>Veuillez introduire les informations de contact alternatif (famille, ami, ...). Ces informations sont visibles par les instructeurs et les membres
-	de l'Organisme d'Administration du club, mais pas par les autres membres.
-	Ces informations sont importantes pour nous permettre de vous contacter en cas d'urgence, par exemple si vous avez un accident
-	ou si le club ne parvient pas à vous joindre pour une raison quelconque
-	et que nous devons contacter votre famille ou vos proches.</p>
+<p>Veuillez introduire les informations de contact d'un proche (famille, ami, ...). Ces informations,
+	exclusivement visibles par les instructeurs et les membres de l'Organisme d'Administration du club,
+	sont nécessaires en cas d'urgence ou de nécessité absolue ( accident , impossibilité de vous joindre, ..). 
+	Il ne sera fait usage de ce contact qu'en cas d'extrême obligation.</p>
 <p>Si vous avez des questions ou des préoccupations concernant la confidentialité de ces informations, n'hésitez pas à 
-	<a href="mailto:privacy@spa-aviation.be">privacy@spa-aviation.be</a>.</p>
-</p>
+	contacter <a href="mailto:privacy@spa-aviation.be">privacy@spa-aviation.be</a>.</p>
 </div> <!-- row -->
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="post" role="form" class="form-horizontal">
