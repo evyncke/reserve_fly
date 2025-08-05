@@ -19,7 +19,7 @@ require_once "dbi.php" ;
 require_once 'mobile_header5.php' ;
 require_once 'Parsedown.php' ;
 ?>
-
+<div class="container">
 <h3>Aide</h3>
 
 <div class="row">
@@ -27,5 +27,5 @@ require_once 'Parsedown.php' ;
 $Parsedown = new Parsedown();
 echo $Parsedown->text(file_get_contents('mobile_help.md')) ;
 ?>
-
 </div><!-- row -->
+</div><!-- container -->
