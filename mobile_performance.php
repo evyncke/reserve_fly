@@ -94,7 +94,6 @@ if ($plane == '') {
                     //Type Piste
                     print("<tr><td class=\"text-end py-0 py-md-1\">Type Piste</td>") ;
                     print("<td class=\"py-0\"><select id=\"id_takeoff_i_runway_type\"  name=\"takeoff_i_runway_type\" style=\"width: 60%;\" $readonly></select>");
-                    //print("<td class=\"py-0\"><input type=\"text\" id=\"id_takeoff_i_runway_type\" class=\"text-end py-0 py-md-1\" value=\"asphalt\" style=\"width: 80%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_runway_type/unit\">xx</span></td>") ;
                     //Pente Piste
                     print("<tr><td class=\"text-end py-0 py-md-1\">Pente Piste</td>") ;
@@ -236,7 +235,154 @@ if ($plane == '') {
 </div> <!---tabcontent TakeOff-->
 
 <div id="Landing" class="tabcontent">
-    <h2 class="d-none d-md-block">Performance Landing:  <?=$plane?></h2>
+   <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-6"> <!--- col -->
+                <h2 class="d-none d-md-block">Landing: <span id="id_landing_plane">Plane OO-XXX</span></h2>
+                <table class="table table-striped table-hover table-bordered table-condensed w-auto" style="margin-bottom: 0rem;">
+                <thead>
+                <tr><th class="text-end py-0 py-md-1">Input</th>
+                    <th class="py-0 py-md-1 py-md-1">Value</th>
+                </tr>
+                </thead>
+                <tbody class="table-divider">
+                <?php
+                    $readonly = '' ;
+                    //QNH
+                    print("<tr><td class=\"text-end py-0 py-md-1\">QNH</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_qnh\" class=\"text-end py-0 py-md-1\" value=\"1013\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_qnh/unit\">xx</span></td>") ;
+                    //Altitude
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Altitude</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_altitude\" class=\"text-end py-0 py-md-1\" value=\"1600\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_altitude/unit\">xx</span></td>") ;
+                    //Température
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Température</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_temperature\" class=\"text-end py-0 py-md-1\" value=\"20\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_temperature/unit\">xx</span></td>") ;
+                    //Piste
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Piste</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_runway_number\" class=\"text-end py-0 py-md-1\" value=\"23\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_runway_number/unit\">xx</span></td>") ;
+                    //Type Piste
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Type Piste</td>") ;
+                    print("<td class=\"py-0\"><select id=\"id_landing_i_runway_type\"  name=\"takeoff_i_runway_type\" style=\"width: 60%;\" $readonly></select>");
+                    print("&nbsp;<span id=\"id_landing_i_runway_type/unit\">xx</span></td>") ;
+                    //Pente Piste
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Pente Piste</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_runway_slope\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_runway_slope/unit\">xx</span></td>") ;
+                    //Direction Vent
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Direction vent</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_wind_direction\" class=\"text-end py-0 py-md-1\" value=\"230\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_wind_direction/unit\">xx</span></td>") ;
+                    //Vitesse Vent
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Vitesse vent</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_wind_speed\" class=\"text-end py-0 py-md-1\" value=\"10\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_wind_speed/unit\">xx</span></td>") ;
+                //Poids
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Poids</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_weight\" class=\"text-end py-0 py-md-1\" value=\"720\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_weight/unit\">xx</span></td>") ;
+                //Flaps
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Flaps</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_flaps\" class=\"text-end py-0 py-md-1\" value=\"0\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_flaps/unit\">xx</span></td>") ;
+                //Pilot skill
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Pilot Skill</td>") ;
+                    print("<td class=\"py-0\"><select id=\"id_landing_i_pilot_skill\"  name=\"id_landing_i_pilot_skill\" style=\"width: 60%;\" $readonly></select>");
+                    print("&nbsp;<span id=\"id_landing_i_pilot_skill/unit\">xx</span></td>") ;
+                //Aircraft Coefficiant
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Aircraft Coefficiant</td>") ;
+                    print("<td class=\"py-0\"><select id=\"id_landing_i_aircraft_coefficiant\"  name=\"id_landing_i_aircraft_coefficiant\" style=\"width: 60%;\" $readonly></select>");
+                    print("&nbsp;<span id=\"id_landing_i_aircraft_coefficiant/unit\">xx</span></td>") ;
+                ?>
+                </tbody>
+                <tfoot class="table-divider">
+                    <tr>
+                    </tr>
+                </tfoot>
+                </table>
+
+                <div id="chart_div">
+                    <p></p>
+                    <canvas id="id_landing_o_canvas" width="600" height="150" style="border:1px solid #686868ff;">
+                    </canvas>
+                    <p></p>
+                </div>
+                <div class="mt-2 p-2 bg-danger text-bg-danger rounded" style="visibility: hidden; display: none;" id="warningsDiv">
+                </div>
+
+            </div><!--col-->
+
+            <!-- should try to use fixed aspect ration with CSS: aspect-ration: 4 / 3 or padding-top: 75% to replace the height setting 
+            using aspect-ratio makes printing over two pages... 
+            using padding-top also prints over 2 pages and makes the display ultra small-->
+            <div class="col-xs-12 col-sm-12 col-lg-6"> <!--- Row COL-->
+                <table class="table table-striped table-hover table-bordered table-condensed w-auto" style="margin-bottom: 0rem;">
+                <thead>
+                <tr><th class="text-end py-0 py-md-1">Result</th>
+                    <th class="py-0 py-md-1 py-md-1" >Value</th>
+                </tr>
+                </thead>
+                <tbody class="table-divider">
+                </tbody>
+                <!--Pressure Altitude-->
+                <tr><td class="text-end py-0 py-md-1">Pressure Altitude</td>
+                    <td class="py-0\"><span id="id_landing_o_pressure_altitude">xx</span>
+                    &nbsp;<span id="id_landing_o_pressure_altitude/unit">xx</span>&nbsp;
+                <span class="tooltip">&#9432;<span id="id_landing_o_pressure_altitude/tooltip" class='tooltiptext'>tooltip</span></span>
+                    </td>
+
+                </tr>
+                <!--Density Altitude-->
+                <tr><td class="text-end py-0 py-md-1">Density Altitude</td>
+                    <td class="py-0\"><span id="id_landing_o_density_altitude">xx</span>
+                    &nbsp;<span id="id_landing_o_density_altitude/unit">xx</span>&nbsp;<span class="tooltip">&#9432;<span id="id_landing_o_density_altitude/tooltip" class='tooltiptext'>tooltip</span></span></td>
+                </tr>
+                <!--Temperature ISA-->
+                <tr><td class="text-end py-0 py-md-1">Temperature ISA</td>
+                    <td class="py-0\"><span id="id_landing_o_temperature_isa">xx</span>
+                    &nbsp;<span id="id_landing_o_temperature_isa/unit">xx</span>&nbsp; <span class="tooltip">&#9432;<span id="id_landing_o_temperature_isa/tooltip" class='tooltiptext'>tooltip</span></span></td>
+                <!--Delta Temperature ISA-->
+                <tr><td class="text-end py-0 py-md-1">Delta Temperature ISA</td>
+                    <td class="py-0\"><span id="id_landing_o_temperature_delta_isa">xx</span>
+                    &nbsp;<span id="id_landing_o_temperature_delta_isa/unit">xx</span>&nbsp; <span class="tooltip">&#9432;<span id="id_landing_o_temperature_delta_isa/tooltip" class='tooltiptext'>tooltip</span></span></td>
+                </tr>
+                <!--Head wind-->
+                <tr><td class="text-end py-0 py-md-1">Head Wind</td>
+                    <td class="py-0\"><span id="id_landing_o_head_wind_speed">xx</span>
+                    &nbsp;<span id="id_landing_o_head_wind_speed/unit">xx</span>&nbsp; <span class="tooltip">&#9432;<span id="id_landing_o_head_wind_speed/tooltip" class='tooltiptext'>tooltip</span></span></td>
+                </tr>
+                <!--Cross wind-->
+                <tr><td class="text-end py-0 py-md-1">Cross Wind</td>
+                    <td class="py-0\"><span id="id_landing_o_cross_wind_speed">xx</span>
+                    &nbsp;<span id="id_landing_o_cross_wind_speed/unit">xx</span>&nbsp; <span class="tooltip">&#9432;<span id="id_landing_o_cross_wind_speed/tooltip" class='tooltiptext'>tooltip</span></span></td>
+                </tr>
+                 <!--50ft IAS-->
+                <tr><td class="text-end py-0 py-md-1">50ft IAS</td>
+                    <td class="py-0\"><span id="id_landing_o_ias_50ft_ld">xx</span>
+                    &nbsp;<span id="id_landing_o_ias_50ft_ld/unit">xx</span>&nbsp; <span class="tooltip">&#9432;<span id="id_landing_o_ias_50ft_ld/tooltip" class='tooltiptext'>tooltip</span></span></td>
+                </tr>
+                <!--50ft Distance-->
+                <tr><td class="text-end py-0 py-md-1">50ft Distance</td>
+                    <td class="py-0\"><span id="id_landing_o_distance_50ft_ld">xx</span>
+                    &nbsp;<span id="id_landing_o_distance_50ft_ld/unit">xx</span>&nbsp; <span class="tooltip">&#9432;<span id="id_landing_o_distance_50ft_ld/tooltip" class='tooltiptext'>tooltip</span></span></td>
+                </tr>
+                <!--Ground Distance-->
+                <tr><td class="text-end py-0 py-md-1">Ground Distance</td>
+                    <td class="py-0\"><span id="id_landing_o_distance_ground_ld">xx</span>
+                    &nbsp;<span id="id_landing_o_distance_ground_ld/unit">xx</span>&nbsp; <span class="tooltip">&#9432;<span id="id_landing_o_distance_ground_ld/tooltip" class='tooltiptext'>tooltip</span></span></td>
+                </tr>
+               </table>
+            </div> <!-- col -->
+        </div><!--row-->
+
+        <p class="d-none d-md-block text-bg-warning mx-auto fs-6" style="height: 20px; position: fixed; margin:0; bottom: 0px;">
+            <small>Ceci est un simple outil informatique, le pilote doit toujours vérifier le POH ainsi que le certificat W&B officiel de l'avion.
+        </small></p>
+
+    </div><!-- container-fluid -->
 </div> <!---tabcontent Landing-->
 
 
