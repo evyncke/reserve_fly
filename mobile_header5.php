@@ -39,6 +39,8 @@ if (isset($_REQUEST['user']) and $_REQUEST['user'] != '') {
 $today_month = date('m') ;
 $today_day = date('d') ;
 
+$base_url = 'https://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/' ;
+
 $christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_month == '01' and $today_day <= '08') ;
 
 ?><!DOCTYPE html>
@@ -425,8 +427,45 @@ if ($userIsAdmin or $userIsInstructor) {
 
           </ul>
         </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">À propos<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item" href="mobile_help.php"> 
+                  <i class="bi bi-question-circle"></i> Aide</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dynamicModal" 
+                  data-bs-target="#dynamicModal" data-modal-title="Rapporter un Bug" data-content-url="<?=$base_url?>mobile_modal_bug_report.html">
+                   <i class="bi bi-bug me-2"></i> Bug</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dynamicModal" 
+                  data-bs-target="#dynamicModal" data-modal-title="Politique de confidentialité" data-content-url="<?=$base_url?>mobile_modal_privacy_policy.html">
+                  <i class="bi bi-lock me-2"></i> Vie privée</a>
+              </li>
+            </ul>
+        </li>
       </ul><!-- navbar left-->
-      <ul class="nav navbar-nav"><!-- navbar right -->
+  <!-- Single Dynamic Modal -->
+  <div class="modal fade" id="dynamicModal" tabindex="-1" aria-labelledby="dynamicModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+          <div class="modal-content text-body">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="dynamicModalLabel"></h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <p>Chargement du contenu...</p> <!-- Initial loading message -->
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+              </div>
+          </div>
+      </div>
+  </div>
+<!-- navbar right -->
+<ul class="nav navbar-nav">
 <?php
 if ($userId <= 0) {
 ?>

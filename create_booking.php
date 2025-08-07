@@ -246,19 +246,19 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 		$userValidities[$row['validity_type_id']] = true ;
 		$row['name'] = db2web($row['name']) ;
 		if ($row['delta'] == '') { // This validity was not filled in
-			if ($row['mandatory'] != 0) {
+			if ($row['mandatory'] > 0) {
 				$userRatingValid = false ;
-				$validity_msg .= "<span style=\"color: red;\">Le profil du pilote ne contient pas $row[name]. Le ROI interdit en ce cas de r&eacute;server un avion. Le pilote doit modifier son profil d'abord.</span><br/>" ;
+				$validity_msg .= "<span style=\"color: red;\">Le profil du pilote ne contient pas $row[name]. Le ROI interdit en ce cas de réserver un avion. Le pilote doit modifier son profil d'abord.</span><br/>" ;
 			}
 		} elseif ($row['delta'] > 0) {
-			if ($row['mandatory'] != 0) {
+			if ($row['mandatory'] > 0) {
 				$userRatingValid = false ;
 				$validity_msg .= "<span style=\"color: red;\">Le $row[name] du pilote n'est plus valable depuis le $row[expire_date]. Le ROI interdit en ce cas de r&eacute;server un avion.</span><br/>" ;
 			} else {
 				$validity_msg .= "<span style=\"color: blue;\">Le $row[name] du pilote n'est plus valable depuis le $row[expire_date].</span><br/>" ;
 			}
 		} elseif ($row['delta'] > - $validity_warning) 
-			$validity_msg .= "<span style=\"color: blue;\">Le $row[name] du pilote ne sera plus valable le $row[expire_date]; il sera alors impossible de r&eacute;server un avion pour ce pilote.</span><br/>" ;
+			$validity_msg .= "<span style=\"color: blue;\">Le $row[name] du pilote ne sera plus valable le $row[expire_date]; il sera alors impossible de réserver un avion pour ce pilote.</span><br/>" ;
 	}
 	mysqli_free_result($result) ;
 	if ($validity_msg == '') 

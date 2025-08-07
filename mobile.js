@@ -398,6 +398,46 @@ function planeSelectBook() { // Only used by mobile_book
 	prefillDropdownMenus('instructor', instructors, instructorId) ;
 }
 
+function listenBootstrapModal() {
+	var dynamicModal = document.getElementById('dynamicModal');
+	dynamicModal.addEventListener('show.bs.modal', function (event) {	
+		// Reset the modal content
+		var modalTitleElement = dynamicModal.querySelector('.modal-title');
+		var modalBodyElement = dynamicModal.querySelector('.modal-body');
+		modalTitleElement.textContent = '';
+		modalBodyElement.innerHTML = '<p>Chargement du contenu...</p>'; // Show loading message while fetching
+		// Button that triggered the modal
+		var button = event.relatedTarget;
+
+		// Extract info from data-bs-* attributes
+		var contentUrl = button.getAttribute('data-content-url');
+		var modalTitle = button.getAttribute('data-modal-title');
+
+		// Update the modal's content.
+		modalTitleElement.textContent = modalTitle;
+		modalBodyElement.innerHTML = '<p>Chargement du contenu...</p>'; // Show loading message while fetching
+
+		if (contentUrl) {
+			fetch(contentUrl)
+				.then(response => {
+					if (!response.ok) {
+						throw new Error('Network response for dynamic model was not ok ' + response.statusText);
+					}
+					return response.text(); // Get the response as plain text/HTML
+				})
+				.then(data => {
+					modalBodyElement.innerHTML = data; // Insert fetched HTML into modal body
+				})
+				.catch(error => {
+					console.error('Error fetching content for dynamic modal:', error);
+					modalBodyElement.innerHTML = '<p class="text-danger">Impossible de charger le contenu. Essayer à nouveau plus tard.</p>';
+				});
+		} else {
+			modalBodyElement.innerHTML = '<p class="text-danger">URL de contenu non spécifiée.</p>';
+		}
+	});
+}
+
 function init() {
 	// Fill in the Planes dropdown menu with the content of planes.js
 	var planesDropdown = document.getElementById('planesDropdown') ;
@@ -445,6 +485,7 @@ function init() {
 		if (titleString)
 			document.title = titleString ;
 	}
+	listenBootstrapModal() ; // Listen to the Bootstrap modal events
 	if (window.location.search.search('kiosk') >= 0) {
 		// Hide the main Navbar
 		var elem = document.getElementById('navBarId') ;

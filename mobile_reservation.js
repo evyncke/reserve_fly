@@ -571,7 +571,7 @@ function initPlanningTable() {
 		}
 		// For all instructors, create empty cells
 		instructorPlanningTable.style.visibility = 'visible' ;
-		instructorPlanningTable.style.display = 'table' ;
+		// instructorPlanningTable.style.display = 'table' ;
 		// FI TEST
 		for (var instructor = 1; instructor < instructors.length	; instructor++) { // Instructors[0] is always 'solo'
 			newRow = instructorPlanningTable.insertRow(-1) ;

@@ -51,12 +51,12 @@ while ($row = mysqli_fetch_array($result)) {
 	$userValidities[$row['validity_type_id']] = true ;
 	$row['name'] = db2web($row['name']) ;
 	if ($row['delta'] == '') { // This validity was not filled in
-		if ($row['mandatory'] != 0) {
+		if ($row['mandatory'] > 0) {
 			$userRatingValid = false ;
 			$validity_msg .= "<span class=\"text-danger\">Votre profil ne contient pas $row[name]. Impossible de réserver un avion. Veuillez modifier votre profil d'abord.</span><br/>" ;
 		}
 	} elseif ($row['delta'] > 0) {
-		if ($row['mandatory'] != 0) {
+		if ($row['mandatory'] > 0) {
 			$userRatingValid = false ;
 			$validity_msg .= "<span class=\"text-danger\">Votre $row[name] n'est plus valable depuis le $row[expire_date]. Impossible de réserver un avion.</span><br/>" ;
 		} else {
@@ -381,7 +381,7 @@ mysqli_free_result($result_news) ;
 <br/>
 
 
-<div class="row justify-content-center">
+<div class="row justify-content-center overflow-x-auto">
  <div class="col-auto">
   <table class="planningRuler">
 	<tr style="vertical-align: top;">
@@ -393,7 +393,10 @@ mysqli_free_result($result_news) ;
 	</tr>
   </table>
 
- <div class="d-flex flex-column align-items-end">
+  <!-- The two tables are used to display the planning for the planes and instructors and are aligned on the right hand side
+   specific width of the parent container is actually 1024 px and is required to have a 'responsive' table via overflow-x-auto
+   i.e., a sliding window at the bottom on small screens -->
+ <div class="d-flex flex-column align-items-end overflow-x-auto" style="width: 1024px;">
 	<table id="planePlanningTable" class="planningTable" style="display: box;"></table>
 	<table id="instructorPlanningTable" class="planningTable" style="display: box;"></table>
   </div><!-- d-flex justify-content-end -->

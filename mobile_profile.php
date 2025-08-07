@@ -27,13 +27,15 @@ if ($userId == 0) {
 if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	$displayed_id = $_REQUEST['displayed_id'] ;
 	if (! is_numeric($displayed_id)) journalise($userId, "F", "Numero d'utilisateur invalide: $displayed_id") ;
-	$read_only = ! ($userIsAdmin or $userIsInstructor or $displayed_id == $userId) ;
+	$read_only = ! ($userIsBoardMember or $userIsInstructor or $displayed_id == $userId) ;
+	$user_only = ($displayed_id == $userId) ;
 	if ($displayed_id != $userId)
 		mysqli_query($mysqli_link, "UPDATE jom_kunena_users SET uhits = uhits + 1 WHERE userid = $displayed_id")
 			or journalise($userId, "E", "Erreur systeme lors de la mise a jour de jom_kunena_users (uhits): " . mysqli_error($mysqli_link)) ;
 } else {
 	$displayed_id = $userId ;
 	$read_only = false ;
+	$user_only = true ;
 }
 $body_attributes = "onload=\"selectedUserId=$displayed_id;init();\"" ;
 $header_postamble = '<script data-cfasync="true" src="profile.js"></script>' ;
@@ -54,7 +56,7 @@ $me['name'] = db2web($me['name']) ;
 $me['username'] = db2web($me['username']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
-if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) {
+if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) {
 	$me['address'] = db2web($me['address']) ; 
 	$me['zipcode'] = db2web($me['zipcode']) ; 
 	$me['city'] = db2web($me['city']) ; 
@@ -65,6 +67,10 @@ if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) {
 	$me['company_city'] = db2web($me['c_city']) ; 
 	$me['company_country'] = db2web($me['c_country']) ;
 	$me['company_bce'] = db2web($me['c_bce']) ;
+	$me['contact_name'] = db2web($me['contact_name']) ;
+	$me['contact_relationship'] = db2web($me['contact_relationship']) ;
+	$me['contact_phone'] = db2web($me['contact_phone']) ;
+	$me['contact_email'] = db2web($me['contact_email']) ;
 }
 
 // Be paranoid
@@ -258,6 +264,22 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 			db2web($first_name) . ", nom: " . db2web($last_name)) ;
 }
 
+// Apply any change before fetching all displayed_id information
+if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'alt_contact' and !$read_only) {
+	$contactName = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_name'])) ;
+	$contactRelationship = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_relationship'])) ;
+	$contactPhone = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_phone'])) ;
+	$contactEmail = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_email'])) ;
+	mysqli_query($mysqli_link, "update $table_person set contact_name='$contactName', contact_relationship='$contactRelationship',
+		contact_phone='$contactPhone', contact_email='$contactEmail' where jom_id = $displayed_id")
+		or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_person: " . mysqli_error($mysqli_link)) ;
+	$affected_rows = mysqli_affected_rows($mysqli_link) ;
+	$change_profile_message = ($affected_rows > 0) ? "Changement(s) effectué(s).<br/>" : "Aucun changement effectué.<br/>" ;
+	if ($affected_rows > 0) 
+		journalise($userId, 'I', "Changement de contact alternatif($me[username]/$displayed_id): nom: " . db2web($contactName) . 
+			", relation: " . db2web($contactRelationship) . ", téléphone: " . db2web($contactPhone) .", email: " . db2web($contactEmail));
+}
+
 // Fetch AGAIN all information about the user since they may have been modified by the above...
 $result = mysqli_query($mysqli_link, "SELECT *,u.username as username,u.email as email, date(p.birthdate) as birthdate
 	FROM $table_person p 
@@ -271,7 +293,7 @@ $me['name'] = db2web($me['name']) ;
 $me['username'] = db2web($me['username']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
-if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) { // Private information only for admins & FI
+if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information only for admins & FI
 	$me['address'] = db2web($me['address']) ; 
 	$me['zipcode'] = db2web($me['zipcode']) ; 
 	$me['city'] = db2web($me['city']) ; 
@@ -282,6 +304,10 @@ if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) { // Private 
 	$me['company_city'] = db2web($me['c_city']) ; 
 	$me['company_country'] = db2web($me['c_country']) ;
 	$me['company_bce'] = db2web($me['c_bce']) ;
+	$me['contact_name'] = db2web($me['contact_name']) ;
+	$me['contact_relationship'] = db2web($me['contact_relationship']) ;
+	$me['contact_phone'] = db2web($me['contact_phone']) ;
+	$me['contact_email'] = db2web($me['contact_email']) ;
 }
 
 // Be paranoid
@@ -296,7 +322,7 @@ foreach($me as $key => $value)
 
 <form>
 <div class="row">
-		<label for="pilotSelect" class="col-form-label col-sm-6 col-md-4 col-lg-3">En tant que membre, vous pouvez choisir le membre à afficher:</label>
+		<label for="pilotSelect" class="col-form-label col-sm-6 col-md-4 col-lg-3">En tant que membre connecté(e), vous pouvez choisir le membre à afficher:</label>
 		<div class="col-sm-6 col-md-3 col-lg-2">
 			<select id="pilotSelect" name="displayed_id" class="form-select" onchange="pilotChange('<?=$_SERVER['PHP_SELF']?>', this);">
 			</select>
@@ -314,6 +340,8 @@ foreach($me as $key => $value)
 <?php
 print($change_profile_message) ; // Display any error message
 $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
+$user_only_attribute = (! $user_only) ? ' readonly disabled' : '' ;
+
 ?>
 </div> <!-- col -->
 </div> <!-- row -->
@@ -321,8 +349,17 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 <br/>
 <ul class="nav nav-tabs" role="tablist">
 	<li class="nav-item">
-  		<a class="nav-link active" role="presentation" data-bs-toggle="tab" data-bs-target="#main" aria-current="page" href="#main">Contact</a>
+  		<a class="nav-link active" role="presentation" data-bs-toggle="tab" data-bs-target="#main" aria-current="page" href="#main">Contact membre</a>
 	</li>
+<?php
+if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
+?>
+	<li class="nav-item">
+  		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#emergency_contact" aria-current="page" href="#main">Contact alternatif</a>
+	</li>
+<?php
+} // end of private information tab
+?>
 	<li class="nav-item">
   		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#validity" aria-current="page" href="#validity">Validités / annotations club</a>
 	</li>
@@ -343,7 +380,10 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 <div class="tab-content">
 
 <div id="main" class="tab-pane fade show active" role="tabpanel">
-
+<?php
+	$phoneIcon = ($me['cell_phone'] != '') ? "&nbsp;<a href=\"tel:$me[cell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Appeler\"></i></a>&nbsp;" : '' ;
+	$emailIcon = ($me['email'] != '') ? "&nbsp;<a href=\"mailto:$me[email]\"><i class=\"bi bi-envelope-fill\" title=\"Envoyer email\"></i></a>&nbsp;" : '' ;
+?>
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="Xform-horizontal">
 <input type="hidden" name="action" value="profile">
 <input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
@@ -373,7 +413,7 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label for="emailId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Adresse e-mail:</label>
+        <label for="emailId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Adresse e-mail<?=$emailIcon?>:</label>
         <div class="col-sm-4">
 	       	<div class="input-group">
                 <input type="email" class="form-control" name="email" id="emailId" value="<?=$me['email']?>" autocomplete="email" <?=$read_only_attribute?>>
@@ -382,7 +422,7 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label for="cell_phoneId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Téléphone mobile:</label>
+        <label for="cell_phoneId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Téléphone mobile<?=$phoneIcon?>:</label>
         <div class="col-sm-4">
 	       	<div class="input-group">
                 <input type="tel" class="form-control" name="cell_phone" id="cell_phoneId" value="<?=$me['cell_phone']?>" autocomplete="mobile tel" <?=$read_only_attribute?>>
@@ -403,7 +443,7 @@ $read_only_attribute = ($read_only) ? ' readonly disabled' : '' ;
 	</div> <!-- col -->
 </div> <!-- row -->
 <?php
-if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
+if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
 ?>
 <div class="row mb-3">
         <label for="addressId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Rue:</label>
@@ -441,7 +481,7 @@ if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) { // Private 
         <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Date de naissance:</label>
         <div class="col-sm-4">
         	<div class="input-group">
-                <input type="date" class="form-control" name="birthdate" placeholder="AAAA-MM-JJ" value="<?=$me['birthdate']?>" autocomplete="bday" <?=$read_only_attribute?>>
+                <input type="date" class="form-control" name="birthdate" placeholder="AAAA-MM-JJ" value="<?=$me['birthdate']?>" autocomplete="bday" <?=$user_only_attribute?>>
                 <span class="input-group-addon">(optionnel)</span>
             </div><!-- input group -->
 	</div> <!-- col -->
@@ -450,7 +490,7 @@ if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) { // Private 
         <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Genre:</label>
         <div class="col-sm-4">
         	<div class="input-group">
-				<select class="form-control" name="sex" <?=$read_only_attribute?>>
+				<select class="form-control" name="sex" <?=$user_only_attribute?>>
 					<option value="0" <?=($me['sex'] == 0) ? 'selected':''?>>Inconnu</option>
 					<option value="1" <?=($me['sex'] == 1) ? 'selected':''?>>Masculin</option>
 					<option value="2" <?=($me['sex'] == 2) ? 'selected':''?>>Féminin</option>
@@ -466,7 +506,7 @@ if ($userIsAdmin or $userIsInstructor or $userId == $displayed_id) { // Private 
         <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Heures de vol:</label>
         <div class="col-sm-4">
         	<div class="input-group">
-				<select class="form-control" name="hide_flight" <?=$read_only_attribute?>>
+				<select class="form-control" name="hide_flight" <?=$user_only_attribute?>>
 					<option value="0" <?=($me['hide_flight_time'] == 0) ? 'selected':''?>>Montrer</option>
 					<option value="1" <?=($me['hide_flight_time'] == 1) ? 'selected':''?>>Cacher</option>
 				</select>
@@ -481,7 +521,7 @@ if (! $read_only) {
 }
 ?>
 </form>
-</div> <!-- id=main -->
+</div> <!-- tabpanel id=main -->
 
 <div id="log" class="tab-pane fade" role="tabpanel">
 <div class="row mb-5">
@@ -531,7 +571,7 @@ if (! $read_only) {
 }
 ?>
 </form>
-</div> <!-- tab id = log -->
+</div> <!-- tabpanel id = log -->
 
 <div id="photo" class="tab-pane fade" role="tabpanel">
 <?php
@@ -558,17 +598,69 @@ if (! $read_only) {
 	</div> <!-- row -->') ;
 }
 ?>
-</div> <!-- id=photo -->
+</div> <!-- tabpanel id=photo -->
+
+<?php
+if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
+	$phoneIcon = ($me['contact_phone'] != '') ? "&nbsp;<a href=\"tel:$me[contact_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Appeler\"></i></a>&nbsp;" : '' ;
+	$emailIcon = ($me['contact_email'] != '') ? "&nbsp;<a href=\"mailto:$me[contact_email]\"><i class=\"bi bi-envelope-fill\" title=\"Envoyer email\"></i></a>&nbsp;" : '' ;
+?>
+<div id="emergency_contact" class="tab-pane fade" role="tabpanel">
+<div class="row">
+<p>Veuillez introduire les informations de contact d'un proche (famille, ami, ...). Ces informations,
+	exclusivement visibles par les instructeurs et les membres de l'Organisme d'Administration du club,
+	sont nécessaires en cas d'urgence ou de nécessité absolue ( accident , impossibilité de vous joindre, ..). 
+	Il ne sera fait usage de ce contact qu'en cas d'extrême obligation.</p>
+<p>Si vous avez des questions ou des préoccupations concernant la confidentialité de ces informations, n'hésitez pas à 
+	contacter <a href="mailto:privacy@spa-aviation.be">privacy@spa-aviation.be</a>.</p>
+</div> <!-- row -->
+<div class="row">
+<form action="<?=$_SERVER['PHP_SELF']?>" method="post" role="form" class="form-horizontal">
+<input type="hidden" name="action" value="alt_contact">
+<input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
+<div class="input-group mb-3">
+	<label for="contactNameId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Nom du contact:</label>
+	<div class="col-sm-4">
+		<input type="text" class="form-control" name="c_name" id="contactNameId" value="<?=$me['contact_name']?>" <?=$user_only_attribute?>>
+	</div> <!-- col -->
+</div> <!-- input-group -->
+<div class="input-group mb-3">
+	<label for="contactRelationshipId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Relation:</label>
+	<div class="col-sm-4">
+		<input type="text" class="form-control" name="c_relationship" id="contactRelationshipId" value="<?=$me['contact_relationship']?>" placeholder="Conjoint(e), parent, partenaire, ..." <?=$user_only_attribute?>>
+	</div> <!-- col -->
+</div> <!-- input-group -->
+<div class="input-group mb-3">
+	<label for="contactPhoneId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Téléphone<?=$phoneIcon?>:</label>
+	<div class="col-sm-4">
+		<input type="text" class="form-control" name="c_phone" id="contactRelationshipId" value="<?=$me['contact_phone']?>" placeholder="Sous la forme +32471234567 sans les 0 ou les '.'" <?=$user_only_attribute?>>
+	</div> <!-- col -->
+</div> <!-- input-group -->
+<div class="input-group mb-3">
+	<label for="contactEmailId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Adresse e-mail<?=$emailIcon?>:</label>
+	<div class="col-sm-4">
+		<input type="email" class="form-control" name="c_email" id="contactEmailId" value="<?=$me['contact_email']?>" <?=$user_only_attribute?>>
+	</div> <!-- col -->
+</div> <!-- input-group -->
+<?php
+if ($user_only) {
+	print('<div class="form-group"><button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Enregistrer les changements</button></div>') ;
+}
+?>
+</form>
+</div> <!-- row -->
+</div> <!-- tabpanel id=emergency_contact -->
+<?php
+} // end of private information tab
+?>
 
 <div id="social_network" class="tab-pane fade" role="tabpanel">
 <div class="row">
-	Les adresses Internet des pages des r&eacute;seaux sociaux de ce membre. Les logos, si pr&eacute;sents, sont cliquables.
+	Les adresses Internet des pages des réseaux sociaux de ce membre. Les logos, si présents, sont cliquables.
 </div> <!-- row -->
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
 <?php
-if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'social' and !$read_only) {
-}
 $facebook_img = ($me['facebook'] != '') ? "<a href=\"https://www.facebook.com/$me[facebook]\" target=\"_blank\"><img src=\"facebook_blue_100.png\" width=\”15\" height=\"15\"></a>\n" : '' ;
 $linkedin_img = ($me['linkedin'] != '') ? "<a href=\"https://www.linkedin.com/in/$me[linkedin]\" target=\"_blank\"><img src=\"linkedin.jpg\"></a>\n" : "" ;
 $skype_img = ($me['skype'] != '') ? "<a href=\"skype:$me[skype]\"><img src=\"skype.png\"></a>\n" : "" ;
@@ -628,7 +720,7 @@ if (! $read_only) {
 	<hr>
 	<p>Pour changer ces données, veuillez contacter par email: <a href="mailto:eric.vyncke@spa-aviation.be">eric.vyncke@spa-aviation.be</a>.</p>
 </div>
-</div> <!-- id=social_network -->
+</div> <!-- id=company -->
 
 <div id="validity" class="tab-pane fade">
 
@@ -636,8 +728,8 @@ if (! $read_only) {
 if (! $read_only) {
 ?>
 <div class="row">
-<div class="jumbotron">ATTENTION, ces validit&eacute;s ne sont pas tenues en compte lors des r&eacute;servations dans le futur.
-<br/><b>LE PILOTE DOIT TOUJOURS LES VERIFIER</b>
+<div class="jumbotron">ATTENTION, ces validités ne sont pas tenues en compte pour des réservations dans le futur.
+<br/><b>LE PILOTE DOIT TOUJOURS LES VÉRIFIER</b>
 </div> <!-- col -->
 </div> <!-- row -->
 
@@ -659,6 +751,7 @@ if (! $read_only) {
 <?php
 $result = mysqli_query($mysqli_link, "select *
 	from $table_validity_type t left join $table_validity v on validity_type_id = t.id and jom_id = $displayed_id
+	where mandatory >= 0
 	order by t.name") or journalise($userId, "F", "Erreur systeme a propos de l'access a validity: " . mysqli_error($mysqli_link)) ;
 $options = '<option value="-1" style=\"background-color: #cccccc;\" disabled selected> -- validité/annotation à ajouter et remplir les cases sur cette ligne--</option>' ;
 while ($row = mysqli_fetch_array($result)) {
@@ -667,10 +760,12 @@ while ($row = mysqli_fetch_array($result)) {
 			$delete = " <a href=\"$_SERVER[PHP_SELF]?displayed_id=$displayed_id&validity_id=$row[id]&action=delete_rating\"><i class=\"bi bi-trash-fill text-danger\"></i></a>" ;
 		else
 			$delete = '' ;
+		if ($row['mandatory'] < 0) # No more in use
+			continue ;
 		if ($row['mandatory_access_control'] == 0)
 			$private_validity = '' ;
-		else if ($userId == $displayed_id or $userIsInstructor)
-			$private_validity = ' (seuls le pilote et les instructeurs voient cette ligne) ' ;
+		else if ($userId == $displayed_id or $userIsInstructor or $userIsBoardMember)
+			$private_validity = ' (seuls le pilote, les administrateurs, et les instructeurs voient cette ligne) ' ;
 		else
 			continue ;
 		print("<tr><td class=\"validityNameCell\">" . db2web($row['name']) . "$private_validity$delete</td>\n") ;
@@ -679,7 +774,10 @@ while ($row = mysqli_fetch_array($result)) {
 			print("<td class=\"validityCell\"><input type=\"text\" name=\"ident_value[$row[id]]\" value=\"" . db2web($row['ident_value']) . "\"$readonly></td>\n") ;
 		else	
 			print("<td class=\"validityCell\"></td>\n") ;
-		print("<td class=\"validityCell\"><input type=\"date\" name=\"grant_date[$row[id]]\" value=\"$row[grant_date]\"$readonly></td>\n") ;
+		if ($row['mandatory_access_control'] == 0)  # Grant date is visible only for non privacy-related validities (e.g. non medical)
+			print("<td class=\"validityCell\"><input type=\"date\" name=\"grant_date[$row[id]]\" value=\"$row[grant_date]\"$readonly></td>\n") ;
+		else
+			print("<td class=\"validityCell\"></td>\n") ;
 		if ($row['time_limitation'])
 			print("<td class=\"validityCell\"><input type=\"date\" name=\"expire_date[$row[id]]\" value=\"$row[expire_date]\"$readonly></td>\n") ;
 		else	
@@ -702,7 +800,7 @@ print("</tbody>
 </table>
 </div> <!-- table responsive-->
 </div> <!-- row -->\n") ;
-if ($userId == $displayed_id) {
+if ($user_only) {
 ?>
 <div class="checkbox col-sd-offset-2">
 	<label>

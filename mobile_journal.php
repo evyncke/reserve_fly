@@ -47,8 +47,8 @@ $start = (isset($_REQUEST['start'])) ? $_REQUEST['start'] : 99999999 ;
 $sql_filter = '' ;
 if (isset($_REQUEST['id']) and is_numeric($_REQUEST['id']))
 	$sql_filter = " AND j_jom_id = $_REQUEST[id]" ;
-  else if (isset($_REQUEST['user']))
-	$sql_filter = " AND name like '%" . web2db($_REQUEST['user']) . "%'" ;
+  else if (isset($_REQUEST['username']))
+	$sql_filter = " AND name like '%" . web2db($_REQUEST['username']) . "%'" ;
  else if (isset($_REQUEST['msg']))
 	$sql_filter = " AND j_message like '%" . web2db($_REQUEST['msg']) . "%'" ;
 $sql = "SELECT * FROM $table_journal 
@@ -58,6 +58,7 @@ $sql = "SELECT * FROM $table_journal
 		LIMIT 0, 25" ;
 $result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access au journal: " . mysqli_error($mysqli_link)) ;
 $first_id = -1 ;
+$last_id = -1 ;
 while ($row = mysqli_fetch_array($result)) {
 	if ($first_id < 0) $first_id = $row['j_id'] ;
 	$last_id = $row['j_id'] ;

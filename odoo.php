@@ -3,20 +3,27 @@
 <?php
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require_once('dbi.php') ;
-require_once('odoo.class.php') ;
+require_once('odoo-json.class.php') ;
 print("<pre>\n") ;
 print("Library loaded\n") ;
 
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
 # For dirty attempts...
-$common = $odooClient->common;
-$models = $odooClient->models ;
 $uid = $odooClient->uid ;
-$encoder = $odooClient->encoder ;
 $odooClient->debug = true ;
 
 print("Connect with UID: $uid\n") ;
+
+$result = $odooClient->Read('res.partner', array(array(32, 37)), array('fields' => array('complete_name', 'lang'))) ;
+
+$result = $odooClient->Update('res.partner', array(32, 37), array('lang' => 'fr_BE')) ;
+
+$result = $odooClient->Read('res.partner', array(array(32, 37)), array('fields' => array('complete_name', 'lang'))) ;
+
+var_dump($odooClient->GetFields('account.move')) ;
+
+exit ;
 
 $result= $odooClient->SearchRead('account.move', 
 	array(array(
@@ -29,6 +36,7 @@ $result= $odooClient->SearchRead('account.move',
 )),  
 	array('fields'=>array('partner_id', 'invoice_date_due', 'amount_total', 'payment_state'))); 
 
+print_r($result) ;
 print("Length = " . count($result) . "\n") ;
 $DueDate = '' ;
 foreach($result as $f=>$desc) {
@@ -48,7 +56,6 @@ foreach($result as $f=>$desc) {
         }
 }
 print('</pre>') ;
-exit ;
 
 # Display all members with coordinates
 

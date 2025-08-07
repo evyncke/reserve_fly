@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2025-2025 Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ if ($userId == 0) {
 	//exit ;
 }
 $plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['plane'])) : 'OO-ALD' ;
-$body_attributes = "style=\"height: 100%; min-height: 100%; width:100%;\" onload=\"init();\"" ;
+$body_attributes = 'style="height: 100%; min-height: 100%; width:100%;" onload="init();mobile_performance_page_loaded();"' ;
 $header_postamble = "
 <script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>
 <link rel=\"stylesheet\" type=\"text/css\" href=\"mobile_performance.css\">
