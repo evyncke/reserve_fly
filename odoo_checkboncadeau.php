@@ -296,6 +296,7 @@ foreach($result as $f=>$desc) {
                 else if (array_key_exists($flightReference, $referenceIDFlightMap)) {
                     $var1=$referenceIDFlightMap[$flightReference];
                     $varRef=$flightReference." ".$partner." (odoo)";
+                    $varRef=str_replace("'"," ",$varRef);
                     $varDate=$date;
                     print("<td $styleRed><a href=\"javascript:void(0);\" onclick=\"createPaymentFunction('$_SERVER[PHP_SELF]', '$var1', '$id', '$credit', '$varDate', '$varRef')\">Créer paiement</a><br>dans<br>
                     <a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDFlightMap[$flightReference]\">$flightReference</a></td>");
