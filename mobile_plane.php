@@ -120,6 +120,18 @@ function generateMaintenanceClass($entretien, $compteur) {
 		</td>
 	</tr>\n");
 	print("</tr>\n") ;
+	print("<tr><td>Prise électrique</td><td>") ;
+	foreach (explode(',', $plane_row['power']) as $prise) {
+		switch (trim(strtolower($prise))) {
+			case 'usb-a':
+			case 'usba': print("<i class=\"bi bi-usb\"></i> USB-A ") ; break ;
+			case 'usb-c':
+			case 'usbc': print("<i class=\"bi bi-usb-c\"></i> USB-C ") ; break ;
+			case '12v': print("<i class=\"bi bi-plug-fill\"></i> 12V ") ; break ;
+			default: print("$prise") ;
+		}
+	}
+	print("</td></tr>") ;
 	print("<tr><td>Dernier vol sur FlightAware  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"https://flightaware.com/live/flight/" . strtoupper($plane_row['id']) . "\" target=\"_blank\"><img src=\"fa.ico\" border=\"0\" width=\"24\" height=\"24\"></a></td></tr>
 	<tr><td>Carnet de routes</td><td><a href=\"mobile_planelog.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-journal\"></i></a></td></tr>
 	<tr><td>Masse et centrage</i></td><td><a href=\"mobile_wnb.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-rulers\"></i></a></td></tr>\n") ;
