@@ -1823,6 +1823,7 @@ if(performanceJSON!="") {
 
     //jQuery("#bookingMessageModal").modal('show') ;
 
-    window.onload=mobile_performance_page_loaded();
+    // Moved to the $body_preamble to allow normal mobile page initialization
+    // window.onload=mobile_performance_page_loaded();
 
 }
