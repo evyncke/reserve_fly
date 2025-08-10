@@ -69,17 +69,13 @@ function displayMobileMETAR(station) {
 				} else {
 					setTimeout(function () { displayMobileMETAR(station);} , 1000 * 60 * 5) ; // Refresh every 5 minutes
 					if (response.condition != null && response.condition == 'VMC')
-						// elem.style.backgroundColor =  'paleGreen' ;
 						elem.className += 'text-bg-success' ;
 					else if (response.condition != null && response.condition == 'MMC')
-						//elem.style.backgroundColor = 'orange' ;
 						elem.className += 'text-bg-warning' ;
 					else if (response.condition != null && response.condition == 'IMC')
-						//elem.style.backgroundColor = 'pink' ;
 						elem.className += 'text-bg-danger' ;
 					else
 						elem.className += 'text-bg-secondary' ;
-						//elem.style.backgroundColor = 'lightGray' ;
 					elem.innerHTML = '<b>' + response.METAR + '</b>' ;
 					document.getElementById('sourceId').innerText = response.source ;
 					if (station == 'EBSP') {
