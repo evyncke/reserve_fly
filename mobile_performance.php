@@ -75,7 +75,11 @@ if ($plane == '') {
                 <tbody class="table-divider">
                 <?php
                     $readonly = '' ;
-                    //QNH
+                    //Airport
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Airport</td>") ;
+                    print("<td class=\"py-0\"><input type=\"text\" id=\"id_takeoff_i_station\" class=\"text-end py-0 py-md-1\" value=\"EBSP\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_takeoff_i_station/unit\">xx</span></td>") ;
+                   //QNH
                     print("<tr><td class=\"text-end py-0 py-md-1\">QNH</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_qnh\" class=\"text-end py-0 py-md-1\" value=\"1013\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_qnh/unit\">xx</span></td>") ;
@@ -87,9 +91,17 @@ if ($plane == '') {
                     print("<tr><td class=\"text-end py-0 py-md-1\">Température</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_temperature\" class=\"text-end py-0 py-md-1\" value=\"20\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_temperature/unit\">xx</span></td>") ;
+                    //Direction Vent
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Direction vent</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_wind_direction\" class=\"text-end py-0 py-md-1\" value=\"230\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_takeoff_i_wind_direction/unit\">xx</span></td>") ;
+                    //Vitesse Vent
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Vitesse vent</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_wind_speed\" class=\"text-end py-0 py-md-1\" value=\"10\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_takeoff_i_wind_speed/unit\">xx</span></td>") ;
                     //Piste
                     print("<tr><td class=\"text-end py-0 py-md-1\">Piste</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_runway_number\" class=\"text-end py-0 py-md-1\" value=\"23\" style=\"width: 60%;\" $readonly>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_runway_number\" min=\"0\" max=\"35\" class=\"text-end py-0 py-md-1\" value=\"23\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_runway_number/unit\">xx</span></td>") ;
                     //Type Piste
                     print("<tr><td class=\"text-end py-0 py-md-1\">Type Piste</td>") ;
@@ -99,27 +111,19 @@ if ($plane == '') {
                     print("<tr><td class=\"text-end py-0 py-md-1\">Pente Piste</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_runway_slope\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_runway_slope/unit\">xx</span></td>") ;
-                    //Direction Vent
-                    print("<tr><td class=\"text-end py-0 py-md-1\">Direction vent</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_wind_direction\" class=\"text-end py-0 py-md-1\" value=\"230\" style=\"width: 60%;\" $readonly>") ;
-                    print("&nbsp;<span id=\"id_takeoff_i_wind_direction/unit\">xx</span></td>") ;
-                    //Vitesse Vent
-                    print("<tr><td class=\"text-end py-0 py-md-1\">Vitesse vent</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_wind_speed\" class=\"text-end py-0 py-md-1\" value=\"10\" style=\"width: 60%;\" $readonly>") ;
-                    print("&nbsp;<span id=\"id_takeoff_i_wind_speed/unit\">xx</span></td>") ;
-                //Poids
+                    //Poids
                     print("<tr><td class=\"text-end py-0 py-md-1\">Poids</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_weight\" class=\"text-end py-0 py-md-1\" value=\"720\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_weight/unit\">xx</span></td>") ;
-                //Flaps
+                    //Flaps
                     print("<tr><td class=\"text-end py-0 py-md-1\">Flaps</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_flaps\" class=\"text-end py-0 py-md-1\" value=\"0\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_flaps/unit\">xx</span></td>") ;
-                //Pilot skill
+                    //Pilot skill
                     print("<tr><td class=\"text-end py-0 py-md-1\">Pilot Skill</td>") ;
                     print("<td class=\"py-0\"><select id=\"id_takeoff_i_pilot_skill\"  name=\"id_takeoff_i_pilot_skill\" style=\"width: 60%;\" $readonly></select>");
                     print("&nbsp;<span id=\"id_takeoff_i_pilot_skill/unit\">xx</span></td>") ;
-                //Aircraft Coefficiant
+                    //Aircraft Coefficiant
                     print("<tr><td class=\"text-end py-0 py-md-1\">Aircraft Coefficiant</td>") ;
                     print("<td class=\"py-0\"><select id=\"id_takeoff_i_aircraft_coefficiant\"  name=\"id_takeoff_i_aircraft_coefficiant\" style=\"width: 60%;\" $readonly></select>");
                     print("&nbsp;<span id=\"id_takeoff_i_aircraft_coefficiant/unit\">xx</span></td>") ;
@@ -248,6 +252,10 @@ if ($plane == '') {
                 <tbody class="table-divider">
                 <?php
                     $readonly = '' ;
+                    //Airport
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Airport</td>") ;
+                    print("<td class=\"py-0\"><input type=\"text\" id=\"id_landing_i_station\" class=\"text-end py-0 py-md-1\" value=\"EBSP\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_station/unit\">xx</span></td>") ;
                     //QNH
                     print("<tr><td class=\"text-end py-0 py-md-1\">QNH</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_qnh\" class=\"text-end py-0 py-md-1\" value=\"1013\" style=\"width: 60%;\" $readonly>") ;
@@ -260,9 +268,17 @@ if ($plane == '') {
                     print("<tr><td class=\"text-end py-0 py-md-1\">Température</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_temperature\" class=\"text-end py-0 py-md-1\" value=\"20\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_landing_i_temperature/unit\">xx</span></td>") ;
+                    //Direction Vent
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Direction vent</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_wind_direction\" class=\"text-end py-0 py-md-1\" value=\"230\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_wind_direction/unit\">xx</span></td>") ;
+                    //Vitesse Vent
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Vitesse vent</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_wind_speed\" class=\"text-end py-0 py-md-1\" value=\"10\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_wind_speed/unit\">xx</span></td>") ;
                     //Piste
                     print("<tr><td class=\"text-end py-0 py-md-1\">Piste</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_runway_number\" class=\"text-end py-0 py-md-1\" value=\"23\" style=\"width: 60%;\" $readonly>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_runway_number\" min=\"0\" max=\"35\" class=\"text-end py-0 py-md-1\" value=\"23\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_landing_i_runway_number/unit\">xx</span></td>") ;
                     //Type Piste
                     print("<tr><td class=\"text-end py-0 py-md-1\">Type Piste</td>") ;
@@ -272,27 +288,19 @@ if ($plane == '') {
                     print("<tr><td class=\"text-end py-0 py-md-1\">Pente Piste</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_runway_slope\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_landing_i_runway_slope/unit\">xx</span></td>") ;
-                    //Direction Vent
-                    print("<tr><td class=\"text-end py-0 py-md-1\">Direction vent</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_wind_direction\" class=\"text-end py-0 py-md-1\" value=\"230\" style=\"width: 60%;\" $readonly>") ;
-                    print("&nbsp;<span id=\"id_landing_i_wind_direction/unit\">xx</span></td>") ;
-                    //Vitesse Vent
-                    print("<tr><td class=\"text-end py-0 py-md-1\">Vitesse vent</td>") ;
-                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_wind_speed\" class=\"text-end py-0 py-md-1\" value=\"10\" style=\"width: 60%;\" $readonly>") ;
-                    print("&nbsp;<span id=\"id_landing_i_wind_speed/unit\">xx</span></td>") ;
-                //Poids
+                   //Poids
                     print("<tr><td class=\"text-end py-0 py-md-1\">Poids</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_weight\" class=\"text-end py-0 py-md-1\" value=\"720\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_landing_i_weight/unit\">xx</span></td>") ;
-                //Flaps
+                    //Flaps
                     print("<tr><td class=\"text-end py-0 py-md-1\">Flaps</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_flaps\" class=\"text-end py-0 py-md-1\" value=\"0\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_landing_i_flaps/unit\">xx</span></td>") ;
-                //Pilot skill
+                    //Pilot skill
                     print("<tr><td class=\"text-end py-0 py-md-1\">Pilot Skill</td>") ;
                     print("<td class=\"py-0\"><select id=\"id_landing_i_pilot_skill\"  name=\"id_landing_i_pilot_skill\" style=\"width: 60%;\" $readonly></select>");
                     print("&nbsp;<span id=\"id_landing_i_pilot_skill/unit\">xx</span></td>") ;
-                //Aircraft Coefficiant
+                    //Aircraft Coefficiant
                     print("<tr><td class=\"text-end py-0 py-md-1\">Aircraft Coefficiant</td>") ;
                     print("<td class=\"py-0\"><select id=\"id_landing_i_aircraft_coefficiant\"  name=\"id_landing_i_aircraft_coefficiant\" style=\"width: 60%;\" $readonly></select>");
                     print("&nbsp;<span id=\"id_landing_i_aircraft_coefficiant/unit\">xx</span></td>") ;

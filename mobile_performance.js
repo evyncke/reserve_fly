@@ -7,6 +7,9 @@ function mobile_performance_page_loaded() {
   //document.getElementById("id_notedefrais_input_odooreference").readOnly=true;;
   //document.getElementById("id_notedefrais_input_odooreference").style.backgroundColor = ReadOnlyColor;
  
+    document.getElementById("id_takeoff_i_station").onchange = function() {
+        stationChanged("takeoff");
+    };
     document.getElementById("id_takeoff_i_qnh").onchange = function() {
         QNHChanged("takeoff");
     };
@@ -81,6 +84,7 @@ function mobile_performance_page_loaded() {
     //document.getElementById("id_submit_notedefrais").disabled=true;
     planeChanged();
     setToolTip();
+    stationChanged("takeoff")
 }
 
 //==============================================
@@ -94,6 +98,17 @@ function planeChanged()
     document.getElementById("id_takeoff_plane").innerHTML=plane;
     document.getElementById("id_landing_plane").innerHTML=plane;
     updateAll();
+}
+//==============================================
+// Function: stationChanged
+// Purpose: Warning: This change is not synchronised
+//==============================================
+function stationChanged(perfoType)
+{
+    Inputs["station"]=document.getElementById("id_"+perfoType+"_i_station").value.toUpperCase();
+    document.getElementById("id_takeoff_i_station").value=Inputs["station"];
+    document.getElementById("id_landing_i_station").value=Inputs["station"];
+    setMETAR(Inputs["station"]);
 }
 //==============================================
 // Function: QNHChanged
@@ -1459,6 +1474,125 @@ function interpolateMapTable(columnIndex, columnInputValues, columnMap)
 }
 
 //==============================================
+// Function: setMETAR
+// Purpose: set the metar for an airport
+// Airport info : https://aviationweather.gov/api/data/airport?ids=KMCI&format=json
+// https://airportdb.io/#howtouse
+// https://airportdb.io/api/v1/airport/KJFK?apiToken=e24a7eb5f31c2072b2a0ef318468849fb7faaf9ff931fb4c4b1ca7a76c989707bef0d6db0c355fe5585f1c32cc2289c0
+//==============================================
+function setMETAR(station) {
+    station=station.toUpperCase();
+    if(station.length!=4) {
+        alert("Error:setMetar: le nom de la station doit comporter 4 lettres \""+station+"\"");
+        return;
+    }
+	var XHR=new XMLHttpRequest();
+	XHR.onreadystatechange = function() {
+		if(this.readyState  == 4) {
+			if(this.status  == 200 || this.status == 304) { // OK or not modified
+				try {
+					var response = eval('(' + this.responseText.trim() + ')') ;
+				} catch(err) {
+                    alert("ERROR:setMETAR: Impossible to retrieve the METAR: "+err);
+					return ;
+				}
+				if (response.error != '') {
+                    alert("ERROR:setMETAR: Impossible to retrieve the METAR of "+station+":\n "+response.error);
+                    setRunway(station);
+                    return;
+                }
+                else {
+                    document.getElementById("id_takeoff_i_qnh").value=response.QNH;
+                    QNHChanged("takeoff");
+
+                    document.getElementById("id_takeoff_i_temperature").value=response.temperature;                   
+                    temperatureChanged("takeoff");
+
+                    document.getElementById("id_takeoff_i_altitude").value=response.elevation;                   
+                    altitudeChanged("takeoff");
+ 
+                    document.getElementById("id_takeoff_i_wind_direction").value=response.wind_direction;                   
+                    document.getElementById("id_takeoff_i_wind_speed").value=response.wind_velocity;                   
+                    windChanged("takeoff");
+
+                    updateAll();
+                    setRunway(station);
+				}
+			}
+		}
+	}
+	var requestUrl = 'metar.php?station=' + station ;
+	XHR.open("GET", requestUrl, true) ;
+	XHR.send(null) ;
+}
+
+
+//==============================================
+// Function: setRunway
+// Purpose: set the runway for an airport
+// Airport info : 
+// https://airportdb.io/#howtouse
+// https://airportdb.io/api/v1/airport/KJFK?apiToken=e24a7eb5f31c2072b2a0ef318468849fb7faaf9ff931fb4c4b1ca7a76c989707bef0d6db0c355fe5585f1c32cc2289c0
+//==============================================
+function setRunway(station) {
+    station=station.toUpperCase();
+    if(station.length!=4) {
+        alert("Error:setRunway: le nom de la station doit comporter 4 lettres \""+station+"\"");
+        return;
+    }
+	var XHR=new XMLHttpRequest();
+	XHR.onreadystatechange = function() {
+		if(this.readyState  == 4) {
+			if(this.status  == 200 || this.status == 304) { // OK or not modified
+				try {
+					var response = eval('(' + this.responseText.trim() + ')') ;
+				} catch(err) {
+                    alert("ERROR:setMETAR: Impossible to retrieve the AirportInfo: "+err);
+					return ;
+				}
+				if (response.hasOwnProperty("statusCode")) {
+                    alert("ERROR:setRunway: Impossible to retrieve the Airport Info of "+station+":\n "+response.message);
+                    return;
+                }
+                else {
+                    // runway: response.runways[].he_heading_degT (en degree) + le_heading_degT (en degree) + length_ft + he_ident (23) + le_indent (04)
+                    // type de piste
+                    var runways=response.runways;
+                    for(var i=0;i<runways.length;i++) {
+                        var runway=runways[i];
+                        var headingRunway1=runway.he_heading_degT;
+                        var headingRunway2=runway.le_heading_degT;
+                        var nameRunway1=runway.he_ident;
+                        var nameRunway2=runway.le_ident;
+                        var lengthRunway=runway.length_ft;
+                        var typeRunway=runway.surface; // ASP GRS
+
+                    }
+                    /*
+                    document.getElementById("id_takeoff_i_qnh").value=response.QNH;
+                    QNHChanged("takeoff");
+
+                    document.getElementById("id_takeoff_i_temperature").value=response.temperature;                   
+                    temperatureChanged("takeoff");
+
+                    document.getElementById("id_takeoff_i_altitude").value=response.elevation;                   
+                    altitudeChanged("takeoff");
+ 
+                    document.getElementById("id_takeoff_i_wind_direction").value=response.wind_direction;                   
+                    document.getElementById("id_takeoff_i_wind_speed").value=response.wind_velocity;                   
+                    windChanged("takeoff");
+*/
+                    updateAll();
+				}
+			}
+		}
+	}
+	var requestUrl = 'https://airportdb.io/api/v1/airport/'+station+'?apiToken=e24a7eb5f31c2072b2a0ef318468849fb7faaf9ff931fb4c4b1ca7a76c989707bef0d6db0c355fe5585f1c32cc2289c0' ;
+	XHR.open("GET", requestUrl, true) ;
+	XHR.send(null) ;
+}
+
+//==============================================
 // Function: setToolTip
 // Purpose: Set the tooltip associated to an output
 //==============================================
@@ -1636,6 +1770,8 @@ var ReadOnlyColor="AliceBlue";
 
 // init Inputs
 var Inputs=Array();
+Inputs["station"]="EBSP";
+Inputs["station/unittype"]="string";
 Inputs["qnh"]=1013;
 Inputs["qnh/unit"]="hPa";
 Inputs["qnh/displayedunit"]="hPa";
