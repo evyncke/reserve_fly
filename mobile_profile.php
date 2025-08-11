@@ -232,10 +232,10 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 	$zipcode = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['zipcode']))) ;
 	$city = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['city']))) ;
 	$country = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['country'])) ;
-	$birthdate = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['birthdate'])) ;
-	$sex = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['sex'])) ;
+	$birthdate = (isset($_REQUEST['birthdate'])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['birthdate'])) : '';
+	$sex = (isset($_REQUEST['sex'])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['sex'])) : 0 ;
 	if (!is_numeric($sex)) $sex = 0 ;
-	$hide_flight = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['hide_flight'])) ;
+	$hide_flight = (isset($_REQUEST['hide_flight'])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['hide_flight'])) : 0 ;
 	if (!is_numeric($hide_flight)) $hide_flight = 0 ;
 	$first_name = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['first_name']))) ;
 	$last_name = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['last_name']))) ;

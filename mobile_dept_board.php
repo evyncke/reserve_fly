@@ -159,7 +159,7 @@ if ($sql_date == $special_date) {
 } else {
     $sql = "SELECT *, i.last_name as ilast_name, i.jom_id as iid,
         pi.last_name as plast_name, pi.jom_id as pid,
-        pax.p_lname as clast_name
+        pax.p_lname as clast_name, if(NOW() > r_start, 1, 0) as in_the_past
         FROM $table_bookings b
         JOIN $table_person pi ON pi.jom_id = r_pilot
         LEFT JOIN $table_person i ON i.jom_id = r_instructor		
@@ -167,7 +167,7 @@ if ($sql_date == $special_date) {
         LEFT JOIN $table_flights fl ON r_id = f_booking
         LEFT JOIN $table_pax_role pr ON fl.f_id = pr.pr_flight AND pr.pr_role = 'C'
         LEFT JOIN $table_pax pax ON pax.p_id = pr.pr_pax
-        WHERE  p.actif = 1 AND p.ressource = 0 AND r_cancel_date IS NULL AND DATE(r_start) = '$sql_date' AND r_start >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
+        WHERE  p.actif = 1 AND p.ressource = 0 AND r_cancel_date IS NULL AND DATE(r_start) = '$sql_date' AND r_start >= DATE_SUB(NOW(), INTERVAL 30 MINUTE) and r_from = 'EBSP'
         ORDER BY r_start, r_plane ASC LIMIT 0,20" ;
 	$result = mysqli_query($mysqli_link, $sql)
 		or journalise($userId, "F", "Cannot retrieve bookings: " . mysqli_error($mysqli_link)) ;
@@ -194,8 +194,8 @@ if ($sql_date == $special_date) {
 		$time = substr($row['r_start'], 11, 2) .  substr($row['r_start'], 14, 2);  
         $plane = substr($row['r_plane'], 0, 2) . substr($row['r_plane'], 3, 3) ; // TODO actually remove the '-'
         print('<div class="row mx-0 my-4 px-0 flex-nowrap">') ; // Set boostrap margin/padding left-right to 0 to align board characters with the black backgound div
-        boardPrint($time, 4, 1) ;
-        boardPrint($plane, 5, 1) ;
+        boardPrint($time, 4, 1, ($row['in_the_past'] ? "gray" : "white")) ;
+        boardPrint($plane, 5, 1, ($row['in_the_past'] ? "gray" : "white")) ;
         boardPrint($name, 10, 1, "yellow") ;
         boardPrint($description, 10, 1) ;
         print("<br/>") ;

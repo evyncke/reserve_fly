@@ -16,6 +16,52 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
    limitations under the License.
 
 */
+
+// Alas need to block some addresses...
+$client_ip = $_SERVER['REMOTE_ADDR'];
+// Would probably need to use the X-Forwarded-For header if behind a proxy
+
+// The blocked prefix and subnet mask length should probably be an array with mix IPv4/IPv6 addresses
+$blocked_prefix = '2a03:cfc0:8000::';
+$subnet_length = 33;
+
+// Convert an IPv6 address to a binary string
+function ipv6ToBinary($ip) {
+    $packed = inet_pton($ip);
+    return $packed ? unpack('A16', $packed)[1] : false;
+}
+
+// Check if an IPv6 address is in a given subnet
+function isInIPv6Subnet($ip, $subnet, $subnet_length) {
+    $ip_bin = ipv6ToBinary($ip);
+    $subnet_bin = ipv6ToBinary($subnet);
+    if ($ip_bin === false || $subnet_bin === false) return false;
+    $bytes = intdiv($subnet_length, 8);
+    $bits = $subnet_length % 8;
+    // Compare full bytes
+    if (substr($ip_bin, 0, $bytes) !== substr($subnet_bin, 0, $bytes)) {
+        return false;
+    }
+    // Compare the remaining bits, if any
+    if ($bits > 0) {
+        $ip_byte = ord($ip_bin[$bytes]);
+        $subnet_byte = ord($subnet_bin[$bytes]);
+        $mask = 0xFF << (8 - $bits) & 0xFF;
+        return ($ip_byte & $mask) === ($subnet_byte & $mask);
+    }
+    return true;
+}
+
+if (filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+    if (isInIPv6Subnet($client_ip, $blocked_prefix, $subnet_length)) {
+        // Block the connection
+        header('HTTP/1.1 403 Forbidden');
+        exit('Access denied.');
+    }
+}
+
+// End of paranoid address blocking
+
 require_once('auth.php') ;
 $db_name = 'spaaviation' ;
 $db_user = 'spaaviation' ;
