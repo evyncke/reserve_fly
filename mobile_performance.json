@@ -285,33 +285,53 @@
             "takeoff" : {
                 "inputs": 
                 {
-                   "weight": { "value": 2300, "unit":"lb", "unittype":"mass", "readonly": 1}, 
+                   "weight": { "value": 2300, "unit":"lb", "unittype":"mass", "readonly": 0}, 
+                   "pressure_altitude": { "value": 0, "unit":"ft", "unittype":"altitude", "readonly": 0}, 
                    "flaps": { "value": 0, "unit":"degree", "unittype":"planeangle", "readonly": 1},
-                   "temperature": { "value": 20, "unit":"C", "unittype":"temperature", "readonly": 1}
+                   "temperature": { "value": 20, "unit":"C", "unittype":"temperature", "readonly": 0}
                 },
                 "outputs":
                 {
                     "IAS_roll":
                     {
-                        "value": {"function_type": "constant", "values": [48], "units": ["kt"], "unittypes":"[speed]"},
+                        "value": {"function_type": "table",  
+                                "columns": ["weight", "value"],
+                                "units" : ["lb", "kt"],
+                                "unittypes":["mass", "speed"],
+                                "values": [
+                                    2300,  48,
+                                    2100,  46,
+                                    1900,  43
+                                ]
+                                },
                         "unitdisplay":"kt"
                     },
                     "IAS_50ft": 
                     {
-                        "value": {"function_type": "constant", "values": [53], "units": ["kt"], "unittypes":["speed"]},
+                        "value": {"function_type": "table",  
+                                "columns": ["weight", "value"],
+                                "units" : ["lb", "kt"],
+                                "unittypes":["mass", "speed"],
+                                "values": [
+                                    2300,  53,
+                                    2100,  51,
+                                    1900,  48
+                                ]
+                                },
                         "unitdisplay":"kt"
                     },
                     "IAS_best_angle": 
                     {
+                        "comment by Eric": "No such thing for FMX",
                         "value": {"function_type": "table",
                             "columns": [ "density_altitude", "value"],
-                            "units" : [ "ft","MPH"],
+                            "units" : [ "ft","kt"],
                             "unittypes":["length","speed"],
                             "values": [
                                 0,  52,
                             10000,  60]
                             },
-                        "unitdisplay":"MPH"
+                        "unitdisplay":"kt"
                     },                    
                     "distance_roll": 
                         {
@@ -400,7 +420,62 @@
                                 ]
                             },
                             "unitdisplay":"m"
-                        }
+                        },
+                    "Max_ROC": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "weight", "pressure_altitude", "temperature", "value"],
+                            "units" : [ "lb", "ft", "temperature", "ft/min"],
+                            "unittypes":["mass", "length", "C", "speed"],
+                            "values": [
+                            2300,    0,    -20,  875,
+                            2300,    0,      0,  815,
+                            2300,    0,     20,  755,
+                            2300,    0,     40,  695,
+                            2300, 2000,    -20,  765,
+                            2300, 2000,      0,  705,
+                            2300, 2000,     20,  650,
+                            2300, 2000,     40,  590,
+                            2300, 4000,    -20,  655,
+                            2300, 4000,      0,  600,
+                            2300, 4000,     20,  545,
+                            2300, 4000,     40,  485,
+                            2200, 6000,    -20,  545,
+                            2200, 6000,      0,  495,
+                            2200, 6000,     20,  440,
+                            2200, 6000,     40,  385,
+                            2100, 8000,    -20,  440,
+                            2100, 8000,      0,  390,
+                            2100, 8000,     20,  335,
+                            2100, 8000,     40,  280,
+                            2000,10000,    -20,  335,
+                            2000,10000,      0,  285,
+                            2000,10000,     20,  230,
+                            2000,12000,    -20,  230,
+                            2000,12000,      0,  180
+                            ]
+                            },
+                        "unitdisplay":"ft/min"
+                    },
+                    "IAS_Max_ROC": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "pressure_altitude", "value"],
+                            "units" : [ "ft","kt"],
+                            "unittypes":["length","speed"],
+                            "values": [
+                                0,  73,
+                             2000,  72,
+                             4000,  71,
+                             6000,  70,
+                             8000,  69,
+                            10000,  68,
+                            12000,  67
+                        ]
+                    },
+                    "unitdisplay":"kt"
+                    }
+
                 }
             },
             "landing" :{}
