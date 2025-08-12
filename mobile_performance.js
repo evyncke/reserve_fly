@@ -253,13 +253,14 @@ function aircraftCoefficiantChanged(perfoType)
 //==============================================
 function weightChanged(perfoType)
 {
-    Inputs["weight"]=Number(document.getElementById("id_"+perfoType+"_i_weight").value);
+    setDisplayedValue(Number(document.getElementById("id_"+perfoType+"_i_weight").value),
+        Inputs, "weight");
     var otherPerfoType="landing";
     if(perfoType=="landing") {
         otherPerfoType="takeoff";
     }
     document.getElementById("id_"+otherPerfoType+"_i_weight").value=Inputs["weight"];
-   updateAll();
+    updateAll();
 }
 //==============================================
 // Function: flapsChanged
@@ -858,6 +859,20 @@ function getDisplayedValue(theMap, theKey)
         theMap[theKey+"/unittype"],
         theMap[theKey+"/unit"],
         theMap[theKey+"/displayedunit"]);
+}
+
+//==============================================
+// Function: setDisplayedValue
+// Purpose: set the displayed value into an Inputs or Outputs map
+//==============================================
+function setDisplayedValue(theValue, theMap, theKey)
+{
+    var value=convertUnit(
+        theValue,
+        theMap[theKey+"/unittype"],
+        theMap[theKey+"/displayedunit"],
+        theMap[theKey+"/unit"]);
+    theMap[theKey]=value;
 }
 
 //==============================================
