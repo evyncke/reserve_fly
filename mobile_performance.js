@@ -83,7 +83,6 @@ function mobile_performance_page_loaded() {
     //document.getElementById("id_notedefrais_rowinput").style.display="none";
     //document.getElementById("id_submit_notedefrais").disabled=true;
     planeChanged();
-    setToolTip();
     stationChanged("takeoff")
 }
 
@@ -94,10 +93,44 @@ function mobile_performance_page_loaded() {
 function planeChanged()
 {
     var plane=document.getElementById("id_plane_select").value;
-    performance_plane_takeoffJSON=performanceJSON.performance[plane].takeoff.outputs;
+    performance_plane_takeoffJSON="";
+    takeoffInputsDefault="";
+    performance_plane_landingJSON="";
+    landingInputsDefault="";
+    if(!performanceJSON.performance[plane].hasOwnProperty("takeoff")) {
+        alert("Error:planeChanged: No takeoff info for the plane "+ plane);
+    }
+    else {
+        if(!performanceJSON.performance[plane].takeoff.hasOwnProperty("outputs")) {
+            alert("Error:planeChanged: No takeoff.outputs info for the plane "+ plane);  
+        }
+        else {
+            performance_plane_takeoffJSON=performanceJSON.performance[plane].takeoff.outputs
+        }
+        if(performanceJSON.performance[plane].takeoff.hasOwnProperty("inputs")) {
+            takeoffInputsDefault=performanceJSON.performance[plane].takeoff.inputs;
+        }
+    }
+    if(!performanceJSON.performance[plane].hasOwnProperty("landing")) {
+        alert("Error:planeChanged: No landing info for the plane "+ plane);
+    }
+    else {
+        if(!performanceJSON.performance[plane].landing.hasOwnProperty("outputs")) {
+            alert("Error:planeChanged: No landing.outputs info for the plane "+ plane);  
+        }
+        else {
+            performance_plane_landingJSON=performanceJSON.performance[plane].landing.outputs;
+        }
+        if(performanceJSON.performance[plane].landing.hasOwnProperty("inputs")) {
+            landingInputsDefault=performanceJSON.performance[plane].landing.inputs;
+        }
+    }
+
     document.getElementById("id_takeoff_plane").innerHTML=plane;
     document.getElementById("id_landing_plane").innerHTML=plane;
+    updateDisplayInputs(takeoffInputsDefault,landingInputsDefault);
     updateAll();
+    setToolTip();
 }
 //==============================================
 // Function: stationChanged
@@ -184,7 +217,7 @@ function runwayTypeChanged(perfoType)
         otherPerfoType="takeoff";
     }
     document.getElementById("id_"+otherPerfoType+"_i_runway_type").value=Inputs["runway_type"];
-   updateAll();
+    updateAll();
 }
 //==============================================
 // Function: pilotSkillChanged
@@ -342,7 +375,7 @@ function updateIASRoll()
     Outputs["ias_roll/unitType"]=unitType.name;
     Outputs["ias_roll/unit"]=unit.name;
     Outputs["ias_roll/displayedunit"]=displayedUnit.name;
-    document.getElementById("id_takeoff_o_ias_roll").innerHTML=rollSpeed.toFixed(0);   
+    document.getElementById("id_takeoff_o_ias_roll").innerHTML=getDisplayedValue(Outputs,"ias_roll").toFixed(0);   
     document.getElementById("id_takeoff_o_ias_roll/unit").innerHTML=displayedUnit.name; 
 }
 //==============================================
@@ -359,7 +392,7 @@ function updateDistanceRoll()
     Outputs["distance_roll/unitType"]=unitType.name;
     Outputs["distance_roll/unit"]=unit.name;
     Outputs["distance_roll/displayedunit"]=displayedUnit.name;
-    document.getElementById("id_takeoff_o_distance_roll").innerHTML=convertUnit(rollDistance,"length","ft","m").toFixed(0);   
+    document.getElementById("id_takeoff_o_distance_roll").innerHTML=getDisplayedValue(Outputs,"distance_roll").toFixed(0);   
     document.getElementById("id_takeoff_o_distance_roll/unit").innerHTML=displayedUnit.name; 
 }
 //==============================================
@@ -394,7 +427,7 @@ function updateDistance50ft()
     Outputs["distance_50ft/unitType"]=unitType.name;
     Outputs["distance_50ft/unit"]=unit.name;
     Outputs["distance_50ft/displayedunit"]=displayedUnit.name;
-    document.getElementById("id_takeoff_o_distance_50ft").innerHTML=convertUnit(distance50ft,"length","ft","m").toFixed(0);   
+    document.getElementById("id_takeoff_o_distance_50ft").innerHTML=getDisplayedValue(Outputs, "distance_50ft").toFixed(0);   
     document.getElementById("id_takeoff_o_distance_50ft/unit").innerHTML=displayedUnit.name; 
 }
 
@@ -412,7 +445,7 @@ function updateIASBestAngle()
     Outputs["ias_best_angle/unitType"]=unitType.name;
     Outputs["ias_best_angle/unit"]=unit.name;
     Outputs["ias_best_angle/displayedunit"]=displayedUnit.name;
-    document.getElementById("id_takeoff_o_ias_best_angle").innerHTML=speed.toFixed(0);   
+    document.getElementById("id_takeoff_o_ias_best_angle").innerHTML=getDisplayedValue(Outputs, "ias_best_angle").toFixed(0);   
     document.getElementById("id_takeoff_o_ias_best_angle/unit").innerHTML=displayedUnit.name; 
 }
 //==============================================
@@ -429,14 +462,14 @@ function updateMaxRoC()
     Outputs["max_roc/unitType"]=unitType.name;
     Outputs["max_roc/unit"]=unit.name;
     Outputs["max_roc/displayedunit"]=displayedUnit.name;
-    document.getElementById("id_takeoff_o_max_roc").innerHTML=speed.toFixed(0);   
+    document.getElementById("id_takeoff_o_max_roc").innerHTML=getDisplayedValue(Outputs, "max_roc").toFixed(0);   
     document.getElementById("id_takeoff_o_max_roc/unit").innerHTML=displayedUnit.name; 
     speed=computeIASMaxRoC(Inputs, Outputs, unitType, unit, displayedUnit);
     Outputs["ias_max_roc"]=speed;
     Outputs["ias_max_roc/unitType"]=unitType.name;
     Outputs["ias_max_roc/unit"]=unit.name;
     Outputs["ias_max_roc/displayedunit"]=displayedUnit.name;
-    document.getElementById("id_takeoff_o_ias_max_roc").innerHTML=speed.toFixed(0);   
+    document.getElementById("id_takeoff_o_ias_max_roc").innerHTML=getDisplayedValue(Outputs, "ias_max_roc").toFixed(0);   
     document.getElementById("id_takeoff_o_ias_max_roc/unit").innerHTML=displayedUnit.name; 
 }
 //==============================================
@@ -579,14 +612,19 @@ function updateTakeoffDisplay()
     ctx.fillStyle = "black";
     var density_altitude=convertUnit(Outputs["density_altitude"],"pressure","hPa","hPa");
     var head_wind_speed=convertUnit(Outputs["head_wind_speed"],"speed","kt","kt");
-    var ias_roll=convertUnit(Outputs["ias_roll"],"speed","MPH","MPH");
-    var ias_50ft=convertUnit(Outputs["ias_50ft"],"speed","MPH","MPH");
-    var ias_best_angle=convertUnit(Outputs["ias_best_angle"],"speed","MPH","MPH");
-    var max_roc=convertUnit(Outputs["max_roc"],"speed","ft/min","ft/min");
-    var ias_max_roc= convertUnit(Outputs["ias_max_roc"],"speed","MPH","MPH");
+    var ias_rollDisplayedUnit=Outputs["ias_roll/displayedunit"];
+    var ias_roll=getDisplayedValue(Outputs,"ias_roll");
+    var ias_50ft=getDisplayedValue(Outputs,"ias_50ft");
+    var ias_50ftDisplayedUnit=Outputs["ias_50ft/displayedunit"];
+    var ias_best_angle=getDisplayedValue(Outputs,"ias_best_angle");
+    var ias_best_angleDisplayedUnit=Outputs["ias_roll/displayedunit"];
+    var max_roc=getDisplayedValue(Outputs,"max_roc");
+    var ias_max_rocDisplayedUnit=Outputs["ias_max_roc/displayedunit"];
+    var ias_max_roc= getDisplayedValue(Outputs,"ias_max_roc");
  
     // Height over tree (ft)= 50ft + MaxRoc*time(min)= MaxROC (ft/min)* distanceToTree/speed (ft/min)
     // Height = 50ft +MaxRoc+ (DistanceTree(m)-Distance50ft(m))*3.281/(Speed MPH * 5279.987/60.0)
+    //PRE - todo
     var heightOverTree= 50.0+max_roc*convertUnit(treeDistance-distance50ft,"length","m","ft")/convertUnit(ias_max_roc,"speed","MPH","ft/min");
 
     // Additional info
@@ -597,19 +635,19 @@ function updateTakeoffDisplay()
     ctx.fillText("Max RoC:"+max_roc.toFixed(0)+"ft/min",xInfo,yInfo);
  
     //Speed
-    var text="IAS: Roll="+ias_roll.toFixed(0)+"MPH";
+    var text="IAS: Roll="+ias_roll.toFixed(0)+ias_rollDisplayedUnit;
     ctx.fillText(text,xSpeedInfo,ySpeedInfo);
     xSpeedInfo+=text.length*yFont*0.6;
 
-    text="50ft="+ias_50ft.toFixed(0)+"MPH";
+    text="50ft="+ias_50ft.toFixed(0)+ias_50ftDisplayedUnit;
     ctx.fillText(text,xSpeedInfo,ySpeedInfo);
     xSpeedInfo+=text.length*yFont*0.6;
 
-    text="Max RoC="+ias_max_roc.toFixed(0)+"MPH";
+    text="Max RoC="+ias_max_roc.toFixed(0)+ias_max_rocDisplayedUnit
     ctx.fillText(text,xSpeedInfo,ySpeedInfo);
     xSpeedInfo+=text.length*yFont*0.6+10.0;
 
-    text="Best Angle RoC="+ias_best_angle.toFixed(0)+"MPH";
+    text="Best Angle RoC="+ias_best_angle.toFixed(0)+ias_best_angleDisplayedUnit;
     ctx.fillText(text,xSpeedInfo,ySpeedInfo);
     xSpeedInfo+=text.length*yFont*0.6;
     
@@ -692,8 +730,8 @@ function updateLandingDisplay()
 
     // Landing Ground Distance 
     // Landing 50ft Distance
-    var groundDistance=convertUnit(Outputs["distance_ground_ld"],"length","ft","m");
-    var distance50ft=convertUnit(Outputs["distance_50ft_ld"],"length","ft","m");
+    var groundDistance=getDisplayedValue(Outputs,"distance_ground_ld");
+    var distance50ft=getDisplayedValue(Outputs,"distance_50ft_ld");
     var x1Distance50ft=x1CenterLine;
     var x2Distance50ft=x1CenterLine+distance50ft*scaleX;
     var y50ftDistance=50.0*scaleY;
@@ -735,19 +773,20 @@ function updateLandingDisplay()
 
     // Display main info
     ctx.fillStyle = "black";
-    var density_altitude=convertUnit(Outputs["density_altitude"],"pressure","hPa","hPa");
-    var head_wind_speed=convertUnit(Outputs["head_wind_speed"],"speed","kt","kt");
-    var ias_50ft=convertUnit(Outputs["ias_50ft_ld"],"speed","MPH","MPH");
-  
-    // Additional info
+    var density_altitude=getDisplayedValue(Outputs,"density_altitude");
+    var head_wind_speed=getDisplayedValue(Outputs,"head_wind_speed");
+    var ias_50ft=getDisplayedValue(Outputs,"ias_50ft_ld");
+    var ias_50ftDisplayedUnit=Outputs["ias_50ft_ld/displayedunit"];
+ 
+    // Additional info todo
     var yInfo=5;
     yInfo+=yFont;
     ctx.fillText("Density Altitude:"+density_altitude.toFixed(0)+"hPa",xInfo,yInfo);
     yInfo+=yFont;
     ctx.fillText("Head wind speed:"+head_wind_speed.toFixed(0)+"hPa",xInfo,yInfo);
   
-    //Speed
-    var text="IAS: 50ft="+ias_50ft.toFixed(0)+"MPH";
+    //Speed todo
+    var text="IAS: 50ft="+ias_50ft.toFixed(0)+ias_50ftDisplayedUnit;
     ctx.fillText(text,xSpeedInfo,ySpeedInfo);
     xSpeedInfo+=text.length*yFont*0.6;
 }
@@ -1154,7 +1193,7 @@ function computeConstantFunction(theFunction, theInputs, theOutputs)
 //==============================================
 function computeEnumerationFunction(theFunction, theInputs, theOutputs)
 {
-    //{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Alphast", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]}
+    //{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]}
     var anEnum="";
     var field=theFunction.columns[0];
     var value=0.0;
@@ -1338,9 +1377,9 @@ function computeTableFunction(theFunction, theInputs, theOutputs)
             if(columnMap.has(keyValue)) {
                 if(columnIndex==columnCount-2) {
                     // Value found directly in the map without interpoilation
-                    return columnMap.get(columnInputValue);
+                    return columnMap.get(keyValue);
                 }
-                columnMap=columnMap.get(columnInputValue);
+                columnMap=columnMap.get(keyValue);
             }
             else {
                 break;
@@ -1480,8 +1519,13 @@ function interpolateMapTable(columnIndex, columnInputValues, columnMap)
 // https://airportdb.io/#howtouse
 // https://airportdb.io/api/v1/airport/KJFK?apiToken=e24a7eb5f31c2072b2a0ef318468849fb7faaf9ff931fb4c4b1ca7a76c989707bef0d6db0c355fe5585f1c32cc2289c0
 //==============================================
-function setMETAR(station) {
+function setMETAR(station) 
+{
     station=station.toUpperCase();
+    if(station=="") {
+        // We keep inputs
+        return;
+    }
     if(station.length!=4) {
         alert("Error:setMetar: le nom de la station doit comporter 4 lettres \""+station+"\"");
         return;
@@ -1510,9 +1554,14 @@ function setMETAR(station) {
 
                     document.getElementById("id_takeoff_i_altitude").value=response.elevation;                   
                     altitudeChanged("takeoff");
- 
-                    document.getElementById("id_takeoff_i_wind_direction").value=response.wind_direction;                   
-                    document.getElementById("id_takeoff_i_wind_speed").value=response.wind_velocity;                   
+                    if(response.wind_direction=="VRB") {
+                        // No direction : Then velocity = 0 !
+                        document.getElementById("id_takeoff_i_wind_speed").value=0.0
+                    }
+                    else {
+                        document.getElementById("id_takeoff_i_wind_direction").value=response.wind_direction;                   
+                        document.getElementById("id_takeoff_i_wind_speed").value=response.wind_velocity; 
+                    }                  
                     windChanged("takeoff");
 
                     updateAll();
@@ -1534,8 +1583,13 @@ function setMETAR(station) {
 // https://airportdb.io/#howtouse
 // https://airportdb.io/api/v1/airport/KJFK?apiToken=e24a7eb5f31c2072b2a0ef318468849fb7faaf9ff931fb4c4b1ca7a76c989707bef0d6db0c355fe5585f1c32cc2289c0
 //==============================================
-function setRunway(station) {
+function setRunway(station) 
+{
     station=station.toUpperCase();
+     if(station=="") {
+        // We keep inputs
+        return;
+    }
     if(station.length!=4) {
         alert("Error:setRunway: le nom de la station doit comporter 4 lettres \""+station+"\"");
         return;
@@ -1558,30 +1612,45 @@ function setRunway(station) {
                     // runway: response.runways[].he_heading_degT (en degree) + le_heading_degT (en degree) + length_ft + he_ident (23) + le_indent (04)
                     // type de piste
                     var runways=response.runways;
+
+                    var wind_direction=Inputs["wind_direction"];
+                    var wind_speed=10.0;
+
+                    var windRunway=-10.0;
+                    var numberRunway=0;
+
                     for(var i=0;i<runways.length;i++) {
                         var runway=runways[i];
                         var headingRunway1=runway.he_heading_degT;
                         var headingRunway2=runway.le_heading_degT;
-                        var nameRunway1=runway.he_ident;
-                        var nameRunway2=runway.le_ident;
+                        var nameRunway1=runway.he_ident.substr(0,2);
+                        var nameRunway2=runway.le_ident.substr(0,2);
                         var lengthRunway=runway.length_ft;
                         var typeRunway=runway.surface; // ASP GRS
-
+                        var runway_direction=Number(nameRunway1)*10;
+                        Inputs["runway_type"]="Asphalt";
+                        if(typeRunway=="GRS") {
+                            Inputs["runway_type"]="Grass";
+                        }
+                        var runway_direction=Number(nameRunway1)*10;
+                        var windHeadSpeed=computeWindHeadSpeed(runway_direction, wind_speed, wind_direction);
+                        if(windHeadSpeed>windRunway) {
+                            windRunway=windHeadSpeed;
+                            numberRunway=nameRunway1;
+                        }
+                        runway_direction=Number(nameRunway2)*10;
+                        var windHeadSpeed=computeWindHeadSpeed(runway_direction, wind_speed, wind_direction);
+                        if(windHeadSpeed>windRunway) {
+                            windRunway=windHeadSpeed;
+                            numberRunway=nameRunway2;
+                        }
                     }
-                    /*
-                    document.getElementById("id_takeoff_i_qnh").value=response.QNH;
-                    QNHChanged("takeoff");
-
-                    document.getElementById("id_takeoff_i_temperature").value=response.temperature;                   
-                    temperatureChanged("takeoff");
-
-                    document.getElementById("id_takeoff_i_altitude").value=response.elevation;                   
-                    altitudeChanged("takeoff");
- 
-                    document.getElementById("id_takeoff_i_wind_direction").value=response.wind_direction;                   
-                    document.getElementById("id_takeoff_i_wind_speed").value=response.wind_velocity;                   
-                    windChanged("takeoff");
-*/
+                    Inputs["runway_number"]=Number(numberRunway);
+                    document.getElementById("id_takeoff_i_runway_type").value=Inputs["runway_type"];
+                    document.getElementById("id_landing_i_runway_type").value=Inputs["runway_type"];
+                    document.getElementById("id_takeoff_i_runway_number").value=Inputs["runway_number"];
+                    document.getElementById("id_landing_i_runway_number").value=Inputs["runway_number"];
+              
                     updateAll();
 				}
 			}
@@ -1616,10 +1685,14 @@ function setToolTip()
                     tooltip=tooltip.substring(5);
                     var tooltipJSON="";
                     if(outputTarget=="takeoff" ) {
-                        tooltipJSON=performance_plane_takeoffJSON[tooltip];   
+                        if(performance_plane_takeoffJSON.hasOwnProperty(tooltip)) {
+                            tooltipJSON=performance_plane_takeoffJSON[tooltip];   
+                        }
                     } 
                     else {
-                        tooltipJSON=performance_plane_landingJSON[tooltip];                          
+                        if(performance_plane_landingJSON.hasOwnProperty(tooltip)) {
+                            tooltipJSON=performance_plane_landingJSON[tooltip]; 
+                        }                         
                     }
                     tooltip=JSON.stringify(tooltipJSON);
                     tooltip=tooltip.replace("},", "},<br>");
@@ -1648,19 +1721,13 @@ function updateDisplayOuputs() {
             var value=Outputs[key];
             var outputTarget=Outputs[key+"/output"];
             if(outputTarget=="all" || outputTarget=="takeoff" ) {
-                document.getElementById("id_takeoff_o_"+key).innerHTML=convertUnit(value,
-                    Outputs[key+"/unittype"],
-                    Outputs[key+"/unit"],
-                    Outputs[key+"/displayedunit"]).toFixed(0);  
+                document.getElementById("id_takeoff_o_"+key).innerHTML=getDisplayedValue(Outputs,key).toFixed(0);  
                 document.getElementById("id_takeoff_o_"+key+"/unit").innerHTML=Outputs[key+"/displayedunit"]; 
                 document.getElementById("id_takeoff_o_"+key).readOnly=true;
                 document.getElementById("id_takeoff_o_"+key).style.backgroundColor = ReadOnlyColor;
             }
             if(outputTarget=="all" || outputTarget=="landing" ) {
-                document.getElementById("id_landing_o_"+key).innerHTML=convertUnit(value,
-                    Outputs[key+"/unittype"],
-                    Outputs[key+"/unit"],
-                    Outputs[key+"/displayedunit"]).toFixed(0);  
+                document.getElementById("id_landing_o_"+key).innerHTML=getDisplayedValue(Outputs,key).toFixed(0);  
                 document.getElementById("id_landing_o_"+key+"/unit").innerHTML=Outputs[key+"/displayedunit"]; 
                 document.getElementById("id_landing_o_"+key).readOnly=true;
                 document.getElementById("id_landing_o_"+key).style.backgroundColor = ReadOnlyColor;
@@ -1673,8 +1740,9 @@ function updateDisplayOuputs() {
 // Function: updateDisplayInputs
 // Purpose: update the display of inputs
 //==============================================
-function updateDisplayInputs(takeoffInputsDefault,landingInputsDefault) {
-    // loop on all outputs
+function updateDisplayInputs(takeoffInputsDefault,landingInputsDefault) 
+{
+    // loop on all Inputs
     for (var key in Inputs) {
         if(key.search("/")==-1) {
             var value=Inputs[key];
@@ -1686,23 +1754,26 @@ function updateDisplayInputs(takeoffInputsDefault,landingInputsDefault) {
                 document.getElementById("id_landing_i_"+key+"/unit").innerHTML="";
             }
             else {
-                document.getElementById("id_takeoff_i_"+key).value=convertUnit(value,
-                    Inputs[key+"/unittype"],
-                    Inputs[key+"/unit"],
-                    Inputs[key+"/displayedunit"]).toFixed(0);  
+                document.getElementById("id_takeoff_i_"+key).value=getDisplayedValue(Inputs,key).toFixed(0);  
                 document.getElementById("id_takeoff_i_"+key+"/unit").innerHTML=Inputs[key+"/displayedunit"];           
-                document.getElementById("id_landing_i_"+key).value=convertUnit(value,
-                    Inputs[key+"/unittype"],
-                    Inputs[key+"/unit"],
-                    Inputs[key+"/displayedunit"]).toFixed(0);  
+                document.getElementById("id_landing_i_"+key).value=getDisplayedValue(Inputs,key).toFixed(0);  
                 document.getElementById("id_landing_i_"+key+"/unit").innerHTML=Inputs[key+"/displayedunit"];           
             }
+            document.getElementById("id_takeoff_i_"+key).readOnly=false;
+            document.getElementById("id_takeoff_i_"+key).style.backgroundColor = "white";
+            document.getElementById("id_landing_i_"+key).readOnly=false;
+            document.getElementById("id_landing_i_"+key).style.backgroundColor = "white";
+ 
          }
     }
     // Default values in takeoffInputsDefault
     for (var key in takeoffInputsDefault) {
         var value=takeoffInputsDefault[key].value;
         var unit=takeoffInputsDefault[key].unit;
+        var unitDisplay=Inputs[key+"/displayedunit"];
+        if(takeoffInputsDefault[key].hasOwnProperty("unitdisplay")) {
+            unitDisplay=takeoffInputsDefault[key].unitdisplay;
+        }
         var unittype=takeoffInputsDefault[key].unittype;
         var readonly=takeoffInputsDefault[key].readonly;
         if(unitType=="string") {
@@ -1720,11 +1791,19 @@ function updateDisplayInputs(takeoffInputsDefault,landingInputsDefault) {
             document.getElementById("id_takeoff_i_"+key).readOnly=true;
             document.getElementById("id_takeoff_i_"+key).style.backgroundColor = ReadOnlyColor;
         }
+        Inputs[key]=value;
+        Inputs[key+"/unit"]=unit;
+        Inputs[key+"/displayedunit"]=unitDisplay;
+        Inputs[key+"/unittype"]=unittype;
     }
     // Default values in landingInputsDefault
     for (var key in landingInputsDefault) {
         var value=landingInputsDefault[key].value;
         var unit=landingInputsDefault[key].unit;
+        var unitDisplay=Inputs[key+"/displayedunit"];
+        if(landingInputsDefault[key].hasOwnProperty("unitdisplay")) {
+            unitDisplay=landingInputsDefault[key].unitdisplay;
+        }
         var unittype=landingInputsDefault[key].unittype;
         var readonly=landingInputsDefault[key].readonly;
         if(unitType=="string") {
@@ -1742,8 +1821,11 @@ function updateDisplayInputs(takeoffInputsDefault,landingInputsDefault) {
             document.getElementById("id_landing_i_"+key).readOnly=true;
             document.getElementById("id_landing_i_"+key).style.backgroundColor = ReadOnlyColor;
         }
+        Inputs[key]=value;
+        Inputs[key+"/unit"]=unit;
+        Inputs[key+"/displayedunit"]=unitDisplay;
+        Inputs[key+"/unittype"]=unittype;
     }
-
 }
 //==============================================
 // Function: prefillDropdownMenus

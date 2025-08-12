@@ -4,7 +4,7 @@
             "takeoff": {
                 "inputs": 
                 {
-                   "weight": { "value": 1600, "unit":"lb", "unittype":"mass", "readonly": 1}, 
+                   "weight": { "value": 1600, "unit":"lb",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
                    "flaps": { "value": 0, "unit":"degree", "unittype":"planeangle", "readonly": 1}
                 },
                 "outputs":
@@ -141,7 +141,7 @@
             {
                 "inputs": 
                 {
-                   "weight": { "value": 1600, "unit":"lb", "unittype":"mass", "readonly": 1}, 
+                   "weight": { "value": 1600, "unit":"lb",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
                    "flaps": { "value": 40, "unit":"degree", "unittype":"planeangle", "readonly": 1}
                 },
                 "outputs":
@@ -227,7 +227,6 @@
                    "weight": { "value": 600, "unit":"kg", "unittype":"mass", "readonly": 1}, 
                    "flaps": { "value": 40, "unit":"degree", "unittype":"planeangle", "readonly": 1}
                 },
-
                 "outputs":
                 {
                     "IAS_roll":
@@ -285,10 +284,8 @@
             "takeoff" : {
                 "inputs": 
                 {
-                   "weight": { "value": 2300, "unit":"lb", "unittype":"mass", "readonly": 0}, 
-                   "pressure_altitude": { "value": 0, "unit":"ft", "unittype":"altitude", "readonly": 0}, 
-                   "flaps": { "value": 0, "unit":"degree", "unittype":"planeangle", "readonly": 1},
-                   "temperature": { "value": 20, "unit":"C", "unittype":"temperature", "readonly": 0}
+                   "weight": { "value": 2300, "unit":"lb", "unitdisplay": "kg", "unittype":"mass", "readonly": 0}, 
+                   "flaps": { "value": 0, "unit":"degree", "unittype":"planeangle", "readonly": 1}
                 },
                 "outputs":
                 {
