@@ -1163,7 +1163,6 @@
                         "unitdisplay":"kt"
                     },                    
                     "distance_roll": 
-<<<<<<< HEAD
                     {
                         "value": {"function_type": "table",  
                             "columns": ["weight", "pressure_altitude", "temperature", "value"],
