@@ -15,6 +15,16 @@
    limitations under the License.
 
 */
+/**
+ * System Journal Display
+ * 
+ * Displays system journal entries with pagination and filtering capabilities.
+ * Only accessible by administrators and board members.
+ * 
+ * @package RAPCS
+ * @author Eric Vyncke
+ * @license Apache-2.0
+ */
 
 require_once "dbi.php" ;
 if ($userId == 0) {
@@ -34,29 +44,30 @@ if (!($userIsAdmin or $userIsBoardMember))
 <table class="table table-striped table-hover">
 <thead>
 <tr>
-<th>Date</th>
-<th>User</th>
-<th class="d-none d-lg-block">IP Address</th>
-<th>Message</th>
-<th class="d-none d-lg-block">URI</th>
+<th scope='col'>Date</th>
+<th scope='col'>User</th>
+<th scope='col' class="d-none d-lg-block">IP Address</th>
+<th scope='col'>Message</th>
+<th scope='col' class="d-none d-lg-block">URI</th>
 </tr>
 </thead>
 <tbody>
 <?php
-$start = (isset($_REQUEST['start'])) ? $_REQUEST['start'] : 99999999 ;
+$start = (isset($_REQUEST['start']) and $_REQUEST['start'] > 0) ? $_REQUEST['start'] : 99999999 ;
 $sql_filter = '' ;
 if (isset($_REQUEST['id']) and is_numeric($_REQUEST['id']))
 	$sql_filter = " AND j_jom_id = $_REQUEST[id]" ;
-  else if (isset($_REQUEST['username']))
-	$sql_filter = " AND name like '%" . web2db($_REQUEST['username']) . "%'" ;
+  else if (isset($_REQUEST['usr']))
+	$sql_filter = " AND name like '%" . web2db(mysqli_real_escape_string($mysqli_link, $_REQUEST['usr'])) . "%'" ;
  else if (isset($_REQUEST['msg']))
-	$sql_filter = " AND j_message like '%" . web2db($_REQUEST['msg']) . "%'" ;
-$sql = "SELECT * FROM $table_journal 
+	$sql_filter = " AND j_message like '%" . web2db(mysqli_real_escape_string($mysqli_link, $_REQUEST['msg'])) . "%'" ;
+$sql = "SELECT * FROM $table_journal
 			LEFT JOIN $table_person p ON j_jom_id = p.jom_id
 		WHERE j_id <= $start $sql_filter
 		ORDER BY j_id desc
 		LIMIT 0, 25" ;
-$result = mysqli_query($mysqli_link, $sql) or die("Erreur systeme a propos de l'access au journal: " . mysqli_error($mysqli_link)) ;
+$result = mysqli_query($mysqli_link, $sql) 
+	or die("Erreur systeme a propos de l'access au journal: " . mysqli_error($mysqli_link)) ;
 $first_id = -1 ;
 $last_id = -1 ;
 while ($row = mysqli_fetch_array($result)) {

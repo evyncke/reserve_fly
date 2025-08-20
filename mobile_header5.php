@@ -254,13 +254,13 @@ if ($christmas_theme) {
         <img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="24px" height="24px">
       </a>
       <ul class="nav navbar-nav multi-collapse collapse navbar-collapse"><!-- nav-bar left with most of the dropdown -->
-        <li class="navbar-item">
+        <li class="navbar-item me-auto me-md-0">
           <a class="nav-link text-white" href="mobile.php?news">Home</a>
         </li>
 <?php
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
-  <li class="nav-item dropdown">
+  <li class="nav-item dropdown me-auto me-md-0">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Administration<span class="caret"></span></a>
     <ul class="dropdown-menu">
       <li><h6 class="dropdown-header class-primary">Réservé aux administrateurs/comptables</h6></li>
@@ -277,7 +277,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 <?php
   if ($userId == 62 or $userId == 66 or $userId == 92 or $userId == 348 or $userId == 306) { // Odoo users
 ?>
-  <li class="nav-item dropdown">
+  <li class="nav-item dropdown me-auto me-md-0">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Compta<span class="caret"></span></a>
     <ul class="dropdown-menu">
       <li><h6 class="dropdown-header">Intégration Odoo</h6></li>
@@ -299,7 +299,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 } // $userIsAdmin or $userIsInstructor or $userIsBoardMember
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
-  <li class="nav-item dropdown">
+  <li class="nav-item dropdown me-auto me-md-0">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">École<span class="caret"></span></a>
     <ul class="dropdown-menu">
       <li><h6 class="dropdown-header">Réservé aux FIs & admins</h6></li>
@@ -322,7 +322,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 }
 if ($userIsFlightManager && $userId == 62) {
 ?>
-  <li class="nav-item dropdown">
+  <li class="nav-item dropdown me-auto me-md-0">
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Vols IF/INIT<span class="caret"></span></a>
     <ul class="dropdown-menu">
     <li><h6 class="dropdown-header">Réservé admins des vols IF/INIT</h6></li>
@@ -340,7 +340,7 @@ if ($userIsFlightManager && $userId == 62) {
   </li> <!-- dropdown vols IF/INIT-->
 <?php  
 }
-?>         <li class="nav-item dropdown">
+?>         <li class="nav-item dropdown me-auto me-md-0">
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Réservations<span class="caret"></span></a>
           <ul class="dropdown-menu">
 <?php
@@ -358,7 +358,7 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_top.php">Top-10 des vols</a></li>
           </ul>
         </li>
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown me-auto me-md-0">
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Avions<span class="caret"></span></a>
           <ul class="dropdown-menu" id="planesDropdown">
             <li><a class="dropdown-item" href="mobile_wnb.php">Masse et centrage</a></li>
@@ -387,7 +387,7 @@ if ($userId > 0) {
 ?>
             </ul>
         </li>
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown me-auto me-md-0">
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Aéroport<span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="mobile_ephemerides.php">Ephémérides</a></li>
@@ -427,7 +427,7 @@ if ($userIsAdmin or $userIsInstructor) {
 
           </ul>
         </li>
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown me-auto">
             <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">À propos<span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li>
