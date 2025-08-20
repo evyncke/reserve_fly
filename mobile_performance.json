@@ -1168,6 +1168,7 @@
                             "columns": ["weight", "pressure_altitude", "temperature", "value"],
                             "units" : ["lb", "ft", "C", "ft"],
                             "unittypes":["mass", "length", "temperature","length"],
+                            "EricComment": "It is basically  0.675 * weight + 0.075 * altitude + 5 * temperature - 857.5",
                             "values": [
                                 2300,    0,    0,  695,
                                 2300,    0,   10,  745,
