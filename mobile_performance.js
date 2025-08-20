@@ -2140,11 +2140,11 @@ try {
     alert("Error when parsing the performance JSON file:\n"+error);
 }
 if(performanceJSON!="") {
-    var planes=Array();
+    var planesFromPerfo=Array();
     for (const key in performanceJSON.performance) {
-        planes.push(key);
+        planesFromPerfo.push(key);
     }
-    prefillDropdownMenus("id_plane_select", planes, planes[0]);
+    prefillDropdownMenus("id_plane_select", planesFromPerfo, planesFromPerfo[0]);
     var pilotSkills=Array("Student","Normal","POH");
     prefillDropdownMenus("id_takeoff_i_pilot_skill", pilotSkills, Inputs["pilot_skill"]);
     prefillDropdownMenus("id_landing_i_pilot_skill", pilotSkills, Inputs["pilot_skill"]);
