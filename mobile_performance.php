@@ -14,6 +14,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+TODO
+?plane=OO-FMX&location=ebsp
+
+Runway: 5 -> 05
+
+
 */
 
 require_once "dbi.php" ;
@@ -42,6 +48,7 @@ print("</script>\n");
 <!--div class="row m-0-xs"-->
     <label for="id_plane_select" class="col-form-label col-xs-1 col-md-1">Plane:</label>
     <select id="id_plane_select" class="col-form-select col-xs-1" name="plane_select"></select>
+    &nbsp;&nbsp;&nbsp;POH:&nbsp;<span id="id_plane_poh">POH</span>
 <!--/div> <!-- row -->
 
 <?php
@@ -111,6 +118,10 @@ if ($plane == '') {
                     print("<tr><td class=\"text-end py-0 py-md-1\">Pente Piste</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_runway_slope\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_takeoff_i_runway_slope/unit\">xx</span></td>") ;
+                    //Longueur Piste
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Longueur Piste</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_runway_length\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_takeoff_i_runway_length/unit\">xx</span></td>") ;
                     //Poids
                     print("<tr><td class=\"text-end py-0 py-md-1\">Poids</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_takeoff_i_weight\" class=\"text-end py-0 py-md-1\" value=\"720\" style=\"width: 60%;\" $readonly>") ;
@@ -288,6 +299,10 @@ if ($plane == '') {
                     print("<tr><td class=\"text-end py-0 py-md-1\">Pente Piste</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_runway_slope\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\" $readonly>") ;
                     print("&nbsp;<span id=\"id_landing_i_runway_slope/unit\">xx</span></td>") ;
+                    //Longueur Piste
+                    print("<tr><td class=\"text-end py-0 py-md-1\">Longueur Piste</td>") ;
+                    print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_runway_length\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\" $readonly>") ;
+                    print("&nbsp;<span id=\"id_landing_i_runway_length/unit\">xx</span></td>") ;
                    //Poids
                     print("<tr><td class=\"text-end py-0 py-md-1\">Poids</td>") ;
                     print("<td class=\"py-0\"><input type=\"number\" id=\"id_landing_i_weight\" class=\"text-end py-0 py-md-1\" value=\"720\" style=\"width: 60%;\" $readonly>") ;

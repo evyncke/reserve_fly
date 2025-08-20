@@ -1,6 +1,7 @@
 {
     "performance": {
         "OO-ALD": {
+            "POH": "https://www.spa-aviation.be/images/pdf/OO-ALD.pdf",
             "takeoff": {
                 "inputs": 
                 {
@@ -53,6 +54,12 @@
                             },
                         "coefficiant" : 
                         {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
                             "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
                             "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
                             "temperature_coefficiant": {"function_type": "linear", "xvalues": [0, 35], 
@@ -61,7 +68,7 @@
                                 "units":[ "F", "none"],
                                 "unittypes":[ "temperature_delta", "unitless"]
                                 },
-                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
                         },
                         "unitdisplay":"m"
                     },
@@ -86,6 +93,12 @@
                             1600, 10, 7500, 1375]},
                         "coefficiant" : 
                         {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
                             "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
                             "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
                             "temperature_coefficiant": {"function_type": "linear", 
@@ -95,7 +108,7 @@
                                 "units":[ "F", "none"],
                                 "unittypes":[ "temperature_delta", "unitless"]
                                 },
-                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
                         },
                         "unitdisplay":"m"
                     },
@@ -110,6 +123,7 @@
                             1600, 5000,  370,
                             1600,10000,  160]
                             },
+                        "comment_patrick":"C est bien un additional et pas un coefficiant",
                         "additional" : 
                         {
                             "temperature_additional": {"function_type": "linear", 
@@ -155,8 +169,8 @@
                     {
                          "value": {"function_type": "table",  
                             "columns": ["weight", "pressure_altitude", "value"],
-                            "units" : ["lb", "kt", "ft","ft"],
-                            "unittypes":["mass", "speed", "length","length"],
+                            "units" : ["lb","ft","ft"],
+                            "unittypes":["mass", "length","length"],
                             "values": [
                             1600,    0, 1075,
                             1600, 2500, 1135,
@@ -165,8 +179,8 @@
                         "coefficiant" : 
                         {
                             "head_wind":{"function_type": "linear", 
-                                "xvalues": [0, -4.0], 
-                                "values": [1.0, 1.1],  
+                                "xvalues": [0,  4.0], 
+                                "values": [1.0, 0.9],  
                                 "columns": ["head_wind_speed","value"], 
                                 "units":[ "kt", "none"],
                                 "unittypes":[ "speed", "unitless"]},
@@ -179,7 +193,7 @@
                                 "units":[ "F", "none"],
                                 "unittypes":[ "temperature_delta", "unitless"]
                                 },
-                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
                         },
                         "unitdisplay":"m"
                     },
@@ -187,8 +201,8 @@
                     {
                          "value": {"function_type": "table",  
                             "columns": ["weight", "pressure_altitude", "value"],
-                            "units" : ["lb", "kt", "ft","ft"],
-                            "unittypes":["mass", "speed", "length","length"],
+                            "units" : ["lb", "ft","ft"],
+                            "unittypes":["mass", "length","length"],
                             "values": [
                             1600,    0, 445,
                             1600, 2500, 470,
@@ -197,8 +211,8 @@
                         "coefficiant" : 
                         {
                             "head_wind":{"function_type": "linear", 
-                                "xvalues": [0, -4.0], 
-                                "values": [1.0, 1.1],  
+                                "xvalues": [0, 4.0], 
+                                "values": [1.0, 0.9],  
                                 "columns": ["head_wind_speed","value"], 
                                 "units":[ "kt", "none"],
                                 "unittypes":[ "speed", "unitless"]},
@@ -211,7 +225,7 @@
                                 "units":[ "F", "none"],
                                 "unittypes":[ "temperature_delta", "unitless"]
                                 },
-                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "Advanced"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
                         },
                         "unitdisplay":"m"
                    }
@@ -220,66 +234,884 @@
          },
          "OO-JRB": 
          { 
-            "takeoff" : 
-            {   
+        "takeoff": {
                 "inputs": 
                 {
-                   "weight": { "value": 600, "unit":"kg", "unittype":"mass", "readonly": 1}, 
-                   "flaps": { "value": 40, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                   "weight": { "value": 1600, "unit":"lb",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
+                   "flaps": { "value": 0, "unit":"degree", "unittype":"planeangle", "readonly": 1}
                 },
                 "outputs":
                 {
                     "IAS_roll":
                     {
-                        "value": {"function_type": "constant", "values": [50], "units": ["MPH"], "unittypes":["speed"]},
-                        "unitdisplay":"kt"
+                        "value": {"function_type": "constant", "values": [64], "units": ["MPH"], "unittypes":"[speed]"},
+                        "unitdisplay":"MPH"
                     },
-                    "IAS_50ft":
+                    "IAS_50ft": 
                     {
-                        "value": {"function_type": "constant", "values": [50], "units": ["MPH"], "unittypes":["speed"]},
-                        "unitdisplay":"kt"
+                        "value": {"function_type": "constant", "values": [64], "units": ["MPH"], "unittypes":["speed"]},
+                        "unitdisplay":"MPH"
+                    },
+                    "IAS_best_angle": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "density_altitude", "value"],
+                            "units" : [ "ft","MPH"],
+                            "unittypes":["length","speed"],
+                            "values": [
+                                0,  52,
+                            10000,  60]
+                            },
+                        "unitdisplay":"MPH"
+                    },
+                    "distance_roll": 
+                    {
+                        "value": {"function_type": "table",  
+                            "columns": ["weight", "head_wind_speed", "pressure_altitude", "value"],
+                            "units" : ["lb", "kt", "ft","ft"],
+                            "unittypes":["mass", "speed", "length","length"],
+                            "values": [
+                            1600,  0,    0,  735,
+                            1600,  0, 2500,  910,
+                            1600,  0, 5000, 1115,
+                            1600,  0, 7500, 1360,
+                            1600,  5,    0,  500,
+                            1600,  5, 2500,  630,
+                            1600,  5, 5000,  780,
+                            1600,  5, 7500,  970,
+                            1600, 10,    0,  305,
+                            1600, 10, 2500,  395,
+                            1600, 10, 5000,  505,
+                            1600, 10, 7500,  640]
+                            },
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
+                            "temperature_coefficiant": {"function_type": "linear", "xvalues": [0, 35], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "F", "none"],
+                                "unittypes":[ "temperature_delta", "unitless"]
+                                },
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
                     },
                     "distance_50ft":
                     {
-                        "value": {"function_type":  "constant", "values": [500], "units": ["m"], "unittypes":["speed"]},
-                        "unitdisplay":"ft"
+                        "value": {"function_type": "table",  
+                            "columns": ["weight", "head_wind_speed", "pressure_altitude", "value"],
+                            "units" : ["lb", "kt", "ft","ft"],
+                            "unittypes":["mass", "speed", "length","length"],
+                            "values": [
+                            1600,  0,    0, 1385,
+                            1600,  0, 2500, 1660,
+                            1600,  0, 5000, 1985,
+                            1600,  0, 7500, 2440,
+                            1600,  5,    0, 1035,
+                            1600,  5, 2500, 1250,
+                            1600,  5, 5000, 1510,
+                            1600,  5, 7500,  875,
+                            1600, 10,    0,  730,
+                            1600, 10, 2500,  890,
+                            1600, 10, 5000, 1090,
+                            1600, 10, 7500, 1375]},
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
+                            "temperature_coefficiant": {"function_type": "linear", 
+                                "xvalues": [0, 35], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "F", "none"],
+                                "unittypes":[ "temperature_delta", "unitless"]
+                                },
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "Max_ROC": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "weight", "density_altitude", "value"],
+                            "units" : [ "lb", "ft","ft/min"],
+                            "unittypes":["mass", "length","speed"],
+                            "values": [
+                            1600,    0,  580,
+                            1600, 5000,  370,
+                            1600,10000,  160]
+                            },
+                        "comment_patrick":"C est bien un additional et pas un coefficiant",
+                        "additional" : 
+                        {
+                            "temperature_additional": {"function_type": "linear", 
+                                "xvalues": [0, 10], 
+                                "values": [0.0, -10.0],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "F", "none"],
+                                "unittypes":[ "temperature_delta", "speed"]
+                            }
+                        },
+                        "unitdisplay":"ft/min"
+                    },
+                    "IAS_Max_ROC": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "density_altitude", "value"],
+                            "units" : [ "ft","MPH"],
+                            "unittypes":["length","speed"],
+                            "values": [
+                                0,  72,
+                            5000,  69,
+                            10000,  66]
+                            },
+                    "unitdisplay":"MPH"
                     }
                 }
             },
-            "landing" :{}
+            "landing": 
+            {
+                "inputs": 
+                {
+                   "weight": { "value": 1600, "unit":"lb",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
+                   "flaps": { "value": 40, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                },
+                "outputs":
+                {
+                    "IAS_50ft_ld": 
+                    {
+                        "value": {"function_type": "constant", "values": [58], "units": ["MPH"], "unittypes":["speed"]},
+                        "unitdisplay":"MPH"
+                    },
+                    "distance_50ft_ld": 
+                    {
+                         "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude", "value"],
+                            "units" : ["lb", "ft","ft"],
+                            "unittypes":["mass", "length","length"],
+                            "values": [
+                            1600,    0, 1075,
+                            1600, 2500, 1135,
+                            1600, 5000, 1195,
+                            1600, 7500, 1255]},
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "head_wind":{"function_type": "linear", 
+                                "xvalues": [0,  4.0], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.20], "units": ["unitless"]},
+                            "temperature_coefficiant": {"function_type": "linear", 
+                                "xvalues": [0, 60], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "F", "none"],
+                                "unittypes":[ "temperature_delta", "unitless"]
+                                },
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "distance_ground_ld": 
+                    {
+                         "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude", "value"],
+                            "units" : ["lb", "ft","ft"],
+                            "unittypes":["mass", "length","length"],
+                            "values": [
+                            1600,    0, 445,
+                            1600, 2500, 470,
+                            1600, 5000, 495,
+                            1600, 7500, 520]},
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                           "head_wind":{"function_type": "linear", 
+                                "xvalues": [0,  4.0], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.20], "units": ["unitless"]},
+                            "temperature_coefficiant": {"function_type": "linear", 
+                                "xvalues": [0, 60], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "F", "none"],
+                                "unittypes":[ "temperature_delta", "unitless"]
+                                },
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                   }
+                }
+            }
         },
         "OO-FUN": 
         { 
-            "takeoff" : 
-            {   
+            "takeoff": {
                 "inputs": 
                 {
-                   "weight": { "value": 600, "unit":"kg", "unittype":"mass", "readonly": 1}, 
+                   "weight": { "value": 726, "unit":"kg",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
+                   "flaps": { "value": 0, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                },
+                "outputs":
+                {
+                    "IAS_50ft": 
+                    {
+                        "value": {"function_type": "constant", "values": [70], "units": ["MPH"], "unittypes":["speed"]},
+                        "unitdisplay":"MPH"
+                    },
+                    "IAS_best_angle": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "density_altitude", "value"],
+                            "units" : [ "ft","MPH"],
+                            "unittypes":["length","speed"],
+                            "values": [
+                                0,  52,
+                            10000,  60]
+                            },
+                        "unitdisplay":"MPH"
+                    },
+                    "distance_roll": 
+                    {
+                        "value": {"function_type": "table",  
+                            "columns": ["weight", "head_wind_speed", "pressure_altitude", "value"],
+                            "units" : ["kg", "kt", "ft","m"],
+                            "unittypes":["mass", "speed", "length","length"],
+                            "values": [
+                            726,  0,    0,  224,
+                            726,  0, 2500,  277,
+                            726,  0, 5000,  340,
+                            726,  0, 7500,  414,
+                            726, 10,    0,  152,
+                            726, 10, 2500,  192,
+                            726, 10, 5000,  238,
+                            726, 10, 7500,  296,
+                            726, 20,    0,   93,
+                            726, 20, 2500,  120,
+                            726, 20, 5000,  154,
+                            726, 20, 7500,  195]
+                            },
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
+                            "temperature_coefficiant": {"function_type": "linear", "xvalues": [0, 20], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "C", "none"],
+                                "unittypes":[ "temperature_delta", "unitless"]
+                                },
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "distance_50ft":
+                    {
+                        "value": {"function_type": "table",  
+                            "columns": ["weight", "head_wind_speed", "pressure_altitude", "value"],
+                            "units" : ["kg", "kt", "ft","m"],
+                            "unittypes":["mass", "speed", "length","length"],
+                            "values": [
+                            726,  0,    0,  422,
+                            726,  0, 2500,  506,
+                            726,  0, 5000,  605,
+                            726,  0, 7500,  744,
+                            726, 10,    0,  315,
+                            726, 10, 2500,  381,
+                            726, 10, 5000,  460,
+                            726, 10, 7500,  572,
+                            726, 20,    0,  222,
+                            726, 20, 2500,  271,
+                            726, 20, 5000,  332,
+                            726, 20, 7500,  419]                        },
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
+                            "temperature_coefficiant": {"function_type": "linear", 
+                                "xvalues": [0, 20], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "C", "none"],
+                                "unittypes":[ "temperature_delta", "unitless"]
+                                },
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "Max_ROC": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "weight", "density_altitude", "value"],
+                            "units" : [ "kg", "ft","ft/min"],
+                            "unittypes":["mass", "length","speed"],
+                            "values": [
+                            726,    0,  670,
+                            726, 5000,  470,
+                            726,10000,  260]
+                            },
+                        "comment_patrick":"C est bien un additional et pas un coefficiant",
+                        "additional" : 
+                        {
+                            "temperature_additional": {"function_type": "linear", 
+                                "xvalues": [0, 5], 
+                                "values": [0.0, -15.0],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "C", "none"],
+                                "unittypes":[ "temperature_delta", "speed"]
+                            }
+                        },
+                        "unitdisplay":"ft/min"
+                    },
+                    "IAS_Max_ROC": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "density_altitude", "value"],
+                            "units" : [ "ft","MPH"],
+                            "unittypes":["length","speed"],
+                            "values": [
+                                0,  78,
+                            5000,   74,
+                            10000,  71]
+                            },
+                    "unitdisplay":"MPH"
+                    }
+                }
+            },
+            "landing": 
+            {
+                "inputs": 
+                {
+                   "weight": { "value": 726, "unit":"kg",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
                    "flaps": { "value": 40, "unit":"degree", "unittype":"planeangle", "readonly": 1}
                 },
-
+                "outputs":
+                {
+                    "IAS_50ft_ld": 
+                    {
+                        "value": {"function_type": "constant", "values": [60], "units": ["MPH"], "unittypes":["speed"]},
+                        "unitdisplay":"MPH"
+                    },
+                    "distance_50ft_ld": 
+                    {
+                         "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude", "value"],
+                            "units" : ["kg","ft","m"],
+                            "unittypes":["mass", "length","length"],
+                            "values": [
+                            726,    0, 328,
+                            726, 2500, 346,
+                            726, 5000, 364,
+                            726, 7500, 383]},
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "head_wind":{"function_type": "linear", 
+                                "xvalues": [0,  4.0], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.20], "units": ["unitless"]},
+                            "temperature_coefficiant": {"function_type": "linear", 
+                                "xvalues": [0, 35], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "C", "none"],
+                                "unittypes":[ "temperature_delta", "unitless"]
+                                },
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "distance_ground_ld": 
+                    {
+                         "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude", "value"],
+                            "units" : ["kg", "ft","m"],
+                            "unittypes":["mass", "length","length"],
+                            "values": [
+                            726,    0, 136,
+                            726, 2500, 143,
+                            726, 5000, 151,
+                            726, 7500, 158]},
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "head_wind":{"function_type": "linear", 
+                                "xvalues": [0,  4.0], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.20], "units": ["unitless"]},
+                            "temperature_coefficiant": {"function_type": "linear", 
+                                "xvalues": [0, 35], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "C", "none"],
+                                "unittypes":[ "temperature_delta", "unitless"]
+                                },
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                   }
+                }
+            }
+        },
+        "OO-APV": {
+            "takeoff": {
+                "inputs": 
+                {
+                   "weight": { "value": 1670, "unit":"lb",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
+                   "flaps": { "value": 0, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                },
                 "outputs":
                 {
                     "IAS_roll":
                     {
-                        "value": {"function_type": "constant", "values": [50], "units": ["MPH"], "unittypes":["speed"]},
+                        "value": {"function_type": "constant", "values": [50], "units": ["kt"], "unittypes":"[speed]"},
                         "unitdisplay":"kt"
                     },
-                    "IAS_50ft":
+                    "IAS_50ft": 
                     {
-                        "value": {"function_type": "constant", "values": [50], "units": ["MPH"], "unittypes":["speed"]},
+                        "value": {"function_type": "constant", "values": [54], "units": ["kt"], "unittypes":["speed"]},
                         "unitdisplay":"kt"
+                    },
+                    "IAS_best_angle": 
+                    {
+                        "comment_patrick": "pas trouve",
+                        "value": {"function_type": "table",
+                            "columns": [ "density_altitude", "value"],
+                            "units" : [ "ft","kt"],
+                            "unittypes":["length","speed"],
+                            "values": [
+                                0,  52,
+                            10000,  60]
+                            },
+                        "unitdisplay":"kt"
+                    },
+                    "distance_roll": 
+                    {
+                        "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude", "temperature", "value"],
+                            "units" : ["lb", "ft", "C","ft"],
+                            "unittypes":["mass", "length","temperature", "length"],
+                            "values": [
+                            1670,    0,  0,  640,
+                            1670,    0, 10,  695,
+                            1670,    0, 20,  755,
+                            1670,    0, 30,  810,
+                            1670,    0, 40,  875,
+                            1670, 1000,  0,  705,
+                            1670, 1000, 10,  765,
+                            1670, 1000, 20,  825,
+                            1670, 1000, 30,  890,
+                            1670, 1000, 40,  960,
+                            1670, 2000,  0,  775,
+                            1670, 2000, 10,  840,
+                            1670, 2000, 20,  910,
+                            1670, 2000, 30,  980,
+                            1670, 2000, 40, 1055,
+                            1670, 3000,  0,  855,
+                            1670, 3000, 10,  925,
+                            1670, 3000, 20, 1000,
+                            1670, 3000, 30, 1080,
+                            1670, 3000, 40, 1165,
+                            1670, 4000,  0,  940,
+                            1670, 4000, 10, 1020,
+                            1670, 4000, 20, 1100,
+                            1670, 4000, 30, 1190,
+                            1670, 4000, 40, 1285,
+                            1670, 5000,  0, 1040,
+                            1670, 5000, 10, 1125,
+                            1670, 5000, 20, 1215,
+                            1670, 5000, 30, 1315,
+                            1670, 5000, 40, 1420,
+                            1670, 6000,  0, 1145,
+                            1670, 6000, 10, 1245,
+                            1670, 6000, 20, 1345,
+                            1670, 6000, 30, 1455,
+                            1670, 6000, 40, 1570,
+                            1670, 7000,  0, 1270,
+                            1670, 7000, 10, 1375,
+                            1670, 7000, 20, 1490,
+                            1670, 7000, 30, 1615,
+                            1670, 7000, 40, 1745,
+                            1670, 8000,  0, 1405,
+                            1670, 8000, 10, 1525,
+                            1670, 8000, 20, 1655,
+                            1670, 8000, 30, 1795,
+                            1670, 8000, 40, 1940
+                            ]   
+                        },
+                        "coefficiant" : 
+                      {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "wind_coefficiant": {"function_type": "linear", 
+                                "xvalues": [0, 9], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]
+                                },
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.15], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
                     },
                     "distance_50ft":
                     {
-                        "value": {"function_type":  "constant", "values": [656.168], "units": ["m"], "unittypes":["speed"]},
-                        "unitdisplay":"ft"
+                        "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude", "temperature", "value"],
+                            "units" : ["lb", "ft", "C", "ft"],
+                            "unittypes":["mass", "length", "temperature","length"],
+                            "values": [
+                            1670,    0,  0, 1190,
+                            1670,    0, 10, 1290,
+                            1670,    0, 20, 1390,
+                            1670,    0, 30, 1495,
+                            1670,    0, 40, 1605,
+                            1670, 1000,  0, 1310,
+                            1670, 1000, 10, 1420,
+                            1670, 1000, 20, 1530,
+                            1670, 1000, 30, 1645,
+                            1670, 1000, 40, 1770,
+                            1670, 2000,  0, 1445,
+                            1670, 2000, 10, 1565,
+                            1670, 2000, 20, 1690,
+                            1670, 2000, 30, 1820,
+                            1670, 2000, 40, 1960,
+                            1670, 3000,  0, 1600,
+                            1670, 3000, 10, 1730,
+                            1670, 3000, 20, 1870,
+                            1670, 3000, 30, 2020,
+                            1670, 3000, 40, 2185,
+                            1670, 4000,  0, 1775,
+                            1670, 4000, 10, 1920,
+                            1670, 4000, 20, 2080,
+                            1670, 4000, 30, 2250,
+                            1670, 4000, 40, 2440,
+                            1670, 5000,  0, 1970,
+                            1670, 5000, 10, 2140,
+                            1670, 5000, 20, 2320,
+                            1670, 5000, 30, 2525,
+                            1670, 5000, 40, 2750,
+                            1670, 6000,  0, 2200,
+                            1670, 6000, 10, 2395,
+                            1670, 6000, 20, 2610,
+                            1670, 6000, 30, 2855,
+                            1670, 6000, 40, 3125,
+                            1670, 7000,  0, 2470,
+                            1670, 7000, 10, 2705,
+                            1670, 7000, 20, 2960,
+                            1670, 7000, 30, 3255,
+                            1670, 7000, 40, 3590,
+                            1670, 8000,  0, 2800,
+                            1670, 8000, 10, 3080,
+                            1670, 8000, 20, 3395,
+                            1670, 8000, 30, 3765,
+                            1670, 8000, 40, 4190
+                            ]},
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
+                            "wind_coefficiant": {"function_type": "linear", 
+                                "xvalues": [0, 9], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]
+                                },
+                             "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "Max_ROC": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "weight", "density_altitude", "value"],
+                            "units" : [ "lb", "ft","ft/min"],
+                            "unittypes":["mass", "length","speed"],
+                            "values": [
+                            1670,    0,  715,
+                            1670, 1000,  675,
+                            1670, 2000,  630,
+                            1670, 3000,  590,
+                            1670, 4000,  550,
+                            1670, 5000,  505,
+                            1670, 6000,  465,
+                            1670, 7000,  425,
+                            1670, 8000,  380,
+                            1670, 9000,  340,
+                            1670,10000,  300,
+                            1670,11000,  255,
+                            1670,12000,  215
+                        ]
+                        },
+                        "unitdisplay":"ft/min"
+                    },
+                    "IAS_Max_ROC": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "weight", "density_altitude", "value"],
+                            "units" : [ "lb", "ft","kt"],
+                            "unittypes":["mass", "length", "speed"],
+                            "values": [
+                            1670,    0,  67,
+                            1670, 1000,  66,
+                            1670, 2000,  66,
+                            1670, 3000,  65,
+                            1670, 4000,  65,
+                            1670, 5000,  64,
+                            1670, 6000,  63,
+                            1670, 7000,  63,
+                            1670, 8000,  62,
+                            1670, 9000,  62,
+                            1670,10000,  61,
+                            1670,11000,  61,
+                            1670,12000,  60
+                            ]
+                           },
+                    "unitdisplay":"kt"
                     }
                 }
             },
-            "landing" :{}
-        },
-         "OO-FMX": 
+            "landing": 
+            {
+                "inputs": 
+                {
+                   "weight": { "value": 1670, "unit":"lb",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
+                   "flaps": { "value": 30, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                },
+                "outputs":
+                {
+                    "IAS_50ft_ld": 
+                    {
+                        "value": {"function_type": "constant", "values": [54], "units": ["kt"], "unittypes":["speed"]},
+                        "unitdisplay":"kt"
+                    },
+                    "distance_50ft_ld": 
+                    {
+                        "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude", "temperature", "value"],
+                            "units" : ["lb", "ft","C", "ft"],
+                            "unittypes":["mass", "length","temperature" ,"length"],
+                            "values": [
+                            1670,    0,  0, 1160,
+                            1670,    0, 10, 1185,
+                            1670,    0, 20, 1215,
+                            1670,    0, 30, 1240,
+                            1670,    0, 40, 1265,
+                            1670, 1000,  0, 1185,
+                            1670, 1000, 10, 1215,
+                            1670, 1000, 20, 1240,
+                            1670, 1000, 30, 1270,
+                            1670, 1000, 40, 1295,
+                            1670, 2000,  0, 1215,
+                            1670, 2000, 10, 1240,
+                            1670, 2000, 20, 1270,
+                            1670, 2000, 30, 1300,
+                            1670, 2000, 40, 1330,
+                            1670, 3000,  0, 1240,
+                            1670, 3000, 10, 1275,
+                            1670, 3000, 20, 1305,
+                            1670, 3000, 30, 1335,
+                            1670, 3000, 40, 1360,
+                            1670, 4000,  0, 1275,
+                            1670, 4000, 10, 1305,
+                            1670, 4000, 20, 1335,
+                            1670, 4000, 30, 1370,
+                            1670, 4000, 40, 1400,
+                            1670, 5000,  0, 1305,
+                            1670, 5000, 10, 1335,
+                            1670, 5000, 20, 1370,
+                            1670, 5000, 30, 1400,
+                            1670, 5000, 40, 1435,
+                            1670, 6000,  0, 1335,
+                            1670, 6000, 10, 1370,
+                            1670, 6000, 20, 1410,
+                            1670, 6000, 30, 1440,
+                            1670, 6000, 40, 1475,
+                            1670, 7000,  0, 1375,
+                            1670, 7000, 10, 1410,
+                            1670, 7000, 20, 1440,
+                            1670, 7000, 30, 1480,
+                            1670, 7000, 40, 1415,
+                            1670, 8000,  0, 1410,
+                            1670, 8000, 10, 1450,
+                            1670, 8000, 20, 1480,
+                            1670, 8000, 30, 1520,
+                            1670, 8000, 40, 1555
+                        ]},
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "wind_coefficiant": {"function_type": "linear", 
+                                "xvalues": [0, 9], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]
+                                },
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.20], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "distance_ground_ld": 
+                    {
+                        "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude", "temperature", "value"],
+                            "units" : ["lb", "ft","C", "ft"],
+                            "unittypes":["mass", "length","temperature" ,"length"],
+                            "values": [
+                            1670,    0,  0,  450,
+                            1670,    0, 10,  465,
+                            1670,    0, 20,  485,
+                            1670,    0, 30,  500,
+                            1670,    0, 40,  515,
+                            1670, 1000,  0,  465,
+                            1670, 1000, 10,  485,
+                            1670, 1000, 20,  500,
+                            1670, 1000, 30,  520,
+                            1670, 1000, 40,  535,
+                            1670, 2000,  0,  485,
+                            1670, 2000, 10,  500,
+                            1670, 2000, 20,  520,
+                            1670, 2000, 30,  535,
+                            1670, 2000, 40,  555,
+                            1670, 3000,  0,  500,
+                            1670, 3000, 10,  520,
+                            1670, 3000, 20,  540,
+                            1670, 3000, 30,  560,
+                            1670, 3000, 40,  575,
+                            1670, 4000,  0,  520,
+                            1670, 4000, 10,  540,
+                            1670, 4000, 20,  560,
+                            1670, 4000, 30,  580,
+                            1670, 4000, 40,  600,
+                            1670, 5000,  0,  540,
+                            1670, 5000, 10,  560,
+                            1670, 5000, 20,  580,
+                            1670, 5000, 30,  600,
+                            1670, 5000, 40,  620,
+                            1670, 6000,  0,  560,
+                            1670, 6000, 10,  580,
+                            1670, 6000, 20,  605,
+                            1670, 6000, 30,  625,
+                            1670, 6000, 40,  645,
+                            1670, 7000,  0,  585,
+                            1670, 7000, 10,  605,
+                            1670, 7000, 20,  625,
+                            1670, 7000, 30,  650,
+                            1670, 7000, 40,  670,
+                            1670, 8000,  0,  605,
+                            1670, 8000, 10,  630,
+                            1670, 8000, 20,  650,
+                            1670, 8000, 30,  675,
+                            1670, 8000, 40,  695
+                        ]},
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "wind_coefficiant": {"function_type": "linear", 
+                                "xvalues": [0, 9], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]
+                                },
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.20], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                   }
+                }
+            }
+         },
+        "OO-FMX": 
         { 
             "takeoff" : {
                 "inputs": 
@@ -331,90 +1163,330 @@
                         "unitdisplay":"kt"
                     },                    
                     "distance_roll": 
-                        {
-                            "value": {"function_type": "table",  
-                                "columns": ["weight", "pressure_altitude", "temperature", "value"],
-                                "units" : ["lb", "ft", "C", "ft"],
-                                "unittypes":["mass", "length", "temperature","length"],
-                                "values": [
-                                    2300,    0,    0,  695,
-                                    2300,    0,   10,  745,
-                                    2300,    0,   20,  805,
-                                    2300,    0,   30,  865,
-                                    2300,    0,   40,  925,
-                                    2300, 1000,    0,  760,
-                                    2300, 1000,   10,  820,
-                                    2300, 1000,   20,  880,
-                                    2300, 1000,   30,  950,
-                                    2300, 1000,   40, 1020,
-                                    2300, 2000,    0,  835,
-                                    2300, 2000,   10,  900,
-                                    2300, 2000,   20,  970,
-                                    2300, 2000,   30, 1045, 
-                                    2300, 2000,   40, 1120,
-                                    2300, 3000,    0,  920, 
-                                    2300, 3000,   10,  990,
-                                    2300, 3000,   20, 1070,
-                                    2300, 3000,   30, 1150,
-                                    2300, 3000,   40, 1235,
-                                    2300, 4000,    0, 1010,
-                                    2300, 4000,   10, 1090,
-                                    2300, 4000,   20, 1180,
-                                    2300, 4000,   30, 1270,
-                                    2300, 4000,   40, 1365,
-                                    2100,    0,    0,  560,
-                                    2100,    0,   10,  605,
-                                    2100,    0,   20,  650,
-                                    2100,    0,   30,  700,
-                                    2100,    0,   40,  750,
-                                    2100, 1000,    0,  615,
-                                    2100, 1000,   10,  665,
-                                    2100, 1000,   20,  715,
-                                    2100, 1000,   30,  765,
-                                    2100, 1000,   40,  820,
-                                    2100, 2000,    0,  675,
-                                    2100, 2000,   10,  725,
-                                    2100, 2000,   20,  785,
-                                    2100, 2000,   30,  840,
-                                    2100, 2000,   40,  905,
-                                    2100, 3000,    0,  740,
-                                    2100, 3000,   10,  800,
-                                    2100, 3000,   20,  860,
-                                    2100, 3000,   30,  925,
-                                    2100, 3000,   40,  995,
-                                    2100, 4000,    0,  815,
-                                    2100, 4000,   10,  880,
-                                    2100, 4000,   20,  950,
-                                    2100, 4000,   30, 1020,
-                                    2100, 4000,   40, 1095  
-                                ]  
-                                },
-                                "Eric Comment": "Partial table, not complete (altutude > 4000 fr and weight = 2100 lb)",
-                            "unitdisplay":"m"
+                    {
+                        "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude", "temperature", "value"],
+                            "units" : ["lb", "ft", "C", "ft"],
+                            "unittypes":["mass", "length", "temperature","length"],
+                            "values": [
+                                2300,    0,    0,  695,
+                                2300,    0,   10,  745,
+                                2300,    0,   20,  805,
+                                2300,    0,   30,  865,
+                                2300,    0,   40,  925,
+                                2300, 1000,    0,  760,
+                                2300, 1000,   10,  820,
+                                2300, 1000,   20,  880,
+                                2300, 1000,   30,  950,
+                                2300, 1000,   40, 1020,
+                                2300, 2000,    0,  835,
+                                2300, 2000,   10,  900,
+                                2300, 2000,   20,  970,
+                                2300, 2000,   30, 1045, 
+                                2300, 2000,   40, 1120,
+                                2300, 3000,    0,  920, 
+                                2300, 3000,   10,  990,
+                                2300, 3000,   20, 1070,
+                                2300, 3000,   30, 1150,
+                                2300, 3000,   40, 1235,
+                                2300, 4000,    0, 1010,
+                                2300, 4000,   10, 1090,
+                                2300, 4000,   20, 1180,
+                                2300, 4000,   30, 1270,
+                                2300, 4000,   40, 1365,
+                                2300, 5000,    0, 1115,
+                                2300, 5000,   10, 1205,
+                                2300, 5000,   20, 1300,
+                                2300, 5000,   30, 1405,
+                                2300, 5000,   40, 1510,
+                                2300, 6000,    0, 1235,
+                                2300, 6000,   10, 1335,
+                                2300, 6000,   20, 1440,
+                                2300, 6000,   30, 1555, 
+                                2300, 6000,   40, 1675,
+                                2300, 7000,    0, 1370, 
+                                2300, 7000,   10, 1480,
+                                2300, 7000,   20, 1600,
+                                2300, 7000,   30, 1730,
+                                2300, 7000,   40, 1865,
+                                2300, 8000,    0, 1520,
+                                2300, 8000,   10, 1645,
+                                2300, 8000,   20, 1780,
+                                2300, 8000,   30, 1925,
+                                2300, 8000,   40, 2080,
+                                2100,    0,    0,  560,
+                                2100,    0,   10,  605,
+                                2100,    0,   20,  650,
+                                2100,    0,   30,  700,
+                                2100,    0,   40,  750,
+                                2100, 1000,    0,  615,
+                                2100, 1000,   10,  665,
+                                2100, 1000,   20,  715,
+                                2100, 1000,   30,  765,
+                                2100, 1000,   40,  820,
+                                2100, 2000,    0,  675,
+                                2100, 2000,   10,  725,
+                                2100, 2000,   20,  785,
+                                2100, 2000,   30,  840,
+                                2100, 2000,   40,  905,
+                                2100, 3000,    0,  740,
+                                2100, 3000,   10,  800,
+                                2100, 3000,   20,  860,
+                                2100, 3000,   30,  925,
+                                2100, 3000,   40,  995,
+                                2100, 4000,    0,  815,
+                                2100, 4000,   10,  880,
+                                2100, 4000,   20,  950,
+                                2100, 4000,   30, 1020,
+                                2100, 4000,   40, 1095,
+                                2100, 5000,    0,  900,
+                                2100, 5000,   10,  970,
+                                2100, 5000,   20, 1045,
+                                2100, 5000,   30, 1125,
+                                2100, 5000,   40, 1210,
+                                2100, 6000,    0,  990,
+                                2100, 6000,   10, 1070,
+                                2100, 6000,   20, 1155,
+                                2100, 6000,   30, 1245, 
+                                2100, 6000,   40, 1340,
+                                2100, 7000,    0, 1095, 
+                                2100, 7000,   10, 1185,
+                                2100, 7000,   20, 1280,
+                                2100, 7000,   30, 1380,
+                                2100, 7000,   40, 1485,
+                                2100, 8000,    0, 1215,
+                                2100, 8000,   10, 1315,
+                                2100, 8000,   20, 1420,
+                                2100, 8000,   30, 1530,
+                                2100, 8000,   40, 1650,
+                                1900,    0,    0,  450,
+                                1900,    0,   10,  480,
+                                1900,    0,   20,  520,
+                                1900,    0,   30,  555,
+                                1900,    0,   40,  595,
+                                1900, 1000,    0,  490,
+                                1900, 1000,   10,  525,
+                                1900, 1000,   20,  565,
+                                1900, 1000,   30,  610,
+                                1900, 1000,   40,  655,
+                                1900, 2000,    0,  535,
+                                1900, 2000,   10,  580,
+                                1900, 2000,   20,  620,
+                                1900, 2000,   30,  665,
+                                1900, 2000,   40,  715,
+                                1900, 3000,    0,  590,
+                                1900, 3000,   10,  635,
+                                1900, 3000,   20,  680,
+                                1900, 3000,   30,  735,
+                                1900, 3000,   40,  785,
+                                1900, 4000,    0,  645,
+                                1900, 4000,   10,  695,
+                                1900, 4000,   20,  750,
+                                1900, 4000,   30,  805,
+                                1900, 4000,   40,  865,
+                                1900, 5000,    0,  710,
+                                1900, 5000,   10,  765,
+                                1900, 5000,   20,  825,
+                                1900, 5000,   30,  890,
+                                1900, 5000,   40,  955,
+                                1900, 6000,    0,  785,
+                                1900, 6000,   10,  845,
+                                1900, 6000,   20,  910,
+                                1900, 6000,   30,  980,
+                                1900, 6000,   40, 1055,
+                                1900, 7000,    0,  865,
+                                1900, 7000,   10,  935,
+                                1900, 7000,   20, 1005,
+                                1900, 7000,   30, 1085,
+                                1900, 7000,   40, 1165,
+                                1900, 8000,    0,  955,
+                                1900, 8000,   10, 1030,
+                                1900, 8000,   20, 1115,
+                                1900, 8000,   30, 1200,
+                                1900, 8000,   40, 1290
+                            ]  
+                            },
+                            "coefficiant" : 
+                            {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "head_wind":{"function_type": "linear", 
+                                "xvalues": [0, 9.0], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.15], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
                        },
-                    "distance_50ft":
+                        "distance_50ft":
                         {
                             "value": {"function_type": "table",  
                                 "columns": ["weight", "pressure_altitude", "temperature", "value"],
                                 "units" : ["lb", "ft", "C", "ft"],
                                 "unittypes":["mass", "length", "temperature","length"],
                                 "values": [
-                                        2300,    0,    0, 1250,
-                                        2300,    0,   10, 1340,
-                                        2300,    0,   20, 1440,
-                                        2300,    0,   30, 1545,
-                                        2300,    0,   40, 1655,
-                                        2300, 1000,    0, 1370,
-                                        2300, 1000,   10, 1475,
-                                        2300, 1000,   20, 1585,
-                                        2300, 1000,   30, 1705,
-                                        2300, 1000,   40, 1830,
-                                        2300, 2000,    0, 1510,
-                                        2300, 2000,   10, 1625,
-                                        2300, 2000,   20, 1750,
-                                        2300, 2000,   30, 1885, 
-                                        2300, 2000,   40, 2030
-                                ]
+                                    2300,    0,    0, 1250,
+                                    2300,    0,   10, 1340,
+                                    2300,    0,   20, 1440,
+                                    2300,    0,   30, 1545,
+                                    2300,    0,   40, 1655,
+                                    2300, 1000,    0, 1370,
+                                    2300, 1000,   10, 1475,
+                                    2300, 1000,   20, 1585,
+                                    2300, 1000,   30, 1705,
+                                    2300, 1000,   40, 1830,
+                                    2300, 2000,    0, 1510,
+                                    2300, 2000,   10, 1625,
+                                    2300, 2000,   20, 1750,
+                                    2300, 2000,   30, 1885,
+                                    2300, 2000,   40, 2030,
+                                    2300, 3000,    0, 1670, 
+                                    2300, 3000,   10, 1800,
+                                    2300, 3000,   20, 1940,
+                                    2300, 3000,   30, 2095,
+                                    2300, 3000,   40, 2260,
+                                    2300, 4000,    0, 1850,
+                                    2300, 4000,   10, 2000,
+                                    2300, 4000,   20, 2165,
+                                    2300, 4000,   30, 2340,
+                                    2300, 4000,   40, 2535,
+                                    2300, 5000,    0, 2060,
+                                    2300, 5000,   10, 2235,
+                                    2300, 5000,   20, 2425,
+                                    2300, 5000,   30, 2635,
+                                    2300, 5000,   40, 2860,
+                                    2300, 6000,    0, 2310,
+                                    2300, 6000,   10, 2515,
+                                    2300, 6000,   20, 2740,
+                                    2300, 6000,   30, 2985, 
+                                    2300, 6000,   40, 3265,
+                                    2300, 7000,    0, 2610, 
+                                    2300, 7000,   10, 2850,
+                                    2300, 7000,   20, 3125,
+                                    2300, 7000,   30, 3430,
+                                    2300, 7000,   40, 3775,
+                                    2300, 8000,    0, 2975,
+                                    2300, 8000,   10, 3270,
+                                    2300, 8000,   20, 3610,
+                                    2300, 8000,   30, 4000,
+                                    2300, 8000,   40, 4465,
+                                    2100,    0,    0, 1020,
+                                    2100,    0,   10, 1095,
+                                    2100,    0,   20, 1170,
+                                    2100,    0,   30, 1250,
+                                    2100,    0,   40, 1340,
+                                    2100, 1000,    0, 1115,
+                                    2100, 1000,   10, 1185,
+                                    2100, 1000,   20, 1285,
+                                    2100, 1000,   30, 1375,
+                                    2100, 1000,   40, 1470,
+                                    2100, 2000,    0, 1225,
+                                    2100, 2000,   10, 1315,
+                                    2100, 2000,   20, 1410,
+                                    2100, 2000,   30, 1515,
+                                    2100, 2000,   40, 1625,
+                                    2100, 3000,    0, 1345,
+                                    2100, 3000,   10, 1445,
+                                    2100, 3000,   20, 1555,
+                                    2100, 3000,   30, 1670,
+                                    2100, 3000,   40, 1795,
+                                    2100, 4000,    0, 1485,
+                                    2100, 4000,   10, 1600,
+                                    2100, 4000,   20, 1720,
+                                    2100, 4000,   30, 1855,
+                                    2100, 4000,   40, 1995,
+                                    2100, 5000,    0,  645,
+                                    2100, 5000,   10, 1775,
+                                    2100, 5000,   20, 1915,
+                                    2100, 5000,   30, 2065,
+                                    2100, 5000,   40, 2225,
+                                    2100, 6000,    0, 1825,
+                                    2100, 6000,   10, 1975,
+                                    2100, 6000,   20, 2135,
+                                    2100, 6000,   30, 2310, 
+                                    2100, 6000,   40, 2505,
+                                    2100, 7000,    0, 2040, 
+                                    2100, 7000,   10, 2210,
+                                    2100, 7000,   20, 2400,
+                                    2100, 7000,   30, 2605,
+                                    2100, 7000,   40, 2835,
+                                    2100, 8000,    0, 2295,
+                                    2100, 8000,   10, 2485,
+                                    2100, 8000,   20, 2720,
+                                    2100, 8000,   30, 2965,
+                                    2100, 8000,   40, 3245,
+                                    1900,    0,    0,  820,
+                                    1900,    0,   10,  880,
+                                    1900,    0,   20,  940,
+                                    1900,    0,   30, 1000,
+                                    1900,    0,   40, 1070,
+                                    1900, 1000,    0,  895,
+                                    1900, 1000,   10,  960,
+                                    1900, 1000,   20, 1025,
+                                    1900, 1000,   30, 1095,
+                                    1900, 1000,   40, 1170,
+                                    1900, 2000,    0,  980,
+                                    1900, 2000,   10, 1050,
+                                    1900, 2000,   20, 1120,
+                                    1900, 2000,   30, 1200,
+                                    1900, 2000,   40, 1280,
+                                    1900, 3000,    0, 1070,
+                                    1900, 3000,   10, 1150,
+                                    1900, 3000,   20, 1230,
+                                    1900, 3000,   30, 1315,
+                                    1900, 3000,   40, 1410,
+                                    1900, 4000,    0, 1175,
+                                    1900, 4000,   10, 1260,
+                                    1900, 4000,   20, 1355,
+                                    1900, 4000,   30, 1450,
+                                    1900, 4000,   40, 1555,
+                                    1900, 5000,    0, 1295,
+                                    1900, 5000,   10, 1390,
+                                    1900, 5000,   20, 1495,
+                                    1900, 5000,   30, 1605,
+                                    1900, 5000,   40, 1725,
+                                    1900, 6000,    0, 1430,
+                                    1900, 6000,   10, 1540,
+                                    1900, 6000,   20, 1655,
+                                    1900, 6000,   30, 1785,
+                                    1900, 6000,   40, 1920,
+                                    1900, 7000,    0, 1585,
+                                    1900, 7000,   10, 1710,
+                                    1900, 7000,   20, 1845,
+                                    1900, 7000,   30, 1990,
+                                    1900, 7000,   40, 2145,
+                                    1900, 8000,    0, 1765,
+                                    1900, 8000,   10, 1905,
+                                    1900, 8000,   20, 2060,
+                                    1900, 8000,   30, 2230,
+                                    1900, 8000,   40, 2410
+                                    ]
+                                },
+                            "coefficiant" : 
+                            {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "head_wind":{"function_type": "linear", 
+                                "xvalues": [0, 9.0], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.15], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
                             },
                             "unitdisplay":"m"
                         },
@@ -437,19 +1509,22 @@
                             2300, 4000,      0,  600,
                             2300, 4000,     20,  545,
                             2300, 4000,     40,  485,
-                            2200, 6000,    -20,  545,
-                            2200, 6000,      0,  495,
-                            2200, 6000,     20,  440,
-                            2200, 6000,     40,  385,
-                            2100, 8000,    -20,  440,
-                            2100, 8000,      0,  390,
-                            2100, 8000,     20,  335,
-                            2100, 8000,     40,  280,
-                            2000,10000,    -20,  335,
-                            2000,10000,      0,  285,
-                            2000,10000,     20,  230,
-                            2000,12000,    -20,  230,
-                            2000,12000,      0,  180
+                            2300, 6000,    -20,  545,
+                            2300, 6000,      0,  495,
+                            2300, 6000,     20,  440,
+                            2300, 6000,     40,  385,
+                            2300, 8000,    -20,  440,
+                            2300, 8000,      0,  390,
+                            2300, 8000,     20,  335,
+                            2300, 8000,     40,  280,
+                            2300,10000,    -20,  335,
+                            2300,10000,      0,  285,
+                            2300,10000,     20,  230,
+                            2300,10000,     40,    0,
+                            2300,12000,    -20,  230,
+                            2300,12000,      0,  180,
+                            2300,12000,     20,    0,
+                            2300,12000,     40,    0
                             ]
                             },
                         "unitdisplay":"ft/min"
@@ -462,20 +1537,570 @@
                             "unittypes":["length","speed"],
                             "values": [
                                 0,  73,
+                             1000,  73,
                              2000,  72,
+                             3000,  72,
                              4000,  71,
+                             5000,  71,
                              6000,  70,
+                             7000,  69,
                              8000,  69,
+                             9000,  68,
                             10000,  68,
+                            11000,  67,
                             12000,  67
                         ]
                     },
                     "unitdisplay":"kt"
                     }
-
                 }
             },
-            "landing" :{}
+            "landing" :
+                {
+                "inputs": 
+                {
+                   "weight": { "value": 2300, "unit":"lb",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
+                   "flaps": { "value": 40, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                },
+                "outputs":
+                {
+                    "IAS_50ft_ld": 
+                    {
+                        "value": {"function_type": "constant", "values": [59], "units": ["kt"], "unittypes":["speed"]},
+                        "unitdisplay":"kt"
+                    },
+                    "distance_50ft_ld": 
+                    {
+                         "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude","temperature", "value"],
+                            "units" : ["kg", "ft", "C", "ft"],
+                            "unittypes":["mass", "length", "temperature", "length"],
+                            "values": [
+                                2300,    0,    0, 1205,
+                                2300,    0,   10, 1235,
+                                2300,    0,   20, 1265,
+                                2300,    0,   30, 1295,
+                                2300,    0,   40, 1330,
+                                2300, 1000,    0, 1235,
+                                2300, 1000,   10, 1265,
+                                2300, 1000,   20, 1230,
+                                2300, 1000,   30, 1330,
+                                2300, 1000,   40, 1365,
+                                2300, 2000,    0, 1265,
+                                2300, 2000,   10, 1300,
+                                2300, 2000,   20, 1335,
+                                2300, 2000,   30, 1370, 
+                                2300, 2000,   40, 1405,
+                                2300, 3000,    0, 1300, 
+                                2300, 3000,   10, 1335,
+                                2300, 3000,   20, 1370,
+                                2300, 3000,   30, 1405,
+                                2300, 3000,   40, 1440,
+                                2300, 4000,    0, 1335,
+                                2300, 4000,   10, 1370,
+                                2300, 4000,   20, 1410,
+                                2300, 4000,   30, 1445,
+                                2300, 4000,   40, 1480,
+                                2300, 5000,    0, 1370,
+                                2300, 5000,   10, 1415,
+                                2300, 5000,   20, 1450,
+                                2300, 5000,   30, 1485,
+                                2300, 5000,   40, 1525,
+                                2300, 6000,    0, 1415,
+                                2300, 6000,   10, 1455,
+                                2300, 6000,   20, 1490,
+                                2300, 6000,   30, 1535, 
+                                2300, 6000,   40, 1570,
+                                2300, 7000,    0, 1455, 
+                                2300, 7000,   10, 1495,
+                                2300, 7000,   20, 1535,
+                                2300, 7000,   30, 1575,
+                                2300, 7000,   40, 1615,
+                                2300, 8000,    0, 1500,
+                                2300, 8000,   10, 1540,
+                                2300, 8000,   20, 1580,
+                                2300, 8000,   30, 1620,
+                                2300, 8000,   40, 1665
+                            ]},
+                        "coefficiant" : 
+                        {
+                            "head_wind":{"function_type": "linear", 
+                                "xvalues": [0, 9.0], 
+                                "values": [1.0, 0.90],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.40], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "distance_ground_ld": 
+                    {
+                         "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude","temperature", "value"],
+                            "units" : ["kg", "ft", "C", "ft"],
+                            "unittypes":["mass", "length", "temperature", "length"],
+                            "values": [
+                                2300,    0,    0,  495,
+                                2300,    0,   10,  510,
+                                2300,    0,   20,  530,
+                                2300,    0,   30,  545,
+                                2300,    0,   40,  565,
+                                2300, 1000,    0,  510,
+                                2300, 1000,   10,  530,
+                                2300, 1000,   20,  545,
+                                2300, 1000,   30,  565,
+                                2300, 1000,   40,  585,
+                                2300, 2000,    0,  530,
+                                2300, 2000,   10,  550,
+                                2300, 2000,   20,  570,
+                                2300, 2000,   30,  590, 
+                                2300, 2000,   40,  610,
+                                2300, 3000,    0,  550, 
+                                2300, 3000,   10,  570,
+                                2300, 3000,   20,  590,
+                                2300, 3000,   30,  610,
+                                2300, 3000,   40,  630,
+                                2300, 4000,    0,  570,
+                                2300, 4000,   10,  590,
+                                2300, 4000,   20,  615,
+                                2300, 4000,   30,  635,
+                                2300, 4000,   40,  655,
+                                2300, 5000,    0,  590,
+                                2300, 5000,   10,  615,
+                                2300, 5000,   20,  635,
+                                2300, 5000,   30,  655,
+                                2300, 5000,   40,  680,
+                                2300, 6000,    0,  615,
+                                2300, 6000,   10,  640,
+                                2300, 6000,   20,  660,
+                                2300, 6000,   30,  685, 
+                                2300, 6000,   40,  705,
+                                2300, 7000,    0,  640, 
+                                2300, 7000,   10,  660,
+                                2300, 7000,   20,  685,
+                                2300, 7000,   30,  710,
+                                2300, 7000,   40,  730,
+                                2300, 8000,    0,  665,
+                                2300, 8000,   10,  690,
+                                2300, 8000,   20,  710,
+                                2300, 8000,   30,  735,
+                                2300, 8000,   40,  760
+                            ]},
+                        "coefficiant" : 
+                        {
+                            "head_wind":{"function_type": "linear", 
+                                "xvalues": [0, 9.0], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.45], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                   }
+                }
+            }
+        },
+         "OO-ALE": {
+            "POH": "https://www.spa-aviation.be/attachments/article/104/oo-ale.pdf",
+            "takeoff": {
+                "inputs": 
+                {
+                   "weight": { "value": 2300, "unit":"lb",  "unitdisplay": "kg", "unittype":"mass", "readonly": 0}, 
+                   "flaps": { "value": 0, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                },
+                "outputs":
+                {
+                    "IAS_roll":
+                    {
+                        "value": {"function_type": "constant", "values": [60], "units": ["MPH"], "unittypes":"[speed]"},
+                        "unitdisplay":"MPH"
+                    },
+                    "IAS_50ft": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "weight", "value"],
+                            "units" : [ "lb","MPH"],
+                            "unittypes":["mass","speed"],
+                            "values": [
+                                2300,  68,
+                                2000,  63,
+                                1700,  58]
+                            },
+                       "unitdisplay":"MPH"
+                    },
+                    "IAS_best_angle": 
+                    {
+                        "comment_patrick": " pas trouve",
+                        "value": {"function_type": "table",
+                            "columns": [ "weight", "value"],
+                            "units" : [ "lb","MPH"],
+                            "unittypes":["mass","speed"],
+                            "values": [
+                                2300,  68,
+                                2000,  63,
+                                1700,  58]
+                            },
+                        "unitdisplay":"MPH"
+                    },
+                    "distance_roll": 
+                    {
+                        "value": {"function_type": "table",  
+                            "columns": ["weight", "head_wind_speed", "pressure_altitude", "value"],
+                            "units" : ["lb", "kt", "ft","ft"],
+                            "unittypes":["mass", "speed", "length","length"],
+                            "values": [
+                            2300,  0,    0,  865,
+                            2300,  0, 2500, 1040,
+                            2300,  0, 5000, 1255,
+                            2300,  0, 7500, 1565,
+                            2300, 10,    0,  615,
+                            2300, 10, 2500,  750,
+                            2300, 10, 5000,  920,
+                            2300, 10, 7500, 1160,
+                            2300, 20,    0,  405,
+                            2300, 20, 2500,  505,
+                            2300, 20, 5000,  630,
+                            2300, 20, 7500,  810,
+                            2000,  0,    0,  630,
+                            2000,  0, 2500,  755,
+                            2000,  0, 5000,  905,
+                            2000,  0, 7500, 1120,
+                            2000, 10,    0,  435,
+                            2000, 10, 2500,  530,
+                            2000, 10, 5000,  645,
+                            2000, 10, 7500,  810,
+                            2000, 20,    0,  275,
+                            2000, 20, 2500,  340,
+                            2000, 20, 5000,  425,
+                            2000, 20, 7500,  595,
+                            1700,  0,    0,  435,
+                            1700,  0, 2500,  520,
+                            1700,  0, 5000,  625,
+                            1700,  0, 7500,  765,
+                            1700, 10,    0,  290,
+                            1700, 10, 2500,  355,
+                            1700, 10, 5000,  430,
+                            1700, 10, 7500,  535,
+                            1700, 20,    0,  175,
+                            1700, 20, 2500,  215,
+                            1700, 20, 5000,  270,
+                            1700, 20, 7500,  345
+                        ]
+                        },
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
+                            "temperature_coefficiant": {"function_type": "linear", "xvalues": [0, 25], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "F", "none"],
+                                "unittypes":[ "temperature_delta", "unitless"]
+                                },
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "distance_50ft":
+                    {
+                        "value": {"function_type": "table",  
+                            "columns": ["weight", "head_wind_speed", "pressure_altitude", "value"],
+                            "units" : ["lb", "kt", "ft","ft"],
+                            "unittypes":["mass", "speed", "length","length"],
+                            "values": [
+                            2300,  0,    0, 1525,
+                            2300,  0, 2500, 1910,
+                            2300,  0, 5000, 2480,
+                            2300,  0, 7500, 3855,
+                            2300, 10,    0, 1170,
+                            2300, 10, 2500, 1485,
+                            2300, 10, 5000, 1955,
+                            2300, 10, 7500, 3110,
+                            2300, 20,    0,  850,
+                            2300, 20, 2500, 1100,
+                            2300, 20, 5000, 1480,
+                            2300, 20, 7500, 2425,
+                            2000,  0,    0, 1095,
+                            2000,  0, 2500, 1326,
+                            2000,  0, 5000, 1625,
+                            2000,  0, 7500, 2165,
+                            2000, 10,    0,  820,
+                            2000, 10, 2500, 1005,
+                            2000, 10, 5000, 1250,
+                            2000, 10, 7500, 1685,
+                            2000, 20,    0,  580,
+                            2000, 20, 2500,  720,
+                            2000, 20, 5000,  910,
+                            2000, 20, 7500, 1255,
+                            1700,  0,    0,  780,
+                            1700,  0, 2500,  920,
+                            1700,  0, 5000, 1095,
+                            1700,  0, 7500, 1370,
+                            1700, 10,    0,  570,
+                            1700, 10, 2500,  680,
+                            1700, 10, 5000,  820,
+                            1700, 10, 7500, 1040,
+                            1700, 20,    0,  385,
+                            1700, 20, 2500,  470,
+                            1700, 20, 5000,  575,
+                            1700, 20, 7500,  745
+                           ]},
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.07], "units": ["unitless"]},
+                            "temperature_coefficiant": {"function_type": "linear", 
+                                "xvalues": [0, 25], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "F", "none"],
+                                "unittypes":[ "temperature_delta", "unitless"]
+                                },
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "Max_ROC": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "weight", "pressure_altitude", "value"],
+                            "units" : [ "lb", "ft","ft/min"],
+                            "unittypes":["mass", "length","speed"],
+                            "values": [
+                                2300,    0,  645,
+                                2300, 5000,  435,
+                                2300,10000,  230,
+                                2300,15000,   20,
+                                2000,    0,  840,
+                                2000, 5000,  610,
+                                2000,10000,  380,
+                                2000,15000,  155,
+                                1700,    0, 1085,
+                                1700, 5000,  825,
+                                1700,10000,  570,
+                                1700,15000,  315
+                        ]
+                        },
+                        "comment_patrick":"C est bien un additional et pas un coefficiant",
+                        "additional" : 
+                        {
+                            "temperature_additional": {"function_type": "linear", 
+                                "xvalues": [0, 10], 
+                                "values": [0.0, -20.0],  
+                                "columns": ["temperature_delta_isa","value"], 
+                                "units":[ "F", "none"],
+                                "unittypes":[ "temperature_delta", "speed"]
+                            }
+                        },
+                        "unitdisplay":"ft/min"
+                    },
+                    "IAS_Max_ROC": 
+                    {
+                        "value": {"function_type": "table",
+                            "columns": [ "weight", "density_altitude", "value"],
+                            "units" : [ "lb", "ft","MPH"],
+                            "unittypes":["mass", "length","speed"],
+                            "values": [
+                                2300,    0,  91,
+                                2300, 5000,  85,
+                                2300,10000,  80,
+                                2300,15000,  73,
+                                2000,    0,  88,
+                                2000, 5000,  81,
+                                2000,10000,  75,
+                                2000,15000,  68,
+                                1700,    0,  83,
+                                1700, 5000,  77,
+                                1700,10000,  70,
+                                1700,15000,  64
+                           ]},
+                    "unitdisplay":"MPH"
+                    }
+                }
+            },
+            "landing": 
+            {
+                "inputs": 
+                {
+                   "weight": { "value": 2300, "unit":"lb",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
+                   "flaps": { "value": 40, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                },
+                "outputs":
+                {
+                    "IAS_50ft_ld": 
+                    {
+                        "value": {"function_type": "constant", "values": [70], "units": ["MPH"], "unittypes":["speed"]},
+                        "unitdisplay":"MPH"
+                    },
+                    "distance_50ft_ld": 
+                    {
+                         "value": {"function_type": "table",  
+                            "columns": ["weight", "density_altitude", "value"],
+                            "units" : ["lb", "ft","ft"],
+                            "unittypes":["mass", "length","length"],
+                            "values": [
+                            2300,    0, 1250,
+                            2300, 2500, 1310,
+                            2300, 5000, 1385,
+                            2300, 7500, 1455
+                            ]},
+                        "coefficiant" : 
+                        {
+                            "head_wind":{"function_type": "linear", 
+                                "xvalues": [0, 5.0], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.20], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "distance_ground_ld": 
+                    {
+                         "value": {"function_type": "table",  
+                            "columns": ["weight", "pressure_altitude", "value"],
+                            "units" : ["lb", "ft","ft"],
+                            "unittypes":["mass", "length","length"],
+                            "values": [
+                            2300,    0, 520,
+                            2300, 2500, 560,
+                            2300, 5000, 605,
+                            2300, 7500, 650
+                        ]},
+                        "coefficiant" : 
+                        {
+                            "head_wind":{"function_type": "linear", 
+                                "xvalues": [0, 5.0], 
+                                "values": [1.0, 0.9],  
+                                "columns": ["head_wind_speed","value"], 
+                                "units":[ "kt", "none"],
+                                "unittypes":[ "speed", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "runwaytype_coefficiant":{"function_type": "enumeration", "columns": ["runway_type"], "enumerations":["Asphalt", "Grass"], "values": [1.0, 1.20], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                   }
+                }
+            }
+         },
+        "OO-SPQ": 
+        { 
+            "takeoff": {
+                "inputs": 
+                {
+                   "weight": { "value": 680, "unit":"kg",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
+                   "flaps": { "value": 0, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                },
+                "outputs":
+                {
+                    "IAS_50ft": 
+                    {
+                        "value": {"function_type": "constant", "values": [70], "units": ["MPH"], "unittypes":["speed"]},
+                        "unitdisplay":"MPH"
+                    },
+                    "IAS_best_angle": 
+                    {
+                        "value": {"function_type": "constant", "values": [63.5], "units": ["MPH"], "unittypes":["speed"]},
+                        "unitdisplay":"MPH"
+                    },
+                    "distance_roll": 
+                    {
+                        "value": {"function_type": "constant", "values": [390], "units": ["ft"], "unittypes":["length"]},
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "distance_50ft":
+                    {
+                        "value": {"function_type": "constant", "values": [750], "units": ["ft"], "unittypes":["length"]},
+                        "coefficiant" : 
+                        {
+                            "slope_coefficiant":{"function_type": "linear", 
+                                "xvalues": [0, 2], 
+                                "values": [1.0, 1.1],  
+                                "columns": ["runway_slope","value"], 
+                                "units":[ "%", "none"],
+                                "unittypes":[ "unitless", "unitless"]},
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                    },
+                    "Max_ROC": 
+                    {
+                        "value": {"function_type": "constant", "values": [710], "units": ["ft/min"], "unittypes":["speed"]},
+                        "unitdisplay":"ft/min"
+                    },
+                    "IAS_Max_ROC": 
+                    {
+                        "value": {"function_type": "constant", "values": [71], "units": ["MPH"], "unittypes":["speed"]},
+                        "unitdisplay":"MPH"
+                    }
+                }
+            },
+            "landing": 
+            {
+                "inputs": 
+                {
+                   "weight": { "value": 680, "unit":"kg",  "unitdisplay": "kg", "unittype":"mass", "readonly": 1}, 
+                   "flaps": { "value": 0, "unit":"degree", "unittype":"planeangle", "readonly": 1}
+                },
+                "outputs":
+                {
+                    "IAS_50ft_ld": 
+                    {
+                        "value": {"function_type": "constant", "values": [60], "units": ["MPH"], "unittypes":["speed"]},
+                        "unitdisplay":"MPH"
+                    },
+                    "distance_ground_ld": 
+                    {
+                        "value": {"function_type": "constant", "values": [385], "units": ["ft"], "unittypes":["length"]},
+                        "coefficiant" : 
+                        {
+                            "aircraft_coefficiant":{"function_type": "enumeration", "columns": ["aircraft_coefficiant"], "enumerations":["POH", "Measured"], "values": [1.0, 1.10], "units": ["unitless"]},
+                            "pilotskill_coefficiant":{"function_type": "enumeration", "columns": ["pilot_skill"], "enumerations":["Student", "Normal", "POH"], "values": [1.3, 1.15, 1.0], "units": ["unitless"]}
+                        },
+                        "unitdisplay":"m"
+                   },
+                   "distance_50ft_ld": 
+                   {
+                        "comment_patrick":"Pas trouve dans le POH j ai ajoute 200ft a distance ground",
+                        "value": {"function_type": "constant", "values": [585], "units": ["ft"], "unittypes":["length"]},
+                        "unitdisplay":"m"
+                   }
+                }
+            }
         }
     }
 }
