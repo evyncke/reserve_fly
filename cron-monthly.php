@@ -174,14 +174,16 @@ $all_rows = mysqli_fetch_all($result, MYSQLI_ASSOC) ;
 foreach ($all_rows as $row) {
         $profile_count = 0 ;
 		$missing_items = array() ;
-		$full_name = db2web($row['full_name']) ; // SQL DB is latin1 and the rest is in UTF-8
-		$first_name = db2web($row['first_name']) ; // SQL DB is latin1 and the rest is in UTF-8
+		$full_name = db2web($row['full_name']) ; 
+		$first_name = db2web($row['first_name']) ; 
         if ($row['email'] != '') $profile_count ++ ;
         if ($row['first_name'] != '') $profile_count ++ ; else $missing_items[] = '<b>pr&eacute;nom</b>' ;
         if ($row['last_name'] != '') $profile_count ++ ; else $missing_items[] = '<b>nom de famille</b>' ;
         if ($row['home_phone'] == '')  $missing_items[] = 't&eacute;l&eacute;phone priv&eacute;' ;
         if ($row['work_phone'] == '') $missing_items[] = 't&eacute;l&eacute;phone travail' ;
         if ($row['cell_phone'] != '') $profile_count ++ ; else $missing_items[] = '<b>t&eacute;l&eacute;phone mobile</b>' ;
+		if ($row['contact_name'] == '') $missing_items[] = 'nom du contact' ;
+		if ($row['contact_phone'] == '') $missing_items[] = 't&eacute;l&eacute;phone du contact' ;
         if ($row['city'] != '') $profile_count ++ ; else $missing_items[] = 'ville' ;
         if ($row['country'] == '') $missing_items[] = 'pays' ; 
         if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ; else $missing_items[] = 'genre' ; 
