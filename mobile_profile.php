@@ -388,10 +388,11 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 <input type="hidden" name="action" value="profile">
 <input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
 <div class="row mb-3">
-	<label for="usernameId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Nom d'utilisateur:</label>
+	<label for="usernameInputId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Nom d'utilisateur:</label>
 	<div class="col-sm-4">
-		<input type="text" class="form-control" id="usernameId" name="username" value="<?=$me['username']?>" readonly disabled>
+		<input type="text" class="form-control" id="usernameInputId" value="<?=$me['username']?>" readonly disabled>
 		<span class="input-group-addon">(contacter webmaster@spa-aviation.be pour changer)</span>
+		<!-- Some weird interactions with some password managers, e.g., LastPass, changing the value into "User" -->
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
