@@ -105,9 +105,39 @@ function updateSubmitButton()
    // Check if Non Remboursable if carburant
     var remboursable=document.getElementById("id_notedefrais_input_remboursable").value;
     for(var i=0;i<nodedefrais_size;i++) {
-        if(notedefrais_type[i]=="carburant" && remboursable==1) {
-            alert("Pour une note de frais carburant, le type de note de frais remboursement être \"Remboursable sur le compte pilote\"");
-            return;
+        if(notedefrais_type[i]=="carburant" ) {
+            if(remboursable==1) {
+                alert("Pour une note de frais carburant, le type de note de frais remboursement être \"Remboursable sur le compte pilote\"");
+                return;
+            }
+        }
+        if(notedefrais_type[i]=="carburant"|| notedefrais_type[i]=="atterrissage" || notedefrais_type[i]=="vol_nuit" ) {
+            // Check if Aircraft defined in description for "Carburant"
+            var description=notedefrais_description[i].toUpperCase();
+            var aircraftCallSign=Array(
+                "ALD",
+                "ALE",
+                "JRB",
+                "SPQ",
+                "FUN",
+                "APV",
+                "FMX"
+            );
+            var found=false;
+            for(var k=0;k<aircraftCallSign.length;k++) {
+                if(description.search("OO"+aircraftCallSign[k])>=0) {
+                    found=true;
+                    break;
+                }
+                if(description.search("OO-"+aircraftCallSign[k])>=0) {
+                    found=true;
+                    break;
+                }
+            }
+            if(!found) {
+                alert("Pour une note de frais de type carburant, taxe atterrissage ou vol de nuit, la description doit contenir le call sign de l'avion (Ex: OO-ALD)");
+                return;                
+            }
         }
     }
 
@@ -426,7 +456,7 @@ function addRow(theIndex, theDate, theType, theDescription, theQuantity, thePric
     // Description
     var cellDescription = row.insertCell(3);
     cellDescription.innerHTML = theDescription;
-    // Quantity
+   // Quantity
     var cellQuantity = row.insertCell(4);
      cellQuantity.innerHTML = theQuantity;
    // Price
