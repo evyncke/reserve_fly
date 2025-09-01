@@ -21,23 +21,44 @@ require_once 'mobile_header5.php' ;
 
 $fontSize = (isset($_REQUEST['kiosk'])) ? '3vw' : '1em' ;
 ?> 
-<div class="container-fluid">
+<main class="container-fluid">
+    <header class="row">
+        <h2 class="h2">Ephémérides du <time id="displayDate"></time></h2>
+    </header>
 
-<div class="row">
-<h3>Ephémérides du <span id="displayDate"><span></h3>
-</div> <!-- row -->
+    <section class="row" style="font-size: <?=$fontSize?>">
+        <dl class="row m-0 w-100">
+            <dt class="col-md-4 col-xs-8">Jour aéronautique:</dt>
+            <dd id="aeroDay" class="col-md-2 col-xs-4"></dd>
+            
+            <dt class="col-md-4 col-xs-8">Nuit aéronautique:</dt>
+            <dd id="aeroNight" class="col-md-2 col-xs-4"></dd>
+            
+            <dt class="col-md-4 col-xs-8">Lever du soleil:</dt>
+            <dd id="civilDay" class="col-md-2 col-xs-4"></dd>
+            
+            <dt class="col-md-4 col-xs-8">Coucher du soleil:</dt>
+            <dd id="civilNight" class="col-md-2 col-xs-4"></dd>
+            
+            <dt class="col-md-4 col-xs-8">Ouverture aéroport:</dt>
+            <dd id="airportDay" class="col-md-2 col-xs-4"></dd>
+            
+            <dt class="col-md-4 col-xs-8">Fermeture aéroport:</dt>
+            <dd id="airportNight" class="col-md-2 col-xs-4"></dd>
+        </dl>
 
-<div class="row" style="font-size: <?=$fontSize?>">
-			<div class="col-md-4 col-xs-8">Jour aéronautique:</div><div id="aeroDay" class="col-md-2 col-xs-4"></div>
-			<div class="col-md-4 col-xs-8">Nuit aéronautique:</div><div id="aeroNight" class="col-md-2 col-xs-4"></div>
-			<div class="col-md-4 col-xs-8">Lever du soleil:</div><div id="civilDay" class="col-md-2 col-xs-4"></div>
-			<div class="col-md-4 col-xs-8">Coucher du soleil:</div><div id="civilNight" class="col-md-2 col-xs-4"></div>
-			<div class="col-md-4 col-xs-8">Ouverture aéroport:</div><div id="airportDay" class="col-md-2 col-xs-4"></div>
-			<div class="col-md-4 col-xs-8">Fermeture aéroport:</div><div id="airportNight" class="col-md-2 col-xs-4"></div>
-			<div class="col-sm-12"><i><b>En heure locale de <?=$default_airport?> et pour info seulement.</b></i></div>
-			<div class="col-md-4 col-xs-8">Heure locale à <?=$default_airport?>:</div><div class="col-md-2 col-xs-4"><span id="hhmmLocal"></span></div>
-			<div class="col-md-4 col-xs-8">Heure universelle:</div><div class="col-md-2 col-xs-4"><span id="hhmmUTC"></span></div>
-</div> <!-- row -->
+        <aside class="col-sm-12">
+            <em><strong>En heure locale de <?=$default_airport?> et pour info seulement.</strong></em>
+        </aside>
+
+        <dl class="row m-0 w-100">
+            <dt class="col-md-4 col-xs-8">Heure locale à <?=$default_airport?>:</dt>
+            <dd class="col-md-2 col-xs-4"><time id="hhmmLocal"></time></dd>
+            
+            <dt class="col-md-4 col-xs-8">Heure universelle:</dt>
+            <dd class="col-md-2 col-xs-4"><time id="hhmmUTC"></time></dd>
+        </dl>
+    </section>
 
 <script>
 refreshEphemerides(<?=date('Y')?>, <?=date('m')?>, <?=date('d')?>) ;

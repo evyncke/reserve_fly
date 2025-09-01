@@ -128,6 +128,7 @@ function generateMaintenanceClass($entretien, $compteur) {
 			case 'usb-c':
 			case 'usbc': print("<i class=\"bi bi-usb-c\"></i> USB-C ") ; break ;
 			case '12v': print("<i class=\"bi bi-plug-fill\"></i> 12V ") ; break ;
+			case '24v': print("<i class=\"bi bi-plug-fill\"></i> 24V ") ; break ;
 			default: print("$prise") ;
 		}
 	}
