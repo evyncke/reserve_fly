@@ -423,6 +423,14 @@ if ($userIsAdmin or $userIsInstructor) {
             <li><a class="dropdown-item text-warning" href="http://192.168.1.37:8001/hls/index-highres.html" target="_blank">Webcams RAPCS 24 heures depuis le club <i class="bi bi-box-arrow-up-right"></i></a></li>
 <?php
 }
+if ($userId > 0) {
+?>
+            <li><hr class="dropdown-divider"/></li>
+            <li><h6 class="dropdown-header">Cartes Jeppessen</h6></li>
+            <li><a class="dropdown-item" href="https://www.spa-aviation.be/airports/tripkits/JeppesenBelgium_31-08-2025.pdf">Belgium Jeppessen</a></li>
+            <li><a class="dropdown-item" href="mobile_airports.php">Résumé airports</a></li>
+<?php
+}
 ?>
 
           </ul>

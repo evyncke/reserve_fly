@@ -1,0 +1,90 @@
+{
+	"Airports":  [
+		{
+			"Name": "Brussels FIR", "ICAO": "EBBU",
+			"Information": ["Brussels Information: 126.900", "Belga Radar: 129.325", "Emergency: 121.500", "Pilot to Pilot: 123.450"],
+			"Phone":"+3222062540", "PhoneName":"Skeyes (Flight Plan)"
+		},		
+		{
+			"Name": "Spa-la Sauvenière","ICAO": "EBSP",
+			"Information": ["Spa Radio: 124.640","Runways: 05/23", "Circuit: 2600ft"],
+			"Phone": "+3287795260",
+			"Position": "50.482498,5.9103"
+		},			
+		{
+			"Name": "Antwerpen Deurne","ICAO": "EBAW",
+			"Information": ["Antwerpen TWR: 135.205", "Antwerpen GND:121.905", "ATIS: 124.205", "Runways: 11/29", "Circuit: 1000ft"],
+			"Position": "51.1894,4.46028"
+		},
+		{
+			"Name": "Cerfontaine","ICAO": "EBCF",
+			"Information": ["Cerfontaine Radio: 123.205","Runways: 12L/30R 12R/30L", "Circuit: 1900ft"],
+			"Phone": "+3271200412",
+			"Position": "50.152802,4.38722"
+		},
+		{
+			"Name": "Charleroi","ICAO": "EBCI",
+			"Information": ["Charleroi TWR: 121.305", "Charleroi APP: 133.130", "Charleroi GND: 121.805", "ATIS: 134.630", "Runways: 07/25", "Circuit: 1500ft"],
+			"Phone": "+3271251213",
+			"Position": "50.459202,4.45382"
+		},
+		{
+			"Name": "Grimbergen","ICAO": "EBGB",
+			"Information": ["Grimbergen Radio: 119.505","Runways: 01/19", "Circuit: 800ft"],
+			"Position": "50.948546,4.39181"
+		},
+		{
+			"Name": "Liège","ICAO": "EBLG",
+			"Information": ["Liege TWR: 118.130", "Liege APP: 119.280", "Liege GND:121.915", "ATIS: 126.255", "Runways: 04R/22L", "Circuit: 1500ft"],
+			"Position": "50.63740158,5.443220139"
+		},
+		{
+			"Name": "Namur Suarlée","ICAO": "EBNM",
+			"Information": ["Namur Radio: 118.005","Runways: 06R/24L", "Circuit: 1600ft"],
+			"Phone": "+3281559355",
+			"Position": "50.487999,4.76892"
+		},
+		{
+			"Name": "Oostende","ICAO": "EBOS",
+			"Information": ["Oostende TWR: 118.180", "Oostende APP: 120.600", "Oostende GND:121.980", "ATIS: 126.130", "Runways: 08/26"],
+			"Phone": "+3259551202",
+			"Position": "51.19889832,2.862220049"
+		},
+		{
+			"Name": "Saint Hubert","ICAO": "EBSH",
+			"Information": ["St Hubert Radio: 122.180","Runways: 05R/23R 14R/32R", "Circuit: 2800ft"],
+			"Phone": "+3261610010",
+			"Position": "50.0359,5.40425"
+		},
+		{
+			"Name": "Brustem St-Truiden","ICAO": "EBST",
+			"Information": ["Brustem Radio: 119.980","Runways: 06L/24R", "Circuit: 2000ft"],
+			"Position": "50.791901,5.20167"
+		},
+		{
+			"Name": "Theux Laboru","ICAO": "EBTX",
+			"Information": ["Theux Radio: 119.005","Runways: 06/24", "Circuit: 2100ft"],
+			"Phone": "+328722302",
+			"Position": "50.55333,5.855"
+		},
+		{
+			"Name": "Kiewit Hasselt","ICAO": "EBZH",
+			"Information": ["Hasselt Radio: 118.330","Runways: 09/27", "Circuit: 1200ft"],
+			"Position": "50.970001,5.37507"
+		},
+		{
+			"Name": "Zwartberg","ICAO": "EBZW",
+			"Information": ["Genk Radio: 120.405","Runways: 03L/21R", "Circuit: 1280ft"],
+			"Phone": "+3289383273",
+			"Position": "51.0154,5.52647"
+		},
+		{
+			"Name": "Transpondeur","ICAO": "",
+			"Information": ["VFR: 7000","With ATR: 2000", "Radio Failure: 7600", "Emergency: 7700"]
+		},
+		{
+			"Name": "VOR","ICAO": "",
+			"Information": ["SPI (Sprimont): 113.100","LNO (Olno): 112.800", "LGE (Liege): 115.450"]
+		}
+	]
+}
