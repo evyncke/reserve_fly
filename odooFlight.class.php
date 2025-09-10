@@ -21,6 +21,7 @@ require_once __DIR__ .'/dbi.php' ;
 require_once __DIR__ .'/odoo.class.php' ;
 require_once __DIR__.'/mobile_tools.php';
 require_once __DIR__.'/notedefraisPDF.php';
+require_once __DIR__.'/bondecommandePDF.php';
 
 class OdooFlight {
 
@@ -648,6 +649,61 @@ function OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids) {
     //OF_SetFlightInvoiceFromFlyID($theFlyID, $invoiceID[0]);
     
     return true;
+}
+//============================================
+// Function: OF_createNoteDeFrais
+// Purpose: Creation d'une note de frais
+//============================================
+function OF_createBonDeCommande($theMemberID, $theBonDeCommandeJSON, &$theUploadFolder, &$theFactureMailTo)
+{
+   //print("<br>OF_createBonDeCommande: Start theMemberID=$theMemberID theBonDeCommandeJSON=$theBonDeCommandeJSON<br>");
+
+    global $mysqli_link, $table_person,$userId;
+
+    if($theMemberID=="") {
+        print("<h2 style=\"color: red;\">ERROR:OF_createNoteDeFrais: Pas de membre sélectionné</h2>");
+        return "";
+    }
+
+    $bonDeCommandelines = json_decode($theBonDeCommandeJSON, true) ;
+    $bonDeCommandeSize=sizeof($bonDeCommandelines);
+
+    /*
+        {"name":"Carnet de vol Avn/hel", "type":"Carnet de vol Avn/hel", "reference": "B-CV", "quantity": 1, "unitaryprice": 28.0},
+        {"name":"Computer papier E6B", "type":"Computer papier E6B", "reference": "B-E6B", "quantity": 1, "unitaryprice": 17.00},
+        {"name":"Jeppesen rotating plotter", "type":"Jeppesen rotating plotter", "reference": "B-JRP", "quantity": 1, "unitaryprice": 20.00},
+    */
+
+    $partner_customer_id=0;
+    $partnerName="";
+    $partner= array();
+    $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id=$theMemberID")
+        		or journalise($userId, "E", "Cannot read table_person: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+            $partnerName=$row['first_name']." ".$row['last_name'];
+            $partner["name"]=$row['first_name']." ".$row['last_name'];
+            $partner["address"]=$row['address'];
+            $partner["city"]=$row['zipcode']." ".$row['city'];;
+            $partner["country"]=$row['country'];
+            $partner["email"]=$row['email'];
+            $partner_customer_id=$row['odoo_id'];
+    }
+    if($partner_customer_id==0) {
+           print("<h2 style=\"color: red;\">ERROR:OF_createBonDeCommande: Unknown partner</h2>");
+           journalise($userId, "E", "OF_createBonDeCommande: Unknown partner for member $theMemberID") ;
+        return "";
+    }
+    $journal_ndf=OF_GetJournalID("client");
+    $moveType="out_refund";
+    $uploadFolder="uploads/bondecommande";
+    $invoice_date= date("Y-m-d") ;
+    $invoice_date_due = date("Y-m-d", strtotime("+1 week")) ;
+	
+    // Version Bon De Commande PDF
+ 
+    //print("<br>OF_createNBonDeCommande: PDF Version 2<br>");
+    return PDF_createBonDeCommande($bonDeCommandelines, $invoice_date, $partner, $theUploadFolder, $theFactureMailTo);
+
 }
 
 //============================================

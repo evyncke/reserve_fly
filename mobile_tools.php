@@ -567,6 +567,36 @@ function getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, $theFlight
 	return $timeTotal;
 }
 
+// Function: Returns the list of Bons de Commande and attached file
+function MT_GetBonDeCommandeFiles(&$theNotesDeFrais, &$theAttachedFiles, &$theUploadFolder)
+{
+	//print("MT_GetBonDeCommandeFiles:start<br>");
+	$theUploadFolder="uploads/bondecommande";
+	$fileList = scandir($theUploadFolder);
+	$previousFile="";
+	$count=-1;
+	foreach ($fileList as $file) {
+		if($file=="." || $file==".." || $file=="bondecommande_number.txt") continue;
+		if($previousFile==""){
+			$count++;
+			$previousFile=$file;
+			$theNotesDeFrais[$count]=$file;
+			$theAttachedFiles[$count]="";
+		}
+		else if(strcmp(substr($previousFile,0,17),substr($file,0,17))==0) {
+			$theAttachedFiles[$count]=$file;
+		}
+		else {
+			$count++;
+			$previousFile=$file;
+			$theNotesDeFrais[$count]=$file;
+			$theAttachedFiles[$count]="";
+		}
+		//echo "$count file=$theNotesDeFrais[$count] : Attached=$theAttachedFiles[$count] <br>";
+	}
+	return $count+1;
+}
+
 // Function: Returns the list of Note de frais and attached file
 function MT_GetNoteDeFraisFiles(&$theNotesDeFrais, &$theAttachedFiles, &$theUploadFolder)
 {

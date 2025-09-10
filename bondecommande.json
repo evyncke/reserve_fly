@@ -1,0 +1,16 @@
+{
+    "bondecommande": [
+        {"name":"Carnet de vol Avn/hel", "type":"Carnet de vol Avn/hel", "reference": "B-CV", "quantity": 1, "unitaryprice": 28.0},
+        {"name":"Computer papier E6B", "type":"Computer papier E6B", "reference": "B-E6B", "quantity": 1, "unitaryprice": 17.00},
+        {"name":"Jeppesen rotating plotter", "type":"Jeppesen rotating plotter", "reference": "B-JRP", "quantity": 1, "unitaryprice": 20.00},
+        {"name":"Latte Nm", "type":"Latte Nm", "reference": "B-LNm", "quantity": 1, "unitaryprice": 13.00},
+        {"name":"Rapporteur Carré", "type":"Rapporteur Carré", "reference": "B-Rc", "quantity": 1, "unitaryprice": 10.00},
+        {"name":"Manuel du Pilote Privé - T1 - Technique", "type":"Manuel du Pilote Privé - T1 - Technique", "reference": "M.02", "quantity": 1, "unitaryprice": 32.00},
+        {"name":"Manuel du Pilote Privé - T1 à T5 - Série", "type":"Manuel du Pilote Privé - T1 à T5 - Série", "reference": "M.07", "quantity": 1, "unitaryprice": 147.00},
+        {"name":"Manuel du Pilote Privé - T2 - Météo", "type":"Manuel du Pilote Privé - T2 - Météo", "reference": "M.03", "quantity": 1, "unitaryprice": 29.00},
+        {"name":"Manuel du Pilote Privé - T3 - Navigation", "type":"Manuel du Pilote Privé - T3 - Navigation", "reference": "M.04", "quantity": 1, "unitaryprice": 29.00},
+        {"name":"Manuel du Pilote Privé - T4 - Réglementation", "type":"Manuel du Pilote Privé - T4 - Réglementation", "reference": "M.05", "quantity": 1, "unitaryprice": 37.00},
+        {"name":"Manuel du Pilote Privé - T5 - PLH", "type":"Manuel du Pilote Privé - T5 - PLH", "reference": "M.06", "quantity": 1, "unitaryprice": 29.00},
+        {"name":"Expédition de Manuels", "type":"Expédition de Manuels", "reference": "M.01", "quantity": 1, "unitaryprice": 7.50}
+    ]
+}
