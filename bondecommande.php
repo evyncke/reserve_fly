@@ -152,9 +152,11 @@ Client:
 <!---<input type="hidden" id="id_bondecommande_json" name="bondecommande_json" value="[{}]">-->
 <input type="hidden" id="id_bondecommande_json" name="bondecommande_json" value="[{}]">
 <br>
+<div class="col-sm-12 col-md-12 col-lg-7">
 <?php
 print("<button id=\"id_submit_bondecommande\" name=\"submit_bondecommande\" class=\"btn btn-primary\" width=\"10%\">Envoyer le bon de commande</button>");
 ?>
+</div>
 </form>
 </div><!-- col -->
 </div><!-- row --> 
