@@ -60,7 +60,15 @@ $fmt = datefmt_create(
 ) ;
 $monthName = datefmt_format($fmt, $sinceDate) ;
 
-$validAirports = [] ;
+$validAirports = array() ; // A cache of valid airports to avoid multiple SQL queries
+$students = array() ; // List of all students' jom_id
+$result = mysqli_query($mysqli_link, "SELECT DISTINCT jom_id 
+		FROM $table_person 
+		JOIN $table_user_usergroup_map on jom_id=user_id
+		WHERE group_id = $joomla_student_group")
+	or journalise($userId, "F", "Cannot read students: " . mysqli_error($mysli_link)) ;
+while ($row = mysqli_fetch_array($result))
+	$students[$row['jom_id']] = true ;
 
 function isValidAirport($apt) {
 	global $validAirports, $mysqli_link, $userId, $table_airports ;
@@ -200,7 +208,8 @@ $sql = "SELECT l_plane, DATE_FORMAT(l_start, '%d/%m/%y') as date, l_start, l_end
 		'$since' <= l_start AND l_start < '$monthAfterString'
 		AND l_start_hour != 0
 	ORDER BY l_plane ASC, l_start ASC" ;
-$result = mysqli_query($mysqli_link, $sql) or die("Erreur système à propos de l'accès au carnet de routes: " . mysqli_error($mysqli_link)) ;
+$result = mysqli_query($mysqli_link, $sql) 
+	or journalise($userId, "F", "Erreur système à propos de l'accès au carnet de routes: " . mysqli_error($mysqli_link)) ;
 $duration_total_hour = 0 ;
 $duration_total_minute = 0 ;
 $pic_total_hour = 0 ;
@@ -214,6 +223,7 @@ $engine_total_minute = 0 ;
 $flight_total_minute = 0 ;
 $previous_airport = false ;
 $previous_plane = '' ;
+$col_span = ($plane == 'TOUS') ? 16 : (($plane_details[$plane]['compteur_vol'] != 0) ? 15 : 13) ;
 while ($row = mysqli_fetch_array($result)) {
 	if ($previous_plane != $row['l_plane']) {
 		if ($previous_plane != '')
@@ -253,29 +263,32 @@ while ($row = mysqli_fetch_array($result)) {
 				else
 					$missingPilots[] = db2web($row2['last_name']) . ' (' . substr($row2['r_start'], 0, 10) . ') #' . $row2['r_id'] ;
 			}
-			print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Missing entries for $gap minutes..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
+			print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=\"$col_span\">Missing entries for $gap minutes..." . implode('<br/>', $missingPilots) . "</td></tr>\n") ;
 		} else if ($gap < 0)
-			print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Overlapping / duplicate entries for $gap minutes...</td></tr>\n") ;
+			print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=\"$col_span\">Overlapping / duplicate entries for $gap minutes...</td></tr>\n") ;
 		if ($previous_end_lt > $this_start_lt)
-			print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Overlapping entries (previous end time after next start)...</td></tr>\n") ;
+			print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=\"$col_span\">Overlapping entries (previous end time after next start)...</td></tr>\n") ;
 	}
 	// Emit a red line if previous arrival apt and this departure airport do not match
 	if ($previous_airport and $previous_airport != $row['l_from'])
-		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Departure airport below($row[l_from]) does not match previous arrival airport ($previous_airport)... taxes are probably invalid.</td></tr>\n") ;
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=\"$col_span\">Departure airport below($row[l_from]) does not match previous arrival airport ($previous_airport)... taxes are probably invalid.</td></tr>\n") ;
 	// Emit a red line if airports are unknown/invalid
 	if (!isValidAirport($row['l_from']))
-		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Departure airport below($row[l_from]) is not valid or is unknown... taxes are probably invalid.</td></tr>\n") ;
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=\"$col_span\">Departure airport below($row[l_from]) is not valid or is unknown... taxes are probably invalid.</td></tr>\n") ;
 	if (!isValidAirport($row['l_to']))
-		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Arrival airport below($row[l_to]) is not valid or is unknown... taxes are probably invalid.</td></tr>\n") ;
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=\"$col_span\">Arrival airport below($row[l_to]) is not valid or is unknown... taxes are probably invalid.</td></tr>\n") ;
 	// Emit a red line if pilot and instructor are the same
 	if ($row['l_pilot'] == $row['l_instructor'])
-		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>The pilot is the instructor on the line below...</td></tr>\n") ;
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=\"$col_span\">The pilot is the instructor on the line below...</td></tr>\n") ;
 	// Emit a red line instructor is 'other FI'
 	if ($row['l_instructor'] == -1)
-		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>The FI is 'other FI' on the line below...</td></tr>\n") ;
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=\"$col_span\">The FI is 'other FI' on the line below...</td></tr>\n") ;
+	// Emit a warning line if no instructor for students
+	if ($row['l_instructor'] == 0 and isset($students[$row['l_pilot']]))
+		print("<tr><td class=\"bg-warning text-bg-warning text-center\" colspan=\"$col_span\">Student flight has no FI on the line below... perhaps a solo flight?</td></tr>\n") ;
 	// Emit a red line if cost is shared with nobody
 	if (($row['l_share_type'] == 'CP1' or $row['l_share_type'] == 'CP2') and $row['l_share_member'] == 0)
-		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=12>Shared flight with nobody on the line below...</td></tr>\n") ;
+		print("<tr><td class=\"bg-danger text-bg-danger text-center\" colspan=\"$col_span\">Shared flight with nobody on the line below...</td></tr>\n") ;
 	$previous_airport = $row['l_to'] ;
 	$previous_end_hour = $row['l_end_hour'] ;
 	$previous_end_minute = $row['l_end_minute'] ;
