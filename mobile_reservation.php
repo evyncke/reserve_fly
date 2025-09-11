@@ -74,7 +74,7 @@ $header_postamble = '<link rel="stylesheet" type="text/css" href="mobile_reserva
 <script src="mobile_reservation.js"></script>
 ' ;
 $body_attributes = 'onload="init(); initBooking();"' ;
-$need_swiped_events = true ; // Allow swipe events on this page
+$need_swiped_events = 1024 ; // Allow swipe events on this page only when view port width >= 1024px as responsive table scroll can be confusing
 require_once 'mobile_header5.php' ;
 ?>
 <div class="container-fluid">

@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2023 Patrick Reginster (and Eric Vyncke)
+   Copyright 2022-2025 Patrick Reginster (and Eric Vyncke)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
    limitations under the License.
 
 */
-require_once __DIR__ .'/dbi.php';
-require_once __DIR__ .'/dto.class.php';
+require_once 'dbi.php';
+require_once 'dto.class.php';
+require_once 'IntroCarnetVol_tools.php' ;
 
 if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year 
 	// TODO only send it when not received
@@ -35,7 +36,6 @@ if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year
 <script>
 	
 <?php
-require_once __DIR__ .'/IntroCarnetVol_tools.php' ;
 //---------------------------------------------------------------------------
 // Initialiation of default variables
 // Define all variables used by the javascript
@@ -79,6 +79,7 @@ $logid="";
 if (isset($_REQUEST['auth']) and $_REQUEST['auth'] != '') {
 	$auth=$_REQUEST['auth'];
 	print("var default_auth='$auth';\n");
+	if ($userId <= 0) journalise($userId, 'D', "IntroCarnetVol.php called with auth=$auth without being logged in") ;
 }
 if (isset($_REQUEST['id']) and $_REQUEST['id'] != '') {
 	$bookingid=$_REQUEST['id'];
@@ -98,13 +99,13 @@ else if (isset($_REQUEST['cdv_bookingid']) and $_REQUEST['cdv_bookingid'] != '')
 }
 
 // Prevent SQL injection
-if (! is_numeric($bookingid)) die("Paramètre bookingid ($bookingid) n'est pas numérique") ;
+if (! is_numeric($bookingid)) journalise($userId, "F", "Paramètre bookingid ($bookingid) n'est pas numérique") ;
 
 // Check whether user is logged in
 if ($userId == 0) {
 	if (!isset($_REQUEST['auth']) or $_REQUEST['auth'] != md5($bookingid . $shared_secret)) {
 		print("</script><p style=\"color: red;\"><b>Impossible to proceed to this request.</br>You must be connected to the spa-aviation.be site or use a valid auth code and not \"$_REQUEST[auth]\"</b></p>") ;
-		die("You must be connected or use a valid auth code and not \"$_REQUEST[auth]\"") ;
+		journalise($userId, "F", "You must be connected or use a valid auth code and not \"$_REQUEST[auth]\" for bookingid $bookingid") ;
 	}
 }
 
@@ -138,7 +139,6 @@ print("var default_aircrafttechlog='$aircraft_techLog';\n");
 </head>
 <body>
   <h1 style="text-align: center;">Introduction vol</h1>
-
 <?php
 //---------------------------------------------------------------------------
 // For FI (or when the trusted_booker cookie is set), display all existing reservations of today w/o any log entries
@@ -152,12 +152,11 @@ if ($userIsAdmin or $userIsInstructor) {
 			FROM $table_bookings r JOIN $table_planes pp on r_plane = pp.id JOIN $table_users AS p ON r_pilot = p.id LEFT JOIN $table_users AS i ON r_instructor = i.id
 			WHERE r_cancel_date IS NULL AND r_type != " . BOOKING_MAINTENANCE . " AND DATE(r_start) = CURRENT_DATE() AND pp.ressource = 0
 			ORDER BY r_start")
-			or die("Cannot get all today bookings: " . mysqli_error($mysqli_link)) ;
+			or journalise($userId, "F", "Cannot get all today bookings: " . mysqli_error($mysqli_link)) ;
 	if ($result->num_rows == 0) {
-		print("<p>Aucune r&eacute;servation pr&eacute;vue ce jour.</p>\n") ;
-      }
-	else {
-        
+		print("<p>Aucune réservation prévue ce jour.</p>\n") ;
+	} else {
+
 		// Table des reservations du jours
 		print("<center><h2>Choisir une réservation de ce jour</h2>
 		<p>Liste des réservations de ce jour (cliquez sur la date pour préremplir les champs ci-dessous).</br><em>Visible uniquement par les FIs et administrateurs.$trustedBookerMsg</em></p>
@@ -209,16 +208,18 @@ if ($bookingidForPrevious) {
 		r_from, r_to, compteur_type, compteur_vol, model, compteur, compteur_date, 
 		r_duration,date_add(r_start, interval 15 minute) as r_takeoff, date(r_start) as r_day
 		from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a
-		where r_id = $bookingidForPrevious and a.id = r_plane") or die("Cannot access the booking #$bookingidForPrevious: " . mysqli_error($mysqli_link)) ;
+		where r_id = $bookingidForPrevious and a.id = r_plane") 
+		or journalise($userId, "F", "Cannot access the booking #$bookingidForPrevious: " . mysqli_error($mysqli_link)) ;
 } else { // Retrieve the nearest one
-	if ($userId <= 0) die("Vous devez être connecté") ;
+	if ($userId <= 0) journalise($userId, "F", "Vous devez être connecté") ;
 	$result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
 		r_from, r_to, compteur_type, compteur_vol, model, compteur, compteur_date, 
 		r_duration,date_add(r_start, interval 15 minute) as r_takeoff, date(r_start) as r_day
 		from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a
 		where r_pilot = $userId and r_start < sysdate() and r_cancel_date is null and a.ressource = 0
 		order by r_start desc
-		limit 0,1") or die("Cannot access closest booking in the past: " . mysqli_error($mysqli_link)) ;
+		limit 0,1") 
+		or journalise($userId, "F", "Cannot access closest booking in the past: " . mysqli_error($mysqli_link)) ;
 }
 $booking = mysqli_fetch_array($result) ;
 if ($bookingidForPrevious) {
@@ -230,7 +231,7 @@ if ($bookingidForPrevious) {
 }
 
 $result = mysqli_query($mysqli_link, "select * from $table_bookings where r_cancel_date is null and r_stop < '$booking[r_start]' and r_start <= sysdate() and $condition order by r_start desc limit 0,1")
-	or die("Cannot access previous booking: ".mysqli_error($mysqli_link)) ;
+	or journalise($userId, "F", "Cannot access previous booking: ".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 $previous_id='';
 if(!is_null($row ) && isset($row['r_id'])) {
@@ -238,7 +239,7 @@ if(!is_null($row ) && isset($row['r_id'])) {
 }
 $previous_auth = md5($previous_id . $shared_secret) ;
 $result = mysqli_query($mysqli_link, "select * from $table_bookings where r_cancel_date is null and r_start > '$booking[r_stop]' and r_start <= sysdate() and $condition order by r_start asc limit 0,1")
-	or die("Cannot access next booking: ".mysqli_error($mysqli_link)) ;
+	or journalise($userId, "F", "Cannot access next booking: ".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 $next_id='';
 if(!is_null($row )) {
@@ -281,9 +282,10 @@ if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 		
 	// Remove the entry in the LogBook
 	$audit_time = mysqli_real_escape_string($mysqli_link, $_REQUEST['audit_time']) ;
-	mysqli_query($mysqli_link, "delete from $table_logbook where l_id=$logid and l_audit_time='$audit_time'") or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "delete from $table_logbook where l_id=$logid and l_audit_time='$audit_time'") 
+		or journalise($userId, "F", "Cannot delete: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
-		$insert_message = "Carnet de routes mis &agrave; jour" ;
+		$insert_message = "Carnet de routes mis à jour" ;
 		journalise($userId, 'I', "Logbook entry deleted for booking $bookingid (done at $audit_time).") ;
 	} else {
 		$insert_message = "Impossible d'effacer la ligne dans le carnet de routes" ;
@@ -303,17 +305,21 @@ if (isset($_REQUEST['bookingtable']) and $_REQUEST['bookingtable'] == '1') {
 	// All DTO flight associated to all segments behing this bookingid
 	RemoveAllDTOFlightBehindBooking($bookingid);
 	
-	// Delete all segments associated to this bookingid
-	mysqli_query($mysqli_link, "delete from $table_logbook where l_booking=$bookingid") or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
+	// Delete all already logged segments associated to this bookingid
+	mysqli_query($mysqli_link, "delete from $table_logbook where l_booking=$bookingid") 
+		or journalise($userId, "F", "Cannot delete: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
-		$insert_message = "Carnet de routes mis &agrave; jour" ;
-		journalise($userId, 'I', "Logbook entri(es) deleted for booking $bookingid.") ;
+		$insert_message = "Carnet de routes mis à jour" ;
+		journalise($userId, 'I', mysqli_affected_rows($mysqli_link) . " logbook entri(es) deleted for booking $bookingid.") ;
 	}
 	
 	// Delete the entry in the bookings table
-	mysqli_query($mysqli_link, "update $table_bookings set r_cancel_date=sysdate(), r_cancel_who=$userId, r_cancel_reason='IntroCarnetVol' where r_id=$bookingid") or die("Cannot cancel: " . mysqli_error($mysqli_link)) ;
+	$remote_address = getClientAddress() ;
+	mysqli_query($mysqli_link, "update $table_bookings set r_cancel_date=sysdate(), r_cancel_who=$userId, r_cancel_reason='IntroCarnetVol', r_cancel_address='$remote_address' 
+			where r_id=$bookingid") 
+		or journalise($userId, "F", "Cannot cancel booking: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_affected_rows($mysqli_link) > 0) {
-		$insert_message = "booking table mise &agrave; jour" ;
+		$insert_message = "Réservation mise à jour (annulée)" ;
 		journalise($userId, 'I', "Booking table entry cancelled for booking $bookingid.") ;
 		$bookingid=0;
 		$id=0;
@@ -331,7 +337,8 @@ print('<p></p>');
 if($bookingid) {
 	$result=mysqli_query($mysqli_link,"SELECT r_id, r_plane, r_type, r_from, r_to, r_start, r_stop, r_pilot, p.last_name as pilotName, i.last_name as instructorName
 	FROM $table_bookings r join $table_person p on r.r_pilot = p.jom_id left join $table_person i on r.r_instructor = i.jom_id
-	WHERE r_id = $bookingid") or die("Impossible de retrouver le bookingid dans booking: " . mysqli_error($mysqli_link)) ;
+	WHERE r_id = $bookingid") 
+		or journalise($userId, "F", "Impossible de retrouver le bookingid dans booking: " . mysqli_error($mysqli_link)) ;
 	$row=mysqli_fetch_array($result);
 
 	$start_UTC = gmdate('H:i', strtotime("$row[r_start] UTC")) ;
@@ -349,10 +356,13 @@ if($bookingid) {
 	//print(" 1. BookingId=$bookingid (r_id)</br>");
 	
 	// Table Resume de la reservation selectionnee
-	print('<center><table  width=100%" border-spacing="0px">
-		<tr><th style="background-color: Gainsboro; text-align: center;" colspan="8">Résumé de la réservation (Heure locale)</th></tr>
-		<tr><th>Date</th><th>Avion</th><th>Pilote</th><th>De</th><th>Départ</th><th>A</th><th>Arrivée</th><th>Action</th></tr>') ;
-	print("<tbody><tr>
+	print("<center><table width=\"100%\" border-spacing=\"0px\">
+		<thead>
+		<tr><th style=\"background-color: Gainsboro; text-align: center;\" colspan=\"8\">Résumé de la réservation (Heure locale)</th></tr>
+		<tr><th>Date</th><th>Avion</th><th>Pilote</th><th>De</th><th>Départ</th><th>À</th><th>Arrivée</th><th>Action</th></tr>
+		</thead>
+		<tbody>
+		<tr>
 		<td>$dateFlight</td>
 		<td>$row[r_plane]</td>
 		<td>$crew</td>
@@ -362,8 +372,9 @@ if($bookingid) {
 		<td>$end_UTC</td>
 		<td>&nbsp;<button type=\"button\" value=\"Del\" onclick=\"redirectBookingDelete('$_SERVER[PHP_SELF]',$bookingid,'$auth');\">&#128465; Annuler la réservation</button>
 		</td>
-		</tr>\n") ;
-	print('</tbody></table></center>');
+		</tr>
+		</tbody>
+		</table></center>");
 	// Select the default pilot
 	print("<script>var default_pilot=$row[r_pilot];</script>\n") ;
 }
@@ -466,7 +477,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		$numeroVol = "$numeroVol" ; // As $remark is not quoted in the SQL statement
 		// Transform a ReferenceId into a Reference (String)
 		//print("SELECT f_id, f_reference FROM $table_flight WHERE f_id = '$numeroVol';</br>") ;
-		$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference FROM $table_flight WHERE f_id = '$numeroVol';") or die("Impossible de retrouver le f_id dans table_flight: " . mysqli_error($mysqli_link)) ;
+		$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference FROM $table_flight WHERE f_id = '$numeroVol';") 
+			or journalise($userId, "F", "Impossible de retrouver le f_id=$numeroVol dans table_flight: " . mysqli_error($mysqli_link)) ;
 		if ($flightResult->num_rows > 0) {
 			$flightRow=mysqli_fetch_array($flightResult);
 			$numeroVol=$flightRow['f_reference'];	
@@ -531,7 +543,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 					r_from, r_to, r_who, r_address,  r_date)
 					values ('$planeId', '$rStart', '$rStop', $rDuration, $pilotId, $instructorId, $rType,
 					'$fromAirport', '$toAirport', $pilotId, '" . getClientAddress() . "',sysdate());")
-				or die("Impossible d'ajouter dans mes reservations: " . mysqli_error($mysqli_link)) ;
+				or journalise($userId, "F", "Impossible d'ajouter dans mes reservations: " . mysqli_error($mysqli_link)) ;
 			$r_id = mysqli_insert_id($mysqli_link) ; 
 			$bookingid=$r_id;
 			$id=$r_id;
@@ -561,7 +573,6 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 					$engineStartHour, $engineStartMinute, $engineEndHour, $engineEndMinute, $flightStartHour, $flightStartMinute, $flightEndHour, $flightEndMinute,
 					'$startDayTime', '$endDayTime', '$flightType', $remark, $paxCount, $crewCount, $pilotId, $isPICFunction, $instructorId, $isInstructorPaid, $dayLandings, $nightLandings,
 					'$shareType', $shareMember, $userId, '" . getClientAddress() . "',sysdate());")
-	//			or die("(1)Impossible d'ajouter dans le logbook: " . mysqli_error($mysqli_link). " Vol déjà introduit") ;
 				or journalise($userId, 'F', "<p style=\"color: red;\"><b>Impossible d'ajouter le segment dans le logbook:Vol déjà introduit.</br>Erreur SQL=" . mysqli_error($mysqli_link)."</br>9 fois sur 10, cela signifie que vous avez déjà introduit un vol ou un segment qui démarre au même moment $startDayTime.</br>Faite un Back avec votre Browser et corrigé l'heure de départ.</b></p>") ;			
 			$l_id = mysqli_insert_id($mysqli_link) ; 
 			$logid=$l_id;
@@ -646,7 +657,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	//print("</br>Check if the pilot is a student pilotId=$pilotId </br>");
 	//print("SELECT user_id FROM $table_user_usergroup_map WHERE user_id = '$pilotId' and group_id='$joomla_student_group';</br>");
 	// Look in the $table_user_usergroup_map if the pilot is a student
-	$studentResult=mysqli_query($mysqli_link,"SELECT user_id FROM $table_user_usergroup_map WHERE user_id = '$pilotId' and group_id='$joomla_student_group';") or die("Impossible de retrouver le user_id dans table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
+	$studentResult=mysqli_query($mysqli_link,"SELECT user_id FROM $table_user_usergroup_map WHERE user_id = '$pilotId' and group_id='$joomla_student_group';") 
+		or journalise($userId, "F", "Impossible de retrouver le user_id=$pilotId dans table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
 	if ($studentResult->num_rows != 0) {
         if($logid!="") {
             $l_id=$logid;
@@ -691,7 +703,8 @@ if($numeroVol!="" && $shareType=="CP1" && ($shareMember==-3 ||$shareMember==-4 |
 		$cdv_flightreferenceid=0;
 		if($cdv_flightreferenceid==0) {
 			//print("SELECT f_id, f_reference, f_type, f_date_flown , f_booking FROM $table_flight WHERE f_reference = '$numeroVol';</br>") ;
-			$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference, f_type, f_date_flown, f_booking  FROM $table_flight WHERE f_reference = '$numeroVol';") or die("Impossible de retrouver le f_reference dans table_flight: " . mysqli_error($mysqli_link)) ;
+			$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference, f_type, f_date_flown, f_booking  FROM $table_flight WHERE f_reference = '$numeroVol';") 
+				or journalise($userId, "F", "Impossible de retrouver le f_reference=$numeroVol dans table_flight: " . mysqli_error($mysqli_link)) ;
 			if ($flightResult->num_rows == 0) {
 				print("<script>alert('La reference du vol IF/INI $numeroVol n existe pas. Ce référence de vol IF/INI n\'est pas fermée.');</script>");
     			print("<p style=\"color: red;\"><b>The flight $numeroVol is NOT correctly closed</b></p>") ;
@@ -708,9 +721,8 @@ if($numeroVol!="" && $shareType=="CP1" && ($shareMember==-3 ||$shareMember==-4 |
 			}
 		}
 		if($cdv_flightreferenceid!=0) {
-			//print("update $table_flight set f_date_flown='$f_date_flown', f_pilot= $pilotId f_booking=$bookingidPage where f_id=$cdv_flightreferenceid;<br>") ;
 			mysqli_query($mysqli_link,"update $table_flight set f_date_flown='$f_date_flown', f_pilot=$pilotId, f_booking=$bookingidPage where f_id=$cdv_flightreferenceid;") 
-			or die("Impossible d'ajouter dans le table_flight:" . mysqli_error($mysqli_link)) ;
+				or journalise($userId, "F", "Impossible d'ajouter dans le table_flight:" . mysqli_error($mysqli_link)) ;
 			//$flightRow=mysqli_fetch_array($flightResult);
 			//$f_id = mysqli_insert_id($mysqli_link) ; 
 			print("<p style=\"color: red;\"><b>The flight $numeroVol is correctly closed</b></p>") ;
@@ -732,7 +744,7 @@ if($bookingid) {
 	l_audit_time, p.last_name as pilotName, i.last_name as instructorName
 			from $table_logbook l join $table_person p on l.l_pilot = p.jom_id left join $table_person i on l.l_instructor = i.jom_id
 			where l_booking = $bookingid order by l_start")
-		or die("Impossible de lire les entrees pour reservation $bookingid: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Impossible de lire les entrees pour réservation $bookingid: " . mysqli_error($mysqli_link)) ;
 
 	$this_segment_id = mysqli_num_rows($result) + 1 ;
 
@@ -854,7 +866,7 @@ if (isset($_REQUEST['edit']) and $_REQUEST['edit'] != '') {
      l_audit_time, p.last_name as pilotName, i.last_name as instructorName
 		from $table_logbook l join $table_person p on l.l_pilot = p.jom_id left join $table_person i on l.l_instructor = i.jom_id
 		where l_booking = $bookingid order by l_start")
-	or die("Impossible de lire les entrees pour segment $logid: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "F", "Impossible de lire les entrees pour segment $logid: " . mysqli_error($mysqli_link)) ;
 
    $this_segment_id = mysqli_num_rows($result) + 1 ;
    //print("this_segment_id=$this_segment_id</br>\n");
@@ -958,12 +970,14 @@ else {
 	if($bookingid != '0') {
 		// Retrieve information in the Table_Booking for the bookingid
 		//printf("SELECT r_id, r_plane, r_start FROM $table_bookings WHERE r_id = $bookingid</br>");
-		$result=mysqli_query($mysqli_link,"SELECT r_id, r_plane, r_start, r_stop, r_pilot, r_instructor FROM $table_bookings WHERE r_id = $bookingid") or die("Impossible de retrouver le bookingid dans booking: " . mysqli_error($mysqli_link)) ;
+		$result=mysqli_query($mysqli_link,"SELECT r_id, r_plane, r_start, r_stop, r_pilot, r_instructor FROM $table_bookings WHERE r_id = $bookingid") 
+			or journalise($userId, "F", "Impossible de retrouver le bookingid dans booking pour $bookingid: " . mysqli_error($mysqli_link)) ;
 		$row=mysqli_fetch_array($result);
 		
 		// Retrieve the flight reference for IF and INIT flight
 		//print("</br>SELECT f_id, f_reference FROM $table_flight WHERE f_booking = $bookingid</br>");
-		$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference, f_type, f_date_flown FROM $table_flight WHERE f_booking = $bookingid") or die("Impossible de retrouver le f_reference dans table_flight: " . mysqli_error($mysqli_link)) ;
+		$flightResult=mysqli_query($mysqli_link,"SELECT f_id, f_reference, f_type, f_date_flown FROM $table_flight WHERE f_booking = $bookingid") 
+			or journalise($userId, "F", "Impossible de retrouver le f_reference dans table_flight pour $bookingid: " . mysqli_error($mysqli_link)) ;
 		$flightRow=mysqli_fetch_array($flightResult);
 	
 		//if ($row['r_instructor']== NULL or $row['r_instructor'] == '' or $row['r_instructor'] == $row['r_pilot']) {
@@ -1033,7 +1047,8 @@ else {
 	if($bookingid!='0') {		
 		// Retrieve information in the Table_LogBook for the bookingid
 		// Allow to retrieve previous segment
-		$result=mysqli_query($mysqli_link,"SELECT l_booking FROM $table_logbook WHERE l_booking = $bookingid") or die("Impossible de 	retrouver le bookingid dans logbook: " . mysqli_error($mysqli_link)) ;
+		$result=mysqli_query($mysqli_link,"SELECT l_booking FROM $table_logbook WHERE l_booking = $bookingid") 
+			or journalise($userId, "F", "Impossible de retrouver le bookingid dans logbook pour $bookingid: " . mysqli_error($mysqli_link)) ;
 		$segmentcount=1;
 		while($row=mysqli_fetch_array($result)) {
 			$segmentcount+=1;

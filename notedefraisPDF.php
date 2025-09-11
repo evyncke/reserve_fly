@@ -176,7 +176,8 @@ function PDF_MergeAttachedPDFFile($notedefraisFolder, $theNotedefraisPDFFile, $t
 // Get the next note de frais number
 function PDF_getNoteDeFraisNumber()
 {
-	$myfile = fopen("uploads/notedefrais/notedefrais_number.txt", "r") or die("Unable to open file uploads/notedefrais/notedefrais_number.txt!");
+	global $userId ;
+	$myfile = fopen("uploads/notedefrais/notedefrais_number.txt", "r") or journalise($userId, "F", "Unable to open file uploads/notedefrais/notedefrais_number.txt!");
 	$number=fgets($myfile);
 	fclose($myfile);
 	//print("PDF_getNoteDeFraisNumber():number=$number<br>");
@@ -195,7 +196,7 @@ function PDF_getNoteDeFraisNumber()
 	else {
 		$numberString=$number;
 	}
-	$myfile = fopen("uploads/notedefrais/notedefrais_number.txt", "w") or die("Unable to open file uploads/notedefrais/notedefrais_number.txt!");
+	$myfile = fopen("uploads/notedefrais/notedefrais_number.txt", "w") or journalise($userId, "F", "Unable to open file uploads/notedefrais/notedefrais_number.txt!");
 	fwrite($myfile, $number);
 	fclose($myfile);
 	return $numberString;

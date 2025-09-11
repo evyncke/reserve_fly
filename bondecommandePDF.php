@@ -82,7 +82,9 @@ function PDF_createBonDeCommande($BonDeCommandelines, $expenseReport_date, $part
 // Get the next bon de commande number
 function PDF_getBonDeCommandeNumber()
 {
-	$myfile = fopen("uploads/bondecommande/bondecommande_number.txt", "r") or die("Unable to open file uploads/bondedodmmande/dondedommande_number.txt!");
+	global $userId
+
+	$myfile = fopen("uploads/bondecommande/bondecommande_number.txt", "r") or journalise($userId, "F", "Unable to open file uploads/bondedodmmande/dondedommande_number.txt!");
 	$number=fgets($myfile);
 	fclose($myfile);
 	//print("PDF_getBonDeCommandeNumber():number=$number<br>");
@@ -101,7 +103,7 @@ function PDF_getBonDeCommandeNumber()
 	else {
 		$numberString=$number;
 	}
-	$myfile = fopen("uploads/bondecommande/bondecommande_number.txt", "w") or die("Unable to open file uploads/bondecommande/bondecommande_number.txt!");
+	$myfile = fopen("uploads/bondecommande/bondecommande_number.txt", "w") or journalise($userId, "F", "Unable to open file uploads/bondecommande/bondecommande_number.txt!");
 	fwrite($myfile, $number);
 	fclose($myfile);
 	return $numberString;

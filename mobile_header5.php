@@ -84,8 +84,18 @@ if (isset($need_swiped_events) and $need_swiped_events) {
 <!-- Allow the swipe events on phones & tablets -->
 <!-- only be loaded when required -->
 <script src="swiped-events.js" defer></script>
+<script>
+  var swipeMinWidth = 0 ; // Default Minimum width to activate swipe events, i.e., by default always
+</script>
 <?php
 } // $need_swiped_events
+if (isset($need_swiped_events) and is_numeric($need_swiped_events)) {
+?>
+<script>
+  swipeMinWidth = <?=$need_swiped_events?> ; // Minimum width to activate swipe events
+</script>
+<?php
+} /// $need_swiped_events is numeric
 ?>  
 <script>
 var

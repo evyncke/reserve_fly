@@ -40,6 +40,10 @@
 
         // if the user released on a different target, cancel!
         if (startEl !== e.target) return;
+        // if the width of the screen is smaller than swipeMinWidth, cancel!
+        if (swipeMinWidth && (document.documentElement.clientWidth < swipeMinWidth)) return;
+
+        // get the threshold and timeout from the target element (or the default values)    
 
         var swipeThreshold = parseInt(startEl.getAttribute('data-swipe-threshold') || '20', 10);    // default 10px
         var swipeTimeout = parseInt(startEl.getAttribute('data-swipe-timeout') || '500', 10);      // default 1000ms
