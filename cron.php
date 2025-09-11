@@ -30,6 +30,10 @@ putenv('LANG=') ;
 
 require_once 'dbi.php' ;
 
+// Let's also get some data from Odoo
+require_once 'odoo.class.php' ;
+$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+
 //$test_mode =true ;
 $debug = true ;
 // SMTP email debuging & optimization
@@ -397,7 +401,7 @@ $result = mysqli_query($mysqli_link, "select *, u.id as j_id,
 	or die(date('Y-m-d H:i:s').": cannot read $table_users and $table_person, " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
 	if ($row['p_email'] != $row['j_email']) {
-		print(date('Y-m-d H:i:s').": $row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
+		print(date('Y-m-d H:i:s').": $row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)\n") ;
 		journalise($row['j_id'], 'W', "$row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
 		$status = mysqli_query($mysqli_link, "UPDATE $table_person SET email = '$row[j_email]' WHERE jom_id = $row[j_id]");
 		if (!$status) {
@@ -405,10 +409,46 @@ while ($row = mysqli_fetch_array($result)) {
 		}
 	}
 	if ($row['p_name'] != $row['j_name']) {
-		print(date('Y-m-d H:i:s').": $row[j_name]/$row[j_id] '$row[p_name]' (RAPCS) != '$row[j_name]' (Joomla)") ;
+		print(date('Y-m-d H:i:s').": $row[j_name]/$row[j_id] '$row[p_name]' (RAPCS) != '$row[j_name]' (Joomla)\n") ;
 	}
 }
 
+
+// Check if unpaid membership fee is now paid
+print(date('Y-m-d H:i:s').": checking membership fees for $membership_year.\n") ;
+$result = mysqli_query($mysqli_link, "SELECT bkf_invoice_id, bkf_user
+	FROM $table_membership_fees
+	WHERE bkf_payment_date IS NULL") // No need to check for the year probably ? or TODO ?
+	or journalise($userId, "E", "Cannot retrieve unpaid membership fees" . mysqli_error($mysqli_link)) ;
+$ids = array() ;
+while ($row = mysqli_fetch_array($result)) {
+	$ids[] = intval($row['bkf_invoice_id']) ;
+}
+
+if (count($ids) > 0) { // If there are still unpaid membership fees
+	$moves = $odooClient->Read('account.move', 
+		[$ids], 
+		array('fields' => array('id', 'name', 'state', 'payment_state'))) ;
+	$newly_paid = 0 ;
+	foreach($moves as $move) {
+		if ($move['payment_state'] == 'paid' or $move['payment_state'] == 'reversed') {
+			mysqli_query($mysqli_link, "UPDATE $table_membership_fees SET bkf_payment_date = SYSDATE() WHERE bkf_invoice_id = $move[id]")
+				or journalise($userId, "E", "Cannot mark membership fees as paid: " . mysqli_error($mysqli_link)) ;
+			$newly_paid ++ ;
+		}
+	}
+	if ($newly_paid > 0)
+		journalise($userId, "I", "There are $newly_paid newly paid membership fees") ;
+}
+
+$result = mysqli_query($mysqli_link, "SELECT bkf_user
+	FROM $table_membership_fees
+	WHERE bkf_payment_date IS NOT NULL and bkf_year = $membership_year") 
+	or journalise($userId, "E", "Cannot retrieve paid membership fees" . mysqli_error($mysqli_link)) ;
+$paid_membership_users = array() ;
+while ($row = mysqli_fetch_array($result)) {
+	$paid_membership_users[$row['bkf_user']] = $row['bkf_user'] ;
+}
 
 // Préparation des fichiers .JS contenant des données statiques afin de permettre le cache
 print(date('Y-m-d H:i:s').": preparing JS files.\n") ;
@@ -496,11 +536,12 @@ else {
 		$row['last_name'] = db2web($row['last_name']) ;
 		$groups = explode(',', $row['allgroups']) ;
 		$student = (in_array($joomla_student_group, $groups)) ? 'true' : 'false' ;
+		$membership = isset($paid_membership_users[$row['id']]) ? 'true' : 'false' ;
 		if ($first)
 			$first = false ;
 		else
 			fwrite($f, ",\n\t") ;
-		fwrite($f, "{ id: $row[id], name: \"$row[name]\", first_name: \"$row[first_name]\", last_name: \"$row[last_name]\", student: $student}") ;
+		fwrite($f, "{ id: $row[id], name: \"$row[name]\", first_name: \"$row[first_name]\", last_name: \"$row[last_name]\", student: $student, membership: $membership }") ;
 	}
 	fwrite($f, "\n]; \n") ;
 	fclose($f) ;
@@ -569,7 +610,8 @@ else {
 		$groups = explode(',', $row['allgroups']) ;
 		$pilot = (in_array($joomla_pilot_group, $groups)) ? 'true' : 'false' ;
 		$student = (in_array($joomla_student_group, $groups)) ? 'true' : 'false' ;
-		fwrite($f, "{ id: $row[id], name: \"$row[name]\", first_name: \"$row[first_name]\", last_name: \"$row[last_name]\", email: \"$row[email]\", pilot: $pilot, student: $student}") ;
+		$membership = isset($paid_membership_users[$row['id']]) ? 'true' : 'false' ;
+		fwrite($f, "{ id: $row[id], name: \"$row[name]\", first_name: \"$row[first_name]\", last_name: \"$row[last_name]\", email: \"$row[email]\", pilot: $pilot, student: $student, membership: $membership}") ;
 	}
 	fwrite($f, "\n]; \n") ;
 	fclose($f) ;
@@ -684,36 +726,6 @@ else {
 	fclose($f) ;
 }
 
-// Let's get some data from Odoo
-require_once 'odoo.class.php' ;
-$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-
-// Check if unpaid membership fee is now paid
-$result = mysqli_query($mysqli_link, "SELECT bkf_invoice_id
-	FROM $table_membership_fees
-	WHERE bkf_payment_date IS NULL")
-	or journalise($userId, "E", "Cannot retrieve unpaid membership fees" . mysqli_error($mysqli_link)) ;
-$ids = array() ;
-while ($row = mysqli_fetch_array($result)) {
-	$ids[] = intval($row['bkf_invoice_id']) ;
-}
-
-if (count($ids) > 0) { // If there are still unpaid membership fees
-	$moves = $odooClient->Read('account.move', 
-		[$ids], 
-		array('fields' => array('id', 'name', 'state', 'payment_state'))) ;
-	$newly_paid = 0 ;
-	foreach($moves as $move) {
-		if ($move['payment_state'] == 'paid' or $move['payment_state'] == 'reversed') {
-			mysqli_query($mysqli_link, "UPDATE $table_membership_fees SET bkf_payment_date = SYSDATE() WHERE bkf_invoice_id = $move[id]")
-				or journalise($userId, "E", "Cannot mark membership fees as paid: " . mysqli_error($mysqli_link)) ;
-			$newly_paid ++ ;
-		}
-	}
-	if ($newly_paid > 0)
-		journalise($userId, "I", "There are $newly_paid newly paid membership fees") ;
-}
-
 // Some SQL clean-up
 print(date('Y-m-d H:i:s').": purging old journal entries.\n") ;
 mysqli_query($mysqli_link, "DELETE FROM $table_journal WHERE j_datetime < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
@@ -781,7 +793,7 @@ else {
 			case 'IMC': $metar_imc++ ; break ;
 			case 'MMC': $metar_mmc++ ; break ;
 			case 'VMC': $metar_vmc++ ; break ;
-			default: $metar_unknown++ ;
+			default: $metar_unknown++ ; $metar['condition'] = 'UNKNOWN' ; break ;
 		}
 	else
 		$metar_unknown++ ;

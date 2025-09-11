@@ -2106,7 +2106,10 @@ function init() {
 		option.value = members[member].id ;
 		document.getElementById('memberSelect').add(option) ;
 	}
+	pilotSelect = document.getElementById('pilotSelect') ;
 	for (var pilot = 0; pilot < pilots.length; pilot++) {
+		if (pilotSelect.getAttribute('data-paid-membership') && pilotSelect.getAttribute('data-paid-membership') === 'true' && !pilots[pilot].membership)
+			continue; // Skip unpaid members
 		var option = document.createElement("option");
 		if ('last_name' in pilots[pilot]) {
 			option.innerHTML = pilots[pilot].last_name + ', ' + pilots[pilot].first_name ;
@@ -2117,7 +2120,7 @@ function init() {
                         option.innerHTML += ' &#x1F393;' ;
                 }
 		option.value = pilots[pilot].id ;
-		document.getElementById('pilotSelect').add(option) ;
+		pilotSelect.add(option) ;
 		id2Name[pilots[pilot].id] = pilots[pilot].name ;
 	}
 	for (var instructor = 0; instructor < instructors.length; instructor++) {

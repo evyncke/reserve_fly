@@ -460,7 +460,7 @@ else if ($userIsMechanic)
 	print("Mécano: ") ;
 else
 	print("Pilote: ") ;
-?></span><select id="pilotSelect"> </select><br/>
+?></span><select id="pilotSelect" data-paid-membership="true"> </select><br/>
 <?php
 // If there is any pending customers list them here...
 $result_customer = mysqli_query($mysqli_link, "SELECT * 

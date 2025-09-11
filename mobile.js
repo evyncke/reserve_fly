@@ -459,6 +459,8 @@ function init() {
 	// Dropdown selected the pilot
 		// Initiliaze pilotSelect from members.js
 		for (var member = 0; member < members.length; member++) {
+				if (pilotSelect.getAttribute('data-paid-membership') && pilotSelect.getAttribute('data-paid-membership') === 'true' && !members[member].membership)
+					continue; // Skip unpaid members
 				var option = document.createElement("option");
 				if (members[member].last_name == '')
 						option.innerHTML = members[member].name ;
