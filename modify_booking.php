@@ -266,5 +266,5 @@ if ($json_encoded === FALSE) {
 	print($json_encoded) ;
 
 if ($response['error'])
-	journalise($userId, 'E', "Error ($response[error]) while modifying booking #$booking_id of $response[previous_plane]=>$plane done for $pilot[name] by $booker[name] ($comment). $start => $end") ;
+	journalise($userId, 'E', "Error ($response[error]) while modifying booking #$response[booking] of $response[previous_plane]=>$plane done for $pilot_id:  $response[previous_booking_start] => $start_date") ;
 ?>
