@@ -372,10 +372,10 @@ if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_e
 if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
 
 // Do we need to redirect to the membership renewal page ?
+$membership_year = date('Y') ;
+if (date('m') == 12 && date('d') >= 15)
+	$membership_year ++ ; // ask for renewal from 15th of December on
 if ($userId > 0 and $userId != 294) { // Only for logged-in users and not for SPW
-	$membership_year = date('Y') ;
-	if (date('m') == 12 && date('d') >= 15)
-		$membership_year ++ ; // ask for renewal from 15th of December on
 	$result_fee = mysqli_query($mysqli_link, "SELECT * FROM $table_membership_fees 
 		WHERE bkf_user=$userId AND bkf_year = '$membership_year'")
 		or journalise($userId, 'E', "Cannot check whether user has paid membership fee: " . mysqli_error($mysqli_link)) ;

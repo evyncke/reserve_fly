@@ -409,7 +409,7 @@ while ($row = mysqli_fetch_array($result)) {
 		}
 	}
 	if ($row['p_name'] != $row['j_name']) {
-		print(date('Y-m-d H:i:s').": $row[j_name]/$row[j_id] '$row[p_name]' (RAPCS) != '$row[j_name]' (Joomla)\n") ;
+		print(date('Y-m-d H:i:s').": $row[j_name]/$row[j_id] '$row[p_name]' (RAPCS) != '$row[j_name]' (Joomla)\n") ; flush() ;
 	}
 }
 
