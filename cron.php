@@ -796,7 +796,7 @@ else {
 			default: $metar_unknown++ ; $metar['condition'] = 'UNKNOWN' ; break ;
 		}
 	else
-		$metar_unknown++ ;
+		$metar_unknown++ ; $metar['condition'] = 'UNKNOWN' ;
 }
 $year = intval(date('Y')) ;
 $month = intval(date('m')) ;
