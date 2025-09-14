@@ -453,10 +453,23 @@ function init() {
 			allPlanesDropdown.appendChild(option) ;
 		}
 	}
+	// And for the dropdown select of planes
+	var planeSelect = document.getElementById('planeSelect') ;
+	if (planeSelect && typeof planes !== 'undefined') {
+	// Dropdown selected the plane
+		// Initiliaze planeSelect from planes.js
+		for (var i = 0; i < planes.length; i++) {
+				var option = document.createElement("option");
+				option.innerHTML = planes[i].name ;
+				option.value = planes[i].id ;
+				planeSelect.add(option) ;
+		}
+	}
 
 	var pilotSelect = document.getElementById('pilotSelect') ;
 	if (pilotSelect) {
 	// Dropdown selected the pilot
+	// TODO should it rather be from pilots.js ?
 		// Initiliaze pilotSelect from members.js
 		for (var member = 0; member < members.length; member++) {
 				if (pilotSelect.getAttribute('data-paid-membership') && pilotSelect.getAttribute('data-paid-membership') === 'true' && !members[member].membership)
@@ -474,6 +487,40 @@ function init() {
 		}
 		pilotSelect.value = selectedUserId ;
 		pilotSelect.disabled = ! (userIsAdmin || userIsInstructor || window.location.pathname == '/resa/mobile_profile.php') ;
+	}
+
+	var memberSelect = document.getElementById('memberSelect') ;
+	if (memberSelect) {
+	// Dropdown selected the member
+		// Initiliaze memberSelect from members.js
+		for (var member = 0; member < members.length; member++) {
+				if (memberSelect.getAttribute('data-paid-membership') && memberSelect.getAttribute('data-paid-membership') === 'true' && !members[member].membership)
+					continue; // Skip unpaid members
+				var option = document.createElement("option");
+				if (members[member].last_name == '')
+						option.innerHTML = members[member].name ;
+				else
+						option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
+				if (members[member].student) {  // Add a student icon was &#x1f4da;
+						option.innerHTML += ' &#x1F393;' ;
+				}
+				option.value = members[member].id ;
+				memberSelect.add(option) ;
+		}
+		memberSelect.value = selectedUserId ;
+		memberSelect.disabled = ! (userIsAdmin || userIsInstructor || window.location.pathname == '/resa/mobile_profile.php') ;
+	}
+
+	var instructorSelect = document.getElementById('instructorSelect') ;
+	if (instructorSelect && typeof instructors !== 'undefined') {
+	// Dropdown selected the instructor
+		// Initiliaze instructorSelect from members.js
+		for (var i = 0; i < instructors.length; i++) {
+				var option = document.createElement("option");
+				option.innerHTML = instructors[i].name ;
+				option.value = instructors[i].id ;
+				instructorSelect.add(option) ;
+		}
 	}
 
 	// Replace the generic HTML title but a more specific one based on the 2nd <h2> tag (the first one is used by the banner)
