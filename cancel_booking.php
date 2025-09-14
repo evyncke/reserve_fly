@@ -165,7 +165,7 @@ else {
 }
 
 function email_adjacent($result, $booking, $booker) {
-	global $managerName, $managerEmail, $userId, $convertToUtf8, $smtp_localhost, $smtp_from ;
+	global $managerName, $userId, $smtp_localhost, $smtp_from ;
 
 	$row = mysqli_fetch_array($result) ;
 	if (!$row) return ;
