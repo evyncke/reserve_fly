@@ -108,23 +108,23 @@ if ($userId > 0) { // Only members can see all bookings
 			$class = ' class="text-warning"' ;
 		// Display date if not today, else display time
 		if (strpos($row['r_start'], $sql_date) === 0) 
-			$row['r_start'] = substr($row['r_start'], 11) ;
+			$display_start = substr($row['r_start'], 11) ;
 		else
-			$row['r_start'] = substr($row['r_start'], 0, 10) ;
+			$display_start = substr($row['r_start'], 0, 10) ;
 		if (strpos($row['r_stop'], $sql_date) === 0) 
-			$row['r_stop'] = substr($row['r_stop'], 11) ;
+			$display_stop = substr($row['r_stop'], 11) ;
 		else
-			$row['r_stop'] = substr($row['r_stop'], 0, 10) ;
+			$display_stop = substr($row['r_stop'], 0, 10) ;
 		// If in the past and not the user, grey out
 		if (strtotime($row['r_stop']) < time())
 			$class = ' class="text-secondary"' ;
 		// If in the past and user or instructor or board member, allow to click to enter counter
-		if ($userId == $row['r_pilot'] or $userIsInstructor or $userIsBoardMember)
+		if (strtotime($row['r_stop']) < time() and ($userId == $row['r_pilot'] or $userIsInstructor or $userIsBoardMember))
 			$onclick = " onclick=\"window.location.href = 'IntroCarnetVol.php?id=$row[r_id]';\"" ;
 		else
 			$onclick = ($userId == $row['r_pilot'] or $userIsInstructor or $userIsBoardMember) ? " onclick=\"showDetails($row[r_id]);\" data-bs-target=\"#detailModal\"" 
 				: " onclick=\"console.log('onclick unprivileged');\"" ;
-		print("<tr$onclick><td$class>$row[r_plane]</td><td$class>$row[r_start]</td><td$class>$row[r_stop]</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
+		print("<tr$onclick><td$class>$row[r_plane]</td><td$class>$display_start</td><td$class>$display_stop</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
 	}
 ?>
 </tbody>
@@ -145,9 +145,12 @@ if ($userId > 0) { // Only members can see all bookings
 					<span id="pilotType"><br/>
 					</span>
 					Pilote/élève: <select id="pilotSelect" data-paid-membership="true"> </select><br/>
+					Mobile pilote: <span id="pilotPhone"></span><br/>
 					Instructeur: <select id="instructorSelect"></select><br/>
+					Mobile instructeur: <span id="instructorPhone"></span><br/>
 					Pilotes RAPCS: <input type="checkbox" id="crewWantedInput" value="true"> bienvenus en tant que co-pilotes.<br/>
 					Membres RAPCS: <input type="checkbox" id="paxWantedInput" value="true"> bienvenus en tant que passagers.<br/>
+					<span id="commentSpan"></span><br/>
 					Début: <input type="datetime-local" id="start"><br/>
 					Fin: <input type="datetime-local" id="stop"><br/>
 					</span> <!-- planeSelectSpan -->
@@ -174,19 +177,22 @@ if ($userId > 0) { // Only members can see all bookings
 			var readonly = (userIsAdmin || userIsInstructor || bookingPilot == userId) ? false : true ;
 
 			document.getElementById("detailModalLabel").innerHTML = 'Réservation #' + bookingId ;
-			document.getElementById("pilotSelect").value = bookings[bookingId].r_pilot ;
-			document.getElementById("pilotSelect").disabled = readonly ;
 			document.getElementById("planeSelect").value = bookings[bookingId].r_plane ;
 			document.getElementById("planeSelect").disabled = readonly ;
+			document.getElementById("pilotSelect").value = bookings[bookingId].r_pilot ;
+			document.getElementById("pilotSelect").disabled = readonly ;
+			document.getElementById("pilotPhone").innerHTML = '<a href="tel:' + bookings[bookingId].pcell_phone + '">' + bookings[bookingId].pcell_phone + ' <i class="bi bi-telephone-fill"></i></a>' ;
 			if (bookings[bookingId].r_instructor <= 0)
 				document.getElementById("instructorSelect").value = '-1' ;
 			else
 				document.getElementById("instructorSelect").value = bookings[bookingId].r_instructor ;
 			document.getElementById("instructorSelect").disabled = readonly ;
+			document.getElementById("instructorPhone").innerHTML = '<a href="tel:' + bookings[bookingId].icell_phone + '">' + bookings[bookingId].icell_phone + ' <i class="bi bi-telephone-fill"></i></a>' ;
 			document.getElementById("crewWantedInput").checked = bookings[bookingId].r_crew_wanted ;
 			document.getElementById("crewWantedInput").disabled = readonly ;
 			document.getElementById("paxWantedInput").checked = bookings[bookingId].r_pax_wanted ;	
 			document.getElementById("paxWantedInput").disabled = readonly ;
+			document.getElementById("commentSpan").innerHTML = bookings[bookingId].r_comment.replace(/\n/g, '<br/>') ;
 			document.getElementById("start").value = bookings[bookingId].r_start ;
 			document.getElementById("start").readOnly = readonly ;    // Makes input read-only
 			document.getElementById("start").disabled = readonly ;    // Disables
