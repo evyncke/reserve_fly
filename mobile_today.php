@@ -66,6 +66,7 @@ if ($userId > 0) { // Only members can see all bookings
 		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.name as pname, pi.cell_phone as pcell_phone, pi.jom_id as pid
 		FROM $table_bookings b
 		JOIN $table_person pi ON pi.jom_id = r_pilot
+		JOIN jom_kunena_users k ON k.userid = r_pilot
 		LEFT JOIN $table_person i ON i.jom_id = r_instructor		
 		JOIN $table_planes p ON r_plane = p.id
 		LEFT JOIN $table_flights fl ON r_id = f_booking
@@ -94,8 +95,13 @@ if ($userId > 0) { // Only members can see all bookings
 			'r_comment' => $row['r_comment'],
 			'r_type' => intval($row['r_type']),
 			'f_type' => intval($row['f_type']),
+			'gravatar' => md5(strtolower(trim($row['email']))), // Hash for gravatar
 			// add other fields as needed
-	    ];
+		] ;
+		if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
+			$rows[$row['r_id']]['avatar'] = $avatar_root_resized_uri . '/' . $row['avatar'] ;
+		elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
+			$rows[$row['r_id']]['avatar'] = $avatar_root_uri . '/' . $row['avatar'] ;
 		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\"></i></span></a>" : '' ;
 		$pname = ($row['pfirst_name'] == '') ? $row['pname'] : 
 			'<span class="hidden-xs">' . db2web($row['pfirst_name']) . ' </span><b>' . db2web($row['plast_name']) . '</b>' ;
@@ -140,6 +146,7 @@ if ($userId > 0) { // Only members can see all bookings
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               	</div>
               	<div class="modal-body" id="detailModalContent">
+					<img id="pilotDetailsImage"><span id="pilotDetailsSpan"></span>
 					Avion: <select id="planeSelect" onchange="ressourceHasChanged(this);"></select>
 					<span id="planeComment"></span>
 					<span id="pilotType"><br/>
@@ -199,6 +206,18 @@ if ($userId > 0) { // Only members can see all bookings
 			document.getElementById("stop").value = bookings[bookingId].r_stop ;
 			document.getElementById("stop").readOnly = readonly ;    // Makes input read-only
 			document.getElementById("stop").disabled = readonly ;    // Disables
+			// Reset the picture in the div
+			document.getElementById("pilotDetailsImage").src = '' ;
+			document.getElementById("pilotDetailsImage").style.display = 'none' ;
+			if (bookings[bookingId].avatar) {
+				document.getElementById("pilotDetailsImage").src = bookings[bookingId].avatar ;
+				document.getElementById("pilotDetailsImage").style.visibility = 'inherited' ;
+				document.getElementById("pilotDetailsImage").style.display = 'inline' ;
+			} else {
+				document.getElementById("pilotDetailsImage").src = 'https://www.gravatar.com/avatar/' + bookings[bookingId].gravatar + '?s=80&d=blank&r=pg' ;
+				document.getElementById("pilotDetailsImage").style.visibility = 'inherited' ;
+				document.getElementById("pilotDetailsImage").style.display = 'inline' ;
+			}
             modalInstance.show();
 			console.log("modal shown") ;
 	};
