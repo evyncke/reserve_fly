@@ -146,6 +146,10 @@ if ($userId > 0) { // Only members can see all bookings
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               	</div>
               	<div class="modal-body" id="detailModalContent">
+					<div id="modalSpinner" class="d-none"
+			           style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:1051; display:flex; align-items:center; justify-content:center;">
+        				<div class="spinner-border" style="width:4rem; height:4rem;" role="status"></div>
+					</div>
 					<img id="pilotDetailsImage"><span id="pilotDetailsSpan"></span>
 					Avion: <select id="planeSelect" onchange="ressourceHasChanged(this);"></select>
 					<span id="planeComment"></span>
@@ -163,6 +167,7 @@ if ($userId > 0) { // Only members can see all bookings
 					</span> <!-- planeSelectSpan -->
               	</div>
               	<div class="modal-footer">
+					<button type="button" class="btn btn-danger" id="cancelButton"><i class="bi bi-trash3-fill"></i> Annuler la réservation</button>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
               	</div>
         </div>
@@ -173,16 +178,15 @@ if ($userId > 0) { // Only members can see all bookings
 	const bookings = <?=json_encode($rows, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
 	const modalContent = document.getElementById('detailModalContent');
 	const modalElement = document.getElementById('detailModal');
-
-	// Initialize modal instance
 	const modalInstance = new bootstrap.Modal(modalElement);
 
 	// On button click: fetch content and show modal
 	function showDetails(bookingId) {
 			// Fill the form with the booking data
 			var bookingPilot = bookings[bookingId].r_pilot ;
-			var readonly = (userIsAdmin || userIsInstructor || bookingPilot == userId) ? false : true ;
+			var readonly = (userIsBoardMember || userIsInstructor || bookingPilot == userId) ? false : true ;
 
+			hideSpinner() ;
 			document.getElementById("detailModalLabel").innerHTML = 'Réservation #' + bookingId ;
 			document.getElementById("planeSelect").value = bookings[bookingId].r_plane ;
 			document.getElementById("planeSelect").disabled = readonly ;
@@ -218,9 +222,49 @@ if ($userId > 0) { // Only members can see all bookings
 				document.getElementById("pilotDetailsImage").style.visibility = 'inherited' ;
 				document.getElementById("pilotDetailsImage").style.display = 'inline' ;
 			}
-            modalInstance.show();
+			if (! readonly) {
+				document.getElementById("cancelButton").style.display = 'block' ;
+				document.getElementById("cancelButton").onclick = cancelBooking.bind(this, bookingId) ;
+			} else {
+				document.getElementById("cancelButton").style.display = 'none' ;
+				document.getElementById("cancelButton").onclick = null ;
+			}
+			modalInstance.show();
 			console.log("modal shown") ;
-	};
+	}
+
+	function showSpinner() {
+		document.getElementById('modalSpinner').classList.remove('d-none');
+		console.log("spinner shown") ;
+	}
+
+	function hideSpinner() {
+		document.getElementById('modalSpinner').classList.add('d-none');
+	}
+
+	function cancelBooking(bookingId) {
+		if (confirm("Confirmer l'annulation de la réservation #" + bookingId + " ?")) {
+			showSpinner() ;
+			fetch('cancel_booking.php?id=' + encodeURIComponent(bookingId) + '&reason=mobile_today')
+			.then(response => {
+				if (!response.ok) throw new Error('Network error');
+				return response.json(); // Parse response as JSON
+			})
+			.then(data => {
+				// Use the JSON data here
+				console.log(data);
+				alert(data.message) ;
+				modalInstance.hide();
+			})
+			.catch(error => {
+				console.error('Error:', error);
+			})
+			.finally(() => {
+				hideSpinner(); // Possibly useless if we reload the page ;-)
+				location.reload() ; // Refresh the page to show the updated bookings
+			});
+		}
+	}
 </script>
 
 <!-- Swipe previous / next -->
