@@ -57,7 +57,7 @@ else {
 	$response['booking_end'] = $booking_end ;
 	if (!($userIsAdmin || $userIsMechanic || $userIsInstructor || ($auth != ''))) {
 		if (($pilot_id != $userId) && ($booking['r_who'] != $userId))
-			$response['error'] .= "Cette r&eacute;servation, $id, ne peut pas être modifi&eacute;e par vous ($userId), uniquement par le pilote $pilot_id ou l'instructeur/admin $booking[r_who]<br/>" ;
+			$response['error'] .= "Cette réservation, $id, ne peut pas être modifiée par vous ($userId), uniquement par le pilote $pilot_id ou l'instructeur/admin $booking[r_who]<br/>" ;
 	}
 }
 
@@ -89,14 +89,14 @@ if ($response['error'] == '') {
 			"output-charset" => "UTF-8",
 			"scheme" => "Q") ;
 		if ($booking_type == BOOKING_MAINTENANCE) {
-			$response['message'] = "La maintenance de $plane du $booking_start au $booking_end: est annul&eacute;e" ;
+			$response['message'] = "La maintenance de $plane du $booking_start au $booking_end: est annulée" ;
 			$email_subject =  iconv_mime_encode('Subject',
 				"Annulation de la mise en maintenance de $plane par $booker[name] [#$id]",
 					$mime_preferences) ;
 			$email_message = "<p>La maintenance du $booking_start au $booking_end sur le $plane " ;
 			$email_message .= "est annul&eacute;e.<br/>" ;
 		} else {
-			$response['message'] = "La r&eacute;servation de $plane du $booking_start au $booking_end: est annul&eacute;e" ;
+			$response['message'] = "La réservation de $plane du $booking_start au $booking_end: est annulée" ;
 			$email_subject = iconv_mime_encode('Subject',
 				"Annulation d'une réservation de $plane par $booker[name] pour $pilot[name]  [#$id]",
 					$mime_preferences) ;
@@ -143,7 +143,7 @@ if ($response['error'] == '') {
 		else
 			journalise($userId, 'W', "Cancellation of booking #$id of $plane done for $pilot[name] by $booker[name]. $booking_start => $booking_end. Reason: " . trim($_REQUEST['reason'])) ;
 	} else
-		$response['error'] .= "Un probl&egrave;me technique s'est produit, annulation non effectu&eacute;e..." . mysqli_error($mysqli_link) . "<br/>" ;
+		$response['error'] .= "Un problème technique s'est produit, annulation non effectuée..." . mysqli_error($mysqli_link) . "<br/>" ;
 }
 
 // Let's send the data back
