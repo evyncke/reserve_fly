@@ -109,6 +109,7 @@ var
 		userIsPilot = <?= ($userIsPilot) ? 'true' : 'false' ?>,
 		userIsInstructor = <?= ($userIsInstructor) ? 'true' : 'false' ?>,
 		userIsAdmin = <?= ($userIsAdmin) ? 'true' : 'false' ?>,
+		userIsBoardMember = <?= ($userIsBoardMember) ? 'true' : 'false' ?>,
 		userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?>,
 		userIsStudent = <?=($userIsStudent)? 'true' : 'false'?>,
 		userIsNoFlight = <?=($userNoFlight)? 'true' : 'false'?> ,
@@ -453,12 +454,12 @@ if ($userId > 0) {
               </li>
               <li>
                 <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dynamicModal" 
-                  data-bs-target="#dynamicModal" data-modal-title="Rapporter un Bug" data-content-url="<?=$base_url?>mobile_modal_bug_report.html">
+                  data-modal-title="Rapporter un Bug" data-content-url="<?=$base_url?>mobile_modal_bug_report.html">
                    <i class="bi bi-bug me-2"></i> Bug</a>
               </li>
               <li>
                 <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dynamicModal" 
-                  data-bs-target="#dynamicModal" data-modal-title="Politique de confidentialité" data-content-url="<?=$base_url?>mobile_modal_privacy_policy.html">
+                  data-modal-title="Politique de confidentialité" data-content-url="<?=$base_url?>mobile_modal_privacy_policy.html">
                   <i class="bi bi-lock me-2"></i> Vie privée</a>
               </li>
             </ul>
