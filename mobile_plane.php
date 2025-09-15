@@ -23,18 +23,21 @@ if ($userId == 0) {
 }
 
 // Param plane
-
 $plane = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['plane'])) ;
-
-// Should display link to POH & CHeckList if available
-// Picture and some parameters
-// + all bookings starting at today
 
 $plane_result = mysqli_query($mysqli_link, "SELECT * FROM $table_planes WHERE id='$plane' AND ressource = 0")
 	or die("Cannot retrieve plane ($id): " . mysqli_error($mysqli_link)) ;
 $plane_row = mysqli_fetch_array($plane_result) ;
 if (! $plane_row) die("No such plane: $plane") ;
 if ($plane_row['compteur_vol']) $plane_row['compteur'] = $plane_row['compteur_vol_valeur'] ;
+
+// Get all pictures of that plane
+$plane_pics = array() ;
+$result_pics = mysqli_query($mysqli_link, "SELECT * FROM $table_planes_pics WHERE pc_plane = '$plane' ORDER BY pc_id")
+	or journalise($userId, "F", "Cannot retrieve $plane pictures: " . mysqli_error($mysqli_link)) ;
+while ($row = mysqli_fetch_assoc($result_pics)) {
+	$plane_pics[] = $row['pc_file'] ;
+}
 
 // Get the engine time from the last entry in the pilot log book
 $index_column = ($plane_row['compteur_vol'] == 0) ? 'l_end_hour' : 'l_flight_end_hour' ;
@@ -46,7 +49,6 @@ $result2 = mysqli_query($mysqli_link, "select $index_column as compteur_pilote, 
 $row2 = mysqli_fetch_array($result2) ;
 
 require_once 'mobile_header5.php' ;
-
 ?> 
 <div class="container-fluid">
 
@@ -56,10 +58,43 @@ require_once 'mobile_header5.php' ;
 
 <!-- should be hidden on phones -->
 <div class="col-sm-4">
+	<!-- while trying caroussel
 	<figure class="figure">
 		<img class="figure-img img-fluid hidden-sm" src="<?=$plane_row['photo']?>">
-	</figure>
-</div>
+	</figure-->
+	<div id="carouselIndicators" class="carousel slide">
+		<div class="carousel-indicators">
+<?php
+for ( $i = 0 ; $i < count($plane_pics) ; $i++) {
+	if ($i == 0) 
+		print('		<button type="button" data-bs-target="#carouselIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Photo 1"></button>' . "\n") ;
+	else
+		print("		<button type=\"button\" data-bs-target=\"#carouselIndicators\" data-bs-slide-to=\"$i\" aria-label=\"Photo " . ($i+1) . "\"></button>\n") ;
+}
+?>
+		</div>
+	<div class="carousel-inner">
+<?php
+$first = true ;
+foreach ($plane_pics as $pic) {
+	$class = ($first) ? ' active' : '' ;
+	$first = false ;
+	print("		<div class=\"carousel-item$class\">\n") ;
+	print("			<img src=\"$pic\" class=\"d-block w-100\" alt=\"$plane\">\n") ;
+	print("		</div><!-- carousel-item-->\n") ;
+}
+?>
+	</div><!-- carousel-inner-->
+	<button class="carousel-control-prev" type="button" data-bs-target="#carouselIndicators" data-bs-slide="prev">
+		<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+		<span class="visually-hidden">Previous</span>
+	</button>
+	<button class="carousel-control-next" type="button" data-bs-target="#carouselIndicators" data-bs-slide="next">
+		<span class="carousel-control-next-icon" aria-hidden="true"></span>
+		<span class="visually-hidden">Next</span>
+	</button>
+	</div><!-- end caroussel-->
+</div><!-- col-sm-4-->
 
 <div class="col-md-8 col-sm-8">
 <table class="table table-responsive table-striped">
@@ -150,7 +185,7 @@ function generateMaintenanceClass($entretien, $compteur) {
 <div class="row">
 <table class="col-sm-12 table table-responsive table-striped">
 	<thead>
-	<tr><th>De</th><th>A</th><th>Pilote</th><th>Commentaire</th></tr>
+	<tr><th>De</th><th>À</th><th>Pilote</th><th>Commentaire</th></tr>
 </thead>
 <tbody class="table-group-divider">
 <?php
