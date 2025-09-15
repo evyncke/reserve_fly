@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2024 Eric Vyncke
+   Copyright 2013-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -80,11 +80,12 @@ var
 
 require_once 'mobile_header5.php' ;
 ?> 
-<h2>Réservation d'un avion</h2>
+<h2>Nouvelle réservation d'un avion</h2>
 
 <div class="container-fluid">
 
 <!-- Not a real form as mobile.js has the onclick code to submit the form -->
+<!-- not even sure whether it is required -->
 <input type="hidden" id="departingAirport" value="<?=$from?>">
 <input type="hidden" id="destinationAirport" value="<?=$to?>">
 <input type="hidden" id="via1Airport" value="<?=$via1?>">
@@ -124,11 +125,11 @@ require_once 'mobile_header5.php' ;
 <div class="row">
 		<label class="control-label col-xs-6 col-md-4" for="startDayInput">Jour début:</label>
 		<div class="col-xs-6 col-md-2">
-			<input type="date" class="form-control" id="startDayInput" name="startDay" value="<?=$startDay?>">
+			<input type="date" class="form-control" id="startDayInput" name="startDay" value="<?=$startDay?>" oninput="adjustEndDay();">
 		</div>
 		<label class="control-label col-xs-6 col-md-4" for="startHourInput">Heure début:</label>
 		<div class="col-xs-6 col-md-2">
-			<input type="time" class="form-control" id="startHourInput" name="startHour" value="<?=$startHour?>" min="09:00" max="20:00" step="900">
+			<input type="time" class="form-control" id="startHourInput" name="startHour" value="<?=$startHour?>" min="09:00" max="20:00" step="900" oninput="adjustEndHour();">
 		</div>
 </div><!-- row -->
 
@@ -170,7 +171,27 @@ if ($action == 'Modifier') {
 if (isset($booking['r_type']) and $booking['r_type'] == BOOKING_MAINTENANCE)
 	print("<br/><div class=\"alert alert-danger\">Cette réservation est une maintenance.</div>") ;
 ?>
-
 </div> <!-- container-fluid-->
+<script>
+function adjustEndDay() {
+	var startDay = document.getElementById('startDayInput').value ;
+	var endDay = document.getElementById('endDayInput').value ;
+	if (endDay < startDay) {
+		document.getElementById('endDayInput').value = startDay ;
+		document.getElementById('startHourInput').value = "09:00" ;
+		document.getElementById('endHourInput').value = "10:00" ;
+	}
+}
+function adjustEndHour() {
+	var startHour = document.getElementById('startHourInput').value ;
+	var endHour = document.getElementById('endHourInput').value ;
+	var sh = parseInt(startHour.substr(0, 2)) ;
+	var sm = parseInt(startHour.substr(3, 2)) ;
+	sm += 60 * parseInt(document.getElementById('flightDuration').value) ;
+	while (sm >= 60) { sm -= 60 ; sh++ ; }
+	if (sh >= 24) sh = 23 ;
+	document.getElementById('endHourInput').value = (sh < 10 ? '0' : '') + sh + ':' + (sm < 10 ? '0' : '') + sm ;
+}
+</script>
 </body>
 </html>
