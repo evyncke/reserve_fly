@@ -69,8 +69,6 @@ if ($id and is_numeric($id)) {
 	$to = '' ;
 }
 
-$body_attributes = 'onload="init();planeSelectBook();"' ; // mobile_header.php will force this into the body tag
-
 $header_postamble = "<script>
 var
 	planeId = " . ((isset($booking)) ? "'$booking[r_plane]'" : "null") . ",

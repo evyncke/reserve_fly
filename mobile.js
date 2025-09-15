@@ -388,12 +388,6 @@ function prefillDropdownMenus(selectName, valuesArray, selectedValue) {
 	}
 }
 
-function planeSelectBook() { // Only used by mobile_book
-	prefillDropdownMenus('plane', planes, planeId) ;
-	prefillDropdownMenus('pilot', pilots, pilotId) ;
-	prefillDropdownMenus('instructor', instructors, instructorId) ;
-}
-
 function listenBootstrapModal() {
 	var dynamicModal = document.getElementById('dynamicModal');
 	dynamicModal.addEventListener('show.bs.modal', function (event) {	
