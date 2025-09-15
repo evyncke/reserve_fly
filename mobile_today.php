@@ -17,6 +17,10 @@
 */
 
 require_once "dbi.php" ;
+if ($userId == 0) {
+	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+	exit ;
+}
 $need_swiped_events = true ; // Allow swipe events on this page
 $header_postamble = '
 <script src="instructors.js"></script>
@@ -43,23 +47,17 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 
 <div class="page-header">
 <h2>Réservations des avions</h2>
-<?php
-if ($userId > 0) { // Only members can see all bookings
-?>
 <ul class="pagination justify-content-center">
 	<li class="page-item"><a class="page-link" href="<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp - 24 * 3600)?>">Jour précédent</a></li>
 	<li class="page-item"><a class="page-link active" href="#"><?=$today_nice?></a></li>
 	<li class="page-item"><a class="page-link" href="<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp + 24 * 3600)?>">Jour suivant</a></li>
 </ul> <!-- pagination -->
-<?php
-}
-?>
 </div> <!-- page-header -->
 
 <div class="row">
-<table class="col-sm-12 col-md-10 table table-striped">
+<table class="table table-striped table-hover">
 	<thead>
-	<tr><th>Avion</th><th>Début</th><th>Fin</th><th>Pilote</th><th>Commentaire</th></tr>
+	<tr><th>Avion</th><th>Début</th><th>Fin</th><th>Pilote</th><th>Remarque</th></tr>
 	</thead>
 	<tbody>
 <?php
@@ -136,6 +134,11 @@ if ($userId > 0) { // Only members can see all bookings
 		$onclick = " onclick=\"showDetails($row[r_id]);\" data-bs-target=\"#detailModal\"" ;
 		print("<tr$onclick><td$class>$row[r_plane]</td><td$class>$display_start</td><td$class>$display_stop</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
 	}
+	// Add an orange divider representing 'now' if not yet done
+	if ($sql_today == $sql_date and !$now_divider_shown and $result->num_rows > 0)
+		print('</tbody><tbody class="table-group-divider" style="border-top: 4px solid #ffc107; "><tr><td colspan="5">Plus de réservations pour aujourd\'hui</td></tr>') ;
+	if ($result->num_rows == 0)
+		print('<tr><td colspan="5" class="text-bg-info">Aucune réservation pour ce jour</td></tr>') ;
 ?>
 </tbody>
 </table>
@@ -217,8 +220,8 @@ if ($userId > 0) { // Only members can see all bookings
 				document.getElementById("instructorSelect").value = bookings[bookingId].r_instructor ;
 			document.getElementById("instructorPhone").innerHTML = '<a href="tel:' + bookings[bookingId].icell_phone + '">' + bookings[bookingId].icell_phone + ' <i class="bi bi-telephone-fill"></i></a>' ;
 			document.getElementById("crewWantedInput").checked = bookings[bookingId].r_crew_wanted ;
-			document.getElementById("paxWantedInput").checked = bookings[bookingId].r_pax_wanted ;	
-			if (bookings[bookingId]['r_comment'] != '')
+			document.getElementById("paxWantedInput").checked = bookings[bookingId].r_pax_wanted ;
+			if (bookings[bookingId].r_comment !== null && bookings[bookingId].r_comment != '')
 				document.getElementById("commentSpan").innerHTML = bookings[bookingId].r_comment.replace(/\n/g, '<br/>') + '<br/>';
 			else
 				document.getElementById("commentSpan").innerHTML = '';
@@ -280,9 +283,13 @@ if ($userId > 0) { // Only members can see all bookings
 	}
 
 	function cancelBooking(bookingId) {
-		if (confirm("Confirmer l'annulation de la réservation #" + bookingId + " ?")) {
+		var reason = prompt("Raison de l'annulation (optionnelle):", "") ;
+		if (reason !== null) { // Not cancelled
+			// User clicked OK
+			// Send AJAX request to cancel the booking
 			showSpinner() ;
-			fetch('cancel_booking.php?id=' + encodeURIComponent(bookingId) + '&reason=mobile_today')
+			if (reason == '') reason = 'mobile_today.php' ; // Avoid null
+			fetch('cancel_booking.php?id=' + encodeURIComponent(bookingId) + '&reason=' + encodeURIComponent(reason))
 			.then(response => {
 				if (!response.ok) throw new Error('Network error');
 				return response.json(); // Parse response as JSON
@@ -305,17 +312,10 @@ if ($userId > 0) { // Only members can see all bookings
 </script>
 
 <!-- Swipe previous / next -->
-<?php
-if ($userId > 0) { // Only members can see all bookings
-?>
 <script>
 document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp + 24 * 3600)?>' }) ;
 document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp - 24 * 3600)?>' }) ;
 </script>
-<?php
-} // $userId > 0
-?>
 </div> <!-- container-->
-
 </body>
 </html>
