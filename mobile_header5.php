@@ -357,15 +357,15 @@ if ($userIsFlightManager && $userId == 62) {
 <?php
 if ($userId > 0) {
 ?>
-            <li><a class="dropdown-item" href="mobile_reservation.php"><i class="bi bi-display"></i> Toutes les réservations (calendrier)</a></i></li>
+            <li><a class="dropdown-item" href="mobile_reservation.php"><i class="bi bi-display"></i> Toutes les réservations (plein écran)</a></i></li>
             <li><a class="dropdown-item" href="mobile_today.php"><i class="bi bi-phone"></i> Toutes les réservations (smartphone)</a></li>
-            <li><a class="dropdown-item" href="mobile.php">Mes réservations</a></li>
-            <li><a class="dropdown-item" href="mobile_book.php">Nouvelle réservation</a></li>
+            <li><a class="dropdown-item" href="mobile.php"><i class="bi bi-file-person-fill"></i> Mes réservations</a></li>
+            <li><a class="dropdown-item" href="mobile_book.php"><i class="bi bi-plus-square-fill"></i> Nouvelle réservation</a></li>
             <li><a class="dropdown-item" href="webcal://ics.php?user=<?=$userId?>&auth=<?=md5($userId . $shared_secret)?>"><i class="bi bi-calendar3"></i> lier à mon calendrier (iCal)</a></li>
 <?php
 }
 ?>
-            <li><a class="dropdown-item" href="mobile_top.php">Top-10 des vols</a></li>
+            <li><a class="dropdown-item" href="mobile_top.php"><i class="bi bi-award-fill"></i> Top-10 des vols</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown me-auto me-md-0">
