@@ -135,7 +135,8 @@ function generateMaintenanceClass($entretien, $compteur) {
 	print("</td></tr>") ;
 	print("<tr><td>Dernier vol sur FlightAware  <i class=\"bi bi-box-arrow-up-right\"></i></td><td><a href=\"https://flightaware.com/live/flight/" . strtoupper($plane_row['id']) . "\" target=\"_blank\"><img src=\"fa.ico\" border=\"0\" width=\"24\" height=\"24\"></a></td></tr>
 	<tr><td>Carnet de routes</td><td><a href=\"mobile_planelog.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-journal\"></i></a></td></tr>
-	<tr><td>Masse et centrage</i></td><td><a href=\"mobile_wnb.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-rulers\"></i></a></td></tr>\n") ;
+	<tr><td>Masse et centrage</i></td><td><a href=\"mobile_wnb.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-rulers\"></i></a></td></tr>
+	<tr><td>Performances</i></td><td><a href=\"mobile_performance.php?plane=" . strtoupper($plane_row['id']) . "\"><i class=\"bi bi-calculator\"></i></a></td></tr>\n") ;
 	print("<tr><td>Aircraft Technical Log</td><td><a href=\"mobile_incidents.php?plane=$plane\"><i class=\"bi bi-tools\"></i></a></td></tr>\n") ;
 ?>
 </table>

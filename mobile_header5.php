@@ -372,6 +372,8 @@ if ($userId > 0) {
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Avions<span class="caret"></span></a>
           <ul class="dropdown-menu" id="planesDropdown">
             <li><a class="dropdown-item" href="mobile_wnb.php">Masse et centrage</a></li>
+            <li><i><a class="dropdown-item" href="mobile_performance.php">Performances</a></i></li>
+
 <?php
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
@@ -379,7 +381,6 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
           <li><i><a class="dropdown-item text-warning" href="mobile_plane_planning.php">Echéances des avions</a></i></li>
           <li><i><a class="dropdown-item text-warning" href="mobile_plane_4_camo.php">Rapport hebdomadaire des avions pour CAMO</a></i></li>
           <li><i><a class="dropdown-item text-warning" href="mobile_shared_flights.php">Vols en codes partagés</a></i></li>
-          <li><i><a class="dropdown-item text-warning" href="mobile_performance.php">Performances</a></i></li>
 <?php
 }
 if ($userId > 0) {

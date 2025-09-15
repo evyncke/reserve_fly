@@ -65,7 +65,8 @@ if ($plane == '') {
 </div>
 
 <div id="W&B" class="tabcontent">
-    <h2 class="d-none d-md-block">Performance Weight & Balance:  <?=$plane?></h2>
+    <h2 class="d-none d-md-block">Masse et centrage:  <?=$plane?>
+    <a href="mobile_wnb.php?plane=<?=$plane?>"><i class="bi bi-rulers"></i></a></h2>
 </div> <!---tabcontent W&B-->
 
 <div id="Take-off" class="tabcontent">
