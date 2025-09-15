@@ -33,9 +33,11 @@ $fmt = datefmt_create(
     IntlDateFormatter::GREGORIAN,
     'EEEE d MMMM yyyy' // See https://unicode-org.github.io/icu/userguide/format_parse/datetime/ !
 ) ;
-$today = datefmt_format($fmt, $displayTimestamp) ;
+$today_nice = datefmt_format($fmt, $displayTimestamp) ; // Nicely locally formatted date
 $sql_date = date('Y-m-d', $displayTimestamp) ;
-
+$sql_today = date('Y-m-d') ;
+$sql_now = date('Y-m-d H:i:s') ;
+if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $today_nice") ;
 ?> 
 <div class="container-fluid">
 
@@ -46,7 +48,7 @@ if ($userId > 0) { // Only members can see all bookings
 ?>
 <ul class="pagination justify-content-center">
 	<li class="page-item"><a class="page-link" href="<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp - 24 * 3600)?>">Jour précédent</a></li>
-	<li class="page-item"><a class="page-link active" href="#"><?=$today?></a></li>
+	<li class="page-item"><a class="page-link active" href="#"><?=$today_nice?></a></li>
 	<li class="page-item"><a class="page-link" href="<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp + 24 * 3600)?>">Jour suivant</a></li>
 </ul> <!-- pagination -->
 <?php
@@ -55,9 +57,9 @@ if ($userId > 0) { // Only members can see all bookings
 </div> <!-- page-header -->
 
 <div class="row">
-<table class="col-sm-12 col-lg-10 table table-striped">
+<table class="col-sm-12 col-md-10 table table-striped">
 	<thead>
-	<tr><th>Avion</th><th>De</th><th>A</th><th>Pilote</th><th>Commentaire</th></tr>
+	<tr><th>Avion</th><th>Début</th><th>Fin</th><th>Pilote</th><th>Commentaire</th></tr>
 	</thead>
 	<tbody>
 <?php
@@ -74,6 +76,7 @@ if ($userId > 0) { // Only members can see all bookings
 		ORDER BY r_start, r_plane ASC LIMIT 0,20")
 		or die("Cannot retrieve bookings($plane): " . mysqli_error($mysqli_link)) ;
 	$rows = array() ;
+	$now_divider_shown = false ;
 	while ($row = mysqli_fetch_array($result)) {
 	    $rows[$row['r_id']] = [
 			'r_id' => intval($row['r_id']),
@@ -93,6 +96,10 @@ if ($userId > 0) { // Only members can see all bookings
 			'r_crew_wanted' => intval($row['r_crew_wanted']),
 			'r_pax_wanted' => intval($row['r_pax_wanted']),
 			'r_comment' => $row['r_comment'],
+			'r_from' => $row['r_from'],
+			'r_to' => $row['r_to'],
+			'r_via1' => $row['r_via1'],
+			'r_via2' => $row['r_via2'],
 			'r_type' => intval($row['r_type']),
 			'f_type' => intval($row['f_type']),
 			'gravatar' => md5(strtolower(trim($row['email']))), // Hash for gravatar
@@ -109,6 +116,11 @@ if ($userId > 0) { // Only members can see all bookings
 		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-bs-toggle="tooltip" data-bs-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
 			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
+		// Add an orange divider representing 'now'
+		if ($sql_today == $sql_date and !$now_divider_shown and $row['r_start'] >= $sql_now) {
+			$now_divider_shown = true;
+			print('</tbody><tbody class="table-group-divider" style="border-top: 4px solid #ffc107; "><!--tr><td colspan="5" class="text-bg-warning"></td></tr-->') ;
+		}
 		$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
 		if ($row['f_type'] != '')
 			$class = ' class="text-warning"' ;
@@ -121,15 +133,7 @@ if ($userId > 0) { // Only members can see all bookings
 			$display_stop = substr($row['r_stop'], 11) ;
 		else
 			$display_stop = substr($row['r_stop'], 0, 10) ;
-		// If in the past and not the user, grey out
-		if (strtotime($row['r_stop']) < time())
-			$class = ' class="text-secondary"' ;
-		// If in the past and user or instructor or board member, allow to click to enter counter
-		if (strtotime($row['r_stop']) < time() and ($userId == $row['r_pilot'] or $userIsInstructor or $userIsBoardMember))
-			$onclick = " onclick=\"window.location.href = 'IntroCarnetVol.php?id=$row[r_id]';\"" ;
-		else
-			$onclick = ($userId == $row['r_pilot'] or $userIsInstructor or $userIsBoardMember) ? " onclick=\"showDetails($row[r_id]);\" data-bs-target=\"#detailModal\"" 
-				: " onclick=\"console.log('onclick unprivileged');\"" ;
+		$onclick = " onclick=\"showDetails($row[r_id]);\" data-bs-target=\"#detailModal\"" ;
 		print("<tr$onclick><td$class>$row[r_plane]</td><td$class>$display_start</td><td$class>$display_stop</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
 	}
 ?>
@@ -151,24 +155,27 @@ if ($userId > 0) { // Only members can see all bookings
         				<div class="spinner-border" style="width:4rem; height:4rem;" role="status"></div>
 					</div>
 					<img id="pilotDetailsImage"><span id="pilotDetailsSpan"></span>
-					Avion: <select id="planeSelect" onchange="ressourceHasChanged(this);"></select>
+					Avion: <select id="planeSelect"></select>
 					<span id="planeComment"></span>
-					<span id="pilotType"><br/>
-					</span>
+					<span id="pilotType"><br/></span>
 					Pilote/élève: <select id="pilotSelect" data-paid-membership="true"> </select><br/>
 					Mobile pilote: <span id="pilotPhone"></span><br/>
 					Instructeur: <select id="instructorSelect"></select><br/>
 					Mobile instructeur: <span id="instructorPhone"></span><br/>
 					Pilotes RAPCS: <input type="checkbox" id="crewWantedInput" value="true"> bienvenus en tant que co-pilotes.<br/>
 					Membres RAPCS: <input type="checkbox" id="paxWantedInput" value="true"> bienvenus en tant que passagers.<br/>
-					<span id="commentSpan"></span><br/>
+					<span id="commentSpan" class="text-bg-info"></span>
 					Début: <input type="datetime-local" id="start"><br/>
 					Fin: <input type="datetime-local" id="stop"><br/>
-					</span> <!-- planeSelectSpan -->
+					Route: <input type="text" id="fromInput" class="form-control d-inline-block" style="width: 4em;" minlength="3" maxlength="3" placeholder="de" required> -
+						<input type="text" id="via1Input" class="form-control d-inline-block" style="width: 4em;" minlength="3" maxlength="3" placeholder="via"> -
+						<input type="text" id="via2Input" class="form-control d-inline-block" style="width: 4em;" minlength="3" maxlength="3" placeholder="via"> -
+						<input type="text" id="toInput" class="form-control d-inline-block" style="width: 4em;" minlength="3" maxlength="3" placeholder="à">
               	</div>
               	<div class="modal-footer">
+					<button type="button" class="btn btn-info" id="indexButton"><i class="bi bi-stopwatch-fill"></i> Compteur</button>
 					<button type="button" class="btn btn-danger" id="cancelButton"><i class="bi bi-trash3-fill"></i> Annuler la réservation</button>
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                  	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
               	</div>
         </div>
     </div>
@@ -186,30 +193,41 @@ if ($userId > 0) { // Only members can see all bookings
 			var bookingPilot = bookings[bookingId].r_pilot ;
 			var readonly = (userIsBoardMember || userIsInstructor || bookingPilot == userId) ? false : true ;
 
-			hideSpinner() ;
+			hideSpinner() ; // Just to be sure...
+
+			// Let's disable all controls if not allowed to change them
+			const div = document.getElementById('detailModalContent');
+			const inputs = div.querySelectorAll('input');
+			inputs.forEach(function(input) {
+				input.readOnly = readonly;
+				input.disabled = readonly ;
+			});
+			const selects = div.querySelectorAll('select');
+			selects.forEach(function(select) {
+				select.disabled = readonly ;
+			});
+
 			document.getElementById("detailModalLabel").innerHTML = 'Réservation #' + bookingId ;
 			document.getElementById("planeSelect").value = bookings[bookingId].r_plane ;
-			document.getElementById("planeSelect").disabled = readonly ;
 			document.getElementById("pilotSelect").value = bookings[bookingId].r_pilot ;
-			document.getElementById("pilotSelect").disabled = readonly ;
 			document.getElementById("pilotPhone").innerHTML = '<a href="tel:' + bookings[bookingId].pcell_phone + '">' + bookings[bookingId].pcell_phone + ' <i class="bi bi-telephone-fill"></i></a>' ;
 			if (bookings[bookingId].r_instructor <= 0)
 				document.getElementById("instructorSelect").value = '-1' ;
 			else
 				document.getElementById("instructorSelect").value = bookings[bookingId].r_instructor ;
-			document.getElementById("instructorSelect").disabled = readonly ;
 			document.getElementById("instructorPhone").innerHTML = '<a href="tel:' + bookings[bookingId].icell_phone + '">' + bookings[bookingId].icell_phone + ' <i class="bi bi-telephone-fill"></i></a>' ;
 			document.getElementById("crewWantedInput").checked = bookings[bookingId].r_crew_wanted ;
-			document.getElementById("crewWantedInput").disabled = readonly ;
 			document.getElementById("paxWantedInput").checked = bookings[bookingId].r_pax_wanted ;	
-			document.getElementById("paxWantedInput").disabled = readonly ;
-			document.getElementById("commentSpan").innerHTML = bookings[bookingId].r_comment.replace(/\n/g, '<br/>') ;
+			if (bookings[bookingId]['r_comment'] != '')
+				document.getElementById("commentSpan").innerHTML = bookings[bookingId].r_comment.replace(/\n/g, '<br/>') + '<br/>';
+			else
+				document.getElementById("commentSpan").innerHTML = '';
 			document.getElementById("start").value = bookings[bookingId].r_start ;
-			document.getElementById("start").readOnly = readonly ;    // Makes input read-only
-			document.getElementById("start").disabled = readonly ;    // Disables
 			document.getElementById("stop").value = bookings[bookingId].r_stop ;
-			document.getElementById("stop").readOnly = readonly ;    // Makes input read-only
-			document.getElementById("stop").disabled = readonly ;    // Disables
+			document.getElementById("fromInput").value = bookings[bookingId].r_from ;
+			document.getElementById("via1Input").value = bookings[bookingId].r_via1 ;
+			document.getElementById("via2Input").value = bookings[bookingId].r_via2 ;
+			document.getElementById("toInput").value = bookings[bookingId].r_to ;
 			// Reset the picture in the div
 			document.getElementById("pilotDetailsImage").src = '' ;
 			document.getElementById("pilotDetailsImage").style.display = 'none' ;
@@ -222,24 +240,43 @@ if ($userId > 0) { // Only members can see all bookings
 				document.getElementById("pilotDetailsImage").style.visibility = 'inherited' ;
 				document.getElementById("pilotDetailsImage").style.display = 'inline' ;
 			}
-			if (! readonly) {
+			if (!readonly) {
 				document.getElementById("cancelButton").style.display = 'block' ;
 				document.getElementById("cancelButton").onclick = cancelBooking.bind(this, bookingId) ;
+				if (isSqlDateInPast(bookings[bookingId].r_start)) {
+					document.getElementById("indexButton").style.display = 'block' ;
+					document.getElementById("indexButton").onclick = indexBooking.bind(this, bookingId) ;
+				} else {
+					document.getElementById("indexButton").style.display = 'none' ;
+					document.getElementById("indexButton").onclick = null ;
+				}
 			} else {
 				document.getElementById("cancelButton").style.display = 'none' ;
 				document.getElementById("cancelButton").onclick = null ;
+				document.getElementById("indexButton").style.display = 'none' ;
+				document.getElementById("indexButton").onclick = null ;
 			}
 			modalInstance.show();
-			console.log("modal shown") ;
 	}
 
 	function showSpinner() {
 		document.getElementById('modalSpinner').classList.remove('d-none');
-		console.log("spinner shown") ;
 	}
 
 	function hideSpinner() {
 		document.getElementById('modalSpinner').classList.add('d-none');
+	}
+
+	function isSqlDateInPast(sqlDateString) {
+		// Replace space with 'T' for ISO format if time is present
+		const isoString = sqlDateString.replace(' ', 'T');
+		const date = new Date(isoString);
+		return date < new Date();
+	}
+
+	function indexBooking(bookingId) {
+		showSpinner() ; // As this is a huge page taking seconds to load
+		window.location.href = 'IntroCarnetVol.php?id=' + bookingId ;
 	}
 
 	function cancelBooking(bookingId) {
