@@ -46,6 +46,10 @@ if ($id and is_numeric($id)) {
 	$endHour = substr($booking['r_stop'], 11, 5) ;
 	$duration = $booking['r_duration'] ;
 	$comment = db2web($booking['r_comment']) ;
+	$from = $booking['r_from'] ;
+	$via1 = $booking['r_via1'] ;
+	$via2 = $booking['r_via2'] ;
+	$to = $booking['r_to'] ;
 } else {
 	$action = "Réserver" ;
 	$startDay = date('Y-m-d') ;
@@ -59,6 +63,10 @@ if ($id and is_numeric($id)) {
 	$endHour = $startHour ;
 	$duration = 1 ;
 	$comment = '' ;
+	$from = '' ;
+	$via1 = '' ;
+	$via2 = '' ;
+	$to = '' ;
 }
 
 $body_attributes = 'onload="init();planeSelectBook();"' ; // mobile_header.php will force this into the body tag
@@ -74,14 +82,15 @@ var
 
 require_once 'mobile_header5.php' ;
 ?> 
+<h2>Réservation d'un avion</h2>
 
 <div class="container-fluid">
 
 <!-- Not a real form as mobile.js has the onclick code to submit the form -->
-<input type="hidden" id="departingAirport" value="<?=$booking['r_from']?>">
-<input type="hidden" id="destinationAirport" value="<?=$booking['r_to']?>">
-<input type="hidden" id="via1Airport" value="<?=$booking['r_via1']?>">
-<input type="hidden" id="via2Airport" value="<?=$booking['r_via2']?>">
+<input type="hidden" id="departingAirport" value="<?=$from?>">
+<input type="hidden" id="destinationAirport" value="<?=$to?>">
+<input type="hidden" id="via1Airport" value="<?=$via1?>">
+<input type="hidden" id="via2Airport" value="<?=$via2?>">
 <!--
 2 boutons: annuler la modification / modifier
 
