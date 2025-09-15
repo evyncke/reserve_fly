@@ -115,10 +115,11 @@ $line = 1 ;
 while ($row = mysqli_fetch_array($result)) {
 	print("<tr>
 		<td class=\"text-start\">$line</td>\n") ;
+	$row['name'] = db2web($row['name']) ; 
+	$moreInfo = ($userIsBoardMember or $userIsInstructor) ? " (pour OA/FI: $row[name])" : "" ;
 	if ($row['hide_flight_time'] and $row['l_pilot'] != $userId)
-		print("<td class=\"text-start\" title=\"Le pilote ne veut pas être affiché(e)\">...</td>\n") ;
+		print("<td class=\"text-start\" title=\"Le pilote ne veut pas être affiché(e)$moreInfo\"><i class=\"bi bi-shield-shaded\"></i>...</td>\n") ;
 	else {
-		$row['name'] = db2web($row['name']) ; 
 		print("<td class=\"text-start\"><a href=\"mobile_profile.php?displayed_id=$row[l_pilot]\">$row[name]</a></td>\n") ;
 	}
 	print("<td class=\"text-end\">$row[flight_count]</td>
@@ -129,7 +130,7 @@ while ($row = mysqli_fetch_array($result)) {
 ?>
 </tbody>
 </table>
-
+<p><em>Vous pouvez cacher votre temps de vol dans votre <a href="mobile_profile.php">profil</a> si vous ne souhaitez pas apparaître dans ce classement.</em></p>
 </div><!-- container-fluid-->
 </body>
 </html>
