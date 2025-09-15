@@ -15,16 +15,22 @@
    limitations under the License.
 
 */
+
+ob_start("ob_gzhandler"); // Enable gzip compression over HTTP
+
 require_once 'dbi.php';
 require_once 'dto.class.php';
 require_once 'IntroCarnetVol_tools.php' ;
+
+# HTTP/2 push of JS & CSS via header() to go faster
+header('Link: </resa/script_carnetdevol.js>;rel=preload;as=script,</resa/members.js>;rel=preload;as=script,</resa/pilots.js>;rel=preload;as=script,' .
+	'</resa/instructors.js>;rel=preload;as=script,' .
+	'</resa/planes.js>;rel=preload;as=script,</resa/shareCodes.js>;rel=preload;as=script,</resa/prix.js>;rel=preload;as=script,</resa/IntroCarnetVol.css>;rel=preload;as=style') ;
 
 if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year 
 	// TODO only send it when not received
 	setcookie('trusted_booker', 1, time() + 365 * 24 * 60 * 60, '/', '', true, true) ;
 }
-
-// ob_start("ob_gzhandler"); // Enable gzip compression over HTTP
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -689,8 +695,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 $epcString="";
 print("<center><span id=\"id_payment_after\">");
 print("<h3>Paiement du vol - Montant: <span id=\"id_payment_amount_after\"></span> &euro;</br>");
-print("Communication : \"<span id=\"id_payment_communication_after\"></span>\"</br>Compte : BE64 7320 3842 1852</h3>");
-print("<img style=\"text-align: right;\" id=\"id_payment_qr_code_after\" width=\"150\" height=\"150\"  src=\"https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=<?=urlencode($epcString)?>\"></center>");
+print("Communication : \"<span id=\"id_payment_communication_after\"></span>\"</br>Compte : BE64 7320 3842 1852</h3>\n");
+// evyncke: as the $epcString is still empty, no need to specify the src as it is invalid... was  src=\"https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" . urlencode($epcString) . "\"
+print("<img style=\"text-align: right;\" id=\"id_payment_qr_code_after\" width=\"150\" height=\"150\" ></center>");
 print("</span>");
 
 	//----------------------------------------------------
@@ -1322,7 +1329,8 @@ print("<button type=\"button\" value=\"Fill\" onclick=\"window.location.href='$_
 <center><span id="id_payment">
 <h3>Paiement du vol - Montant: <span id="id_payment_amount"></span> &euro;</br>
 Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 7320 3842 1852</h3>
-<img style="text-align: right;" id="id_payment_qr_code" width="150" height="150" src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=url>"></center>
+<!-- evyncke the src URL is invalid as it contains 'url', no need to specify the src=, was  src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=url>"-->
+<img style="text-align: right;" id="id_payment_qr_code" width="150" height="150"></center>
 </span>
 
 <p></p>
