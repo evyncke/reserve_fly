@@ -50,7 +50,7 @@ var
 	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?>,
 	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?>;
 </script>
-<script type="text/javascript" src="fleet_map.js"></script>
+<script type="text/javascript" src="js/fleet_map.js"></script>
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
@@ -82,7 +82,7 @@ var
 
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('fleet_map.php')) ;
-$version_js = date ("Y-m-d H:i:s.", filemtime('fleet_map.js')) ;
+$version_js = date ("Y-m-d H:i:s.", filemtime('js/fleet_map.js')) ;
 $version_ajax = date ("Y-m-d H:i:s.", filemtime('get_tracks.php')) ;
 ?>
 <hr>

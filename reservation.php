@@ -20,7 +20,7 @@
 ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/reservation.css>;rel=preload;as=style, </resa/datepickr.css>;rel=preload;as=style,</resa/reservation.js>;rel=preload;as=script,</resa/datepickr.js>;rel=preload;as=script') ;
+header('Link: </resa/reservation.css>;rel=preload;as=style, </resa/datepickr.css>;rel=preload;as=style,</resa/js/reservation.js>;rel=preload;as=script,</resa/js/datepickr.js>;rel=preload;as=script') ;
 header('Link: </resa/fa.ico>;rel=preload;as=image,</resa/members.js>;rel=preload;as=script') ;
 
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
@@ -97,7 +97,7 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 <meta property="fb:app_id"        content="=$ fb_app_id " />
 
 <title>Réservation des avions</title>
-<script data-cfasync="true" src="datepickr.js"></script>
+<script data-cfasync="true" src="js/datepickr.js"></script>
 <script>
 var // was 'const' but IE does not support it !
 	// preset Javascript constant fill with the right data from db.php PHP variables
@@ -277,7 +277,7 @@ if (!$convertToUtf8) {
 <script src="pilots.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
 <script src="members.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
 <script src="instructors.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<script src="reservation.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
+<script src="js/reservation.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
@@ -662,7 +662,7 @@ if ($userIsInstructor || $userIsAdmin) {
 <!-- end of div for the agenda item window-->
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('reservation.php')) ;
-$version_js = date ("Y-m-d H:i:s.", filemtime('reservation.js')) ;
+$version_js = date ("Y-m-d H:i:s.", filemtime('js/reservation.js')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('reservation.css')) ;
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;

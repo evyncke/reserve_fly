@@ -277,7 +277,7 @@ function journalise($userId, $severity, $message) {
 		die("Une erreur fatale a eu lieu. Impossible de continuer l'execution de $_SERVER[PHP_SELF]. Veuillez contacter eric@vyncke.org avec ce message:\n $message \n") ;
 }
 
-// same function exists in reservation.js
+// same function exists in js/reservation.js
 function planeClassIsMember($member, $group) {
         if ($member == $group) return true ;
         switch ($group) {

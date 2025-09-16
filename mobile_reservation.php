@@ -71,7 +71,7 @@ $header_postamble = '<link rel="stylesheet" type="text/css" href="mobile_reserva
 <script src="ressources.js"></script>
 <script src="pilots.js"></script>
 <script src="instructors.js"></script>
-<script src="mobile_reservation.js"></script>
+<script src="js/mobile_reservation.js"></script>
 ' ;
 $body_attributes = 'onload="init(); initBooking();"' ;
 $need_swiped_events = 1024 ; // Allow swipe events on this page only when view port width >= 1024px as responsive table scroll can be confusing
@@ -616,7 +616,7 @@ if ($userIsInstructor || $userIsAdmin) {
 
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('mobile_reservation.php')) ;
-$version_js = date ("Y-m-d H:i:s.", filemtime('mobile_reservation.js')) ;
+$version_js = date ("Y-m-d H:i:s.", filemtime('js/mobile_reservation.js')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('mobile_reservation.css')) ;
 $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 ?>

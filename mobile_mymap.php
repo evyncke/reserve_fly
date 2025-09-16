@@ -60,8 +60,8 @@ if (isset($_REQUEST['period'])) {
 $header_postamble = '<!-- Load the MAP BOX scripts & CSS -->
 <script src="https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css" rel="stylesheet"/>
-<script src="arc.js"></script> <!-- GreatCircles for geodesic lines -->
-<script src="mymap.js"></script>
+<script src="js/arc.js"></script> <!-- GreatCircles for geodesic lines -->
+<script src="js/mobile_mymap.js"></script>
 ' ;
 $body_attributes="onload=\"initMyMap($apt_longitude, $apt_latitude, $pilot_arg, '$period', '$mapbox_token');init();\"" ;
 require_once 'mobile_header5.php' ;

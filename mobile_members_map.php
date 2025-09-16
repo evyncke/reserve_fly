@@ -28,7 +28,7 @@ if ($userId != 62) journalise($userId, 'I', "Member map displayed") ;
 $header_postamble = "<!-- Load the MAP BOX scripts & CSS -->
 <script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
 <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
-<script type='text/javascript' src='mobile_members_map.js'></script>
+<script type='text/javascript' src='js/mobile_members_map.js'></script>
 " ;
 $body_attributes = "onload=\"init();initMap($apt_longitude, $apt_latitude, '$mapbox_token', 'get_members.php');\"" ;
 

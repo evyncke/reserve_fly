@@ -69,7 +69,7 @@ var
 	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?>,
 	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?>;
 </script>
-<script type="text/javascript" src="fleet_map.js"></script>
+<script type="text/javascript" src="js/fleet_map.js"></script>
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];

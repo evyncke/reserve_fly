@@ -2063,7 +2063,7 @@ function initBooking() {
 		option.value = members[member].id ;
 		document.getElementById('memberSelect').add(option) ;
 	}
-	// Pilot select is initiase in the mobile.js code
+	// Pilot select is initialised in the js/mobile.js code
 	for (var instructor = 0; instructor < instructors.length; instructor++) {
 		var option = document.createElement("option");
 		option.text = instructors[instructor].name ;

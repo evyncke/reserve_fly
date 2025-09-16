@@ -25,7 +25,7 @@ $local_latitude_bound /= 2.0 ;
 $header_postamble = "<!-- Load the MAP BOX scripts & CSS -->
 <script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
 <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
-<script type='text/javascript' src='local_flights.js'></script>
+<script type='text/javascript' src='js/local_flights.js'></script>
 " ;
 $body_attributes = "onload=\"init();initLocalFlights($apt_longitude, $local_longitude_bound, $apt_latitude, $local_latitude_bound, $local_altimeter_bound, '$mapbox_token', $zoom_level, 'get_local_tracks.php?mult=0.5');\"" ;
 

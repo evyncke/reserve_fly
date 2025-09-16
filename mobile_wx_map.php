@@ -62,7 +62,7 @@ var CenterLng = ' . $center_long . ' ;
 var CenterZoom = ' . $center_zoom . ' ;
 var displayAirport =  ' . ((isset($_REQUEST['disp_apt']) && strtoupper($_REQUEST['disp_apt'] != 'N')) ? 'true' : 'false') . ' ;
 </script>
-<script type="text/javascript" src="mobile_wx_map.js"></script> ' ;
+<script type="text/javascript" src="js/mobile_wx_map.js"></script> ' ;
 $body_attributes = 'onload="loadWxMap();init();"' ;
 require_once 'mobile_header5.php' ;
 ?>

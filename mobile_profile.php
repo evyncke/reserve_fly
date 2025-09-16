@@ -38,7 +38,7 @@ if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	$user_only = true ;
 }
 $body_attributes = "onload=\"selectedUserId=$displayed_id;init();\"" ;
-$header_postamble = '<script data-cfasync="true" src="profile.js"></script>' ;
+$header_postamble = '<script data-cfasync="true" src="js/mobile_profile.js"></script>' ;
 require_once 'mobile_header5.php' ;
 
 $change_profile_message = '' ;

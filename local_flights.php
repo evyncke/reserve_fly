@@ -65,7 +65,7 @@ var
 	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?>,
 	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?>;
 </script>
-<script type="text/javascript" src="local_flights.js"></script>
+<script type="text/javascript" src="js/local_flights.js"></script>
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
@@ -99,7 +99,7 @@ var
 <div id='flightInfo' style='display: none; position: absolute; margin: 0px auto; padding: 10px; text-align: left; color: black; background: white; opacity: 0.7;'></div>
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('local_flights.php')) ;
-$version_js = date ("Y-m-d H:i:s.", filemtime('local_flights.js')) ;
+$version_js = date ("Y-m-d H:i:s.", filemtime('js/local_flights.js')) ;
 $version_ajax = date ("Y-m-d H:i:s.", filemtime('get_local_tracks.php')) ;
 ?>
 <hr>

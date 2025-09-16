@@ -30,7 +30,7 @@ $latest = (isset($_REQUEST['latest'])) ? '?latest=y' : '' ;
 $header_postamble = "<!-- Load the MAP BOX scripts & CSS -->
 <script src='https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js'></script>
 <link href='https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css' rel='stylesheet' />
-<script type='text/javascript' src='fleet_map.js'></script>
+<script type='text/javascript' src='js/fleet_map.js'></script>
 " ;
 $body_attributes = "onload=\"init();initFleet($apt_longitude, $apt_latitude, '$mapbox_token', 'get_tracks.php$latest');\"" ;
 

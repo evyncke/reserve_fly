@@ -84,7 +84,7 @@ require_once 'mobile_header5.php' ;
 
 <div class="container-fluid">
 
-<!-- Not a real form as mobile.js has the onclick code to submit the form -->
+<!-- Not a real form as js/mobile.js has the onclick code to submit the form -->
 <!-- not even sure whether it is required -->
 <input type="hidden" id="departingAirport" value="<?=$from?>">
 <input type="hidden" id="destinationAirport" value="<?=$to?>">

@@ -21,7 +21,7 @@
 ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
+header('Link: </resa/js/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
 
 # Handle the toggle between dark/light themes
 if (isset($_GET['theme']) and $_GET['theme'] != '') {
@@ -83,7 +83,7 @@ if (isset($need_swiped_events) and $need_swiped_events) {
 ?>
 <!-- Allow the swipe events on phones & tablets -->
 <!-- only be loaded when required -->
-<script src="swiped-events.js" defer></script>
+<script src="js/swiped-events.js" defer></script>
 <script>
   var swipeMinWidth = 0 ; // Default Minimum width to activate swipe events, i.e., by default always
 </script>
@@ -125,7 +125,7 @@ function pilotSelectChanged() {
 			'<?= ((isset($_REQUEST['previous'])) ? '&previous' : '')?>' ;
 }
 </script>
-<script src="mobile.js"></script>
+<script src="js/mobile.js"></script>
 <script src="planes.js"></script>
 <script src="members.js"></script> <!-- TODO load only if pilotSelect is active -->
 <?php
@@ -392,7 +392,7 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_logbook_summary.php">Résumé vols club</a></li>
             <li><a class="dropdown-item" href="mobile_fleet_map.php">Ces dernières 24 heures</a></li>
             <li><a class="dropdown-item" href="mobile_fleet_map.php?latest">Dernières localisations</a></li>
-            <!-- init() in mobile.js will insert all active planes -->
+            <!-- init() in js/mobile.js will insert all active planes -->
 <?php
 }
 ?>
