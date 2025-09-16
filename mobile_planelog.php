@@ -22,7 +22,7 @@ if ($userId == 0) {
 	exit ;
 }
 
-$header_postamble = '<script src="shareCodes.js"></script>' ;
+$header_postamble = '<script src="data/shareCodes.js"></script>' ;
 $body_attributes=' onload="initPlaneLog();init();" ' ;
 $need_swiped_events = true ; // Allow swipe events on this page
 require_once 'mobile_header5.php' ;

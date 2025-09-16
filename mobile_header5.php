@@ -21,7 +21,7 @@
 ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/js/mobile.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
+header('Link: </resa/js/mobile.js>;rel=preload;as=script,</resa/data/members.js>;rel=preload;as=script,</resa/data/planes.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image') ;
 
 # Handle the toggle between dark/light themes
 if (isset($_GET['theme']) and $_GET['theme'] != '') {
@@ -126,8 +126,8 @@ function pilotSelectChanged() {
 }
 </script>
 <script src="js/mobile.js"></script>
-<script src="planes.js"></script>
-<script src="members.js"></script> <!-- TODO load only if pilotSelect is active -->
+<script src="data/planes.js"></script>
+<script src="data/members.js"></script> <!-- TODO load only if pilotSelect is active -->
 <?php
 if (!isset($_REQUEST['kiosk'])) { // No matomo analytics in kiosk mode
 ?>

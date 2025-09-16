@@ -68,9 +68,9 @@ while ($row = mysqli_fetch_array($result)) {
 
 $header_postamble = '<link rel="stylesheet" type="text/css" href="css/mobile_reservation.css">
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="ressources.js"></script>
-<script src="pilots.js"></script>
-<script src="instructors.js"></script>
+<script src="data/ressources.js"></script>
+<script src="data/pilots.js"></script>
+<script src="data/instructors.js"></script>
 <script src="js/mobile_reservation.js"></script>
 ' ;
 $body_attributes = 'onload="init(); initBooking();"' ;

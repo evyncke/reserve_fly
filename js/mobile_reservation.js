@@ -2034,7 +2034,7 @@ function initBooking() {
 	refreshWebcam() ;
 	setTimeout(refreshTimestamp, 1000 * 60) ; // Refresh every 60 seconds
 	if (planes.length == 0 || pilots.length == 0 || instructors.length <= 1) {
-		console.log("Planes.js or pilots.js or instructors.js has a length of 0") ;
+		console.log("data/planes.js or data/pilots.js or data/instructors.js has a length of 0") ;
 		alert("Erreur lors du chargement des avions, pilotes et instructeurs.\nPrevenez eric@vyncke.org et essayez de faire un refresh ou un autre browser.") ;
 	}
 	for (var plane = 0; plane < planes.length; plane++) {

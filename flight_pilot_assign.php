@@ -18,7 +18,7 @@
 require_once 'flight_header.php' ;
 
 ?>
-<script src="pilots.js"></script>
+<script src="data/pilots.js"></script>
 <div class="page-header hidden-xs">
 <h3>Assignation des pilotes ces 90 derniers jours</h3>
 </div><!-- page header -->

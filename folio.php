@@ -166,7 +166,7 @@ class FolioLine{
         $this->share_type = $row['l_share_type'] ;
         $this->share_member = $row['l_share_member'] ;
         switch ($this->share_member) {
-        // Should reflect the content of shareCodes.js 
+        // Should reflect the content of data/shareCodes.js 
             case -1: $this->share_member_name = '(Ferry)'; $this->share_member_fname = 'Club'; break ;
             case -2: $this->share_member_name = '(Autres)'; $this->share_member_fname = 'Club'; break ;
             case -3: $this->share_member_name = 'Initiation'; $this->share_member_fname = ''; break ;

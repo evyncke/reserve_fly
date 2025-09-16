@@ -453,8 +453,8 @@ while ($row = mysqli_fetch_array($result)) {
 // Préparation des fichiers .JS contenant des données statiques afin de permettre le cache
 print(date('Y-m-d H:i:s').": preparing JS files.\n") ;
 
-$f = fopen("planes.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open planes.js for writing") ;
+$f = fopen("data/planes.js", "w") ;
+if (! $f) journalise(0, "E", "Cannot open data/planes.js for writing") ;
 else {
 	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
 	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
@@ -474,8 +474,8 @@ else {
 	fclose($f) ;
 }
 
-$f = fopen("allPlanes.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open allPlanes.js for writing") ;
+$f = fopen("data/allPlanes.js", "w") ;
+if (! $f) journalise(0, "E", "Cannot open data/allPlanes.js for writing") ;
 else {
 	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
 	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
@@ -495,8 +495,8 @@ else {
 	fclose($f) ;
 }
 
-$f = fopen("ressources.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open ressources.js for writing") ;
+$f = fopen("data/ressources.js", "w") ;
+if (! $f) journalise(0, "E", "Cannot open data/ressources.js for writing") ;
 else {
 	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
 	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
@@ -516,8 +516,8 @@ else {
 	fclose($f) ;
 }
 
-$f = fopen("pilots.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open pilots.js for writing") ;
+$f = fopen("data/pilots.js", "w") ;
+if (! $f) journalise(0, "E", "Cannot open data/pilots.js for writing") ;
 else {
 	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
 	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
@@ -547,8 +547,8 @@ else {
 	fclose($f) ;
 }
 
-$f = fopen("instructors.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open instructors.js for writing") ;
+$f = fopen("data/instructors.js", "w") ;
+if (! $f) journalise(0, "E", "Cannot open data/instructors.js for writing") ;
 else {
 	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
 	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
@@ -585,8 +585,8 @@ else {
 	fclose($e) ;
 }
 
-$f = fopen("members.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open members.js for writing") ;
+$f = fopen("data/members.js", "w") ;
+if (! $f) journalise(0, "E", "Cannot open data/members.js for writing") ;
 else {
 	$first = true ;
 	fwrite($f,"var members = [ ") ;

@@ -21,7 +21,7 @@ ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
 header('Link: </resa/css/reservation.css>;rel=preload;as=style, </resa/css/datepickr.css>;rel=preload;as=style,</resa/js/reservation.js>;rel=preload;as=script,</resa/js/datepickr.js>;rel=preload;as=script') ;
-header('Link: </resa/fa.ico>;rel=preload;as=image,</resa/members.js>;rel=preload;as=script') ;
+header('Link: </resa/fa.ico>;rel=preload;as=image,</resa/data/members.js>;rel=preload;as=script') ;
 
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
 require_once "dbi.php" ;
@@ -272,11 +272,11 @@ if (!$convertToUtf8) {
 }
 
 </script>
-<script src="planes.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<script src="ressources.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<script src="pilots.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<script src="members.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
-<script src="instructors.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
+<script src="data/planes.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
+<script src="data/ressources.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
+<script src="data/pilots.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
+<script src="data/members.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
+<script src="data/instructors.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
 <script src="js/reservation.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
 <!-- Matomo -->
 <script type="text/javascript">

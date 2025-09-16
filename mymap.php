@@ -74,7 +74,7 @@ if ($sql_filters != '') $sql_filters = "where $sql_filters" ;
 <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
 <title>Carte des vols de <?=$pilot_name?></title>
 <script src="js/arc.js"></script> <!-- GreatCircles for geodesic lines -->
-<script src="members.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
+<script src="data/members.js"></script> <!--- cannot be loaded before as its initialization code use variable above... -->
 <script>
 var
 	// preset Javascript constant fill with the right data from db.php PHP variables

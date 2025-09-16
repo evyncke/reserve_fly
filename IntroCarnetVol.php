@@ -23,9 +23,9 @@ require_once 'dto.class.php';
 require_once 'IntroCarnetVol_tools.php' ;
 
 # HTTP/2 push of JS & CSS via header() to go faster
-header('Link: </resa/script_carnetdevol.js>;rel=preload;as=script,</resa/members.js>;rel=preload;as=script,</resa/pilots.js>;rel=preload;as=script,' .
-	'</resa/instructors.js>;rel=preload;as=script,' .
-	'</resa/planes.js>;rel=preload;as=script,</resa/shareCodes.js>;rel=preload;as=script,</resa/prix.js>;rel=preload;as=script,</resa/IntroCarnetVol.css>;rel=preload;as=style') ;
+header('Link: </resa/script_carnetdevol.js>;rel=preload;as=script,</resa/data/members.js>;rel=preload;as=script,</resa/data/pilots.js>;rel=preload;as=script,' .
+	'</resa/data/instructors.js>;rel=preload;as=script,' .
+	'</resa/data/planes.js>;rel=preload;as=script,</resa/data/shareCodes.js>;rel=preload;as=script,</resa/prix.js>;rel=preload;as=script,</resa/IntroCarnetVol.css>;rel=preload;as=style') ;
 
 if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year 
 	// TODO only send it when not received
@@ -1345,11 +1345,11 @@ Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 
 <p>Durée: "2:20", "2h20", "140"</p>
 <p>Compteur : xxxxyy (OO-APV xxxxy)  xxxx.yy (OO-APV xxxx.y) ou xxxx,yy  (OO-APV xxxx,y)</p>
 <!-- Those scripts must be at the end and not in the header as some prefil operations are not done in the onLoad() :-( ...-->
-<script src="https://www.spa-aviation.be/resa/planes.js" ></script>
-<script src="https://www.spa-aviation.be/resa/instructors.js"></script>
-<script src="https://www.spa-aviation.be/resa/members.js"></script>
-<script src="https://www.spa-aviation.be/resa/shareCodes.js"></script>
-<script src="https://www.spa-aviation.be/resa/pilots.js"></script>
+<script src="data/planes.js" ></script>
+<script src="data/instructors.js"></script>
+<script src="data/members.js"></script>
+<script src="data/shareCodes.js"></script>
+<script src="data/pilots.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/CP_frais_type.js"\></script>-->
 <script src="https://www.spa-aviation.be/resa/prix.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->

@@ -21,8 +21,9 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
-$header_postamble = '<script src="shareCodes.js"></script>
-<script src="members.js"></script>
+# TODO check whether data/members.js is already loaded by mobile_header5.php
+$header_postamble = '<script src="data/shareCodes.js"></script>
+<script src="data/members.js"></script>
 ' ;
 $body_attributes = 'onload="init();initShareCodes();"' ;
 

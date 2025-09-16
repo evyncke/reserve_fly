@@ -46,7 +46,7 @@ if (isset($_REQUEST['edit_pilot']) and isset($_REQUEST['pilot'])){
 	journalise($userId, "I", "New pilot rating for $pilot: discovery=$_REQUEST[discovery], initiation=$_REQUEST[initiation]") ;
 }
 ?>
-<script src="pilots.js"></script>
+<script src="data/pilots.js"></script>
 <div class="page-header hidden-xs">
 <h3>Qualifications des pilotes</h3>
 </div><!-- page header -->

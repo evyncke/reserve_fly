@@ -176,8 +176,8 @@ if (isset($_REQUEST['pilotlog']) and $_REQUEST['pilotlog'] != '') {
 <!-- Latest compiled JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 <title>Situation comptable de <?=$userName?> (#<?=$userId?>)</title>
-<script src="members.js"></script>
-<script src="shareCodes.js"></script>
+<script src="data/members.js"></script>
+<script src="data/shareCodes.js"></script>
 <script>
 var
 	// preset Javascript constants filled with the right data from db.php PHP variables
@@ -202,7 +202,7 @@ function init() {
         var pilotSelect = document.getElementById('pilotSelect') ;
 	// Dropdown selected the pilot
         if (userIsInstructor || userIsAdmin) {
-                // Initiliaze pilotSelect from members.js
+                // Initiliaze pilotSelect from data/members.js
                for (var member = 0; member < members.length; member++) {
                         var option = document.createElement("option");
                         if (members[member].last_name == '')

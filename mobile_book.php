@@ -75,8 +75,8 @@ var
 	pilotId = " . ((isset($booking)) ? $booking['r_pilot'] : $userId) . ",
 	instructorId = " . ((isset($booking['r_instructor']) and $booking['r_instructor']) ? $booking['r_instructor'] : -1)  . " ;
 </script>
-<script src=\"instructors.js\"></script>
-<script src=\"pilots.js\"></script>" ;
+<script src=\"data/instructors.js\"></script>
+<script src=\"data/pilots.js\"></script>" ;
 
 require_once 'mobile_header5.php' ;
 ?> 

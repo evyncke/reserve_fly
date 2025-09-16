@@ -23,7 +23,7 @@ if ($userId == 0) {
 }
 $need_swiped_events = true ; // Allow swipe events on this page
 $header_postamble = '
-<script src="instructors.js"></script>
+<script src="data/instructors.js"></script>
 ' ;
 require_once 'mobile_header5.php' ;
 

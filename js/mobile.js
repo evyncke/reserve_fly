@@ -429,7 +429,7 @@ function listenBootstrapModal() {
 }
 
 function init() {
-	// Fill in the Planes dropdown menu with the content of planes.js
+	// Fill in the Planes dropdown menu with the content of data/planes.js
 	var planesDropdown = document.getElementById('planesDropdown') ;
 	if (planesDropdown) {
 		for (var plane = 0; plane < planes.length; plane++) {
@@ -451,7 +451,7 @@ function init() {
 	var planeSelect = document.getElementById('planeSelect') ;
 	if (planeSelect && typeof planes !== 'undefined') {
 	// Dropdown selected the plane
-		// Initiliaze planeSelect from planes.js
+		// Initiliaze planeSelect from data/planes.js
 		for (var i = 0; i < planes.length; i++) {
 				var option = document.createElement("option");
 				option.innerHTML = planes[i].name ;
@@ -463,8 +463,8 @@ function init() {
 	var pilotSelect = document.getElementById('pilotSelect') ;
 	if (pilotSelect) {
 	// Dropdown selected the pilot
-	// TODO should it rather be from pilots.js ?
-		// Initiliaze pilotSelect from members.js
+	// TODO should it rather be from data/pilots.js ?
+		// Initiliaze pilotSelect from data/members.js
 		for (var member = 0; member < members.length; member++) {
 				if (pilotSelect.getAttribute('data-paid-membership') && pilotSelect.getAttribute('data-paid-membership') === 'true' && !members[member].membership)
 					continue; // Skip unpaid members
@@ -508,7 +508,7 @@ function init() {
 	var instructorSelect = document.getElementById('instructorSelect') ;
 	if (instructorSelect && typeof instructors !== 'undefined') {
 	// Dropdown selected the instructor
-		// Initiliaze instructorSelect from members.js
+		// Initiliaze instructorSelect from data/members.js
 		for (var i = 0; i < instructors.length; i++) {
 				var option = document.createElement("option");
 				option.innerHTML = instructors[i].name ;
