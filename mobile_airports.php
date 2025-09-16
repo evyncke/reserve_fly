@@ -28,7 +28,7 @@ $header_postamble = "
 
 require_once 'mobile_header5.php' ;
 ?>
-    <h1 style='text-align: center;'>Airport Information</h1>
+    <h2 style='text-align: center;'>Airport Information</h2>
 <?php
 //Load the JSON feed
     $airportFolder='../airports/';
@@ -38,7 +38,7 @@ require_once 'mobile_header5.php' ;
     if (file_exists($file)) {
     	//echo "The file $file exists";
     } else {
-    	echo "The file $file does not exist";
+    	journalise($userId, "E", "The file $file does not exist") ;
     }
 	
     $json = file_get_contents($file);
@@ -50,11 +50,10 @@ require_once 'mobile_header5.php' ;
     $airports = $json_data->Airports;
  	//echo var_dump($airports);
  ?>
-   	<!-- Table des tarifs de base (Initiation, Prix a la minute vol decouverte, ...)-->
     <table style="width: 100%; margin-left: auto; margin-right: auto;" border="2" cellspacing="3">
   	<tbody>
   	<tr style='background-color: #23ccdb; text-align: center; width: 10%;'>
-  	<td>Airport</td>
+  	<th>Airport</th>
   	</tr>
 	<?php
     foreach ($airports as $airport) {
