@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2022 Eric Vyncke
+   Copyright 2013-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -70,13 +70,13 @@ else {
 // Find the previous/next booking
 $result = mysqli_query($mysqli_link, "select * from $table_bookings JOIN $table_planes on r_plane = $table_planes.id
 		where ressource = 0 and r_cancel_date is null and r_stop <= '$booking[r_start]' and $condition order by r_start desc limit 0,1")
-	or die("Cannot access previous booking: ".mysqli_error()) ;
+	or die("Cannot access previous booking: ".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 $previous_id = $row['r_id'] ;
 $previous_auth = md5($previous_id . $shared_secret) ;
 $result = mysqli_query($mysqli_link, "select * from $table_bookings JOIN $table_planes ON r_plane = $table_planes.id
 		where ressource = 0 and r_cancel_date is null and r_start >= '$booking[r_stop]' and $condition order by r_start asc limit 0,1")
-	or die("Cannot access previous booking: ".mysqli_error()) ;
+	or die("Cannot access previous booking: ".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 $next_id = $row['r_id'] ;
 $next_auth = md5($next_id . $shared_secret) ;
@@ -90,7 +90,7 @@ $booking['r_comment'] = db2web($booking['r_comment']) ;
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
-<link rel="stylesheet" type="text/css" href="booking.css">
+<link rel="stylesheet" type="text/css" href="css/booking.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <meta charset="utf-8">
 <!--meta name="viewport" content="width=320"-->
@@ -175,7 +175,6 @@ console.log("cancelConfirm") ;
 		if(XHR.readyState  == 4) {
 			if(XHR.status  == 200) {
 				try {
-console.log('cancel_booking:' + XHR.responseText) ;
 					var response = eval('(' + XHR.responseText.trim() + ')') ;
 				} catch(err) {
 					return ;
@@ -189,7 +188,6 @@ console.log('cancel_booking:' + XHR.responseText) ;
 		}
 	}
 	var requestUrl = "cancel_booking.php?id=<?=$id?>&auth=<?=$auth?>" ;
-console.log(requestUrl) ;
 	XHR.open("GET", requestUrl, false) ;
 	XHR.send(null) ;
 
@@ -205,7 +203,6 @@ function abandonCancel() {
 }
 
 function cancelFirstClick () {
-console.log("cancelFirstClick()") ;
 	document.getElementById('confirmCancellation').style.visibility = 'visible' ;
 	document.getElementById('confirmCancellation').style.display = 'block' ;
 	document.getElementById('bookingTable').style.visibility = 'hidden' ;
@@ -216,8 +213,6 @@ console.log("cancelFirstClick()") ;
 
 function init() {
 	document.getElementById('logDiv').style.top = browserHeight - 100 ;
-//	document.getElementById('logDiv').innerHTML = "Optimized for smartphones<br/>Browser dimensions: " + browserWidth + ' x ' + browserHeight + ", orientation: " + browserOrientation + '<br/>' ;
-//	document.getElementById('logDiv').innerHTML += (isMobile) ? 'Using a mobile device<br/>' : 'Using a desktop<br/>' ;
 }
 
 </script>

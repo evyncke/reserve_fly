@@ -32,7 +32,7 @@ if ($userId != 62) journalise($userId, 'I', "Fleet location displayed") ;
 ?>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="log.css">
+<link rel="stylesheet" type="text/css" href="css/log.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <!-- Load the MAP BOX scripts & CSS -->

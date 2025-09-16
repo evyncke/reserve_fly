@@ -501,7 +501,7 @@ $invoice_reason = 'solde après folio' ;
 $invoice_total = round($cost_grand_total - $balance, 2) ;
 
 $version_php = date ("Y-m-d H:i:s.", filemtime('myfolio.php')) ;
-$version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
+$version_css = date ("Y-m-d H:i:s.", filemtime('css/log.css')) ;
 
 /*
 as Google Charts API is about to be deprecated, alternatives could be:

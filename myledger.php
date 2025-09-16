@@ -49,7 +49,7 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('myledger.php')) ;
 ?><!doctype html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="log.css">
+<link rel="stylesheet" type="text/css" href="css/log.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <!--meta name="viewport" content="width=320"-->

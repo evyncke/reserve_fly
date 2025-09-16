@@ -32,7 +32,7 @@ if (! ($userIsFlightPilot or $userIsFlightManager))
 <html>
 <head>
 <!-- TODO trim the CSS -->
-<link rel="stylesheet" type="text/css" href="flight.css">
+<link rel="stylesheet" type="text/css" href="css/flight.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <meta charset="utf-8">
@@ -51,7 +51,7 @@ if (! ($userIsFlightPilot or $userIsFlightManager))
 if ($christmas_theme) {
 ?>
 <!-- Christmas theme -->
-<link rel="stylesheet" href="mobile_christmas.css">
+<link rel="stylesheet" href="css/mobile_christmas.css">
 <?php
 } // $christmas theme
 ?>

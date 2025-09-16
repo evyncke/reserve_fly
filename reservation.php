@@ -20,7 +20,7 @@
 ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/reservation.css>;rel=preload;as=style, </resa/datepickr.css>;rel=preload;as=style,</resa/js/reservation.js>;rel=preload;as=script,</resa/js/datepickr.js>;rel=preload;as=script') ;
+header('Link: </resa/css/reservation.css>;rel=preload;as=style, </resa/css/datepickr.css>;rel=preload;as=style,</resa/js/reservation.js>;rel=preload;as=script,</resa/js/datepickr.js>;rel=preload;as=script') ;
 header('Link: </resa/fa.ico>;rel=preload;as=image,</resa/members.js>;rel=preload;as=script') ;
 
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
@@ -78,9 +78,9 @@ while ($row = mysqli_fetch_array($result)) {
 <?
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 ?>
-<link rel="stylesheet" type="text/css" href="reservation.css">
+<link rel="stylesheet" type="text/css" href="css/reservation.css">
 <!--- the script below has been modified to explicitely call jumpPlanningDate() when a date is selected -->
-<link rel="stylesheet" type="text/css" href="datepickr.css">
+<link rel="stylesheet" type="text/css" href="css/datepickr.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
@@ -663,7 +663,7 @@ if ($userIsInstructor || $userIsAdmin) {
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('reservation.php')) ;
 $version_js = date ("Y-m-d H:i:s.", filemtime('js/reservation.js')) ;
-$version_css = date ("Y-m-d H:i:s.", filemtime('reservation.css')) ;
+$version_css = date ("Y-m-d H:i:s.", filemtime('css/reservation.css')) ;
 print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ; 
 $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 ?>

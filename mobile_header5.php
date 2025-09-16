@@ -76,7 +76,7 @@ $christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_mont
 if ($christmas_theme) {
 ?>
 <!-- Christmas theme -->
-<link rel="stylesheet" href="mobile_christmas.css">
+<link rel="stylesheet" href="css/mobile_christmas.css">
 <?php
 } // $christmas theme
 if (isset($need_swiped_events) and $need_swiped_events) {

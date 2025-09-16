@@ -66,7 +66,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$validity_msg .= "<span class=\"text-warning\">Votre $row[name] ne sera plus valable le $row[expire_date]; il vous sera alors impossible de réserver un avion.</span><br/>" ;
 }
 
-$header_postamble = '<link rel="stylesheet" type="text/css" href="mobile_reservation.css">
+$header_postamble = '<link rel="stylesheet" type="text/css" href="css/mobile_reservation.css">
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="ressources.js"></script>
 <script src="pilots.js"></script>
@@ -617,7 +617,7 @@ if ($userIsInstructor || $userIsAdmin) {
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('mobile_reservation.php')) ;
 $version_js = date ("Y-m-d H:i:s.", filemtime('js/mobile_reservation.js')) ;
-$version_css = date ("Y-m-d H:i:s.", filemtime('mobile_reservation.css')) ;
+$version_css = date ("Y-m-d H:i:s.", filemtime('css/mobile_reservation.css')) ;
 $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 ?>
 <div class="copyright">Réalisation: Eric Vyncke, 2014-2024 et Patrick Reginster 2020-2022, pour RAPCS, Royal Aéro Para Club de Spa, ASBL<br/>

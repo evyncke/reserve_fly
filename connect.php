@@ -54,7 +54,7 @@ if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
-<link rel="stylesheet" type="text/css" href="mobile.css">
+<link rel="stylesheet" type="text/css" href="css/mobile.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <meta charset="utf-8">
 <!--meta name="viewport" content="width=320"-->

@@ -332,7 +332,7 @@ pour des vols sur des avions hors RAPCS).
 </div>
 <br/>
 <?php
-$version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
+$version_css = date ("Y-m-d H:i:s.", filemtime('css/log.css')) ;
 ?>
 <?php if (isset($_REQUEST['auth'])) print('</div>') ; ?>
 <hr>

@@ -16,7 +16,7 @@
 
 */
 $header_postamble ='
-    <link rel="stylesheet" type="text/css" href="log.css">
+    <link rel="stylesheet" type="text/css" href="css/log.css">
 ';
 require_once 'flight_header.php' ;
 require_once "dbi.php" ;
@@ -486,7 +486,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
 
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('if_init_folio.php')) ;
-$version_css = date ("Y-m-d H:i:s.", filemtime('log.css')) ;
+$version_css = date ("Y-m-d H:i:s.", filemtime('css/log.css')) ;
 ?>
 <hr>
 <div class="copyright">Réalisation: Patrick Reginster et Eric Vyncke, janvier 2015 - november 2023, pour RAPCS, Royal Aéro Para Club de Spa<br>
