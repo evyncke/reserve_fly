@@ -530,15 +530,13 @@ function init() {
 		var elem = document.getElementById('navBarId') ;
 		if (elem)
 			elem.style.display = 'none' ;
-		// TODO the duration is not the display time of the current page but how long the previous one is displayed
 		var kioskURIs = [ 
-			{ path: 'mobile_metar.php', duration: 15},			
+			{ path: 'mobile_metar.php', duration: 10},			
 //			{ path: 'mobile_webcam.php?cam=1', duration: 10}, // Seems to often cause time-out
-			{ path: 'mobile_fleet_map.php', duration: 10},
-			{ path: 'mobile_ephemerides.php', duration: 10},
-			{ path: 'mobile_dept_board.php', duration: 15},
+			{ path: 'mobile_fleet_map.php', duration: 15},
+			{ path: 'mobile_ephemerides.php', duration: 5},
+			{ path: 'mobile_dept_board.php', duration: 10},
 			{ path: 'mobile_local_flights.php', duration: 15},
-//			{ path: 'mobile_webcam.php?cam=0', duration: 20},
 			{ path: 'mobile_wx_map.php', duration: 15},
 			{ path: 'mobile_mymap.php?user=all&period=1m&auth=3293a7509955277ae6b674be7898bab9', duration: 15},
 		] ;
@@ -546,17 +544,16 @@ function init() {
 		for (var i = 0; i < kioskURIs.length; i++) {
 			var urlParts = kioskURIs[i].path.split('?') ; // TODO not perfect as cam=0 and cam=1 look the same then...
 			if (urlParts[0] == thisPath) { // Ignoring the query string
-				if (i + 1 == kioskURIs.length)
-					i = 0 ;
-				else
-					i = i + 1 ;
+				var duration = kioskURIs[i].duration * 1000;
+				i = (i + 1)	 % kioskURIs.length ; // Loop around
+				// Redirect to the next page after the specified duration'
 				setTimeout(function () { 
 					if (kioskURIs[i].path.includes('?'))
 						window.location.href = kioskURIs[i].path + '&kiosk' ;
 					else
 						window.location.href = kioskURIs[i].path + '?kiosk' ; 
 				},
-					kioskURIs[i].duration * 1000) ;
+					duration) ;
 				break ;
 			}
 		}
