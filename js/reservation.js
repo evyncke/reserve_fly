@@ -1321,6 +1321,8 @@ function hideEditAgendaItemDetails() {
 }
 
 function engineHoursClicked() {
+	// Loading the logbook page takes several seconds, so let's display a spinner
+	displayWaiting() ;
 	window.location.href = 'IntroCarnetVol.php?id=' + currentlyDisplayedBooking ;
 }
 
@@ -1328,6 +1330,8 @@ function redirectLogBook(event) {
 	event.stopPropagation() ; // Avoid further processing the initial click as it removes the box :-)
 	var id = event.target.id ;
 	if (id == 0) return ; // When clicking on pilot details, this event is also triggered :-(
+	// Loading the logbook page takes several seconds, so let's display a spinner
+	displayWaiting() ;
 	window.location.href = 'IntroCarnetVol.php?id=' + bookingFromID(id) ;
 }
 
