@@ -2037,44 +2037,12 @@ function initBooking() {
 		console.log("data/planes.js or data/pilots.js or data/instructors.js has a length of 0") ;
 		alert("Erreur lors du chargement des avions, pilotes et instructeurs.\nPrevenez eric@vyncke.org et essayez de faire un refresh ou un autre browser.") ;
 	}
-	for (var plane = 0; plane < planes.length; plane++) {
-		var option = document.createElement("option");
-		option.text = planes[plane].name ;
-		option.value = planes[plane].id ;
-		document.getElementById('planeSelect').add(option) ;
-	}
 	for (var ressource = 0; ressource < ressources.length; ressource++) {
 		var option = document.createElement("option");
 		option.text = ressources[ressource].name ;
 		option.value = ressources[ressource].id.replace(/\+/g,' ') ;
 		option.disabled = (!userIsInstructor && !userIsAdmin) ;
 		document.getElementById('ressourceSelect').add(option) ;
-	}
-	for (var member = 0; member < members.length; member++) {
-		var option = document.createElement("option");
-		if ('last_name' in members[member]) {
-			option.innerHTML = members[member].last_name + ', ' + members[member].first_name ;
-		} else {
-			option.innerHTML = members[member].name ;
-		}
-                if (members[member].student) {  // Add a student icon
-                        option.innerHTML += ' &#x1F393;' ;
-                }
-		option.value = members[member].id ;
-		document.getElementById('memberSelect').add(option) ;
-	}
-	// Pilot select is initialised in the js/mobile.js code
-	for (var instructor = 0; instructor < instructors.length; instructor++) {
-		var option = document.createElement("option");
-		option.text = instructors[instructor].name ;
-		option.value = instructors[instructor].id ;
-		document.getElementById('instructorSelect').add(option) ;
-		if (instructors[instructor].id > 0) {
-			var option = document.createElement("option");
-			option.text = instructors[instructor].name ;
-			option.value = instructors[instructor].id ;
-			document.getElementById('agendaItemInstructorSelect').add(option) ; // Solo (id = -1) is not a valid option for the agenda :-)
-		}
 	}
 	planningByPlane = false ; // By default, let's start in one single day mode with one line per plane
 	initPlanningTable() ;

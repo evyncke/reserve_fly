@@ -32,7 +32,6 @@ if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '') {
     $plane = NULL ;
 }
 
-$body_attributes = "onLoad=\"prefillDropdownMenus('plane', planes, '$plane');init()\"";
 require_once 'mobile_header5.php' ;
 require_once 'incident.class.php' ;
 require_once 'mobile_tools.php' ;

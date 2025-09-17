@@ -30,7 +30,7 @@ if($displayAllColumns=='true') {
     $hiddenTag="";
     $itemWidth="width=\"25%\"";
 }
-$body_attributes = "style=\"height: 100%; min-height: 100%; width:100%;\" onload=\"init(); prefillDropdownMenus('plane', planes, '$plane');\"" ;
+$body_attributes = "style=\"height: 100%; min-height: 100%; width:100%;\" onload=\"init();\"" ;
 $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>
 <script type=\"text/javascript\">
     var gChartLoaded = false ;
