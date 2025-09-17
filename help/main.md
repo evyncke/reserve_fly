@@ -1,8 +1,10 @@
-# Application web de gestion des membres, avions, et réservations
+## Aide
+
+### Application web de gestion des membres, avions, et réservations
 
 _En cours de rédaction_
 
-## Icones
+### Icones
 
 Dans beaucoup d'endroits, il y a des petites icones:
 
@@ -17,6 +19,6 @@ Dans beaucoup d'endroits, il y a des petites icones:
 - <i class="bi bi-pencil-fill"></i>  ou <i class="bi bi-binoculars-fill"></i> : ouvrir une nouvelle page pour visualiser ou modifier une information
 - <i class="bi bi-copy"></i> copier dans le clipboard
 
-## Note importante
+### Note importante
 
 <i class="bi bi-bug-fill"></i> Ne pas hésiter à envoyer des suggestions ou 'bugs' à [Eric Vyncke](https://www.spa-aviation.be/resa/mobile_profile.php?displayed_id=62)

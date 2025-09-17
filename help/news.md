@@ -1,4 +1,4 @@
-# Nouveautés
+## Nouveautés
 
 Vous trouverez ici les diverses nouveautés à propos du site réservation du RAPCS. Les suggestions sont les bienvenues auprès de 
 [Éric Vyncke](https://www.spa-aviation.be/resa/mobile_profile.php?displayed_id=62) et

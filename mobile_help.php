@@ -30,8 +30,6 @@ if (isset($_REQUEST['topic']) and $_REQUEST['topic'] != '') {
 if ($userId != 62) journalise($userId, "I", "Help topic: $topic") ;
 ?>
 <div class="container">
-<h2>Aide</h2>
-
 <div class="row">
 <?php
 $Parsedown = new Parsedown();
