@@ -454,6 +454,10 @@ if ($userId > 0) {
                   <i class="bi bi-question-circle"></i> Aide</a>
               </li>
               <li>
+                <a class="dropdown-item" href="mobile_help.php?topic=news"> 
+                  <i class="bi bi-newspaper"></i> Nouveautés</a>
+              </li>
+              <li>
                 <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dynamicModal" 
                   data-modal-title="Rapporter un Bug" data-content-url="<?=$base_url?>mobile_modal_bug_report.html">
                    <i class="bi bi-bug me-2"></i> Bug</a>

@@ -18,14 +18,28 @@
 require_once "dbi.php" ;
 require_once 'mobile_header5.php' ;
 require_once 'Parsedown.php' ;
+if (isset($_REQUEST['topic']) and $_REQUEST['topic'] != '') {
+    $topic = $_REQUEST['topic'] ;
+    // Disallow directory traversal and only allow safe characters
+    if (!preg_match('/^[a-zA-Z0-9._-]+$/', $topic) or // only safe chars
+            strpos($topic, '..') !== false or            // no directory traversal
+            strpos($topic, '/') !== false)                // no slashes
+        journalise($userId, "F", "Invalid help topic: $topic") ;
+} else 
+    $topic = 'main' ;
+if ($userId != 62) journalise($userId, "I", "Help topic: $topic") ;
 ?>
 <div class="container">
-<h3>Aide</h3>
+<h2>Aide</h2>
 
 <div class="row">
 <?php
 $Parsedown = new Parsedown();
-echo $Parsedown->text(file_get_contents('mobile_help.md')) ;
+$text = file_get_contents("help/$topic.md") 
+    or journalise($userId, "F", "Cannot read help file help/$topic.md") ;
+echo $Parsedown->text($text) ;
 ?>
 </div><!-- row -->
 </div><!-- container -->
+</body>
+</html>
