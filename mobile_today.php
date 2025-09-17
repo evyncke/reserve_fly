@@ -184,7 +184,11 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
     </div>
 </div>
 
-<script>
+<button type="button" class="btn btn-primary" onclick="window.location.href='mobile_book.php'">
+  <i class="bi bi-plus"></i> Nouvelle réservation
+</button>
+
+<script> // This could should probably be moved to a js/mobile_today.js file
 	const bookings = <?=json_encode($rows, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
 	const modalContent = document.getElementById('detailModalContent');
 	const modalElement = document.getElementById('detailModal');
