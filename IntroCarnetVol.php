@@ -25,7 +25,7 @@ require_once 'IntroCarnetVol_tools.php' ;
 # HTTP/2 push of JS & CSS via header() to go faster
 header('Link: </resa/js/script_carnetdevol.js>;rel=preload;as=script,</resa/data/members.js>;rel=preload;as=script,</resa/data/pilots.js>;rel=preload;as=script,' .
 	'</resa/data/instructors.js>;rel=preload;as=script,' .
-	'</resa/data/planes.js>;rel=preload;as=script,</resa/data/shareCodes.js>;rel=preload;as=script,</resa/data/prix.js>;rel=preload;as=script,</resa/IntroCarnetVol.css>;rel=preload;as=style') ;
+	'</resa/data/planes.js>;rel=preload;as=script,</resa/data/shareCodes.js>;rel=preload;as=script,</resa/data/prix.js>;rel=preload;as=script,</resa/css/IntroCarnetVol.css>;rel=preload;as=style') ;
 
 if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year 
 	// TODO only send it when not received
@@ -36,7 +36,7 @@ if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year
 <html lang="fr">
 <head>
   <title>Introduction carnet de routes</title>
-  <link rel="stylesheet" type="text/css" href="IntroCarnetVol.css">
+  <link rel="stylesheet" type="text/css" href="css/IntroCarnetVol.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://www.spa-aviation.be/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
 <script>

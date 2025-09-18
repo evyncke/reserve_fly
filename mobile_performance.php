@@ -31,7 +31,7 @@ $plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, s
 $body_attributes = 'style="height: 100%; min-height: 100%; width:100%;" onload="init();mobile_performance_page_loaded();"' ;
 $header_postamble = "
 <script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>
-<link rel=\"stylesheet\" type=\"text/css\" href=\"mobile_performance.css\">
+<link rel=\"stylesheet\" type=\"text/css\" href=\"css/mobile_performance.css\">
 </script>
 " ;
 
