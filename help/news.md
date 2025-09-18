@@ -1,6 +1,6 @@
 ## Nouveautés
 
-Vous trouverez ici les diverses nouveautés à propos du site réservation du RAPCS. Les suggestions sont les bienvenues auprès de 
+Vous trouverez ici les diverses nouveautés à propos du site réservation du RAPCS. Les suggestions sont les bienvenues auprès de
 [Éric Vyncke](https://www.spa-aviation.be/resa/mobile_profile.php?displayed_id=62) et
 [Patrick Reginster](https://www.spa-aviation.be/resa/mobile_profile.php?displayed_id=66).
 
@@ -19,4 +19,4 @@ Vous trouverez ici les diverses nouveautés à propos du site réservation du RA
 
 - la page [Aéroport -> Départ](mobile_dept_board.php) affiche les vols dont le départ était prévu jusqu'à 30 minutes dans le passé en gris.
 - les pages par avions (par exemple, [Avions -> OO-APV](mobile_plane.php?plane=OO-APV)) affichent le type d'alimentation disponible (par exemple, USB-C <i class="bi bi-usb-c"></i> ou allume-cigare <i class="bi bi-plug-fill"></i>).
-- ajout des pages [Aide](mobile_help.php) dans le menu "A propos".
+- ajout des pages [À propos -> Aide](mobile_help.php) dans le menu "À propos".
