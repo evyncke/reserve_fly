@@ -23,7 +23,7 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
-$bondecommandeJSONcontent = file_get_contents('bondecommande.json') ;
+$bondecommandeJSONcontent = file_get_contents('data/bondecommande.json') ;
 $bondecommandeJSONcontent = str_replace("\n","",$bondecommandeJSONcontent);
 
 $header_postamble = "
@@ -31,7 +31,7 @@ $header_postamble = "
   var bondecommandeJSONString='$bondecommandeJSONcontent';
   var default_member=$userId;
 </script>
-<script src=\"bondecommande.js\"></script>" ;
+<script src=\"js/bondecommande.js\"></script>" ;
 
 $body_attributes = 'onload=init();bondecommandeMain();' ;
 

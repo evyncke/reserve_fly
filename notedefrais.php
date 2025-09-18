@@ -30,7 +30,7 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
-$notedefraisJSONcontent = file_get_contents('notedefrais.json') ;
+$notedefraisJSONcontent = file_get_contents('data/notedefrais.json') ;
 $notedefraisJSONcontent = str_replace("\n","",$notedefraisJSONcontent);
 
 $header_postamble = "
@@ -38,7 +38,7 @@ $header_postamble = "
   var notedefraisJSONString='$notedefraisJSONcontent';
   var default_member=$userId;
 </script>
-<script src=\"notedefrais.js\"></script>" ;
+<script src=\"js/notedefrais.js\"></script>" ;
 
 $body_attributes = 'onload=init();notedefraisMain();' ;
 

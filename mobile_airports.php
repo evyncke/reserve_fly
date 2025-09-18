@@ -21,7 +21,6 @@ if ($userId == 0) {
 	//header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	//exit ;
 }
-$plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['plane'])) : 'OO-ALD' ;
 $body_attributes = 'style="height: 100%; min-height: 100%; width:100%;" onload="init();"' ;
 $header_postamble = "
 " ;
@@ -33,7 +32,7 @@ require_once 'mobile_header5.php' ;
 //Load the JSON feed
     $airportFolder='../airports/';
     $airportMapFolder='../airports/maps/';
-    $file = 'mobile_airports.json';
+    $file = 'data/mobile_airports.json';
     //Check if JSON file is actually found.
     if (file_exists($file)) {
     	//echo "The file $file exists";

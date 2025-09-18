@@ -23,9 +23,9 @@ require_once 'dto.class.php';
 require_once 'IntroCarnetVol_tools.php' ;
 
 # HTTP/2 push of JS & CSS via header() to go faster
-header('Link: </resa/script_carnetdevol.js>;rel=preload;as=script,</resa/data/members.js>;rel=preload;as=script,</resa/data/pilots.js>;rel=preload;as=script,' .
+header('Link: </resa/js/script_carnetdevol.js>;rel=preload;as=script,</resa/data/members.js>;rel=preload;as=script,</resa/data/pilots.js>;rel=preload;as=script,' .
 	'</resa/data/instructors.js>;rel=preload;as=script,' .
-	'</resa/data/planes.js>;rel=preload;as=script,</resa/data/shareCodes.js>;rel=preload;as=script,</resa/prix.js>;rel=preload;as=script,</resa/IntroCarnetVol.css>;rel=preload;as=style') ;
+	'</resa/data/planes.js>;rel=preload;as=script,</resa/data/shareCodes.js>;rel=preload;as=script,</resa/data/prix.js>;rel=preload;as=script,</resa/IntroCarnetVol.css>;rel=preload;as=style') ;
 
 if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year 
 	// TODO only send it when not received
@@ -1351,8 +1351,8 @@ Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 
 <script src="data/shareCodes.js"></script>
 <script src="data/pilots.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/CP_frais_type.js"\></script>-->
-<script src="https://www.spa-aviation.be/resa/prix.js"></script>
+<script src="https://www.spa-aviation.be/resa/data/prix.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
-<script src="https://www.spa-aviation.be/resa/script_carnetdevol.js"></script>
+<script src="https://www.spa-aviation.be/resa/js/script_carnetdevol.js"></script>
 </body>
 </html>

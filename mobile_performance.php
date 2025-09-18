@@ -457,6 +457,6 @@ function openPerformance(evt, cityName) {
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
 </script>
-<script src="https://www.spa-aviation.be/resa/mobile_performance.js"></script>
+<script src="https://www.spa-aviation.be/resa/js/mobile_performance.js"></script>
 </body>
 </html>
