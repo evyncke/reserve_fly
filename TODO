@@ -1,34 +1,9 @@
 TODO list
-- page principale: ajouter un bouton 'today' et 'refresh'
-- auto refresh toutes les 15 minutes?
-- envoi d'un email au SPW avec les réservations du jour?
-- planing journalier afficher en orange l'heure dans la ligne top aussi
-- click sur une réservation à soi dans le passé pour passer en mode logbook
-- lien vers carnet de route / réservation sur page avion
-- en cas de cancel, prévenir les pilotes avant/après pour extension possible
-- booking.php, truc spécial pour les FI?
-
-Style genre départs
-       body {
-            background-color: black;
-            background-size:     cover;                      /* <------ */
-            background-repeat:   no-repeat;
-            background-position: -100px center;
-            background-attachment: fixed;
-            margin:0px;
-            padding: 0px;
-        }
-
-        #bheader {
-            display:none;
-
-        }
-
-        #loader {
-            color:white;
-
-        }
-        .bline {
-            display:block !important;
-
-        }
+- move all API (create/modify/cancel) in a /api subdir
+- metar.php use the full XML when available ?
+- mobile_today, rename in something else, + use date and not timestamp
+- mobile_today, pass the date when creating a new booking
+- mobile_book, display a spinner
+- mobile_book, redirect to the mobile_today page of the right day
+- mobile_header if file in help/$script_name.md exist add a help item in 'about'
+- move $script_name code into dbi.php and rename as referer_script
