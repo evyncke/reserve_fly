@@ -99,7 +99,10 @@ if (in_array($metar_station, $belgocontrol_automated_stations)) { // Special cas
 //	$url = 'https://www.aviationweather.gov/adds/dataserver_current/httpparam?' .
 //		'dataSource=metars&requestType=retrieve&format=xml&hoursBeforeNow=3&mostRecent=true&fields=raw_text&stationString=' . $metar_station ;
 // https://aviationweather.gov/cgi-bin/data/metar.php?ids=EBBR&hours=0&order=id%2C-obs&sep=true
-	$url = "https://aviationweather.gov/cgi-bin/data/metar.php?ids=$metar_station&hours=0&order=id%2C-obs&sep=true" ;
+//	$url = "https://aviationweather.gov/cgi-bin/data/metar.php?ids=$metar_station&hours=0&order=id%2C-obs&sep=true" ;
+// 2025-09-05 API endpoint changed: https://aviationweather.gov/data/api/#changes
+// $url = "https://aviationweather.gov/cgi-bin/data/metar.php?ids=$metar_station&hours=0&order=id%2C-obs&sep=true" ;
+	$url = "https://aviationweather.gov/api/data/metar?ids=$metar_station&format=xml&hours=0" ;
 	$reply['source'] = $url ;
 	$xml_string = @file_get_contents($url, "r") ;
 	$reply['http_response'] = $xml_string ;
@@ -116,14 +119,23 @@ if (in_array($metar_station, $belgocontrol_automated_stations)) { // Special cas
 		} else
 			$line = $xml->data[0]->METAR->raw_text ;
 		$reply['METAR'] = trim($line) ;
-//		$reply['xml_errors'] = serialize($xml->errors) ;
-//		$reply['xml_warnings'] = serialize($xml->warnings) ;
+		// $line should be something like "METAR EBLG 231250Z 05014KT 9999 SCT032 14/06 Q1023 NOSIG"
+		// TODO use the XML already parsed elements!
+		// Cannot use serialize() on SimpleELements
+		// $reply['xml_errors'] = serialize($xml->errors) ;
+		// $reply['xml_warnings'] = serialize($xml->warnings) ;
 	} // End of XML parsing
 } // not Belgocontrol stations
 
-if ($line == '')
+if (!isset($line) or $line == '')
 	$reply['error'] = "Unable to retrieve the METAR from the Internet" ;
 if ($reply['error'] == '') {
+	// Let's remove the leading "METAR" in $line
+	if (substr($line, 0, 6) == 'METAR ')
+		$line = trim(substr($line, 6)) ;
+	if (substr($line, 0, 6) == 'SPECI ')
+		$line = trim(substr($line, 6)) ;
+	$reply['line'] = $line ;
 	// Now let's try to parse lines such as 
 	// EBLB 020703Z 28011KT 9000 -SHSN FEW002 BKN010 BKN020 00/M00 Q1003 GRN
 	// EBCI 290820Z 19008KT 150V210 9000 FEW036 10/08 Q1017 NOSIG= 
@@ -315,8 +327,10 @@ emit:
  
 // METAR are usually updated every 30 minutes, so, caching 3 minutes should be OK
 // Prepare last-modified HTTP header based on METAR issue time (always in GMT) such as "2015/12/13 14:20"
-$last_modified = strtotime($reply['datetime']) ;
-header('Last-Modified: ' . date('D, d M Y H:i:s \G\M\T', $last_modified)) ;
+if (isset($reply['datetime']) and $reply['datetime'] != '') {
+	$last_modified = strtotime($reply['datetime']) ;
+	header('Last-Modified: ' . date('D, d M Y H:i:s \G\M\T', $last_modified)) ;
+}
 
 // Let's send the data back
 if (isset($_REQUEST['callback'])) {
