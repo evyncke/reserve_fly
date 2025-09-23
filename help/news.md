@@ -4,7 +4,7 @@ Vous trouverez ici les diverses nouveautés à propos du site réservation du RA
 [Éric Vyncke](https://www.spa-aviation.be/resa/mobile_profile.php?displayed_id=62) et
 [Patrick Reginster](https://www.spa-aviation.be/resa/mobile_profile.php?displayed_id=66).
 
-## Septembre 2026
+## Septembre 2025
 
 - ajout de cette page 'nouveautés'.
 - les pages des avions ([Avions -> OO-ALD](mobile_plane.php?plane=OO-ALD) par exemple) ont plusieurs photos qui peuvent être glissées (_swiped_).
@@ -15,7 +15,7 @@ Vous trouverez ici les diverses nouveautés à propos du site réservation du RA
 - ajout optionel mais recommandé d'un contact alternatif dans votre [profile](mobile_profile.php) (via le menu déroulant en haut à droite via votre nom).
 - affiche un "Loading" pendant l'accès à la page d'introduction des compteurs.
 
-## Août 2026
+## Août 2025
 
 - la page [Aéroport -> Départ](mobile_dept_board.php) affiche les vols dont le départ était prévu jusqu'à 30 minutes dans le passé en gris.
 - les pages par avions (par exemple, [Avions -> OO-APV](mobile_plane.php?plane=OO-APV)) affichent le type d'alimentation disponible (par exemple, USB-C <i class="bi bi-usb-c"></i> ou allume-cigare <i class="bi bi-plug-fill"></i>).
