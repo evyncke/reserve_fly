@@ -52,7 +52,7 @@ if ($id and is_numeric($id)) {
 	$to = $booking['r_to'] ;
 } else {
 	$action = "Réserver" ;
-	$startDay = date('Y-m-d') ;
+	$startDay = (isset($_REQUEST['date'])) ? mysqli_real_escape_string($mysqli_link, $_REQUEST['date']) : date('Y-m-d') ;
 	$endDay = $startDay ;
 	// Need to round up to next 15 minutes
 	$startMinute = date('i') ;
@@ -60,7 +60,7 @@ if ($id and is_numeric($id)) {
 	$startMinute = 15 * ($startMinute + 1) ;
 	if ($startMinute >= 60) $startMinute = '00' ;
 	$startHour = date('H:') . $startMinute ;
-	$endHour = $startHour ;
+	$endHour = (1 + date('H')) . ':' . $startMinute ;
 	$duration = 1 ;
 	$comment = '' ;
 	$from = '' ;
@@ -156,17 +156,21 @@ require_once 'mobile_header5.php' ;
 <?php
 if ($action == 'Modifier') {
 ?>
-	      <button class="btn btn-primary" onclick="modifyBooking(<?=$id?>, '<?=$auth?>');"><?=$action?></button>
+	      <button class="btn btn-primary" onclick="showSpinner();modifyBooking(<?=$id?>, '<?=$auth?>');hideSpinner();"><?=$action?></button>
 <?php
 } else {
 ?>
-	      <button class="btn btn-primary" onclick="createBooking();"><?=$action?></button>
+	      <button class="btn btn-primary" id="idBookButton" onclick="bookClicked();"><?=$action?></button>
 <?php
 }
 ?>
    		</div>
 </div><!-- row -->
 
+<div id="spinner" class="d-none"
+	style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:1051; display:flex; align-items:center; justify-content:center;">
+	<div class="spinner-border" style="width:4rem; height:4rem;" role="status"><span class="visually-hidden">En cours...</span></div>
+</div>
 <?php
 if (isset($booking['r_type']) and $booking['r_type'] == BOOKING_MAINTENANCE)
 	print("<br/><div class=\"alert alert-danger\">Cette réservation est une maintenance.</div>") ;
@@ -191,6 +195,21 @@ function adjustEndHour() {
 	while (sm >= 60) { sm -= 60 ; sh++ ; }
 	if (sh >= 24) sh = 23 ;
 	document.getElementById('endHourInput').value = (sh < 10 ? '0' : '') + sh + ':' + (sm < 10 ? '0' : '') + sm ;
+}
+
+function showSpinner() {
+	document.getElementById('spinner').classList.remove('d-none');
+}
+
+function hideSpinner() {
+	document.getElementById('spinner').classList.add('d-none');
+}
+
+function bookClicked() {
+	document.getElementById('idBookButton').disabled = true ;
+	showSpinner() ;
+	createBooking() ;
+	hideSpinner() ;
 }
 </script>
 </body>
