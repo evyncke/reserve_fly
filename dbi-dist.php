@@ -236,9 +236,36 @@ $mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
 if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
 if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
 
+// Do we need to redirect to the membership renewal page ?
+$membership_year = date('Y') ;
+if (date('m') == 12 && date('d') >= 15)
+	$membership_year ++ ; // ask for renewal from 15th of December on
+if ($userId > 0 and $userId != 294) { // Only for logged-in users and not for SPW
+	$result_fee = mysqli_query($mysqli_link, "SELECT * FROM $table_membership_fees 
+		WHERE bkf_user=$userId AND bkf_year = '$membership_year'")
+		or journalise($userId, 'E', "Cannot check whether user has paid membership fee: " . mysqli_error($mysqli_link)) ;
+	$row_fee = mysqli_fetch_array($result_fee) ;
+	if (!$row_fee) {
+		$cb = urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) ;
+		if ($_SERVER['PHP_SELF'] != '/resa/mobile_journal.php' && $_SERVER['PHP_SELF'] != '/resa/mobile_membership.php' && 
+			$_SERVER['PHP_SELF'] != '/resa/get_bookings.php' && $_SERVER['PHP_SELF'] != '/resa/get_fi_agenda.php')
+			if (!isset($_COOKIE['membership'])) {
+					journalise($userId, "I", "Unpaid membership, redirecting to membership page") ;
+					header("Location: https://www.spa-aviation.be/resa/mobile_membership.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+			}
+	}
+} else $row_fee = NULL ;// $userId > 0
+
+// Get HTTP referer
+$http_referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+if ($http_referer != '') {
+	$referer_name = basename(parse_url($http_referer, PHP_URL_PATH));   
+} else {
+	$referer_name = '';
+}
+
 // IP addresses are fetched from the X-Forwarded-For HTTP header
 function getClientAddress() {
-	$headers = (function_exists( 'apache_request_headers')) ? apache_request_headers(): $_SERVER;
 	$remote_address = (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] ;
 	$remote_address = (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) ? $_SERVER['HTTP_CF_CONNECTING_IP'] : $remote_address ;
 	return $remote_address ;

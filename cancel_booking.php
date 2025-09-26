@@ -24,14 +24,6 @@ ob_start("ob_gzhandler");
 
 require_once 'dbi.php' ;
 
-$referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-if ($referer != '') {
-	$path = parse_url($referer, PHP_URL_PATH);
-	$script_name = basename($path);   
-} else {
-	$script_name = '';
-}
-
 $response = array() ;
 $response['error'] = '' ; // Until now: no error :-)
 $response['message'] = '' ; // Until now: no error :-)
@@ -149,7 +141,7 @@ if ($response['error'] == '') {
 		if ($booking_type == BOOKING_MAINTENANCE)
 			journalise($userId, 'W', "Cancellation of maintenance #$id of $plane. $booking_start => $booking_end") ;
 		else
-			journalise($userId, 'W', "Cancellation of booking #$id of $plane done by $script_name for $pilot[name] by $booker[name]. $booking_start => $booking_end. Reason: " . trim($_REQUEST['reason'])) ;
+			journalise($userId, 'W', "Cancellation of booking #$id of $plane done by $referer_name for $pilot[name] by $booker[name]. $booking_start => $booking_end. Reason: " . trim($_REQUEST['reason'])) ;
 	} else
 		$response['error'] .= "Un problème technique s'est produit, annulation non effectuée..." . mysqli_error($mysqli_link) . "<br/>" ;
 }
@@ -159,7 +151,7 @@ header('Content-type: application/json');
 print(json_encode($response)) ;
 
 if ($response['error'])
-	journalise($userId, 'E', "Error ($response[error]) while $script_name tried to cancel booking #$id of $plane done for $pilot[name] by $booker[name]. $booking_start => $booking_end") ;
+	journalise($userId, 'E', "Error ($response[error]) while $referer_name tried to cancel booking #$id of $plane done for $pilot[name] by $booker[name]. $booking_start => $booking_end") ;
 else {
 	// Warn by email the previous and next bookings if any
 	$result = mysqli_query($mysqli_link, "select * from $table_bookings, $table_users

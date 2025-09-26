@@ -392,9 +392,16 @@ if ($userId > 0 and $userId != 294) { // Only for logged-in users and not for SP
 	}
 } else $row_fee = NULL ;// $userId > 0
 
+// Get HTTP referer
+$http_referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+if ($http_referer != '') {
+	$referer_name = basename(parse_url($http_referer, PHP_URL_PATH));   
+} else {
+	$referer_name = '';
+}
+
 // IP addresses are fetched from the X-Forwarded-For HTTP header
 function getClientAddress() {
-	$headers = (function_exists( 'apache_request_headers')) ? apache_request_headers(): $_SERVER;
 	$remote_address = (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] ;
 	$remote_address = (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) ? $_SERVER['HTTP_CF_CONNECTING_IP'] : $remote_address ;
 	return $remote_address ;

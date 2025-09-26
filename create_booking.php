@@ -24,13 +24,6 @@ $mime_preferences = array(
 	"output-charset" => "UTF-8",
 	"scheme" => "Q") ;
 
-$referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-if ($referer != '') {
-	$path = parse_url($referer, PHP_URL_PATH);
-	$script_name = basename($path);   
-} else {
-	$script_name = '';
-}
 $response = array() ;
 $response['error'] = '' ; // Until now: no error :-)
 
@@ -447,7 +440,7 @@ if ($response['error'] == '') {
 		if ($booking_type == BOOKING_MAINTENANCE)
 			journalise($userId, 'W', "$plane is out for maintenance #$booking_id by $booker[name] ($comment). $start => $end") ;
 		else {
-			journalise($userId, 'I', "Booking #$booking_id of $plane done by $script_name for $pilot[name] by $booker[name] ($comment). $start => $end") ;
+			journalise($userId, 'I', "Booking #$booking_id of $plane done by $referer_name for $pilot[name] by $booker[name] ($comment). $start => $end") ;
 			// Check for long booking...
 			date_default_timezone_set('Europe/Brussels') ;
 			$interval = date_diff(date_create($end), date_create($start)) ;
