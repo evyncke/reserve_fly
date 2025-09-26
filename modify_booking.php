@@ -247,12 +247,12 @@ if ($response['error'] == '') {
 		if (strtotime($end) != strtotime($response['previous_booking_stop'])) $modif_log .= "end: $response[previous_booking_stop]=>$end " ;
 
 		if ($booking_type == BOOKING_MAINTENANCE)
-			journalise($userId, 'W', "Modification of maintenance booking #$booking_id by $booker[name] ($modif_log)") ;
+			journalise($userId, 'W', "Modification by $referer_name of maintenance booking #$booking_id by $booker[name] ($modif_log)") ;
 		else
-			journalise($userId, 'W', "Modification of booking #$booking_id for $pilot[name] by $booker[name] ($modif_log)") ;
+			journalise($userId, 'W', "Modification by $referer_name of booking #$booking_id for $pilot[name] by $booker[name] ($modif_log)") ;
 	} else {
 		$response['error'] .= "Reservation pas mise a jour... " . mysqli_affected_rows($mysqli_link) ;
-		journalise($userId, "D", "Reservation pas mise a jour... " . mysqli_affected_rows($mysqli_link)) ;}
+		journalise($userId, "D", "Reservation pas mise a jour par $referer_name... " . mysqli_affected_rows($mysqli_link)) ;}
 }
 
 // Let's send the data back
@@ -266,5 +266,5 @@ if ($json_encoded === FALSE) {
 	print($json_encoded) ;
 
 if ($response['error'])
-	journalise($userId, 'E', "Error ($response[error]) while modifying booking #$response[booking] of $response[previous_plane]=>$plane done for $pilot_id:  $response[previous_booking_start] => $start_date") ;
+	journalise($userId, 'E', "Error ($response[error]) while modifying booking by $referer_name #$response[booking] of $response[previous_plane]=>$plane done for $pilot_id:  $response[previous_booking_start] => $start_date") ;
 ?>

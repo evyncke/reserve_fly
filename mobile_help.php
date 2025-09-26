@@ -28,8 +28,7 @@ if (isset($_REQUEST['topic']) and $_REQUEST['topic'] != '') {
 } else 
     $topic = 'main' ;
 
-$referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '' ;
-if ($userId != 62) journalise($userId, "I", "Help topic: $topic, referer: $referer") ;
+if ($userId != 62) journalise($userId, "I", "Help topic: $topic, referer: $referer_name") ;
 // TODO use referer to get to specific help page if the relevant help/*.ms exists and no topic is specified
 ?>
 <div class="container">
