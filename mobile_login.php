@@ -64,12 +64,12 @@ require_once 'mobile_header5.php' ;
 <label for="username" class="form-label">
 	Identifiant: 
 </label>
-<input type="text" class="form-control" id="username" name="username" placeholder="Votre nom d'utilisateur" value="<?=$_REQUEST['username']?>"><br/>
+<input type="text" class="form-control" id="username" name="username" placeholder="Votre nom d'utilisateur" autocomplete="username" value="<?=$_REQUEST['username']?>"><br/>
 
 <label for="password" class="form-label">
 	Mot de passe:
 </label>
-<input class="form-control" type="password" id="password" placeholder="Votre mot de passe" name="password"><br/>
+<input class="form-control" type="password" id="password" placeholder="Votre mot de passe" name="password" autocomplete="current-password"><br/>
 
 <input type="submit" class="btn btn-primary" value="Connexion">
 
