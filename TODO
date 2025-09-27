@@ -6,4 +6,4 @@
 - mobile_book, display a spinner
 - mobile_book, redirect to the mobile_today page of the right day
 - mobile_header if file in help/$script_name.md exist add a help item in 'about'
-- mobile_connect, once connecte display a tip about the system (saving the latest displayed one in a cookie ? or in $table_person)
+- mobile_connect, once connected display a tip about the system (saving the latest displayed one in a cookie ? or in $table_person)
