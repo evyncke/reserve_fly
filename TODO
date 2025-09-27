@@ -1,9 +1,9 @@
-TODO list
-- move all API (create/modify/cancel) in a /api subdir
+# TODO list
+
+- move all API in a /api subdir
 - metar.php use the full XML when available ?
 - mobile_today, rename in something else, + use date and not timestamp
-- mobile_today, pass the date when creating a new booking
 - mobile_book, display a spinner
 - mobile_book, redirect to the mobile_today page of the right day
 - mobile_header if file in help/$script_name.md exist add a help item in 'about'
-- move $script_name code into dbi.php and rename as referer_script
+- mobile_connect, once connecte display a tip about the system (saving the latest displayed one in a cookie ? or in $table_person)

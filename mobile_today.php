@@ -350,8 +350,8 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 
 <!-- Swipe previous / next -->
 <script>
-document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp + 24 * 3600)?>' }) ;
-document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?time=' . ($displayTimestamp - 24 * 3600)?>' }) ;
+document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?date=' . $day_before?>' }) ;
+document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?date=' . $day_after?>' }) ;
 </script>
 </div> <!-- container-->
 </body>
