@@ -86,7 +86,7 @@ while ($row = mysqli_fetch_array($result)) {
 	else 
 		$date = substr($date,0, 10) . '<br/>' . substr($date, 11) ; // Nice break
 	if (isset($row['last_name']) and $row['last_name'] != '')
-		$name = db2web("<b>$row[last_name]</b> $row[first_name]") ;
+		$name = db2web("<b>$row[last_name]</b><span class=\"d-none d-md-inline\"> $row[first_name]</span>") ;
 	else
 		$name = db2web($row['name']) ;
 	print("<tr>
