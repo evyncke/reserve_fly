@@ -897,7 +897,8 @@ datediff(current_date(), b_when) as days_blocked
 				if($cotisation!="") {
 					$cotisation="[".$cotisation."]";
 				}
-				print("<td style='text-align: center;' class='text-danger'><a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"createCotisationFunction('$_SERVER[PHP_SELF]','Cotisation','$nom $prenom','$personid','$member','$student','$pilot')\">$cotisation<span class='tooltiptext'>Click pour facturer une cotisation</span></a>
+				print("<td style='text-align: center;' class='text-danger'><a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"createCotisationFunction('$_SERVER[PHP_SELF]','Cotisation','" .
+				str_replace("'", "\\'","$nom $prenom") . "','$personid','$member','$student','$pilot')\">$cotisation<span class='tooltiptext'>Click pour facturer une cotisation</span></a>
 				</td>");			
 			}
 		}
