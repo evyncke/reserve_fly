@@ -53,7 +53,7 @@ if (!($userIsAdmin or $userIsBoardMember))
 </thead>
 <tbody>
 <?php
-$start = (isset($_REQUEST['start']) and $_REQUEST['start'] > 0) ? $_REQUEST['start'] : 99999999 ;
+$start = (isset($_REQUEST['start']) and $_REQUEST['start'] > 0) ? $_REQUEST['start'] : DB_MAX_UINT ;
 $sql_filter = '' ;
 if (isset($_REQUEST['id']) and is_numeric($_REQUEST['id']))
 	$sql_filter = " AND j_jom_id = $_REQUEST[id]" ;
@@ -86,7 +86,7 @@ while ($row = mysqli_fetch_array($result)) {
 	else 
 		$date = substr($date,0, 10) . '<br/>' . substr($date, 11) ; // Nice break
 	if (isset($row['last_name']) and $row['last_name'] != '')
-		$name = db2web("<b>$row[last_name]</b> $row[first_name]") ;
+		$name = db2web("<b>$row[last_name]</b><span class=\"d-none d-md-inline\"> $row[first_name]</span>") ;
 	else
 		$name = db2web($row['name']) ;
 	print("<tr>

@@ -897,7 +897,8 @@ datediff(current_date(), b_when) as days_blocked
 				if($cotisation!="") {
 					$cotisation="[".$cotisation."]";
 				}
-				print("<td style='text-align: center;' class='text-danger'><a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"createCotisationFunction('$_SERVER[PHP_SELF]','Cotisation','$nom $prenom','$personid','$member','$student','$pilot')\">$cotisation<span class='tooltiptext'>Click pour facturer une cotisation</span></a>
+				print("<td style='text-align: center;' class='text-danger'><a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"createCotisationFunction('$_SERVER[PHP_SELF]','Cotisation','" .
+				str_replace("'", "\\'","$nom $prenom") . "','$personid','$member','$student','$pilot')\">$cotisation<span class='tooltiptext'>Click pour facturer une cotisation</span></a>
 				</td>");			
 			}
 		}
@@ -917,7 +918,8 @@ datediff(current_date(), b_when) as days_blocked
 		print("<td $soldeStyle>$soldeText</td>");				
 		if($blocked==2) {
 			print("<td style='text-align: center;font-size: 17px;' class='text-danger'>
-			<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Unblock','$nom $prenom','$personid','$solde')\">&#x26D4;<span class='tooltiptext'>Click pour DEBLOQUER</span>
+			<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Unblock','" .
+				str_replace("'", "\\'","$nom $prenom") . "','$personid','$solde')\">&#x26D4;<span class='tooltiptext'>Click pour DEBLOQUER</span>
 				<span class=\"badge text-bg-info\">$row[days_blocked]</span></a></td>");
 		}
 		else if($blocked==1){
@@ -926,7 +928,8 @@ datediff(current_date(), b_when) as days_blocked
 		}
 		else {
 			print("<td style='text-align: center;font-size: 17px;' class='text-success'>
-				<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Block','$nom $prenom','$personid','$solde')\">&#x2714;<span class='tooltiptext'>Click pour BLOQUER</span></a></td>");		
+				<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Block','" .
+				str_replace("'", "\\'","$nom $prenom") . "','$personid','$solde')\">&#x2714;<span class='tooltiptext'>Click pour BLOQUER</span></a></td>");
 		}
 		print("<td style='text-align: left;'>$invoiceDueDate$status</td>");
 		/*

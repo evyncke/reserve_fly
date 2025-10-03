@@ -96,7 +96,7 @@ function findMember(a, m) {
 }
 
 function initPlaneLog() {
-	var planeSelect = document.getElementById('planeSelect') ;
+	var planeSelect = document.getElementById('planeLogSelect') ;
 	if (planeSelect) planeSelect.value = '<?=$plane?>' ;
 	// Convert all share codes into strings
 	var collection = document.getElementsByClassName("shareCodeClass") ;
@@ -115,7 +115,8 @@ function initPlaneLog() {
 <div class="container-fluid">
 <h2>Carnet de routes de <?=$plane?> du <?=$since?> au <?=$monthAfterForTitleString?></h2>
 <?php
-print("Carnet de route de: <select id=\"planeSelect\" onchange=\"planeChanged(this);\">" ) ;
+// Get all planes including non active ones... ? the global init() in mobile_header5.php does that already
+print("Carnet de route de: <select id=\"planeLogSelect\" onchange=\"planeChanged(this);\">" ) ;
 $result = mysqli_query($mysqli_link, "SELECT *
 	FROM $table_planes
 	WHERE ressource = 0

@@ -329,6 +329,9 @@ $table_users = 'jom_users' ;
 $table_session = 'jom_session' ;
 
 // Some constants
+
+define('DB_MAX_UINT', 4294967295) ;
+
 // type of booking
 define('BOOKING_PILOT', 1) ;
 define('BOOKING_INSTRUCTOR', 2) ;

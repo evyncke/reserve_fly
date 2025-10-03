@@ -99,6 +99,10 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 	$rows = array() ;
 	$now_divider_shown = false ;
 	while ($row = mysqli_fetch_array($result)) {
+		// No need for seconds in the timing...
+		$row['r_start'] = substr($row['r_start'], 0, 16) ;
+		$row['r_stop'] = substr($row['r_stop'], 0, 16) ;
+//		print("pfirstname=$row[pfirst_name], plastname=$row[plast_name], pname=$row[pname]<br/>") ;
 	    $rows[$row['r_id']] = [
 			'r_id' => intval($row['r_id']),
 			'r_plane' => $row['r_plane'],
@@ -130,10 +134,10 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 			$rows[$row['r_id']]['avatar'] = $avatar_root_resized_uri . '/' . $row['avatar'] ;
 		elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
 			$rows[$row['r_id']]['avatar'] = $avatar_root_uri . '/' . $row['avatar'] ;
-		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\"></i></span></a>" : '' ;
+		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" : '' ;
 		$pname = ($row['pfirst_name'] == '') ? $row['pname'] : 
-			'<span class="hidden-xs">' . db2web($row['pfirst_name']) . ' </span><b>' . db2web($row['plast_name']) . '</b>' ;
-		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><i class=\"bi bi-telephone-fill\"></i></span></a>" : '' ;
+			'<span class="d-none d-md-inline">' . db2web($row['pfirst_name']) . ' </span><b>' . db2web($row['plast_name']) . '</b>' ;
+		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" : '' ;
 		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-bs-toggle="tooltip" data-bs-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
 			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
@@ -162,8 +166,8 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 			$instructor = '' ;
 		}
 		// Make the row clickable to show the details in a modal dialog
-		$onclick = " onclick=\"showDetails($row[r_id]);\" data-bs-target=\"#detailModal\"" ;
-		print("<tr$onclick><td$class>$row[r_plane]</td><td$class>$display_start</td><td$class>$display_stop</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(db2web($row['r_comment'])) . "</td></tr>\n") ;
+		$onclick = ($row['r_type'] != BOOKING_MAINTENANCE) ? " onclick=\"showDetails($row[r_id]);\" data-bs-target=\"#detailModal\"" : '';
+		print("<tr$onclick><td$class>$row[r_plane]</td><td$class>$display_start</td><td$class>$display_stop</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($row['r_comment']))) . "</td></tr>\n") ;
 	}
 	// Add an orange divider representing 'now' if not yet done
 	if ($sql_today == $displayDate and !$now_divider_shown and $result->num_rows > 0) {
@@ -194,10 +198,13 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 					Avion: <select id="planeSelect"></select>
 					<span id="planeComment"></span>
 					<span id="pilotType"><br/></span>
-					Pilote/élève: <select id="pilotSelect" data-paid-membership="true"> </select><br/>
+					Pilote/élève: <select id="pilotSelect" data-paid-membership="true"> </select>
+						 <a id="vcardLink"><i class="bi bi-person-vcard-fill" title="Ajouter le contact"></i></a><br/>
 					Mobile pilote: <span id="pilotPhone"></span><br/>
-					Instructeur: <select id="instructorSelect"></select><br/>
-					Mobile instructeur: <span id="instructorPhone"></span><br/>
+					<span id="instructorSpan">
+						Instructeur: <select id="instructorSelect"></select><br/>
+						Mobile instructeur: <span id="instructorPhone"></span><br/>
+					</span>
 					Pilotes RAPCS: <input type="checkbox" id="crewWantedInput" value="true"> bienvenus en tant que co-pilotes.<br/>
 					Membres RAPCS: <input type="checkbox" id="paxWantedInput" value="true"> bienvenus en tant que passagers.<br/>
 					<span id="commentSpan" class="text-bg-info"></span>
@@ -251,10 +258,14 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 			document.getElementById("planeSelect").value = bookings[bookingId].r_plane ;
 			document.getElementById("pilotSelect").value = bookings[bookingId].r_pilot ;
 			document.getElementById("pilotPhone").innerHTML = '<a href="tel:' + bookings[bookingId].pcell_phone + '">' + bookings[bookingId].pcell_phone + ' <i class="bi bi-telephone-fill"></i></a>' ;
-			if (bookings[bookingId].r_instructor <= 0)
+			document.getElementById("vcardLink").href = 'vcard.php?id=' + bookings[bookingId].r_pilot ;
+			if (bookings[bookingId].r_instructor <= 0) {
 				document.getElementById("instructorSelect").value = '-1' ;
-			else
+				document.getElementById("instructorSpan").style.display = 'none' ;
+			} else {
 				document.getElementById("instructorSelect").value = bookings[bookingId].r_instructor ;
+				document.getElementById("instructorSpan").style.display = 'inline' ;
+			}
 			document.getElementById("instructorPhone").innerHTML = '<a href="tel:' + bookings[bookingId].icell_phone + '">' + bookings[bookingId].icell_phone + ' <i class="bi bi-telephone-fill"></i></a>' ;
 			document.getElementById("crewWantedInput").checked = bookings[bookingId].r_crew_wanted ;
 			document.getElementById("paxWantedInput").checked = bookings[bookingId].r_pax_wanted ;
@@ -338,6 +349,7 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 				modalInstance.hide();
 			})
 			.catch(error => {
+				alert('Une erreur est survenue lors de l\'annulation. Prévenir webmaster@spa-aviation.be');
 				console.error('Error:', error);
 			})
 			.finally(() => {
@@ -348,8 +360,11 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 	}
 </script>
 
-<!-- Swipe previous / next -->
+<!-- Swipe previous / next & 15 minute refresh-->
 <script>
+setInterval(function() {
+  location.reload();
+}, 900000); // 900,000 ms = 15 minutes
 document.addEventListener('swiped-left', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?date=' . $day_after?>'}) ;
 document.addEventListener('swiped-right', function(e) {location.href='<?=$_SERVER['PHP_SELF'] . '?date=' . $day_before?>'}) ;
 </script>
