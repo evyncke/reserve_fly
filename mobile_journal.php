@@ -53,7 +53,7 @@ if (!($userIsAdmin or $userIsBoardMember))
 </thead>
 <tbody>
 <?php
-$start = (isset($_REQUEST['start']) and $_REQUEST['start'] > 0) ? $_REQUEST['start'] : 99999999 ;
+$start = (isset($_REQUEST['start']) and $_REQUEST['start'] > 0) ? $_REQUEST['start'] : DB_MAX_UINT ;
 $sql_filter = '' ;
 if (isset($_REQUEST['id']) and is_numeric($_REQUEST['id']))
 	$sql_filter = " AND j_jom_id = $_REQUEST[id]" ;
