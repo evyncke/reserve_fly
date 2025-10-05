@@ -122,9 +122,7 @@ function geoCode($address) {
     //      "status" : "REQUEST_DENIED" }
     $json = json_decode($content, true) ; // Get an associative array
     if ($json['status'] != 'OK') {
-        // TODO evyncke these calls generate an MySQL exception :-(
-//        journalise($userId, 'E', "GeoCode($address) return $json[status]: $json[error_message]") ;
-//        journalise($userId, 'E', "GeoCode() return : ") ;
+        journalise($userId, 'E', "GeoCode($address) return $json[status]: $json[error_message]") ;
         return false ;
     }
     $result = $json['results'][0]['geometry']['location'] ;
@@ -199,7 +197,7 @@ while ($row = mysqli_fetch_array($result)) {
         } else
             print("<td><a href=\"https://spa-aviation.odoo.com/web#id=$odoo_customer[id]&cids=1&menu_id=122&action=275&model=res.partner&view_type=form\">#$odoo_customer[id]</a></td>") ;
     } else {
-        $db_name = db2web("$row[p_lname] $row[p_fname]") ;
+        $name_in_db = db2web("$row[p_lname] $row[p_fname]") ;
         $updates = array(
             'category_id' => array($flight_tag),
             'email' => $row['p_email'],  
@@ -207,8 +205,8 @@ while ($row = mysqli_fetch_array($result)) {
             'comment' => "Vol: <a href=\"flight_create.php?flight_id=$row[f_id]\">$row[f_reference]</a><br/>
                 <h3>Note client</h3>" . nl2br(db2web($row['f_description'])) . "<h3>Note flight manager</h3>" . nl2br(db2web($row['f_notes'])),
             'ref' => $row['f_reference'],
-            'name' => $db_name,
-            'complete_name' => $db_name) ;  
+            'name' => $name_in_db,
+            'complete_name' => $name_in_db) ;  
         // Not all flights have valid address if any...
         if ($row['p_street'] != '') $updates['street'] = db2web($row['p_street']) ;
         if ($row['p_city'] != '') $updates['city'] = db2web($row['p_city']) ;
