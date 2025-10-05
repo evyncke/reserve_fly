@@ -21,11 +21,13 @@ require_once 'odoo.class.php' ;
 
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
-if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) journalise($userId, "F", "This admin page is reserved to administrators") ;
+if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) // 348 = René Vandevelde
+    journalise($userId, "F", "This admin page is reserved to administrators") ;
 
 ?>
 <h2>Export des vols INIT/IF vers Odoo@<?=$odoo_host?></h2>
-<p>Recopie les données des personnes de contact des bons/vouchers du site vols IF/INIT (pas encore effectués) vers Odoo... Cela inclut l'adresse (y compris longitude & latitude), les numéros de téléphone, nom et prénom.</p>
+<p>Recopie les données des personnes de contact des bons/vouchers du site vols IF/INIT (pas encore effectués) vers Odoo... 
+    Cela inclut l'adresse (y compris longitude & latitude), les numéros de téléphone, nom et prénom.</p>
 
 <?php
 // Let's get all Odoo customers
@@ -108,11 +110,11 @@ function GetOdooCountry($country) {
     return null ;
 }
 
-
 function geoCode($address) {
     global $gmap_api_key, $userId ;
     // https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=$gmap_api_key
     // https://developers.google.com/maps/documentation/geocoding/requests-geocoding?hl=fr
+    // TODO: this returns a REQUEST_DENIED if the API key is authorized for HTTP referrer only... and there is no referer in file_get_contents()...
     $content = file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address=' . urlencode($address) . 
         '&key=' . urlencode($gmap_api_key)) ;
     // Could return { "error_message" : "This IP, site or mobile application is not authorized to use this API key. Request received from IP address 51.68.11.231, with empty referer", 
@@ -120,7 +122,9 @@ function geoCode($address) {
     //      "status" : "REQUEST_DENIED" }
     $json = json_decode($content, true) ; // Get an associative array
     if ($json['status'] != 'OK') {
-        journalise($userId, 'E', "GeoCode($address) return $json[status]") ;
+        // TODO evyncke these calls generate an MySQL exception :-(
+//        journalise($userId, 'E', "GeoCode($address) return $json[status]: $json[error_message]") ;
+//        journalise($userId, 'E', "GeoCode() return : ") ;
         return false ;
     }
     $result = $json['results'][0]['geometry']['location'] ;
@@ -154,14 +158,15 @@ while ($row = mysqli_fetch_array($result)) {
             or journalise($userId, "E", "Cannot update country/city for $row[p_id] $email: " . mysqli_error($mysqli_link)) ;
     }
     print("<tr><td>" . db2web("<b>$row[p_lname]</b> $row[p_fname]") . 
-        " <a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\">$row[f_reference]</a></td>
+        " <a href=\"flight_create.php?flight_id=$row[f_id]\">$row[f_reference]</a></td>
         <td class=\"text-center\"><a href=\"mailto:$email\">$email</a></td>
         <td>" . db2web("$row[p_street]</td><td>$row[p_zip] $row[p_city]") . "</td><td>$row[p_country]</td><td>$row[f_date_created]</td>") ;
     if (isset($odoo_customers[$email])) { // Does the customer already exists in Odoo ?
         $odoo_customer = $odoo_customers[$email] ;
-        if ($row['p_odoo_cust_id'] = '') // Does the flight contact has the link to Odoo ?
+        if ($row['p_odoo_cust_id'] == '') { // Does the flight contact has the link to Odoo ?
             mysqli_query($mysqli_link, "UPDATE $table_pax SET p_odoo_cust_id = $odoo_customer[id] WHERE p_id = $row[p_id]")
                 or journalise($userId, "E", "Cannot update p_odoo_cust_id for $row[p_id] $email: " . mysqli_error($mysqli_link)) ;
+        }
         // Prepare some updates to Odoo (if data in flights has been modified)
         $updates = array() ; 
         if ($odoo_customer['ref'] == '' and $row['f_reference'] != '') // Some customers have several flights...
@@ -199,7 +204,7 @@ while ($row = mysqli_fetch_array($result)) {
             'category_id' => array($flight_tag),
             'email' => $row['p_email'],  
             'phone' => db2web($row['p_tel']),
-            'comment' => "Vol: <a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\">$row[f_reference]</a><br/>
+            'comment' => "Vol: <a href=\"flight_create.php?flight_id=$row[f_id]\">$row[f_reference]</a><br/>
                 <h3>Note client</h3>" . nl2br(db2web($row['f_description'])) . "<h3>Note flight manager</h3>" . nl2br(db2web($row['f_notes'])),
             'ref' => $row['f_reference'],
             'name' => $db_name,
