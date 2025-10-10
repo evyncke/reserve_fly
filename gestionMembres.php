@@ -17,6 +17,7 @@
 */
 require_once 'dbi.php';
 require_once 'odooFlight.class.php';
+
 // Cotisation computed for year 
 $cotisationYear=$membership_year; // Set in dbi.php
 if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor) 
@@ -501,6 +502,12 @@ function createCotisationFunction(PHP_Self,action,theName,thePersonid,theMember,
 		aCotisationValue=70.0;
 		aCotisationTypeString="membre non naviguant";
 		aCotisationType="nonnaviguant";
+	}
+	// After 1 July: Proportional to the numer of mounth
+	aDate= new Date();
+	aMonth=aDate.getMonth()+1;
+	if(aMonth>6){
+		aCotisationValue=aCotisationValue*(12-aMonth)/12.0;
 	}
 	if (confirm("Confirmer que vous voulez créer une facture de cotisation " + aCotisationTypeString + " de " + aCotisationValue.toString() + " € à " + theName + " (id="+thePersonid+")?") == true) {
       		var aCommand=PHP_Self+"?createcotisation=true&personid="+thePersonid+"&cotisationtype="+aCotisationType;

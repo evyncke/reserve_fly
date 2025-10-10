@@ -157,7 +157,15 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMember
         //print("OF_createFactureCotisation 3 ($thePersonID, $theCotisationType)<br>");
         return false;
     }
+    // Cotisation after 1 july is % of the year
+    $month=date("m");
+    $non_nav_membership_price_corrected=$non_nav_membership_price;
+    $nav_membership_price_corrected=$nav_membership_price;
+    if($month>6) {
+        $non_nav_membership_price_corrected=$non_nav_membership_price_corrected*(12-$month)/12.0;
+        $nav_membership_price_corrected=$nav_membership_price_corrected*(12-$month)/12.0;
 
+    }
     $odooClient = OF_GetOdooClient();
     $invoice_lines = array() ;
     $invoice_lines[] = array(0, 0,
@@ -165,20 +173,20 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMember
             'name' => "Cotisation club pour l'année $theMembership_year",
             'product_id' => $non_nav_membership_product, 
             'quantity' => 1,
-            'price_unit' => $non_nav_membership_price,
+            'price_unit' => $non_nav_membership_price_corrected,
             'analytic_distribution' => array($membership_analytic_account => 100)
     )) ;
-    $membership_price=$non_nav_membership_price;
+    $membership_price=$non_nav_membership_price_corrected;
     if($theCotisationType=="naviguant") {
         $invoice_lines[] = array(0, 0,
             array(
                 'name' => "Cotisation membre naviguant pour l'année $theMembership_year",
                 'product_id' => $nav_membership_product, 
                 'quantity' => 1,
-                'price_unit' => $nav_membership_price,
+                'price_unit' => $nav_membership_price_corrected,
                 'analytic_distribution' => array($membership_analytic_account => 100)
             )) ;
-        $membership_price+=$nav_membership_price;
+        $membership_price+=$nav_membership_price_corrected;
     }
     $params =  array(array('partner_id' => intval($odoo_id), // Must be of INT type else Odoo does not accept
     // Should the state set to 'posted' rather than 'draft' which is the default it seems?
