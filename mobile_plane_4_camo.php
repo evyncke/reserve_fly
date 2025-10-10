@@ -54,13 +54,20 @@ function delta2BSClass($n) {
         return 'text-bg-danger' ;
     return 'text-bg-warning' ;
 }
+
+function toHourMinute($totalMimutes) {
+    $hours=intval($totalMimutes/60);
+    $minutes=$totalMimutes-60*$hours;
+    return $hours.":".$minutes;
+}
+
 ?>
 <div class="container-fluid">
 <h2>Weekly Aircraft Report for CAMO</h2>
 <table class="col-sm-12 col-lg-8 table table-hover table-bordered table-striped">
 <thead>
-<tr class="text-center"><th>Plane</th> <th colspan="4">Engine/Flight Index</th>                        <th>Aircraft Tech Log</th><th colspan="3">Last 7 days (from <?=$first_day?> to <?=$last_day?> included)</th><th colspan="3">Year to date</th></tr>
-<tr class="text-center"><th></th>      <th>Last</th><th>Limit</th><th>Delta</th><th>Next Operation</th><th></th>                 <th>Engine</th><th>Flight</th><th>Landings</th>                       <th>Engine</th><th>Flight</th><th>Landings</th></tr>
+<tr class="text-center"><th>Avion</th> <th colspan="4">Engine Index</th>                        <th>Problèmes techniques</th><th colspan="3">Last 7 days (from <?=$first_day?> to <?=$last_day?> included)</th><th colspan="3">Year to date</th></tr>
+<tr class="text-center"><th></th>      <th>Compteur Moteur</th><th>Compteur limite</th><th>Delta</th><th>Prochaine maintenance</th><th></th>                 <th>Engine</th><th>Flight</th><th>Landings</th>                       <th>Engine</th><th>Flight</th><th>Landings</th></tr>
 </thead>
 <tbody>
 <?php
@@ -80,7 +87,7 @@ while ($row = mysqli_fetch_array($result)) {
 }
 // Per plane: YTD counters (engine, flight, landings)
 $result = mysqli_query($mysqli_link, "SELECT UPPER(p.id) AS id, type_entretien, entretien, compteur_vol,
-        MAX(l_end_hour) AS latest_engine,
+        MAX(60*l_end_hour+l_end_minute) AS latest_engine,
         MAX(l_flight_end_hour) AS latest_flight,
         SUM(l_day_landing+l_night_landing) AS landings,
         SUM(60*(l_end_hour-l_start_hour) + l_end_minute-l_start_minute) AS engine_minutes,
@@ -114,14 +121,14 @@ foreach($ytd as $id => $ytd_row) {
         $weekly_row = array('engine_minutes' => '', 'flight_minutes' => '', 'landings' => '') ;
     print("<tr class=\"text-center\"><td class=\"text-nowrap\">$id</td>") ;
     if ($ytd_row['compteur_vol'] != 0)
-        print("<td>$ytd_row[latest_flight]</td>") ;
+        print("<td>".toHourMinute($ytd_row['latest_flight'])."</td>") ;
     else
-        print("<td>$ytd_row[latest_engine]</td>") ;
-    print("<td>$ytd_row[entretien]</td>") ;
+        print("<td>".toHourMinute($ytd_row['latest_engine'])."</td>") ;
+    print("<td>$ytd_row[entretien]:00</td>") ;
     if ($ytd_row['compteur_vol'] != 0) {
-        print("<td class=\"" . delta2BSClass($ytd_row['entretien'] - $ytd_row['latest_flight']) . "\">" . ($ytd_row['entretien'] - $ytd_row['latest_flight']) . "</td>") ;
+        print("<td class=\"" . delta2BSClass(60*$ytd_row['entretien'] - $ytd_row['latest_flight']). "\">" . toHourMinute((60*$ytd_row['entretien'] - $ytd_row['latest_flight'])) . "</td>") ;
     } else {
-        print("<td class=\"" .  delta2BSClass($ytd_row['entretien'] - $ytd_row['latest_engine']) . "\">" . ($ytd_row['entretien'] - $ytd_row['latest_engine']) . "</td>") ;
+        print("<td class=\"" . delta2BSClass(60*$ytd_row['entretien'] - $ytd_row['latest_engine']). "\">" . toHourMinute((60*$ytd_row['entretien'] - $ytd_row['latest_engine'])) . "</td>") ;
     }
     print("<td>$ytd_row[type_entretien]</td>") ;
     if (isset($atl[$id]))
