@@ -63,11 +63,10 @@ function toHourMinute($totalMimutes) {
 
 ?>
 <div class="container-fluid">
-<h2>Weekly Aircraft Report for CAMO</h2>
+<h2>Rapport hebdomadaire de la flotte du RAPCS pour le  CAMO</h2>
 <table class="col-sm-12 col-lg-8 table table-hover table-bordered table-striped">
 <thead>
-<tr class="text-center"><th>Avion</th> <th colspan="4">Engine Index</th>                        <th>Problèmes techniques</th><th colspan="3">Last 7 days (from <?=$first_day?> to <?=$last_day?> included)</th><th colspan="3">Year to date</th></tr>
-<tr class="text-center"><th></th>      <th>Compteur Moteur</th><th>Compteur limite</th><th>Delta</th><th>Prochaine maintenance</th><th></th>                 <th>Engine</th><th>Flight</th><th>Landings</th>                       <th>Engine</th><th>Flight</th><th>Landings</th></tr>
+<tr class="text-center"><th>Avion</th><th>Compteur Moteur</th><th>Compteur limite</th><th>Delta</th><th>Prochaine maintenance</th><th>Problèmes techniques - ATL</th></tr>
 </thead>
 <tbody>
 <?php
@@ -135,12 +134,7 @@ foreach($ytd as $id => $ytd_row) {
         print("<td>$atl[$id]</td>") ;
     else
         print("<td></td>") ;
-    Cell($weekly_row['engine_minutes']) ;
-    Cell($weekly_row['flight_minutes']) ;
-    print("<td>$weekly_row[landings]</td>") ;
-    Cell($ytd_row['engine_minutes']) ;
-    Cell($ytd_row['flight_minutes']) ;
-    print("<td>$ytd_row[landings]</td>") ;
+
     print("</tr>") ;
 }
 ?>
