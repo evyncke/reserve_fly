@@ -268,7 +268,8 @@ while ($row = mysqli_fetch_array($result)) {
                     $odoo_customer['partner_latitude'] = 0.0 ;
                 } 
                 // If coordinates have changed, let's redo them
-                if ($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) {
+                // evyncke geocode disabled on 2024-01-10 as it was causing too many Google Maps API calls
+                if (false and ($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0)) {
                     $coordinates = geoCode(db2web($row['address']) . "," . db2web($row['city']) . ', ' . db2web($row['country'])) ;
                     if ($coordinates and count($coordinates) == 2) { 
                         $updates['partner_latitude'] = $coordinates['lat'] ;
