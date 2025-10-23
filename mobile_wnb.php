@@ -30,7 +30,7 @@ if($displayAllColumns=='true') {
     $hiddenTag="";
     $itemWidth="width=\"25%\"";
 }
-$body_attributes = "style=\"height: 100%; min-height: 100%; width:100%;\" onload=\"init();\"" ;
+$body_attributes = "style=\"height: 100%; min-height: 100%; width:100%;\" onload=\"init();wnbSelectPlane();\"" ;
 $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>
 <script type=\"text/javascript\">
     var gChartLoaded = false ;
@@ -40,6 +40,10 @@ $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.
     }
     google.charts.load('current', {packages:['corechart', 'line']});
     google.charts.setOnLoadCallback(markGChartLoaded);
+
+    function wnbSelectPlane() {
+      document.getElementById('planeSelect').value=\"$plane\";
+    }
 </script>
 " ;
 
@@ -57,7 +61,7 @@ require_once 'mobile_header5.php' ;
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form" class="form-horizontal">
 <!--div class="row m-0-xs"-->
 	<label for="planeSelect" class="col-form-label col-xs-1 col-md-1">Plane:</label>
-    <select id="planeSelect" class="col-form-select col-xs-1" name="plane" onchange="document.location.href='<?=$_SERVER['PHP_SELF']?>?displayallcolumns=<?print($displayAllColumns);?>&plane=' + this.value ;"></select>
+    <select id="planeSelect" class="col-form-select col-xs-1" name="plane" onchange="document.location.href='<?=$_SERVER['PHP_SELF']?>?displayallcolumns=<?print($displayAllColumns);?>&plane=' + this.value ;">$plane</select>
 <!--/div> <!-- row -->
 
 <?php
@@ -116,7 +120,7 @@ while ($row = mysqli_fetch_array($result)) {
     } else {
         $readonly = ($row['weight'] > 0) ? ' readonly' : 'oninput="processWnB();"' ;
         $readonly = 'oninput="processWnB();"' ;
-        print("<td class=\"py-0\"><input type=\"number\" id=\"w_$rowCount\" class=\"text-end py-0 py-md-1\" value=\"$row[weight]\" style=\"width: 80%;\" $readonly>") ;
+        print("<td class=\"py-0\"><input type=\"text\" id=\"w_$rowCount\" class=\"text-end py-0 py-md-1\" value=\"$row[weight]\" style=\"width: 80%;\" $readonly>") ;
         if ($row['fuel'] == 'true') {
             print("&nbsp;l</td>") ;
             $weight_lbs = round($row['weight'] * $row['fuelwt'], 1) ;
@@ -177,12 +181,47 @@ using padding-top also prints over 2 pages and makes the display ultra small-->
 
 </div><!-- container-fluid -->
 <script type="text/javascript">
+    document.getElementById('planeSelect').value='<?=$plane?>';
     var rowCount = <?=$rowCount?>, maxWeight = <?=$maxWeight?>, cgAft = <?=$cgAft?>, cgFwd = <?=$cgFwd?>, density = [], 
         darkMode = 	(decodeURIComponent(document.cookie).search('theme=dark') >= 0), displayDarkMode = darkMode ;
 <?php
     foreach($density as $i=>$d)
         print("\tdensity[$i] = $d ;\n") ;
+
+
 ?>
+// Compute the input like a = number1 + number 2
+function wnbConvertToFloat(elementId, inputValue) {
+    var value=Number(inputValue);
+    if(isNaN(value))  {
+        inputValue=inputValue.replace("=","");
+        inputValue=inputValue.replace(",",".");
+        var values=inputValue.split("+");
+        value=0;
+        for(var i=0;i<values.length;i++) {
+            if(values[i].length==0) {
+                // it is not a number
+                value=Number.NaN;
+                break;               
+            }
+            var value1=Number(values[i]);
+            if(isNaN(value1)) {
+                // it is not a number
+                value=Number.NaN;
+                break;
+            }
+            value+=value1;
+        }
+     }
+    if(isNaN(value)) {
+        value=0;
+        document.getElementById(elementId).style.backgroundColor = 'LightSalmon';
+    }
+    else {
+        document.getElementById(elementId).style.backgroundColor = 'GhostWhite';       
+    }
+    return value;
+}
 
 function processWnB() {
     var totalWeight, totalMoment ;
@@ -198,7 +237,8 @@ function processWnB() {
     for (var i = 0; i < rowCount ; i++) { 
        var elem = document.getElementById('w_' + i) ;
         if (elem) {
-            var weight = parseFloat(elem.value) * density[i];
+            var wValue=wnbConvertToFloat('w_' + i, elem.value);
+            var weight = wValue * density[i];
             document.getElementById('wlb_' + i).innerText = weight.toFixed(1) ;
         }
         if (! document.getElementById('wlb_' + i)) continue ;
