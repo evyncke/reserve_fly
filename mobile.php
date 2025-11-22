@@ -149,15 +149,31 @@ if (isset($_REQUEST['news'])) {
 		LIMIT 0,3") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
 	
 	if (mysqli_num_rows($result_news)) {
-		print('<div class="row"><div class="col-xs-12 col-md-6 mt-4 p-5 text-bg-primary rounded"><ul>') ;
+		print('<div class="row"><div class="col-xs-12 col-md-6 mt-1 p-2 text-bg-primary rounded"><ul>') ;
 		while ($row_news = mysqli_fetch_array($result_news)) {
 			$subject = db2web($row_news['n_subject']) ;
 			$text = db2web(nl2br($row_news['n_text'])) ;
 			print("<li><b>$subject</b>: $text</li>\n") ;
 		}
 		print('</ul></div></div>') ;
-}
-mysqli_free_result($result_news) ;
+	}
+	mysqli_free_result($result_news) ;
+	if ($userIsAdmin or $userIsInstructor) {
+		print('<div class="row"><div class="col-xs-12 col-md-6 mt-1 p-2 text-bg-info rounded">') ;
+		print('Les nouvelles du club sont visibles comme sur la page réservation:') ;
+		print('<ul>
+			<li>Nouveau site in Progress: <a href="https://new.spa-aviation.be">https://new.spa-aviation.be</a></li>
+			<li>Safety Day 2026 – Mars 2026</li>
+			</ul>') ;
+		print('</div></div>') ;
+		print('<div class="row"><div class="col-xs-12 col-md-6 mt-1 p-2 text-bg-secondary rounded">') ;
+		print('Nouvelles de la flotte:
+			<ul>
+				<li>OO-ALD: Saumon réparé à partir du jeudi 19/11 (10jours US)</li>
+				<li>OO-JRB: Gauge essence droite réparée lors de sa prochaine 200h</li>
+			</ul>') ;
+		print('</div></div>') ;
+	}
 }
 ?>
 <div class="page-header text-center">
