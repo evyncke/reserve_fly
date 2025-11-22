@@ -447,6 +447,13 @@ if ($userId > 0) {
 
           </ul>
         </li>
+<?php
+if ($userIsAdmin or $userIsInstructor) {
+?>
+        <li class="nav-item"><a class="nav-link text-white" href="mobile_documents.php"><i class="bi bi-download"></i> Documents</a></li>
+<?php
+}
+?>
         <li class="nav-item dropdown me-auto">
             <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">À propos<span class="caret"></span></a>
             <ul class="dropdown-menu">
