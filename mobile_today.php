@@ -69,7 +69,7 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 <div class="container-fluid">
 
 <div class="page-header">
-<h2>&#128241; Réservations des avions</h2>
+<h2>&#128241; Réservations</h2>
 <ul class="pagination justify-content-center">
 	<li class="page-item"><a class="page-link" href="<?=$_SERVER['PHP_SELF'] . '?date=' . $day_before?>"><?=$day_before_nice?></a></li>
 	<li class="page-item"><a class="page-link active" href="#"><?=$today_nice?></a></li>
