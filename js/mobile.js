@@ -262,7 +262,6 @@ function createBooking() {
 	var destinationAirport = document.getElementById("destinationAirport").value  ;
 	var via1Airport = document.getElementById("via1Airport").value  ;
 	var via2Airport = document.getElementById("via2Airport").value  ;
-	var flightDuration = document.getElementById("flightDuration").value  ;
 
 	var XHR=new XMLHttpRequest();
 
@@ -280,11 +279,6 @@ if (false) {
 			}
 	}
 	
-	// Check whether a flight duration has been set
-	if (flightDuration == '') {
-		alert("Vous devez entrer une estimation de la dur&eacute;e du vol") ;
-		return ;
-	}
 }
 	XHR.onreadystatechange = function() {
 		if(this.readyState  == 4) {
@@ -316,8 +310,7 @@ if (false) {
 		'&start=' + bookingStart + '&end=' + bookingEnd +
 		'&type=' + bookingType + '&comment=' + encodeURIComponent(comment) + 
 		'&fromApt=' + encodeURIComponent(departingAirport) + '&toApt=' + encodeURIComponent(destinationAirport) +
-		'&via1Apt=' + encodeURIComponent(via1Airport) + '&via2Apt=' + encodeURIComponent(via2Airport) +
-		'&duration=' + flightDuration ;
+		'&via1Apt=' + encodeURIComponent(via1Airport) + '&via2Apt=' + encodeURIComponent(via2Airport) ;
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 }
@@ -335,7 +328,6 @@ function modifyBooking(id, auth) {
 	var destinationAirport = document.getElementById("destinationAirport").value  ;
 	var via1Airport = document.getElementById("via1Airport").value  ;
 	var via2Airport = document.getElementById("via2Airport").value  ;
-	var flightDuration = document.getElementById("flightDuration").value  ;
 
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
@@ -362,8 +354,7 @@ function modifyBooking(id, auth) {
 		'&start=' + bookingStart + '&end=' + bookingEnd +
 		'&comment=' + encodeURIComponent(comment) + 
 		'&fromApt=' + encodeURIComponent(departingAirport) + '&toApt=' + encodeURIComponent(destinationAirport) +
-		'&via1Apt=' + encodeURIComponent(via1Airport) + '&via2Apt=' + encodeURIComponent(via2Airport) +
-		'&duration=' + flightDuration ;
+		'&via1Apt=' + encodeURIComponent(via1Airport) + '&via2Apt=' + encodeURIComponent(via2Airport) ;
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 }
