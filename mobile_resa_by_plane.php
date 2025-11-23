@@ -169,13 +169,16 @@ function displayPlane($id) {
 		// If the booking is for maintenance, show it in red and don't display the booker's name
 		if ($row['r_type'] == BOOKING_MAINTENANCE) {
 			$class = ' class="text-danger"' ;
+			$planeClass = ' class="text-danger d-none d-md-table-cell"' ;
 			$pname = '<i class="bi bi-tools"></i> <i>Maintenance</i>' ;
 			$ptelephone = '' ;
 			$instructor = '' ;
+		} else {
+			$planeClass = ' class="d-none d-md-table-cell"' ;
 		}
 		// Make the row clickable to show the details in a modal dialog
 		$onclick = ($row['r_type'] != BOOKING_MAINTENANCE) ? " onclick=\"showDetails($row[r_id]);\" data-bs-target=\"#detailModal\"" : '';
-		print("<tr$onclick><td$class class=\"d-none d-md-table-cell\">$row[r_plane]</td><td$class>$display_start</td><td$class>$display_stop</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($row['r_comment']))) . "</td></tr>\n") ;
+		print("<tr$onclick><td$planeClass>$row[r_plane]</td><td$class>$display_start</td><td$class>$display_stop</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($row['r_comment']))) . "</td></tr>\n") ;
 	}
 	if ($result->num_rows == 0) {
 		$bookMessage = ($displayDate >= $sql_today) ? ' <a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate . '" title="pour ajouter une réservation"><i class="bi bi-plus"></i> réservation.</a>' : '' ;
