@@ -90,7 +90,7 @@ function displayPlane($id) {
 		$avatar_root_directory, $avatar_root_uri,
 		$avatar_root_resized_directory, $avatar_root_resized_uri ;
 	print("<tr><td colspan=\"5\" class=\"table-active text-center\"><b>$id</b></td></tr>
-		'</tbody><tbody class=\"table-group-divider\">\n") ;
+		</tbody><tbody class=\"table-group-divider\">\n") ;
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.name as iname, i.cell_phone as icell_phone, i.jom_id as iid,
 		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.name as pname, pi.cell_phone as pcell_phone, pi.jom_id as pid
 		FROM $table_planes p 
