@@ -104,8 +104,8 @@ var
 		utcOffset = Number(<?=date('Z')/3600?>),
 		userId = <?=$userId?>,
 		selectedUserId = <?=(isset($_REQUEST['user']) and $_REQUEST['user'] != '') ? $_REQUEST['user'] : $userId?>,
-		userName = '<?=json_encode($userName)?>',
-		userFullName = '<?=json_encode($userFullName)?>',
+		userName = <?=json_encode($userName)?>,
+		userFullName = <?=json_encode($userFullName)?>,
 		userIsPilot = <?= ($userIsPilot) ? 'true' : 'false' ?>,
 		userIsInstructor = <?= ($userIsInstructor) ? 'true' : 'false' ?>,
 		userIsAdmin = <?= ($userIsAdmin) ? 'true' : 'false' ?>,
@@ -451,7 +451,7 @@ if ($userId > 0) {
 <?php
 if ($userIsAdmin or $userIsInstructor) {
 ?>
-        <li class="nav-item"><a class="nav-link text-white" href="mobile_documents.php"><i class="bi bi-download"></i> Documents</a></li>
+        <li class="nav-item"><a class="nav-link text-white" href="mobile_documents.php">Documents<i class="bi bi-download"></i></a></li>
 <?php
 }
 ?>
