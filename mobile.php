@@ -169,7 +169,7 @@ if (isset($_REQUEST['news'])) {
 		print('<div class="row"><div class="col-xs-12 col-md-6 mt-1 p-2 text-bg-secondary rounded">') ;
 		print('Nouvelles de la flotte:
 			<ul>
-				<li>OO-ALD: Saumon réparé à partir du jeudi 19/11 (10jours US)</li>
+				<li>OO-ALD: Saumon réparé à partir du jeudi 19/11 (10 jours US)</li>
 				<li>OO-JRB: Gauge essence droite réparée lors de sa prochaine 200h</li>
 			</ul>') ;
 		print('</div></div>') ;
