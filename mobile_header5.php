@@ -449,7 +449,7 @@ if ($userId > 0) {
           </ul>
         </li>
 <?php
-if ($userIsAdmin or $userIsInstructor) {
+if ($userId > 0) {
 ?>
         <li class="nav-item me-auto me-md-0"><a class="nav-link text-white" href="mobile_documents.php">Documents<span class="bi bi-download"></span></a></li>
 <?php

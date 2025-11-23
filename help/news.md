@@ -1,8 +1,16 @@
 ## Nouveautés
 
 Vous trouverez ici les diverses nouveautés à propos du site réservation du RAPCS. Les suggestions sont les bienvenues auprès de
-[Éric Vyncke](https://www.spa-aviation.be/resa/mobile_profile.php?displayed_id=62) et
-[Patrick Reginster](https://www.spa-aviation.be/resa/mobile_profile.php?displayed_id=66).
+[Éric Vyncke](mobile_profile.php?displayed_id=62) et [Patrick Reginster](mobile_profile.php?displayed_id=66).
+
+## Novembre 2025
+
+- il est possible de consulter directement la plupart des documents (sous format PDF) du club via l'option [Documents<i class="bi bi-download"></i>](mobile_documents.php).
+- lors d'une réservation: suppression totale de l'entrée d'une durée prévue pour le vol.
+
+## Octobre 2025
+
+- lors de l'entrée des masses dans le devis masse et centrage ([Avions -> Masse et Centrage](mobile_wnb.php)), il est possible d'utiliser des formules genre <span class="font-monospace">"75+60"</span> pour additionner deux masses de 75 et 60 kg.
 
 ## Septembre 2025
 
