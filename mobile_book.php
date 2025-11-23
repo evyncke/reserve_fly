@@ -41,6 +41,7 @@ if ($id and is_numeric($id)) {
 	$booking = mysqli_fetch_array($result) or die("Réservation inconnue") ;
 	$action = "Modifier" ;
 	$startDay = substr($booking['r_start'], 0, 10) ;
+	$selectedPlane = $booking['r_plane'] ;
 	$startHour = substr($booking['r_start'], 11, 5) ;
 	$endDay = substr($booking['r_stop'], 0, 10) ;
 	$endHour = substr($booking['r_stop'], 11, 5) ;
@@ -53,6 +54,7 @@ if ($id and is_numeric($id)) {
 } else {
 	$action = "Réserver" ;
 	$startDay = (isset($_REQUEST['date'])) ? mysqli_real_escape_string($mysqli_link, $_REQUEST['date']) : date('Y-m-d') ;
+	$selectedPlane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, $_REQUEST['plane']) : '' ;
 	$endDay = $startDay ;
 	// Need to round up to next 15 minutes
 	$startMinute = date('i') ;
@@ -71,7 +73,7 @@ if ($id and is_numeric($id)) {
 
 $header_postamble = "<script>
 var
-	planeId = " . ((isset($booking)) ? "'$booking[r_plane]'" : "null") . ",
+	selectedPlane = " . ((isset($selectedPlane) and $selectedPlane != '') ? "'$selectedPlane'" : "null") . ",
 	pilotId = " . ((isset($booking)) ? $booking['r_pilot'] : $userId) . ",
 	instructorId = " . ((isset($booking['r_instructor']) and $booking['r_instructor']) ? $booking['r_instructor'] : -1)  . " ;
 </script>

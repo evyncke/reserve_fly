@@ -360,6 +360,7 @@ if ($userId > 0) {
 ?>
             <li><a class="dropdown-item" href="mobile_reservation.php"><i class="bi bi-display"></i> Toutes les réservations (plein écran)</a></i></li>
             <li><a class="dropdown-item" href="mobile_today.php">&#128241; Toutes les réservations (smartphone)</a></li>
+            <li><a class="dropdown-item" href="mobile_resa_by_plane.php"><i class="bi bi-airplane"></i> Toutes les réservations par avion (smartphone)</a></li>
             <li><a class="dropdown-item" href="mobile.php"><i class="bi bi-file-person-fill"></i> Mes réservations</a></li>
             <li><a class="dropdown-item" href="mobile_book.php"><i class="bi bi-plus-square-fill"></i> Nouvelle réservation</a></li>
             <li><a class="dropdown-item" href="webcal://ics.php?user=<?=$userId?>&auth=<?=md5($userId . $shared_secret)?>"><i class="bi bi-calendar3"></i> lier à mon calendrier (iCal)</a></li>

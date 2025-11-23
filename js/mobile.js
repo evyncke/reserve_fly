@@ -458,6 +458,8 @@ function init() {
 				option.value = planes[i].id ;
 				planeSelect.add(option) ;
 		}
+		if (typeof selectedPlane !== 'undefined' && selectedPlane != null)
+			planeSelect.value = selectedPlane ;
 	}
 
 	var pilotSelect = document.getElementById('pilotSelect') ;
