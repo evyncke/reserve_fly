@@ -117,9 +117,8 @@ function generateMaintenanceClass($entretien, $compteur) {
 		print("<tr><td>POH </td><td><a href=\"$plane_row[poh]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
 	if ($plane_row['checklist'])
 		print("<tr><td>Checklist</td><td><a href=\"$plane_row[checklist]\"><i class=\"bi bi-file-earmark-pdf\"></i></a></td></tr>\n") ;
-	print("<tr><td>Liste des équipements pour plan de vol OACI 
-		<a data-bs-toggle=\"collapse\" href=\"#collapseDoc\" title=\"Cliquez pour voir la liste et les manuels\"><i class=\"bi bi-collection-fill\"></i></a>
-  		</td><td>") ;
+	print("<tr><td><a data-bs-toggle=\"collapse\" href=\"#collapseDoc\" title=\"Cliquez pour voir la liste et les manuels\" id=\"toggleEquiments\"><i class=\"bi bi-chevron-down\" id=\"toggleIcon\"></i></a>
+		 Équipements</td><td>") ;
 	$result_equipment = mysqli_query($mysqli_link, "SELECT *
 		FROM $table_plane_device
 			JOIN $table_device on d_name = pd_device
@@ -128,7 +127,8 @@ function generateMaintenanceClass($entretien, $compteur) {
 		or journalise($userId, "F", "Cannot read equipments list: " . mysqli_error($mysqli_link)) ;
 	if (mysqli_num_rows($result_equipment) > 0) {
 		while ($row_equipment = mysqli_fetch_array($result_equipment))
-			print("<span title=\"$row_equipment[d_type]\">$row_equipment[d_fpl_code]</span> ") ;	
+			print("<span title=\"$row_equipment[d_type]\">$row_equipment[d_fpl_code]</span> ") ;
+		print(" (pour plan de vol OACI)\n") ;	
 	} else
 		print("Inconnue\n") ;
 	mysqli_free_result($result_equipment) ;
@@ -222,5 +222,17 @@ function generateMaintenanceClass($entretien, $compteur) {
 </table>
 </div><!-- row -->
 </div> <!-- container-->
+<script>
+    document.getElementById('toggleEquiments').addEventListener('click', function () {
+        const icon = document.getElementById('toggleIcon');
+        if (icon.classList.contains('bi-chevron-down')) {
+            icon.classList.remove('bi-chevron-down');
+            icon.classList.add('bi-chevron-up');
+        } else {
+            icon.classList.remove('bi-chevron-up');
+            icon.classList.add('bi-chevron-down');
+        }
+    });
+</script>
 </body>
 </html>
