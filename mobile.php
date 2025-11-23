@@ -32,7 +32,7 @@ if ($id) {
 	if ($auth != md5($id . $shared_secret)) die("Wrong key for booking#$id: $auth ") ;
 	if (! is_numeric($id)) die("Wrong booking id: $id") ;
 	$result = mysqli_query($mysqli_link, "select r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_who, r_date, 
-		convert(r_comment using utf8) as r_comment, r_from, r_to, r_duration,
+		convert(r_comment using utf8) as r_comment, r_from, r_to,
 		p.username as username, convert(p.name using utf8) as pilot_name,
 		convert(i.name using utf8) as instructor_name, w.username as username2, convert(w.name using utf8) as booker_name,
 		p.email as email, home_phone, work_phone, cell_phone,
@@ -47,7 +47,7 @@ if ($id) {
 		if (! is_numeric($me)) die("Wrong booking me: $me") ;
 	}
 	$result = mysqli_query($mysqli_link, "select r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_who, r_date, 
-		convert(r_comment using utf8) as r_comment, r_from, r_to, r_duration,
+		convert(r_comment using utf8) as r_comment, r_from, r_to,
 		p.username as username, convert(p.name using utf8) as pilot_name, convert(i.name using utf8) as instructor_name,
 		w.username as username2, convert(w.name using utf8) as booker_name,
 		p.email as email, home_phone, work_phone, cell_phone,

@@ -746,7 +746,7 @@ function displayBookingDetails(id) {
 	if (booking.instructorId != -1)
 		span.innerHTML += 'Instructeur vol: ' + booking.instructorName + '<br/>' ;
 	span.innerHTML += 'Réservation du: ' + booking.start + ", " ;
-	span.innerHTML += 'à: ' + booking.end + " <i>(" + booking.duration + " heure(s) de vol)</i><br/>" ;
+	span.innerHTML += 'à: ' + booking.end + " <i><br/>" ;
 	if (booking.log_start) {
 		span.innerHTML += 'Carnet de route: ' + booking.log_start + ", " ;
 		span.innerHTML += 'à: ' + booking.log_end + ' (' + booking.log_pilotName + ')<br/>'  ;
@@ -959,7 +959,6 @@ function modifyBooking(id) {
 		var destinationAirport = document.getElementById("destinationAirport").value  ;
 		var via1Airport = document.getElementById("via1Airport").value  ;
 		var via2Airport = document.getElementById("via2Airport").value  ;
-		var flightDuration = document.getElementById("flightDuration").value  ;
 	} else {
 		var plane = document.getElementById("ressourceSelect").value ;
 		var pilotId = document.getElementById("memberSelect").value ;
@@ -972,7 +971,6 @@ function modifyBooking(id) {
 		var destinationAirport = '' ;
 		var via1Airport = '' ;
 		var via2Airport = '' ;
-		var flightDuration = 0 ;
 	}
 	var bookingStart = document.getElementById("startYearSelect").value ;
 	bookingStart += '-' + document.getElementById("startMonthSelect").value ;
@@ -1011,8 +1009,7 @@ function modifyBooking(id) {
 		'&customerId=' + customerId + '&start=' + bookingStart + '&end=' + bookingEnd +
 		'&comment=' + encodeURIComponent(comment) + '&crewWanted=' + crewWanted + '&paxWanted=' + paxWanted + 
 		'&fromApt=' + encodeURIComponent(departingAirport) + '&toApt=' + encodeURIComponent(destinationAirport) +
-		'&via1Apt=' + encodeURIComponent(via1Airport) + '&via2Apt=' + encodeURIComponent(via2Airport) +
-		'&duration=' + flightDuration ;
+		'&via1Apt=' + encodeURIComponent(via1Airport) + '&via2Apt=' + encodeURIComponent(via2Airport) ;
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 	// Now, let's hide the modal form and allow the waiting div to be shown
@@ -1085,25 +1082,9 @@ function cancelReasonChanged() {
 	}
 }
 
-// On event: when the flight duration is changed to unlock the 'add' button
-function durationChanged() {
-	var elem = document.getElementById("flightDuration") ;
-	var addButton = document.getElementById('addBookingButton') ;
-
-	if (elem.value != '' && !isNaN(parseFloat(elem.value))) {
-		elem.style.borderColor = 'gray' ;
-		elem.style.backgroundColor = 'white' ;
-		addButton.disabled = false ;
-	} else {
-		elem.style.borderColor = 'red' ;
-		elem.style.backgroundColor = 'red' ;
-		addButton.disabled = true ;
-	}
-}
-
 function confirmBooking(bookingIsForFlying) {
-	var plane = (document.getElementById("flightInfo1Span").style.display == 'none') ?
-		 document.getElementById("ressourceSelect").value : document.getElementById("planeSelect").value ;
+	var plane = (bookingIsForFlying) ? document.getElementById("planeSelect").value :
+		 document.getElementById("ressourceSelect").value;
 	var bookingStart = document.getElementById("startYearSelect").value ;
 
 	var d = new Date(); var text = d.toTimeString();
@@ -1117,8 +1098,8 @@ function confirmBooking(bookingIsForFlying) {
 	bookingEnd += ' ' + document.getElementById("endHourSelect").value ;
 	bookingEnd += ':' + document.getElementById("endMinuteSelect").value + ":00";
 	var comment = document.getElementById("commentTextArea").value ;
-	var pilotId = (document.getElementById("flightInfo1Span").style.display == 'none') ?
-		document.getElementById("memberSelect").value : document.getElementById("pilotSelect").value ;
+	var pilotId = (bookingIsForFlying) ? document.getElementById("pilotSelect").value :
+		document.getElementById("memberSelect").value ;
 	var instructorId = document.getElementById("instructorSelect").value ;
 	if (document.getElementById("customerSelect"))
 		customerId = document.getElementById("customerSelect").value ;
@@ -1130,7 +1111,6 @@ function confirmBooking(bookingIsForFlying) {
 	var via1Airport = document.getElementById("via1Airport").value  ;
 	var via2Airport = document.getElementById("via2Airport").value  ;
 	var destinationAirport = document.getElementById("destinationAirport").value  ;
-	var flightDuration = document.getElementById("flightDuration").value  ;
 
 	// Check whether a solo flight is allowed on this plane
 	if (!userIsInstructor && instructorId <= 0) {
@@ -1143,11 +1123,6 @@ function confirmBooking(bookingIsForFlying) {
 						return ; 
 						}
 			}
-	}
-	// Check whether a flight duration has been set
-	if (document.getElementById("flightInfo1Span").style.display != 'none' && flightDuration == '') {
-		alert("Vous devez entrer une estimation de la durée du vol") ;
-		return ;
 	}
 	hideEditBookingDetails() ;
 	displayWaiting() ;
@@ -1186,8 +1161,7 @@ function confirmBooking(bookingIsForFlying) {
 		'&customerId=' + customerId + '&start=' + bookingStart + '&end=' + bookingEnd +
 		'&type=' + bookingType + '&comment=' + encodeURIComponent(comment) + '&crewWanted=' + crewWanted + '&paxWanted=' + paxWanted + 
 		'&fromApt=' + encodeURIComponent(departingAirport) + '&toApt=' + encodeURIComponent(destinationAirport) +
-		'&via1Apt=' + encodeURIComponent(via1Airport) + '&via2Apt=' + encodeURIComponent(via2Airport) +
-		'&duration=' + flightDuration ;
+		'&via1Apt=' + encodeURIComponent(via1Airport) + '&via2Apt=' + encodeURIComponent(via2Airport) ;
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 }
@@ -1363,15 +1337,12 @@ function editBookingDetails(event) {
 	// Fill comment and airport fields
 	document.getElementById("commentTextArea").value = booking.comment ;
 	if (ressource == 0) {
-		document.getElementById("flightInfo1Span").style.display = 'inline' ;
 		document.getElementById("flightInfo2Span").style.display = 'inline' ;
-		document.getElementById("flightDuration").value = booking.duration ;
 		document.getElementById("departingAirport").value = booking.from ;
 		document.getElementById("via1Airport").value = booking.via1 ;
 		document.getElementById("via2Airport").value = booking.via2 ;
 		document.getElementById("destinationAirport").value = booking.to ;
 	} else { // This is not a plane
-		document.getElementById("flightInfo1Span").style.display = 'none' ;
 		document.getElementById("flightInfo2Span").style.display = 'none' ;
 	}
 	
@@ -1485,28 +1456,18 @@ function newBookingDetails(event) {
 	// Empty comment and airport fields
 	document.getElementById("commentTextArea").value = '' ;
 	if (ressourceType == 0) {
-		document.getElementById("flightInfo1Span").style.display = 'inline' ;
 		document.getElementById("flightInfo2Span").style.display = 'inline' ;
-		document.getElementById("flightDuration").value = '' ; // Rough estimate of flight time
-		document.getElementById("flightDuration").style.borderColor = 'red' ; // Rough estimate of flight time
 		document.getElementById("departingAirport").value = 'EBSP' ;
 		document.getElementById("via1Airport").value = '' ;
 		document.getElementById("via2Airport").value = '' ;
 		document.getElementById("destinationAirport").value = 'EBSP' ;
 	} else { // This is not a plane
-		document.getElementById("flightInfo1Span").style.display = 'none' ;
 		document.getElementById("flightInfo2Span").style.display = 'none' ;
 	}
 	// Enable the right set of buttons
 	buttonDisplayIf('addMaintenanceButton', ressourceType == 0 && (userIsMechanic || userIsInstructor || userIsAdmin)) ;
 	buttonDisplayIf('addBookingButton', (userIsPilot && allPlanes[i].actif == 1) || userIsInstructor || userIsAdmin) ;
-	if (ressourceType == 0) { // Only plane needs additional flight duration value
-		if (document.getElementById('addBookingButton') !== null)
-			document.getElementById('addBookingButton').disabled = true ;
-	} else {
-		if (document.getElementById('addBookingButton') !== null)
-			document.getElementById('addBookingButton').disabled = false ;
-	}
+	document.getElementById('addBookingButton').disabled = false ; // Always display the Add booking button as enabled
 	buttonHide('modifyBookingButton') ;
 	buttonHide('cancelBookingButton') ;
 	buttonHide('cancelMaintenanceButton') ;
@@ -1561,6 +1522,7 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 		}
 		workDate = new Date(displayYear, displayMonth - 1, displayDay, hour, minute, 0, 0) ;
 		thisCell = planePlanningTable.rows[1+row].cells[i] ;
+		// Need to support startDate=13:17, endDate=13:30, and workDate = 13:15, 13:30
 		if (startDate <= workDate && workDate < endDate) {
 			if (nameDisplayed) {
 				widthInColumn++ ;
@@ -1881,8 +1843,6 @@ function refreshInstructorPlanningRow(rowIndex, instructor, displayDay, displayM
 				if(this.status  == 200) {
 					try {
 						var agenda = eval('(' + convertCharset(this.responseText.trim()) + ')') ;
-						// Sort it based on duration longuest first
-						agenda.sort(function(a, b) { return b.duration - a.duration ;}) ;
 					} catch(err) {
 						hideWaiting() ;
 						return ;

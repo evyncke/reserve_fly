@@ -46,9 +46,6 @@ $customer_id = (isset($_REQUEST['customerId'])) ? intval(trim($_REQUEST['custome
 if (!is_numeric($customer_id)) journalise($userId, "F", "Invalid customerId") ;
 $booking_type = $_REQUEST['type'] ;
 if (!is_numeric($booking_type)) journalise($userId, "F", "Bien essaye... type: $booking_type") ;
-$duration = str_replace(',', '.', $_REQUEST['duration']) ;
-if (isset($_REQUEST['duration']) and $duration != '' and (!is_numeric($duration) or $duration < 0)) journalise($userId, "F", "Bien essaye... duree: $duration") ;
-if (! isset($_REQUEST['duration']) or $duration == '') $duration = 0 ;
 $start = mysqli_real_escape_string($mysqli_link, $_REQUEST['start']) ;
 $end = mysqli_real_escape_string($mysqli_link, $_REQUEST['end']) ;
 $comment = mysqli_real_escape_string($mysqli_link, $_REQUEST['comment']) ;
@@ -321,9 +318,9 @@ if ($result) {
 	$response['error'] .= "Cannot check booking ($start ... $stop):" . mysqli_error($mysqli_link) . "<br/>" ;
 
 if ($response['error'] == '') {
-	$result = mysqli_query($mysqli_link, "INSERT INTO $table_bookings(r_plane, r_start, r_stop, r_duration, r_pilot, r_instructor, r_comment, r_crew_wanted, r_pax_wanted,
+	$result = mysqli_query($mysqli_link, "INSERT INTO $table_bookings(r_plane, r_start, r_stop, r_pilot, r_instructor, r_comment, r_crew_wanted, r_pax_wanted,
 			r_from, r_via1, r_via2, r_to, r_type, r_date, r_address, r_who, r_sequence)
-		VALUES('$plane', '$start', '$end', $duration, $pilot_id, $instructor_id, '$comment_db', $crew_wanted, $pax_wanted,
+		VALUES('$plane', '$start', '$end', $pilot_id, $instructor_id, '$comment_db', $crew_wanted, $pax_wanted,
 			'$from_apt', '$via1_apt', '$via2_apt', '$to_apt', $booking_type, sysdate(), '" . getClientAddress() . "', $userId, 0)") ;
 	if (!$result) { // Failed insertion
 		journalise($userId, 'E', 'Cannot insert into DB: ' . mysqli_error($mysqli_link)) ;

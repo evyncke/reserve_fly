@@ -34,9 +34,6 @@ if ($instructor_id) {
         if ($instructor_id == -1) $instructor_id = "NULL" ;
 } else
         $instructor_id = "NULL" ;
-$duration = (isset($_REQUEST['duration'])) ? trim($_REQUEST['duration']) : '' ;
-$duration = str_replace(',', '.', $_REQUEST['duration']) ;
-if (!is_numeric($duration) or $duration < 0) die("Bien essaye... duration: $duration") ;
 $start = mysqli_real_escape_string($mysqli_link, $_REQUEST['start']) ;
 $end = mysqli_real_escape_string($mysqli_link, $_REQUEST['end']) ;
 $comment = mysqli_real_escape_string($mysqli_link, $_REQUEST['comment']) ;
@@ -151,7 +148,7 @@ if ($result) {
 
 if ($response['error'] == '') {
 	$sql = "UPDATE $table_bookings
-			SET r_plane='$plane', r_start='$start', r_stop='$end', r_duration=$duration, r_pilot=$pilot_id, r_instructor=$instructor_id,
+			SET r_plane='$plane', r_start='$start', r_stop='$end', r_pilot=$pilot_id, r_instructor=$instructor_id,
 				r_comment='$comment_db', r_crew_wanted=$crew_wanted, r_pax_wanted=$pax_wanted,
 				r_from='$from_apt', r_via1='$via1_apt', r_via2='$via2_apt', r_to='$to_apt', r_type= $booking_type,
 				r_date=sysdate(), r_address='" . getClientAddress() . "', r_who=$userId, r_sequence=" . ($booking['r_sequence'] +1) . "

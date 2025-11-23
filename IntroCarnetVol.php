@@ -212,7 +212,7 @@ $bookingidForPrevious=$bookingid;
 if ($bookingidForPrevious) {
 	$result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
 		r_from, r_to, compteur_type, compteur_vol, model, compteur, compteur_date, 
-		r_duration,date_add(r_start, interval 15 minute) as r_takeoff, date(r_start) as r_day
+		date_add(r_start, interval 15 minute) as r_takeoff, date(r_start) as r_day
 		from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a
 		where r_id = $bookingidForPrevious and a.id = r_plane") 
 		or journalise($userId, "F", "Cannot access the booking #$bookingidForPrevious: " . mysqli_error($mysqli_link)) ;
@@ -220,7 +220,7 @@ if ($bookingidForPrevious) {
 	if ($userId <= 0) journalise($userId, "F", "Vous devez être connecté") ;
 	$result = mysqli_query($mysqli_link, "select username, r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
 		r_from, r_to, compteur_type, compteur_vol, model, compteur, compteur_date, 
-		r_duration,date_add(r_start, interval 15 minute) as r_takeoff, date(r_start) as r_day
+		date_add(r_start, interval 15 minute) as r_takeoff, date(r_start) as r_day
 		from $table_bookings join $table_users as p on r_pilot = p.id, $table_planes as a
 		where r_pilot = $userId and r_start < sysdate() and r_cancel_date is null and a.ressource = 0
 		order by r_start desc
@@ -544,10 +544,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 		$dt->setTimezone(new DateTimeZone($default_timezone));
 		$rStop = $dt->format('Y-m-d H:i');
 		$rType = ($instructorId != '' and $instructorId > 0) ? BOOKING_INSTRUCTOR : BOOKING_PILOT;
-		$rDuration=1.0;
-		mysqli_query($mysqli_link, "insert into $table_bookings(r_plane, r_start, r_stop, r_duration, r_pilot, r_instructor, r_type,
+		mysqli_query($mysqli_link, "insert into $table_bookings(r_plane, r_start, r_stop, r_pilot, r_instructor, r_type,
 					r_from, r_to, r_who, r_address,  r_date)
-					values ('$planeId', '$rStart', '$rStop', $rDuration, $pilotId, $instructorId, $rType,
+					values ('$planeId', '$rStart', '$rStop', $pilotId, $instructorId, $rType,
 					'$fromAirport', '$toAirport', $pilotId, '" . getClientAddress() . "',sysdate());")
 				or journalise($userId, "F", "Impossible d'ajouter dans mes reservations: " . mysqli_error($mysqli_link)) ;
 			$r_id = mysqli_insert_id($mysqli_link) ; 

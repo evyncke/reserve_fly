@@ -28,7 +28,7 @@ if ($id) {
 	if ($auth != md5($id . $shared_secret)) die("Wrong key for booking#$id: $auth ") ;
 	if (! is_numeric($id)) die("Wrong booking id: $id") ;
 	$result = mysqli_query($mysqli_link, "select r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_who, r_date, 
-		convert(r_comment using utf8) as r_comment, r_from, r_to, r_duration,
+		convert(r_comment using utf8) as r_comment, r_from, r_to,
 		p.username as username, convert(p.name using utf8) as pilot_name,
 		convert(i.name using utf8) as instructor_name, w.username as username2, convert(w.name using utf8) as booker_name,
 		p.email as email, home_phone, work_phone, cell_phone,
@@ -41,7 +41,7 @@ if ($id) {
 	if ($auth != md5($me . $shared_secret)) die("Wrong key for booking#$me: $auth ") ;
 	if (! is_numeric($me)) die("Wrong booking me: $me") ;
 	$result = mysqli_query($mysqli_link, "select r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_who, r_date, 
-		convert(r_comment using utf8) as r_comment, r_from, r_to, r_duration,
+		convert(r_comment using utf8) as r_comment, r_from, r_to,
 		p.username as username, convert(p.name using utf8) as pilot_name, convert(i.name using utf8) as instructor_name,
 		w.username as username2, convert(w.name using utf8) as booker_name,
 		p.email as email, home_phone, work_phone, cell_phone,
@@ -57,7 +57,7 @@ if ($id) {
 
 $booking = mysqli_fetch_array($result) ;
 
-if (! $booking) die("D&eacute;sol&eacute; cette r&eacute;servation n'existe pas") ;
+if (! $booking) die("Désolé cette réservation n'existe pas") ;
 
 if ($id)
 	$condition = "(r_pilot = $booking[r_pilot])" ;
@@ -237,7 +237,7 @@ function init() {
 	</center></div> <!-- jumbotron -->
 <table id="bookingTable">
 	<tr><td class="bookingLabel">Avion:</td><td class="bookingValue"><?=$booking['r_plane']?></td><tr>
-	<tr><td class="bookingLabel">D&eacute;but:</td><td class="bookingValue"><?=$booking['r_start']?></td><tr>
+	<tr><td class="bookingLabel">Début:</td><td class="bookingValue"><?=$booking['r_start']?></td><tr>
 	<tr><td class="bookingLabel">Fin:</td><td class="bookingValue"><?=$booking['r_stop']?></td><tr>
 	<tr><td class="bookingLabel">Pilote:</td><td class="bookingValue"><?=$booking['pilot_name']?></td><tr>
 <?php
@@ -248,7 +248,7 @@ if ($booking['instructor_name'] != '') {
 } // end instructor present
 ?>
 	<tr><td class="bookingLabel">Commentaire:</td><td class="bookingValue"><?=$booking['r_comment']?></td><tr>
-	<tr><td class="bookingLabel">Effectu&eacute;e par:</td><td class="bookingValue"><?=$booking['booker_name']?></td><tr>
+	<tr><td class="bookingLabel">Effectuée par:</td><td class="bookingValue"><?=$booking['booker_name']?></td><tr>
 </table>
 </div> <!-- col-->
 <!-- /div-->
@@ -260,10 +260,10 @@ if ($booking['instructor_name'] != '') {
 <ul class="pager col-xs-12">
 <?php
 if ($previous_id != '') {
-	print("<li class=\"previous\"><a href=\"$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth\">R&eacute;servation pr&eacute;c&eacute;dente</a></li>\n") ;
+	print("<li class=\"previous\"><a href=\"$_SERVER[PHP_SELF]?id=$previous_id&auth=$previous_auth\">Réservation précédente</a></li>\n") ;
 }
 if ($next_id != '') {
-	print("<li class=\"next\"><a href=\"$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth\">R&eacute;servation suivante</a></li>\n") ;
+	print("<li class=\"next\"><a href=\"$_SERVER[PHP_SELF]?id=$next_id&auth=$next_auth\">Réservation suivante</a></li>\n") ;
 } 
 ?>
 </ul>
@@ -291,7 +291,7 @@ if ($booking['can_cancel']) {
 <div class="row">
 	<br/>
 	<div class="col-xs-12 text-center ">
-		<button id="cancelButton" class="btn btn-primary btn-danger" onclick="cancelFirstClick();">Annuler la r&eacute;servation</button>
+		<button id="cancelButton" class="btn btn-primary btn-danger" onclick="cancelFirstClick();">Annuler la réservation</button>
 	</div><!-- col-->
 </div> <!-- row -->
 <?php

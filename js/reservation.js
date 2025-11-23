@@ -1132,8 +1132,8 @@ function durationChanged() {
 }
 
 function confirmBooking(bookingIsForFlying) {
-	var plane = (document.getElementById("flightInfo1Span").style.display == 'none') ?
-		 document.getElementById("ressourceSelect").value : document.getElementById("planeSelect").value ;
+	var plane = (bookingIsForFlying) ? document.getElementById("planeSelect").value :
+		 document.getElementById("ressourceSelect").value ;
 	var bookingStart = document.getElementById("startYearSelect").value ;
 
 	var d = new Date(); var text = d.toTimeString();
@@ -1147,8 +1147,8 @@ function confirmBooking(bookingIsForFlying) {
 	bookingEnd += ' ' + document.getElementById("endHourSelect").value ;
 	bookingEnd += ':' + document.getElementById("endMinuteSelect").value + ":00";
 	var comment = document.getElementById("commentTextArea").value ;
-	var pilotId = (document.getElementById("flightInfo1Span").style.display == 'none') ?
-		document.getElementById("memberSelect").value : document.getElementById("pilotSelect").value ;
+	var pilotId = (bookingIsForFlying) ? document.getElementById("pilotSelect").value :
+		document.getElementById("memberSelect").value ;
 	var instructorId = document.getElementById("instructorSelect").value ;
 	if (document.getElementById("customerSelect"))
 		customerId = document.getElementById("customerSelect").value ;
@@ -1175,14 +1175,7 @@ function confirmBooking(bookingIsForFlying) {
 			}
 	}
 	
-	// Check whether a flight duration has been set
-	if (document.getElementById("flightInfo1Span").style.display != 'none' && flightDuration == '') {
-		alert("Vous devez entrer une estimation de la durée du vol") ;
-		return ;
-	}
-//	d = new Date(); text = d.toTimeString(); console.log('start displayWaiting(): ' + text) ;
 	displayWaiting() ;
-//	d = new Date(); text = d.toTimeString(); console.log('after displayWAiting(): ' + text) ;
 	var XHR=new XMLHttpRequest();
 	XHR.onreadystatechange = function() {
 		if(this.readyState  == 4) {
@@ -1397,7 +1390,6 @@ function editBookingDetails(event) {
 	// Fill comment and airport fields
 	document.getElementById("commentTextArea").value = booking.comment ;
 	if (ressource == 0) {
-		document.getElementById("flightInfo1Span").style.display = 'inline' ;
 		document.getElementById("flightInfo2Span").style.display = 'inline' ;
 		document.getElementById("flightDuration").value = booking.duration ;
 		document.getElementById("departingAirport").value = booking.from ;
@@ -1405,7 +1397,6 @@ function editBookingDetails(event) {
 		document.getElementById("via2Airport").value = booking.via2 ;
 		document.getElementById("destinationAirport").value = booking.to ;
 	} else { // This is not a plane
-		document.getElementById("flightInfo1Span").style.display = 'none' ;
 		document.getElementById("flightInfo2Span").style.display = 'none' ;
 	}
 	
@@ -1519,7 +1510,6 @@ function newBookingDetails(event) {
 	// Empty comment and airport fields
 	document.getElementById("commentTextArea").value = '' ;
 	if (ressourceType == 0) {
-		document.getElementById("flightInfo1Span").style.display = 'inline' ;
 		document.getElementById("flightInfo2Span").style.display = 'inline' ;
 		document.getElementById("flightDuration").value = '' ; // Rough estimate of flight time
 		document.getElementById("flightDuration").style.borderColor = 'red' ; // Rough estimate of flight time
@@ -1528,7 +1518,6 @@ function newBookingDetails(event) {
 		document.getElementById("via2Airport").value = '' ;
 		document.getElementById("destinationAirport").value = 'EBSP' ;
 	} else { // This is not a plane
-		document.getElementById("flightInfo1Span").style.display = 'none' ;
 		document.getElementById("flightInfo2Span").style.display = 'none' ;
 	}
 	// Enable the right set of buttons

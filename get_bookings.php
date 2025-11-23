@@ -43,7 +43,7 @@ if ($error_message != '') {
 } else {
 	// TODO sometime the booked plane is replaced on the field by another one... tried 2024-04-30
 	$sql = "SELECT r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
-		CONVERT(r_comment USING UTF8) AS r_comment, r_from, r_via1, r_via2, r_to, r_duration, r_crew_wanted, r_pax_wanted,
+		CONVERT(r_comment USING UTF8) AS r_comment, r_from, r_via1, r_via2, r_to, r_crew_wanted, r_pax_wanted,
 		p.username as username, p.name as name, w.username AS username2, w.name AS name2,
 		p.email as email, home_phone, work_phone, cell_phone, avatar, ressource, r.id AS plane_id,
 		CONVERT_TZ(l_start, 'UTC', 'Europe/Brussels') as log_start, CONVERT_TZ(l_end, 'UTC', 'Europe/Brussels') as log_end, 
@@ -120,7 +120,6 @@ if ($error_message != '') {
 				$booking['to'] = $row['log_to'] ;
 			else if ($row['r_to'])
 				$booking['to'] = $row['r_to'] ;
-			$booking['duration'] = $row['r_duration'] ;
 			if ($row['r_instructor']) {
 				$booking['instructorId'] = $row['r_instructor']  ;
 				$result_fi = mysqli_query($mysqli_link, "select u.name as name, u.email as email, home_phone, work_phone, cell_phone

@@ -59,7 +59,7 @@ print(date('Y-m-d H:i:s').": preparing lists of plane bookings & logbook entries
 $email_body = "<p>Voici la liste mensuelle des diverses r&eacute;servations des avions du RAPCS.</p>" ;
 
 function print_plane_table($title, $sql, $columns) {
-	global $email_body, $mysqli_link, $convertToUtf8 ;
+	global $email_body, $mysqli_link ;
 
 	$email_body .= "<h2>$title</h2>\n<table border='1'><tr>" ;
 	foreach ($columns as $column) 
@@ -85,21 +85,21 @@ function print_plane_table($title, $sql, $columns) {
 }
 
 if (strpos($actions, 'b') !== FALSE) {
-$sql = "select r_plane, count(*), sum(r_duration)  
+$sql = "select r_plane, count(*)
 	from $table_planes p left join $table_bookings on p.id = r_plane
 	where p.actif != 0 and p.ressource = 0 and r_cancel_date is null and r_start > date_sub(sysdate(), interval 1 month) and r_type != " . BOOKING_MAINTENANCE . "
 	group by r_plane" ;
 
-print_plane_table("R&eacute;servations du dernier mois", $sql, ['Avion', 'Nbr r&eacute;servations', 'Dur&eacute;e pr&eacute;vue<br/>en heures']) ;
+print_plane_table("R&eacute;servations du dernier mois", $sql, ['Avion', 'Nbr r&eacute;servations']) ;
 
-$sql = "select name, count(*), sum(r_duration) as total_duration  
+$sql = "select name, count(*)
 	from $table_users p left join $table_bookings on p.id = r_pilot
 	where r_plane = 'OO-SPQ' and r_cancel_date is null and r_start > date_sub(sysdate(), interval 1 month) and r_type != " . BOOKING_MAINTENANCE . "
 	group by r_pilot
 	order by total_duration desc
 	limit 0,10" ;
 
-print_plane_table("R&eacute;servations OO-SPQ top-10 du dernier mois", $sql, ['Pilote', 'Nbr r&eacute;servations', 'Dur&eacute;e pr&eacute;vue<br/>en heures']) ;
+print_plane_table("R&eacute;servations OO-SPQ top-10 du dernier mois", $sql, ['Pilote', 'Nbr r&eacute;servations']) ;
 
 }
 

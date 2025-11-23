@@ -30,7 +30,7 @@ if ($id and is_numeric($id)) {
 	if (($userId <= 0) and ($auth != md5($id . $shared_secret))) die("Wrong key for booking#$id: $auth ") ;
 	if (! is_numeric($id)) die("Wrong booking id: $id") ;
 	$result = mysqli_query($mysqli_link, "select r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_who, r_date, 
-		convert(r_comment using utf8) as r_comment, r_from, r_to, r_duration,
+		convert(r_comment using utf8) as r_comment, r_from, r_to,
 		p.username as username, convert(p.name using utf8) as pilot_name,
 		convert(i.name using utf8) as instructor_name, w.username as username2, convert(w.name using utf8) as booker_name,
 		if (date(r_start) = current_date(), 1, 0) as today,
@@ -45,7 +45,6 @@ if ($id and is_numeric($id)) {
 	$startHour = substr($booking['r_start'], 11, 5) ;
 	$endDay = substr($booking['r_stop'], 0, 10) ;
 	$endHour = substr($booking['r_stop'], 11, 5) ;
-	$duration = $booking['r_duration'] ;
 	$comment = db2web($booking['r_comment']) ;
 	$from = $booking['r_from'] ;
 	$via1 = $booking['r_via1'] ;
@@ -63,7 +62,6 @@ if ($id and is_numeric($id)) {
 	if ($startMinute >= 60) $startMinute = '00' ;
 	$startHour = date('H:') . $startMinute ;
 	$endHour = (1 + date('H')) . ':' . $startMinute ;
-	$duration = 1 ;
 	$comment = '' ;
 	$from = '' ;
 	$via1 = '' ;
@@ -118,10 +116,6 @@ require_once 'mobile_header5.php' ;
 			<select class="form-control" id="planeSelect" name="plane"></select>
 		</div>
 
-		<label class="control-label col-xs-6 col-md-3" for="durationInput">Durée vol (heure):</label>
-		<div class="col-xs-6 col-md-3">
-			<input type="number" min="0" max="50" class="form-control" id="flightDuration" name="duration" value="<?=$duration?>">
-		</div>
 </div><!-- row -->
 
 <div class="row">
@@ -193,7 +187,7 @@ function adjustEndHour() {
 	var endHour = document.getElementById('endHourInput').value ;
 	var sh = parseInt(startHour.substr(0, 2)) ;
 	var sm = parseInt(startHour.substr(3, 2)) ;
-	sm += 60 * parseInt(document.getElementById('flightDuration').value) ;
+	sm += 60 ;
 	while (sm >= 60) { sm -= 60 ; sh++ ; }
 	if (sh >= 24) sh = 23 ;
 	document.getElementById('endHourInput').value = (sh < 10 ? '0' : '') + sh + ':' + (sm < 10 ? '0' : '') + sm ;

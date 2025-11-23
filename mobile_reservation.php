@@ -494,10 +494,6 @@ Fin: <select id="endDaySelect"><?=$all_day_options?></select> -
 <select id="endHourSelect"></select> : 
 <select id="endMinuteSelect"><?=$all_minute_options?></select>
 <br/>
-<span id="flightInfo1Span">
-Temps de vol prévu: <input type="number" id="flightDuration" size="4" maxlength="4" min="0" max="100" oninput="javascript:durationChanged();" onchange="javascript:durationChanged();"> heure(s) <i>(arrondir à l'heure supérieure)</i>
-<br/>
-</span><!-- flightInfo1Span -->
 <span style="vertical-align: top;">
 Commentaire: <textarea id="commentTextArea" rows=4 cols=40></textarea>
 </span>
@@ -510,11 +506,6 @@ Via: <input type=text id="via1Airport" size="6" maxlength="4" onKeyUp="airportCh
 et: <input type=text id="via2Airport" size="6" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
 <br/>
 
-	  <hr>
-<span class="text-info">N'oubliez pas de vérifier la validité de votre qualification SEP, certificat médical, de votre ELP, des
-règles d'emport de passagers et les autres règles du club définies dans
-<a href="https://www.spa-aviation.be/index.php/fr/avions/regles-pour-la-reservation">règles pour réservation</a>.
-</span>
       </div><!-- class=modal-body-->
       <div class="modal-footer">
 	  <?php
