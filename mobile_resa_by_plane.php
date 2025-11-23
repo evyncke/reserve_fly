@@ -89,7 +89,8 @@ function displayPlane($id) {
 		$table_planes, $table_bookings, $table_person, $table_flights,
 		$avatar_root_directory, $avatar_root_uri,
 		$avatar_root_resized_directory, $avatar_root_resized_uri ;
-	print("<tr><td colspan=\"5\" class=\"table-active text-center\"><b>$id</b></td></tr>\n") ;
+	print("<tr><td colspan=\"5\" class=\"table-active text-center\"><b>$id</b></td></tr>
+		'</tbody><tbody class=\"table-group-divider\">\n") ;
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.name as iname, i.cell_phone as icell_phone, i.jom_id as iid,
 		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.name as pname, pi.cell_phone as pcell_phone, pi.jom_id as pid
 		FROM $table_planes p 
@@ -104,12 +105,10 @@ function displayPlane($id) {
                 OR (DATE(r_stop) = '$displayDate' OR (DATE(r_start) <= '$displayDate' and '$displayDate' <= DATE(r_stop))))
 		ORDER BY p.id, r_start ASC LIMIT 0,20")
 		or die("Cannot retrieve bookings($id): " . mysqli_error($mysqli_link)) ;
-    $previous_plane = '' ;
 	while ($row = mysqli_fetch_array($result)) {
 		// No need for seconds in the timing...
 		$row['r_start'] = substr($row['r_start'], 0, 16) ;
 		$row['r_stop'] = substr($row['r_stop'], 0, 16) ;
-//		print("pfirstname=$row[pfirst_name], plastname=$row[plast_name], pname=$row[pname]<br/>") ;
 	    $rows[$row['r_id']] = [
 			'r_id' => intval($row['r_id']),
 			'r_plane' => $row['r_plane'],
@@ -148,12 +147,6 @@ function displayPlane($id) {
 		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-bs-toggle="tooltip" data-bs-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
 			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
-		// Add adivider when switching plane
-		if ($previous_plane != $row['r_plane']) {
-			$previous_plane = $row['r_plane'] ;
-//			print('</tbody><tbody class="table-group-divider" style="border-top: 4px solid #ffc107; ">') ;
-			print('</tbody><tbody class="table-group-divider">') ;
-		}
 		$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
 		if ($row['f_type'] != '')
 			$class = ' class="text-warning"' ;
@@ -199,6 +192,10 @@ function displayPlane($id) {
 ?>
 </tbody>
 </table>
+</div><!-- row -->
+
+<div class="row">
+	<p>Cliquez sur une ligne pour voir/modifier les détails de la réservation.</p>
 </div><!-- row -->
 
  <!-- Single Dynamic Modal -->

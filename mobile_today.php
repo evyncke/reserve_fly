@@ -180,6 +180,9 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 </tbody>
 </table>
 </div><!-- row -->
+<div class="row">
+	<p>Cliquez sur une ligne pour voir/modifier les détails de la réservation.</p>
+</div><!-- row -->
 
  <!-- Single Dynamic Modal -->
 <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
