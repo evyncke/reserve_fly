@@ -451,7 +451,7 @@ if ($userId > 0) {
 <?php
 if ($userIsAdmin or $userIsInstructor) {
 ?>
-        <li class="nav-item"><a class="nav-link text-white" href="mobile_documents.php">Documents<i class="bi bi-download"></i></a></li>
+        <li class="nav-item me-auto"><a class="nav-link text-white" href="mobile_documents.php">Documents<i class="bi bi-download"></i></a></li>
 <?php
 }
 ?>
