@@ -130,27 +130,53 @@ if (isset($_POST['action']) and $_POST['action'] == 'upload') {
 // Let's convert minutes into hours
 $dc_hours = intdiv($dc_minutes, 60) ;
 $dc_minutes = $dc_minutes % 60 ;
+$dc_pct = round(($dc_hours * 60 + $dc_minutes) * 100 / (25 * 60)) ;
 $solo_hours = intdiv($solo_minutes, 60) ;
 $solo_minutes = $solo_minutes % 60 ;
 $xcountry_hours = intdiv($xcountry_minutes, 60) ;
 $xcountry_minutes = $xcountry_minutes % 60 ;
+$xcountry_pct = round(($xcountry_hours * 60 + $xcountry_minutes) * 100 / (5 * 60)) ;
 $supervised_hours = intdiv($supervised_minutes, 60) ;
 $supervised_minutes = $supervised_minutes % 60 ;
+$supervised_pct = round(($supervised_hours * 60 + $supervised_minutes) * 100 / (10 * 60)) ;
 $total_hours = intdiv($total_minutes, 60) ;
 $total_minutes = $total_minutes % 60 ;
+$total_pct = round(($total_hours * 60 + $total_minutes) * 100 / (45 * 60)) ;
+
+// TODO add line bar/progress bar ?
+// 45: of flight hours required for PPL
+// 25 of DC
+// 10 of supervised solo
+// 5 of solo cross country
 ?>
 <div class="row">
 <div class="col-sm-12 col-md-4">
 <p><ul>
     <li>Flight count: <?=$flights->count?></li>
     <li>Last flight: <?=$last_flight?></li>
-    <li>DC: <?="$dc_hours H $dc_minutes min"?></li>
+    <li>DC: <?="$dc_hours H $dc_minutes min"?><br/>
+        <div class="progress" role="progressbar">
+            <div class="progress-bar<?=($dc_pct>=100)?' bg-success' : ''?>" style="width: <?=$dc_pct?>%"><?=$dc_pct?>%</div>
+        </div>
+    </li>
     <ul>
         <li>Supervised solo: <?="$solo_hours H $solo_minutes min"?></li>
-        <li>Solo X-country: <?="$xcountry_hours H $xcountry_minutes min"?></li>
-        <li><b>Total solo: <?="$supervised_hours H $supervised_minutes min"?></b></li>
+        <li>Solo X-country: <?="$xcountry_hours H $xcountry_minutes min"?><br/>
+            <div class="progress" role="progressbar">
+                <div class="progress-bar<?=($xcountry_pct>=100)?' bg-success' : ''?>" style="width: <?=$xcountry_pct?>%"><?=$xcountry_pct?>%</div>
+            </div>
+        </li>
+        <li><b>Total solo: <?="$supervised_hours H $supervised_minutes min"?></b><br/></li>
+            <div class="progress" role="progressbar">
+                <div class="progress-bar<?=($supervised_pct>=100)?' bg-success' : ''?>" style="width: <?=$supervised_pct?>%"><?=$supervised_pct?>%</div>
+            </div>
+        </li>
     </ul>
-    <li><b>Grand total: <?="$total_hours H $total_minutes min"?></b></li>
+    <li><b>Grand total: <?="$total_hours H $total_minutes min"?></b><br/>
+        <div class="progress" role="progressbar">
+            <div class="progress-bar<?=($total_pct>=100)?' bg-success' : ''?>" style="width: <?=$total_pct?>%"><?=$total_pct?>%</div>
+        </div>
+    </li>
 </ul>
 </p>
 </div><!-- col -->
