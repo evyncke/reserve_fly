@@ -293,6 +293,7 @@ $me['name'] = db2web($me['name']) ;
 $me['username'] = db2web($me['username']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
+$me['cell_phone'] = canonicalizePhone($me['cell_phone']) ;
 if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information only for admins & FI
 	$me['address'] = db2web($me['address']) ; 
 	$me['zipcode'] = db2web($me['zipcode']) ; 
@@ -306,7 +307,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	$me['company_bce'] = db2web($me['c_bce']) ;
 	$me['contact_name'] = db2web($me['contact_name']) ;
 	$me['contact_relationship'] = db2web($me['contact_relationship']) ;
-	$me['contact_phone'] = db2web($me['contact_phone']) ;
+	$me['contact_phone'] = canonicalizePhone($me['contact_phone']) ;
 	$me['contact_email'] = db2web($me['contact_email']) ;
 }
 
@@ -329,7 +330,7 @@ foreach($me as $key => $value)
 		</div> <!-- col -->
 	<div class="col-sm-12 col-md-5">
 		Ajouter <?=$me['name']?> à mes contacts: 
-		<a href="vcard.php?id=<?=$displayed_id?>" title="Télécharge carte de visite VCF"><i class="bi bi-cloud-download"></i></a> 
+		<a href="vcard.php?id=<?=$displayed_id?>" title="Télécharge carte de visite VCF"><i class="bi bi-person-vcard-fill"></i></a> 
 		<a href="vcard.php?id=<?=$displayed_id?>&qr=yes" title="Affiche un QR code"><i class="bi bi-qr-code"></i></a> 
  	</div> <!--- col -->
 </div> <!--- row -->
@@ -382,6 +383,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 <div id="main" class="tab-pane fade show active" role="tabpanel">
 <?php
 	$phoneIcon = ($me['cell_phone'] != '') ? "&nbsp;<a href=\"tel:$me[cell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Appeler\"></i></a>&nbsp;" : '' ;
+	$whatsAppIcon = ($me['cell_phone'] != '') ? "&nbsp;<a href=\"https://wa.me/$me[cell_phone]\"><i class=\"bi bi-whatsapp\" title=\"Envoyer un message WhatsApp\"></i></a>&nbsp;" : '' ;
 	$emailIcon = ($me['email'] != '') ? "&nbsp;<a href=\"mailto:$me[email]\"><i class=\"bi bi-envelope-fill\" title=\"Envoyer email\"></i></a>&nbsp;" : '' ;
 ?>
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="Xform-horizontal">
@@ -423,7 +425,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label for="cell_phoneId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Téléphone mobile<?=$phoneIcon?>:</label>
+        <label for="cell_phoneId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Téléphone mobile<?=$phoneIcon?> <?=$whatsAppIcon?>:</label>
         <div class="col-sm-4">
 	       	<div class="input-group">
                 <input type="tel" class="form-control" name="cell_phone" id="cell_phoneId" value="<?=$me['cell_phone']?>" autocomplete="mobile tel" <?=$read_only_attribute?>>
@@ -604,6 +606,7 @@ if (! $read_only) {
 <?php
 if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
 	$phoneIcon = ($me['contact_phone'] != '') ? "&nbsp;<a href=\"tel:$me[contact_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Appeler\"></i></a>&nbsp;" : '' ;
+	$whatsAppIcon = ($me['contact_phone'] != '') ? "&nbsp;<a href=\"https://wa.me/$me[contact_phone]\"><i class=\"bi bi-whatsapp\" title=\"Envoyer un message WhatsApp\"></i></a>&nbsp;" : '' ;
 	$emailIcon = ($me['contact_email'] != '') ? "&nbsp;<a href=\"mailto:$me[contact_email]\"><i class=\"bi bi-envelope-fill\" title=\"Envoyer email\"></i></a>&nbsp;" : '' ;
 ?>
 <div id="emergency_contact" class="tab-pane fade" role="tabpanel">
@@ -632,7 +635,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	</div> <!-- col -->
 </div> <!-- input-group -->
 <div class="input-group mb-3">
-	<label for="contactPhoneId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Téléphone<?=$phoneIcon?>:</label>
+	<label for="contactPhoneId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Téléphone<?=$phoneIcon?><?=$whatsAppIcon?>:</label>
 	<div class="col-sm-4">
 		<input type="text" class="form-control" name="c_phone" id="contactRelationshipId" value="<?=$me['contact_phone']?>" placeholder="Sous la forme +32471234567 sans les 0 ou les '.'" <?=$user_only_attribute?>>
 	</div> <!-- col -->

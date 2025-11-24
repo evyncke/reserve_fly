@@ -5,8 +5,9 @@ Vous trouverez ici les diverses nouveautés à propos du site réservation du RA
 
 ## Novembre 2025
 
+- en plus de pouvoir appeler un membre sur son téléphone en cliquant sur l'icône téléphone <i class="bi bi-telephone-fill"></i>, il est aussi possible de lui envoyer un message WhatsApp via l'icône <i class="bi bi-whatsapp"></i> (disponible sur les pages réservations, profil, ...).
 - il est possible de consulter directement la plupart des documents (sous format PDF) du club via l'option [Documents<i class="bi bi-download"></i>](mobile_documents.php).
-- lors d'une réservation: suppression totale de l'entrée d'une durée prévue pour le vol.
+- lors d'une réservation, il n'est plus nécessaire d'entrer la durée prévue pour le vol.
 
 ## Octobre 2025
 
@@ -20,7 +21,7 @@ Vous trouverez ici les diverses nouveautés à propos du site réservation du RA
 - pour les réservations sur petits écrans (genre smartphone), il est plus simple d'utiliser la version tabulaire du calendrier des réservation via [Réservations -> Toutes les réservations (smartphone)](mobile_today.php). Cette page permet d'afficher les détails de toutes les réservations, d'annuler les vôtres, et d'entrer les compteurs.
 - téléchargement des cartes Jeppenssen via [Aéroport -> Jeppenssen Charts](https://www.spa-aviation.be/airports/tripkits/JeppesenBelgium_31-08-2025.pdf) (via la license officielle du club).
 - liste des aéroports proches ainsi qu'un lien vers leur cartes Jeppensen via [Aéroport -> Résumé aéroports](mobile_airports.php) et un clic sur le code OACI de l'aéroport.
-- ajout optionel mais recommandé d'un contact alternatif dans votre [profile](mobile_profile.php) (via le menu déroulant en haut à droite via votre nom).
+- ajout optionel mais recommandé d'un contact alternatif dans votre [profil](mobile_profile.php) (via le menu déroulant en haut à droite via votre nom).
 - affiche un "Loading" pendant l'accès à la page d'introduction des compteurs.
 
 ## Août 2025

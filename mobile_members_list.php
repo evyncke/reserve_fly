@@ -73,7 +73,7 @@ if ($group) {
         $line++ ;
         print('<td>' . db2web(strtoupper("<b>$row[last_name]</b>")) . db2web(", $row[first_name]") . "</td>") ;
         if ($email) print("<td>$row[email]</td>") ;
-        if ($mobile) print("<td>$row[cell_phone]</td>") ;
+        if ($mobile) print("<td>" . canonicalizePhone($row['cell_phone']) . "</td>") ;
         if ($qualite) print("<td>$row[titles]</td>") ;
         if ($procuration) print("<td></td>") ;
         if ($signature) print("<td></td>") ;

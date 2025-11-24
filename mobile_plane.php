@@ -202,8 +202,9 @@ function generateMaintenanceClass($entretien, $compteur) {
 		ORDER BY r_start ASC LIMIT 0,10")
 		or die("Cannot retrieve bookings($plane): " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
-		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\"></i></a>" : '' ;
-		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><i class=\"bi bi-telephone-fill\"></i></a>" : '' ;
+		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? "&nbsp;<a href=\"tel:" . canonicalizePhone($row['pcell_phone']) . "\"><i class=\"bi bi-telephone-fill\"></i></a>" .
+			"&nbsp;<a href=\"https://wa.me/" . canonicalizePhone($row['pcell_phone']) . "\"><i class=\"bi bi-whatsapp\" title=\"Envoyer un message WhatsApp\"></i></a>" : '' ;
+		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? "&nbsp;<a href=\"tel:" . canonicalizePhone($row['icell_phone']) . "\"><i class=\"bi bi-telephone-fill\"></i></a>" : '' ;
 		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-toggle="tooltip" data-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
 			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 

@@ -129,9 +129,9 @@ if ($error_message != '') {
 					$booking['instructorName'] = db2web($row_fi['name']) ;
 					if ($userId > 0) {
 						$booking['instructorEmail'] = $row_fi['email'] ;
-						$booking['instructorWorkPhone'] = $row_fi['work_phone'] ;
-						$booking['instructorCellPhone'] = $row_fi['cell_phone'] ;
-						$booking['instructorHomePhone'] = $row_fi['home_phone'] ;
+						$booking['instructorWorkPhone'] = canonicalizePhone($row_fi['work_phone']) ;
+						$booking['instructorCellPhone'] = canonicalizePhone($row_fi['cell_phone']) ;
+						$booking['instructorHomePhone'] = canonicalizePhone($row_fi['home_phone']) ;
 // TODO fetch avatar from kunena?
 //						$booking['instructorAvatar'] = $row_fi['avatar'] ;
 					}
@@ -149,9 +149,9 @@ if ($error_message != '') {
 			if ($userId > 0) {
 				$booking['email'] = $row['email'] ;
 				$booking['gravatar'] = md5(strtolower(trim($row['email']))) ; // Hash for gravatar
-				$booking['home_phone'] = $row['home_phone'] ;
-				$booking['work_phone'] = $row['work_phone'] ;
-				$booking['cell_phone'] = $row['cell_phone'] ;
+				$booking['home_phone'] = canonicalizePhone($row['home_phone']) ;
+				$booking['work_phone'] = canonicalizePhone($row['work_phone']) ;
+				$booking['cell_phone'] = canonicalizePhone($row['cell_phone']) ;
 				if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
 					$booking['avatar'] = $avatar_root_resized_uri . '/' . $row['avatar'] ;
 				elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))

@@ -440,17 +440,18 @@ function showPilotDetails(id) {
 	var booking = allBookings[bookingFromID(id)][loggingFromID(id)] ;
 	if (booking.log_pilot != 0 && booking.log_pilot != booking.user) { // The booked pilot is not the same as in logbook and there is a logbook entry
 		span.innerHTML = '<b>' + booking.log_pilotName + "</b>" ;
-		span.innerHTML += ' <a href="vcard.php?id=' + booking.log_pilot + '"><i class="bi bi-download" title="Télécharger"></i></a>' ;
+		span.innerHTML += ' <a href="vcard.php?id=' + booking.log_pilot + '"><i class="bi bi-person-vcard-fill" title="Télécharger"></i></a>' ;
 		span.innerHTML += ' <a href="vcard.php?id=' + booking.log_pilot + '&qr=yes"><i class="bi bi-qr-code" title="Afficher QR-code"></i></a>' ;
-		span.innerHTML += '<br>Vol réserve par: ' + booking.name ;
+		span.innerHTML += '<br>Vol réservé par: ' + booking.name ;
 	} else { // No logbook information (possibly future reservation)
 		span.innerHTML = '<b>' + booking.name + "</b>" ;
 		if (booking.user) {
-			span.innerHTML += ' <a href="vcard.php?id=' + booking.user + '"><i class="bi bi-download" title="Télécharger"></i></a>' ;
+			span.innerHTML += ' <a href="vcard.php?id=' + booking.user + '"><i class="bi bi-person-vcard-fill" title="Télécharger"></i></a>' ;
 			span.innerHTML += ' <a href="vcard.php?id=' + booking.user + '&qr=yes"><i class="bi bi-qr-code" title="Afficher QR-code"></i></a>' ;
 		}
 		if (booking.cell_phone)
-			span.innerHTML += '<br/>Mobile: <a href="tel:' + booking.cell_phone + '">' + booking.cell_phone + '</a>';
+			span.innerHTML += '<br/>Mobile: <a href="tel:' + booking.cell_phone + '">' + booking.cell_phone + '</a> ' +
+				'<a href="https://wa.me/' + booking.cell_phone + '"><i class="bi bi-whatsapp" title="Envoyer un message WhatsApp"></i></a>' ;
 		if (booking.home_phone)
 			span.innerHTML += '<br/>Privé: <a href="tel:' + booking.home_phone + '">' + booking.home_phone + '</a>';
 		if (booking.work_phone)
@@ -469,9 +470,10 @@ function showPilotDetails(id) {
 	}
 	if (booking.instructorId > 0) {
 		span.innerHTML += '<hr><b>' + booking.instructorName + "</b>" ;
-		span.innerHTML += ' <a href="vcard.php?id=' + booking.instructorId + '"><i class="bi bi-download" title="Télécharger"></i></a>' ;
+		span.innerHTML += ' <a href="vcard.php?id=' + booking.instructorId + '"><i class="bi bi-person-vcard-fill" title="Télécharger"></i></a>' ;
 		if (booking.instructorCellPhone)
-			span.innerHTML += '<br/>Mobile: <a href="tel:' + booking.instructorCellPhone + '">' + booking.instructorCellPhone + '</a>';
+			span.innerHTML += '<br/>Mobile: <a href="tel:' + booking.instructorCellPhone + '">' + booking.instructorCellPhone + '</a> ' +
+				'<a href="https://wa.me/' + booking.instructorCellPhone + '"><i class="bi bi-whatsapp" title="Envoyer un message WhatsApp"></i></a>' ;
 		if (booking.instructorHomePhone)
 			span.innerHTML += '<br/>Privé: ' + booking.instructorHomePhone ;
 		if (booking.instructorWorkPhone)
