@@ -142,12 +142,6 @@ $supervised_pct = round(($supervised_hours * 60 + $supervised_minutes) * 100 / (
 $total_hours = intdiv($total_minutes, 60) ;
 $total_minutes = $total_minutes % 60 ;
 $total_pct = round(($total_hours * 60 + $total_minutes) * 100 / (45 * 60)) ;
-
-// TODO add line bar/progress bar ?
-// 45: of flight hours required for PPL
-// 25 of DC
-// 10 of supervised solo
-// 5 of solo cross country
 ?>
 <div class="row">
 <div class="col-sm-12 col-md-4">
