@@ -11,6 +11,13 @@
         {"name":"Manuel du Pilote Privé - T3 - Navigation", "type":"Manuel du Pilote Privé - T3 - Navigation", "reference": "M.04", "quantity": 1, "unitaryprice": 29.00},
         {"name":"Manuel du Pilote Privé - T4 - Réglementation", "type":"Manuel du Pilote Privé - T4 - Réglementation", "reference": "M.05", "quantity": 1, "unitaryprice": 37.00},
         {"name":"Manuel du Pilote Privé - T5 - PLH", "type":"Manuel du Pilote Privé - T5 - PLH", "reference": "M.06", "quantity": 1, "unitaryprice": 29.00},
-        {"name":"Expédition de Manuels", "type":"Expédition de Manuels", "reference": "M.01", "quantity": 1, "unitaryprice": 7.50}
+        {"name":"Expédition de Manuels", "type":"Expédition de Manuels", "reference": "M.01", "quantity": 1, "unitaryprice": 7.50},
+        {
+            "name": "Heading level Four",
+            "type": "Heading level Four",
+            "reference": "Heading level Four",
+            "quantity": 1,
+            "unitaryprice": 50.0
+        }
     ]
 }
