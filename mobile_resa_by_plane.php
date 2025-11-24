@@ -89,7 +89,7 @@ function displayPlane($id) {
 		$table_planes, $table_bookings, $table_person, $table_flights,
 		$avatar_root_directory, $avatar_root_uri,
 		$avatar_root_resized_directory, $avatar_root_resized_uri ;
-	print("<tr><td colspan=\"5\" class=\"table-active text-center\"><b>$id</b></td></tr>
+	print("<tr><td colspan=\"5\" class=\"table-active text-center text-bg-success\"><b>$id</b></td></tr>
 		</tbody><tbody class=\"table-group-divider\">\n") ;
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.name as iname, i.cell_phone as icell_phone, i.jom_id as iid,
 		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.name as pname, pi.cell_phone as pcell_phone, pi.jom_id as pid
@@ -105,6 +105,7 @@ function displayPlane($id) {
                 OR (DATE(r_stop) = '$displayDate' OR (DATE(r_start) <= '$displayDate' and '$displayDate' <= DATE(r_stop))))
 		ORDER BY p.id, r_start ASC LIMIT 0,20")
 		or die("Cannot retrieve bookings($id): " . mysqli_error($mysqli_link)) ;
+	$previous_booking = $sql_now . " 09:00" ; // Start of today
 	while ($row = mysqli_fetch_array($result)) {
 		// No need for seconds in the timing...
 		$row['r_start'] = substr($row['r_start'], 0, 16) ;
@@ -136,6 +137,10 @@ function displayPlane($id) {
 			'gravatar' => md5(strtolower(trim($row['email']))), // Hash for gravatar
 			// add other fields as needed
 		] ;
+		if ($previous_booking < $row['r_start'] and $displayDate >= $sql_today) {
+			print('<tr><td colspan="5" class="Xtext-bg-secondary"><a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate . '" class="btn btn-outline-primary btn-sm" title="Créer une réservation"><i class="bi bi-plus"></i> Réserver ' . $id . '</a></td></tr>') ;
+		}
+		$previous_booking = $row['r_stop'] ;
 		if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
 			$rows[$row['r_id']]['avatar'] = $avatar_root_resized_uri . '/' . $row['avatar'] ;
 		elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
@@ -174,8 +179,8 @@ function displayPlane($id) {
 		print("<tr$onclick><td$planeClass>$row[r_plane]</td><td$class>$display_start</td><td$class>$display_stop</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($row['r_comment']))) . "</td></tr>\n") ;
 	}
 	if ($result->num_rows == 0) {
-		$bookMessage = ($displayDate >= $sql_today) ? ' <a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate . '" title="pour ajouter une réservation"><i class="bi bi-plus"></i> réservation.</a>' : '' ;
-		print('<tr><td colspan="5" class="text-bg-info">Aucune réservation pour ce jour.' . $bookMessage . '</td></tr>') ;
+		$bookMessage = ($displayDate >= $sql_today) ? ' <a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate . '" class="btn btn-outline-primary btn-sm" title="Créer une réservation"><i class="bi bi-plus"></i> Réserver ' . $id . '</a>' : '' ;
+		print('<tr><td colspan="5" class="Xtext-bg-info">Aucune réservation pour ce jour.' . $bookMessage . '</td></tr>') ;
 	}
 }
 
