@@ -102,12 +102,16 @@ require_once 'mobile_header5.php' ;
 <input type="hidden" id="via1Airport" value="<?=$via1?>">
 <input type="hidden" id="via2Airport" value="<?=$via2?>">
 <!--
-2 boutons: annuler la modification / modifier
-
-!!! booking.php devrait aussi annoncer 'pas de réservations endéans les XX jours'
+2 boutons: annuler la modification / modifier la réservation
 -->
 
-<div class="alert alert-info alert-dismissible" id="bookingMessageDiv" style="visibility: hidden; display: none;"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><span id="bookingMessageSpan"></span></div>
+<div class="alert alert-info alert-dismissible fade show" id="bookingMessageDiv" style="visibility: hidden; display: none;">
+	<span id="bookingMessageSpan"></span>
+	<br/>
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Retour aux réservations"></button>
+	<hr>
+	Cliquez sur la croix pour fermer ce message et vous allez être redirigé vers la page des réservations.
+</div><!-- alert -->
 
 <div class="row">
 		<label class="form-label col-xs-6 col-md-3" for="pilotSelect">Pilote:</label>
@@ -184,6 +188,13 @@ if (isset($booking['r_type']) and $booking['r_type'] == BOOKING_MAINTENANCE)
 ?>
 </div> <!-- container-fluid-->
 <script>
+
+// When the alert is closed, redirect to the calling page $_SERVER['HTTP_REFERER']
+document.getElementById('bookingMessageDiv').addEventListener('closed.bs.alert', function () {
+	console.log("Redirecting to <?=$_SERVER['HTTP_REFERER']?> as closed.bs.alter event received"); ;
+	window.location.href = "<?=$_SERVER['HTTP_REFERER']?>";
+});
+
 function adjustEndDay() {
 	var startDay = document.getElementById('startDayInput').value ;
 	var endDay = document.getElementById('endDayInput').value ;
@@ -214,9 +225,10 @@ function hideSpinner() {
 
 function bookClicked() {
 	document.getElementById('idBookButton').disabled = true ;
-	showSpinner() ;
+	// This function is defined in js/mobile.js and this file seems to be the only one using it...
+	// It knows about the field names and the spinner div
+	// It is also fully asynchronous
 	createBooking() ;
-	hideSpinner() ;
 }
 </script>
 </body>

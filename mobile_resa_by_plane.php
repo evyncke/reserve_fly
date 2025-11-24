@@ -112,6 +112,10 @@ function displayPlane($id) {
 		// No need for seconds in the timing...
 		$row['r_start'] = substr($row['r_start'], 0, 16) ;
 		$row['r_stop'] = substr($row['r_stop'], 0, 16) ;
+		// Canonicalize phone numbers
+		$row['pcell_phone'] = canonicalizePhone($row['pcell_phone']) ;
+		$row['icell_phone'] = canonicalizePhone($row['icell_phone']) ;
+		// Keep all rows in an array for further processing
 	    $rows[$row['r_id']] = [
 			'r_id' => intval($row['r_id']),
 			'r_plane' => $row['r_plane'],
@@ -149,7 +153,8 @@ function displayPlane($id) {
 			$rows[$row['r_id']]['avatar'] = $avatar_root_resized_uri . '/' . $row['avatar'] ;
 		elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
 			$rows[$row['r_id']]['avatar'] = $avatar_root_uri . '/' . $row['avatar'] ;
-		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? "&nbsp;<a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" : '' ;
+		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? "&nbsp;<a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" .
+			"&nbsp;<a href=\"https://wa.me/$row[pcell_phone]\"><i class=\"bi bi-whatsapp\" title=\"Envoyer un message WhatsApp\"></i></a>" : '' ;
 		$pname = ($row['pfirst_name'] == '') ? $row['pname'] : 
 			'<b>' . db2web($row['plast_name']) . '</b><span class="d-none d-md-inline"> ' . db2web($row['pfirst_name']) . '</span>' ;
 		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? "&nbsp;<a href=\"tel:$row[icell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" : '' ;

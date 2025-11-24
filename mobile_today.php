@@ -102,7 +102,10 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 		// No need for seconds in the timing...
 		$row['r_start'] = substr($row['r_start'], 0, 16) ;
 		$row['r_stop'] = substr($row['r_stop'], 0, 16) ;
-//		print("pfirstname=$row[pfirst_name], plastname=$row[plast_name], pname=$row[pname]<br/>") ;
+		// Canonicalize phone numbers
+		$row['pcell_phone'] = canonicalizePhone($row['pcell_phone']) ;
+		$row['icell_phone'] = canonicalizePhone($row['icell_phone']) ;
+		// Keep all rows in an array for further processing
 	    $rows[$row['r_id']] = [
 			'r_id' => intval($row['r_id']),
 			'r_plane' => $row['r_plane'],
@@ -134,13 +137,14 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 			$rows[$row['r_id']]['avatar'] = $avatar_root_resized_uri . '/' . $row['avatar'] ;
 		elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
 			$rows[$row['r_id']]['avatar'] = $avatar_root_uri . '/' . $row['avatar'] ;
-		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" : '' ;
+		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? "&nbsp;<a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" . 
+			"&nbsp;<a href=\"https://wa.me/$row[pcell_phone]\"><i class=\"bi bi-whatsapp\" title=\"Envoyer un message WhatsApp\"></i></a>" : '' ;
 		$pname = ($row['pfirst_name'] == '') ? $row['pname'] : 
 			'<span class="d-none d-md-inline">' . db2web($row['pfirst_name']) . ' </span><b>' . db2web($row['plast_name']) . '</b>' ;
-		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" : '' ;
-		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-bs-toggle="tooltip" data-bs-placement="right" title="' .
+		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? "&nbsp;<a href=\"tel:$row[icell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" : '' ;
+		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? '&nbsp;<i><span data-bs-toggle="tooltip" data-bs-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
-			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
+			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '.</span></i>&nbsp;' . $itelephone : '' ; 
 		// Add an orange divider representing 'now'
 		if ($sql_today == $displayDate and !$now_divider_shown and $row['r_start'] >= $sql_now) {
 			$now_divider_shown = true;

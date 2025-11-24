@@ -5,6 +5,8 @@ Vous trouverez ici les diverses nouveautés à propos du site réservation du RA
 
 ## Novembre 2025
 
+- il est possible de voir les réservations d'un jour sous forme de liste condensées, de voir les détails d'une réservation voire de la modifier en cliquant sur une ligne, il est aussi possible de réserver un avion. C'est spécialement prévu pour les petits écrans et c'est [Réservation -> <i class="bi bi-airplane"></i> Toutes les réservations par avion (smartphone)](https://www.spa-aviation.be/resa/mobile_resa_by_plane.php).
+- en créant une réservation avec ce système, il faut cliquer sur la croix en haut à gauche pour revenir à la liste des réservations.
 - en plus de pouvoir appeler un membre sur son téléphone en cliquant sur l'icône téléphone <i class="bi bi-telephone-fill"></i>, il est aussi possible de lui envoyer un message WhatsApp via l'icône <i class="bi bi-whatsapp"></i> (disponible sur les pages réservations, profil, ...).
 - il est possible de consulter directement la plupart des documents (sous format PDF) du club via l'option [Documents<i class="bi bi-download"></i>](mobile_documents.php).
 - lors d'une réservation, il n'est plus nécessaire d'entrer la durée prévue pour le vol.
