@@ -64,6 +64,8 @@ $day_before_nice = datefmt_format($short_fmt, $dt_before) ; // Nicely locally fo
 $day_after_nice = datefmt_format($short_fmt, $dt_after) ; // Nicely locally formatted date
 $sql_today = date('Y-m-d') ;
 $sql_now = date('Y-m-d H:i:s') ;
+$today_closing = date('Y-m-d H:i', airport_closing_local_time(substr($displayDate, 0, 4), substr($displayDate, 5, 2), substr($displayDate, 8, 2))) ; // format is $year, $month, $day....
+// TODO convert in local TZ... if not yet done
 if ($userId != 62) journalise($userId, "D", "Using smartphone per plane booking page for $today_nice") ;
 ?> 
 <div class="container-fluid">
@@ -80,12 +82,12 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone per plane booking 
 <div class="row">
 <table class="table table-striped table-hover">
 	<thead>
-	<tr><th class="d-none d-md-table-cell">Avion</th><th>Début</th><th>Fin</th><th>Pilote</th><th>Remarque</th></tr>
+	<tr><th class="d-none d-lg-table-cell">Avion</th><th>Début</th><th>Fin</th><th>Pilote</th><th>Remarque</th></tr>
 	</thead>
 <?php
 
 function displayPlane($id) {
-	global $rows, $mysqli_link, $displayDate, $userId, $sql_today, $sql_now, 
+	global $rows, $mysqli_link, $displayDate, $userId, $sql_today, $sql_now, $today_closing,
 		$table_planes, $table_bookings, $table_person, $table_flights,
 		$avatar_root_directory, $avatar_root_uri,
 		$avatar_root_resized_directory, $avatar_root_resized_uri ;
@@ -105,7 +107,7 @@ function displayPlane($id) {
                 OR (DATE(r_stop) = '$displayDate' OR (DATE(r_start) <= '$displayDate' and '$displayDate' <= DATE(r_stop))))
 		ORDER BY p.id, r_start ASC LIMIT 0,20")
 		or die("Cannot retrieve bookings($id): " . mysqli_error($mysqli_link)) ;
-	$previous_booking = $sql_now . " 09:00" ; // Start of today
+	$previous_booking = $displayDate . " 09:00" ; // Start of today  TODO should be the airport opening time
 	while ($row = mysqli_fetch_array($result)) {
 		// No need for seconds in the timing...
 		$row['r_start'] = substr($row['r_start'], 0, 16) ;
@@ -138,20 +140,22 @@ function displayPlane($id) {
 			// add other fields as needed
 		] ;
 		if ($previous_booking < $row['r_start'] and $displayDate >= $sql_today) {
-			print('<tr><td colspan="5" class="Xtext-bg-secondary"><a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate . '" class="btn btn-outline-primary btn-sm" title="Créer une réservation"><i class="bi bi-plus"></i> Réserver ' . $id . '</a></td></tr>') ;
+			print('<tr><td colspan="5"><a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate . 
+				'&start=' . $previous_booking . '&end=' . $row['r_start'] . 
+				'" class="btn btn-outline-primary btn-sm py-0" title="Créer une réservation"><i class="bi bi-plus"></i> Réserver ' . $id . '</a></td></tr>') ;
 		}
 		$previous_booking = $row['r_stop'] ;
 		if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
 			$rows[$row['r_id']]['avatar'] = $avatar_root_resized_uri . '/' . $row['avatar'] ;
 		elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
 			$rows[$row['r_id']]['avatar'] = $avatar_root_uri . '/' . $row['avatar'] ;
-		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" : '' ;
+		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? "&nbsp;<a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" : '' ;
 		$pname = ($row['pfirst_name'] == '') ? $row['pname'] : 
-			'<span class="d-none d-md-inline">' . db2web($row['pfirst_name']) . ' </span><b>' . db2web($row['plast_name']) . '</b>' ;
-		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" : '' ;
-		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-bs-toggle="tooltip" data-bs-placement="right" title="' .
+			'<b>' . db2web($row['plast_name']) . '</b><span class="d-none d-md-inline"> ' . db2web($row['pfirst_name']) . '</span>' ;
+		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? "&nbsp;<a href=\"tel:$row[icell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" : '' ;
+		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? '&nbsp;<i><span data-bs-toggle="tooltip" data-bs-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
-			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
+			substr($row['ilast_name'], 0, 1) . "." . substr($row['ifirst_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
 		$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
 		if ($row['f_type'] != '')
 			$class = ' class="text-warning"' ;
@@ -166,22 +170,26 @@ function displayPlane($id) {
 			$display_stop = substr($row['r_stop'], 0, 10) ;
 		// If the booking is for maintenance, show it in red and don't display the booker's name
 		if ($row['r_type'] == BOOKING_MAINTENANCE) {
-			$class = ' class="text-danger"' ;
-			$planeClass = ' class="text-danger d-none d-md-table-cell"' ;
+			$planeClass = ' class="text-danger d-none d-lg-table-cell"' ;
 			$pname = '<i class="bi bi-tools"></i> <i>Maintenance</i>' ;
 			$ptelephone = '' ;
+			$itelephone = '' ;
 			$instructor = '' ;
 		} else {
-			$planeClass = ' class="d-none d-md-table-cell"' ;
+			$planeClass = ' class="d-none d-lg-table-cell"' ;
 		}
 		// Make the row clickable to show the details in a modal dialog
 		$onclick = ($row['r_type'] != BOOKING_MAINTENANCE) ? " onclick=\"showDetails($row[r_id]);\" data-bs-target=\"#detailModal\"" : '';
 		print("<tr$onclick><td$planeClass>$row[r_plane]</td><td$class>$display_start</td><td$class>$display_stop</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($row['r_comment']))) . "</td></tr>\n") ;
 	}
 	if ($result->num_rows == 0) {
-		$bookMessage = ($displayDate >= $sql_today) ? ' <a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate . '" class="btn btn-outline-primary btn-sm" title="Créer une réservation"><i class="bi bi-plus"></i> Réserver ' . $id . '</a>' : '' ;
-		print('<tr><td colspan="5" class="Xtext-bg-info">Aucune réservation pour ce jour.' . $bookMessage . '</td></tr>') ;
-	}
+		$bookMessage = ($displayDate >= $sql_today) ? ' <a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate . '" class="btn btn-outline-primary btn-sm py-0" title="Créer une réservation"><i class="bi bi-plus"></i> Réserver ' . $id . '</a>' : '' ;
+		print('<tr><td colspan="5"><span class="d-none d-lg-inline">Aucune réservation pour ce jour.</span>' . $bookMessage . '</td></tr>') ;
+	} else if ($previous_booking < $today_closing and $displayDate >= $sql_today) {
+		print('<tr><td colspan="5"><a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate .
+			'&start=' . $previous_booking . '&end=' . $today_closing . 
+			 '" class="btn btn-outline-primary btn-sm py-0" title="Créer une réservation"><i class="bi bi-plus"></i> Réserver ' . $id . '</a></td></tr>') ;
+	}	
 }
 
 	$result_planes = mysqli_query($mysqli_link, "SELECT id
