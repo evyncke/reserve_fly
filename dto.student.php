@@ -100,14 +100,17 @@ if (isset($_POST['action']) and $_POST['action'] == 'upload') {
             case 'verygood': $session_grade_message = '<i class="bi bi-hand-thumbs-up-fill text-success" title="Very good flight"></i>' ; break ; 
             default: $session_grade_message = '' ;
         }
+        $route = ($flight->flightFrom != '' and $flight->flightTo != '' and ($flight->flightFrom != 'EBSP' or $flight->flightTo != 'EBSP')) ? 
+            " ($flight->flightFrom - $flight->flightTo)" : '' ;
         print("<tr><td>$flight->flightId  $session_grade_message <a href=\"dto.flight.php?flight=$flight->id\">
             <i class=\"bi bi-pencil-fill\" data-bs-toggle=\"tooltip\" title=\"See/edit the student flight report\"></i></a></td><td>$flight->date</td>
-            <td>$flight->flightDuration</td><td>$flight->flightType</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
+            <td>$flight->flightDuration</td><td>$flight->flightType$route</td><td>$flight->plane</td><td>$flight->fiLastName $flight->fiFirstName</td></tr>\n") ;
         // Sum up the duration
         switch ($flight->flightType) {
             case 'DC': $dc_minutes += $flight->flightDuration ; break ;
             case 'solo': $solo_minutes += $flight->flightDuration ; break ;
-            case 'XCountry': $xcountry_minutes += $flight->flightDuration ; break ;
+            case 'Xcountry': $xcountry_minutes += $flight->flightDuration ; break ;
+            default: journalise($userId, 'E', "Unknown flight type '$flight->flightType' for flight id $flight->id") ; break ;
         }
         $total_minutes += $flight->flightDuration ;
     }
@@ -143,7 +146,7 @@ $total_minutes = $total_minutes % 60 ;
 </p>
 </div><!-- col -->
 <div class="col-sm-12 col-md-4">
-<p>Placeholder for email, phone, postal address, picture.</p>
+<p>Placeholder for picture.</p>
 <?php
 if ($student->blocked)
     print("<p class=\"mt-2 p-4 bg-danger text-bg-danger rounded\">$student->blockedMessage</p>") ;

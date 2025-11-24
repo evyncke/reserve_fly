@@ -202,6 +202,8 @@ class Flight {
     public $fiFirstName ;
     public $flightType ;
     public $flightDuration ;
+    public $flightFrom ;
+    public $flightTo ;
     public $remark ;
     public $who ;
     public $whoFirstName ;
@@ -226,6 +228,8 @@ class Flight {
         $this->fiLastName = db2web($row['fi_last_name']) ;
         $this->flightType = $row['df_type'] ;
         $this->flightDuration = $row['duration'] ;
+        $this->flightFrom = $row['l_from'] ;
+        $this->flightTo = $row['l_to'] ;
         $this->remark = db2web($row['df_remark']) ;
         if ($row['df_session_grade'] == '')
             $this->sessionGrade = 'satisfactory' ;
@@ -244,7 +248,8 @@ class Flight {
                     s.last_name AS s_last_name, s.first_name AS s_first_name, 
                     fi.last_name AS fi_last_name, fi.first_name AS fi_first_name,
                     who.last_name AS who_last_name, who.first_name AS who_first_name,
-                    60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration 
+                    60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration,
+                    l_from, l_to
                 FROM $table_dto_flight 
                     JOIN $table_person s ON df_student = s.jom_id
                     JOIN $table_logbook ON df_flight_log = l_id
@@ -264,7 +269,8 @@ class Flight {
                     s.last_name AS s_last_name, s.first_name AS s_first_name, 
                     fi.last_name AS fi_last_name, fi.first_name AS fi_first_name, 
                     who.last_name AS who_last_name, who.first_name AS who_first_name,
-                    60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration 
+                    60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration,
+                    l_from, l_to
                 FROM $table_dto_flight 
                     JOIN $table_person s ON df_student = s.jom_id
                     JOIN $table_logbook ON df_flight_log = l_id
@@ -328,7 +334,8 @@ class Flights implements Iterator {
                 s.last_name AS s_last_name, s.first_name AS s_first_name,
                 fi.last_name AS fi_last_name, fi.first_name AS fi_first_name,
                 who.last_name AS who_last_name, who.first_name AS who_first_name,
-                60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration
+                60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration,
+                l_from, l_to
             FROM $table_dto_flight
                 JOIN $table_person s ON df_student = s.jom_id
                 JOIN $table_logbook ON df_flight_log = l_id
@@ -351,7 +358,8 @@ class Flights implements Iterator {
                 s.last_name AS s_last_name, s.first_name AS s_first_name,
                 fi.last_name AS fi_last_name, fi.first_name AS fi_first_name,
                 who.last_name AS who_last_name, who.first_name AS who_first_name,
-                60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration
+                60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration,
+                l_from, l_to
             FROM $table_dto_flight
                 JOIN $table_person s ON df_student = s.jom_id
                 JOIN $table_logbook ON df_flight_log = l_id
@@ -359,7 +367,6 @@ class Flights implements Iterator {
                 LEFT JOIN $table_person who ON df_who = who.jom_id
             WHERE l_instructor = $fiId AND df_when = l_audit_time
             ORDER BY df_when DESC" ;
- //           print("<hr><pref>$sql</pre><hr>") ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur systeme a propos de l'access aux vols école via l'instructeur $fiId: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
