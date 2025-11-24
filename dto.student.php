@@ -91,9 +91,11 @@ if (isset($_POST['action']) and $_POST['action'] == 'upload') {
 <?php
     $flights = new Flights($student_id) ;
     $dc_minutes = 0 ;
+    $supervised_minutes = 0 ;
     $solo_minutes = 0 ;
     $xcountry_minutes = 0 ;
     $total_minutes = 0 ;
+    $last_flight = 'never' ;
     foreach($flights as $flight) {
         switch ($flight->sessionGrade) {
             case 'unsatisfactory': $session_grade_message = '<i class="bi bi-hand-thumbs-down-fill text-danger" title="Unsatisfactory flight"></i>' ; break ; 
@@ -108,11 +110,12 @@ if (isset($_POST['action']) and $_POST['action'] == 'upload') {
         // Sum up the duration
         switch ($flight->flightType) {
             case 'DC': $dc_minutes += $flight->flightDuration ; break ;
-            case 'solo': $solo_minutes += $flight->flightDuration ; break ;
-            case 'Xcountry': $xcountry_minutes += $flight->flightDuration ; break ;
+            case 'solo': $solo_minutes += $flight->flightDuration ; $supervised_minutes += $flight->flightDuration ; break ;
+            case 'Xcountry': $xcountry_minutes += $flight->flightDuration ; $supervised_minutes += $flight->flightDuration ; break ;
             default: journalise($userId, 'E', "Unknown flight type '$flight->flightType' for flight id $flight->id") ; break ;
         }
         $total_minutes += $flight->flightDuration ;
+        $last_flight = $flight->date ;
     }
 ?>
 </tbody>
@@ -131,6 +134,8 @@ $solo_hours = intdiv($solo_minutes, 60) ;
 $solo_minutes = $solo_minutes % 60 ;
 $xcountry_hours = intdiv($xcountry_minutes, 60) ;
 $xcountry_minutes = $xcountry_minutes % 60 ;
+$supervised_hours = intdiv($supervised_minutes, 60) ;
+$supervised_minutes = $supervised_minutes % 60 ;
 $total_hours = intdiv($total_minutes, 60) ;
 $total_minutes = $total_minutes % 60 ;
 ?>
@@ -138,15 +143,21 @@ $total_minutes = $total_minutes % 60 ;
 <div class="col-sm-12 col-md-4">
 <p><ul>
     <li>Flight count: <?=$flights->count?></li>
+    <li>Last flight: <?=$last_flight?></li>
     <li>DC: <?="$dc_hours H $dc_minutes min"?></li>
-    <li>Solo: <?="$solo_hours H $solo_minutes min"?></li>
-    <li>X-country: <?="$xcountry_hours H $xcountry_minutes min"?></li>
-    <li>Total: <?="$total_hours H $total_minutes min"?></li>
+    <ul>
+        <li>Supervised solo: <?="$solo_hours H $solo_minutes min"?></li>
+        <li>Solo X-country: <?="$xcountry_hours H $xcountry_minutes min"?></li>
+        <li><b>Total solo: <?="$supervised_hours H $supervised_minutes min"?></b></li>
+    </ul>
+    <li><b>Grand total: <?="$total_hours H $total_minutes min"?></b></li>
 </ul>
 </p>
 </div><!-- col -->
 <div class="col-sm-12 col-md-4">
-<p>Placeholder for picture.</p>
+<img src="<?=$student->picture?>" width="80">
+</div><!-- col -->
+<div class="col-sm-12 col-md-4">
 <?php
 if ($student->blocked)
     print("<p class=\"mt-2 p-4 bg-danger text-bg-danger rounded\">$student->blockedMessage</p>") ;

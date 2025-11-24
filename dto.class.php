@@ -40,18 +40,21 @@ class DTOMember {
     public $zipCode ;
     public $city ;
     public $country ;
+    public $picture ;
     public $blocked ;
     public $blockedMessage ;
     public $membershipPaid ;
     public $groupMembership ;
 
     function __construct($row = NULL) {
+        global $avatar_root_uri , $avatar_root_directory, 
+            $avatar_root_resized_uri, $avatar_root_resized_directory ;
         if ($row) {
             $this->firstName = db2web($row['first_name']) ;
             $this->lastName = db2web($row['last_name']) ;
             $this->jom_id = $row['jom_id'] ;
             $this->email = $row['email'] ;
-            $this->mobilePhone = $row['cell_phone'] ;
+            $this->mobilePhone = canonicalizePhone($row['cell_phone']) ;
             $this->address = db2web($row['address']) ;
             $this->zipCode = $row['zipcode'] ;
             $this->city = db2web($row['city']) ;
@@ -60,17 +63,24 @@ class DTOMember {
             $this->blockedMessage = db2web($row['b_reason']) ;
             $this->membershipPaid = ($row['bkf_payment_date'] != '') ;
             $this->groupMembership = $row['group_ids'] ;
+            if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
+                $this->picture = $avatar_root_resized_uri . '/' . $row['avatar'] ;
+            elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
+                $this->picture = $avatar_root_uri . '/' . $row['avatar'] ;
+            else
+                $this->picture = 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($row['email']))) . '?s=80&d=blank&r=pg'  ; // Hash for gravatar ;
         }
     }
 
     function getById($jom_id) {
         global $mysqli_link, $table_blocked, $table_person, $table_user_usergroup_map, $table_membership_fees, $userId, $membership_year;
 
-        $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(group_id) AS group_ids 
+        $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS group_ids 
                 FROM $table_person
                 LEFT JOIN $table_blocked ON b_jom_id = jom_id
-                JOIN $table_user_usergroup_map ON jom_id = user_id  
+                JOIN $table_user_usergroup_map m ON jom_id = m.user_id  
                 LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = $membership_year
+                LEFT JOIN jom_kunena_users k ON k.userid = jom_id
                 WHERE jom_id = $jom_id")
             or journalise($userId, "F", "Cannot read from $table_person for $jom_id: " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
@@ -138,15 +148,16 @@ class DTOMembers implements Iterator {
             $fi_condition = '' ;
         $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(l_start) AS count_flights, 
                     MIN(DATEDIFF(SYSDATE(), DATE(l_start))) AS days_since_last_flight,
-                    GROUP_CONCAT(group_id) AS group_ids 
+                    GROUP_CONCAT(m.group_id) AS group_ids 
                 FROM $table_person 
                     JOIN $table_users AS u ON u.id = jom_id
-                    JOIN $table_user_usergroup_map ON jom_id = user_id 
+                    JOIN $table_user_usergroup_map m ON jom_id = m.user_id 
                     LEFT JOIN $table_dto_flight ON df_student = jom_id
                     LEFT JOIN $table_logbook ON df_flight_log = l_id
                     LEFT JOIN $table_blocked ON b_jom_id = jom_id
                     LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = $membership_year
-                WHERE group_id = $this->group AND block = 0  $fi_condition
+                    LEFT JOIN jom_kunena_users k ON k.userid = jom_id
+                WHERE m.group_id = $this->group AND block = 0  $fi_condition
                 GROUP BY jom_id
                 ORDER BY last_name, first_name" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
@@ -255,6 +266,7 @@ class Flight {
                     JOIN $table_logbook ON df_flight_log = l_id
                     LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
                     LEFT JOIN $table_person who ON df_who = who.jom_id
+                    LEFT JOIN jom_kunena_users k ON k.userid = df_student
                 WHERE df_id = $id")
             or journalise($userId, "F", "Cannot read from $table_dto_flight for flight $id: " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
@@ -276,6 +288,7 @@ class Flight {
                     JOIN $table_logbook ON df_flight_log = l_id
                     LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
                     LEFT JOIN $table_person who ON df_who = who.jom_id
+                    LEFT JOIN jom_kunena_users k ON k.userid = df_student
                 WHERE l_instructor = $fi
                 ORDER BY l_start DESC
                 LIMIT 1")
@@ -341,6 +354,7 @@ class Flights implements Iterator {
                 JOIN $table_logbook ON df_flight_log = l_id
                 LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
                 LEFT JOIN $table_person who ON df_who = who.jom_id
+                LEFT JOIN jom_kunena_users k ON k.userid = df_student
             WHERE df_student = $this->studentId
             ORDER BY df_student_flight" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
@@ -365,6 +379,7 @@ class Flights implements Iterator {
                 JOIN $table_logbook ON df_flight_log = l_id
                 LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
                 LEFT JOIN $table_person who ON df_who = who.jom_id
+                LEFT JOIN jom_kunena_users k ON k.userid = df_student
             WHERE l_instructor = $fiId AND df_when = l_audit_time
             ORDER BY df_when DESC" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
