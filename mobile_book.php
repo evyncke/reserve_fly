@@ -41,10 +41,10 @@ if ($id and is_numeric($id)) {
 	$booking = mysqli_fetch_array($result) or die("Réservation inconnue") ;
 	$action = "Modifier" ;
 	$startDay = substr($booking['r_start'], 0, 10) ;
-	$selectedPlane = $booking['r_plane'] ;
 	$startHour = substr($booking['r_start'], 11, 5) ;
 	$endDay = substr($booking['r_stop'], 0, 10) ;
 	$endHour = substr($booking['r_stop'], 11, 5) ;
+	$selectedPlane = $booking['r_plane'] ;
 	$comment = db2web($booking['r_comment']) ;
 	$from = $booking['r_from'] ;
 	$via1 = $booking['r_via1'] ;
@@ -53,15 +53,26 @@ if ($id and is_numeric($id)) {
 } else {
 	$action = "Réserver" ;
 	$startDay = (isset($_REQUEST['date'])) ? mysqli_real_escape_string($mysqli_link, $_REQUEST['date']) : date('Y-m-d') ;
-	$selectedPlane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, $_REQUEST['plane']) : '' ;
 	$endDay = $startDay ;
-	// Need to round up to next 15 minutes
-	$startMinute = date('i') ;
-	$startMinute = floor($startMinute / 15) ;
-	$startMinute = 15 * ($startMinute + 1) ;
-	if ($startMinute >= 60) $startMinute = '00' ;
-	$startHour = date('H:') . $startMinute ;
-	$endHour = (1 + date('H')) . ':' . $startMinute ;
+	if (isset($_REQUEST['start'])) {
+		$startMinute = substr(mysqli_real_escape_string($mysqli_link, $_REQUEST['start']), 14, 2) ;
+		$startHour = substr(mysqli_real_escape_string($mysqli_link, $_REQUEST['start']), 11, 5) ;
+		if (isset($_REQUEST['end'])) {
+			$endMinute = substr(mysqli_real_escape_string($mysqli_link, $_REQUEST['end']), 14, 2) ;
+			$endHour = substr(mysqli_real_escape_string($mysqli_link, $_REQUEST['end']), 11, 5) ;
+		} else {
+			$endHour = (1 + intval(substr($startHour, 0, 2))) . ':' . $startMinute ;
+		}
+	} else {
+		// Need to round up to next 15 minutes
+		$startMinute = date('i') ;
+		$startMinute = floor($startMinute / 15) ;
+		$startMinute = 15 * ($startMinute + 1) ;
+		if ($startMinute >= 60) $startMinute = '00' ;
+		$startHour = date('H:') . $startMinute ;
+		$endHour = (1 + date('H')) . ':' . $startMinute ;
+	}
+	$selectedPlane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, $_REQUEST['plane']) : '' ;
 	$comment = '' ;
 	$from = '' ;
 	$via1 = '' ;
