@@ -340,11 +340,7 @@ if ($response['error'] == '') {
 			$email_message = "<p>La maintenance du $start au $end sur le $plane avec comme commentaires: <i>$comment</i> " ;
 			$email_message .= "est confirm&eacute;e.<br/>" ;
 		} else {
-			$response['message'] = "La r&eacute;servation de $plane du $start au $end: est confirm&eacute;e.<br/>" .
-				"<b>Note</b>: apr&egrave;s votre vol, n'oubliez pas d'encoder les index du compteur d&eacute;part et arriv&eacute;e " .
-				"et les autres informations demand&eacute;es. " .
-				"Sans cela, votre prochaine r&eacute;servation sera impossible. " .
-				"Merci de votre coop&eacute;ration." ;
+			$response['message'] = "La r&eacute;servation de $plane du $start au $end: est confirm&eacute;e.<br/>"  ;
 			if ($pilot_id == $userId)
 				$email_subject = "✈ Confirmation d'une nouvelle réservation de $plane pour $pilot[name] [#$booking_id]" ;
 			else
