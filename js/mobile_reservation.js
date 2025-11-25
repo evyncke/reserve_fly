@@ -1084,12 +1084,12 @@ function cancelReasonChanged() {
 	}
 }
 
+// bookingIsForFlying: true for plane booking, false for maintenance booking
 function confirmBooking(bookingIsForFlying) {
-	var plane = (bookingIsForFlying) ? document.getElementById("planeSelect").value :
+	// Check whether it is a regular plane oe a resource
+	var plane = (document.getElementById("planeSelectSpan").style.display != 'none') ? document.getElementById("planeSelect").value :
 		 document.getElementById("ressourceSelect").value;
 	var bookingStart = document.getElementById("startYearSelect").value ;
-
-	var d = new Date(); var text = d.toTimeString();
 	bookingStart += '-' + document.getElementById("startMonthSelect").value ;
 	bookingStart += '-' + document.getElementById("startDaySelect").value ;
 	bookingStart += ' ' + document.getElementById("startHourSelect").value ;
@@ -1100,7 +1100,7 @@ function confirmBooking(bookingIsForFlying) {
 	bookingEnd += ' ' + document.getElementById("endHourSelect").value ;
 	bookingEnd += ':' + document.getElementById("endMinuteSelect").value + ":00";
 	var comment = document.getElementById("commentTextArea").value ;
-	var pilotId = (bookingIsForFlying) ? document.getElementById("pilotSelect").value :
+	var pilotId = (document.getElementById("planeSelectSpan").style.display != 'none') ? document.getElementById("pilotSelect").value :
 		document.getElementById("memberSelect").value ;
 	var instructorId = document.getElementById("instructorSelect").value ;
 	if (document.getElementById("customerSelect"))

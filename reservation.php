@@ -584,11 +584,11 @@ if ($userIsMechanic || $userIsInstructor) {
 	print('<button id="cancelMaintenanceButton" onclick="javascript:cancelBooking(false);">Annuler la maintenance</button><br/>' . "\n") ;
 }
 if (! $userNoFlight && ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin)) {
-	print('<button id="addBookingButton" onclick="javascript:confirmBooking(true);">Je respecte les conditions et r&eacute;serve</button>' . "\n") ;
-	print('<button id="modifyBookingButton" onclick="javascript:modifyBooking(true);">Modifier la r&eacute;servation</button>' . "\n") ;
+	print('<button id="addBookingButton" onclick="javascript:confirmBooking(true);">Je respecte les conditions et réserve</button>' . "\n") ;
+	print('<button id="modifyBookingButton" onclick="javascript:modifyBooking(true);">Modifier la réservation</button>' . "\n") ;
 }
 if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin) {
-	print('<button id="cancelBookingButton" onclick="javascript:confirmCancelBooking();">Annuler la r&eacute;servation</button>' . "\n") ;
+	print('<button id="cancelBookingButton" onclick="javascript:confirmCancelBooking();">Annuler la réservation</button>' . "\n") ;
 	print('<button id="engineHoursButton" onclick="javascript:engineHoursClicked();">Encoder les heures moteur</button>' . "\n") ;
 }
 ?>
