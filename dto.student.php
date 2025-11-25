@@ -171,6 +171,7 @@ $total_pct = round(($total_hours * 60 + $total_minutes) * 100 / (45 * 60)) ;
             <div class="progress-bar<?=($total_pct>=100)?' bg-success' : ''?>" style="width: <?=$total_pct?>%"><?=$total_pct?>%</div>
         </div>
     </li>
+    <li><span id="progressMessageSpan"></span></li>
 </ul>
 </p>
 </div><!-- col -->
@@ -190,7 +191,8 @@ if ($student->mobilePhone == '')
 ?>
 <p><ul>
 <li>Email: <a href="mailto:<?=$student->email?>"  title="Send email"><?=$student->email?> <i class="bi bi-envelope-fill"></i></a></li>
-<li>Mobile Phone: <a href="phone:<?=$student->mobilePhone?>"  title="Call mobile phone"><?=$student->mobilePhone?> <i class="bi bi-telephone-fill"></i></a></li>
+<li>Mobile Phone: <a href="tel:<?=$student->mobilePhone?>"  title="Call mobile phone"><?=$student->mobilePhone?> <i class="bi bi-telephone-fill"></i></a>
+        <a href="https://wa.me/<?=$student->mobilePhone?>"><i class="bi bi-whatsapp" title="Envoyer un message WhatsApp"></i></a></li>
 </ul>
 </p>
 <p>
@@ -217,6 +219,7 @@ if ($student->mobilePhone == '')
 <?php
 // Let's display the aggregated exercises
 $exercices = new StudentExercices($student_id) ;
+$progressSteps = array() ;
 foreach ($exercices as $exercice) {
     if ($exercice->grading) { // Multiple choice
 ?>
@@ -240,6 +243,7 @@ foreach ($exercices as $exercice) {
 </tr>
 <?php
     } else { // Single choice
+        $progressSteps[$exercice->reference] = isset($exercice->grade['yes']) and $exercice->grade['yes'] == 'yes' ;
 ?>
  <tr><td><b><?=$exercice->reference?></b></td>
  <td><b><?=$exercice->description?></b></td>
@@ -299,7 +303,7 @@ foreach ($documents as $document) {
 </div><!-- row --> 
 
 <div class="row">
-    <hr>
+<hr>
 <form method="POST" action="<?=$_SERVER['PHP_SELF']?>" enctype="multipart/form-data" role="form" class="form-inline">
 <input type="hidden" name="student" value="<?=$student->jom_id?>">
 <input type="hidden" name="action" value="upload">
@@ -313,5 +317,21 @@ foreach ($documents as $document) {
 </div><!-- tab-pane --> 
 
 </div><!-- tab-content -->
+<script>
+    // let's show a message depending on the progress
+    const progressSteps = <?=json_encode($progressSteps)?> ;
+    const progressMessageSpan = document.getElementById("progressMessageSpan");
+
+    // Iterate over the progressSteps object
+    for (const [key, value] of Object.entries(progressSteps)) {
+        // Create a new span element for the pill
+        const pill = document.createElement("span");
+        pill.className = `badge rounded-pill ${value ? "bg-success" : "bg-secondary"} me-2`;
+        pill.textContent = key;
+
+        // Append the pill to the progressMessageSpan
+        progressMessageSpan.appendChild(pill);
+    }
+</script>
 </body>
 </html>
