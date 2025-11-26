@@ -55,7 +55,7 @@ $response['booking'] = $id ;
 
 $result = mysqli_query($mysqli_link, "select * from $table_bookings where r_id = $id") ;
 if ((!$result) || (mysqli_num_rows($result) == 0))
-        $response['error'] .= "Cette reservation, $id, n'existe pas, " . mysqli_error($mysqli_link) . '<br/>' ;
+        $response['error'] .= "Cette réservation, $id, n'existe pas, " . mysqli_error($mysqli_link) . '<br/>' ;
 else {
         $booking = mysqli_fetch_array($result) ;
 //        $pilot_id = $booking['r_pilot'] ;
@@ -77,17 +77,17 @@ $start_date = new DateTime($start) ;
 if (!$start_date) $response['error'] .= "$start is not a valid date<br/>" ;
 $end_date = new DateTime($end) ;
 if (!$end_date) $response['error'] .= "$end is not a valid date<br/>" ;
-if ($end_date <= $start_date) $response['error'] .= "La fin doit &ecirc;tre apr&egrave;s le d&eacute;but: $start -> $end.<br/>" ;
+if ($end_date <= $start_date) $response['error'] .= "La fin doit être après le début: $start -> $end.<br/>" ;
 
 // Check on user ids
-if ($userId == 0) $response['error'] .= "Vous devez &ecirc;tre connect&eacute; pour faire une r&eacute;servation.<br/>" ;
+if ($userId == 0) $response['error'] .= "Vous devez être connecté pour faire une réservation.<br/>" ;
 if ($booking_type == BOOKING_MAINTENANCE) {
 	if (! ($userIsMechanic or $userIsInstructor or $userIsAdmin)) $response['error'] .= "Impossible de modifier une mise en maintenance.<br/>" ;
 } else {
 	if ($pilot_id != $userId) {
-		if (! ($userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit de modifier une r&eacute;servation d'un autre pilote.<br/>" ;
+		if (! ($userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit de modifier une réservation d'un autre pilote.<br/>" ;
 	} else {
-		if (! ($userIsPilot or $userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une modification de r&eacute;servation.<br/>" ;
+		if (! ($userIsPilot or $userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une modification de réservation.<br/>" ;
 	}
 }
 
@@ -95,7 +95,7 @@ if ($booking_type == BOOKING_MAINTENANCE) {
 $blocked_user = false ;
 $blocked_msg = '' ;
 if ($userNoFlight) {
-	$response['error'] .= "Vous &ecirc;tes interdit(e) de vol. Contactez l'a&eacute;roclub." ;
+	$response['error'] .= "Vous êtes interdit(e) de vol. Contactez l'aéroclub." ;
 	$blocked_user = true ;
 }
 
@@ -105,15 +105,15 @@ $result_blocked = mysqli_query($mysqli_link, "SELECT * FROM $table_blocked WHERE
 $row_blocked = mysqli_fetch_array($result_blocked) ;
 if ($row_blocked) {
 	journalise($userId, "W", "This pilot $pilot_id is blocked: $row_blocked[b_reason]") ;
-	$response['error'] .= "Vous &ecirc;tes interdit(e) de vol: " . db2web($row_blocked['b_reason']) . ". Contactez info@spa-aviation.be" ;
+	$response['error'] .= "Vous êtes interdit(e) de vol: " . db2web($row_blocked['b_reason']) . ". Contactez info@spa-aviation.be" ;
 	$blocked_user = true ;
 }
 
 // Check whether membership fee is paid
 if ($membership_year == date('Y') and (!isset($row_fee) or $row_fee['bkf_payment_date'] == '')) {
-	$response['error'] .= "Vous n'&ecirc;tes pas en r&egrave;gle de cotisation." ;
+	$response['error'] .= "Vous n'êtes pas en règle de cotisation." ;
 	$blocked_user = true ;
-	$blocked_msg = "<p>Vous n'&ecirc;tes pas en r&egrave;gle de cotisation." ;
+	$blocked_msg = "<p>Vous n'êtes pas en règle de cotisation." ;
 	journalise($userId, "E", "Unpaid membership fee") ;
 }
 
@@ -124,7 +124,7 @@ if ($membership_year == date('Y') and (!isset($row_fee) or $row_fee['bkf_payment
 $result = mysqli_query($mysqli_link, "select * from $table_planes where id = '$plane'") or die("Cannot check the plane status:".mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_array($result) ;
 if (!$row or $row['actif'] == 0)
-	$response['error'] .= "Cet avion ($plane) n'est pas disponible, r&eacute;servation non effectu&eacute;e...<br/>" ;
+	$response['error'] .= "Cet avion ($plane) n'est pas disponible, réservation non effectuée...<br/>" ;
 
 // Check whether this period overlaps with other ones
 // TODO should give more information about other reservations => do not count(*) but mysqli_num_rows()
@@ -142,7 +142,7 @@ if ($result) {
 	$row = mysqli_fetch_array($result) ;
 	$response['result'] = $row[0] ;
 	if ($row[0] > 0)
-		$response['error'] .= "Cette r&eacute;servation ($plane) est en conflit avec une autre! Modification non effectu&eacute;e...<br/>" ;
+		$response['error'] .= "Cette réservation ($plane) est en conflit avec une autre! Modification non effectuée...<br/>" ;
 } else
 	$response['error'] .= "Cannot check booking ($start ... $stop):" . mysqli_error($mysqli_link) . "<br/>" ;
 
@@ -180,7 +180,7 @@ if ($response['error'] == '') {
 			"input-charset" => "UTF-8",
 			"output-charset" => "UTF-8",
 			"scheme" => "Q") ;
-		$response['message'] = "La r&eacute;servation de $plane du $start au $end: est modifi&eacute;e" ;
+		$response['message'] = "La réservation de $plane du $start au $end: est modifiée" ;
 		if ($pilot_id == $userId)
 			$email_subject = iconv_mime_encode('Subject',
 				"Modification d'une réservation de $plane pour $pilot[name] [#$booking_id]",
@@ -248,7 +248,7 @@ if ($response['error'] == '') {
 		else
 			journalise($userId, 'W', "Modification by $referer_name of booking #$booking_id for $pilot[name] by $booker[name] ($modif_log)") ;
 	} else {
-		$response['error'] .= "Reservation pas mise a jour... " . mysqli_affected_rows($mysqli_link) ;
+		$response['error'] .= "Réservation pas mise à jour... " . mysqli_affected_rows($mysqli_link) ;
 		journalise($userId, "D", "Reservation pas mise a jour par $referer_name... " . mysqli_affected_rows($mysqli_link)) ;}
 }
 

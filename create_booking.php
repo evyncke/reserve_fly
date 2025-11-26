@@ -312,7 +312,7 @@ if ($result) {
 	$row = mysqli_fetch_array($result) ;
 	if ($row) {  
 		$row['name'] = db2web($row['name']) ; // SQL DB is latin1 and the rest is in UTF-8
-		$response['error'] .= "Cette r&eacute;servation ($plane) est en conflit avec une r&eacute;servation de $row[name] d&eacute;butant le $row[r_start]!<br/>R&eacute;servation non effectu&eacute;e...<br/>" ;
+		$response['error'] .= "Cette réservation ($plane) est en conflit avec une réservation de $row[name] débutant le $row[r_start]!<br/>Réservation non effectuée...<br/>" ;
 	}
 } else
 	$response['error'] .= "Cannot check booking ($start ... $stop):" . mysqli_error($mysqli_link) . "<br/>" ;
@@ -324,7 +324,7 @@ if ($response['error'] == '') {
 			'$from_apt', '$via1_apt', '$via2_apt', '$to_apt', $booking_type, sysdate(), '" . getClientAddress() . "', $userId, 0)") ;
 	if (!$result) { // Failed insertion
 		journalise($userId, 'E', 'Cannot insert into DB: ' . mysqli_error($mysqli_link)) ;
-		$response['error'] = "Erreur systeme dans la base de donnees, reservation non effectuee" ;
+		$response['error'] = "Erreur système dans la base de données, réservation non effectuée" ;
 	}
 	if ($result and mysqli_affected_rows($mysqli_link) == 1) {
 		$booking_id = mysqli_insert_id($mysqli_link) ;
@@ -335,12 +335,12 @@ if ($response['error'] == '') {
 				or journalise($userId, 'E', "Cannot update flight: " . mysqli_error($mysqli_link)) ;
 		}
 		if ($booking_type == BOOKING_MAINTENANCE) {
-			$response['message'] = "La maintenance de $plane du $start au $end: est confirm&eacute;e" ;
+			$response['message'] = "La maintenance de $plane du $start au $end: est confirmée" ;
 			$email_subject = "🛠 Confirmation de la mise en maintenance de $plane par $booker[name] [#$booking_id]" ;
 			$email_message = "<p>La maintenance du $start au $end sur le $plane avec comme commentaires: <i>$comment</i> " ;
 			$email_message .= "est confirm&eacute;e.<br/>" ;
 		} else {
-			$response['message'] = "La r&eacute;servation de $plane du $start au $end: est confirm&eacute;e.<br/>"  ;
+			$response['message'] = "La réservation de $plane du $start au $end: est confirmée.<br/>"  ;
 			if ($pilot_id == $userId)
 				$email_subject = "✈ Confirmation d'une nouvelle réservation de $plane pour $pilot[name] [#$booking_id]" ;
 			else
@@ -446,7 +446,7 @@ if ($response['error'] == '') {
 			}
 		}
 	} else {
-		$response['error'] .= "Un probl&egrave;me technique s'est produit, r&eacute;servation non effectu&eacute;e..." . mysqli_error($mysqli_link) . "<br/>" ;
+		$response['error'] .= "Un problème technique s'est produit, réservation non effectuée..." . mysqli_error($mysqli_link) . "<br/>" ;
 	}
 }
 
