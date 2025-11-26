@@ -26,7 +26,9 @@ elseif (! str_starts_with($additional_preload, ',')) // Ensure it starts with a 
   $additional_preload = ',' . $additional_preload ; 
 
 # HTTP/2 push of some JS scripts via header()
-header('Link: </resa/js/mobile.js>;rel=preload;as=script,</resa/data/members.js>;rel=preload;as=script,</resa/data/planes.js>;rel=preload;as=script,</logo_rapcs_256x256_white.png>;rel=preload;as=image' . $additional_preload) ;
+header('Link: </resa/js/mobile.js>;rel=preload;as=script,</resa/data/members.js>;rel=preload;as=script,</resa/data/planes.js>;rel=preload;as=script,' .
+  '</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image' . 
+  $additional_preload) ;
 
 # Handle the toggle between dark/light themes
 if (isset($_GET['theme']) and $_GET['theme'] != '') {
@@ -267,7 +269,7 @@ if ($christmas_theme) {
       </button>
       <!-- below in the <a the navbar-collapse widen the space by adding right margin !!! -->
       <a class="navbar-brand multi-collapse hidden-md collapse navbar-collapse" href="mobile.php?news" style="max-width: 40px;">
-        <img src="https://www.spa-aviation.be/logo_rapcs_256x256_white.png" width="24px" height="24px">
+        <img src="/logo_rapcs_256x256_white.png" width="24px" height="24px">
       </a>
       <ul class="nav navbar-nav multi-collapse collapse navbar-collapse"><!-- nav-bar left with most of the dropdown -->
         <li class="navbar-item me-auto me-md-0">
