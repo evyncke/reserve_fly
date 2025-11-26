@@ -56,9 +56,9 @@ function showDetails(bookingId) {
         document.getElementById("crewWantedInput").checked = bookings[bookingId].r_crew_wanted ;
         document.getElementById("paxWantedInput").checked = bookings[bookingId].r_pax_wanted ;
         if (bookings[bookingId].r_comment !== null && bookings[bookingId].r_comment != '')
-            document.getElementById("commentSpan").innerHTML = bookings[bookingId].r_comment.replace(/\n/g, '<br/>') + '<br/>';
+            document.getElementById("commentTextArea").value = bookings[bookingId].r_comment ;
         else
-            document.getElementById("commentSpan").innerHTML = '';
+            document.getElementById("commentTextArea").value = '';
         document.getElementById("start").value = bookings[bookingId].r_start ;
         document.getElementById("stop").value = bookings[bookingId].r_stop ;
         document.getElementById("fromInput").value = bookings[bookingId].r_from ;
@@ -80,6 +80,8 @@ function showDetails(bookingId) {
         if (!readonly) {
             document.getElementById("cancelButton").style.display = 'block' ;
             document.getElementById("cancelButton").onclick = cancelBooking.bind(this, bookingId) ;
+            document.getElementById("modifyButton").style.display = 'block' ;
+            document.getElementById("modifyButton").onclick = modifyBooking.bind(this, bookingId) ;
             if (isSqlDateInPast(bookings[bookingId].r_start)) {
                 document.getElementById("indexButton").style.display = 'block' ;
                 document.getElementById("indexButton").onclick = indexBooking.bind(this, bookingId) ;
@@ -143,4 +145,42 @@ function cancelBooking(bookingId) {
             location.reload() ; // Refresh the page to show the updated bookings
         });
     }
+}
+
+function modifyBooking(bookingId) {
+    // User clicked 'modify' button
+    // Send AJAX request to modify the booking
+    showSpinner() ;
+    fetch('modify_booking.php?booking=' + encodeURIComponent(bookingId) + 
+        '&plane=' + encodeURIComponent(document.getElementById("planeSelect").value) +
+        '&pilotId=' + encodeURIComponent(document.getElementById("pilotSelect").value) +
+        '&instructorId=' + encodeURIComponent(document.getElementById("instructorSelect").value) +
+        '&start=' + encodeURIComponent(document.getElementById("start").value) +
+        '&end=' + encodeURIComponent(document.getElementById("stop").value) +
+        '&comment=' + encodeURIComponent(document.getElementById("commentTextArea").value) +
+        '&crewWanted=' + (document.getElementById("crewWantedInput").checked ? '1' : '0') +
+        '&paxWanted=' + (document.getElementById("paxWantedInput").checked ? '1' : '0') +
+        '&fromApt=' + encodeURIComponent(document.getElementById("fromInput").value) +
+        '&toApt=' + encodeURIComponent(document.getElementById("toInput").value) +
+        '&via1Apt=' + encodeURIComponent(document.getElementById("via1Input").value) +
+        '&via2Apt=' + encodeURIComponent(document.getElementById("via2Input").value)
+    )
+    .then(response => {
+        if (!response.ok) throw new Error('Network error');
+        return response.json(); // Parse response as JSON
+    })
+    .then(data => {
+        // Use the JSON data here
+        console.log(data);
+        alert(data.message) ;
+        modalInstance.hide();
+    })
+    .catch(error => {
+        alert('Une erreur est survenue lors de l\'annulation. Prévenir webmaster@spa-aviation.be');
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        hideSpinner(); // Possibly useless if we reload the page ;-)
+        location.reload() ; // Refresh the page to show the updated bookings
+    });
 }

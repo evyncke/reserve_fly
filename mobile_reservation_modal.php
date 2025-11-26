@@ -12,6 +12,7 @@
         				<div class="spinner-border" style="width:4rem; height:4rem;" role="status"><span class="visually-hidden">En cours...</span></div>
 					</div>
 					<img id="pilotDetailsImage"><span id="pilotDetailsSpan"></span>
+					<!-- TODO adding form-select in <select> use 2 lines rather than 1 line, Should use the col / row layout instead ? -->
 					Avion: <select id="planeSelect"></select>
 					<span id="planeComment"></span>
 					<span id="pilotType"><br/></span>
@@ -24,7 +25,7 @@
 					</span>
 					Pilotes RAPCS: <input type="checkbox" id="crewWantedInput" value="true"> bienvenus en tant que co-pilotes.<br/>
 					Membres RAPCS: <input type="checkbox" id="paxWantedInput" value="true"> bienvenus en tant que passagers.<br/>
-					<span id="commentSpan" class="text-bg-info"></span>
+					<textarea id="commentTextArea" class="text-bg-info"></textarea><br/>
 					Début: <input type="datetime-local" id="start"><br/>
 					Fin: <input type="datetime-local" id="stop"><br/>
 					Route: <input type="text" id="fromInput" class="form-control d-inline-block" style="width: 4em;" minlength="3" maxlength="3" placeholder="de" required> -
@@ -35,6 +36,7 @@
               	<div class="modal-footer">
 					<button type="button" class="btn btn-info" id="indexButton"><i class="bi bi-stopwatch-fill"></i> Compteur</button>
 					<button type="button" class="btn btn-danger" id="cancelButton"><i class="bi bi-trash3-fill"></i> Annuler la réservation</button>
+					<button type="button" class="btn btn-primary" id="modifyButton"><i class="bi bi-pencil-fill"></i> Modifier la réservation</button>
                   	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
               	</div>
         </div>
