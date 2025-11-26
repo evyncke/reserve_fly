@@ -1,4 +1,4 @@
-//   Copyright 2014-2025 Eric Vyncke
+//   Copyright 2025 Eric Vyncke
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -12,9 +12,13 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-const modalContent = document.getElementById('detailModalContent');
-const modalElement = document.getElementById('detailModal');
-const modalInstance = new bootstrap.Modal(modalElement);
+var modalContent, modalElement, modalInstance ;
+
+document.addEventListener("DOMContentLoaded", function () {
+    modalContent = document.getElementById('detailModalContent');
+    modalElement = document.getElementById('detailModal');
+    modalInstance = new bootstrap.Modal(modalElement);
+}) ;
 
 // On button click: fetch content and show modal
 function showDetails(bookingId) {
