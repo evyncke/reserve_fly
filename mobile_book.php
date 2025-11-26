@@ -70,7 +70,7 @@ if ($id and is_numeric($id)) {
 		$startMinute = 15 * ($startMinute + 1) ;
 		if ($startMinute >= 60) $startMinute = '00' ;
 		$startHour = date('H:') . $startMinute ;
-		$endHour = (1 + date('H')) . ':' . $startMinute ;
+		$endHour = sprintf('%02d', (1 + date('H'))) . ':' . $startMinute ;
 	}
 	$selectedPlane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, $_REQUEST['plane']) : '' ;
 	$comment = '' ;
