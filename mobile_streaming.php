@@ -64,7 +64,7 @@ if ($webcam == '-both') {
 } elseif ($webcam == '-sowaer') {
 ?>
 <iframe src="https://g0.ipcamlive.com/player/player.php?alias=camebspairside&autoplay=1&mute=1&disableautofullscreen=1&disablezoombutton=p;disableframecapture=1&disabletimelapseplayer=1&disablestorageplayer=1&disabledownloadbutton=1&disableplaybackspeedbutton=1&disablenavigation=1&disableuserpause=1" 
-  width="800px" height="450px" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
+  width="640px" height="360px" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
   <p>Courtesy of SOWAER and Spa/EBSP airfield (hosted by ipcamlive.com.)</p>
 <?php
 } else {
