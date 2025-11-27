@@ -430,6 +430,7 @@ if ($userId > 0) {
             <li><hr class="dropdown-divider"/></li>
             <li><h6 class="dropdown-header">Réservé aux membres</h6></li>
             <li><a class="dropdown-item" href="mobile_streaming.php?webcam=apron">Webcam RAPCS (Apron) streaming</a></li>
+            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=sowaer">Webcam SOWAER (station météo) streaming</a></li>
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=2">Webcam RAPCS (Hangars)</a></li>
             <li><a class="dropdown-item" href="mobile_streaming.php?webcam=hangars">Webcam RAPCS (Hangars) streaming</a></li>
 <?php
