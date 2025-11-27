@@ -35,17 +35,17 @@ if ($plane == '') {
 }
 $plane = mysqli_real_escape_string($mysqli_link, $plane) ;
 $pilot_id = $_REQUEST['pilotId'] ;
-if (!is_numeric($pilot_id)) die("Bien essaye... pilot: $pilot_id") ;
+if (!is_numeric($pilot_id)) journalise($userId, "F", "Bien essayé... pilot: $pilot_id") ;
 $instructor_id = $_REQUEST['instructorId'] ;
 if ($instructor_id) {
-	if (!is_numeric($instructor_id)) die("Bien essaye... instructor: $instructor_id") ;
+	if (!is_numeric($instructor_id)) journalise($userId, "F", "Bien essayé... instructor: $instructor_id") ;
 	if ($instructor_id == -1) $instructor_id = "NULL" ;
 } else
 	$instructor_id = "NULL" ;
 $customer_id = (isset($_REQUEST['customerId'])) ? intval(trim($_REQUEST['customerId'])) : 0 ;
 if (!is_numeric($customer_id)) journalise($userId, "F", "Invalid customerId") ;
 $booking_type = $_REQUEST['type'] ;
-if (!is_numeric($booking_type)) journalise($userId, "F", "Bien essaye... type: $booking_type") ;
+if (!is_numeric($booking_type)) journalise($userId, "F", "Bien essayé... type: $booking_type") ;
 $start = mysqli_real_escape_string($mysqli_link, $_REQUEST['start']) ;
 $end = mysqli_real_escape_string($mysqli_link, $_REQUEST['end']) ;
 $comment = mysqli_real_escape_string($mysqli_link, $_REQUEST['comment']) ;
@@ -62,18 +62,18 @@ $start_date = new DateTime($start) ;
 if (!$start_date) $response['error'] .= "$start is not a valid date<br/>" ;
 $end_date = new DateTime($end) ;
 if (!$end_date) $response['error'] .= "$end is not a valid date<br/>" ;
-if ($end_date <= $start_date) $response['error'] .= "La fin doit &ecirc;tre apr&egrave;s le d&eacute;but: $start -> $end.<br/>" ;
+if ($end_date <= $start_date) $response['error'] .= "La fin doit être après le début: $start -> $end.<br/>" ;
 
 // Check on user ids
-if ($userId == 0) $response['error'] .= "Vous devez &ecirc;tre connect&eacute; pour faire une r&eacute;servation.<br/>" ;
+if ($userId == 0) $response['error'] .= "Vous devez être connecté pour faire une réservation.<br/>" ;
 if ($booking_type == BOOKING_MAINTENANCE) {
 	if (! ($userIsMechanic or $userIsInstructor or $userIsAdmin)) 
 		$response['error'] .= "Vous n'avez pas le droit de mettre en maintenance.<br/>" ;
 } else {
 	if ($pilot_id != $userId) {
-		if (! ($userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit de faire une r&eacute;servation pour un autre pilote.<br/>" ;
+		if (! ($userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit de faire une réservation pour un autre pilote.<br/>" ;
 	} else {
-		if (! ($userIsPilot or $userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une r&eacute;servation.<br/>" ;
+		if (! ($userIsPilot or $userIsInstructor or $userIsAdmin)) $response['error'] .= "Vous n'avez pas le droit faire une réservation.<br/>" ;
 	}
 }
 // Is the user on the no flight list ?
@@ -81,9 +81,9 @@ $blocked_user = false ;
 $blocked_msg = '' ;
 if ($userNoFlight) {
 	journalise($userId, "W", "This pilot $pilot_id is blocked: in userNoFlight group") ;
-	$response['error'] .= "Vous &ecirc;tes interdit(e) de vol. Contactez l'a&eacute;roclub." ;
+	$response['error'] .= "Vous êtes interdit(e) de vol. Contactez l'aéroclub." ;
 	$blocked_user = true ;
-	$blocked_msg =  "<p>Vous &ecirc;tes interdit(e) de vol. Contactez l'a&eacute;roclub.</p>\n" ;
+	$blocked_msg =  "<p>Vous êtes interdit(e) de vol. Contactez l'aéroclub.</p>\n" ;
 }
 // Check whether the user is blocked for some specific reason
 $result_blocked = mysqli_query($mysqli_link, "SELECT * FROM $table_blocked WHERE b_jom_id=$pilot_id")
@@ -91,16 +91,16 @@ $result_blocked = mysqli_query($mysqli_link, "SELECT * FROM $table_blocked WHERE
 $row_blocked = mysqli_fetch_array($result_blocked) ;
 if ($row_blocked) {
 	journalise($userId, "W", "This pilot $pilot_id is blocked: $row_blocked[b_reason]") ;
-	$response['error'] .= "Vous &ecirc;tes interdit(e) de vol: " . db2web($row_blocked['b_reason']) . ". Contactez info@spa-aviation.be" ;
+	$response['error'] .= "Vous êtes interdit(e) de vol: " . db2web($row_blocked['b_reason']) . ". Contactez info@spa-aviation.be" ;
 	$blocked_user = true ;
-	$blocked_msg =  "<p>Vous &ecirc;tes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. Contactez info@spa-aviation.be.</p>\n" ;
+	$blocked_msg =  "<p>Vous êtes interdit(e) de vol: <b>" . db2web($row_blocked['b_reason']) . "</b>. Contactez info@spa-aviation.be.</p>\n" ;
 }
 
 // Check whether membership fee is paid
 if ($membership_year == date('Y') and (!isset($row_fee) or $row_fee['bkf_payment_date'] == '')) {
-	$response['error'] .= "Vous n'&ecirc;tes pas en r&egrave;gle de cotisation." ;
+	$response['error'] .= "Vous n'êtes pas en règle de cotisation." ;
 	$blocked_user = true ;
-	$blocked_msg = "<p>Vous n'&ecirc;tes pas en r&egrave;gle de cotisation." ;
+	$blocked_msg = "<p>Vous n'êtes pas en règle de cotisation." ;
 	journalise($userId, "E", "Unpaid membership fee") ;
 }
 
@@ -121,11 +121,11 @@ if ($customer_id > 0) {
 $result = mysqli_query($mysqli_link, "select * from $table_planes where id = '$plane'") or die("Cannot check the plane status:".mysqli_error($mysqli_link)) ;
 $plane_row = mysqli_fetch_array($result) ;
 if (!$plane_row or $plane_row['actif'] == 0)
-	$response['error'] .= "Cet avion ($plane) n'est pas disponible, r&eacute;servation non effectu&eacute;e...<br/>" ;
+	$response['error'] .= "Cet avion ($plane) n'est pas disponible, réservation non effectuée...<br/>" ;
 elseif ($plane_row['actif'] == 2 and !($userIsAdmin || $userIsInstructor))
-	$response['error'] .= "Cet avion ($plane) n'est disponible que pour les instructeurs, r&eacute;servation non effectu&eacute;e...<br/>" ;
+	$response['error'] .= "Cet avion ($plane) n'est disponible que pour les instructeurs, réservation non effectuée...<br/>" ;
 elseif ($plane_row['ressource'] != 0 and !($userIsAdmin || $userIsInstructor))
-	$response['error'] .= "Cette ressource ($plane) n'est disponible que pour les instructeurs, r&eacute;servation non effectu&eacute;e...<br/>" ;
+	$response['error'] .= "Cette ressource ($plane) n'est disponible que pour les instructeurs, réservation non effectuée...<br/>" ;
 mysqli_free_result($result) ;
 
 // Get information about pilot
@@ -136,7 +136,7 @@ $pilot['name'] = db2web($pilot['name']) ; // SQL DB is latin1 and the rest is in
 // Check whether the pilot is on the no fly list
 $result = mysqli_query($mysqli_link, "SELECT * FROM jom_user_usergroup_map WHERE user_id = $pilot_id and group_id = $joomla_no_flight") 
 	or journalise($userId, "E", "Cannot get info about pilot's group: " . mysqli_error($mysqli_link));
-if (mysqli_num_rows($result) > 0) $response['error'] .= "Le pilote est interdit de vol (violation des r&egrave;gles du club (par exemple, non paiement))" ;
+if (mysqli_num_rows($result) > 0) $response['error'] .= "Le pilote est interdit de vol (violation des règles du club (par exemple, non paiement))" ;
 
 // If instructor is on board, then get information about instructor
 if ($instructor_id != 'NULL') {
@@ -169,7 +169,7 @@ $message .= "<ul>\n" ;
 		LIMIT 1") or journalise($userId, "E", "Cannot get last reservation: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
 	if (! $row) {
-		$message .= "<li>Aucune entr&eacute;e dans le carnet de routes de l'avion $plane pour ce pilote.</li>\n" ;
+		$message .= "<li>Aucune entrée dans le carnet de routes de l'avion $plane pour ce pilote.</li>\n" ;
 		mysqli_free_result($result) ;
 	} else {
 		$message .= "<li>Entrée dans le carnet de routes de l'avion $plane pour ce pilote, le dernier vol date de $row[temps_dernier] jours et la limite club réservation: $delai_reservation jours.</li>\n" ;
@@ -188,12 +188,12 @@ $message .= "<ul>\n" ;
 		ORDER BY l_end DESC") or journalise($userId, "E", "Cannot get last reservation in pilot logbook: " . mysqli_error($mysqli_link)) ;
 	$row = mysqli_fetch_array($result) ;
 	if (! $row) {
-		$message .= "<li>Aucune entr&eacute;e dans le logbook du pilote pour $plane.</li>\n" ;
+		$message .= "<li>Aucune entrée dans le logbook du pilote pour $plane.</li>\n" ;
 		mysqli_free_result($result) ;
 		$message .= "</ul>\n" ;
 		return FALSE ;
 	} else {
-		$message .= "<li>Entr&eacute;e dans le logbook du pilote pour $plane, le dernier vol date de $row[temps_dernier] jours et la limite club r&eacute;servation: $delai_reservation jours.</li>\n" ;
+		$message .= "<li>Entrée dans le logbook du pilote pour $plane, le dernier vol date de $row[temps_dernier] jours et la limite club réservation: $delai_reservation jours.</li>\n" ;
 		mysqli_free_result($result) ;
 		$message .= "</ul>\n" ;
 		return $delai_reservation >= $row['temps_dernier'] ;
@@ -205,12 +205,12 @@ $message .= "<ul>\n" ;
 if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BOOKING_MAINTENANCE) or $userIsInstructor or $instructor_id != "NULL")) {
 //	journalise($userId, "D", "Check club is required: userIsMechanic = $userIsMechanic, userIsInstructor = $userIsInstructor, instructor_id = $instructor_id, pilot_id = $pilot[name]/$pilot_id") ;
 //if (false) {
-	$intro = "<p>De mani&egrave;re exp&eacute;rimentale, chaque r&eacute;servation est v&eacute;rifi&eacute;e quant au R&egrave;glement d'Ordre Intérieur (ROI) &agrave; propos du re-check RAPCS.<p>
-		<p><i>Ce message est envoy&eacute; au pilote, aux instructeurs et aux gestionnaires de la flotte.</i></p>" ;
+	$intro = "<p>	De manière expérimentale, chaque réservation est vérifiée quant au Règlement d'Ordre Intérieur (ROI) à propos du re-check RAPCS.<p>
+		<p><i>Ce message est envoyé au pilote, aux instructeurs et aux gestionnaires de la flotte.</i></p>" ;
 	if ($comment != '')
-		$intro .= "<p>Commentaire de la r&eacute;servation: <i>$comment</i>.</p>\n" ;
+		$intro .= "<p>Commentaire de la réservation: <i>$comment</i>.</p>\n" ;
 	mysqli_free_result($result) ;
-	$message = "<p>V&eacute;rification de la r&eacute;servation de $plane (de type $plane_row[classe]) effectu&eacute;e par $userFullName/$userId pour $pilot[name]/$pilot_id." ;
+	$message = "<p>Vérification de la réservation de $plane (de type $plane_row[classe]) effectuée par $userFullName/$userId pour $pilot[name]/$pilot_id." ;
 	// Not too distant reservation?
 	$reservation_permise = RecentBooking($plane, /*$userId*/ $pilot_id, $plane_row['delai_reservation']) ;
 	if (!$reservation_permise) {
@@ -250,7 +250,7 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 		} elseif ($row['delta'] > 0) {
 			if ($row['mandatory'] > 0) {
 				$userRatingValid = false ;
-				$validity_msg .= "<span style=\"color: red;\">Le $row[name] du pilote n'est plus valable depuis le $row[expire_date]. Le ROI interdit en ce cas de r&eacute;server un avion.</span><br/>" ;
+				$validity_msg .= "<span style=\"color: red;\">Le $row[name] du pilote n'est plus valable depuis le $row[expire_date]. Le ROI interdit en ce cas de réserver un avion.</span><br/>" ;
 			} else {
 				$validity_msg .= "<span style=\"color: blue;\">Le $row[name] du pilote n'est plus valable depuis le $row[expire_date].</span><br/>" ;
 			}
