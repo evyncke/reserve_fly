@@ -335,12 +335,12 @@ if ($response['error'] == '') {
 				or journalise($userId, 'E', "Cannot update flight: " . mysqli_error($mysqli_link)) ;
 		}
 		if ($booking_type == BOOKING_MAINTENANCE) {
-			$response['message'] = "La maintenance de $plane du $start au $end: est confirmée" ;
+			$response['message'] = "La maintenance de $plane du $start au $end: est confirmée." ;
 			$email_subject = "🛠 Confirmation de la mise en maintenance de $plane par $booker[name] [#$booking_id]" ;
 			$email_message = "<p>La maintenance du $start au $end sur le $plane avec comme commentaires: <i>$comment</i> " ;
 			$email_message .= "est confirm&eacute;e.<br/>" ;
 		} else {
-			$response['message'] = "La réservation de $plane du $start au $end: est confirmée.<br/>"  ;
+			$response['message'] = "La réservation de $plane du $start au $end: est confirmée."  ;
 			if ($pilot_id == $userId)
 				$email_subject = "✈ Confirmation d'une nouvelle réservation de $plane pour $pilot[name] [#$booking_id]" ;
 			else
