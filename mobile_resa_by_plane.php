@@ -68,6 +68,13 @@ $sql_today = date('Y-m-d') ;
 $sql_now = date('Y-m-d H:i:s') ;
 $today_closing = date('Y-m-d H:i', airport_closing_local_time(substr($displayDate, 0, 4), substr($displayDate, 5, 2), substr($displayDate, 8, 2))) ; // format is $year, $month, $day....
 // TODO convert in local TZ... if not yet done
+// Need to know the booking type for the current user in order to create bookings
+if ($userIsInstructor)			
+	$bookingType = BOOKING_INSTRUCTOR ;
+else if ($userIsAdmin)
+	$bookingType = BOOKING_ADMIN ;
+else
+	$bookingType = BOOKING_PILOT ;
 if ($userId != 62) journalise($userId, "D", "Using smartphone per plane booking page for $today_nice") ;
 ?> 
 <div class="container-fluid">
@@ -89,7 +96,7 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone per plane booking 
 <?php
 
 function displayPlane($id) {
-	global $rows, $mysqli_link, $displayDate, $userId, $sql_today, $sql_now, $today_closing,
+	global $rows, $mysqli_link, $displayDate, $userId, $sql_today, $sql_now, $today_closing, $bookingType,
 		$table_planes, $table_bookings, $table_person, $table_flights,
 		$avatar_root_directory, $avatar_root_uri,
 		$avatar_root_resized_directory, $avatar_root_resized_uri ;
@@ -146,9 +153,9 @@ function displayPlane($id) {
 			// add other fields as needed
 		] ;
 		if ($previous_booking < $row['r_start'] and $displayDate >= $sql_today) {
-			print('<tr><td colspan="5"><a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate . 
-				'&start=' . $previous_booking . '&end=' . $row['r_start'] . 
-				'" class="btn btn-outline-primary btn-sm py-0" title="Créer une réservation"><i class="bi bi-plus"></i> Réserver ' . $id . '</a></td></tr>') ;
+			print('<tr><td colspan="5"><button type="button" class="btn btn-outline-primary btn-sm py-0" title="Créer une réservation" 
+			onclick="displayBookingForm(' . $userId . ', ' . $bookingType . ', \'' . $id . '\', \'' . $previous_booking . '\', \'' . $row['r_start'] . '\');"><i class="bi bi-plus"></i> Réserver ' . $id . '</button>' .
+			'</td></tr>') ;
 		}
 		$previous_booking = $row['r_stop'] ;
 		if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
@@ -190,12 +197,13 @@ function displayPlane($id) {
 		print("<tr$onclick><td$planeClass>$row[r_plane]</td><td$class>$display_start</td><td$class>$display_stop</td><td$class>$pname$ptelephone$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($row['r_comment']))) . "</td></tr>\n") ;
 	}
 	if ($result->num_rows == 0) {
-		$bookMessage = ($displayDate >= $sql_today) ? ' <a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate . '" class="btn btn-outline-primary btn-sm py-0" title="Créer une réservation"><i class="bi bi-plus"></i> Réserver ' . $id . '</a>' : '' ;
+		$bookMessage = ($displayDate >= $sql_today) ? ' <button type="button" class="btn btn-outline-primary btn-sm py-0" title="Créer une réservation" 
+			onclick="displayBookingForm(' . $userId . ', ' . $bookingType . ', \'' . $id . '\', \'' . $displayDate . ' 09:00\', \'' . $displayDate . ' 10:00\');"><i class="bi bi-plus"></i> Réserver ' . $id . '</button>' 
+			: '' ;
 		print('<tr><td colspan="5"><span class="d-none d-lg-inline">Aucune réservation pour ce jour.</span>' . $bookMessage . '</td></tr>') ;
 	} else if ($previous_booking < $today_closing and $displayDate >= $sql_today) {
-		print('<tr><td colspan="5"><a href="mobile_book.php?plane=' . $id . '&date=' . $displayDate .
-			'&start=' . $previous_booking . '&end=' . $today_closing . 
-			 '" class="btn btn-outline-primary btn-sm py-0" title="Créer une réservation"><i class="bi bi-plus"></i> Réserver ' . $id . '</a></td></tr>') ;
+		print('<tr><td colspan="5"><button type="button" class="btn btn-outline-primary btn-sm py-0" title="Créer une réservation" 
+			onclick="displayBookingForm(' . $userId . ', ' . $bookingType . ', \'' . $id . '\', \'' . $previous_booking . '\', \'' . $today_closing . '\');"><i class="bi bi-plus"></i> Réserver ' . $id . '</button> </td></tr>') ;
 	}	
 }
 
@@ -223,8 +231,9 @@ function displayPlane($id) {
 require_once 'mobile_reservation_modal.php' ;
 
 if ($displayDate >= $sql_today) {
+	// TODO Should probably compute better the default start and stop time when $displayDate is today...
 ?>
-<button type="button" class="btn btn-primary" onclick="window.location.href='mobile_book.php?date=<?=$displayDate?>';">
+<button type="button" class="btn btn-primary" onclick="displayBookingForm(<?=$userId?>, <?=$bookingType?>, undefined, '<?=$displayDate?> 09:00' , '<?=$displayDate?> 10:00' );" title="Créer une réservation" >
   <i class="bi bi-plus"></i> Nouvelle réservation
 </button>
 <?php

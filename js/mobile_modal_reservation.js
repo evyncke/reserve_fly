@@ -28,7 +28,7 @@ function showDetails(bookingId) {
 
         hideSpinner() ; // Just to be sure...
 
-        // Let's disable all controls if not allowed to change them
+        // Let's disable all controls if not allowed to change them or enable them
         const div = document.getElementById('detailModalContent');
         const inputs = div.querySelectorAll('input');
         inputs.forEach(function(input) {
@@ -39,7 +39,12 @@ function showDetails(bookingId) {
         selects.forEach(function(select) {
             select.disabled = readonly ;
         });
+        const textareas = div.querySelectorAll('textarea');
+        textareas.forEach(function(textarea) {
+            textarea.disabled = readonly ;
+        });
 
+        // Now fill the data
         document.getElementById("detailModalLabel").innerHTML = 'Réservation #' + bookingId ;
         document.getElementById("planeSelect").value = bookings[bookingId].r_plane ;
         document.getElementById("pilotSelect").value = bookings[bookingId].r_pilot ;
@@ -77,6 +82,7 @@ function showDetails(bookingId) {
             document.getElementById("pilotDetailsImage").style.visibility = 'inherited' ;
             document.getElementById("pilotDetailsImage").style.display = 'inline' ;
         }
+        // Show or hide the buttons depending on the rights and date in past or future
         if (!readonly) {
             document.getElementById("cancelButton").style.display = 'block' ;
             document.getElementById("cancelButton").onclick = cancelBooking.bind(this, bookingId) ;
@@ -89,12 +95,17 @@ function showDetails(bookingId) {
                 document.getElementById("indexButton").style.display = 'none' ;
                 document.getElementById("indexButton").onclick = null ;
             }
-        } else {
+        } else { // Readonly: hide buttons
+            document.getElementById("modifyButton").style.display = 'none' ;
+            document.getElementById("modifyButton").onclick = null ;
             document.getElementById("cancelButton").style.display = 'none' ;
             document.getElementById("cancelButton").onclick = null ;
             document.getElementById("indexButton").style.display = 'none' ;
             document.getElementById("indexButton").onclick = null ;
         }
+        // The add Button must always be hidden here
+        document.getElementById("createButton").style.display = 'none' ;
+        document.getElementById("createButton").onclick = null ;
         modalInstance.show();
 }
 
@@ -176,11 +187,104 @@ function modifyBooking(bookingId) {
         modalInstance.hide();
     })
     .catch(error => {
-        alert('Une erreur est survenue lors de l\'annulation. Prévenir webmaster@spa-aviation.be');
+        alert('Une erreur est survenue lors de la modification. Prévenir webmaster@spa-aviation.be');
         console.error('Error:', error);
     })
     .finally(() => {
         hideSpinner(); // Possibly useless if we reload the page ;-)
         location.reload() ; // Refresh the page to show the updated bookings
     });
+}
+
+function addBooking(bookingType) {
+    // User clicked 'create' button
+    // Send AJAX request to modify the booking
+    showSpinner() ;
+    fetch('create_booking.php?' + 
+        'plane=' + encodeURIComponent(document.getElementById("planeSelect").value) +
+        '&type=' + encodeURIComponent(bookingType) +
+        '&pilotId=' + encodeURIComponent(document.getElementById("pilotSelect").value) +
+        '&instructorId=' + encodeURIComponent(document.getElementById("instructorSelect").value) +
+        '&start=' + encodeURIComponent(document.getElementById("start").value) +
+        '&end=' + encodeURIComponent(document.getElementById("stop").value) +
+        '&comment=' + encodeURIComponent(document.getElementById("commentTextArea").value) +
+        '&crewWanted=' + (document.getElementById("crewWantedInput").checked ? '1' : '0') +
+        '&paxWanted=' + (document.getElementById("paxWantedInput").checked ? '1' : '0') +
+        '&fromApt=' + encodeURIComponent(document.getElementById("fromInput").value) +
+        '&toApt=' + encodeURIComponent(document.getElementById("toInput").value) +
+        '&via1Apt=' + encodeURIComponent(document.getElementById("via1Input").value) +
+        '&via2Apt=' + encodeURIComponent(document.getElementById("via2Input").value)
+    )
+    .then(response => {
+        if (!response.ok) throw new Error('Network error');
+        return response.json(); // Parse response as JSON
+    })
+    .then(data => {
+        // Use the JSON data here
+        console.log(data);
+        alert(data.message) ;
+        modalInstance.hide();
+    })
+    .catch(error => {
+        alert('Une erreur est survenue lors de la création. Prévenir webmaster@spa-aviation.be');
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        hideSpinner(); // Possibly useless if we reload the page ;-)
+        location.reload() ; // Refresh the page to show the updated bookings
+    });
+}
+
+// Should add some JS to handle stop when start is changed...
+function displayBookingForm(pilot, bookingType, plane = null, start = null, stop = null) {
+    // Clear all fields
+    // Let's disable all controls if not allowed to change them or enable them
+    const div = document.getElementById('detailModalContent');
+    const inputs = div.querySelectorAll('input');
+    inputs.forEach(function(input) {
+        input.disabled = false ;
+        input.value = '' ;
+    });
+    const selects = div.querySelectorAll('select');
+    selects.forEach(function(select) {
+        select.disabled = false ;
+    });
+    const textareas = div.querySelectorAll('textarea');
+    textareas.forEach(function(textarea) {
+        textarea.disabled = false ;
+        textarea.value = '' ;
+    });
+    // Set default values
+    document.getElementById("detailModalLabel").innerHTML = 'Nouvelle réservation' ;
+    document.getElementById("pilotSelect").value = pilot ;
+    if (plane !== null)
+        document.getElementById("planeSelect").value = plane ;
+    if (start !== null)
+        document.getElementById("start").value = start ;
+    else {
+        const now = new Date();
+        // Format as YYYY-MM-DDTHH:mm
+        const formattedDateTime = now.toISOString().slice(0, 16);
+        document.getElementById("start").value = formattedDateTime ;
+    }
+    if (stop !== null)
+        document.getElementById("stop").value = stop ;
+    else {
+        const now = new Date();
+        now.setHours(now.getHours() + 1); // Add one hour
+        // Format as YYYY-MM-DDTHH:mm
+        const formattedDateTime = now.toISOString().slice(0, 16);
+        document.getElementById("stop").value = formattedDateTime ;
+    }
+
+// Only the add Button must always be hidden here
+    document.getElementById("createButton").style.display = 'block' ;
+    document.getElementById("createButton").onclick = addBooking.bind(this, bookingType) ;
+    document.getElementById("modifyButton").style.display = 'none' ;
+    document.getElementById("modifyButton").onclick = null ;
+    document.getElementById("cancelButton").style.display = 'none' ;
+    document.getElementById("cancelButton").onclick = null ;
+    document.getElementById("indexButton").style.display = 'none' ;
+    document.getElementById("indexButton").onclick = null ;
+    modalInstance.show();
 }

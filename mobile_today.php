@@ -22,9 +22,7 @@ if ($userId == 0) {
 	exit ;
 }
 # HTTP/2 push of some JS scripts via header()
-header('Link: </resa/js/mobile.js>;rel=preload;as=script,</resa/data/members.js>;rel=preload;as=script,</resa/data/planes.js>;rel=preload;as=script,' .
-  '</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image' . 
-  $additional_preload) ;
+$additional_preload = '</resa/js/mobile_modal_reservation.js>;rel=preload;as=script' ;
 $need_swiped_events = true ; // Allow swipe events on this page
 $header_postamble = '
 <script src="data/instructors.js"></script>
@@ -70,6 +68,14 @@ $day_after_nice = datefmt_format($short_fmt, $dt_after) ; // Nicely locally form
 $sql_today = date('Y-m-d') ;
 $sql_now = date('Y-m-d H:i:s') ;
 if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $today_nice") ;
+// Need to know the booking type for the current user in order to create bookings
+if ($userIsInstructor)			
+	$bookingType = BOOKING_INSTRUCTOR ;
+else if ($userIsAdmin)
+	$bookingType = BOOKING_ADMIN ;
+else
+	$bookingType = BOOKING_PILOT ;
+if ($userId != 62) journalise($userId, "D", "Using smartphone per plane booking page for $today_nice") ;
 ?> 
 <div class="container-fluid">
 
@@ -192,8 +198,7 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $
 <div class="row">
 	<p>Cliquez sur une ligne pour voir/modifier les détails de la réservation.</p>
 </div><!-- row -->
-
-<button type="button" class="btn btn-primary" onclick="window.location.href='mobile_book.php?date=<?=$displayDate?>';">
+<button type="button" class="btn btn-primary" onclick="displayBookingForm(<?=$userId?>, <?=$bookingType?>, undefined, '<?=$displayDate?> 09:00' , '<?=$displayDate?> 10:00' );" title="Créer une réservation" >
   <i class="bi bi-plus"></i> Nouvelle réservation
 </button>
 <?php

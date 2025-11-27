@@ -25,18 +25,19 @@
 					</span>
 					Pilotes RAPCS: <input type="checkbox" id="crewWantedInput" value="true"> bienvenus en tant que co-pilotes.<br/>
 					Membres RAPCS: <input type="checkbox" id="paxWantedInput" value="true"> bienvenus en tant que passagers.<br/>
-					<textarea id="commentTextArea" class="text-bg-info"></textarea><br/>
+					<textarea id="commentTextArea" class="form-control"></textarea><br/>
 					Début: <input type="datetime-local" id="start"><br/>
 					Fin: <input type="datetime-local" id="stop"><br/>
-					Route: <input type="text" id="fromInput" class="form-control d-inline-block" style="width: 4em;" minlength="3" maxlength="3" placeholder="de" required> -
-						<input type="text" id="via1Input" class="form-control d-inline-block" style="width: 4em;" minlength="3" maxlength="3" placeholder="via"> -
-						<input type="text" id="via2Input" class="form-control d-inline-block" style="width: 4em;" minlength="3" maxlength="3" placeholder="via"> -
-						<input type="text" id="toInput" class="form-control d-inline-block" style="width: 4em;" minlength="3" maxlength="3" placeholder="à">
+					Route: <input type="text" id="fromInput" class="form-control d-inline-block" style="width: 5em;" minlength="4" maxlength="4" placeholder="de" required> -
+						<input type="text" id="via1Input" class="form-control d-inline-block" style="width: 5em;" minlength="4" maxlength="4" placeholder="via"> -
+						<input type="text" id="via2Input" class="form-control d-inline-block" style="width: 5em;" minlength="4" maxlength="4" placeholder="via"> -
+						<input type="text" id="toInput" class="form-control d-inline-block" style="width: 5em;" minlength="4" maxlength="4" placeholder="à">
               	</div>
               	<div class="modal-footer">
 					<button type="button" class="btn btn-info" id="indexButton"><i class="bi bi-stopwatch-fill"></i> Compteur</button>
 					<button type="button" class="btn btn-danger" id="cancelButton"><i class="bi bi-trash3-fill"></i> Annuler la réservation</button>
 					<button type="button" class="btn btn-primary" id="modifyButton"><i class="bi bi-pencil-fill"></i> Modifier la réservation</button>
+					<button type="button" class="btn btn-primary" id="createButton"><i class="bi bi-plus-circle-fill"></i> Ajouter la réservation</button>
                   	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
               	</div>
         </div>
