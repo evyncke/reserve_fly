@@ -23,15 +23,27 @@
 						Instructeur: <select id="instructorSelect"></select><br/>
 						Mobile instructeur: <span id="instructorPhone"></span><br/>
 					</span>
+<?php
+if (! $userIsInstructor) {
+?>
 					Pilotes RAPCS: <input type="checkbox" id="crewWantedInput" value="true"> bienvenus en tant que co-pilotes.<br/>
 					Membres RAPCS: <input type="checkbox" id="paxWantedInput" value="true"> bienvenus en tant que passagers.<br/>
+<?php
+}
+?>
 					<textarea id="commentTextArea" class="form-control"></textarea><br/>
 					Début: <input type="datetime-local" id="start"><br/>
 					Fin: <input type="datetime-local" id="stop"><br/>
+<?php
+if (! $userIsInstructor) {
+?>
 					Route: <input type="text" id="fromInput" class="form-control d-inline-block" style="width: 5em;" minlength="4" maxlength="4" placeholder="de" required> -
 						<input type="text" id="via1Input" class="form-control d-inline-block" style="width: 5em;" minlength="4" maxlength="4" placeholder="via"> -
 						<input type="text" id="via2Input" class="form-control d-inline-block" style="width: 5em;" minlength="4" maxlength="4" placeholder="via"> -
 						<input type="text" id="toInput" class="form-control d-inline-block" style="width: 5em;" minlength="4" maxlength="4" placeholder="à">
+<?php
+}
+?>
               	</div>
               	<div class="modal-footer">
 					<button type="button" class="btn btn-info" id="indexButton"><i class="bi bi-stopwatch-fill"></i> Compteur</button>
