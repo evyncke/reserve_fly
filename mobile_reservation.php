@@ -84,7 +84,7 @@ var
 	// preset Javascript constant fill with the right data from db.php PHP variables
 	// This is bad practice to have this in the <body> though but too complex to pass it as $header_postamble 
 	allPlanes = [
-<?
+<?php
 // Get the engine time from the mechanics  TODO no more useful as pilot logbook is now mandatory
 $result = mysqli_query($mysqli_link, "SELECT upper(id) as id, classe, compteur, compteur_vol, compteur_vol_valeur, compteur_date, entretien, photo, 
 		sous_controle, delai_reservation, commentaire, actif, compteur_vol
@@ -380,27 +380,39 @@ mysqli_free_result($result_news) ;
 
 <br/>
 
+<!-- Planning ruler and planning tables using overflow-x-auto to have a sliding window on small screens 
+ and left/start align on small screen and centered on wider ones -->
+<?php
+// The two tables are used to display the planning for the planes and instructors and are aligned on the right hand side
+// specific width of the parent container is required to have a 'responsive' table via overflow-x-auto
+// i.e., a sliding window at the bottom on small screens
+//   NOTE: the container as justify-content-center, which is probably not good for narrow screen
+//   NOTE: the actual width is computed based on the amount of airfield opening hours, e.g., 780px for Winter and 1024px or 984px for Summer
+$planning_table_width =	180 + (airport_closing_local_time(date('Y'), date('m'), date('d')) 
+		- airport_opening_local_time(date('Y'), date('m'), date('d'))) / (60 * 15) * 18 ; // 17+1 px per 15 minutes
+//		$planning_table_width = 721;
+// One issue is that the left column (plane/instructor names) is not fixed width (proportional dynamic font plane_cell font-size: calc(0.5vw + 0.75vh))
+// could use width: max-content; but not supported by all browsers yet
+// or width: calc() ?
+?>
 
-<div class="row justify-content-center overflow-x-auto">
- <div class="col-auto">
-  <table class="planningRuler">
-	<tr style="vertical-align: top;">
-		<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-7);"><i class="bi bi-rewind-fill"></i></a></td>
-		<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-1);"><i class="bi bi-caret-left-fill"></i></a></td>
-		<td class="planningRulerCellLarge"><span id="planningDayOfWeek"></span><input type="date" sytyle="width: 100px;" id="planningDate" onchange="jumpPlanningDate();"></td>
-		<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+1);"><i class="bi bi-caret-right-fill"></i></a></td>
-		<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+7);"><i class="bi bi-fast-forward-fill"></i></a></td>
-	</tr>
-  </table>
+ <div class="row d-flex justify-content-start justify-content-md-center overflow-x-auto">
+	<div class="col">
+		<table class="planningRuler">
+			<tr style="vertical-align: top;">
+				<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-7);"><i class="bi bi-rewind-fill"></i></a></td>
+				<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-1);"><i class="bi bi-caret-left-fill"></i></a></td>
+				<td class="planningRulerCellLarge"><span id="planningDayOfWeek"></span><input type="date" sytyle="width: 100px;" id="planningDate" onchange="jumpPlanningDate();"></td>
+				<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+1);"><i class="bi bi-caret-right-fill"></i></a></td>
+				<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(+7);"><i class="bi bi-fast-forward-fill"></i></a></td>
+			</tr>
+		</table>
 
-  <!-- The two tables are used to display the planning for the planes and instructors and are aligned on the right hand side
-   specific width of the parent container is actually 1024 px and is required to have a 'responsive' table via overflow-x-auto
-   i.e., a sliding window at the bottom on small screens -->
- <div class="d-flex flex-column align-items-end overflow-x-auto" style="width: 1024px;">
-	<table id="planePlanningTable" class="planningTable" style="display: box;"></table>
-	<table id="instructorPlanningTable" class="planningTable" style="display: box;"></table>
-  </div><!-- d-flex justify-content-end -->
- </div><!-- col-auto -->
+		<div class="d-flex flex-column align-items-end overflow-x-auto" style="width: <?=$planning_table_width?>px;">
+			<table id="planePlanningTable" class="planningTable" style="display: box;"></table>
+			<table id="instructorPlanningTable" class="planningTable" style="display: box;"></table>
+		</div><!-- d-flex justify-content-end -->
+	</div><!-- col -->
 </div><!-- row justify-content-center -->
 
 <div class="text-center fw-light small">
@@ -611,7 +623,7 @@ $version_js = date ("Y-m-d H:i:s.", filemtime('js/mobile_reservation.js')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('css/mobile_reservation.css')) ;
 $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 ?>
-<div class="copyright">Réalisation: Eric Vyncke, 2014-2024 et Patrick Reginster 2020-2022, pour RAPCS, Royal Aéro Para Club de Spa, ASBL<br/>
+<div class="copyright">Réalisation: Eric Vyncke, 2014-2025 et Patrick Reginster 2020-2022, pour RAPCS, Royal Aéro Para Club de Spa, ASBL<br/>
 Open Source code: <a href="https://github.com/evyncke/reserve_fly">on github</a><br/>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, exécuté en <?=$execution_time?> sec</div>
 <br/>
