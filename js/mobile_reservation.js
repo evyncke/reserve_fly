@@ -496,6 +496,7 @@ function createPlanningTableHeader(planningTable) {
 	// Add the first column for the header
 	rowHeader.insertCell(0) ;
 	rowHeader.cells[0].innerHTML= '' ;
+	rowHeader.cells[0].style.width = '15ch' ;
     // Add enough 'time' cells to this new row
 	nightColumn = 1 ;
     for (i = 1, hour = planningStartHour, minute = 0 ; hour < planningStopHour; i++, minute += 15) {
@@ -522,9 +523,8 @@ function createPlanningTableHeader(planningTable) {
 }
 
 function initPlanningTable() {
-	var header, rowHeader, hour, minute, i, newRow;
+	var i, newRow;
 
-	myLog("start initPlanningTable() planningHours = " + planningStartHour + '-' + planningStopHour) ;
 	planePlanningTable = document.getElementById('planePlanningTable') ;
 	instructorPlanningTable = document.getElementById('instructorPlanningTable') ;
 	// As there could be a previous version on the screen with a different layout
@@ -534,7 +534,6 @@ function initPlanningTable() {
 	rowCount = instructorPlanningTable.rows.length ;
 	while(rowCount)
 		instructorPlanningTable.deleteRow(--rowCount);
-//        header = planePlanningTable.createTHead() ;
 
 	columnCount = createPlanningTableHeader(planePlanningTable) ;
 	createPlanningTableHeader(instructorPlanningTable) ;
@@ -585,7 +584,6 @@ function initPlanningTable() {
 		}
 	}
 	refreshPlanningTableHeader() ;
-	myLog("end initPlanningTable()") ;
 }
 
 function jumpPlanningDate() {

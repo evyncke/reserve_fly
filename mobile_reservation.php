@@ -388,7 +388,7 @@ mysqli_free_result($result_news) ;
 // i.e., a sliding window at the bottom on small screens
 //   NOTE: the container as justify-content-center, which is probably not good for narrow screen
 //   NOTE: the actual width is computed based on the amount of airfield opening hours, e.g., 780px for Winter and 1024px or 984px for Summer
-$planning_table_width =	180 + (airport_closing_local_time(date('Y'), date('m'), date('d')) 
+$planning_table_width =	(airport_closing_local_time(date('Y'), date('m'), date('d')) 
 		- airport_opening_local_time(date('Y'), date('m'), date('d'))) / (60 * 15) * 18 ; // 17+1 px per 15 minutes
 //		$planning_table_width = 721;
 // One issue is that the left column (plane/instructor names) is not fixed width (proportional dynamic font plane_cell font-size: calc(0.5vw + 0.75vh))
@@ -398,7 +398,7 @@ $planning_table_width =	180 + (airport_closing_local_time(date('Y'), date('m'), 
 
  <div class="row d-flex justify-content-start justify-content-md-center overflow-x-auto">
 	<div class="col">
-		<table class="planningRuler">
+		<table class="planningRuler mx-0" >
 			<tr style="vertical-align: top;">
 				<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-7);"><i class="bi bi-rewind-fill"></i></a></td>
 				<td class="planningRulerCell"><a href="javascript:bumpPlanningBy(-1);"><i class="bi bi-caret-left-fill"></i></a></td>
@@ -408,7 +408,7 @@ $planning_table_width =	180 + (airport_closing_local_time(date('Y'), date('m'), 
 			</tr>
 		</table>
 
-		<div class="d-flex flex-column align-items-end overflow-x-auto" style="width: <?=$planning_table_width?>px;">
+		<div class="d-flex flex-column align-items-end overflow-x-auto" style="width: calc(<?=$planning_table_width?>px + 15ch);">
 			<table id="planePlanningTable" class="planningTable" style="display: box;"></table>
 			<table id="instructorPlanningTable" class="planningTable" style="display: box;"></table>
 		</div><!-- d-flex justify-content-end -->
