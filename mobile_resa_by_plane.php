@@ -21,7 +21,7 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
-$additional_preload = '</resa/js/mobile_modal_reservation.js>;rel=preload;as=script' ;
+$additional_preload = '</resa/js/mobile_modal_reservation.js>;rel=preload;as=script,</resa/data/instructors.js>;rel=preload;as=script' ;
 $need_swiped_events = true ; // Allow swipe events on this page
 $header_postamble = '
 <script src="data/instructors.js"></script>
