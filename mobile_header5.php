@@ -25,6 +25,10 @@ if (!isset($additional_preload))
 elseif (! str_starts_with($additional_preload, ',')) // Ensure it starts with a comma
   $additional_preload = ',' . $additional_preload ; 
 
+if (isset($need_swiped_events) and $need_swiped_events) {
+    $additional_preload .= ',</resa/js/swiped-events.js>;rel=preload;as=script' ;
+}
+
 # HTTP/2 push of some JS scripts via header()
 header('Link: </resa/js/mobile.js>;rel=preload;as=script,</resa/data/members.js>;rel=preload;as=script,</resa/data/planes.js>;rel=preload;as=script,' .
   '</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image' . 
