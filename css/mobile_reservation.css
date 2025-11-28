@@ -26,7 +26,6 @@ td { border: 1px; margin: 0px; padding: 1px;}
 
 .planningRuler { height: 32px ; margin-left: auto; vertical-align: text-top ;  margin-right: auto; }
 .planningRulerCell { height: 32px ; padding-left: 10px; padding-right: 10px; vertical-align: top; vertical-align: text-top ; border: solid; border-width: 2px;}
-.planningRulerCellCalendar { height: 32px ; padding-left: 1px; padding-right: 1px; vertical-align: top; vertical-align: text-top ; border: solid; border-width: 2px;}
 .planningRulerCellLarge { height: 32px ; width: 200px; vertical-align: top; vertical-align: text-top ; border: solid; border-width: 2px;}
 span#planningDayOfWeek { width: 80px; font-size: 14; text-align: center; vertical-align: top; }
 input#planningDate { width: 90px; font-size: 14; text-align: center; vertical-align: top; }
