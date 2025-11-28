@@ -6,14 +6,14 @@ function offrir_page_loaded() {
 
  	document.getElementById("id_valeur_virement").style.display="none";
 
-	document.getElementById("id_valeur_bon").onchange = function() {compute_tarifs("id_valeur_bon")};
+	document.getElementById("id_valeur_bon").onchange = function() {
+        compute_hideshow("bon_valeur");
+        compute_tarifs("id_valeur_bon")};
 
 	document.getElementById("id_numberofpassagers").oninput = function() {compute_tarifs("id_numberofpassagers")};
 
 	document.getElementById("id_valeur_bon_libre").oninput = function() {compute_tarifs("id_valeur_bon_libre")};
-
-	document.getElementById("id_valeur_bon_libre").onchange = function() {compute_tarifs("id_valeur_bon_libre")};
-    
+   
     document.getElementById("id_typeofgift").onchange = function() {
         check_field("id_typeofgift");
         check_submit();
@@ -186,7 +186,10 @@ function compute_hideshow(theTypeOfGift)
 
        document.getElementById('id_valeur_bon_row').style.display="";
 
-       //document.getElementById("id_valeur_bon_libre").style.display="" ;
+       document.getElementById("id_valeur_bon_libre").style.display="none" ;
+       if(document.getElementById('id_valeur_bon').value=="9") {
+             document.getElementById("id_valeur_bon_libre").style.display="" ;
+       }
 
        document.getElementById("id_voldansles12mois_row").style.display="";
 
