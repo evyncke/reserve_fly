@@ -23,505 +23,18 @@ $cotisationYear=$membership_year; // Set in dbi.php
 if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor) 
 	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
 
+// In the mobile_header.php, $additional_preload is use to force a HTTP/2 preload of specific resources (faster load time)
+$additional_preload = '</resa/js/gestionMembres.js>;rel=preload;as=script,</resa/css/gestionMembres.css>;rel=preload;as=style' ;
 // In the mobile_header.php, $header_postamble will be inserted in the actual <head>...</head> section
 $header_postamble ='
-<style>
-	.tooltip {
-	  position: relative;
-	  display: inline-block;
-	  border-bottom: 1px dotted black;
-	  opacity: 1;
-	}
-
-	.tooltip .tooltiptext {
-	  visibility: hidden;
-	  width: 120px;
-	  background-color: #555;
-	  color: #fff;
-	  text-align: center;
-	  border-radius: 6px;
-	  padding: 5px 0;
-	  position: absolute;
-	  z-index: 1;
-	  bottom: 125%;
-	  left: 50%;
-	  margin-left: -60px;
-	  opacity: 0;
-	  transition: opacity 0.3s;
-	}
-
-	.tooltip .tooltiptext::after {
-	  content: "";
-	  position: absolute;
-	  top: 100%;
-	  left: 50%;
-	  margin-left: -5px;
-	  border-width: 5px;
-	  border-style: solid;
-	  border-color: #555 transparent transparent transparent;
-	}
-
-	.tooltip:hover .tooltiptext {
-	  visibility: visible;
-	  opacity: 1;
-	}
-	</style>
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script type="text/javascript" src="js/gestionMembres.js"></script>
+<link rel="stylesheet" type="text/css" href="css/gestionMembres.css">
 ' ;
-
 require_once 'mobile_header5.php' ;
 
-?>  
-<!-- Eric's suggestion: move all the JS code in gestionMembres.js and include this file, it will be cached on the client browser and
-and the page load will be faster -->
-<script type="text/javascript">
-	var dirSort="asc";
-	var columnSort=-1;
-// Manage Search when keyup
-
-// Manage Search when document loaded
-$(document).ready(function() {
-   $("#id_SearchInput").on("keyup", function() {
-      var value = $(this).val().toLowerCase();
-      $("#myTable tr").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '').indexOf(value) > -1)
-     });
-    });
-    var value = $("#id_SearchInput").val().toLowerCase();
-      $("#myTable tr").filter(function() {
-      $(this).toggle($(this).text().toLowerCase().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '').indexOf(value) > -1)
-      });
-});
-//.normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '');
-//        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-function parseFloatEU(s) {
-	if (s == '') return 0 ;
-	return parseFloat(s.replace(/\./g, "").replace(/\,/g, ".")) ;
-}
-
-// Based on https://www.w3schools.com/howto/howto_js_sort_table.asp
-function sortTable(n, isNumeric) {
-	if(columnSort!=n) {
-		dirSort="asc";
-		columnSort=n;
-	}
-	var table, rows, i, k, x, y;
-  	table = document.getElementById("myTable");
-  	rows = table.rows;
-  	const keyMap = new Map();
-  	for (i = 0; i < (rows.length - 1); i++) {
-		//Fill the Map to sort
-    	x = rows[i].getElementsByTagName("TD")[n];
-		var xText=x.innerText;
-		if (isNumeric) {
-			// add (i*0.0001 if 2 times the same key
-			keyMap.set(parseFloatEU(xText)+(i*0.0001), i);
-		} 
-		else {
-			// add _i if 2 times the same key
-			keyMap.set(xText+"_"+i, i);
-		}
-	}
-	var sorted;
-	if(isNumeric) {
-		if(dirSort=="asc") {
-		 	sorted = [...keyMap].sort((a, b) => a[0] - b[0]);
-		}
-		else {
-			sorted = [...keyMap].sort((a, b) => b[0] - a[0]);
-		}
-	}
-	else {
-		if(dirSort=="asc") {
-		 	sorted = [...keyMap].sort();
-		}
-		else {
-			sorted = [...keyMap].sort((a, b) => b[0].localeCompare(a[0]));			
-		}
-	}
-	
-	const sortedMap = new Map(sorted);
-	let keys = Array.from(sortedMap.keys());
-	i=0;
-	for (let [key, value] of sortedMap) {
-		if(value!=i) {
-			//console.log("sortTable value="+value);
-			rows[i].parentNode.insertBefore(rows[value], rows[i]);
-			var aLen=keys.length;
-			for (k = i+1; k < aLen; k++) {
-				var aKey=keys[k];
-				var aValue=sortedMap.get(aKey);
-				if(aValue<value) {
-					sortedMap.set(aKey,aValue+1);
-					if(aValue+1>aLen-1) {
-						console.log("sortTable value="+value+";aValue="+aValue);
-					}
-				}
-			}
-		}
-		i++;
-	}
-	if(dirSort == "asc") {
-		dirSort="desc";
-	}
-	else {
-		dirSort="asc";
-	}
-}
-
-function blockFunction(PHP_Self, theBlockedFlag, theNom, theUserId, theSolde)
-{
-	var aSearchText=document.getElementById("id_SearchInput").value;
-	var aReason="";
-	if(theBlockedFlag=="Block") {
-		aReason=getReason(theSolde);
-		if (confirm("Confirmer que vous voulez bloquer " + theNom + "?\nRaison: "+aReason) == true) {			
-   		 	var aCommand=PHP_Self+"?block=true&personid="+theUserId+"&reason="+aReason;	
-			if(aSearchText!="")	 {
-				aCommand+="&search="+aSearchText;
-			}
-   		 	window.location.href = encodeURI(aCommand);
-		}
-	}
-	else {
-		if (confirm("Confirmer que vous voulez débloquer " + theNom + "?") == true) {
-      		var aCommand=PHP_Self+"?unblock=true&personid="+theUserId;
- 			if(aSearchText!="")	 {
- 				aCommand+="&search="+aSearchText;
- 			}
-      		 window.location.href = aCommand;
-		}		
-	}
-}
-
-function getReason(theSolde)
-{
-	var aPredefinedReason="Votre solde est actuellement négatif pour un montant de ("+theSolde+" EUR). Merci de régulariser rapidement. Vos réservations seront débloquées une fois le paiement enregistré dans la comptabilité.";
-	if(theSolde=="") {
-		aPredefinedReason="Votre solde est actuellement négatif. Merci de régulariser rapidement. Vos réservations seront débloquées une fois le paiement enregistré dans la comptabilité.";
-	}
-	if(theSolde==-70 || theSolde==-255){
-		aPredefinedReason="Vous n'êtes pas en ordre de cotisation. Vous êtes donc interdit(e)s de réservation tant que votre cotisation n'est pas réglée.";
-	}
-	var reason = prompt("Entrer la raison du blocage", aPredefinedReason);
-	return reason;
-}
-
-function filterSelected()
-{
-	for(i=1;i<=9;i++){
-	    var aToggleComponentId="id_FilterRows"+i.toString();
-		var blockedToggle = document.getElementById(aToggleComponentId);
-		blockedToggle.checked=false;
-	}
-	var aToggle = document.getElementById("id_FilterSelected");
-	var aCheckedValue=aToggle.checked;
-    var table = document.getElementById("myTable");
-    var rows = table.rows;
-	var aSelectToggleColumn=0;
-   	for (i = 0; i < rows.length; i++) {
-        var row = rows[i];
-		if(!aCheckedValue) {
-   		  row.hidden=false;
-		  continue;
-		}
-		var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
-		var aSelectedToggle = aColumn1Row.childNodes[0];
-		if(aSelectedToggle.checked) {
-     		  row.hidden=false;
-		}
-		else {
-   		  row.hidden=true;			
-		}
-	}
-}
-
-function submitSelect(theSelect)
-{
-    var table = document.getElementById("myTable");
-    var rows = table.rows;
-	var aSelectToggleColumn=0;
-   	for (i = 0; i < rows.length; i++) {
-		var row = rows[i];
-		var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
-		var aSelectedToggle = aColumn1Row.childNodes[0];
-		if(theSelect=="SelectVisible") {
-			// Select all visible rows
-			if(row.hidden) {
-				aSelectedToggle.checked=false;
-			}
-			else {
-				aSelectedToggle.checked=true;
-			}
-		}
-		else {
-			// Unselect all rows
-			aSelectedToggle.checked=false;
-		}
-	}
-}
-
-function filterRows(count, blocked, sign)
-{
-	// Untoggle other checkboxs
-	var blockedToggle = document.getElementById("id_FilterSelected");
-	blockedToggle.checked=false;
-	for(i=1;i<=9;i++){
-		if(i!=count) {
-	    	var aToggleComponentId="id_FilterRows"+i.toString();
-			blockedToggle = document.getElementById(aToggleComponentId);
-			blockedToggle.checked=false;
-		}
-	}
-    var aNegativeValueComponentId="id_FilterRows"+count.toString();
-	var blockedToggle = document.getElementById(aNegativeValueComponentId);
-	var aCheckedValue=blockedToggle.checked;
-    var table = document.getElementById("myTable");
-    var rows = table.rows;
-	var aSelectToggleColumn=0;
-	var aStatusColumn=16;
-	var aNonNaviguantColumn=10;
-	var aEleveColumn=11;
-	var aPiloteColumn=12;
-	var aEffectifColumn=13;
-	var aValueColumn=15;
-  	var aCotisationColumn=14;
-	var aOdooColumn=2;
-	var aHidden=false;
-   	for (i = 0; i < rows.length-1; i++) {
-        var row = rows[i];
-		if(!aCheckedValue) {
-   		  row.hidden=false;
-		  continue;
-		}
-		var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
-		var aSelectedToggle = aColumn1Row.childNodes[0];
-		
-		var aOdoo = row.getElementsByTagName("TD")[aOdooColumn].textContent;
-		if(aOdoo.indexOf("xxxx")!=-1) {
-     		  row.hidden=true;	
-			  continue;
-		}
-		// Display rows without cotisation
-		if(blocked=="membre") {
-			if(sign=="sanscotisation") {
-				var aCotisation=row.getElementsByTagName("TD")[aCotisationColumn].textContent;
-				var aPos=aCotisation.search("[?]");
-				if(aPos!=-1) {
-					row.hidden=false;	
-					continue;
-				}
-				else {
-					row.hidden=true;	
-					continue;
-				}
-			}
-			else if(sign=="nonnaviguant") {
-				var aCotisation=row.getElementsByTagName("TD")[aNonNaviguantColumn].textContent;
-				if(aCotisation!="") {
-					row.hidden=false;	
-					continue;
-				}
-				else {
-					row.hidden=true;	
-					continue;
-				}
-			}
-			else if(sign=="eleve") {
-				var aMemberType=row.getElementsByTagName("TD")[aEleveColumn].textContent;
-				if(aMemberType!="") {
-					row.hidden=false;	
-					continue;
-				}
-				else {
-					row.hidden=true;	
-					continue;
-				}
-			}
-			else if(sign=="pilote") {
-				var aMemberType=row.getElementsByTagName("TD")[aPiloteColumn].textContent;
-				if(aMemberType!="") {
-					row.hidden=false;	
-					continue;
-				}
-				else {
-					row.hidden=true;	
-					continue;
-				}
-			}
-			else if(sign=="effectif") {
-				var aMemberType=row.getElementsByTagName("TD")[aEffectifColumn].textContent;
-				if(aMemberType!="") {
-					row.hidden=false;	
-					continue;
-				}
-				else {
-					row.hidden=true;	
-					continue;
-				}
-			}
-			else {
-				alert("ERROR: unknown action "+sign);
-				return;
-			}
-		}
-	   	var aStatus=row.getElementsByTagName("TD")[aStatusColumn].textContent;
-		var aBlockedRow=!(aStatus.indexOf("DEBLOQUER")==-1);		
-		if(aStatus.indexOf("BLOQUER")==-1) {
-			// Deactivated row
-   		 	row.hidden=true;
-			//aSelectedToggle.checked=false;
-		 	continue;
-		}
-		if(blocked=="Blocked") {
-			if(!aBlockedRow || aStatus=="") {
-	   			row.hidden=true;
-	  			//aSelectedToggle.checked=false;
-			  continue;
-			}
-		} 
-		else if(blocked=="NotBlocked") {
-			if(aBlockedRow || aStatus=="") {
-	   		  	row.hidden=true;
-  				//aSelectedToggle.checked=false;
-			  continue;
-			}
-		}
-		 
-   		var aValueText=row.getElementsByTagName("TD")[aValueColumn].textContent;	
-		var aNegativeValue=(aValueText.indexOf("-")==0);
-		if(sign=="<") {
-			if(!aNegativeValue) {
-		 		row.hidden=true;
-	  			//aSelectedToggle.checked=false;
- 				continue;
-			}
-		}
-		else if(sign==">") {
-			if(aNegativeValue) {
-		 		row.hidden=true;
-	  			//aSelectedToggle.checked=false;
- 				continue;
-			}
-		}
- 		row.hidden=false;
-		//aSelectedToggle.checked=true;
- 	}
-}
-
-function submitBlocked(PHP_Self, blocked) {
-	var aSearchText=document.getElementById("id_SearchInput").value;
-    var table = document.getElementById("myTable");
-    var rows = table.rows;
-	var aSelectToggleColumn=0;
-	var aListOfId="";
-	var aCount=0;
-   	for (i = 0; i < rows.length; i++) {
-        var row = rows[i];
-		if(!row.hidden) {
-			var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
-			var aSelectedToggle = aColumn1Row.childNodes[0];
-			if(aSelectedToggle.checked) {
-				aCount++;
-				var aValueText=row.getElementsByTagName("TD")[1].textContent;
-				if(aListOfId!="") {
-					aListOfId+=",";
-				}
-				aListOfId+=aValueText;
-				aColumn1Row.style.backgroundColor="orange";
-			}
-			else {
-				aColumn1Row.style.backgroundColor="white";
-			}
-		}
-	}
-	if(aCount==0) {
-		alert("Pour Bloquer ou Débloquer, vous devez d'abord selectionner des lignes dans la table!");
-		return;
-	}
-	var aReason="";
-	if(blocked=="Block") {
-		aReason=getReason("");
-		if (confirm("Confirmer que vous voulez bloquer " + aCount.toString() +" personne(s)" + "?\nRaison: "+aReason) == true) {			
-   		 	var aCommand=PHP_Self+"?block=true&listpersonid="+aListOfId+"&reason="+aReason;	
-			if(aSearchText!="")	 {
-				aCommand+="&search="+aSearchText;
-			}
-   		 	window.location.href = encodeURI(aCommand);
-		}
-	}
-	else {
-		if (confirm("Confirmer que vous voulez débloquer "+ aCount.toString() +" personne(s)" + "?") == true) {
-      		var aCommand=PHP_Self+"?unblock=true&listpersonid="+aListOfId+"&reason="+aReason;
- 			if(aSearchText!="")	 {
- 				aCommand+="&search="+aSearchText;
- 			}
-      		 window.location.href = aCommand;
-		}		
-	}
-}
-function submitDownloadMail(PHP_Self, action) {
-	var table = document.getElementById("myTable");
-    var rows = table.rows;
-	var aSelectToggleColumn=0;
-	var aMailColumn=9;
-	var aListOfMails="";
-	var aCount=0;
-   	for (i = 0; i < rows.length-1; i++) {
-        var row = rows[i];
-		if(!row.hidden) {
-			var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
-			var aSelectedToggle = aColumn1Row.childNodes[0];
-			if(aSelectedToggle.checked) {
-				aCount++;
-				var aValueText=row.getElementsByTagName("TD")[aMailColumn].textContent;
-				if(aListOfMails!="") {
-					aListOfMails+=",";
-				}
-				aListOfMails+=aValueText;
-			}
-		}
-	}
-	if(aCount==0) {
-		alert("Pour copier des mails, vous devez d'abord selectionner des lignes dans la table!");
-		return;
-	}
-	if(action=="CopyMail") {
-		navigator.clipboard.writeText(aListOfMails);
-		alert(aCount+" adresses mails sont copiées dans le clipboard. Utiliser le Paste (Cmd+V) pour le copier dans un document !");
-	}
-}
-
-function createCotisationFunction(PHP_Self,action,theName,thePersonid,theMember, theStudent, thePilot) {
-	var aSearchText=document.getElementById("id_SearchInput").value;
-	aCotisationValue=270.0;
-	aCotisationTypeString="membre naviguant";
-	aCotisationType="naviguant";
-	if(theMember!="") {
-		aCotisationValue=70.0;
-		aCotisationTypeString="membre non naviguant";
-		aCotisationType="nonnaviguant";
-	}
-	// After 1 July: Proportional to the numer of mounth
-	aDate= new Date();
-	aMonth=aDate.getMonth()+1;
-	if(aMonth>6){
-		aCotisationValue=aCotisationValue*(12-aMonth)/12.0;
-	}
-	if (confirm("Confirmer que vous voulez créer une facture de cotisation " + aCotisationTypeString + " de " + aCotisationValue.toString() + " € à " + theName + " (id="+thePersonid+")?") == true) {
-      		var aCommand=PHP_Self+"?createcotisation=true&personid="+thePersonid+"&cotisationtype="+aCotisationType;
- 			if(aSearchText!="")	 {
- 				aCommand+="&search="+aSearchText;
- 			}
-      		 window.location.href = aCommand;
-	}
-}
-</script>
-<?php
 // Display or not Web deActicated member (Must be managed by a toggle button)
 $displayWebDeactivated=false;
-//print("userId=$userId</br>");
 $searchText=""; 	
 if (isset($_REQUEST['search']) and $_REQUEST['search'] != '') {
 	$searchText=$_REQUEST['search'];
@@ -601,12 +114,10 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 //Create Cotisation invoice
 if (isset($_REQUEST['createcotisation'])) {
 	$personid="";
-	//print("Action: createcotisation<br>");
 	if (isset($_REQUEST['personid']) and $_REQUEST['personid'] != '') {
 		$personid=$_REQUEST['personid'];
 		if (isset($_REQUEST['cotisationtype']) and $_REQUEST['cotisationtype'] != '') {
 			$cotisationtype=$_REQUEST['cotisationtype'];
-			// $membership_year=date("Y"); // Already set in dbi.php
 			if(OF_CreateFactureCotisation($personid, $cotisationtype, $membership_year)) {
 				print("<b>La facture de cotisation pour $personid de type $cotisationtype pour $membership_year a été créée dans ODOO!</b></br>");	
 			}
@@ -622,7 +133,60 @@ if (isset($_REQUEST['createcotisation'])) {
 	else  {
 		print("<b style='color: red;'>Impossible de créer une cotisation: Personne n'est sélectionné!</b></br>");	
 	}
-	//print("Action end: createcotisation<br>");
+}
+
+// Handle checkboxes toggling, i.e., add or remove from group
+if (isset($_REQUEST['checkboxId']) and $_REQUEST['checkboxId'] != '' and isset($_REQUEST['checked']) and $_REQUEST['checked'] != '') {
+	$checked=$_REQUEST['checked'];
+	$parts = explode('-', $_REQUEST['checkboxId']);
+	$personId = $parts[1];
+	switch($parts[2]) {
+		case 'Member':
+			$groupId = $joomla_member_group;
+			break;
+		case 'Student':
+			$groupId = $joomla_student_group;
+			break;
+		case 'Pilot':
+			$groupId = $joomla_pilot_group;
+			break;
+		case 'Effectif':
+			$groupId = $joomla_effectif_group;
+			break;
+		default:
+			journalise($userId, "E", "Unknown group for checkbox toggling: " . $_REQUEST['checkboxId']) ;
+			break;
+	}
+	if ($checked == 'true') {
+		// Add to group
+		mysqli_report(MYSQLI_REPORT_OFF); // Disable exceptions (could also use try-catch)
+		$rc = mysqli_query($mysqli_link, "INSERT INTO $table_user_usergroup_map (user_id, group_id) 
+			VALUES ($personId, $groupId)") ;
+		if ($rc === FALSE)
+			if (mysqli_errno($mysqli_link) == 1062) {
+				// Duplicate entry, i.e., already in group
+				journalise($userId, 'W', "User $personId already in group $groupId/$parts[2]") ;
+				print("<div class=\"alert alert-warning\" role=\"alert\">
+ 				 User $personId is already in group $groupId/$parts[2].</div>");
+			} else 
+				journalise($userId, 'F', "Cannot add user $personId to group $groupId/$parts[2]: " . mysqli_error($mysqli_link)) ;
+		else {
+			journalise($userId, 'I', "User $personId added to group $groupId/$parts[2]") ;
+			print("<div class=\"alert alert-info\" role=\"alert\">
+ 				 User $personId added to group $groupId/$parts[2].</div>");
+		}
+	} else if ($checked == 'false') {
+		// Remove from group
+		mysqli_query($mysqli_link, "DELETE FROM $table_user_usergroup_map 
+			WHERE user_id = $personId AND group_id = $groupId")
+			or journalise($userId, 'F', "Cannot remove user $personId from group $groupId: " . mysqli_error($mysqli_link)) ;
+		journalise($userId, 'I', "User $personId removed from group $groupId/$parts[2]") ;
+		print("<div class=\"alert alert-info\" role=\"alert\">
+ 			 User $personId removed from group $groupId/$parts[2].</div>");
+	} else {
+		journalise($userId, "E", "Strange value for checkbox toggling: " . $checked) ;
+	}
+	// TODO send an email to personId to inform him of the change
 }
 
 // Let's get some data from Odoo
@@ -647,7 +211,7 @@ foreach($members as $member) {
 	$odoo_customers[$email] = $member ; // Let's build a dict indexed by the email addresses
 }
 ?>
-<h2>Table des membres du RAPCS</h2>
+<h2>Gestion des membres</h2>
 <?php
 print("<b>Cotisation pour l'année $cotisationYear</b><br>");
 ?>
@@ -656,17 +220,17 @@ print("<b>Cotisation pour l'année $cotisationYear</b><br>");
   print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeholder=\"Search..\" value=\"$searchText\">");
 ?>
   <br>&nbsp;&nbsp;Display only:
-  &nbsp;&nbsp;<input type="checkbox" id="id_FilterSelected" name="name_FilterSelected" value="Selected" onclick="filterSelected();" ><label for="name_FilterSelected">&nbsp;Selected</label>
-  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows1" name="name_FilterRows1" value="Blocked" onclick="filterRows(1,'Blocked','');" ><label for="name_Blocked">&nbsp;Blocked</label>
-  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows2" name="name_FilterRows2" value="negativeValue" onclick="filterRows(2,'','<');" ><label for="name_negativeValue">&nbsp;Negative Value</label>
-  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows3" name="name_FilterRows3" value="negativeValue" onclick="filterRows(3,'NotBlocked','<');" ><label for="name_negativeValue">&nbsp;Negative Value & Not Blocked</label>
-  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows4" name="name_FilterRows4" value="negativeValue" onclick="filterRows(4,'Blocked','>');" ><label for="name_negativeValue">&nbsp;Positive Value & Blocked</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterSelected" name="name_FilterSelected" value="Selected" onclick="filterSelected();" ><label for="name_FilterSelected">&nbsp;Selected</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows1" name="name_FilterRows1" value="Blocked" onclick="filterRows(1,'Blocked','');" ><label for="name_Blocked">&nbsp;Blocked</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows2" name="name_FilterRows2" value="negativeValue" onclick="filterRows(2,'','<');" ><label for="name_negativeValue">&nbsp;Negative Value</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows3" name="name_FilterRows3" value="negativeValue" onclick="filterRows(3,'NotBlocked','<');" ><label for="name_negativeValue">&nbsp;Negative Value & Not Blocked</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows4" name="name_FilterRows4" value="negativeValue" onclick="filterRows(4,'Blocked','>');" ><label for="name_negativeValue">&nbsp;Positive Value & Blocked</label>
   <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows5" name="name_FilterRows5" value="sanscotisation" onclick="filterRows(5,'membre','sanscotisation');" ><label for="name_sanscotisation">&nbsp;Sans Cotisation</label>
-  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows6" name="name_FilterRows6" value="membre" onclick="filterRows(6,'membre','nonnaviguant');" ><label for="name_nonnaviguant">&nbsp;Membres non naviguant</label>
-  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows7" name="name_FilterRows7" value="membre" onclick="filterRows(7,'membre','eleve');" ><label for="name_eleve">&nbsp;Elèves</label>
-  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows8" name="name_FilterRows8" value="membre" onclick="filterRows(8,'membre','pilote');" ><label for="name_pilote">&nbsp;Pilotes</label>
-  &nbsp;&nbsp;<input type="checkbox" id="id_FilterRows9" name="name_FilterRows9" value="membre" onclick="filterRows(9,'membre','effectif');" ><label for="name_effectif">&nbsp;Membres effectifs</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows5" name="name_FilterRows5" value="sanscotisation" onclick="filterRows(5,'membre','sanscotisation');" ><label for="name_sanscotisation">&nbsp;Sans Cotisation</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows6" name="name_FilterRows6" value="membre" onclick="filterRows(6,'membre','nonnaviguant');" ><label for="name_nonnaviguant">&nbsp;Membres non naviguant</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows7" name="name_FilterRows7" value="membre" onclick="filterRows(7,'membre','eleve');" ><label for="name_eleve">&nbsp;Elèves</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows8" name="name_FilterRows8" value="membre" onclick="filterRows(8,'membre','pilote');" ><label for="name_pilote">&nbsp;Pilotes</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows9" name="name_FilterRows9" value="membre" onclick="filterRows(9,'membre','effectif');" ><label for="name_effectif">&nbsp;Membres effectifs</label>
   <br>
 <?php
 print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
@@ -683,17 +247,17 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 	<thead style="position: sticky;">
 <tr style="text-align: Center;">
 <th class="select-checkbox" onclick="sortTable(0, true)" style="text-align: right;">#</th>
-<th onclick="sortTable(1, true)">Id</th>
-<th onclick="sortTable(2, true)">Ref. odoo</th>
+<th onclick="sortTable(1, true)">Jom Id</th>
+<th onclick="sortTable(2, true)">Ré	f. Odoo</th>
 <th onclick="sortTable(3, false)">Nom</th>
 <th onclick="sortTable(4, false)">Prénom</th>
 <th onclick="sortTable(5, false)">Adresse</th>
 <th onclick="sortTable(6, false)">Code</th>
 <th onclick="sortTable(7, false)">Ville</th>
 <th onclick="sortTable(8, false)">Pays</th>
-<th onclick="sortTable(9, false)">email</th>
+<th onclick="sortTable(9, false)">Email</th>
 <th onclick="sortTable(10, false)">Membre non-navigant</th>
-<th onclick="sortTable(11, false)">Elève</th>
+<th onclick="sortTable(11, false)">Élève</th>
 <th onclick="sortTable(12, false)">Pilote</th>
 <th onclick="sortTable(13, false)">Membre Effectif</th>
 <th onclick="sortTable(14, true)">Cotisation</th>
@@ -761,9 +325,15 @@ datediff(current_date(), b_when) as days_blocked
 		}
 			
 		$groups = explode(',', $row['allGroups']) ;
-		$effectif = (in_array($joomla_effectif_group, $groups)) ? $CheckMark : '' ;
-		$pilot = (in_array($joomla_pilot_group, $groups)) ? $CheckMark : '' ;
-		$student = (in_array($joomla_student_group, $groups)) ? $CheckMark : '' ;
+		$effectif = (in_array($joomla_effectif_group, $groups)) ? 
+			'<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Effectif" checked>' 
+			: '<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Effectif">'  ;
+		$pilot = (in_array($joomla_pilot_group, $groups)) ? 
+			'<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Pilot" checked>' 
+			: '<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Pilot">'  ;
+		$student = (in_array($joomla_student_group, $groups)) ? 
+			'<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Student" checked>' 
+			: '<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Student">'  ;
 		$status=db2web($row['b_reason']);
 		$blocked=$row['block'];
 		$odoo = (isset($odoo_customers[strtolower($row['email'])])) ? $odoo_customers[strtolower($row['email'])] : null ;
@@ -789,8 +359,8 @@ datediff(current_date(), b_when) as days_blocked
 			*/
 		}
 		if($status=="") $status="OK";
-		$member=$CheckMark;
-		if($blocked==1 || $pilot == $CheckMark || $student== $CheckMark) {
+		$member='<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Member" checked disabled>' ;
+		if($blocked==1 || strpos($pilot, "checked") !== false || strpos($student, "checked") !== false) {
 			$member='';
 		}
 		$solde=0.;
@@ -873,10 +443,10 @@ datediff(current_date(), b_when) as days_blocked
 			$rowStyle="class='text-info'";	
 		}
 		if($blocked!=1) {
-			if($member == $CheckMark) $memberCount++;
-			if($student == $CheckMark) $studentCount++;
-			if($pilot == $CheckMark) $pilotCount++;
-			if($effectif == $CheckMark) $effectifCount++;
+			if(strpos($member, "checked") !== false) $memberCount++;
+			if(strpos($student, "checked") !== false) $studentCount++;
+			if(strpos($pilot, "checked") !== false) $pilotCount++;
+			if(strpos($effectif, "checked") !== false) $effectifCount++;
 		}
 		if($blocked == 2) $blockedCount++;
 		print("<tr style='text-align: right'; $rowStyle>
@@ -904,8 +474,14 @@ datediff(current_date(), b_when) as days_blocked
 				if($cotisation!="") {
 					$cotisation="[".$cotisation."]";
 				}
-				print("<td style='text-align: center;' class='text-danger'><a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"createCotisationFunction('$_SERVER[PHP_SELF]','Cotisation','" .
-				str_replace("'", "\\'","$nom $prenom") . "','$personid','$member','$student','$pilot')\">$cotisation<span class='tooltiptext'>Click pour facturer une cotisation</span></a>
+				$isMember = (strpos($member, "checked") !== false) ? 'true' : 'false';
+				print("<td style=\"text-align: center;\" class=\"text-danger\">
+				<a class=\"tooltip\" href=\"javascript:void(0);\" 
+					onclick=\"createCotisationFunction('$_SERVER[PHP_SELF]','Cotisation','" .
+					str_replace("'", "\\'","$nom $prenom") . "','$personid',
+					$isMember)\">
+					$cotisation<span class='tooltiptext'>Click pour facturer une cotisation</span>
+				</a>
 				</td>");			
 			}
 		}
@@ -927,7 +503,7 @@ datediff(current_date(), b_when) as days_blocked
 			print("<td style='text-align: center;font-size: 17px;' class='text-danger'>
 			<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Unblock','" .
 				str_replace("'", "\\'","$nom $prenom") . "','$personid','$solde')\">&#x26D4;<span class='tooltiptext'>Click pour DEBLOQUER</span>
-				<span class=\"badge text-bg-info\">$row[days_blocked]</span></a></td>");
+				<span class=\"badge text-bg-info\"><i class=\"bi bi-calendar3\"></i>&nbsp;$row[days_blocked]</span></a></td>");
 		}
 		else if($blocked==1){
 			// X rouge
