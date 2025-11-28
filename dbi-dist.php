@@ -152,7 +152,6 @@ function airport_closing_local_time($year, $month, $day) {
 		return $today->format('U') -3600 ;
 	else
 		return $today->format('U') ;
-	return $today->format('U') ; // as ->getTimeStamp() is not widely supported ....
 }
 
 $validity_warning = 30 ; // Number of days before validity expiration to flag as warning
