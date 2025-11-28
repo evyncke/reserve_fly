@@ -267,6 +267,22 @@ if ($http_referer != '') {
 	$referer_name = '';
 }
 
+// Canonicalize a phone number by removing spaces, dashes, dots, parentheses
+// and add a +32 if starts with 0
+
+function canonicalizePhone($phone) {
+	$phone = preg_replace('/\s+/', '', $phone) ; // Remove spaces
+	$phone = str_replace('-', '', $phone) ; // Remove dashes
+	$phone = str_replace('.', '', $phone) ; // Remove dots
+	$phone = str_replace('(', '', $phone) ; // Remove (
+	$phone = str_replace(')', '', $phone) ; // Remove )
+	if (substr($phone, 0, 2) == '00')
+		$phone = '+' . substr($phone, 2) ;	
+	else if (substr($phone, 0, 1) == '0')
+		$phone = '+32' . substr($phone, 1) ;	
+	return $phone ;
+}
+
 // IP addresses are fetched from the X-Forwarded-For HTTP header
 function getClientAddress() {
 	$remote_address = (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] ;
