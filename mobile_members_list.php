@@ -109,7 +109,7 @@ if ($group) {
 </div><!-- mb-3-->
 <div class="mb-3">
 <label for="groupId" class="form-label">Sélectionner les membre du groupe</label>
-<select id="groupId" class="col-form-select col-xs-1" name="group">
+<select id="groupId" class="col-form-select col-1" name="group">
     <?php
     $result = mysqli_query($mysqli_link, "SELECT * FROM jom_usergroups ORDER BY title ASC")
         or journalise($userId, "F", "Cannot list user groups: " . mysqli_error($mysqli_link)) ;

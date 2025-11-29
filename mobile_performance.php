@@ -46,8 +46,8 @@ print("</script>\n");
 <h2 class="d-none d-md-block">Aircraft Performance</h2>
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form" class="form-horizontal">
 <!--div class="row m-0-xs"-->
-    <label for="id_plane_select" class="col-form-label col-xs-1 col-md-1">Plane:</label>
-    <select id="id_plane_select" class="col-form-select col-xs-1" name="plane_select"></select>
+    <label for="id_plane_select" class="col-form-label col-1 col-md-1">Plane:</label>
+    <select id="id_plane_select" class="col-form-select col-1" name="plane_select"></select>
     &nbsp;&nbsp;&nbsp;POH:&nbsp;<span id="id_plane_poh">POH</span>
 <!--/div> <!-- row -->
 
@@ -72,7 +72,7 @@ if ($plane == '') {
 <div id="Take-off" class="tabcontent">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-xs-12 col-sm-12 col-lg-6"> <!--- col -->
+            <div class="col-12 col-sm-12 col-lg-6"> <!--- col -->
                 <h2 class="d-none d-md-block">Take-off: <span id="id_takeoff_plane">Plane OO-XXX</span></h2>
                 <table class="table table-striped table-hover table-bordered table-condensed w-auto" style="margin-bottom: 0rem;">
                 <thead>
@@ -161,7 +161,7 @@ if ($plane == '') {
             <!-- should try to use fixed aspect ration with CSS: aspect-ration: 4 / 3 or padding-top: 75% to replace the height setting 
             using aspect-ratio makes printing over two pages... 
             using padding-top also prints over 2 pages and makes the display ultra small-->
-            <div class="col-xs-12 col-sm-12 col-lg-6"> <!--- Row COL-->
+            <div class="col-12 col-sm-12 col-lg-6"> <!--- Row COL-->
                 <table class="table table-striped table-hover table-bordered table-condensed w-auto" style="margin-bottom: 0rem;">
                 <thead>
                 <tr><th class="text-end py-0 py-md-1">Result</th>
@@ -253,7 +253,7 @@ if ($plane == '') {
 <div id="Landing" class="tabcontent">
    <div class="container-fluid">
         <div class="row">
-            <div class="col-xs-12 col-sm-12 col-lg-6"> <!--- col -->
+            <div class="col-12 col-sm-12 col-lg-6"> <!--- col -->
                 <h2 class="d-none d-md-block">Landing: <span id="id_landing_plane">Plane OO-XXX</span></h2>
                 <table class="table table-striped table-hover table-bordered table-condensed w-auto" style="margin-bottom: 0rem;">
                 <thead>
@@ -342,7 +342,7 @@ if ($plane == '') {
             <!-- should try to use fixed aspect ration with CSS: aspect-ration: 4 / 3 or padding-top: 75% to replace the height setting 
             using aspect-ratio makes printing over two pages... 
             using padding-top also prints over 2 pages and makes the display ultra small-->
-            <div class="col-xs-12 col-sm-12 col-lg-6"> <!--- Row COL-->
+            <div class="col-12 col-sm-12 col-lg-6"> <!--- Row COL-->
                 <table class="table table-striped table-hover table-bordered table-condensed w-auto" style="margin-bottom: 0rem;">
                 <thead>
                 <tr><th class="text-end py-0 py-md-1">Result</th>

@@ -580,9 +580,9 @@ if (! $read_only) {
 <?php
 print("<div class=\"row\">") ;
 if ($me['avatar'] != '') {
-		print("<img src=\"$avatar_root_uri/$me[avatar]\" class=\"col-xs-12 col-sm-6 col-md-2\">") ;
+		print("<img src=\"$avatar_root_uri/$me[avatar]\" class=\"col-12 col-sm-6 col-md-2\">") ;
 }
-print("<img src=\"https://www.gravatar.com/avatar/" . md5(strtolower(trim($me['email']))) . "?s=200&d=blank&r=pg\" class=\"col-xs-12 col-sm-6 col-md-2\">
+print("<img src=\"https://www.gravatar.com/avatar/" . md5(strtolower(trim($me['email']))) . "?s=200&d=blank&r=pg\" class=\"col-12 col-sm-6 col-md-2\">
 	</div> <!-- row -->\n") ;
 if (! $read_only) {
 	print('<div class="row">
@@ -745,10 +745,10 @@ if (! $read_only) {
 <table class="table table-striped table-bordered">
 <thead>
 <tr>
-<th class="validityHeader col-xs-3 col-md-1">Nom</th>
-<th class="validityHeader col-xs-3 col-md-1">Code, identifiant, ...</th>
-<th class="validityHeader col-xs-3 col-md-1">Date d'obtention</th>
-<th class="validityHeader col-xs-3 col-md-1">Limite de validit&eacute;</th>
+<th class="validityHeader col-3 col-md-1">Nom</th>
+<th class="validityHeader col-3 col-md-1">Code, identifiant, ...</th>
+<th class="validityHeader col-3 col-md-1">Date d'obtention</th>
+<th class="validityHeader col-3 col-md-1">Limite de validit&eacute;</th>
 </tr>
 </thead>
 <tbody>

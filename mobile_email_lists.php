@@ -75,7 +75,7 @@ const copyToClipboard = async () => {
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form">
 <div class="mb-3">
 <label for="groupId" class="form-label">Groupe</label>
-<select id="groupId" class="col-form-select col-xs-1" name="group">
+<select id="groupId" class="col-form-select col-1" name="group">
     <?php
     $result = mysqli_query($mysqli_link, "SELECT * FROM jom_usergroups ORDER BY title ASC")
         or journalise($userId, "F", "Cannot list user groups: " . mysqli_error($mysqli_link)) ;
@@ -88,7 +88,7 @@ const copyToClipboard = async () => {
 </div>
 <div class="mb-3">
 <label for="separatorId" class="form-label">Separateur d'adresses</label>
-<select id="separatorId" class="col-form-select col-xs-1" name="separator">
+<select id="separatorId" class="col-form-select col-1" name="separator">
     <option value=";">; (Outlook)</option>
     <option value=",">, (GMail)</option>
     <option value="nl">Retour à la ligne</option>

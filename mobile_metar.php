@@ -38,14 +38,14 @@ $station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(s
 <div class="row">
 <form class="form-inline" action="<?=$_SERVER['PHP_SELF']?>" method="GET">
 	<div class="form-group">
-		<label class="control-label col-xs-4 col-md-4" for="stationMETARInput">Station METAR:</label>
-		<div class="col-xs-3 col-md-4">
+		<label class="control-label col-4 col-md-4" for="stationMETARInput">Station METAR:</label>
+		<div class="col-3 col-md-4">
 			<input type="text" size="5" maxlength="4" class="form-control" id="stationMETARInput" placeholder="<?=$station?>" name="station">
 		</div>
 	</div>
 
 	<div class="form-group">
-		<div class="col-xs-3 col-md-4">
+		<div class="col-3 col-md-4">
 	      <input type="submit" class="btn btn-primary" value="Changer">
    		</div>
 	</div><!-- formgroup-->

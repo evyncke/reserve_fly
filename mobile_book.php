@@ -114,56 +114,56 @@ require_once 'mobile_header5.php' ;
 </div><!-- alert -->
 
 <div class="row">
-		<label class="form-label col-xs-6 col-md-3" for="pilotSelect">Pilote:</label>
-		<div class="col-xs-6 col-md-3">
+		<label class="form-label col-6 col-md-3" for="pilotSelect">Pilote:</label>
+		<div class="col-6 col-md-3">
 			<select class="form-control" id="pilotSelect" name="pilot"></select>
 		</div>
 
-		<label class="control-label col-xs-6 col-md-3" for="instructorSelect">Instructeur:</label>
-		<div class="col-xs-6 col-md-3">
+		<label class="control-label col-6 col-md-3" for="instructorSelect">Instructeur:</label>
+		<div class="col-6 col-md-3">
 			<select class="form-control" id="instructorSelect" name="instructor"></select>
 		</div>
 </div><!-- row -->
 
 <div class="row">
-		<label class="control-label col-xs-6 col-md-3" for="planeSelect">Avion:</label>
-		<div class="col-xs-6 col-md-3">
+		<label class="control-label col-6 col-md-3" for="planeSelect">Avion:</label>
+		<div class="col-6 col-md-3">
 			<select class="form-control" id="planeSelect" name="plane"></select>
 		</div>
 
 </div><!-- row -->
 
 <div class="row">
-		<label class="control-label col-xs-6 col-md-4" for="startDayInput">Jour début:</label>
-		<div class="col-xs-6 col-md-2">
+		<label class="control-label col-6 col-md-4" for="startDayInput">Jour début:</label>
+		<div class="col-6 col-md-2">
 			<input type="date" class="form-control" id="startDayInput" name="startDay" value="<?=$startDay?>" oninput="adjustEndDay();">
 		</div>
-		<label class="control-label col-xs-6 col-md-4" for="startHourInput">Heure début:</label>
-		<div class="col-xs-6 col-md-2">
+		<label class="control-label col-6 col-md-4" for="startHourInput">Heure début:</label>
+		<div class="col-6 col-md-2">
 			<input type="time" class="form-control" id="startHourInput" name="startHour" value="<?=$startHour?>" min="09:00" max="20:00" step="900" oninput="adjustEndHour();">
 		</div>
 </div><!-- row -->
 
 <div class="row">
-		<label class="control-label col-xs-6 col-md-4" for="endDayInput">Jour fin:</label>
-		<div class="col-xs-6 col-md-2">
+		<label class="control-label col-6 col-md-4" for="endDayInput">Jour fin:</label>
+		<div class="col-6 col-md-2">
 			<input type="date" class="form-control" id="endDayInput" name="endDay" value="<?=$endDay?>">
 		</div>
-		<label class="control-label col-xs-6 col-md-4" for="endHourInput">Heure fin:</label>
-		<div class="col-xs-6 col-md-2">
+		<label class="control-label col-6 col-md-4" for="endHourInput">Heure fin:</label>
+		<div class="col-6 col-md-2">
 			<input type="time" class="form-control" id="endHourInput" name="endHour" value="<?=$endHour?>" min="09:00" max="20:00" step="900">
 		</div>
 </div><!-- row -->
 
 <div class="row">
-		<label class="control-label col-xs-6 col-md-4" for="commentTextArea">Remarque:</label>
-	      <textarea class="form-control col-xs-12 col-md-12" name="comment" id="commentTextArea" width="100%" row="5" col="80"><?=$comment?></textarea>
+		<label class="control-label col-6 col-md-4" for="commentTextArea">Remarque:</label>
+	      <textarea class="form-control col-12 col-md-12" name="comment" id="commentTextArea" width="100%" row="5" col="80"><?=$comment?></textarea>
 </div><!-- row -->
 
 
 
 <div class="row">
-		<div class="col-xs-3 col-md-4">
+		<div class="col-3 col-md-4">
 <?php
 if ($action == 'Modifier') {
 ?>

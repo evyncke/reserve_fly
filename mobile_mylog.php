@@ -311,8 +311,8 @@ if (isset($error_message))
 }
 ?>
 <div class="row mb-3">
-<label for="periodSelect" class="col-xs-2 col-md-1 col-form-label text-end">Période:</label>
-<div class="col-xs-2 col-md-1">
+<label for="periodSelect" class="col-2 col-md-1 col-form-label text-end">Période:</label>
+<div class="col-2 col-md-1">
 <select id="periodSelect" class="form-control" name="periodName" onchange="selectChanged();">
 </select>
 </div><!-- col -->
