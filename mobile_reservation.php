@@ -66,6 +66,11 @@ while ($row = mysqli_fetch_array($result)) {
 		$validity_msg .= "<span class=\"text-warning\">Votre $row[name] ne sera plus valable le $row[expire_date]; il vous sera alors impossible de réserver un avion.</span><br/>" ;
 }
 
+# HTTP/2 push of some JS scripts via header()
+$additional_preload = '</resa/js/mobile_reservation.js>;rel=preload;as=script,' . 
+	'</resa/css/mobile_reservation.css>;rel=preload;as=style,' .
+	'</resa/data/instructors.js>;rel=preload;as=script,</resa/data/ressources.js>;rel=preload;as=script,</resa/data/pilots.js>;rel=preload;as=script' ;
+
 $header_postamble = '<link rel="stylesheet" type="text/css" href="css/mobile_reservation.css">
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="data/ressources.js"></script>
