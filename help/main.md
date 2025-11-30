@@ -1,5 +1,9 @@
 ## Aide
 
+### Nouveautés
+
+Les nouveautés du site aux niveaux des nouvelles fonctions, ... est disponibles [À propos -> Nouveautés](mobile_help.php?topic=news).
+
 ### Application web de gestion des membres, avions, et réservations
 
 _En cours de rédaction_
