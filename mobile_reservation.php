@@ -69,6 +69,7 @@ while ($row = mysqli_fetch_array($result)) {
 # HTTP/2 push of some JS scripts via header()
 $additional_preload = '</resa/js/mobile_reservation.js>;rel=preload;as=script,' . 
 	'</resa/css/mobile_reservation.css>;rel=preload;as=style,' .
+	'</resa/images/spinner.gif>;rel=preload;as=image,</resa/images/fa.ico>;rel=preload;as=image,' .
 	'</resa/data/instructors.js>;rel=preload;as=script,</resa/data/ressources.js>;rel=preload;as=script,</resa/data/pilots.js>;rel=preload;as=script' ;
 
 $header_postamble = '<link rel="stylesheet" type="text/css" href="css/mobile_reservation.css">
@@ -424,7 +425,7 @@ $planning_table_width =	(airport_closing_local_time(date('Y'), date('m'), date('
 <i class="bi bi-exclamation-triangle-fill text-danger" alt="!" width="12" height="12"></i>: vous n'avez pas volé dessus récemment (et le règlement d'ordre intérieur impose des vols récents).<br/>
 <i class="bi bi-ban text-danger" alt="X" width="12" height="12"></i>: vous n'avez pas les qualifications requises (sur base des validités de votre profil).<br/>
 <i class="bi bi-tools text-bg-warning" width="12" height="12"></i>: il existe un Aircraft Technical Log pour ce avion à consulter.<br/>
-<img src="fa.ico" border="0" width="12" height="12">: ouvre Flight Aware avec le dernier vol de cet avion.<br/>
+<img src="images/fa.ico" border="0" width="12" height="12">: ouvre Flight Aware avec le dernier vol de cet avion.<br/>
 </div>
 <center><input type="button" id="roadBookButton" value="Carnet de routes" onclick="roadBookClick();" disabled="true" style="display: none;"></center>
 <p>
@@ -632,7 +633,7 @@ $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 Open Source code: <a href="https://github.com/evyncke/reserve_fly">on github</a><br/>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, exécuté en <?=$execution_time?> sec</div>
 <br/>
-<div id="waitingDiv">Connecting to the server, please wait...<img src="spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();" width="256px" height="256px"></div>
+<div id="waitingDiv">Connecting to the server, please wait...<img src="images/spinner.gif" id="waitingImage" alt="Waiting..."  onStalled="imgStalled();" width="256px" height="256px"></div>
 
 </div><!-- container -->
 </body>
