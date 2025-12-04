@@ -470,7 +470,9 @@ document.addEventListener("DOMContentLoaded", function () {
     checkboxes.forEach(function (checkbox) {
         checkbox.onclick = function () {
 			var values=this.id.split("-");
-			if(confirm("Confirmez que vous voulez changer le statut \""+values[2]+"\" de ce membre!\nRappel: le membre doit au moins être non-naviguant ou élève ou pilote.")) {
+			if(confirm("Confirmez que vous voulez changer le statut \""+values[2]+"\" de ce membre!"+
+				"\nRappel: le membre doit au moins être non-naviguant ou élève ou pilote."+
+				"\nNe pas oublier de prévenir les personnes responsables et de mettre à jour le fichier membres.xls sur OneDribe.")) {
             	// Redirect to the same URL with the checkbox ID in the query string
             	window.location.href = window.location.pathname + '?checkboxId=' + this.id + '&checked=' + this.checked;
 			}
