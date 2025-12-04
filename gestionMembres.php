@@ -27,8 +27,8 @@ if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor)
 $additional_preload = '</resa/js/gestionMembres.js>;rel=preload;as=script,</resa/css/gestionMembres.css>;rel=preload;as=style' ;
 // In the mobile_header.php, $header_postamble will be inserted in the actual <head>...</head> section
 $header_postamble ='
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script type="text/javascript" src="js/gestionMembres.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <link rel="stylesheet" type="text/css" href="css/gestionMembres.css">
 ' ;
 require_once 'mobile_header5.php' ;
@@ -111,6 +111,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 		}
 	}
 }
+
 //Create Cotisation invoice
 if (isset($_REQUEST['createcotisation'])) {
 	$personid="";
@@ -140,6 +141,8 @@ if (isset($_REQUEST['checkboxId']) and $_REQUEST['checkboxId'] != '' and isset($
 	$checked=$_REQUEST['checked'];
 	$parts = explode('-', $_REQUEST['checkboxId']);
 	$personId = $parts[1];
+	if (! is_numeric($personId))
+		journalise($userId, "F", "Strange personId for checkbox toggling: " . $personId) ;
 	switch($parts[2]) {
 		case 'Member':
 			$groupId = $joomla_member_group;
@@ -193,8 +196,7 @@ if (isset($_REQUEST['checkboxId']) and $_REQUEST['checkboxId'] != '' and isset($
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 // Find all Odoo IDs
-$sql = "SELECT odoo_id 
-	FROM $table_person" ;
+$sql = "SELECT odoo_id FROM $table_person" ;
 $result = mysqli_query($mysqli_link, $sql)
 	or journalise($userId, "F", "Cannot retrieve all Odoo ids: " . mysqli_error($mysqli_link)) ;
 $ids = array() ;

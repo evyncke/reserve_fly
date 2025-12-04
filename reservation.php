@@ -20,8 +20,8 @@
 ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/css/reservation.css>;rel=preload;as=style, </resa/css/datepickr.css>;rel=preload;as=style,</resa/js/reservation.js>;rel=preload;as=script,</resa/js/datepickr.js>;rel=preload;as=script') ;
-header('Link: </resa/fa.ico>;rel=preload;as=image,</resa/data/members.js>;rel=preload;as=script') ;
+header('Link: </resa/css/reservation.css>;rel=preload;as=style, </resa/css/datepickr.css>;rel=preload;as=style,</resa/js/reservation.js>;rel=preload;as=script,</resa/js/datepickr.js>;rel=preload;as=script,' .
+		'</resa/images/spinner.gif>;rel=preload;as=image,</resa/fa.ico>;rel=preload;as=image,</resa/data/members.js>;rel=preload;as=script') ;
 
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
 require_once "dbi.php" ;
@@ -662,6 +662,6 @@ $execution_time = round(microtime(TRUE) - $microtime_start, 3) ;
 Open Source code: <a href="https://github.com/evyncke/reserve_fly">on github</a><br/>
 Versions: PHP=<?=$version_php?>, JS=<?=$version_js?>, CSS=<?=$version_css?>, ex&eacute;cut&eacute en <?=$execution_time?> sec</div>
 <br/>
-<div id="waitingDiv">Connecting to the server, please wait...<img src="spinner.gif" id="waitingImage" alt="Waiting..."width="256px" height="256px"></div>
+<div id="waitingDiv">Connecting to the server, please wait...<img src="images/spinner.gif" id="waitingImage" alt="Waiting..."width="256px" height="256px"></div>
 </body>
 </html>

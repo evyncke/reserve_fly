@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2024 Eric Vyncke
+   Copyright 2024-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -46,13 +46,14 @@ foreach($result as $record)
     $companies[$record['id']] = $record ;
 ?>
 <h2>Sociétés des membres @<?=$odoo_host?></h2>
-<p>Liste des membres actifs du club ayant une entreprise à laquelle facturer. Pour changer, demander à Éric ou Patrick.</p>
+<p>Liste des membres actifs du club ayant une entreprise à laquelle facturer. Pour changer, demander à Éric ou Patrick
+     (tables <?=$table_company ?> et <?=$table_company_member?>).</p>
 
 <form action="<?=$_SERVER['PHP_SELF']?>" id="company_form">
     <input type="hidden" name="save_company" value="true">
 <table class="table table-hover table-responsive table-bordered">
     <thead>
-        <tr><th>Nom, prénom <i>(Codes ciel/Odoo)</i></th><th>Entreprise</th><th>Odoo ID</th></th><th>Code BCE</th><th>Balance</th><th>Adresse</th><th>Code postal</th><th>Ville</th><th>Pays</th></tr>
+        <tr><th>Nom, prénom <i>(Code Odoo membre)</i></th><th>Entreprise</th><th>Odoo ID</th></th><th>Code BCE</th><th>Balance</th><th>Adresse</th><th>Code postal</th><th>Ville</th><th>Pays</th></tr>
     </thead>
     <tbody class="table-group-divider">
 <?php
@@ -81,8 +82,9 @@ while ($row = mysqli_fetch_array($result)) {
     }
     $first_name = db2web($row['first_name']) ;
     $last_name = db2web($row['last_name']) ;
-    print("<tr class=\"ciel-row\">
-        <td><b>$last_name</b>, $first_name <i>($row[ciel_code400] / $row[odoo_id])</i></td>
+    print("<tr>
+        <td><b>$last_name</b>, $first_name 
+            <a href=\"https://$odoo_host/web#id=$row[odoo_id]&cids=1&menu_id=122&action=275&model=res.partner&view_type=form\" target=\"_blank\">$row[odoo_id] <i class=\"bi bi-box-arrow-up-right\"></a></td>
         <td>$name</td>
         <td><a href=\"https://$odoo_host/web#id=$row[c_odoo_id]&cids=1&menu_id=122&action=275&model=res.partner&view_type=form\" target=\"_blank\">$row[c_odoo_id] <i class=\"bi bi-box-arrow-up-right\"></a></td>
         <td>$row[c_bce]</td><td>$company[total_due]&nbsp;&euro;</td><td>$address</td><td>$zipcode</td><td>$city</td><td>$country</td>
