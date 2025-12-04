@@ -469,8 +469,20 @@ document.addEventListener("DOMContentLoaded", function () {
     // Add the onclick event to each checkbox whose id starts with "check-"
     checkboxes.forEach(function (checkbox) {
         checkbox.onclick = function () {
-            // Redirect to the same URL with the checkbox ID in the query string
-            window.location.href = window.location.pathname + '?checkboxId=' + this.id + '&checked=' + this.checked;
+			var values=this.id.split("-");
+			if(confirm("Confirmez que vous voulez changer le statut \""+values[2]+"\" de ce membre!\nRappel: le membre doit au moins être non-naviguant ou élève ou pilote.")) {
+            	// Redirect to the same URL with the checkbox ID in the query string
+            	window.location.href = window.location.pathname + '?checkboxId=' + this.id + '&checked=' + this.checked;
+			}
+			else {
+				var checked=this.checked;
+				if(checked){
+					this.checked=false;
+				}
+				else {
+					this.checked=true;
+				}
+			}
         };
     });
 });
