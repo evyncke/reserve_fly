@@ -287,11 +287,6 @@ while ($row = mysqli_fetch_array($result)) {
                 $updates['name'] = $name_from_db ;
             if ($odoo_customer['complete_name'] != $name_from_db and $name_from_db != '')
                 $updates['complete_name'] = $name_from_db ;
-            // Code below is to copy from Ciel to Odoo
-            // Disabled based on Dominique Collette's feedback over WhatsApp on 2023-12-27    
-            //if ($row['ciel_code400'] != '' and $property_account_receivable_id  != $row['ciel_code400']) {
-            //    $updates['property_account_receivable_id'] = GetOdooAccount($row['ciel_code400'], db2web("$row[last_name] $row[first_name]")) ;
-            //}
             // Code below is to ensure that all members are using the same 400100 account
             if ($property_account_receivable_id  != '400100') {
                 $updates['property_account_receivable_id'] = GetOdooAccount('400100', db2web("$row[last_name] $row[first_name]")) ;

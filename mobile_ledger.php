@@ -42,7 +42,6 @@ $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person
 $pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 $userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
-$codeCiel = $pilot['ciel_code'] ;
 $odooId = $pilot['odoo_id'] ;
 $odooCommercialId = $pilot['c_odoo_id'] ;
 $ledgerOwner = ($pilot['c_name']) ? db2web("$pilot[first_name] $pilot[last_name] (<i>$pilot[c_name]</i>)") : $userName ;

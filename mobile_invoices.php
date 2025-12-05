@@ -37,7 +37,6 @@ $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id =
 $pilot = mysqli_fetch_array($result) or journalise(0, 'F', "Membre $userId inconnu") ;
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 $userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
-$codeCiel = $pilot['ciel_code'] ;
 $odooId = $pilot['odoo_id'] ;
 mysqli_free_result($result) ;
 
@@ -136,39 +135,7 @@ if ($count > 0) {
 </div><!-- table responsive -->
 </div><!-- col -->
 </div><!-- row -->
-<?php
-if ($count == 0) print("<p class=\"alert-info\">Hélas, pas encore de facture à votre nom dans le système.</p>\n") ;
-?>
-<span id="payment" style="display: none;">
-<h2>QR-code pour payer <span id="payment_reason"></span> de <span id="payment_amount"></span> &euro;</h3>
-<p>Le QR-code contient votre identifiant au niveau de la comptabilité
-RAPCS (<em><?=$codeCiel?></em>). Le QR-code est à utiliser avec une application bancaire
-et pas Payconiq (ce dernier étant payant pour le commerçant).</p>
-<img id="payment_qr_code" width="300" height="300" src="qr-code.php?chs=300x300&chl=<?=urlencode($epcString)?>">
-</span>
-<script>
-var 
-	epcBic = '<?=$bic?>' ;
-	epcName = '<?=$bank_account_name?>' ;
-	epcIban = '<?=$iban?>' ;
-	compteCiel = '400<?=$codeCiel?>' ;
-	userLastName = '<?=$userLastName?>' ;
 
-function pay(reason, amount) {
-	if (amount <= 0.0 || amount <= 0) {
-		document.getElementById('payment').style.display = 'none' ;
-		return ;
-	}
-	document.getElementById('payment').style.display = 'block' ;
-	document.getElementById('payment_reason').innerText = reason ;
-	document.getElementById('payment_amount').innerText = amount ;
-	// Should uptdate to version 002 (rather than 001), https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
-	// There should be 2 reasons, first one is structured, the second one is free text
-	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount + "\n" + reason + "\n" + reason ;
-	document.getElementById('payment_qr_code').src = "qr-code.php?chs=300x300&&chl=" + encodeURI(epcURI) ;
-}
-
-</script>
 </div> <!-- container fluid -->
 </body>
 </html>
