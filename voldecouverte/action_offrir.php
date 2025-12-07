@@ -1,11 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-		   <script>
-		    function goBack() {
-		      window.history.back();
-		    }
-		   </script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17776877434"></script>
+<script>
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+
+	gtag('config', 'AW-17776877434');
+</script>
+<script>
+	function goBack() {
+		window.history.back();
+	}
+</script>
 <title>Résumé de votre demande (InProgress)</title>
 <!-- Matomo -->
 <script type="text/javascript">

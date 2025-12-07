@@ -243,8 +243,17 @@ else {
 	$MessageAnswerBody='<html><head><meta http-equiv="Content-Type" content="text/html; charset=us-ascii"></head><body>'.$MessageAnswer."</body></html>";
 }
 ?>
-		<html>
-		<head>
+<html>
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17776877434"></script>
+<script>
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+
+	gtag('config', 'AW-17776877434');
+</script>
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
