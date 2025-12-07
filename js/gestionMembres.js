@@ -472,7 +472,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			var values=this.id.split("-");
 			if(confirm("Confirmez que vous voulez changer le statut \""+values[2]+"\" de ce membre." +
 				"\nRappel: le membre doit être élève ou pilote sinon il est non-navigant." +
-				"\nNe pas oublier de prévenir les personnes responsables et de mettre à jour le fichier membres.xls sur OneDrive (même si probablement plus utilisé).")) {
+				"\nNe pas oublier de prévenir les personnes responsables et de mettre à jour le fichier membres.xls sur OneDrive (Toujours utilisé - Seul endroit ou on gere l'historique des membres).")) {
             	// Redirect to the same URL with the checkbox ID in the query string
             	window.location.href = window.location.pathname + '?checkboxId=' + this.id + '&checked=' + this.checked;
 			}
