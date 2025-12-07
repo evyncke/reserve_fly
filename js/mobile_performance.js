@@ -1774,7 +1774,8 @@ function setRunway(station)
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 }
-
+// Notam : https://developer.laminardata.aero/documentation/notamdata/v2#!/NOTAMs32by32User32Defined32Geometry/post_notams
+//          https://api.autorouter.aero/v1.0/notam?itemas=["EDDS"]
 //==============================================
 // Function: setToolTip
 // Purpose: Set the tooltip associated to an output

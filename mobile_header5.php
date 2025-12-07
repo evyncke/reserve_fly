@@ -288,6 +288,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><h6 class="dropdown-header class-primary">Réservé aux administrateurs/comptables</h6></li>
       <li><a class="dropdown-item" href="mobile_journal.php">Journal système</a></li>
       <li><a class="dropdown-item" href="gestionMembres.php">Gestion membres</a></li>
+      <li><a class="dropdown-item" href="odoo_inscription.php">Introduction d'un nouveau membre</a></li>
       <li><a class="dropdown-item" href="mobile_members_map.php">Localisation de nos membres</a></li>
       <li><a class="dropdown-item" href="mobile_email_lists.php">Adresses emails des membres</a></li>
       <li><a class="dropdown-item" href="mobile_members_list.php">Listes spécifiques des membres</a></li>

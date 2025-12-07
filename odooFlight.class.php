@@ -1905,4 +1905,394 @@ function OF_LastInvoiceDueDate($theOdooPartnerReference)
     }
     return $DueDate;
 }
+
+
+//============================================
+// Function: OF_CreateNewMember
+// Purpose: Create a new member in your tables and in odoo
+//============================================
+function OF_CreateNewMember( 
+            $prenom,
+            $nom,
+            $username,
+            $password,
+            $datenaissance,
+            $email,
+            $telephone,
+            $adresse,
+            $codepostal,
+            $ville,
+            $pays,
+            $motivation,
+            $typemembre,
+            $qualification,
+            $licence,
+            $validitemedicale,
+            $validiteelp,
+            $courstheorique,
+            $cotisation,
+            $caution,
+            $dateinscription,
+            $factureodoo,
+            $societe,
+            $nomsociete,
+            $bcesociete,
+            $adressesociete,
+            $codepostalsociete,
+            $villesociete,
+            $payssociete,
+            $contactnom,
+            $contactlien,
+            $contactphone,
+            $contactmail
+)
+{
+    // Group : INSERT INTO $table_user_usergroup_map (user_id, group_id)  Voir gestionmembre.php
+    //   Tables company: (tables rapcs_company et rapcs_company_member).
+    /*
+Questions:
+jom_users
+- Suffit de remplir les champs pour être compatible joomla?
+- id doit il être introduit ou fait automatiquement?
+- password : comment faire?
+- ne pas introduire block? sendmail?, lastvisitdate, activation, lasresettime, reset count, otep, requirereset, authprovider
+params=mediumtext? {"admin_style":"","admin_language":"","language":"fr-FR","editor":"","timezone":""} == default
+// Joomla specific table names
+****$table_users = 'jom_users' ;
+Fields:
+id = rien ou id+1
+name = "pierre dupont"
+username= "pdupont"
+RegisterDate = today()
+lastvisitDate = -
+activation = -
+params = {"admin_style":"","admin_language":"","language":"fr-FR","editor":"","timezone":""}
+lastResetTime = -
+Date of last password reset = -
+resetCount = -
+lastResetTime = -
+otpKey = -
+otep = -
+requireReset = -
+authProvider = -
+
+****$table_user_usergroup_map = 'jom_user_usergroup_map' ;
+user_id =  id de joomla
+group_id = (membre=18,  Eleves=16, pilote=14)
+
+****jom_user_profiles : Utilisée???
+****jom_user_keys : Utilisée???
+
+****$table_person = 'rapcs_person' ;
+has_passwod: meme que jom_users?
+Profile?
+view_type=?
+notification?
+$table_validity = 'rapcs_validity' ;
+$table_validity_type = 'rapcs_validity_type' ;
+
+
+$table_bk_balance = 'rapcs_bk_balance' ;
+$table_bk_invoices = 'rapcs_bk_invoices' ;
+$table_bk_ledger = 'rapcs_bk_ledger' ;
+$table_blocked = 'rapcs_blocked' ;
+$table_payconiq = 'rapcs_payconiq' ;
+
+$table_company = 'rapcs_company' ;
+$table_company_member = 'rapcs_company_member' ;
+$table_membership_fees = 'rapcs_bk_fees' ;
+
+
+
+*/
+    global $table_users,$table_person,$table_user_usergroup_map,$table_company, $table_company_member;
+    global $userId,$mysqli_link,$joomla_student_group,$joomla_pilote_group,$joomla_member_group;
+
+    $insertFlag=true;
+/*
+    print("<br> OF_CreateNewMember:Started:<br>
+        prenom=$prenom<br>
+        nom=$nom<br>
+        username=$username<br>
+        password=$password<br>
+        datenaissance=$datenaissance<br>
+        email=$email<br>
+        telephone=$telephone<br>
+        adresse=$adresse<br>
+        codepostal=$codepostal<br>
+        ville=$ville<br>
+        pays=$pays<br>
+        motivation=$motivation<br>
+        typemembre=$typemembre<br>
+        qualification=$qualification<br>
+        licence=$licence<br>
+        validitemedicale=$validitemedicale<br>
+        validiteelp=$validiteelp<br>
+        courstheorique=$courstheorique<br>
+        cotisation=$cotisation<br>
+        caution=$caution<br>
+        dateinscription=$dateinscription<br>
+        factureodoo=$factureodoo<br>
+        societe=$societe<br>
+        nomsociete=$nomsociete<br>
+        bcesociete=$bcesociete<br>
+        adressesociete=$adressesociete<br>
+        codepostalsociete=$codepostalsociete<br>
+        villesociete=$villesociete<br>
+        payssociete=$payssociete<br>
+        contactnom= $contactnom<br>
+        contactlien=$contactlien<br>
+        contactphone=$contactphone<br>
+        contactmail<br>
+     ");
+     */
+    $fullName=$prenom." ".$nom;
+    if($password!="Rapcs123!") {
+        return "Today the password must be Rapcs123!. Other password not yet implemented!";
+    }
+    $hashPassword='$2y$10$cBt1zEWomm7NOKxtrQGES.skeauwcURaiEukb/IutAXS0hgbeB2AW';
+    $registerDate=$dateinscription." 12:00:00";
+    $params='{"admin_style":"","admin_language":"","language":"fr-FR","editor":"","timezone":""}';
+ 
+    //1. Check if the e-mail already exists (Only one time) in $table_users = 'jom_users'
+    $sql= "SELECT email FROM $table_users WHERE email='$email'";
+    //print("OF_CreateNewMember:$sql<br>");
+    $result = mysqli_query($mysqli_link, $sql)
+    	or journalise($userId, "E", "Cannot read rapcs_person " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        // The email address already exist then stop
+        return "The email address is aready used (jom_users): Use a new email. The new member is not created.";
+    }
+    if($societe=="oui") {
+        return "Programmation avec societe pas terminee! The new member is not created!";
+    }
+    //2. Check if the e-mail already exists (Only one time) in $table_person = 'rapcs_person' ; (Should be the same but to be sure)
+    $sql= "SELECT email FROM $table_person WHERE email='$email'";
+    //print("OF_CreateNewMember:$sql<br>");
+    $result = mysqli_query($mysqli_link, $sql)
+    	or journalise($userId, "E", "Cannot read jom_users: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        // The email address already exist then stop
+        return "The email address is aready used (rapcs_person): Use a new email. The new member is not created.";
+    }
+
+     //3. Insert the new member in the table $table_users = 'jom_users' (Name, username,...)
+    $sql= "INSERT INTO $table_users (name, username, email, password, registerDate, params)
+		    VALUES ('$fullName', '$username', '$email', '$hashPassword', '$registerDate', '$params')";
+    print("OF_CreateNewMember:$sql<br>");
+    if(0 && $insertFlag) {
+       $result = mysqli_query($mysqli_link, $sql)
+    	or journalise($userId, "E", "Cannot insert into jom_users: " . mysqli_error($mysqli_link)) ;
+		$jom_id = mysqli_insert_id($mysqli_link) ; 
+    }
+    else {
+        $jom_id=560;
+    }
+
+ 	//	    or journalise($userId, "F", "Impossible d'ajouter un paiement: " . mysqli_error($mysqli_link)) ;
+    //4. Insert the new member in the table $table_person = 'rapcs_person' (Name, address, contact, ...)
+    $sql= "INSERT INTO $table_person (jom_id, name, first_name, last_name, email, address, zipcode, city, country, cell_phone, lang, birthdate, contact_name, contact_relationship, contact_phone,contact_email)
+		    VALUES ($jom_id, '$username', '$prenom', '$nom', '$email','$adresse', '$codepostal', '$ville', '$pays', '$telephone', 'francais','$datenaissance', '$contactnom','$contactlien', '$contactphone' ,'$contactmail')";
+    print("OF_CreateNewMember:$sql<br>");
+    if($insertFlag) {
+       $result = mysqli_query($mysqli_link, $sql)
+    	or journalise($userId, "E", "Cannot insert into rapcs_person: " . mysqli_error($mysqli_link)) ;
+    }
+
+    //5. Insert the new member in the table  $table_user_usergroup_map = 'jom_user_usergroup_map' (Type of member)
+    // Insert like a member
+    $sql= "INSERT INTO $table_user_usergroup_map (user_id, group_id)
+		    VALUES($jom_id, $joomla_member_group)";
+    print("OF_CreateNewMember:$sql<br>");
+    if($insertFlag) {
+        $result = mysqli_query($mysqli_link, $sql)
+        or journalise($userId, "E", "Cannot insert into jom_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
+    }
+    if($typemembre!="nonnaviguant") {
+        // Insert like a pilot or a student
+        $groupId=$joomla_student_group;
+        if($typemembre=="pilote") $groupId=$joomla_pilote_group;
+
+        $sql= "INSERT INTO $table_user_usergroup_map (user_id, group_id)
+                VALUES($jom_id, $groupId)";
+        print("OF_CreateNewMember:$sql<br>");
+        if($insertFlag) {
+            $result = mysqli_query($mysqli_link, $sql)
+            or journalise($userId, "E", "Cannot insert into rapcs_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
+        }
+    }
+
+    //6. Insert the company of new member in the table  $table_company = 'rapcs_company'+ $table_company_member = 'rapcs_company_member' ;
+    if($societe=="oui") {
+        $sql= "INSERT INTO $table_company(c_name, c_address, c_zipcode, c_city, c_country,c_bce)
+        VALUES ( '$nomsociete', '$adressesociete', '$codepostalsociete', '$villesociete', '$payssociete', '$bcesociete)";
+        print("OF_CreateNewMember:$sql<br>");
+        if($insertFlag) {
+            $result = mysqli_query($mysqli_link, $sql)
+            or journalise($userId, "E", "Cannot insert into rapcs_company: " . mysqli_error($mysqli_link)) ;
+ 	        $societeId = mysqli_insert_id($mysqli_link) ; 
+        }
+        $sql= "INSERT INTO $table_company_member(cm_member, cm_company)
+        VALUES ( $jom_id, $societeId)";
+        print("OF_CreateNewMember:$sql<br>");
+        if($insertFlag) {
+            $result = mysqli_query($mysqli_link, $sql)
+            or journalise($userId, "E", "Cannot insert into rapcs_company_member: " . mysqli_error($mysqli_link)) ;
+       }
+    }
+
+    //7. Insert the validity of new member in the table  $table_validity = 'rapcs_validity' + $table_validity_type = 'rapcs_validity_type' ;
+    //8. Insert the new member in Odoo + adapt rapcs_person
+    if($insertFlag) {
+        OF_AddPartnerInOdoo(
+            $jom_id,
+            $prenom,
+            $nom,
+            $email,
+            $telephone,
+            $adresse,
+            $codepostal,
+            $ville,
+            $pays);
+    }
+
+    //9. Insert the company of the new member in Odoo+  adapt rapcs_person
+    if(0) {
+        // add the company in odoo
+        $companyOdooId=OF_AddPartnerInOdoo(
+            0, // Pas de jom_id pour une societe
+            "",
+            $nomsociete,
+            "",
+            "",
+            $adressesociete,
+            $codepostalsociete,
+            $villesociete,
+            $payssociete
+        ) ;
+    }
+    //10. Insert the company of the new member in Odoo
+    if(0) {
+        // Add child_ids[osooIdMemeber] dans res_partener de la societe
+    }
+    //11. Create the invoice for caution + cotisation
+    $cotisationType="naviguant";
+    if($typemembre=="nonnaviguant") $cotisationType="nonnaviguant";
+    if($insertFlag) {
+        if(!OF_CreateFactureCotisation($jom_id, $cotisationType, substr($dateinscription,0,4))) {
+            return "Impossible to create the invoice in Odoo!";
+        }
+    }
+    //12. Send a mail
+     print("<a href=\"mailto:$email?cc=benoitmendes@hotmail.com,pendersbernard@gmail.com,vintens.ch@gmail.com,eric@vyncke.org,patrick.reginster@gmail.com&subject=Acces%20au%20site%20du%20RAPCS&body=Bonjour%20$fullName,%0D%0Aline1<br>line2\" target=\"_top\">Send mail to the new member!</a><br>");
+    // Reste cours theorique et motivation ?
+ 
+    return "";
+}
+
+//============================================
+// Function: OF_AddPartnerInOdoo
+// Purpose: Create a new partner in odoo
+//============================================
+
+function OF_AddPartnerInOdoo(
+            $jom_id,
+            $prenom,
+            $nom,
+            $email,
+            $telephone,
+            $adresse,
+            $codepostal,
+            $ville,
+            $pays
+    ) 
+{
+    global $mysqli_link,$table_person,$userId;
+    print("OF_AddPartnerInOdoo:started<br>");
+    // Let's create a Odoo partner/client on request
+    // Is the Jom_is defined?
+    $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $jom_id")
+        or journalise($userId, "F", "Cannot read $table_person for #$jom_id: " . mysqli_error($mysqli_link)) ;
+    $row = mysqli_fetch_array($result) 
+        or journalise($userId, "F", "User $jom_id not found") ;
+
+    $countryid=20; // Belgique
+    if($pays=="Luxembourg") $countryid=133;
+    if($pays=="France") $countryid=75;
+
+    //Add the partner in Odoo
+
+    $student_tag = GetOdooCategory('Student') ;
+    $pilot_tag = GetOdooCategory('Pilot') ;
+    $member_tag = GetOdooCategory('Member') ;
+  //if(1) return;
+
+    $odooClient=OF_GetOdooClient();
+    $odooid = $odooClient->Create('res.partner', array(
+        'name' => db2web("$nom $prenom"),
+        'complete_name' => db2web("$nom $prenom"),
+        'property_account_receivable_id' => GetOdooAccount('400100', db2web("$nom $prenom")) ,
+        'street' => db2web($adresse),
+        'zip' => db2web($codepostal),
+        'city' => db2web($ville),
+        'email' => db2web($email),
+        'phone' => db2web($telephone),
+        'mobile' => db2web($telephone),
+        'country_id' => db2web($countryid)
+        //'category_id' => db2web($categoryid);
+    )) ;
+
+    // Link the odooid in the rapcs_person table
+    mysqli_query($mysqli_link, "UPDATE $table_person SET odoo_id = $odooid WHERE jom_id = $jom_id") 
+    or journalise($userId, "E", "Cannot set Odoo customer for user #$row[jom_id]") ;
+    print("OF_AddPartnerInOdoo: $jom_id inserted in odoo partner=$odooid<br>");
+}
+function GetOdooAccount($code, $fullName) {
+    static $cache = array() ;
+    print("GetOdooAccount:started<br>");
+  //if(1) return;
+   $odooClient=OF_GetOdooClient();
+    if (isset($cache[$code])) return $cache[$code] ;
+    $result = $odooClient->SearchRead('account.account', array(array(
+		array('account_type', '=', 'asset_receivable'),
+		array('code', '=', $code))), 
+	array()) ; 
+    if (count($result) > 0) {
+        $cache[$code] = $result[0]['id'] ;
+    	return $result[0]['id'] ;
+    }
+    // Customer account does not exist... Need to create one
+    $id = $odooClient->Create('account.account', array(
+        'name' => $fullName,
+        'account_type' => 'asset_receivable',
+        'internal_group' => 'asset',
+        'code' => $code,
+        'name' => "$fullName")) ;
+    if ($id > 0) {
+        $cache[$code] = $id ;
+        return $id ;
+    } else
+        return 158 ; // Harcoded default 400000 in RAPCS2.odoo.com
+}
+// Role being 'student', 'member', ...
+function GetOdooCategory($role) {
+
+    static $cache = array() ;
+    $odooClient=OF_GetOdooClient();
+    if (isset($cache[$role])) return $cache[$role] ;
+    $result = $odooClient->SearchRead('res.partner.category', array(array(
+		array('name', '=', $role))), 
+	array()) ; 
+    if (count($result) > 0) {
+        $cache[$role] = $result[0]['id'] ;
+    	return $result[0]['id'] ;
+    }
+    // Category does not exist... Need to create one
+    $id = $odooClient->Create('res.partner.category', array(
+        'name' => $role, 'display_name' => $role)) ;
+    if ($id > 0) {
+        $cache[$role] = $id ;
+        return $id ;
+    }
+}
 ?>
