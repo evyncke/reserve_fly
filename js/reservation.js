@@ -1961,7 +1961,7 @@ function refreshPlanningTable() {
 				// Add FlightAware link only for members, need to stop event propagation to the TD click causing a switch of presentation
 				if (userId > 0)
 					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <a href="https://flightaware.com/live/flight/' + allPlanes[plane].id.toUpperCase() +
-						'" onclick="event.stopPropagation();" target="_blank"><img src="fa.ico" border="0" width="12" height="12" title="Dernier vol sur Flightaware"></a>' ;
+						'" onclick="event.stopPropagation();" target="_blank"><img src="images/fa.ico" border="0" width="12" height="12" title="Dernier vol sur Flightaware"></a>' ;
 				compteur = allPlanes[plane].compteur_pilote ;
 				planePlanningTable.rows[1 + plane].cells[0].innerHTML += '<br/>Compteur: ' + compteur + '<br/>Maint. &agrave;: ' + allPlanes[plane].entretien ;
 				if (allPlanes[plane].entretien <= compteur)
