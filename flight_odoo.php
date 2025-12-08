@@ -42,33 +42,6 @@ foreach($result as $client) {
     $odoo_customers[$client['id']] = $client ; // Let's be dirty as associative PHP arrays allow is... let's also index by odoo id
 }
 
-function GetOdooAccount($code, $fullName) {
-    global $odooClient ;
-    static $cache = array() ;
-
-    if (isset($cache[$code])) return $cache[$code] ;
-    $result = $odooClient->SearchRead('account.account', array(array(
-		array('account_type', '=', 'asset_receivable'),
-		array('code', '=', $code))), 
-	array()) ; 
-    if (count($result) > 0) {
-        $cache[$code] = $result[0]['id'] ;
-    	return $result[0]['id'] ;
-    }
-    // Customer account does not exist... Need to create one
-    $id = $odooClient->Create('account.account', array(
-        'name' => $fullName,
-        'account_type' => 'asset_receivable',
-        'internal_group' => 'asset',
-        'code' => $code,
-        'name' => "$fullName")) ;
-    if ($id > 0) {
-        $cache[$code] = $id ;
-        return $id ;
-    } else
-        return 158 ; // Harcoded default 400000 in RAPCS2.odoo.com
-}
-
 // Country being Belgium, France, ...
 function GetOdooCountry($country) {
     global $odooClient ;
