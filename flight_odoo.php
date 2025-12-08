@@ -63,6 +63,8 @@ function GetOdooCountry($country) {
 
 function geoCode($address) {
     global $gmap_api_key, $userId ;
+
+    return false ; // Eric's API was too expensive
     // https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=$gmap_api_key
     // https://developers.google.com/maps/documentation/geocoding/requests-geocoding?hl=fr
     // TODO: this returns a REQUEST_DENIED if the API key is authorized for HTTP referrer only... and there is no referer in file_get_contents()...
@@ -134,13 +136,14 @@ while ($row = mysqli_fetch_array($result)) {
             $updates['city'] = db2web($row['p_city']) ;
             $odoo_customer['partner_latitude'] = 0.0 ;
         } 
-        if (($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) and $row['p_street'] != '' and $row['p_city'] != '') {
-            $coordinates = geoCode(db2web($row['p_street']) . "," . db2web($row['p_city']) . ', ' . db2web($row['p_country'])) ;
-            if ($coordinates and count($coordinates) == 2) { 
-                $updates['partner_latitude'] = $coordinates['lat'] ;
-                $updates['partner_longitude'] = $coordinates['lng'] ;
-            }
-        }
+        # Commented out as Eric's API was too expensive
+        //if (($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) and $row['p_street'] != '' and $row['p_city'] != '') {
+        //    $coordinates = geoCode(db2web($row['p_street']) . "," . db2web($row['p_city']) . ', ' . db2web($row['p_country'])) ;
+        //    if ($coordinates and count($coordinates) == 2) { 
+        //        $updates['partner_latitude'] = $coordinates['lat'] ;
+        //        $updates['partner_longitude'] = $coordinates['lng'] ;
+        //    }
+        //}
         if (count($updates) > 0) { // There were some changes, let's update the Odoo record
             if (! $odoo_customer['id']) { print("<pre>") ; var_dump($odoo_customer); print("</pre>") ; }
             $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
