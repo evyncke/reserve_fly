@@ -69,28 +69,6 @@ function GetOdooAccount($code, $fullName) {
         return 158 ; // Harcoded default 400000 in RAPCS2.odoo.com
 }
 
-// Role being 'student', 'member', ...
-function GetOdooCategory($role) {
-    global $odooClient ;
-    static $cache = array() ;
-
-    if (isset($cache[$role])) return $cache[$role] ;
-    $result = $odooClient->SearchRead('res.partner.category', array(array(
-		array('name', '=', $role))), 
-	array()) ; 
-    if (count($result) > 0) {
-        $cache[$role] = $result[0]['id'] ;
-    	return $result[0]['id'] ;
-    }
-    // Category does not exist... Need to create one
-    $id = $odooClient->Create('res.partner.category', array(
-        'name' => $role, 'display_name' => $role)) ;
-    if ($id > 0) {
-        $cache[$role] = $id ;
-        return $id ;
-    }
-}
-
 // Country being Belgium, France, ...
 function GetOdooCountry($country) {
     global $odooClient ;
@@ -129,7 +107,7 @@ function geoCode($address) {
     return $result ;
 }
 
-$flight_tag = GetOdooCategory('Client-IF-INI') ;
+$flight_tag = $odooClient -> GetOrCreateCategory('Client-IF-INI') ;
 
 // Let's look at all our flights customers
 $result = mysqli_query($mysqli_link, "SELECT *

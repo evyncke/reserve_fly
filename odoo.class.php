@@ -223,5 +223,27 @@ class OdooClient {
         
         return $result['result'] ;
     }
+
+    # Get the category ID from its roleName, create it if not existing
+    # Role being 'student', 'member', ...
+    function GetOrCreateCategory($roleName) {
+        static $cache = array() ;
+
+        if (isset($cache[$roleName])) 
+            return $cache[$roleName] ;
+        $categories = $this->SearchRead('res.partner.category', 
+            array(array(array('name', '=', $roleName))), 
+            array('fields'=>array('id', 'name'))) ;
+        if (count($categories) > 0) {
+            $cache[$roleName] = $categories[0]['id'] ;
+            return $categories[0]['id'] ;
+        } else {
+            die("Creating Odoo category '$roleName'") ;
+            $newCategoryId = $this->Create('res.partner.category', 
+                array('name' => $roleName)) ;
+            $cache[$roleName] = $newCategoryId ;
+            return $newCategoryId ;
+        }
+    }
 }
 ?>

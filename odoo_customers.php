@@ -161,28 +161,6 @@ function GetOdooAccount($code, $fullName) {
         return 158 ; // Harcoded default 400000 in RAPCS2.odoo.com
 }
 
-// Role being 'student', 'member', ...
-function GetOdooCategory($role) {
-    global $odooClient ;
-    static $cache = array() ;
-
-    if (isset($cache[$role])) return $cache[$role] ;
-    $result = $odooClient->SearchRead('res.partner.category', array(array(
-		array('name', '=', $role))), 
-	array()) ; 
-    if (count($result) > 0) {
-        $cache[$role] = $result[0]['id'] ;
-    	return $result[0]['id'] ;
-    }
-    // Category does not exist... Need to create one
-    $id = $odooClient->Create('res.partner.category', array(
-        'name' => $role, 'display_name' => $role)) ;
-    if ($id > 0) {
-        $cache[$role] = $id ;
-        return $id ;
-    }
-}
-
 function geoCode($address) {
     global $gmap_api_key, $userId ;
     // https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=$gmap_api_key
@@ -203,11 +181,11 @@ function geoCode($address) {
     return $result ;
 }
 
-$fi_tag = GetOdooCategory('FI') ;
-$student_tag = GetOdooCategory('Student') ;
-$pilot_tag = GetOdooCategory('Pilot') ;
-$member_tag = GetOdooCategory('Member') ;
-$board_member_tag = GetOdooCategory('Board Member') ;
+$fi_tag = $odooClient -> GetOrCreateCategory('FI') ;
+$student_tag = $odooClient -> GetOrCreateCategory('Student') ;
+$pilot_tag = $odooClient -> GetOrCreateCategory('Pilot') ;
+$member_tag = $odooClient -> GetOrCreateCategory('Member') ;
+$board_member_tag = $odooClient -> GetOrCreateCategory('Board Member') ;
 
 // Let's look at all our members
 $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS allgroups 
