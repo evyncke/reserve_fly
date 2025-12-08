@@ -24,7 +24,7 @@ require_once "dbi.php" ;
 require_once __DIR__.'/odooFlight.class.php';
 
 if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/odoo_inscription.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
 if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) journalise($userId, "F", "This admin page is reserved to administrators") ;
