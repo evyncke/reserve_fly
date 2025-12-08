@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2024 Eric Vyncke
+   Copyright 2024-2025 Patrick Reginster for all OF_ functions
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,21 +17,12 @@
 */
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require __DIR__ . '/vendor/autoload.php' ;
-require_once __DIR__ .'/dbi.php' ;
-require_once __DIR__ .'/odoo.class.php' ;
-require_once __DIR__.'/mobile_tools.php';
-require_once __DIR__.'/notedefraisPDF.php';
-require_once __DIR__.'/bondecommandePDF.php';
+require_once '/dbi.php' ;
+require_once '/odoo.class.php' ;
+require_once '/mobile_tools.php';
+require_once '/notedefraisPDF.php';
+require_once '/bondecommandePDF.php';
 
-class OdooFlight {
-
-    function __construct() {
-    }
-
-    # Read return all records from one model based on their IDs
-    function Read() {
-    }
-}
 //============================================
 // Function: OF_GetOdooClient
 // Purpose: Returns the odooClient
@@ -2057,23 +2048,27 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     //1. Check if the e-mail already exists (Only one time) in $table_users = 'jom_users'
     $sql= "SELECT email FROM $table_users WHERE email='$email'";
     //print("OF_CreateNewMember:$sql<br>");
+    // TODO could also use mysqli_num_rows to check if there is already a user with this email
+    // Also, the DB does not allow multiple same email (Unique)
     $result = mysqli_query($mysqli_link, $sql)
-    	or journalise($userId, "E", "Cannot read rapcs_person " . mysqli_error($mysqli_link)) ;
+    	or journalise($userId, "E", "Cannot read $table_users  " . mysqli_error($mysqli_link)) ;
     while ($row = mysqli_fetch_array($result)) {
         // The email address already exist then stop
-        return "The email address is aready used (jom_users): Use a new email. The new member is not created.";
+        return "The email address is aready used ($table_users): Use a new email. The new member is not created.";
     }
     if($societe=="oui") {
-        return "Programmation avec societe pas terminee! The new member is not created!";
+        return "Programmation avec societe pas terminée! The new member is not created!";
     }
     //2. Check if the e-mail already exists (Only one time) in $table_person = 'rapcs_person' ; (Should be the same but to be sure)
+    // TODO could also use mysqli_num_rows to check if there is already a user with this email
+    // Also, the DB does not allow multiple same email (Unique)
     $sql= "SELECT email FROM $table_person WHERE email='$email'";
     //print("OF_CreateNewMember:$sql<br>");
     $result = mysqli_query($mysqli_link, $sql)
-    	or journalise($userId, "E", "Cannot read jom_users: " . mysqli_error($mysqli_link)) ;
+    	or journalise($userId, "E", "Cannot read $table_person: " . mysqli_error($mysqli_link)) ;
     while ($row = mysqli_fetch_array($result)) {
         // The email address already exist then stop
-        return "The email address is aready used (rapcs_person): Use a new email. The new member is not created.";
+        return "The email address is aready used ($table_person): Use another email. The new member is not created.";
     }
 
      //3. Insert the new member in the table $table_users = 'jom_users' (Name, username,...)
@@ -2082,7 +2077,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     print("OF_CreateNewMember:$sql<br>");
     if(0 && $insertFlag) {
        $result = mysqli_query($mysqli_link, $sql)
-    	or journalise($userId, "E", "Cannot insert into jom_users: " . mysqli_error($mysqli_link)) ;
+    	or journalise($userId, "E", "Cannot insert into $table_users: " . mysqli_error($mysqli_link)) ;
 		$jom_id = mysqli_insert_id($mysqli_link) ; 
     }
     else {
@@ -2096,7 +2091,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     print("OF_CreateNewMember:$sql<br>");
     if($insertFlag) {
        $result = mysqli_query($mysqli_link, $sql)
-    	or journalise($userId, "E", "Cannot insert into rapcs_person: " . mysqli_error($mysqli_link)) ;
+    	or journalise($userId, "E", "Cannot insert into $table_person : " . mysqli_error($mysqli_link)) ;
     }
 
     //5. Insert the new member in the table  $table_user_usergroup_map = 'jom_user_usergroup_map' (Type of member)
@@ -2106,7 +2101,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     print("OF_CreateNewMember:$sql<br>");
     if($insertFlag) {
         $result = mysqli_query($mysqli_link, $sql)
-        or journalise($userId, "E", "Cannot insert into jom_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
+        or journalise($userId, "E", "Cannot insert into $table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
     }
     if($typemembre!="nonnaviguant") {
         // Insert like a pilot or a student
@@ -2118,7 +2113,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
         print("OF_CreateNewMember:$sql<br>");
         if($insertFlag) {
             $result = mysqli_query($mysqli_link, $sql)
-            or journalise($userId, "E", "Cannot insert into rapcs_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
+            or journalise($userId, "E", "Cannot insert into $table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
         }
     }
 
@@ -2129,7 +2124,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
         print("OF_CreateNewMember:$sql<br>");
         if($insertFlag) {
             $result = mysqli_query($mysqli_link, $sql)
-            or journalise($userId, "E", "Cannot insert into rapcs_company: " . mysqli_error($mysqli_link)) ;
+            or journalise($userId, "E", "Cannot insert into $table_company: " . mysqli_error($mysqli_link)) ;
  	        $societeId = mysqli_insert_id($mysqli_link) ; 
         }
         $sql= "INSERT INTO $table_company_member(cm_member, cm_company)
@@ -2137,7 +2132,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
         print("OF_CreateNewMember:$sql<br>");
         if($insertFlag) {
             $result = mysqli_query($mysqli_link, $sql)
-            or journalise($userId, "E", "Cannot insert into rapcs_company_member: " . mysqli_error($mysqli_link)) ;
+            or journalise($userId, "E", "Cannot insert into $table_company_member: " . mysqli_error($mysqli_link)) ;
        }
     }
 
