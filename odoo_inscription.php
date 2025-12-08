@@ -158,6 +158,7 @@ if (isset($_REQUEST['createmember']) and $_REQUEST['createmember'] == 'create') 
 ?>
 
 <h3>Create a new member in RAPCS tables and in Odoo</h3>
+<h4>To edit a member: Use the page <a href="https://www.spa-aviation.be/resa/gestionMembres.php">GestionMembres</a></h4>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal" enctype="multipart/form-data">

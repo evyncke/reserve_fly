@@ -2054,8 +2054,18 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     	or journalise($userId, "E", "Cannot read $table_users  " . mysqli_error($mysqli_link)) ;
     while ($row = mysqli_fetch_array($result)) {
         // The email address already exist then stop
-        return "The email address is aready used ($table_users): Use a new email. The new member is not created.";
+        return "The email address $email is aready used ($table_users): Use a new email. The new member is not created.";
     }
+    $sql= "SELECT username FROM $table_users WHERE username='$username'";
+    // TODO could also use mysqli_num_rows to check if there is already a user with this username
+    // Also, the DB does not allow multiple same email (Unique)
+    $result = mysqli_query($mysqli_link, $sql)
+    	or journalise($userId, "E", "Cannot read $table_users  " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        // The email address already exist then stop
+        return "The username $username is aready used ($table_users): Use a new email. The new member is not created.";
+    }
+
     if($societe=="oui") {
         return "Programmation avec societe pas terminée! The new member is not created!";
     }
