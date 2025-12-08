@@ -21,7 +21,7 @@ ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
 header('Link: </resa/css/reservation.css>;rel=preload;as=style, </resa/css/datepickr.css>;rel=preload;as=style,</resa/js/reservation.js>;rel=preload;as=script,</resa/js/datepickr.js>;rel=preload;as=script,' .
-		'</resa/images/spinner.gif>;rel=preload;as=image,</resa/fa.ico>;rel=preload;as=image,</resa/data/members.js>;rel=preload;as=script') ;
+		'</resa/images/spinner.gif>;rel=preload;as=image,</resa/images/fa.ico>;rel=preload;as=image,</resa/data/members.js>;rel=preload;as=script') ;
 
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
 require_once "dbi.php" ;
@@ -507,7 +507,7 @@ base de l'entr&eacute;e des heures de vol dans votre carnet de vols).<br/>
 <img src="forbidden-icon.png" width="12" height="12" alt="X">: vous n'avez pas les qualifications requises (sur base des validit&eacute;s de votre profil).<br/>
 V&eacute;rifiez les r&egrave;gles de r&eacute;servation et si vous les respectez: r&eacute;servez :-)<br/>
 <span class="material-symbols-rounded" style="font-size: 12px; color: orangeRed;">handyman</span>: il existe un Aircraft Technical Log pour ce avion à consulter.<br/>
-<img src="fa.ico" border="0" width="12" height="12">: ouvre Flight Aware avec le dernier vol de cet avion.<br/>
+<img src="images/fa.ico" border="0" width="12" height="12">: ouvre Flight Aware avec le dernier vol de cet avion.<br/>
 </span>
 <center><input type="button" id="roadBookButton" value="Carnet de routes" onclick="roadBookClick();" disabled="true" style="display: none;"></center>
 <p>
