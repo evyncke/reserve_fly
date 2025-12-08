@@ -27,12 +27,8 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/odoo_inscription.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
+if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) journalise($userId, "F", "This admin page is reserved to administrators") ;
 
-if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '') {
-    $plane = strtoupper(trim($_REQUEST['plane'])) ;
-} else {
-    $plane = NULL ;
-}
 $header_postamble = "
 <script>
   var default_member=$userId;
