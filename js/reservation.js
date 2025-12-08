@@ -1642,7 +1642,7 @@ function displayBooking(row, booking, displayDay, displayMonth, displayYear) {
 			thisCell.innerHTML += '<br/><b><i>' + pInitials + '</i></b>' ;
 		}
 		// Add a clickable icons to display details
-		thisCell.innerHTML += '<br/><a href="javascript:showPilotDetails(\'' + booking.id + '-' + booking.log_id + '\');"><img src="usl_search_icon.png" alt="?" title="D&eacute;tails"></a>' ;
+		thisCell.innerHTML += '<br/><a href="javascript:showPilotDetails(\'' + booking.id + '-' + booking.log_id + '\');"><img src="images/usl_search_icon.png" alt="?" title="D&eacute;tails"></a>' ;
 	}
 }
 
@@ -1930,7 +1930,7 @@ function refreshPlanningTable() {
 			// }
 			// Check for rating validity 
 			if (!allPlanes[plane].qualifications_requises) {
-				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <img src="forbidden-icon.png" width="12" height="12" title="Manque la qualification" alt="X">' ;
+				planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <img src="images/forbidden-icon.png" width="12" height="12" title="Manque la qualification" alt="X">' ;
 			} else {
 				// Ratings are valid, let's do further check whether plane can be booked
 				var bookingAllowed = allPlanes[plane].reservation_permise ;
@@ -1945,7 +1945,7 @@ function refreshPlanningTable() {
 				if (bookingAllowed && allPlanes[plane].actif == 2)
 					bookingAllowed = false ;
 				if (!bookingAllowed)
-					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <img src="exclamation-icon.png" width="12" height="12" title="Pas de vol récent" alt="!">' ;
+					planePlanningTable.rows[1 + plane].cells[0].innerHTML += ' <img src="images/exclamation-icon.png" width="12" height="12" title="Pas de vol récent" alt="!">' ;
 			}
 			// Check for incidents ATL
 			if (allPlanes[plane].incidents == 'NOHAZARD')
