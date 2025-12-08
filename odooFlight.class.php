@@ -17,11 +17,11 @@
 */
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require __DIR__ . '/vendor/autoload.php' ;
-require_once '/dbi.php' ;
-require_once '/odoo.class.php' ;
-require_once '/mobile_tools.php';
-require_once '/notedefraisPDF.php';
-require_once '/bondecommandePDF.php';
+require_once 'dbi.php' ;
+require_once 'odoo.class.php' ;
+require_once 'mobile_tools.php';
+require_once 'notedefraisPDF.php';
+require_once 'bondecommandePDF.php';
 
 //============================================
 // Function: OF_GetOdooClient
