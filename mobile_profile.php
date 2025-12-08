@@ -665,10 +665,10 @@ if ($user_only) {
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal">
 <?php
-$facebook_img = ($me['facebook'] != '') ? "<a href=\"https://www.facebook.com/$me[facebook]\" target=\"_blank\"><img src=\"facebook_blue_100.png\" width=\”15\" height=\"15\"></a>\n" : '' ;
-$linkedin_img = ($me['linkedin'] != '') ? "<a href=\"https://www.linkedin.com/in/$me[linkedin]\" target=\"_blank\"><img src=\"linkedin.jpg\"></a>\n" : "" ;
-$skype_img = ($me['skype'] != '') ? "<a href=\"skype:$me[skype]\"><img src=\"skype.png\"></a>\n" : "" ;
-$twitter_img = ($me['twitter'] != '') ? "<a href=\"https://www.twitter.com/$me[twitter]\" target=\"_blank\"><img src=\"twitter.jpg\"></a>\n" : '' ;
+$facebook_img = ($me['facebook'] != '') ? "<a href=\"https://www.facebook.com/$me[facebook]\" target=\"_blank\"><img src=\"images/facebook_blue_100.png\" width=\”15\" height=\"15\"></a>\n" : '' ;
+$linkedin_img = ($me['linkedin'] != '') ? "<a href=\"https://www.linkedin.com/in/$me[linkedin]\" target=\"_blank\"><img src=\"images/linkedin.jpg\"></a>\n" : "" ;
+$skype_img = ($me['skype'] != '') ? "<a href=\"skype:$me[skype]\"><img src=\"images/skype.png\"></a>\n" : "" ;
+$twitter_img = ($me['twitter'] != '') ? "<a href=\"https://www.twitter.com/$me[twitter]\" target=\"_blank\"><img src=\"images/twitter.jpg\"></a>\n" : '' ;
 ?>
 <input type="hidden" name="action" value="social">
 <input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
