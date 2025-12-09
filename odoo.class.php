@@ -223,5 +223,54 @@ class OdooClient {
         
         return $result['result'] ;
     }
+
+    # Get the category ID from its roleName, create it if not existing
+    # Role being 'student', 'member', ...
+    function GetOrCreateCategory($roleName) {
+        static $cache = array() ;
+
+        if (isset($cache[$roleName])) 
+            return $cache[$roleName] ;
+        $categories = $this->SearchRead('res.partner.category', 
+            array(array(array('name', '=', $roleName))), 
+            array('fields'=>array('id', 'name'))) ;
+        if (count($categories) > 0) {
+            $cache[$roleName] = $categories[0]['id'] ;
+            return $categories[0]['id'] ;
+        } else {
+            $newCategoryId = $this->Create('res.partner.category', 
+                array('name' => $roleName)) ;
+            $cache[$roleName] = $newCategoryId ;
+            return $newCategoryId ;
+        }
+    }
+
+    # Get or create an account based on its ID or its full name
+    function GetOrCreateAccount($code, $fullName) {
+        static $cache = array() ;
+
+        if (isset($cache[$code])) 
+            return $cache[$code] ;
+        $result = $this->SearchRead('account.account', array(array(
+                array('account_type', '=', 'asset_receivable'),
+                array('code', '=', $code))), 
+            array()) ; 
+        if (count($result) > 0) {
+            $cache[$code] = $result[0]['id'] ;
+            return $result[0]['id'] ;
+        }
+        // Customer account does not exist... Need to create one
+        $id = $this->Create('account.account', array(
+            'name' => $fullName,
+            'account_type' => 'asset_receivable',
+            'internal_group' => 'asset',
+            'code' => $code,
+            'name' => "$fullName")) ;
+        if ($id > 0) {
+            $cache[$code] = $id ;
+            return $id ;
+        } else
+            return 158 ; // Harcoded default 400000 in RAPCS2.odoo.com
+    }
 }
 ?>

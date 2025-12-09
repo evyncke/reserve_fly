@@ -42,7 +42,7 @@ if ($create) {
     $id = $odooClient->Create('res.partner', array(
         'name' => db2web("$row[last_name] $row[first_name]"),
         'complete_name' => db2web("$row[last_name] $row[first_name]"),
-        'property_account_receivable_id' => GetOdooAccount('400100', db2web("$row[last_name] $row[first_name]")) ,
+        'property_account_receivable_id' => $odooClient->GetOrCreateAccount('400100', db2web("$row[last_name] $row[first_name]")) ,
         'street' => db2web($row['address']),
         'zip' => db2web($row['zipcode']),
         'city' => db2web($row['city']),
@@ -134,55 +134,6 @@ foreach($result as $client) {
     $odoo_customers[$client['id']] = $client ; // Let's be dirty as associative PHP arrays allow is... let's also index by odoo id
 }
 
-function GetOdooAccount($code, $fullName) {
-    global $odooClient ;
-    static $cache = array() ;
-
-    if (isset($cache[$code])) return $cache[$code] ;
-    $result = $odooClient->SearchRead('account.account', array(array(
-		array('account_type', '=', 'asset_receivable'),
-		array('code', '=', $code))), 
-	array()) ; 
-    if (count($result) > 0) {
-        $cache[$code] = $result[0]['id'] ;
-    	return $result[0]['id'] ;
-    }
-    // Customer account does not exist... Need to create one
-    $id = $odooClient->Create('account.account', array(
-        'name' => $fullName,
-        'account_type' => 'asset_receivable',
-        'internal_group' => 'asset',
-        'code' => $code,
-        'name' => "$fullName")) ;
-    if ($id > 0) {
-        $cache[$code] = $id ;
-        return $id ;
-    } else
-        return 158 ; // Harcoded default 400000 in RAPCS2.odoo.com
-}
-
-// Role being 'student', 'member', ...
-function GetOdooCategory($role) {
-    global $odooClient ;
-    static $cache = array() ;
-
-    if (isset($cache[$role])) return $cache[$role] ;
-    $result = $odooClient->SearchRead('res.partner.category', array(array(
-		array('name', '=', $role))), 
-	array()) ; 
-    if (count($result) > 0) {
-        $cache[$role] = $result[0]['id'] ;
-    	return $result[0]['id'] ;
-    }
-    // Category does not exist... Need to create one
-    $id = $odooClient->Create('res.partner.category', array(
-        'name' => $role, 'display_name' => $role)) ;
-    if ($id > 0) {
-        $cache[$role] = $id ;
-        return $id ;
-    }
-}
-
 function geoCode($address) {
     global $gmap_api_key, $userId ;
     // https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=$gmap_api_key
@@ -203,11 +154,11 @@ function geoCode($address) {
     return $result ;
 }
 
-$fi_tag = GetOdooCategory('FI') ;
-$student_tag = GetOdooCategory('Student') ;
-$pilot_tag = GetOdooCategory('Pilot') ;
-$member_tag = GetOdooCategory('Member') ;
-$board_member_tag = GetOdooCategory('Board Member') ;
+$fi_tag = $odooClient -> GetOrCreateCategory('FI') ;
+$student_tag = $odooClient -> GetOrCreateCategory('Student') ;
+$pilot_tag = $odooClient -> GetOrCreateCategory('Pilot') ;
+$member_tag = $odooClient -> GetOrCreateCategory('Member') ;
+$board_member_tag = $odooClient -> GetOrCreateCategory('Board Member') ;
 
 // Let's look at all our members
 $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS allgroups 
@@ -289,7 +240,7 @@ while ($row = mysqli_fetch_array($result)) {
                 $updates['complete_name'] = $name_from_db ;
             // Code below is to ensure that all members are using the same 400100 account
             if ($property_account_receivable_id  != '400100') {
-                $updates['property_account_receivable_id'] = GetOdooAccount('400100', db2web("$row[last_name] $row[first_name]")) ;
+                $updates['property_account_receivable_id'] = $odooClient->GetOrCreateAccount('400100', db2web("$row[last_name] $row[first_name]")) ;
             }
             // TODO for FI, should do property_account_payable_id based on the code ? 400xxx to 700xxx ?
             $tags = array() ;

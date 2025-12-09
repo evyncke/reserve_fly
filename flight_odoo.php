@@ -42,55 +42,6 @@ foreach($result as $client) {
     $odoo_customers[$client['id']] = $client ; // Let's be dirty as associative PHP arrays allow is... let's also index by odoo id
 }
 
-function GetOdooAccount($code, $fullName) {
-    global $odooClient ;
-    static $cache = array() ;
-
-    if (isset($cache[$code])) return $cache[$code] ;
-    $result = $odooClient->SearchRead('account.account', array(array(
-		array('account_type', '=', 'asset_receivable'),
-		array('code', '=', $code))), 
-	array()) ; 
-    if (count($result) > 0) {
-        $cache[$code] = $result[0]['id'] ;
-    	return $result[0]['id'] ;
-    }
-    // Customer account does not exist... Need to create one
-    $id = $odooClient->Create('account.account', array(
-        'name' => $fullName,
-        'account_type' => 'asset_receivable',
-        'internal_group' => 'asset',
-        'code' => $code,
-        'name' => "$fullName")) ;
-    if ($id > 0) {
-        $cache[$code] = $id ;
-        return $id ;
-    } else
-        return 158 ; // Harcoded default 400000 in RAPCS2.odoo.com
-}
-
-// Role being 'student', 'member', ...
-function GetOdooCategory($role) {
-    global $odooClient ;
-    static $cache = array() ;
-
-    if (isset($cache[$role])) return $cache[$role] ;
-    $result = $odooClient->SearchRead('res.partner.category', array(array(
-		array('name', '=', $role))), 
-	array()) ; 
-    if (count($result) > 0) {
-        $cache[$role] = $result[0]['id'] ;
-    	return $result[0]['id'] ;
-    }
-    // Category does not exist... Need to create one
-    $id = $odooClient->Create('res.partner.category', array(
-        'name' => $role, 'display_name' => $role)) ;
-    if ($id > 0) {
-        $cache[$role] = $id ;
-        return $id ;
-    }
-}
-
 // Country being Belgium, France, ...
 function GetOdooCountry($country) {
     global $odooClient ;
@@ -112,6 +63,8 @@ function GetOdooCountry($country) {
 
 function geoCode($address) {
     global $gmap_api_key, $userId ;
+
+    return false ; // Eric's API was too expensive
     // https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=$gmap_api_key
     // https://developers.google.com/maps/documentation/geocoding/requests-geocoding?hl=fr
     // TODO: this returns a REQUEST_DENIED if the API key is authorized for HTTP referrer only... and there is no referer in file_get_contents()...
@@ -129,7 +82,7 @@ function geoCode($address) {
     return $result ;
 }
 
-$flight_tag = GetOdooCategory('Client-IF-INI') ;
+$flight_tag = $odooClient -> GetOrCreateCategory('Client-IF-INI') ;
 
 // Let's look at all our flights customers
 $result = mysqli_query($mysqli_link, "SELECT *
@@ -183,13 +136,14 @@ while ($row = mysqli_fetch_array($result)) {
             $updates['city'] = db2web($row['p_city']) ;
             $odoo_customer['partner_latitude'] = 0.0 ;
         } 
-        if (($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) and $row['p_street'] != '' and $row['p_city'] != '') {
-            $coordinates = geoCode(db2web($row['p_street']) . "," . db2web($row['p_city']) . ', ' . db2web($row['p_country'])) ;
-            if ($coordinates and count($coordinates) == 2) { 
-                $updates['partner_latitude'] = $coordinates['lat'] ;
-                $updates['partner_longitude'] = $coordinates['lng'] ;
-            }
-        }
+        # Commented out as Eric's API was too expensive
+        //if (($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0) and $row['p_street'] != '' and $row['p_city'] != '') {
+        //    $coordinates = geoCode(db2web($row['p_street']) . "," . db2web($row['p_city']) . ', ' . db2web($row['p_country'])) ;
+        //    if ($coordinates and count($coordinates) == 2) { 
+        //        $updates['partner_latitude'] = $coordinates['lat'] ;
+        //        $updates['partner_longitude'] = $coordinates['lng'] ;
+        //    }
+        //}
         if (count($updates) > 0) { // There were some changes, let's update the Odoo record
             if (! $odoo_customer['id']) { print("<pre>") ; var_dump($odoo_customer); print("</pre>") ; }
             $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
