@@ -39,7 +39,7 @@ td.header_not_hour {width: 15px; }
 	border-collapse: separate; border-width: 1px; 
 	font-size: /*0.75em*/ 1em; line-height: 1 ;}
 
-td.plane_cell { border-top-style: dotted; border-top-width: 1px; border-color: black; font-size: calc(0.3vw + 0.75vh); }
+td.plane_cell { border-top-style: dotted; border-top-width: 1px; border-color: black; font-size: calc(0.3vw + 0.5vh); }
 td.slot { width: 17px; min-width: 17px ; max-width: 17px; height: 40px; max-height: 40px; 
 	border-spacing: 1px; border-width: 1px; border-color: white; 
 	color: black; 
