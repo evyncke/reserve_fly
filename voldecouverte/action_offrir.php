@@ -370,7 +370,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 	
 	$MessageAnswerBody='<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>'.$MessageAnswer."</body></html>";
     mail_attachment($contactmail, $sender, "", $replyto, "Confirmation ($flight_reference): ".$subject, $MessageAnswerBody,"", "", "");
-	journalise(0, "I", "Vol decouverte $flight_reference: New reservation from $contactmail") ;
+	journalise(0, "I", "Vol découverte $flight_reference: New reservation by $contactmail, referer $_SERVER[HTTP_REFERER]") ;
 }
 ?>
         <p>
