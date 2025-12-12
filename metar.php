@@ -20,6 +20,24 @@
 
 require_once 'dbi.php' ; // Mainly to have access to $default_metar_station...
 
+// List of allowed origins
+$allowed_origins = [
+    "https://www.spa-aviation.be",
+    "https://spa-aviation.be",
+    "https://www.spa-aviation.ovh",
+    "https://spa-aviation.ovh"
+];
+
+// Get the Origin of the request
+if (isset($_SERVER['HTTP_ORIGIN'])) {
+    $origin = $_SERVER['HTTP_ORIGIN'];
+
+    // Check if the Origin is in the allowed list
+    if (in_array($origin, $allowed_origins)) {
+        header("Access-Control-Allow-Origin: $origin");
+    }
+}	
+
 $reply = array() ;
 $reply['error'] = '' ;
 
