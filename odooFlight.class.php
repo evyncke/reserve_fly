@@ -2085,7 +2085,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     $sql= "INSERT INTO $table_users (name, username, email, password, registerDate, params)
 		    VALUES ('$fullName', '$username', '$email', '$hashPassword', '$registerDate', '$params')";
     print("OF_CreateNewMember:$sql<br>");
-    if(0 && $insertFlag) {
+    if($insertFlag) {
        $result = mysqli_query($mysqli_link, $sql)
     	or journalise($userId, "E", "Cannot insert into $table_users: " . mysqli_error($mysqli_link)) ;
 		$jom_id = mysqli_insert_id($mysqli_link) ; 
