@@ -120,16 +120,20 @@ while ($row = mysqli_fetch_array($result)) {
     } else {
         $readonly = ($row['weight'] > 0) ? ' readonly' : 'oninput="processWnB();"' ;
         $readonly = 'oninput="processWnB();"' ;
-        print("<td class=\"py-0\"><input type=\"text\" id=\"w_$rowCount\" class=\"text-end py-0 py-md-1\" value=\"$row[weight]\" style=\"width: 80%;\" $readonly>") ;
+        print("<td class=\"py-0\">
+		<div class=\"input-group\">
+			<input type=\"text\" id=\"w_$rowCount\" class=\"text-end py-0 py-md-1\" value=\"$row[weight]\" style=\"width: 80%;\" $readonly>
+			<span class=\"input-group-text\">") ;
         if ($row['fuel'] == 'true') {
-            print("&nbsp;l</td>") ;
+            print("l</td>") ;
             $weight_lbs = round($row['weight'] * $row['fuelwt'], 1) ;
             $density[$rowCount] = $row['fuelwt'] ;
         } else {
-            print("&nbsp;kg</td>") ;
+            print("kg</td>") ;
             $weight_lbs = round($row['weight'] * 2.20462, 1) ;
             $density[$rowCount] = 2.20462 ;
         }
+	print("</span>\n</div><!-- input-group-->\n") ;
         print("<td $hiddenTag class=\"py-md-1\"><span id=\"wlb_$rowCount\">$weight_lbs</span></td>") ;
     }
     print("<td $hiddenTag class=\"py-md-1\"><span id=\"arm_$rowCount\">$row[arm]</span></td>") ;
@@ -213,12 +217,15 @@ function wnbConvertToFloat(elementId, inputValue) {
             value+=value1;
         }
      }
+document.getElementById(elementId).classList.add('form-control') ;
     if(isNaN(value)) {
         value=0;
-        document.getElementById(elementId).style.backgroundColor = 'LightSalmon';
+//        document.getElementById(elementId).style.backgroundColor = 'LightSalmon';
+        document.getElementById(elementId).classList.add('is-invalid') ;
     }
     else {
-        document.getElementById(elementId).style.backgroundColor = 'GhostWhite';       
+        document.getElementById(elementId).classList.remove('is-invalid') ;
+//        document.getElementById(elementId).style.backgroundColor = 'GhostWhite';       
     }
     return value;
 }
