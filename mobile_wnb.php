@@ -22,15 +22,16 @@ if ($userId == 0) {
 	//exit ;
 }
 $displayAllColumns=false;
-$hiddenTag="hidden";
-$itemWidth="width=\"50%\"";
 $plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['plane'])) : 'OO-ALD' ;
 $displayAllColumns = (isset($_REQUEST['displayallcolumns'])) ? $_REQUEST['displayallcolumns']: 'false' ;
 if($displayAllColumns=='true') {
     $hiddenTag="";
-    $itemWidth="width=\"25%\"";
+    $itemWidth='width="25%"';
+} else {
+    $hiddenTag="hidden";
+    $itemWidth='width="50%"';
 }
-$body_attributes = "style=\"height: 100%; min-height: 100%; width:100%;\" onload=\"init();wnbSelectPlane();\"" ;
+$body_attributes = 'style="height: 100%; min-height: 100%; width:100%;" onload="init();wnbSelectPlane();"' ;
 $header_postamble = "<script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>
 <script type=\"text/javascript\">
     var gChartLoaded = false ;
@@ -51,9 +52,6 @@ require_once 'mobile_header5.php' ;
 ?>
 
 <div class="container-fluid">
-<!--div class="container-fluid" style="height: 100%!important;overflow:auto;top:0;bottom:0;left:0;right:0;position:fixed;"-->
-<!--div class="container-fluid" style="height: 100%!important;"-->
-<!--div class="container vh-90" style="height: 80vh!important;width: 100vw!important;bottom:0!important;left:0!important;right:0!important;"-->
 
 <div class="row">
 <div class="col-12 col-sm-12 col-lg-6">
@@ -61,7 +59,7 @@ require_once 'mobile_header5.php' ;
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form" class="form-horizontal">
 <!--div class="row m-0-xs"-->
 	<label for="planeSelect" class="col-form-label col-1 col-md-1">Plane:</label>
-    <select id="planeSelect" class="col-form-select col-1" name="plane" onchange="document.location.href='<?=$_SERVER['PHP_SELF']?>?displayallcolumns=<?print($displayAllColumns);?>&plane=' + this.value ;">$plane</select>
+    <select id="planeSelect" class="col-form-select col-1" name="plane" onchange="document.location.href='<?=$_SERVER['PHP_SELF']?>?displayallcolumns=<?=$displayAllColumns?>&plane=' + this.value ;">$plane</select>
 <!--/div> <!-- row -->
 
 <?php
@@ -72,11 +70,11 @@ if ($plane == '') {
 ?>
 <table class="table table-striped table-hover table-bordered table-condensed w-auto" style="margin-bottom: 0rem;">
 <thead>
-<tr><th <?php print("$itemWidth"); ?> class="text-end py-0 py-md-1">Item</th>
-    <th class="py-0 py-md-1 py-md-1" >Weight</th>
-    <th <?php print("$hiddenTag"); ?> class="py-md-1">Weight (pound)</th>
-    <th <?php print("$hiddenTag"); ?> class="py-md-1">Arm (inch)</th>
-    <th <?php print("$hiddenTag"); ?> class="py-md-1">Moment (inch-pound)</th>
+<tr><th <?=$itemWidth?> class="text-end py-0 py-md-1">Item</th>
+    <th class="text-end py-0 py-md-1 py-md-1" >Weight</th>
+    <th <?=$hiddenTag?> class="text-end py-md-1">Weight (pound)</th>
+    <th <?=$hiddenTag?> class="text-end py-md-1">Arm (inch)</th>
+    <th <?=$hiddenTag?> class="text-end py-md-1">Moment (inch.pound)</th>
 </tr>
 </thead>
 <tbody class="table-divider">
@@ -92,25 +90,23 @@ $rowCount = 0 ;
 $density = array() ;
 while ($row = mysqli_fetch_array($result)) {
     $item=$row['line_item'];
-    if($item=="Co-Pilot+Pilot") {
-        $item="Pilot + Co-Pilot";
-    }
-    if($item=="Pilot+Co-Pilot") {
-        $item="Pilot + Co-Pilot";
-    }
-    else if($item=="Passenger 1+Passenger 2") {
-        $item="Rear Passengers";
-    }
-    else if($item=="Passenger 2+Passenger 1") {
-        $item="Rear Passengers";
-    }
-    else if($item=="Basic empty weight") {
-        $item="Empty Weight";
+    switch ($item) {
+        case "Co-Pilot+Pilot":
+        case "Pilot+Co-Pilot":
+            $item = "Pilot + Co-Pilot";
+            break;
+        case "Passenger 1+Passenger 2":
+        case "Passenger 2+Passenger 1":
+            $item = "Rear Passengers";
+            break;
+        case "Basic empty weight":
+            $item = "Empty Weight";
+            break;
     }
     print("<tr><td class=\"text-end py-0 py-md-1\">$item</td>") ;
     if ($row['emptyweight'] == 'true') {
-        print("<td class=\"py-0 py-md-1\">" . round($row['weight'] / 2.20462,1) . "&nbsp;kg</td>");
-		print("<td $hiddenTag class=\"py-md-1\"><span id=\"wlb_$rowCount\">$row[weight]</span></td>") ;
+        print("<td class=\"text-end py-0 py-md-1\">" . round($row['weight'] / 2.20462,1) . "&nbsp;kg</td>");
+		print("<td $hiddenTag class=\"text-end py-md-1\"><span id=\"wlb_$rowCount\">$row[weight]</span></td>") ;
         $weight_lbs = $row['weight'] ;
         $density[$rowCount] = 1.0 ; // Empty weight is in pounds
         // Save some aircraft-related values
@@ -134,10 +130,10 @@ while ($row = mysqli_fetch_array($result)) {
             $density[$rowCount] = 2.20462 ;
         }
 	print("</span>\n</div><!-- input-group-->\n") ;
-        print("<td $hiddenTag class=\"py-md-1\"><span id=\"wlb_$rowCount\">$weight_lbs</span></td>") ;
+        print("<td $hiddenTag class=\"text-end py-md-1\"><span id=\"wlb_$rowCount\">$weight_lbs</span></td>") ;
     }
-    print("<td $hiddenTag class=\"py-md-1\"><span id=\"arm_$rowCount\">$row[arm]</span></td>") ;
-    print("<td $hiddenTag class=\"py-md-1 \"><span id=\"moment_$rowCount\">" . round($weight_lbs * $row['arm'], 1) . "</span></td>") ;
+    print("<td $hiddenTag class=\"text-end py-md-1\"><span id=\"arm_$rowCount\">$row[arm]</span></td>") ;
+    print("<td $hiddenTag class=\"text-end py-md-1\"><span id=\"moment_$rowCount\">" . round($weight_lbs * $row['arm'], 1) . "</span></td>") ;
     print("</tr>\n") ;
     $rowCount ++ ;
 }
@@ -146,10 +142,10 @@ while ($row = mysqli_fetch_array($result)) {
 <tfoot class="table-divider">
     <tr>
         <th class="table-info text-end text-start py-0 py-md-1">Totals</th>
-        <td class="table-info text-start py-0 py-md-1"><span id="w_total"></span>&nbsp;kg</td>
-        <td <?php print("$hiddenTag"); ?> class="py-md-1"><span id="wlb_total"></span></td>
-        <td <?php print("$hiddenTag"); ?> class="py-md-1"><span id="arm_total"></span></td>
-        <td <?php print("$hiddenTag"); ?> class="py-md-1 table-info"><span id="moment_total"></span></td>
+        <td class="table-info text-end py-0 py-md-1"><span id="w_total"></span>&nbsp;kg</td>
+        <td <?php print("$hiddenTag"); ?> class="text-end py-md-1"><span id="wlb_total"></span></td>
+        <td <?php print("$hiddenTag"); ?> class="text-end py-md-1"><span id="arm_total"></span></td>
+        <td <?php print("$hiddenTag"); ?> class="text-end py-md-1 table-info"><span id="moment_total"></span></td>
     </tr>
 </tfoot>
 </table>
