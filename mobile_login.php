@@ -54,7 +54,7 @@ if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
 require_once 'mobile_header5.php' ;
 ?> 
 <div class="container">
-   <h1>Connexion</h1>
+   <h2>Connexion</h2>
     <p class="bg-danger"><?=$connect_msg?></p>
     <p class="bg-info">Pour accéder au site vous devez vous connecter.</p>
 
