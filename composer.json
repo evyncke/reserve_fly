@@ -1,6 +1,5 @@
 {
     "require": {
-        "darkaonline/ripcord": "^0.2.0",
-        "phpxmlrpc/phpxmlrpc": "^4.10"
+        "facebook/graph-sdk": "^5.1"
     }
 }
