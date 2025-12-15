@@ -16,10 +16,13 @@
 
 */
 
+require_once "dbi.php" ;
+
 // Needs to be done before anything is sent...
 if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'delay') {
-    setcookie('membership', 'ignore', time() + (1 * 60 * 60), "/"); 
-    header("Location: https://$_SERVER[HTTP_HOST]/$_REQUEST[cb]") ;
+    $hours = ($membership_year == date('Y')) ? 1 : 24 ; // 1 hour if for this year else 24 hours
+    setcookie('membership', 'ignore', time() + ($hours * 60 * 60), "/"); 
+    header("Location: https://$_SERVER[HTTP_HOST]/" . urldecode($_REQUEST['cb']), TRUE, 307) ;
     exit ;
 }
 
@@ -31,7 +34,6 @@ if (isset($_REQUEST['radioMember']) and $_REQUEST['radioMember'] == 'quit') {
 if (!isset($_REQUEST['cb']))
     $_REQUEST['cb'] = 'mobile.php' ; // If the membership URL was shared by email, ...
 
-require_once "dbi.php" ;
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
@@ -148,7 +150,7 @@ communication structurée <?=$reference?>.</p>
 <?php
         if ($row_fee['bkf_payment_date'] != '')
             print("<p>Votre paiement a été reçu le $row_fee[bkf_payment_date]. Merci beaucoup.</p>") ;
-    } else { // existing invoice
+    } else { // existing invoice $row_fee == NULL
 //
 // NO ACTION: show the form
 //
@@ -185,11 +187,19 @@ avec un de nos avions. Veuillez choisir une des trois options possibles ci-desso
 <input type="hidden" name="cb" value="<?=$_REQUEST['cb']?>">
 <br/>
 <button type="submit" class="btn btn-primary" name="invoice" value="pay">Confirmer votre choix</button>
-<button type="submit" class="btn btn-secondary" name="invoice" value="delay">Ignorer pendant une heure</button>
-</form>
 <?php
-    } // non existing invoice
+if ($membership_year == date('Y')) {
 ?>
+<button type="submit" class="btn btn-secondary" name="invoice" value="delay">Ignorer pendant une heure</button>
+<?php
+} else {  
+?>
+<button type="submit" class="btn btn-secondary" name="invoice" value="delay">Ignorer pendant un jour</button>
+<?php
+} 
+} // end of no existing invoice
+?>
+</form>
 </div><!-- container-fluid-->
 </body>
 </html>

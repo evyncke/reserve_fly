@@ -165,7 +165,7 @@ $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS allg
     FROM $table_person AS p JOIN $table_users AS u ON u.id = p.jom_id
         LEFT JOIN $table_user_usergroup_map m ON u.id = m.user_id
         LEFT JOIN $table_blocked b ON b.b_jom_id = p.jom_id
-        LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = $membership_year
+        LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = YEAR(CURDATE())
     WHERE jom_id IS NOT NULL AND u.block = 0
     GROUP BY jom_id
     ORDER BY last_name, first_name") 

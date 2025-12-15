@@ -443,8 +443,8 @@ if (count($ids) > 0) { // If there are still unpaid membership fees
 
 $result = mysqli_query($mysqli_link, "SELECT bkf_user
 	FROM $table_membership_fees
-	WHERE bkf_payment_date IS NOT NULL and bkf_year = $membership_year") 
-	or journalise($userId, "E", "Cannot retrieve paid membership fees" . mysqli_error($mysqli_link)) ;
+	WHERE bkf_payment_date IS NOT NULL and bkf_year = YEAR(CURDATE())") 
+	or journalise($userId, "E", "Cannot retrieve paid membership fees for this year " . mysqli_error($mysqli_link)) ;
 $paid_membership_users = array() ;
 while ($row = mysqli_fetch_array($result)) {
 	$paid_membership_users[$row['bkf_user']] = $row['bkf_user'] ;
