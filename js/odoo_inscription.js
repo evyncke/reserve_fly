@@ -238,6 +238,41 @@ function updateFields(theField) {
 		}
 	}
 
+    value=document.getElementById("id_typemembre").value;
+	var typemembre=value;
+	if(typemembre=="pilote") {
+		document.getElementById("id_qualification_row").style.display="";
+ 		document.getElementById("id_licence_row").style.display="";
+ 		document.getElementById("id_validitemedicale_row").style.display="";
+ 		document.getElementById("id_validiteelp_row").style.display="";
+ 		document.getElementById("id_courstheorique_row").style.display="";	}
+	else {
+		document.getElementById("id_qualification_row").style.display="none";
+		document.getElementById("id_licence_row").style.display="none";
+ 		document.getElementById("id_validitemedicale_row").style.display="none";
+		document.getElementById("id_validiteelp_row").style.display="none";
+ 		document.getElementById("id_courstheorique_row").style.display="none";
+	}
+
+  	value=document.getElementById("id_societe").value;
+    if(value=="") return false;
+	var societe=value;
+	if(societe=="oui") {
+		document.getElementById("id_nomsociete_row").style.display="";
+		document.getElementById("id_bcesociete_row").style.display="";
+   		document.getElementById("id_adressesociete_row").style.display="";
+		document.getElementById("id_codepostalsociete_row").style.display="";
+  		document.getElementById("id_villesociete_row").style.display="";
+  	    document.getElementById("id_payssociete_row").style.display="";
+ 	}
+	else {
+		document.getElementById("id_nomsociete_row").style.display="none";
+		document.getElementById("id_bcesociete_row").style.display="none";
+ 		document.getElementById("id_adressesociete_row").style.display="none";
+		document.getElementById("id_codepostalsociete_row").style.display="none";
+ 		document.getElementById("id_villesociete_row").style.display="none";
+	    document.getElementById("id_payssociete_row").style.display="none";
+	}
 
 
 	document.getElementById("id_createmember").disabled=true;
@@ -291,24 +326,17 @@ function checkFields() {
     if(value=="") return false;
 	var typemembre=value;
 	if(typemembre=="pilote") {
-		document.getElementById("id_qualification_row").style.display="";
 		value=document.getElementById("id_qualification").style.value;
     	if(value=="") return false;
 
- 		document.getElementById("id_licence_row").style.display="";
- 		value=document.getElementById("id_licence").value;
+  		value=document.getElementById("id_licence").value;
      	if(value=="") return false;
-
- 		document.getElementById("id_validitemedicale_row").style.display="";
-   		value=document.getElementById("id_validitemedicale").value;
+  		value=document.getElementById("id_validitemedicale").value;
     	if(value=="") return false;
-
- 		document.getElementById("id_validiteelp_row").style.display="";
-   		value=document.getElementById("id_validiteelp").value;
+  		value=document.getElementById("id_validiteelp").value;
     	if(value=="") return false;
-
- 		document.getElementById("id_courstheorique_row").style.display="";
-    	value=document.getElementById("id_courstheorique").value;
+    
+        value=document.getElementById("id_courstheorique").value;
     	if(value=="") return false;
 	}
 	else {
@@ -341,37 +369,23 @@ function checkFields() {
     if(value=="") return false;
 	var societe=value;
 	if(societe=="oui") {
-		document.getElementById("id_nomsociete_row").style.display="";
    		value=document.getElementById("id_nomsociete").value;
      	if(value=="") return false;
 
-		document.getElementById("id_bcesociete_row").style.display="";
    		value=document.getElementById("id_bcesociete").value;
      	if(value=="") return false;
 
-  		document.getElementById("id_adressesociete_row").style.display="";
   		value=document.getElementById("id_adressesociete").value;
      	if(value=="") return false;
 
-		document.getElementById("id_codepostalsociete_row").style.display="";
    		value=document.getElementById("id_codepostalsociete").value;
      	if(value=="") return false;
 
-  		document.getElementById("id_villesociete_row").style.display="";
   		value=document.getElementById("id_villesociete").value;
     	if(value=="") return false;
 
- 	    document.getElementById("id_payssociete_row").style.display="";
   		value=document.getElementById("id_payssociete").value;
      	if(value=="") return false;
-		}
-	else {
-		document.getElementById("id_nomsociete_row").style.display="none";
-		document.getElementById("id_bcesociete_row").style.display="none";
- 		document.getElementById("id_adressesociete_row").style.display="none";
-		document.getElementById("id_codepostalsociete_row").style.display="none";
- 		document.getElementById("id_villesociete_row").style.display="none";
-	    document.getElementById("id_payssociete_row").style.display="none";
 	}
 
 	if(0) {
