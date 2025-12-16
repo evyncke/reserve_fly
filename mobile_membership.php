@@ -135,7 +135,7 @@ Vous pouvez prépayer cette facture via le QR-code ci-dessous ou via un virement
 communication structurée <?=$reference?>.</p>
   <!--img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$membership_price\n\n$reference\nCotisation $membership_year $userLastName\n")?>"-->
   <img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$amount\n\n$reference\n\n\n")?>">
-<p>Le club vous remercie pour votre fidélité.</p>
+<p>Le club vous remercie pour votre fidélité, il faut quelques heures pour que votre paiement soit pris en compte.</p>
 <a href="<?=$_REQUEST['cb']?>"><button type="button" class="btn btn-primary">Continuer vers le site</button></a>
 <?php
     exit ;
@@ -169,7 +169,7 @@ avec un de nos avions. Veuillez choisir une des trois options possibles ci-desso
 <div class="form-check">
   <input class="form-check-input" type="radio" name="radioMember" value="groundMember" id="radioMemberId"<?=$membershipState?>>
   <label class="form-check-label" for="radioMemberId">
-    Membre non-naviguant et instructeurs (<?=$non_nav_membership_price?> €)
+    Membre non-naviguant (<?=$non_nav_membership_price?> €)
   </label>
 </div>
 <div class="form-check">
