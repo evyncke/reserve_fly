@@ -233,7 +233,7 @@ if ($bookingidForPrevious) {
 } else {
 	$condition = "(r_pilot = $userId or r_instructor = $userId)" ;
 	$bookingidForPrevious = $booking['r_id'] ;
-	$auth = md5($id . $shared_secret) ;
+	$auth = md5($bookingidForPrevious . $shared_secret) ;
 }
 
 $result = mysqli_query($mysqli_link, "select * from $table_bookings where r_cancel_date is null and r_stop < '$booking[r_start]' and r_start <= sysdate() and $condition order by r_start desc limit 0,1")
