@@ -41,13 +41,15 @@ $date = date_format(date_create("$year-$month-$day"), 'Y-m-d') ; // Let's make a
 if ($error_message != '') {
 	$bookings['errorMessage'] = $error_message ;
 } else {
+	// Initialize a cache for instructor info
+	$instructorCache = [];
 	// TODO sometime the booked plane is replaced on the field by another one... tried 2024-04-30
 	$sql = "SELECT r_id, r_plane, r_start, r_stop, r_type, r_pilot, r_instructor, r_who, r_date, 
 		CONVERT(r_comment USING UTF8) AS r_comment, r_from, r_via1, r_via2, r_to, r_crew_wanted, r_pax_wanted,
 		p.username as username, p.name as name, w.username AS username2, w.name AS name2,
 		p.email as email, home_phone, work_phone, cell_phone, avatar, ressource, r.id AS plane_id,
 		CONVERT_TZ(l_start, 'UTC', 'Europe/Brussels') as log_start, CONVERT_TZ(l_end, 'UTC', 'Europe/Brussels') as log_end, 
-		l_from as log_from, l_to as log_to, l_id as log_id, l.l_pilot as log_pilot, l.l_plane as log_plane,
+		l_from as log_from, l_to as log_to, l_id as log_id, l.l_pilot as log_pilot, l.l_instructor as log_instructor, l.l_plane as log_plane,
 		b_reason AS blocked_reason, b_when AS blocked_date
 		FROM $table_bookings JOIN $table_planes AS r ON r_plane = r.id JOIN $table_users AS p ON r_pilot = p.id JOIN jom_kunena_users k ON k.userid = r_pilot
 		LEFT JOIN $table_logbook AS l ON l.l_booking = r_id
@@ -120,24 +122,37 @@ if ($error_message != '') {
 				$booking['to'] = $row['log_to'] ;
 			else if ($row['r_to'])
 				$booking['to'] = $row['r_to'] ;
-			if ($row['r_instructor']) {
-				$booking['instructorId'] = $row['r_instructor']  ;
-				$result_fi = mysqli_query($mysqli_link, "select u.name as name, u.email as email, home_phone, work_phone, cell_phone
-					 from $table_users u left join $table_person p on u.id=p.jom_id where u.id=$row[r_instructor]") ;
-				if ($result_fi) {
-					$row_fi = mysqli_fetch_array($result_fi) ;
-					$booking['instructorName'] = db2web($row_fi['name']) ;
-					if ($userId > 0) {
-						$booking['instructorEmail'] = $row_fi['email'] ;
-						$booking['instructorWorkPhone'] = canonicalizePhone($row_fi['work_phone']) ;
-						$booking['instructorCellPhone'] = canonicalizePhone($row_fi['cell_phone']) ;
-						$booking['instructorHomePhone'] = canonicalizePhone($row_fi['home_phone']) ;
-// TODO fetch avatar from kunena?
-//						$booking['instructorAvatar'] = $row_fi['avatar'] ;
+			// Check whether the logbook entry exists (log_start is then not null) and use the instructor from there
+			$booking['instructorId'] = ($row['log_start'] != '') ? $row['log_instructor'] : $row['r_instructor'];
+			if ($booking['instructorId']) {
+				// Check if the instructor info is already cached
+				if (!isset($instructorCache[$booking['instructorId']])) {
+					$result_fi = mysqli_query($mysqli_link, "SELECT u.name as name, u.email as email, home_phone, work_phone, cell_phone
+						FROM $table_users u LEFT JOIN $table_person p ON u.id=p.jom_id WHERE u.id=$booking[instructorId]");
+					if ($result_fi) {
+						$row_fi = mysqli_fetch_array($result_fi);
+						$instructorCache[$booking['instructorId']] = [
+							'name' => db2web($row_fi['name']),
+							'email' => $row_fi['email'],
+							'work_phone' => canonicalizePhone($row_fi['work_phone']),
+							'cell_phone' => canonicalizePhone($row_fi['cell_phone']),
+							'home_phone' => canonicalizePhone($row_fi['home_phone'])
+						];
+						mysqli_free_result($result_fi);
+					} else {
+						$bookings['errorMessage'] = "Impossible de lire les details pour $booking[instructorId] : " . mysqli_error($mysqli_link);
 					}
-					mysqli_free_result($result_fi) ;
-				} else
-					$bookings['errorMessage'] = "Impossible de lire les details pour $row[r_instructor] : " . mysqli_error($mysqli_link) ;
+				}
+				// Use cached instructor info
+				if (isset($instructorCache[$booking['instructorId']])) {
+					$booking['instructorName'] = $instructorCache[$booking['instructorId']]['name'];
+					if ($userId > 0) {
+						$booking['instructorEmail'] = $instructorCache[$booking['instructorId']]['email'];
+						$booking['instructorWorkPhone'] = $instructorCache[$booking['instructorId']]['work_phone'];
+						$booking['instructorCellPhone'] = $instructorCache[$booking['instructorId']]['cell_phone'];
+						$booking['instructorHomePhone'] = $instructorCache[$booking['instructorId']]['home_phone'];
+					}
+				} 
 			} else {
 				$booking['instructorId'] = -1 ;
 				$booking['instructorName'] = 'solo' ;
@@ -166,6 +181,7 @@ if ($error_message != '') {
 					$booking['log_end'] = str_replace('-', '/', $row['log_end']) ;  // Safari javascript does not like - in dates !!!
 					$booking['log_id'] = $row['log_id'] ;
 					$booking['log_pilot'] = $row['log_pilot'] ;
+					$booking['log_instructor'] = $row['log_instructor'] ;
 					$booking['log_plane'] = $row['log_plane'] ;
 				}
 			}
