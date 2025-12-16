@@ -43,7 +43,6 @@ factu/
 htaccess-resa
 htaccess-root
 .gitignore
-composer.lock
 flight_create_InProgress.php
 odoo.php
 auth.php

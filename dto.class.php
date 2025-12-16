@@ -73,13 +73,13 @@ class DTOMember {
     }
 
     function getById($jom_id) {
-        global $mysqli_link, $table_blocked, $table_person, $table_user_usergroup_map, $table_membership_fees, $userId, $membership_year;
+        global $mysqli_link, $table_blocked, $table_person, $table_user_usergroup_map, $table_membership_fees, $userId;
 
         $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS group_ids 
                 FROM $table_person
                 LEFT JOIN $table_blocked ON b_jom_id = jom_id
                 JOIN $table_user_usergroup_map m ON jom_id = m.user_id  
-                LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = $membership_year
+                LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = YEAR(CURDATE())
                 LEFT JOIN jom_kunena_users k ON k.userid = jom_id
                 WHERE jom_id = $jom_id")
             or journalise($userId, "F", "Cannot read from $table_person for $jom_id: " . mysqli_error($mysqli_link)) ;
@@ -139,7 +139,7 @@ class DTOMembers implements Iterator {
 
     function __construct ($group, $fi = NULL) {
         global $mysqli_link, $table_users, $table_person, $table_dto_flight, $table_user_usergroup_map, 
-            $table_logbook, $table_blocked, $table_membership_fees, $membership_year, $userId ;
+            $table_logbook, $table_blocked, $table_membership_fees, $userId ;
 
         $this->group = $group ; // FI, TKI, Student, ...
         if ($fi)
@@ -155,7 +155,7 @@ class DTOMembers implements Iterator {
                     LEFT JOIN $table_dto_flight ON df_student = jom_id
                     LEFT JOIN $table_logbook ON df_flight_log = l_id
                     LEFT JOIN $table_blocked ON b_jom_id = jom_id
-                    LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = $membership_year
+                    LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = YEAR(CURDATE())
                     LEFT JOIN jom_kunena_users k ON k.userid = jom_id
                 WHERE m.group_id = $this->group AND block = 0  $fi_condition
                 GROUP BY jom_id

@@ -346,10 +346,14 @@ if ($row_blocked) {
 // Check whether users have paid theirs membership fees
 // $row_fee is set in dbi.php
 if (! $row_fee and ! $userIsInstructor and $userId != 294) { // 294 = SPW
-	journalise($userId, "W", "This user has yet to pay their membership fee") ;
-//	$userNoFlight = false;
-	print("<div class=\"noFlyBox\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
-		Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
+	if ($membership_year == date('Y')) {
+		journalise($userId, "W", "This user has yet to pay their membership fee") ;
+		print("<div class=\"noFlyBox\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
+			Un clic sur le bouton <i>Folio du mois</i> ci-dessous vous permet de visualiser votre situation comptable.</div>") ;
+	} else
+			print("<div class=\"validityBox\">Vous n'êtes pas en ordre de cotisation pour $membership_year.
+			Il vous sera donc impossible de réserver un avion dès le 1er janvier $membership_year.
+			<a href=\"mobile_membership.php\">Payer votre cotisation</a></div>") ;
 }
 
 // Check whether there are due invoices
@@ -396,14 +400,14 @@ if ($userId == 0) {
 		$userNoFlight = true ;
 	}
     print('<br>');
+	print('<input type="button" style="background-color: green; color: white;" value="Site mobile" onclick="javascript:document.location.href=\'mobile_reservation.php\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;" value="Mon profil" onclick="javascript:document.location.href=\'mobile_profile.php\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;" value="Mon carnet de vols" onclick="javascript:document.location.href=\'mobile_mylog.php\';"> ') ;
-	print('<input type="button" style="background-color: green; color: white;" value="Carte de mes vols" onclick="javascript:document.location.href=\'mobile_mymap.php\';"> ') ;
-	print('<input type="button" style="background-color: green; color: white;" value="Site mobile" onclick="javascript:document.location.href=\'mobile_reservation.php\';"> ') ;
+//	print('<input type="button" style="background-color: green; color: white;" value="Carte de mes vols" onclick="javascript:document.location.href=\'mobile_mymap.php\';"> ') ;
 	print('<input type="button" style="background-color: green; color: white;" value="Folio du mois" onclick="javascript:document.location.href=\'mobile_folio.php\';"> ') ;
     print('<input type="button" style="background-color: green; color: white;" value="TechLog" onclick="javascript:document.location.href=\'mobile_incidents.php\';"> ') ;
-	if ($userIsAdmin) print('<input style="background-color: green; color: white;" type="button" value="Journal des opérations" onclick="javascript:document.location.href=\'mobile_journal.php\';"> ') ;
-	if ($userIsAdmin || $userIsMechanic) print('<input type="button" value="Echéances des maintenances" style="background-color: green; color: white;" onclick="javascript:document.location.href=\'plane_planning.php\';"> ') ;
+//	if ($userIsAdmin) print('<input style="background-color: green; color: white;" type="button" value="Journal des opérations" onclick="javascript:document.location.href=\'mobile_journal.php\';"> ') ;
+//	if ($userIsAdmin || $userIsMechanic) print('<input type="button" value="Echéances des maintenances" style="background-color: green; color: white;" onclick="javascript:document.location.href=\'plane_planning.php\';"> ') ;
 	print('<input type="button" value="No log" style="background-color: yellow; visibility: hidden;" id="logButton" onclick="javascript:toggleLogDisplay();"> ') ;
 	print("<a href=\"webcal://$_SERVER[SERVER_NAME]/resa/ics.php?user=$userId&auth=" . md5($userId . $shared_secret) . "\">lier &agrave; mon calendrier (iCal)</a>") ;
 	// Display any validity message from above

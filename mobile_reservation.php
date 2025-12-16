@@ -280,11 +280,16 @@ if ($row_blocked) {
 }
 // Check whether users have paid theirs membership fees
 // $row_fee is set in dbi.php
-if (! $row_fee and ! $userIsInstructor and $userId != 294) { // 294 = SPW
-	journalise($userId, "W", "This user has yet to pay their membership fee") ;
-//	$userNoFlight = false;
-	print("<div class=\"text-bg-danger\">Vous n'êtes pas en ordre de cotisation (nécessaire pour payer les assurances pilotes).
-		Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
+if (! $row_fee and ! $userIsInstructor and $userId != 294) // 294 = SPW
+	if ($membership_year == date('Y')) {
+		print("<div class=\"text-bg-danger\">Vous n'êtes pas en ordre de cotisation pour $membership_year (nécessaire pour payer les assurances pilotes).
+			Il vous est donc impossible de réserver un avion.
+			Vous pouvez visualiser votre situation comptable en cliquant sur votre nom en haut à droite.</div>") ;
+		journalise($userId, "W", "This user has yet to pay their membership fee") ;
+	} else {
+			print("<div class=\"text-bg-warning\">Vous n'êtes pas en ordre de cotisation pour $membership_year.
+			Il vous sera donc impossible de réserver un avion dès le 1er janvier $membership_year.
+			<a href=\"mobile_membership.php\" class=\"btn btn-primary\">Payer votre cotisation</a></div>") ;
 }
 
 // Check whether there are unpaid due invoices

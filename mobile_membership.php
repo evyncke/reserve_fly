@@ -16,10 +16,13 @@
 
 */
 
+require_once "dbi.php" ;
+
 // Needs to be done before anything is sent...
 if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'delay') {
-    setcookie('membership', 'ignore', time() + (1 * 60 * 60), "/"); 
-    header("Location: https://$_SERVER[HTTP_HOST]/$_REQUEST[cb]") ;
+    $hours = ($membership_year == date('Y')) ? 1 : 24 ; // 1 hour if for this year else 24 hours
+    setcookie('membership', 'ignore', time() + ($hours * 60 * 60), "/"); 
+    header("Location: https://$_SERVER[HTTP_HOST]/" . urldecode($_REQUEST['cb']), TRUE, 307) ;
     exit ;
 }
 
@@ -31,7 +34,6 @@ if (isset($_REQUEST['radioMember']) and $_REQUEST['radioMember'] == 'quit') {
 if (!isset($_REQUEST['cb']))
     $_REQUEST['cb'] = 'mobile.php' ; // If the membership URL was shared by email, ...
 
-require_once "dbi.php" ;
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
@@ -133,7 +135,7 @@ Vous pouvez prépayer cette facture via le QR-code ci-dessous ou via un virement
 communication structurée <?=$reference?>.</p>
   <!--img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$membership_price\n\n$reference\nCotisation $membership_year $userLastName\n")?>"-->
   <img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$amount\n\n$reference\n\n\n")?>">
-<p>Le club vous remercie pour votre fidélité.</p>
+<p>Le club vous remercie pour votre fidélité, il faut quelques heures pour que votre paiement soit pris en compte.</p>
 <a href="<?=$_REQUEST['cb']?>"><button type="button" class="btn btn-primary">Continuer vers le site</button></a>
 <?php
     exit ;
@@ -148,7 +150,7 @@ communication structurée <?=$reference?>.</p>
 <?php
         if ($row_fee['bkf_payment_date'] != '')
             print("<p>Votre paiement a été reçu le $row_fee[bkf_payment_date]. Merci beaucoup.</p>") ;
-    } else { // existing invoice
+    } else { // existing invoice $row_fee == NULL
 //
 // NO ACTION: show the form
 //
@@ -167,7 +169,7 @@ avec un de nos avions. Veuillez choisir une des trois options possibles ci-desso
 <div class="form-check">
   <input class="form-check-input" type="radio" name="radioMember" value="groundMember" id="radioMemberId"<?=$membershipState?>>
   <label class="form-check-label" for="radioMemberId">
-    Membre non-naviguant et instructeurs (<?=$non_nav_membership_price?> €)
+    Membre non-naviguant (<?=$non_nav_membership_price?> €)
   </label>
 </div>
 <div class="form-check">
@@ -185,11 +187,19 @@ avec un de nos avions. Veuillez choisir une des trois options possibles ci-desso
 <input type="hidden" name="cb" value="<?=$_REQUEST['cb']?>">
 <br/>
 <button type="submit" class="btn btn-primary" name="invoice" value="pay">Confirmer votre choix</button>
-<button type="submit" class="btn btn-secondary" name="invoice" value="delay">Ignorer pendant une heure</button>
-</form>
 <?php
-    } // non existing invoice
+if ($membership_year == date('Y')) {
 ?>
+<button type="submit" class="btn btn-secondary" name="invoice" value="delay">Ignorer pendant une heure</button>
+<?php
+} else {  
+?>
+<button type="submit" class="btn btn-secondary" name="invoice" value="delay">Ignorer pendant un jour</button>
+<?php
+} 
+} // end of no existing invoice
+?>
+</form>
 </div><!-- container-fluid-->
 </body>
 </html>

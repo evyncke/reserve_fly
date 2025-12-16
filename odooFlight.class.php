@@ -16,7 +16,7 @@
 
 */
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
-require __DIR__ . '/vendor/autoload.php' ;
+require __DIR__ . '/vendor/autoload.php' ; // EVY Is this needed here?
 require_once 'dbi.php' ;
 require_once 'odoo.class.php' ;
 require_once 'mobile_tools.php';
