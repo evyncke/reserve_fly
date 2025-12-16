@@ -500,7 +500,7 @@ $fi_grand_total_minute = $fi_grand_total_minute % 60 ;
 </tfoot>
 </table>
 <br/>
-<div style="border-style: inset;background-color: AntiqueWhite;">
+<div class="text-bg-light p-1">
 Sur base des données que vous avez entrées après les vols dans le
 carnet de route des avions (à préférer pour avoir les heures moteur) ou celles que vous avez entrées via la dernière ligne de la
 table.
