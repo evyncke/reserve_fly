@@ -22,7 +22,7 @@ require_once "dbi.php" ;
 if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'delay') {
     $hours = ($membership_year == date('Y')) ? 1 : 24 ; // 1 hour if for this year else 24 hours
     setcookie('membership', 'ignore', time() + ($hours * 60 * 60), "/"); 
-    header("Location: https://$_SERVER[HTTP_HOST]/" . urldecode($_REQUEST['cb']), TRUE, 307) ;
+    header("Location: https://www.spa-aviation.be/resa/" . urldecode($_REQUEST['cb']), TRUE, 307) ; // TODO avoid using hardcoded domain name
     exit ;
 }
 
@@ -133,7 +133,7 @@ souhaitons plein de succès dans vos projets à venir.</p>
 <p>Merci pour votre inscription pour <?=$membership_year?>, vous allez recevoir rapidement une facture par email.
 Vous pouvez prépayer cette facture via le QR-code ci-dessous ou via un virement vers le compte <?=$iban?> avec la 
 communication structurée <?=$reference?>.</p>
-  <!--img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$membership_price\n\n$reference\nCotisation $membership_year $userLastName\n")?>"-->
+  <!--img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$amount\n\n$reference\nCotisation $membership_year $userLastName\n")?>"-->
   <img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$amount\n\n$reference\n\n\n")?>">
 <p>Le club vous remercie pour votre fidélité, il faut quelques heures pour que votre paiement soit pris en compte.</p>
 <a href="<?=$_REQUEST['cb']?>"><button type="button" class="btn btn-primary">Continuer vers le site</button></a>
@@ -181,7 +181,7 @@ avec un de nos avions. Veuillez choisir une des trois options possibles ci-desso
 <div class="form-check">
   <input class="form-check-input" type="radio" name="radioMember" value="quit" id="radioNoMemberId">
   <label class="form-check-label" for="radioNoMemberId">
-    Je ne désire plus être membre
+    Je ne désire plus être membre (le solde de votre compte sera remboursé par notre service comptable)
   </label>
 </div>
 <input type="hidden" name="cb" value="<?=$_REQUEST['cb']?>">
