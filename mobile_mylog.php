@@ -47,11 +47,20 @@ if (!isset($_REQUEST['period']) or $_REQUEST['period'] == '') $_REQUEST['period'
 if (isset($_REQUEST['period']) and $_REQUEST['period'] != 'always') {
 	$period = $_REQUEST['period'] ;
 	if ($period == 'SEP') {
-		$sep_limit = date_create($row_owner['expire_date']) ; // Next SEP expiry date
-		$date_from = date_format(date_sub($sep_limit, date_interval_create_from_date_string('12 months - 1 day')), 'd/m/Y') . 
-		   " (12 mois avant la date limite de prorogation SEP, $row_owner[expire_date])" ;	
-		$sep_limit = date_create($row_owner['expire_date']) ; // Next SEP expiry date
-		$date_from_sql = date_format(date_sub($sep_limit, date_interval_create_from_date_string('12 months - 1 day')), 'Y-m-d') ;
+		if ($row_owner['expire_date'] == NULL) {
+			$period = '1y' ; // Fallback to 1 year
+			$interval = '1 year' ;
+			$today = date_create("now") ;
+			$date_from = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'd/m/Y') ;	
+			$today = date_create("now") ; // As $today has changed above...
+			$date_from_sql = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'Y-m-d') ;	
+		} else {
+			$sep_limit = date_create($row_owner['expire_date']) ; // Next SEP expiry date
+			$date_from = date_format(date_sub($sep_limit, date_interval_create_from_date_string('12 months - 1 day')), 'd/m/Y') . 
+			" (12 mois avant la date limite de prorogation SEP, $row_owner[expire_date])" ;	
+			$sep_limit = date_create($row_owner['expire_date']) ; // Next SEP expiry date
+			$date_from_sql = date_format(date_sub($sep_limit, date_interval_create_from_date_string('12 months - 1 day')), 'Y-m-d') ;
+		}
 	} else {
 		switch ($_REQUEST['period']) {
 			case '2y': $interval = '2 years' ; break ;
@@ -60,8 +69,7 @@ if (isset($_REQUEST['period']) and $_REQUEST['period'] != 'always') {
 			case '1m': 	$interval = '1 month' ; break ;
 		}
 		$today = date_create("now") ;
-		$date_from = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'd/m/Y') . 
-		   ' (12 mois avant la date limite de prorogation SEP)' ;	
+		$date_from = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'd/m/Y') ;	
 		$today = date_create("now") ; // As $today has changed above...
 		$date_from_sql = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'Y-m-d') ;	
 	}

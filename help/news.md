@@ -3,6 +3,10 @@
 Vous trouverez ici les diverses nouveautés à propos du site réservation du RAPCS. Les suggestions sont les bienvenues auprès de
 [Éric Vyncke](mobile_profile.php?displayed_id=62) et [Patrick Reginster](mobile_profile.php?displayed_id=66).
 
+## Décembre 2025
+
+- dans le carnet de vol [<i class="bi bi-person"></i> votre nom -> <i class="bi bi-journals"></i> Mon carnet de vol](https://www.spa-aviation.be/resa/mobile_mylog.php) il est possible de choisir la période des 12 mois utilisée pour la prorogation de votre SEP.
+
 ## Novembre 2025
 
 - il est possible de voir les réservations d'un jour sous forme de listes condensées (triées par avion ou par heure), de voir les détails d'une réservation voire de la modifier en cliquant sur une ligne, il est aussi possible de réserver un avion. C'est spécialement prévu pour les petits écrans et c'est [Réservation -> <i class="bi bi-airplane"></i> Toutes les réservations par avion (smartphone)](https://www.spa-aviation.be/resa/mobile_resa_by_plane.php).
