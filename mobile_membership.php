@@ -60,10 +60,11 @@ if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'pay' and isset($_RE
         journalise($userId, "I", "Ne veut pas renouveler sa cotisation") ;
         $smpt_headers[] = 'MIME-Version: 1.0';
         $smpt_headers[] = 'Content-type: text/html; charset=utf-8';
-        mail('info@spa-aviation.be,ca@spa-aviation.be', "Membre $userLastName #$userId demissionaire", 
+        @mail('info@spa-aviation.be,ca@spa-aviation.be', "Membre $userLastName #$userId demissionaire", 
             "Ce membre ($userFirstName $userLastName) a indiqué vouloir quitter notre club. Veuillez lui rembourser son solde.",
             implode("\r\n", $smpt_headers)) ;
-?>
+       journalise($userId, "I", "Email envoye aux comptables au sujet de la démission") ;
+ ?>
 <p>Vous avez fait le choix de ne plus être membre du Royal Aero Para Club de
 Spa ASBL.</p>
 <p>Vous allez recevoir un email confirmant votre résiliation et notre
@@ -78,7 +79,6 @@ souhaitons plein de succès dans vos projets à venir.</p>
     // ACTION: generate an invoice
     //
     // Let create an invoice and display a confirmation message then redirect to original page via the call back
-    journalise($userId, "D", "About to generate a membership invoice") ;
     if (date('Y') != $membership_year) { // Renewing before the actual year (e.g., in December)
         $invoice_date = date("Y-01-01", strtotime("+ 1 year")) ;
         $invoice_date_due = $invoice_date ; // no differed due date
@@ -122,11 +122,11 @@ souhaitons plein de succès dans vos projets à venir.</p>
     mysqli_query($mysqli_link, "INSERT INTO $table_membership_fees(bkf_user, bkf_year, bkf_amount, bkf_invoice_id, bkf_invoice_date)
         VALUES($userId, '$membership_year', $membership_price, $result[0], '$invoice_date')")
         or journalise($userId, "F", "Cannot insert into $table_membership_fees: " . mysqli_error($mysqli_link)) ;
-    journalise($userId, "D", "Membership invoice stored in MySQL") ;
     $reference = $result[0] ;
     $modulo = substr('00' . ($reference % 97), -2) ;
     $reference = substr('000000000000' . $reference . $modulo, -12) ;
-    $reference = '+++' . substr($reference, 0, 3) . '/' . substr($reference, 3, 4) . '/' . substr($reference, 7, 5) . '+++' ;
+// No need to use the +++ as it needs to be RF Creditor Reference (norme ISO 11649), just 12 figures
+//    $reference = '+++' . substr($reference, 0, 3) . '/' . substr($reference, 3, 4) . '/' . substr($reference, 7, 5) . '+++' ;
     $amount = number_format($membership_price, 2, '.', '') ;
     // Display confirmation and continue to the callback
 ?>
@@ -134,7 +134,7 @@ souhaitons plein de succès dans vos projets à venir.</p>
 Vous pouvez prépayer cette facture via le QR-code ci-dessous ou via un virement vers le compte <?=$iban?> avec la 
 communication structurée <?=$reference?>.</p>
   <!--img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$amount\n\n$reference\nCotisation $membership_year $userLastName\n")?>"-->
-  <img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n001\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$amount\n\n$reference\n\n\n")?>">
+  <img width="200" height="200" src="qr-code.php?chs=200x200&chl=<?=urlencode("BCD\n002\n1\nSCT\n$bic\n$bank_account_name\n$iban\nEUR$amount\n\n$reference\n\n\n")?>">
 <p>Le club vous remercie pour votre fidélité, il faut quelques heures pour que votre paiement soit pris en compte.</p>
 <a href="<?=$_REQUEST['cb']?>"><button type="button" class="btn btn-primary">Continuer vers le site</button></a>
 <?php
