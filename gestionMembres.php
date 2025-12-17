@@ -191,7 +191,56 @@ if (isset($_REQUEST['checkboxId']) and $_REQUEST['checkboxId'] != '' and isset($
 	}
 	// TODO send an email to personId to inform him of the change
 }
+?>
+<script type="text/javascript">
 
+var dirSort="asc";
+var columnSort=-1;
+// Manage Search when keyup
+
+// Manage Search when document loaded
+$(document).ready(function() {
+   $("#id_SearchInput").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      $("#myTable tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '').indexOf(value) > -1)
+     });
+    });
+    var value = $("#id_SearchInput").val().toLowerCase();
+      $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '').indexOf(value) > -1)
+      });
+});
+
+// Add onclick event to checkboxes after DOM loaded
+// Could possible be included (or include) the above code
+document.addEventListener("DOMContentLoaded", function () {
+    // Select all checkboxes with an id starting with "check-"
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="check-"]');
+
+    // Add the onclick event to each checkbox whose id starts with "check-"
+    checkboxes.forEach(function (checkbox) {
+        checkbox.onclick = function () {
+			var values=this.id.split("-");
+			if(confirm("Confirmez que vous voulez changer le statut \""+values[2]+"\" de ce membre." +
+				"\nRappel: le membre doit être élève ou pilote sinon il est non-navigant." +
+				"\nNe pas oublier de prévenir les personnes responsables et de mettre à jour le fichier membres.xls sur OneDrive (Toujours utilisé - Seul endroit ou on gere l'historique des membres).")) {
+            	// Redirect to the same URL with the checkbox ID in the query string
+            	window.location.href = window.location.pathname + '?checkboxId=' + this.id + '&checked=' + this.checked;
+			}
+			else { // Revert to previous checked state
+				// TODO can probably simply do this.checked = !this.checked; ;-)
+				if(this.checked){
+					this.checked=false;
+				} else {
+					this.checked=true;
+				}
+			}
+        };
+    });
+});
+</script>
+<?php
 // Let's get some data from Odoo
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
