@@ -508,7 +508,7 @@ function getINITFlightCount($thePlane, $theDateFilter)
 //  $theNbrOfFlight : returns the number of flights
 function getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, $theFlightType, &$theNbrOfFlight)
 {
-	global $mysqli_link, $table_logbook,  $table_flight, $table_person, $table_flights_ledger,$table_bookings,$userId ;
+	global $mysqli_link, $table_logbook,  $table_flight, $table_person, $table_bookings,$userId ;
 	$theNbrOfFlight=0;
 	$filterType = 'f_type ="D"' ;
 	if($theFlightType=="INIT") {
@@ -516,10 +516,10 @@ function getCompteurIfInitDhfValueInMinute($thePlane, $theDateFilter, $theFlight
 	}
 	$sql="SELECT DISTINCT l_start, l_start_hour, l_start_minute, l_end_hour, l_end_minute, f_invoice_ref, 
 	l_plane, f_date_flown, first_name, last_name, r_plane, f_reference 
-	FROM rapcs_flight AS f 
-	JOIN rapcs_person ON f.f_pilot = jom_id 
-	JOIN rapcs_bookings AS b ON f.f_booking = b.r_id 
-	JOIN rapcs_logbook AS l ON f.f_booking = l.l_booking 
+	FROM $table_flight AS f 
+	JOIN $table_person ON f.f_pilot = jom_id 
+	JOIN $table_bookings AS b ON f.f_booking = b.r_id 
+	JOIN $table_logbook AS l ON f.f_booking = l.l_booking 
 	WHERE l_plane='$thePlane' AND $filterType AND f_date_flown IS NOT NULL AND f_invoice_ref IS NOT NULL
 	AND f_date_flown like '$theDateFilter' ORDER BY f_date_flown";
 
