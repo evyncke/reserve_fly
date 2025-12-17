@@ -518,15 +518,15 @@ Fin: <select id="endDaySelect"><?=$all_day_options?></select> -
 <select id="endMinuteSelect"><?=$all_minute_options?></select>
 <br/>
 <span style="vertical-align: top;">
-Commentaire: <textarea id="commentTextArea" rows=4 cols=40></textarea>
+Commentaire: <textarea class="form-control" id="commentTextArea" rows=4 cols=40></textarea>
 </span>
 <br/>
 <span id="flightInfo2Span">
-Lieu de départ: <input type=text id="departingAirport" size="6" maxlength="4" onKeyUp="airportChanged(this);" value="EBSP">
-d'arrivée: <input type=text id="destinationAirport" size="6" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
+Lieu de départ: <input type="text" id="departingAirport" size="6" maxlength="4" onKeyUp="airportChanged(this);" value="EBSP">
+d'arrivée: <input type="text" id="destinationAirport" size="6" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
 <br/>
-Via: <input type=text id="via1Airport" size="6" maxlength="4" onKeyUp="airportChanged(this);">
-et: <input type=text id="via2Airport" size="6" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
+Via: <input type="text" id="via1Airport" size="6" maxlength="4" onKeyUp="airportChanged(this);">
+et: <input type="text" id="via2Airport" size="6" maxlength="4" onKeyUp="airportChanged(this);"> <i>(codes OACI)</i>
 <br/>
 
       </div><!-- class=modal-body-->
@@ -563,7 +563,7 @@ if ($userIsPilot || $userIsMechanic || $userIsInstructor || $userIsAdmin) {
       <div class="modal-body">
 <span style="vertical-align: top;">
 Raison de l'annulation (obligatoire):<br/>
-<textarea id="reasonTextArea" rows=4 cols=40 oninput="javascript:cancelReasonChanged();" onchange="javascript:cancelReasonChanged();"></textarea>
+<textarea id="reasonTextArea" class="form-control" rows="4" cols="40" oninput="javascript:cancelReasonChanged();" onchange="javascript:cancelReasonChanged();"></textarea>
 </span>
 <br/>
 <div id="cancelBookingDivLog"></div>
