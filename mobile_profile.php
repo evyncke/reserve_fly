@@ -37,6 +37,11 @@ if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	$read_only = false ;
 	$user_only = true ;
 }
+
+# Prepare for Social Networks SDKs
+require_once 'vendor/autoload.php'; // Ensure you have the Google and Facebook SDKs installed via Composer
+use Facebook\Facebook;
+
 $body_attributes = "onload=\"selectedUserId=$displayed_id;init();\"" ;
 $header_postamble = '<script data-cfasync="true" src="js/mobile_profile.js"></script>' ;
 require_once 'mobile_header5.php' ;
@@ -77,6 +82,40 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) {
 foreach($me as $key => $value)
 	$me[$key] = htmlspecialchars($value, ENT_QUOTES) ;
 
+
+// Handle OAuth callbacks
+// Actually seem that code and state are set by Facebook but value is opaque and not 'facebook'
+if (isset($_GET['code']) or (isset($_GET['state']) && $_GET['state'] === 'facebook')) {
+	// Initialize Facebook Client
+	$facebookClient = new Facebook([
+		'app_id' => $fb_app_id,
+		'app_secret' => $fb_app_secret,
+		'default_graph_version' => 'v12.0',
+	]);
+    $helper = $facebookClient->getRedirectLoginHelper();
+	journalise($userId, "D", "Facebook OAuth: getting access token for displayed_id=$displayed_id") ;
+    try {
+        $accessToken = $helper->getAccessToken();
+        if (isset($accessToken)) {
+			journalise($userId, "D", "Facebook OAuth: access token obtained for displayed_id=$displayed_id") ;
+            $response = $facebookClient->get('/me?fields=id,name,email', $accessToken);
+            $facebookUser = $response->getGraphUser();
+			journalise($userId, "D", "Facebook OAuth: user info obtained for displayed_id=$displayed_id: facebook id = $facebookUser[id], name = $facebookUser[name], email = $facebookUser[email]") ;
+			mysqli_query($mysqli_link, "UPDATE $table_person SET facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "', " .
+				" facebook_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
+				WHERE jom_id = $displayed_id") ;
+			journalise($userId, "I", "Compte Facebook lié: facebook id = $facebookUser[id], name = $facebookUser[name], email = $facebookUser[email] for displayed_id=$displayed_id") ;
+			$change_profile_message .= "Votre compte Facebook a été lié avec succès à votre profil.<br/>" ;
+        }
+    } catch (Facebook\Exceptions\FacebookResponseException $e) {
+        journalise($userId, "E", 'Facebook API Error: ' . $e->getMessage());
+    } catch (Facebook\Exceptions\FacebookSDKException $e) {
+        journalise($userId, "E", 'Facebook SDK Error: ' . $e->getMessage());
+    } catch (Exception $e) {
+		journalise($userId, "E", 'General Error: ' . $e->getMessage());
+	}
+}
+
 if (isset($_REQUEST['action'])) journalise($userId, 'I', "Profile is called with action= $_REQUEST[action] for displayed_id=$displayed_id") ;
 
 // Apply any change on the photo tab before fetching all displayed_id information
@@ -87,7 +126,7 @@ if (isset($_POST['action']) and $_POST['action'] == 'photo' and !$read_only) {
 	$image_size = getimagesize($source_file) ;
 	if ($image_size === FALSE) {
 		journalise($userId, 'E', "Ce fichier n'est pas une photo($displayed_id): " . $_FILES['photoFile']['name'] . '/' . $source_file) ;
-		journalise($userId, "F", "Ce fichier ne semble pas être une image, veuillez l'envoyer par email à webmaster@spa-aviation.be") ;
+		journalise($userId, "F", "Ce fichier ne semble pas être une image (JPEG, PNG ou GIF), veuillez l'envoyer par email à webmaster@spa-aviation.be") ;
 	}
 	$image_width = $image_size[0] ;
 	$image_height = $image_size[1] ;
@@ -693,7 +732,20 @@ $twitter_img = ($me['twitter'] != '') ? "<a href=\"https://www.twitter.com/$me[t
 </div> <!-- input-group -->
 <?php
 if (! $read_only) {
-	print('<div class="form-group"><button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Enregistrer les changements</button></div>') ;
+	print('<div class="form-group"><button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Enregistrer les changements</button></div><br/>') ;
+	// Initialize Facebook Client
+	$facebookClient = new Facebook([
+		'app_id' => $fb_app_id,
+		'app_secret' => $fb_app_secret,
+		'default_graph_version' => 'v12.0',
+	]);
+	// Generate OAuth URLs
+	//$googleAuthUrl = $googleClient->createAuthUrl();
+	$facebookHelper = $facebookClient->getRedirectLoginHelper();
+	$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_profile.php', ['email']);
+	print('<div class="form-group">Faciliter la connexion/login en 
+		<a class="col-sm-offset-2 col-md-offset-1 btn btn-primary" href="' . $facebookAuthUrl . '">
+			liant mon compte Facebook</a> ' . $_SERVER['SERVER_ADDR'] . '</div>') ;
 }
 ?>
 </form>
