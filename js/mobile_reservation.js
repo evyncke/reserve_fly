@@ -877,7 +877,7 @@ function confirmCancelBooking() {
 	var saveCurrentlyDisplayedBooking = currentlyDisplayedBooking ; // Need to save it as hideEditBookingDetails() resets it
 	hideEditBookingDetails() ;
 	currentlyDisplayedBooking = saveCurrentlyDisplayedBooking ;
-	document.getElementById("reasonTextArea").style.borderColor = 'red' ;
+	document.getElementById("reasonTextArea").classList.add('is-invalid') ;
 	document.getElementById("reasonTextArea").value = '' ;
 	document.getElementById("reasonTextArea").placeholder = "Raison de l'annulation (obligatoire)" ;
 	document.getElementById('confirmCancelBookingButton').disabled = true ;
@@ -1072,12 +1072,10 @@ function cancelReasonChanged() {
 	var confirmCancelButton = document.getElementById('confirmCancelBookingButton') ;
 
 	if (elem.value != '') {
-		elem.style.borderColor = 'gray' ;
-		elem.style.backgroundColor = 'white' ;
+		elem.classList.remove('is-invalid') ;
 		confirmCancelButton.disabled = false ;
 	} else {
-		elem.style.borderColor = 'red' ;
-		elem.style.backgroundColor = 'red' ;
+		elem.classList.add('is-invalid') ;
 		confirmCancelButton.disabled = true ;
 	}
 }

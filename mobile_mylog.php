@@ -32,7 +32,10 @@ if (isset($_REQUEST['user']) && $_REQUEST['user'] != '' && is_numeric($_REQUEST[
 	$owner = $userId ;
 }
 
-$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $owner")
+// If validity == 1 (SEP), then we can show the SEP expiry date
+$result = mysqli_query($mysqli_link, "SELECT * FROM $table_person p 
+	LEFT JOIN $table_validity v ON v.jom_id =p.jom_id AND validity_type_id = 1
+	WHERE p.jom_id = $owner")
 	or journalise($userId, "F", "Cannot read user data:" . mysqli_error($mysqli_link)) ;
 $row_owner = mysqli_fetch_array($result) or journalise($userId, "F", "User $owner not found");
 $owner_name = db2web("$row_owner[last_name], $row_owner[first_name]") ;
@@ -43,16 +46,33 @@ $sql_filter = [] ;
 if (!isset($_REQUEST['period']) or $_REQUEST['period'] == '') $_REQUEST['period'] = '1y' ; // Default to one year
 if (isset($_REQUEST['period']) and $_REQUEST['period'] != 'always') {
 	$period = $_REQUEST['period'] ;
-	switch ($_REQUEST['period']) {
-		case '2y': $interval = '2 years' ; break ;
-		case '1y': $interval = '1 year' ; break ;
-		case '3m': $interval = '3 months' ; break ;
-		case '1m': 	$interval = '1 month' ; break ;
+	if ($period == 'SEP') {
+		if ($row_owner['expire_date'] == NULL) {
+			$period = '1y' ; // Fallback to 1 year
+			$interval = '1 year' ;
+			$today = date_create("now") ;
+			$date_from = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'd/m/Y') ;	
+			$today = date_create("now") ; // As $today has changed above...
+			$date_from_sql = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'Y-m-d') ;	
+		} else {
+			$sep_limit = date_create($row_owner['expire_date']) ; // Next SEP expiry date
+			$date_from = date_format(date_sub($sep_limit, date_interval_create_from_date_string('12 months - 1 day')), 'd/m/Y') . 
+			" (12 mois avant la date limite de prorogation SEP, $row_owner[expire_date])" ;	
+			$sep_limit = date_create($row_owner['expire_date']) ; // Next SEP expiry date
+			$date_from_sql = date_format(date_sub($sep_limit, date_interval_create_from_date_string('12 months - 1 day')), 'Y-m-d') ;
+		}
+	} else {
+		switch ($_REQUEST['period']) {
+			case '2y': $interval = '2 years' ; break ;
+			case '1y': $interval = '1 year' ; break ;
+			case '3m': $interval = '3 months' ; break ;
+			case '1m': 	$interval = '1 month' ; break ;
+		}
+		$today = date_create("now") ;
+		$date_from = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'd/m/Y') ;	
+		$today = date_create("now") ; // As $today has changed above...
+		$date_from_sql = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'Y-m-d') ;	
 	}
-	$today = date_create("now") ;
-	$date_from = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'd/m/Y') ;	
-	$today = date_create("now") ; // As $today has changed above...
-	$date_from_sql = date_format(date_sub($today, date_interval_create_from_date_string($interval)), 'Y-m-d') ;	
 } else {
 	$period = 'always' ; 
 	$date_from = '17/12/1903 (1er vol des frères Wright)' ; // All flights should be done after this date, Wright brothers ;-)
@@ -210,6 +230,7 @@ function initMyLog() {
 		{id: '1y', name: '1 an'},
 		{id: '3m', name: '3 mois'},
 		{id: '1m', name: '1 mois'},
+		{id: 'SEP', name: '1 an avant prorogation SEP'}
 	], '<?=$period?>') ;
 }
 </script>
@@ -500,7 +521,7 @@ $fi_grand_total_minute = $fi_grand_total_minute % 60 ;
 </tfoot>
 </table>
 <br/>
-<div style="border-style: inset;background-color: AntiqueWhite;">
+<div class="text-bg-light p-1">
 Sur base des données que vous avez entrées après les vols dans le
 carnet de route des avions (à préférer pour avoir les heures moteur) ou celles que vous avez entrées via la dernière ligne de la
 table.
