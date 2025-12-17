@@ -35,10 +35,10 @@ if (! isset($_REQUEST['chs'])) {
     // size should be max(1, chs / 53)
     // margin should be (chs - size * 53)
     $size = max(1, round($parts[0] / 53)) ;
-    $margin = 0 ;
+    $margin = 5 ;
 }   
 if (! isset($_REQUEST['chl'])) die('Missing paramater chl') ;
-$chl = trim($_REQUEST['chl']) ;
+$chl = $_REQUEST['chl'] ;
 
 header('Content-type: image/png'); // Unsure whether required though
 include('phpqrcode.php');
