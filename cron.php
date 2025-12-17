@@ -428,17 +428,20 @@ while ($row = mysqli_fetch_array($result)) {
 if (count($ids) > 0) { // If there are still unpaid membership fees
 	$moves = $odooClient->Read('account.move', 
 		[$ids], 
-		array('fields' => array('id', 'name', 'state', 'payment_state'))) ;
+		array('fields' => array('id', 'name', 'state', 'payment_state', 'partner_id'))) ;
 	$newly_paid = 0 ;
+	$newly_paid_names = array() ;
 	foreach($moves as $move) {
 		if ($move['payment_state'] == 'paid' or $move['payment_state'] == 'reversed') {
 			mysqli_query($mysqli_link, "UPDATE $table_membership_fees SET bkf_payment_date = SYSDATE() WHERE bkf_invoice_id = $move[id]")
 				or journalise($userId, "E", "Cannot mark membership fees as paid: " . mysqli_error($mysqli_link)) ;
 			$newly_paid ++ ;
+			if (is_array($move['partner_id']))
+				$newly_paid_names[] = $move['partner_id'][1] ;
 		}
 	}
 	if ($newly_paid > 0)
-		journalise($userId, "I", "There are $newly_paid newly paid membership fees") ;
+		journalise($userId, "I", "There are $newly_paid newly paid membership fees: " . implode(", ", $newly_paid_names)) ;
 }
 
 $result = mysqli_query($mysqli_link, "SELECT bkf_user
