@@ -23,6 +23,7 @@ if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'delay') {
     $hours = ($membership_year == date('Y')) ? 1 : 24 ; // 1 hour if for this year else 24 hours
     setcookie('membership', 'ignore', time() + ($hours * 60 * 60), "/"); 
     header("Location: https://www.spa-aviation.be/resa/" . urldecode($_REQUEST['cb']), TRUE, 307) ; // TODO avoid using hardcoded domain name
+    journalise($userId, "I", "Membership reminder delayed by $hours hours") ;
     exit ;
 }
 
