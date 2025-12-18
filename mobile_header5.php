@@ -294,7 +294,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><a class="dropdown-item" href="mobile_members_list.php">Listes spécifiques des membres</a></li>
       <li><a class="dropdown-item" href="mobile_tilea.php">Taxe TILEA</a></li>
       <li><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></li>
-      <li><a class="dropdown-item" href="http://www.spa-aviation.ovh">Essai nouveau site<i class="bi bi-box-arrow-up-right"></i></a></li>
+      <li><a class="dropdown-item" href="http://www.spa-aviation.ovh" target="_blank>Essai nouveau site <i class="bi bi-box-arrow-up-right"></i></a></li>
     </ul>
   </li> <!-- dropdown administration-->
 
