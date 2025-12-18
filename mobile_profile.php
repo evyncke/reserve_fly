@@ -41,6 +41,7 @@ if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 # Prepare for Social Networks SDKs
 require_once 'vendor/autoload.php'; // Ensure you have the Google and Facebook SDKs installed via Composer
 use Facebook\Facebook;
+use League\OAuth2\Client\Provider\Google;
 
 $body_attributes = "onload=\"selectedUserId=$displayed_id;init();\"" ;
 $header_postamble = '<script data-cfasync="true" src="js/mobile_profile.js"></script>' ;
@@ -84,35 +85,63 @@ foreach($me as $key => $value)
 
 
 // Handle OAuth callbacks
-// Actually seem that code and state are set by Facebook but value is opaque and not 'facebook'
-if (isset($_GET['code']) or (isset($_GET['state']) && $_GET['state'] === 'facebook')) {
-	// Initialize Facebook Client
-	$facebookClient = new Facebook([
-		'app_id' => $fb_app_id,
-		'app_secret' => $fb_app_secret,
-		'default_graph_version' => 'v12.0',
-	]);
-    $facebookHelper = $facebookClient->getRedirectLoginHelper();
-	journalise($userId, "D", "Facebook OAuth: getting access token for displayed_id=$displayed_id") ;
-    try {
-        $accessToken = $facebookHelper->getAccessToken();
-        if (isset($accessToken)) {
-			journalise($userId, "D", "Facebook OAuth: access token obtained for displayed_id=$displayed_id") ;
-            $response = $facebookClient->get('/me?fields=id,name,email', $accessToken);
-            $facebookUser = $response->getGraphUser();
-			journalise($userId, "D", "Facebook OAuth: user info obtained for displayed_id=$displayed_id: facebook id = $facebookUser[id], name = $facebookUser[name], email = $facebookUser[email]") ;
-			mysqli_query($mysqli_link, "UPDATE $table_person SET facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "', " .
-				" facebook_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
-				WHERE jom_id = $displayed_id") ;
-			journalise($userId, "I", "Compte Facebook lié: facebook id = $facebookUser[id], name = $facebookUser[name], email = $facebookUser[email] for displayed_id=$displayed_id") ;
-			$change_profile_message .= "Votre compte Facebook a été lié avec succès à votre profil.<br/>" ;
+if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
+    // Is is Google or Facebook?
+    if ($_GET['state'] === $_SESSION['google_oauth2state']) {
+		// Initialize Google Client
+		$google = new Google([
+			'clientId'     => $google_client_id,
+			'clientSecret' => $google_client_secret,
+			'redirectUri'  => 'https://www.spa-aviation.be/resa/mobile_profile.php', // Doit être identique à la console Google
+		]);
+		journalise(0, "I", "Google OAuth callback received") ;
+        try {
+            $accessToken = $google->getAccessToken('authorization_code', [
+                'code' => $_GET['code']
+            ]);
+            if (isset($accessToken)) {
+                $googleUser = $google->getResourceOwner($accessToken);
+                journalise($userId, "I", "Google OAuth: user info obtained: google id = " . $googleUser->getId() . 
+                    ", name = " . $googleUser->getName() . ", email = " . $googleUser->getEmail()) ;
+				mysqli_query($mysqli_link, "UPDATE $table_person SET google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "', " .
+					" google_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
+					WHERE jom_id = $displayed_id") 
+					or journalise($userId, "E", "Error updating google_id/token for user id $displayed_id in $table_person: " . mysqli_error($mysqli_link)) ;
+				$change_profile_message .= "Votre compte Google a été lié avec succès à votre profil.<br/>" ;
+				journalise($userId, "I", "Compte Google lié: google id = " . $googleUser->getId() . ", email = " . $googleUser->getEmail() . " for displayed_id=$displayed_id") ;
+          	} 
+        } catch (Exception $e) {
+            journalise(0, "E", 'Google OAuth Error: ' . $e->getMessage());
         }
-    } catch (Facebook\Exceptions\FacebookResponseException $e) {
-        journalise($userId, "E", 'Facebook API Error: ' . $e->getMessage());
-    } catch (Facebook\Exceptions\FacebookSDKException $e) {
-        journalise($userId, "E", 'Facebook SDK Error: ' . $e->getMessage());
-    } catch (Exception $e) {
-		journalise($userId, "E", 'General Error: ' . $e->getMessage());
+	} else {
+		// Initialize Facebook Client
+		$facebookClient = new Facebook([
+			'app_id' => $fb_app_id,
+			'app_secret' => $fb_app_secret,
+			'default_graph_version' => 'v12.0',
+		]);
+		$facebookHelper = $facebookClient->getRedirectLoginHelper();
+		journalise($userId, "D", "Facebook OAuth: getting access token for displayed_id=$displayed_id") ;
+		try {
+			$accessToken = $facebookHelper->getAccessToken();
+			if (isset($accessToken)) {
+				journalise($userId, "D", "Facebook OAuth: access token obtained for displayed_id=$displayed_id") ;
+				$response = $facebookClient->get('/me?fields=id,name,email', $accessToken);
+				$facebookUser = $response->getGraphUser();
+				journalise($userId, "D", "Facebook OAuth: user info obtained for displayed_id=$displayed_id: facebook id = $facebookUser[id], name = $facebookUser[name], email = $facebookUser[email]") ;
+				mysqli_query($mysqli_link, "UPDATE $table_person SET facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "', " .
+					" facebook_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
+					WHERE jom_id = $displayed_id") ;
+				journalise($userId, "I", "Compte Facebook lié: facebook id = $facebookUser[id], name = $facebookUser[name], email = $facebookUser[email] for displayed_id=$displayed_id") ;
+				$change_profile_message .= "Votre compte Facebook a été lié avec succès à votre profil.<br/>" ;
+			}
+		} catch (Facebook\Exceptions\FacebookResponseException $e) {
+			journalise($userId, "E", 'Facebook API Error: ' . $e->getMessage());
+		} catch (Facebook\Exceptions\FacebookSDKException $e) {
+			journalise($userId, "E", 'Facebook SDK Error: ' . $e->getMessage());
+		} catch (Exception $e) {
+			journalise($userId, "E", 'General Error: ' . $e->getMessage());
+		}
 	}
 }
 
@@ -773,13 +802,22 @@ if (! $read_only) {
 		'app_secret' => $fb_app_secret,
 		'default_graph_version' => 'v18.0',
 	]);
+	// Initialize Google Client
+	$google = new Google([
+		'clientId'     => $google_client_id,
+		'clientSecret' => $google_client_secret,
+		'redirectUri'  => 'https://www.spa-aviation.be/resa/mobile_profile.php', // Doit être identique à la console Google
+	]);
 	// Generate OAuth URLs
-	//$googleAuthUrl = $googleClient->createAuthUrl();
 	$facebookHelper = $facebookClient->getRedirectLoginHelper();
 	$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_profile.php', ['email','public_profile','user_link']);
+	$googleAuthUrl = $google->getAuthorizationUrl();
+	$_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 	print('<div class="form-group">Faciliter la connexion/login en 
 		<a class="col-sm-offset-2 col-md-offset-1 btn btn-primary" href="' . $facebookAuthUrl . '">
-			<i class="bi bi-facebook"></i> liant mon compte Facebook</a></div>') ;
+			<i class="bi bi-facebook"></i> liant mon compte Facebook</a> ou en
+		<a class="col-sm-offset-2 col-md-offset-1 btn btn-outline-secondary" href="' . $googleAuthUrl . '">
+			<i class="bi bi-google"></i> liant mon compte Google</a></div>') ;
 }
 ?>
 </form>

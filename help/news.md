@@ -5,9 +5,9 @@ Vous trouverez ici les diverses nouveautés à propos du site réservation du RA
 
 ## Décembre 2025
 
-- il est possible de se connecter avec votre compte Facebook *si*
-    - votre adresse email sur le site du club est identique à l'adresse email de votre compte Facebook *ou*
-    - vous avez lié vos comptes du club et Facebook en allant sur votre profil [<i class="bi bi-person"></i> votre nom -> <i class="bi bi-person-circle"></i> Mon profil](https://www.spa-aviation.be/resa/mobile_profile.php), partie _Réseaux Sociaux_ et avez cliqué sur <span class="btn btn-primary"><i class="bi bi-facebook"></i> liant mon compte Facebook</span>
+- il est possible de se connecter avec votre compte Facebook ou Google *si*
+    - votre adresse email sur le site du club est identique à l'adresse email de votre compte Facebook ou Google (par exemple une adresse email @gmail.com) *ou*
+    - vous avez lié vos comptes du club et Facebook & Facebook en allant sur votre profil [<i class="bi bi-person"></i> votre nom -> <i class="bi bi-person-circle"></i> Mon profil](https://www.spa-aviation.be/resa/mobile_profile.php), partie _Réseaux Sociaux_ et avez cliqué sur <span class="btn btn-primary"><i class="bi bi-facebook"></i> liant mon compte Facebook</span> et idem pour Google.
 - dans le carnet de vol [<i class="bi bi-person"></i> votre nom -> <i class="bi bi-journals"></i> Mon carnet de vol](https://www.spa-aviation.be/resa/mobile_mylog.php) il est possible de choisir la période des 12 mois utilisée pour la prorogation de votre SEP.
 
 ## Novembre 2025
