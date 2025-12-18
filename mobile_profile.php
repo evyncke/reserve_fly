@@ -92,10 +92,10 @@ if (isset($_GET['code']) or (isset($_GET['state']) && $_GET['state'] === 'facebo
 		'app_secret' => $fb_app_secret,
 		'default_graph_version' => 'v12.0',
 	]);
-    $helper = $facebookClient->getRedirectLoginHelper();
+    $facebookHelper = $facebookClient->getRedirectLoginHelper();
 	journalise($userId, "D", "Facebook OAuth: getting access token for displayed_id=$displayed_id") ;
     try {
-        $accessToken = $helper->getAccessToken();
+        $accessToken = $facebookHelper->getAccessToken();
         if (isset($accessToken)) {
 			journalise($userId, "D", "Facebook OAuth: access token obtained for displayed_id=$displayed_id") ;
             $response = $facebookClient->get('/me?fields=id,name,email', $accessToken);
@@ -616,30 +616,60 @@ if (! $read_only) {
 </div> <!-- tabpanel id = log -->
 
 <div id="photo" class="tab-pane fade" role="tabpanel">
+<div class="row">
+<div class="col-12 col-sm-6 col-md-4">
+<h4>Photo sur le site</h4>
 <?php
-print("<div class=\"row\">") ;
 if ($me['avatar'] != '') {
-		print("<img src=\"$avatar_root_uri/$me[avatar]\" class=\"col-12 col-sm-6 col-md-2\">") ;
+	print("<img src=\"$avatar_root_uri/$me[avatar]\" class=\"col-12 col-sm-6 col-md-4\">") ;
+} else {
+	print("<p>Aucune photo de profil n'a été téléchargée.</p>") ;
 }
-print("<img src=\"https://www.gravatar.com/avatar/" . md5(strtolower(trim($me['email']))) . "?s=200&d=blank&r=pg\" class=\"col-12 col-sm-6 col-md-2\">
-	</div> <!-- row -->\n") ;
 if (! $read_only) {
-	print('<div class="row">
-		<form action="' . $_SERVER['PHP_SELF'] . '" method="post" enctype="multipart/form-data" role="form" class="form-inline">
+	print('<form action="' . $_SERVER['PHP_SELF'] . '" method="post" enctype="multipart/form-data" role="form" class="form-inline">
 			<input type="hidden" name="action" value="photo">
 			<input type="hidden" name="displayed_id" value="' . $displayed_id . '">
 		<div class="form-group">
-			<label class="control-label col-sm-9 col-md-4">Fichier pour la nouvelle photo (200 x 200 pixels de pr&eacute;f&eacute;rence):</label>
+			<label class="control-label">Fichier pour la nouvelle photo (format JPEG et 200 x 200 pixels de préférence):</label>
 			<input type="file" name="photoFile" class="form-control col-sm-6 col-md-2"/>
 		</div> <!-- form-group -->
 		<div class="form-group"-->
-			<button type="submit" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-2 btn btn-primary">Mettre &agrave; jour la photo</button>
+			<button type="submit" class="col-sm-offset-2 col-md-offset-1 btn btn-primary">Mettre à jour la photo</button>
 		</div> <!-- form-group -->
-	</form>
-	<p>Vous pouvez aussi utiliser le site gratuit <a href="https://gravatar.com/">Gravatar</a> pour y mettre votre photo et la lier ainsi à votre adresse email ' . $me['email'] . '.</p>
-	</div> <!-- row -->') ;
+	</form>') ;
 }
 ?>
+</div> <!-- col -->
+<div class="col-12 col-sm-6 col-md-4">
+<h4>Photo sur Gravatar</h4>
+<img src="https://www.gravatar.com/avatar/<?=md5(strtolower(trim($me['email'])))?>?s=200&d=blank&r=pg" class="col-12 col-sm-6 col-md-4">
+<p>Vous pouvez aussi utiliser le site gratuit <a href="https://gravatar.com/">Gravatar</a> pour y mettre votre photo 
+	et la lier ainsi à votre adresse email <em><?=htmlspecialchars($me['email'])?></em>.</p>
+</div> <!-- col -->
+<div class="col-12 col-sm-6 col-md-4">
+<h4>Photo du profil Facebook</h4>
+<?php
+	if ($me['facebook_id'] != '' and $me['facebook_token'] != '') {
+		// Récupérer l'URL de la photo de l'utilisateur connecté
+		// Initialize Facebook Client
+		$facebookClient = new Facebook([
+			'app_id' => $fb_app_id,
+			'app_secret' => $fb_app_secret,
+			'default_graph_version' => 'v12.0',
+		]);
+		$fb_response = $facebookClient->get("/$me[facebook_id]/picture?type=large&redirect=false", $me['facebook_token']);
+		$fb_picture = $fb_response->getGraphUser();
+		print('<img src="' . $fb_picture['url'] . '" style="width: auto;" alt="Photo de profil Facebook">') ;
+	} else {
+		print('<p>Compte Facebook inexistant ou pas lié au profil du site.</p>') ;
+		if (! $read_only) {
+			print('<p>Pour lier votre compte Facebook à votre profil du site, veuillez vous rendre dans <a href="mobile_profile.php">votre profil</a> et y ajouter votre identifiant Facebook.</p>') ;
+		}
+	}
+?>
+</div><!-- col -->
+</div> <!-- row -->
+
 </div> <!-- tabpanel id=photo -->
 
 <?php
