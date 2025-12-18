@@ -139,7 +139,11 @@ if (isset($_GET['state']) and isset($_GET['code'])) {
                 $app->triggerEvent('onUserLogin', array(
                     (array) $joomla_user,
                     $options));
-                journalise($userId, "I", "Facebook login for user id $userId ($facebookUser[email]) from $callback") ;
+                journalise($userId, "I", "Facebook login for user id $userId ($facebookUser[email]) from $callback.") ;
+       			mysqli_query($mysqli_link, "UPDATE $table_person SET facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "', " .
+    				" facebook_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
+	    			WHERE jom_id = $userId") 
+                    or journalise($userId, "E", "Error updating facebook_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
                 header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
                 exit ;  
             } else {
@@ -160,7 +164,7 @@ if (isset($_GET['state']) and isset($_GET['code'])) {
 // Generate OAuth URLs
 //$googleAuthUrl = $googleClient->createAuthUrl();
 $facebookHelper = $facebook->getRedirectLoginHelper();
-$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login_oauth.php', ['email']);
+$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login_oauth.php', ['email','public_profile']);
 
 ?>
 

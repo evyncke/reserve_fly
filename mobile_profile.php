@@ -742,10 +742,10 @@ if (! $read_only) {
 	// Generate OAuth URLs
 	//$googleAuthUrl = $googleClient->createAuthUrl();
 	$facebookHelper = $facebookClient->getRedirectLoginHelper();
-	$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_profile.php', ['email']);
+	$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_profile.php', ['email','public_profile']);
 	print('<div class="form-group">Faciliter la connexion/login en 
 		<a class="col-sm-offset-2 col-md-offset-1 btn btn-primary" href="' . $facebookAuthUrl . '">
-			liant mon compte Facebook</a> ' . $_SERVER['SERVER_ADDR'] . '</div>') ;
+			<i class="bi bi-facebook"></i> liant mon compte Facebook</a></div>') ;
 }
 ?>
 </form>
