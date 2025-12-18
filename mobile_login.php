@@ -79,8 +79,7 @@ use Facebook\Facebook;
 $google = new Google([
     'clientId'     => $google_client_id,
     'clientSecret' => $google_client_secret,
-//    'redirectUri'  => $_SERVER['PHP_SELF'],
-    'redirectUri'  => 'https://www.spa-aviation.be/resa/mobile_login_oauth.php', // Doit être identique à la console Google
+    'redirectUri'  => 'https://www.spa-aviation.be/resa/mobile_login.php', // Doit être identique à la console Google
 ]);
 
 // Initialize Facebook Client
@@ -90,26 +89,6 @@ $facebook = new Facebook([
     'default_graph_version' => 'v18.0',
 ]);
 
-// Handle OAuth Callbacks
-/* if (isset($_GET['code']) && isset($_GET['state']) && $_GET['state'] === 'google') {
-    $token = $googleClient->fetchAccessTokenWithAuthCode($_GET['code']);
-    if (!isset($token['error'])) {
-        $googleClient->setAccessToken($token['access_token']);
-        $googleOAuth = new Google_Service_Oauth2($googleClient);
-        $googleUser = $googleOAuth->userinfo->get();
-
-        // Store token in MariaDB
-        $stmt = $mysqli_link->prepare("INSERT INTO oauth_tokens (provider, user_id, token) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = ?");
-        $stmt->bind_param('ssss', $provider, $userId, $token['access_token'], $token['access_token']);
-        $provider = 'google';
-        $userId = $googleUser->getId();
-        $stmt->execute();
-
-        header("Location: https://www.spa-aviation.be/$callback", TRUE, 307);
-        exit;
-    }
-} else
-*/
 // Check whether  OAuth callback
 if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
     // Is is Google or Facebook?
@@ -215,7 +194,6 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
 
 // Generate OAuth URLs
 $googleAuthUrl = $google->getAuthorizationUrl();
-// On stocke l'état (state) en session pour éviter les attaques CSRF
 $_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 $facebookHelper = $facebook->getRedirectLoginHelper();
 $facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login_oauth.php', ['email','public_profile','user_link']);
