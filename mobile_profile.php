@@ -639,13 +639,13 @@ if (! $read_only) {
 	</form>') ;
 }
 ?>
-</div> <!-- col -->
+</div> <!-- col site photo-->
 <div class="col-12 col-sm-6 col-md-4">
 <h4>Photo sur Gravatar</h4>
 <img src="https://www.gravatar.com/avatar/<?=md5(strtolower(trim($me['email'])))?>?s=200&d=blank&r=pg" class="col-12 col-sm-6 col-md-4">
 <p>Vous pouvez aussi utiliser le site gratuit <a href="https://gravatar.com/">Gravatar</a> pour y mettre votre photo 
 	et la lier ainsi à votre adresse email <em><?=htmlspecialchars($me['email'])?></em>.</p>
-</div> <!-- col -->
+</div> <!-- col gravatar photo -->
 <div class="col-12 col-sm-6 col-md-4">
 <h4>Photo du profil Facebook</h4>
 <?php
@@ -655,11 +655,14 @@ if (! $read_only) {
 		$facebookClient = new Facebook([
 			'app_id' => $fb_app_id,
 			'app_secret' => $fb_app_secret,
-			'default_graph_version' => 'v12.0',
+			'default_graph_version' => 'v18.0',
 		]);
 		$fb_response = $facebookClient->get("/$me[facebook_id]/picture?type=large&redirect=false", $me['facebook_token']);
 		$fb_picture = $fb_response->getGraphUser();
 		print('<img src="' . $fb_picture['url'] . '" style="width: auto;" alt="Photo de profil Facebook">') ;
+		$fb_response = $facebookClient->get("/$me[facebook_id]?fields=link", $me['facebook_token']);
+		$fb_link = $fb_response->getGraphUser();
+		print('<a class="btn btn-primary" href="' . $fb_link->getLink() . '" target="_blank"><i class="bi bi-facebook"></i> Voir le profil Facebook <i class="bi bi-box-arrow-up-right"></i></a>') ;
 	} else {
 		print('<p>Compte Facebook inexistant ou pas lié au profil du site.</p>') ;
 		if (! $read_only) {
@@ -667,7 +670,8 @@ if (! $read_only) {
 		}
 	}
 ?>
-</div><!-- col -->
+</div><!-- col facebook photo-->
+<!-- TODO use Google profile photo ? -->
 </div> <!-- row -->
 
 </div> <!-- tabpanel id=photo -->
@@ -767,12 +771,12 @@ if (! $read_only) {
 	$facebookClient = new Facebook([
 		'app_id' => $fb_app_id,
 		'app_secret' => $fb_app_secret,
-		'default_graph_version' => 'v12.0',
+		'default_graph_version' => 'v18.0',
 	]);
 	// Generate OAuth URLs
 	//$googleAuthUrl = $googleClient->createAuthUrl();
 	$facebookHelper = $facebookClient->getRedirectLoginHelper();
-	$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_profile.php', ['email','public_profile']);
+	$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_profile.php', ['email','public_profile','user_link']);
 	print('<div class="form-group">Faciliter la connexion/login en 
 		<a class="col-sm-offset-2 col-md-offset-1 btn btn-primary" href="' . $facebookAuthUrl . '">
 			<i class="bi bi-facebook"></i> liant mon compte Facebook</a></div>') ;

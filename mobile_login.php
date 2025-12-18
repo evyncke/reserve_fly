@@ -70,23 +70,24 @@ require_once 'mobile_header5.php' ;
 // Transfert from resa/vendor => scp -rp . spaaviat@ftp.cluster015.hosting.ovh.net:www/resa/vendor (+ password of course)
 require_once 'vendor/autoload.php'; // Ensure you have the Google and Facebook SDKs installed via Composer
 
-# use Google\Client as GoogleClient;
+use League\OAuth2\Client\Provider\Google;
 use Facebook\Facebook;
 
-// Don't use Google Client for now as it requires too many dependencies
+// session_start(); // Probably already started in mobile_header5.php or via dbi.php
+
 // Initialize Google Client
-#$googleClient = new GoogleClient();
-#$googleClient->setClientId($google_client_id);
-#$googleClient->setClientSecret($google_client_secret);
-#$googleClient->setRedirectUri('https://www.spa-aviation.be/resa/mobile_login_oauth.php');
-#$googleClient->addScope('email');
-#$googleClient->addScope('profile');
+$google = new Google([
+    'clientId'     => $google_client_id,
+    'clientSecret' => $google_client_secret,
+//    'redirectUri'  => $_SERVER['PHP_SELF'],
+    'redirectUri'  => 'https://www.spa-aviation.be/resa/mobile_login_oauth.php', // Doit être identique à la console Google
+]);
 
 // Initialize Facebook Client
 $facebook = new Facebook([
     'app_id' => $fb_app_id,
     'app_secret' => $fb_app_secret,
-    'default_graph_version' => 'v12.0',
+    'default_graph_version' => 'v18.0',
 ]);
 
 // Handle OAuth Callbacks
@@ -109,90 +110,155 @@ $facebook = new Facebook([
     }
 } else
 */
-// Check whether Facebook OAuth callback
-if (isset($_GET['state']) and isset($_GET['code'])) {
-    $helper = $facebook->getRedirectLoginHelper();
-    try {
-        $accessToken = $helper->getAccessToken();
-        if (isset($accessToken)) {
-            $response = $facebook->get('/me?fields=id,name,email', $accessToken);
-            $facebookUser = $response->getGraphUser();
-            journalise($userId, "I", "Facebook OAuth: user info obtained: facebook id = $facebookUser[id], name = $facebookUser[name], email = $facebookUser[email]") ;
-            // Check if user exists with this facebook id or email
-            $query = "SELECT jom_id 
-                FROM $table_person 
-                WHERE facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "' 
-                    OR email='" . mysqli_real_escape_string($mysqli_link, $facebookUser['email']) . "'";
-            $result = mysqli_query($mysqli_link, $query)
-                or journalise(0, "F", "Error querying for facebook user: " . mysqli_error($mysqli_link));
-            $row = mysqli_fetch_assoc($result);
-            if ($row) {
-                // User found, log them in
-                $userId = $row['jom_id'];
-                $joomla_user = JFactory::getUser($userId);
-                $app = JFactory::getApplication('site');
-                $session = JFactory::getSession();
-                $session->set('user', $joomla_user);
-                $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
-                $joomla_user->save();
-                $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
-                $app->triggerEvent('onUserLogin', array(
-                    (array) $joomla_user,
-                    $options));
-                journalise($userId, "I", "Facebook login for user id $userId ($facebookUser[email]) from $callback.") ;
-       			mysqli_query($mysqli_link, "UPDATE $table_person SET facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "', " .
-    				" facebook_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
-	    			WHERE jom_id = $userId") 
-                    or journalise($userId, "E", "Error updating facebook_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
-                header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
-                exit ;  
-            } else {
-                journalise(0, "W", "No user found for Facebook id $facebookUser[id] or email $facebookUser[email]") ;
-                $connect_msg = "Aucun utilisateur n'a été trouvé pour votre compte Facebook. 
-                    Veuillez utiliser une autre méthode ou lier votre profil à votre compte Facebook via votre profil sur ce site onglet Réseaux Sociaux." ;
+// Check whether  OAuth callback
+if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
+    // Is is Google or Facebook?
+    if ($_GET['state'] === $_SESSION['google_oauth2state']) {
+        journalise(0, "I", "Google OAuth callback received") ;
+        try {
+            $accessToken = $google->getAccessToken('authorization_code', [
+                'code' => $_GET['code']
+            ]);
+            if (isset($accessToken)) {
+                $googleUser = $google->getResourceOwner($accessToken);
+                journalise($userId, "I", "Google OAuth: user info obtained: google id = " . $googleUser->getId() . 
+                    ", avatar = " . $googleUser->getAvatar() .
+                    ", name = " . $googleUser->getName() . ", email = " . $googleUser->getEmail()) ;
+                // Check if user exists with this google id or email
+                $query = "SELECT jom_id 
+                    FROM $table_person 
+                    WHERE google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "' 
+                        OR email='" . mysqli_real_escape_string($mysqli_link, $googleUser->getEmail()) . "'";
+                $result = mysqli_query($mysqli_link, $query)
+                    or journalise(0, "F", "Error querying for google user: " . mysqli_error($mysqli_link));
+                $row = mysqli_fetch_assoc($result);
+                if ($row) {   
+                    // User found, log them in
+                    $userId = $row['jom_id'];
+                    $joomla_user = JFactory::getUser($userId);
+                    $app = JFactory::getApplication('site');
+                    $session = JFactory::getSession();
+                    $session->set('user', $joomla_user);
+                    $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
+                    $joomla_user->save();
+                    $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
+                    $app->triggerEvent('onUserLogin', array(
+                        (array) $joomla_user,
+                        $options));
+                    journalise($userId, "I", "Google login for user id $userId (" . $googleUser->getEmail() . ") from $callback.") ;
+                    mysqli_query($mysqli_link, "UPDATE $table_person SET google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "', " .
+                        " google_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
+                        WHERE jom_id = $userId") 
+                        or journalise($userId, "E", "Error updating google_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
+                    header("Location: https://www.spa-aviation.be/$callback", TRUE, 307);
+                    exit;
+                } else {
+                    journalise(0, "W", "No user found for google id $googleUser->getId() or email $googleUser->getEmail()") ;
+                    $connect_msg = "Aucun utilisateur n'a été trouvé pour votre compte Google via votre adresse email " . $googleUser->getEmail() . ". 
+                        Veuillez utiliser une autre méthode ou lier votre profil à votre compte Google via votre profil sur ce site onglet Réseaux Sociaux." ;
+                }
             }
+        } catch (Exception $e) {
+            journalise(0, "E", 'Google OAuth Error: ' . $e->getMessage());
         }
-    } catch (Facebook\Exceptions\FacebookResponseException $e) {
-        journalise(0, "F", 'Facebook API Error: ' . $e->getMessage());
-    } catch (Facebook\Exceptions\FacebookSDKException $e) {
-        journalise(0, "F", 'Facebook SDK Error: ' . $e->getMessage());
-    } catch (Exception $e) {
-		journalise($userId, "E", 'General Error: ' . $e->getMessage());
+    } else { // Assume Facebook
+        $helper = $facebook->getRedirectLoginHelper();
+        try {
+            $accessToken = $helper->getAccessToken();
+            if (isset($accessToken)) {
+                $response = $facebook->get('/me?fields=id,name,email', $accessToken);
+                $facebookUser = $response->getGraphUser();
+                journalise($userId, "I", "Facebook OAuth: user info obtained: facebook id = $facebookUser[id], name = $facebookUser[name], email = $facebookUser[email]") ;
+                // Check if user exists with this facebook id or email
+                $query = "SELECT jom_id 
+                    FROM $table_person 
+                    WHERE facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "' 
+                        OR email='" . mysqli_real_escape_string($mysqli_link, $facebookUser['email']) . "'";
+                $result = mysqli_query($mysqli_link, $query)
+                    or journalise(0, "F", "Error querying for facebook user: " . mysqli_error($mysqli_link));
+                $row = mysqli_fetch_assoc($result);
+                if ($row) {
+                    // User found, log them in
+                    $userId = $row['jom_id'];
+                    $joomla_user = JFactory::getUser($userId);
+                    $app = JFactory::getApplication('site');
+                    $session = JFactory::getSession();
+                    $session->set('user', $joomla_user);
+                    $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
+                    $joomla_user->save();
+                    $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
+                    $app->triggerEvent('onUserLogin', array(
+                        (array) $joomla_user,
+                        $options));
+                    journalise($userId, "I", "Facebook login for user id $userId ($facebookUser[email]) from $callback.") ;
+                    mysqli_query($mysqli_link, "UPDATE $table_person SET facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "', " .
+                        " facebook_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
+                        WHERE jom_id = $userId") 
+                        or journalise($userId, "E", "Error updating facebook_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
+                    header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
+                    exit ;  
+                } else {
+                    journalise(0, "W", "No user found for Facebook id $facebookUser[id] or email $facebookUser[email]") ;
+                    $connect_msg = "Aucun utilisateur n'a été trouvé pour votre compte Facebook. 
+                        Veuillez utiliser une autre méthode ou lier votre profil à votre compte Facebook via votre profil sur ce site onglet Réseaux Sociaux." ;
+                }
+            }
+        } catch (Facebook\Exceptions\FacebookResponseException $e) {
+            journalise(0, "F", 'Facebook API Error: ' . $e->getMessage());
+        } catch (Facebook\Exceptions\FacebookSDKException $e) {
+            journalise(0, "F", 'Facebook SDK Error: ' . $e->getMessage());
+        } catch (Exception $e) {
+            journalise($userId, "E", 'General Error: ' . $e->getMessage());
+        }
     }
 }
 
 // Generate OAuth URLs
-//$googleAuthUrl = $googleClient->createAuthUrl();
+$googleAuthUrl = $google->getAuthorizationUrl();
+// On stocke l'état (state) en session pour éviter les attaques CSRF
+$_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 $facebookHelper = $facebook->getRedirectLoginHelper();
-$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login_oauth.php', ['email','public_profile']);
+$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login_oauth.php', ['email','public_profile','user_link']);
 
 ?>
 
 <div class="container">
     <h2>Connexion</h2>
     <p class="bg-danger"><?=$connect_msg?></p>
-    <p class="bg-info">Pour accéder au site vous devez vous connecter.</p>
+    <p class="bg-info">Pour accéder au site vous devez vous connecter soit via votre identifiant et mot de passe,</p>
 
     <form method="post" action="<?=$_SERVER['PHP_SELF']?>">
         <input type="hidden" name="cb" value="<?=$callback?>">
 
-        <label for="username" class="form-label">
-            Identifiant:
-        </label>
-        <input type="text" class="form-control" id="username" name="username" placeholder="Votre nom d'utilisateur" autocomplete="username" value="<?=$_REQUEST['username']?>"><br/>
+        <div class="d-flex align-items-center">
+            <label for="username" class="form-label col-auto me-2">
+                Identifiant:
+            </label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Votre nom d'utilisateur" autocomplete="username" value="<?=$_REQUEST['username']?>"><br/>
+        </div> <!-- d-flex -->
 
-        <label for="password" class="form-label">
-            Mot de passe:
-        </label>
-        <input class="form-control" type="password" id="password" placeholder="Votre mot de passe" name="password" autocomplete="current-password"><br/>
+        <div class="d-flex align-items-center">
+            <label for="password" class="form-label col-auto me-2">
+                Mot de passe:
+            </label>
+            <input class="form-control" type="password" id="password" placeholder="Votre mot de passe" name="password" autocomplete="current-password"><br/>
+        </div> <!-- d-flex -->
 
         <input type="submit" class="btn btn-primary" value="Connexion">
     </form>
 
     <hr>
 
-    <!--a href="<?=$googleAuthUrl?>" class="btn btn-danger">Se connecter avec Google</a-->
-    <a href="<?=$facebookAuthUrl?>" class="btn btn-primary text-center"><i class="bi bi-facebook"></i> Se connecter avec Facebook</a>
+    <div class="text-center">
+        <p><b>OU</b> via:</p>
+        <a href="<?=$facebookAuthUrl?>" class="btn btn-primary"><i class="bi bi-facebook"></i> Facebook</a>
+        <a href="<?=$googleAuthUrl?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Google</a>
+    </div>
+    <div class="row">
+        <p class="text-center text-muted mt-3">Les connexions via Google ou Facebook nécessitent que votre adresse email soit la même sur le système de réservation
+            et sur Facebook ou Google (trivial si votre email est ...@gmail.com).
+            Si ce n'est pas le cas, veuillez utiliser la connexion classique et lier votre compte via votre profil sur ce site onglet Réseaux Sociaux.</p>
+    </div><!-- row -->   
 </div> <!-- container -->
 </body>
 </html>
