@@ -92,7 +92,7 @@ $facebook = new Facebook([
 // Check whether  OAuth callback
 if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
     // Is is Google or Facebook?
-    if ($_GET['state'] === $_SESSION['google_oauth2state']) {
+    if (isset($_SESSION['google_oauth2state']) and $_GET['state'] === $_SESSION['google_oauth2state']) {
         try {
             $accessToken = $google->getAccessToken('authorization_code', [
                 'code' => $_GET['code']
@@ -140,6 +140,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
             journalise(0, "E", 'Google OAuth Error: ' . $e->getMessage());
         }
     } else { // Assume Facebook
+        if (isset($_SESSION['google_oauth2state'])) unset($_SESSION['google_oauth2state']); // Clear Google state if any
         $helper = $facebook->getRedirectLoginHelper();
         try {
             $accessToken = $helper->getAccessToken();
