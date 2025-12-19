@@ -491,7 +491,7 @@ $fi_grand_total_minute = $fi_grand_total_minute % 60 ;
 ?>
 </tbody>
 <tfoot class="table-group-divider">
-<tr><td colspan="8" class="bg-info">Table Total (for this period)</td>
+<tr><td colspan="8" class="bg-info">Table Total (for this period, i.e., <?= $line_count ?> flights)</td>
 <td class="bg-info"><?=$duration_total_hour?></td>
 <td class="bg-info"><?=$duration_total_minute?></td>
 <td class="bg-info"></td>
