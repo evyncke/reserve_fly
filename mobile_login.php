@@ -93,7 +93,6 @@ $facebook = new Facebook([
 if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
     // Is is Google or Facebook?
     if ($_GET['state'] === $_SESSION['google_oauth2state']) {
-        journalise(0, "I", "Google OAuth callback received") ;
         try {
             $accessToken = $google->getAccessToken('authorization_code', [
                 'code' => $_GET['code']
@@ -105,9 +104,9 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                     ", name = " . $googleUser->getName() . ", email = " . $googleUser->getEmail()) ;
                 // Check if user exists with this google id or email
                 $query = "SELECT jom_id 
-                    FROM $table_person 
-                    WHERE google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "' 
-                        OR email='" . mysqli_real_escape_string($mysqli_link, $googleUser->getEmail()) . "'";
+                    FROM $table_person AS p JOIN $table_users AS u ON p.jom_id = u.id
+                    WHERE u.block = 0 AND google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "' 
+                        OR p.email='" . mysqli_real_escape_string($mysqli_link, $googleUser->getEmail()) . "'";
                 $result = mysqli_query($mysqli_link, $query)
                     or journalise(0, "F", "Error querying for google user: " . mysqli_error($mysqli_link));
                 $row = mysqli_fetch_assoc($result);
@@ -150,9 +149,9 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                 journalise($userId, "I", "Facebook OAuth: user info obtained: facebook id = $facebookUser[id], name = $facebookUser[name], email = $facebookUser[email]") ;
                 // Check if user exists with this facebook id or email
                 $query = "SELECT jom_id 
-                    FROM $table_person 
-                    WHERE facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "' 
-                        OR email='" . mysqli_real_escape_string($mysqli_link, $facebookUser['email']) . "'";
+                    FROM $table_person AS p JOIN $table_users AS u ON p.jom_id = u.id
+                    WHERE u.block = 0 AND facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "' 
+                        OR p.email='" . mysqli_real_escape_string($mysqli_link, $facebookUser['email']) . "'";
                 $result = mysqli_query($mysqli_link, $query)
                     or journalise(0, "F", "Error querying for facebook user: " . mysqli_error($mysqli_link));
                 $row = mysqli_fetch_assoc($result);
