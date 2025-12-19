@@ -330,7 +330,8 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><a class="dropdown-item" href="dto.students.php">Liste des élèves</a></li>
       <li><a class="dropdown-item" href="dto.exercices.php">Liste des exercices</a></li>
       <li><a class="dropdown-item" href="dto.safetyday.php">Participation au Safety Day</a></li>
-
+      <li><hr class="dropdown-divider"/></li>
+      <li><a class="dropdown-item" href="dto.pilots.php">Liste des pilotes</a></li>
 <?php
   if ($userIsInstructor) {
 ?>

@@ -24,6 +24,11 @@ class DTO {
         return new DTOMembers($joomla_student_group, $fi) ;
     }
 
+    function Pilots() {
+        global $joomla_pilot_group ;
+        return new DTOMembers($joomla_pilot_group) ;
+    }
+
     function FIs() {
         global $joomla_instructor_group ;
         return new DTOMembers($joomla_instructor_group) ;
@@ -45,6 +50,12 @@ class DTOMember {
     public $blockedMessage ;
     public $membershipPaid ;
     public $groupMembership ;
+    public $firstFlight ;
+    public $lastFlight ;
+    public $countFlights ;
+    public $daysSinceLastFlight ;
+    public $validities = array() ;
+
 
     function __construct($row = NULL) {
         global $avatar_root_uri , $avatar_root_directory, 
@@ -69,6 +80,19 @@ class DTOMember {
                 $this->picture = $avatar_root_uri . '/' . $row['avatar'] ;
             else
                 $this->picture = 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($row['email']))) . '?s=80&d=blank&r=pg'  ; // Hash for gravatar ;
+            if (isset($row['first_flight']) and $row['first_flight'] != '') { // Depending on how the DTOMember is created (listing all students or via a DTOMmember.getById() some columns are not present
+                $this->firstFlight = $row['first_flight'] ;
+                $this->lastFlight = $row['last_flight'] ;  
+                $this->countFlights = $row['count_flights'] ; 
+                $this->daysSinceLastFlight = $row['days_since_last_flight'] ;
+            } 
+            if (isset($row['validities']) and $row['validities'] != '') {
+                $validities = explode(',', $row['validities']) ;
+                foreach($validities as $validity) {
+                    list($expire_date, $validity_type_id) = explode(';', $validity) ;
+                    $this->validities[$validity_type_id] = $expire_date ;
+                }
+            }
         }
     }
 
@@ -94,6 +118,13 @@ class DTOMember {
 
         return strpos($this->groupMembership, $joomla_student_group) !== FALSE ;
     }
+
+    function isPilot() {
+        // TODO: oversimplistic... should explode on ',' then look if exit in array
+        global $joomla_pilot_group ;
+
+        return strpos($this->groupMembership, $joomla_pilot_group) !== FALSE ;
+    }
 }
 
 class FI extends DTOMember {
@@ -108,21 +139,9 @@ class TKI extends DTOMember {
 }
 
 class Student extends DTOMember {
-    public $firstFlight ;
-    public $lastFlight ;
-    public $countFlights ;
-    public $daysSinceLastFlight ;
 
     function __construct($row = NULL) {
         parent::__construct($row) ; 
-        if ($row) {
-            if (isset($row['first_flight'])) { // Depending on how the Student is created (listing all students or via a DTOMmember.getById() some columns are not present
-                $this->firstFlight = $row['first_flight'] ;
-                $this->lastFlight = $row['last_flight'] ;  
-                $this->countFlights = $row['count_flights'] ; 
-                $this->daysSinceLastFlight = $row['days_since_last_flight'] ;
-            } 
-        } 
     }
 
     function Flights() {
@@ -138,30 +157,41 @@ class DTOMembers implements Iterator {
     private $row ;
 
     function __construct ($group, $fi = NULL) {
-        global $mysqli_link, $table_users, $table_person, $table_dto_flight, $table_user_usergroup_map, 
-            $table_logbook, $table_blocked, $table_membership_fees, $userId ;
+        global $mysqli_link, $table_users, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_validity,
+            $table_logbook, $table_blocked, $table_membership_fees, $joomla_instructor_group, $userId,
+            $joomla_instructor_group, $joomla_student_group, $joomla_pilot_group ;
 
         $this->group = $group ; // FI, TKI, Student, ...
         if ($fi)
             $fi_condition = "AND l_instructor = $fi " ;
         else 
             $fi_condition = '' ;
-        $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(l_start) AS count_flights, 
+        switch ($this->group) {
+            case $joomla_instructor_group: $logbook_condition = 'jom_id = l_instructor' ; $dto_flight_join = '' ; break ;
+            case $joomla_student_group: $logbook_condition = 'df_flight_log = l_id' ; $dto_flight_join = "LEFT JOIN $table_dto_flight ON df_student = jom_id" ; break ;
+            case $joomla_pilot_group: $logbook_condition = 'jom_id = l_pilot' ; $dto_flight_join = '' ; break ;
+            default: journalise($userId, "F", "DTOMembers instantiated with unknown group $this->group") ;
+        }
+        $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(DISTINCT l_start) AS count_flights, 
                     MIN(DATEDIFF(SYSDATE(), DATE(l_start))) AS days_since_last_flight,
-                    GROUP_CONCAT(m.group_id) AS group_ids 
-                FROM $table_person 
-                    JOIN $table_users AS u ON u.id = jom_id
-                    JOIN $table_user_usergroup_map m ON jom_id = m.user_id 
-                    LEFT JOIN $table_dto_flight ON df_student = jom_id
-                    LEFT JOIN $table_logbook ON df_flight_log = l_id
-                    LEFT JOIN $table_blocked ON b_jom_id = jom_id
-                    LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = YEAR(CURDATE())
-                    LEFT JOIN jom_kunena_users k ON k.userid = jom_id
+                    GROUP_CONCAT(DISTINCT m.group_id) AS group_ids,
+                    GROUP_CONCAT(DISTINCT concat(expire_date, ';', validity_type_id)) AS validities
+                FROM $table_person AS p
+                    JOIN $table_users AS u ON u.id = p.jom_id
+                    JOIN $table_user_usergroup_map m ON p.jom_id = m.user_id
+                    $dto_flight_join
+                    LEFT JOIN $table_logbook ON $logbook_condition
+                    LEFT JOIN $table_blocked ON b_jom_id = p.jom_id
+                    LEFT JOIN $table_membership_fees ON bkf_user = p.jom_id AND bkf_year = YEAR(CURDATE())
+                    LEFT JOIN jom_kunena_users AS k ON k.userid = p.jom_id
+                    left join rapcs_validity AS v ON v.jom_id = p.jom_id
                 WHERE m.group_id = $this->group AND block = 0  $fi_condition
-                GROUP BY jom_id
+                GROUP BY p.jom_id
                 ORDER BY last_name, first_name" ;
+
+//        if ($userId == 62) print("<pre>") . $sql . "</pre>" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
-                or journalise($userId, "F", "Erreur systeme a propos de l'access aux membres du groupe $this->group: " . mysqli_error($mysqli_link)) ;
+                or journalise($userId, "F", "Erreur système à propos de l'accès aux membres du groupe $this->group: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
         $this->row = mysqli_fetch_assoc($this->result) ;
     }
