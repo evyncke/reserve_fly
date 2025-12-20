@@ -72,6 +72,7 @@ require_once 'vendor/autoload.php'; // Ensure you have the Google and Facebook S
 
 use League\OAuth2\Client\Provider\Google;
 use Facebook\Facebook;
+use League\OAuth2\Client\Provider\LinkedIn;
 
 // session_start(); // Probably already started in mobile_header5.php or via dbi.php
 
@@ -89,14 +90,19 @@ $facebook = new Facebook([
     'default_graph_version' => 'v18.0',
 ]);
 
+// Initialize LinkedIn Client
+$linkedin = new LinkedIn([
+    'clientId' => $linkedin_client_id,
+    'clientSecret' => $linkedin_client_secret,
+    'redirectUri' => 'https://www.spa-aviation.be/resa/oauth.php',
+]);
+
 // Check whether  OAuth callback
 if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
-    // Is is Google or Facebook?
+    // Is is Google or Facebook or LinkedIn?
     if (isset($_SESSION['google_oauth2state']) and $_GET['state'] === $_SESSION['google_oauth2state']) {
         try {
-            $accessToken = $google->getAccessToken('authorization_code', [
-                'code' => $_GET['code']
-            ]);
+            $accessToken = $google->getAccessToken('authorization_code', ['code' => $_GET['code']]);
             if (isset($accessToken)) {
                 $googleUser = $google->getResourceOwner($accessToken);
                 journalise($userId, "I", "Google OAuth: user info obtained: google id = " . $googleUser->getId() . 
@@ -105,8 +111,8 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                 // Check if user exists with this google id or email
                 $query = "SELECT jom_id 
                     FROM $table_person AS p JOIN $table_users AS u ON p.jom_id = u.id
-                    WHERE u.block = 0 AND google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "' 
-                        OR p.email='" . mysqli_real_escape_string($mysqli_link, $googleUser->getEmail()) . "'";
+                    WHERE u.block = 0 AND (google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "' 
+                        OR p.email='" . mysqli_real_escape_string($mysqli_link, $googleUser->getEmail()) . "')";
                 $result = mysqli_query($mysqli_link, $query)
                     or journalise(0, "F", "Error querying for google user: " . mysqli_error($mysqli_link));
                 $row = mysqli_fetch_assoc($result);
@@ -128,6 +134,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                         " google_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
                         WHERE jom_id = $userId") 
                         or journalise($userId, "E", "Error updating google_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
+                    unset($_SESSION['google_oauth2state']); // Clear Google state
                     header("Location: https://www.spa-aviation.be/$callback", TRUE, 307);
                     exit;
                 } else {
@@ -139,8 +146,67 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
         } catch (Exception $e) {
             journalise(0, "E", 'Google OAuth Error: ' . $e->getMessage());
         }
+        unset($_SESSION['google_oauth2state']); // Clear Google state    
+    } // Is is Google or Facebook or LinkedIn?
+    else if (isset($_SESSION['linkedin_oauth2state']) and $_GET['state'] === $_SESSION['linkedin_oauth2state']) {
+        try {
+            $accessToken = $linkedin->getAccessToken('authorization_code', ['code' => $_GET['code']]);
+            if (isset($accessToken)) {
+                // Fetch the resource owner details w/o using the provider's built-in method as it does not work properly
+                $headers = [
+                    'Authorization: Bearer ' . $accessToken,
+                    'Content-Type: application/json',
+                ];
+                $ch = curl_init('https://api.linkedin.com/v2/userinfo');
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $response = curl_exec($ch);
+                $linkedInUser = json_decode($response, true);
+                journalise($userId, "I", "LinkedIn OAuth: user info obtained: linkedin id = " . $linkedInUser['sub'] .
+                    ", avatar = " . $linkedInUser['picture'] .
+                    ", email = " . $linkedInUser['email']) ;
+                // Check if user exists with this linkedin id or email
+                $query = "SELECT jom_id 
+                    FROM $table_person AS p JOIN $table_users AS u ON p.jom_id = u.id
+                    WHERE u.block = 0 AND (linkedin_id='" . mysqli_real_escape_string($mysqli_link, $linkedInUser['sub']) . "' 
+                        OR p.email='" . mysqli_real_escape_string($mysqli_link, $linkedInUser['email']) . "')";
+                $result = mysqli_query($mysqli_link, $query)
+                    or journalise(0, "F", "Error querying for linkedin user: " . mysqli_error($mysqli_link));
+                $row = mysqli_fetch_assoc($result);
+                if ($row) {   
+                    // User found, log them in
+                    $userId = $row['jom_id'];
+                    $joomla_user = JFactory::getUser($userId);
+                    $app = JFactory::getApplication('site');
+                    $session = JFactory::getSession();
+                    $session->set('user', $joomla_user);
+                    $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
+                    $joomla_user->save();
+                    $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
+                    $app->triggerEvent('onUserLogin', array(
+                        (array) $joomla_user,
+                        $options));
+                    journalise($userId, "I", "LinkedIn login for user id $userId (" . $linkedInUser['email'] . ") from $callback.") ;
+                    mysqli_query($mysqli_link, "UPDATE $table_person SET linkedin_id='" . mysqli_real_escape_string($mysqli_link, $linkedInUser['sub']) . "', " .
+                        " linkedin_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
+                        WHERE jom_id = $userId") 
+                        or journalise($userId, "E", "Error updating linkedin_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
+                    unset($_SESSION['linkedin_oauth2state']); // Clear LinkedIn state
+                    header("Location: https://www.spa-aviation.be/$callback", TRUE, 307);
+                    exit;
+                } else {
+                    journalise(0, "W", "No user found for LinkedIn id $linkedInUser[sub] or email $linkedInUser[email]") ;
+                    $connect_msg = "Aucun utilisateur n'a été trouvé pour votre compte LinkedIn via votre adresse email " . $linkedInUser['email'] . ". 
+                        Veuillez utiliser une autre méthode ou lier votre profil à votre compte LinkedIn via votre profil sur ce site onglet Réseaux Sociaux." ;
+                }
+            }
+        } catch (Exception $e) {
+            journalise(0, "E", 'LinkedIn OAuth Error: ' . $e->getMessage());
+        }
+        unset($_SESSION['linkedin_oauth2state']); // Clear LinkedIn state
     } else { // Assume Facebook
         if (isset($_SESSION['google_oauth2state'])) unset($_SESSION['google_oauth2state']); // Clear Google state if any
+        if (isset($_SESSION['linkedin_oauth2state'])) unset($_SESSION['linkedin_oauth2state']); // Clear LinkedIn state if any
         $helper = $facebook->getRedirectLoginHelper();
         try {
             $accessToken = $helper->getAccessToken();
@@ -151,8 +217,8 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                 // Check if user exists with this facebook id or email
                 $query = "SELECT jom_id 
                     FROM $table_person AS p JOIN $table_users AS u ON p.jom_id = u.id
-                    WHERE u.block = 0 AND facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "' 
-                        OR p.email='" . mysqli_real_escape_string($mysqli_link, $facebookUser['email']) . "'";
+                    WHERE u.block = 0 AND (facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "' 
+                        OR p.email='" . mysqli_real_escape_string($mysqli_link, $facebookUser['email']) . "')";
                 $result = mysqli_query($mysqli_link, $query)
                     or journalise(0, "F", "Error querying for facebook user: " . mysqli_error($mysqli_link));
                 $row = mysqli_fetch_assoc($result);
@@ -197,6 +263,10 @@ $googleAuthUrl = $google->getAuthorizationUrl();
 $_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 $facebookHelper = $facebook->getRedirectLoginHelper();
 $facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login_oauth.php', ['email','public_profile','user_link']);
+$linkedInAuthUrl = $linkedin->getAuthorizationUrl(['scope' => ['openid', 'profile', 'email']]);
+//$linkedInAuthUrl = $linkedin->getAuthorizationUrl(['scope' => ['r_liteprofile', 'r_emailaddress']]);
+
+$_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 
 ?>
 
@@ -229,12 +299,12 @@ $facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/res
 
     <div class="text-center">
         <p><b>OU</b> via:</p>
-        <a href="<?=$facebookAuthUrl?>" class="btn btn-primary"><i class="bi bi-facebook"></i> Facebook</a>
-        <a href="<?=$googleAuthUrl?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Google</a>
-    </div>
+        <a href="<?=$facebookAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-primary"><i class="bi bi-facebook"></i> Facebook</a>
+        <a href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Google</a>
+        <a href="<?=$linkedInAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><i class="bi bi-linkedin"></i> LinkedIn</a>
     <div class="row">
-        <p class="text-center text-muted mt-3">Les connexions via Google ou Facebook nécessitent que votre adresse email soit la même sur le système de réservation
-            et sur Facebook ou Google (trivial si votre email est ...@gmail.com).
+        <p class="text-center text-muted mt-3">Les connexions via Google, Facebook, ou LinkedIn nécessitent que votre adresse email soit la même sur le système de réservation
+            et sur Facebook ou Google (trivial si votre email est ...@gmail.com) ou LinkedIn.
             Si ce n'est pas le cas, veuillez utiliser la connexion classique et lier votre compte via votre profil sur ce site onglet Réseaux Sociaux.</p>
     </div><!-- row -->   
 </div> <!-- container -->

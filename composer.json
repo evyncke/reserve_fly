@@ -1,6 +1,7 @@
 {
     "require": {
         "facebook/graph-sdk": "^5.1",
-        "league/oauth2-google": "^4.1"
+        "league/oauth2-google": "^4.1",
+        "league/oauth2-linkedin": "^5.1"
     }
 }
