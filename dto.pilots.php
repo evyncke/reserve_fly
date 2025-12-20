@@ -92,30 +92,36 @@ $sql_now = date('Y-m-d') ;
             $daysColor = 'text-bg-warning' ;
         else
             $daysColor = 'text-bg-danger' ;
-        if (isset($pilot->validities[2]) and $pilot->validities[2] != '0000-00-00') {
-            $medical_date = $pilot->validities[2] ;
+        if (isset($pilot->validitiesDates[2]) and $pilot->validitiesDates[2] != '0000-00-00') {
+            $medical_date = $pilot->validitiesDates[2] ;
             if ($medical_date <= $sql_now)
-                $medical = "<span class=\"text-danger\">Médical expiré le $medical_date</span>" ;
+                $medical = "<span class=\"text-danger\">Médical expiré le $medical_date</span>
+                    <span class=\"badge text-bg-danger\" title=\"Jours depuis expiration\"><i class=\"bi bi-calendar3\"></i> " . $pilot->validitiesDaysLeft[2] . "</span>";
             else
-                $medical = "Médical valide jusqu'au $medical_date" ;
+                $medical = "Médical valide jusqu'au $medical_date
+                    <span class=\"badge text-bg-info\" title=\"Jours avant expiration\"><i class=\"bi bi-calendar3\"></i> " . $pilot->validitiesDaysLeft[2] . "</span>";
         } else  {
             $medical = '<span class="text-warning">Médical non-spécifié</span>' ;
         }
-        if (isset($pilot->validities[4]) and $pilot->validities[4] != '0000-00-00') {
-            $elp_date = $pilot->validities[4] ;
+        if (isset($pilot->validitiesDates[4]) and $pilot->validitiesDates[4] != '0000-00-00') {
+            $elp_date = $pilot->validitiesDates[4] ;
             if ($elp_date <= $sql_now)
-                $elp = "<span class=\"text-danger\">ELP expiré le $elp_date</span>" ;
+                $elp = "<span class=\"text-danger\">ELP expiré le $elp_date</span>
+                    <span class=\"badge text-bg-danger\" title=\"Jours depuis expiration\"><i class=\"bi bi-calendar3\"></i> " . $pilot->validitiesDaysLeft[4] . "</span>" ;
             else
-                $elp = "ELP valide jusqu'au $elp_date" ;
+                $elp = "ELP valide jusqu'au $elp_date
+                    <span class=\"badge text-bg-info\" title=\"Jours avant expiration\"><i class=\"bi bi-calendar3\"></i> " . $pilot->validitiesDaysLeft[4] . "</span>" ;
         } else  {
             $elp = '<span class="text-warning">ELP non-spécifié</span>' ;
         }
-        if (isset($pilot->validities[1]) and $pilot->validities[1] != '0000-00-00') {
-            $sep_date = $pilot->validities[1] ;
+        if (isset($pilot->validitiesDates[1]) and $pilot->validitiesDates[1] != '0000-00-00') {
+            $sep_date = $pilot->validitiesDates[1] ;
             if ($sep_date <= $sql_now)
-                $sep = "<span class=\"text-danger\">SEP expiré le $sep_date</span>" ;
+                $sep = "<span class=\"text-danger\">SEP expiré le $sep_date</span>
+                    <span class=\"badge text-bg-danger\" title=\"Jours depuis expiration\"><i class=\"bi bi-calendar3\"></i> " . $pilot->validitiesDaysLeft[1] . "</span>" ;
             else
-                $sep = "SEP valide jusqu'au $sep_date" ;
+                $sep = "SEP valide jusqu'au $sep_date
+                    <span class=\"badge text-bg-info\" title=\"Jours avant expiration\"><i class=\"bi bi-calendar3\"></i> " . $pilot->validitiesDaysLeft[1] . "</span>" ;
         } else  {
             $sep = '<span class="text-warning">SEP non-spécifié</span>' ;
         }

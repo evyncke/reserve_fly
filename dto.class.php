@@ -54,7 +54,8 @@ class DTOMember {
     public $lastFlight ;
     public $countFlights ;
     public $daysSinceLastFlight ;
-    public $validities = array() ;
+    public $validitiesDates = array() ;
+    public $validitiesDaysLeft = array() ;
 
 
     function __construct($row = NULL) {
@@ -89,8 +90,9 @@ class DTOMember {
             if (isset($row['validities']) and $row['validities'] != '') {
                 $validities = explode(',', $row['validities']) ;
                 foreach($validities as $validity) {
-                    list($expire_date, $validity_type_id) = explode(';', $validity) ;
-                    $this->validities[$validity_type_id] = $expire_date ;
+                    list($expire_date, $validity_type_id, $days_since_expiry) = explode(';', $validity) ;
+                    $this->validitiesDates[$validity_type_id] = $expire_date ;
+                    $this->validitiesDaysLeft[$validity_type_id] = -$days_since_expiry ;
                 }
             }
         }
@@ -99,7 +101,7 @@ class DTOMember {
     function getById($jom_id) {
         global $mysqli_link, $table_blocked, $table_person, $table_user_usergroup_map, $table_membership_fees, $userId;
 
-        $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS group_ids 
+        $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(DISTINCT m.group_id) AS group_ids 
                 FROM $table_person
                 LEFT JOIN $table_blocked ON b_jom_id = jom_id
                 JOIN $table_user_usergroup_map m ON jom_id = m.user_id  
@@ -113,17 +115,15 @@ class DTOMember {
     }
 
     function isStudent() {
-        // TODO: oversimplistic... should explode on ',' then look if exit in array
         global $joomla_student_group ;
 
-        return strpos($this->groupMembership, $joomla_student_group) !== FALSE ;
+        return in_array($joomla_student_group, explode(',', $this->groupMembership)) ;  
     }
 
     function isPilot() {
-        // TODO: oversimplistic... should explode on ',' then look if exit in array
         global $joomla_pilot_group ;
 
-        return strpos($this->groupMembership, $joomla_pilot_group) !== FALSE ;
+        return in_array($joomla_pilot_group, explode(',', $this->groupMembership)) ;
     }
 }
 
@@ -175,7 +175,7 @@ class DTOMembers implements Iterator {
         $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(DISTINCT l_start) AS count_flights, 
                     MIN(DATEDIFF(SYSDATE(), DATE(l_start))) AS days_since_last_flight,
                     GROUP_CONCAT(DISTINCT m.group_id) AS group_ids,
-                    GROUP_CONCAT(DISTINCT concat(expire_date, ';', validity_type_id)) AS validities
+                    GROUP_CONCAT(DISTINCT concat(expire_date, ';', validity_type_id, ';', DATEDIFF(SYSDATE(), expire_date))) AS validities
                 FROM $table_person AS p
                     JOIN $table_users AS u ON u.id = p.jom_id
                     JOIN $table_user_usergroup_map m ON p.jom_id = m.user_id
