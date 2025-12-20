@@ -103,11 +103,10 @@ function displayPlane($id) {
 	print("<tr><td colspan=\"5\" class=\"table-active text-center text-bg-success\"><b>$id</b></td></tr>
 		</tbody><tbody class=\"table-group-divider\">\n") ;
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.name as iname, i.cell_phone as icell_phone, i.jom_id as iid,
-		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.name as pname, pi.cell_phone as pcell_phone, pi.jom_id as pid
+		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.name as pname, pi.cell_phone as pcell_phone, pi.jom_id as pid, pi.gravatar as avatar
 		FROM $table_planes p 
         LEFT JOIN $table_bookings b ON b.r_plane = p.id
 		LEFT JOIN $table_person pi ON pi.jom_id = b.r_pilot
-		LEFT JOIN jom_kunena_users k ON k.userid = b.r_pilot
 		LEFT JOIN $table_person i ON i.jom_id = b.r_instructor		
 		LEFT JOIN $table_flights fl ON b.r_id = f_booking
 		WHERE  p.id = '$id' AND r_cancel_date IS NULL AND 

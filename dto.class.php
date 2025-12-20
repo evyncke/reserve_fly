@@ -75,10 +75,10 @@ class DTOMember {
             $this->blockedMessage = db2web($row['b_reason']) ;
             $this->membershipPaid = ($row['bkf_payment_date'] != '') ;
             $this->groupMembership = $row['group_ids'] ;
-            if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
-                $this->picture = $avatar_root_resized_uri . '/' . $row['avatar'] ;
-            elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
+            if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
                 $this->picture = $avatar_root_uri . '/' . $row['avatar'] ;
+            elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
+                $this->picture = $avatar_root_resized_uri . '/' . $row['avatar'] ;
             else
                 $this->picture = 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($row['email']))) . '?s=80&d=blank&r=pg'  ; // Hash for gravatar ;
             if (isset($row['first_flight']) and $row['first_flight'] != '') { // Depending on how the DTOMember is created (listing all students or via a DTOMmember.getById() some columns are not present
@@ -106,7 +106,6 @@ class DTOMember {
                 LEFT JOIN $table_blocked ON b_jom_id = jom_id
                 JOIN $table_user_usergroup_map m ON jom_id = m.user_id  
                 LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = YEAR(CURDATE())
-                LEFT JOIN jom_kunena_users k ON k.userid = jom_id
                 WHERE jom_id = $jom_id")
             or journalise($userId, "F", "Cannot read from $table_person for $jom_id: " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
@@ -172,7 +171,8 @@ class DTOMembers implements Iterator {
             case $joomla_pilot_group: $logbook_condition = 'jom_id = l_pilot' ; $dto_flight_join = '' ; break ;
             default: journalise($userId, "F", "DTOMembers instantiated with unknown group $this->group") ;
         }
-        $sql = "SELECT *, MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(DISTINCT l_start) AS count_flights, 
+        $sql = "SELECT *, p.jom_id AS jom_id, 
+                    MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(DISTINCT l_start) AS count_flights, 
                     MIN(DATEDIFF(SYSDATE(), DATE(l_start))) AS days_since_last_flight,
                     GROUP_CONCAT(DISTINCT m.group_id) AS group_ids,
                     GROUP_CONCAT(DISTINCT concat(expire_date, ';', validity_type_id, ';', DATEDIFF(SYSDATE(), expire_date))) AS validities
@@ -183,13 +183,12 @@ class DTOMembers implements Iterator {
                     LEFT JOIN $table_logbook ON $logbook_condition
                     LEFT JOIN $table_blocked ON b_jom_id = p.jom_id
                     LEFT JOIN $table_membership_fees ON bkf_user = p.jom_id AND bkf_year = YEAR(CURDATE())
-                    LEFT JOIN jom_kunena_users AS k ON k.userid = p.jom_id
-                    left join rapcs_validity AS v ON v.jom_id = p.jom_id
+                    LEFT JOIN $table_validity AS v ON v.jom_id = p.jom_id
                 WHERE m.group_id = $this->group AND block = 0  $fi_condition
                 GROUP BY p.jom_id
                 ORDER BY last_name, first_name" ;
 
-//        if ($userId == 62) print("<pre>") . $sql . "</pre>" ;
+        // if ($userId == 62) print("<pre>") . $sql . "</pre>" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
                 or journalise($userId, "F", "Erreur système à propos de l'accès aux membres du groupe $this->group: " . mysqli_error($mysqli_link)) ;
         $this->count = mysqli_num_rows($this->result) ;
@@ -286,7 +285,7 @@ class Flight {
         global $mysqli_link, $table_dto_flight, $table_logbook, $table_person, $userId ;
 
         $result = mysqli_query($mysqli_link, "SELECT *, DATE(l_start) AS date,
-                    s.last_name AS s_last_name, s.first_name AS s_first_name, 
+                    s.last_name AS s_last_name, s.first_name AS s_first_name, s.avatar as avatar,
                     fi.last_name AS fi_last_name, fi.first_name AS fi_first_name,
                     who.last_name AS who_last_name, who.first_name AS who_first_name,
                     60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration,
@@ -296,7 +295,6 @@ class Flight {
                     JOIN $table_logbook ON df_flight_log = l_id
                     LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
                     LEFT JOIN $table_person who ON df_who = who.jom_id
-                    LEFT JOIN jom_kunena_users k ON k.userid = df_student
                 WHERE df_id = $id")
             or journalise($userId, "F", "Cannot read from $table_dto_flight for flight $id: " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
@@ -308,7 +306,7 @@ class Flight {
         global $mysqli_link, $table_dto_flight, $table_logbook, $table_person, $userId ;
 
         $result = mysqli_query($mysqli_link, "SELECT *, DATE(l_start) AS date,
-                    s.last_name AS s_last_name, s.first_name AS s_first_name, 
+                    s.last_name AS s_last_name, s.first_name AS s_first_name, s.avatar as avatar,
                     fi.last_name AS fi_last_name, fi.first_name AS fi_first_name, 
                     who.last_name AS who_last_name, who.first_name AS who_first_name,
                     60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration,
@@ -318,7 +316,6 @@ class Flight {
                     JOIN $table_logbook ON df_flight_log = l_id
                     LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
                     LEFT JOIN $table_person who ON df_who = who.jom_id
-                    LEFT JOIN jom_kunena_users k ON k.userid = df_student
                 WHERE l_instructor = $fi
                 ORDER BY l_start DESC
                 LIMIT 1")
@@ -374,7 +371,7 @@ class Flights implements Iterator {
         if (!$studentId) return ;
         $this->studentId = $studentId ; 
         $sql = "SELECT *, DATE(l_start) AS date,
-                s.last_name AS s_last_name, s.first_name AS s_first_name,
+                s.last_name AS s_last_name, s.first_name AS s_first_name, s.avatar as avatar,
                 fi.last_name AS fi_last_name, fi.first_name AS fi_first_name,
                 who.last_name AS who_last_name, who.first_name AS who_first_name,
                 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration,
@@ -384,7 +381,6 @@ class Flights implements Iterator {
                 JOIN $table_logbook ON df_flight_log = l_id
                 LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
                 LEFT JOIN $table_person who ON df_who = who.jom_id
-                LEFT JOIN jom_kunena_users k ON k.userid = df_student
             WHERE df_student = $this->studentId
             ORDER BY df_student_flight" ;
         $this->result = mysqli_query($mysqli_link, $sql) 
@@ -399,7 +395,7 @@ class Flights implements Iterator {
         $this->studentId = NULL; 
         if ($this->result) mysqli_free_result($this->result) ;
         $sql = "SELECT *, DATE(l_start) AS date,
-                s.last_name AS s_last_name, s.first_name AS s_first_name,
+                s.last_name AS s_last_name, s.first_name AS s_first_name, s.avatar as avatar,
                 fi.last_name AS fi_last_name, fi.first_name AS fi_first_name,
                 who.last_name AS who_last_name, who.first_name AS who_first_name,
                 60 * (l_end_hour - l_start_hour) + l_end_minute - l_start_minute AS duration,
@@ -409,7 +405,6 @@ class Flights implements Iterator {
                 JOIN $table_logbook ON df_flight_log = l_id
                 LEFT JOIN $table_person fi ON l_instructor = fi.jom_id
                 LEFT JOIN $table_person who ON df_who = who.jom_id
-                LEFT JOIN jom_kunena_users k ON k.userid = df_student
             WHERE l_instructor = $fiId AND df_when = l_audit_time
             ORDER BY df_when DESC" ;
         $this->result = mysqli_query($mysqli_link, $sql) 

@@ -163,10 +163,10 @@ $ical_name = "My club calendar" ; // Name of the iCAL calendar
 $ical_organizer = "My flighht club" ; // Name of the organizer for iCAL calendar
 
 // More Joomla dependencies
-$avatar_root_resized_uri = "https://www.example.org/media/kunena/avatars/resized/size144" ;
-$avatar_root_resized_directory = "media/kunena/avatars/resized/size144" ;
-$avatar_root_uri = "https://www.example.org/media/kunena/avatars" ;
-$avatar_root_directory = "media/kunena/avatars" ;
+$avatar_root_resized_uri = "https://www.example.org/resa/images/members/resized/size144" ;
+$avatar_root_resized_directory = "resa/images/members/resized/size144" ;
+$avatar_root_uri = "https://www.example.org/resa/images/members" ;
+$avatar_root_directory = "resa/images/members" ;
 
 // Table names
 

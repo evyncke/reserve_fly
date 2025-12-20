@@ -3,6 +3,7 @@ facebook-sdk-*/
 font/*
 PHPExcel/
 vendor/
+images/members
 PHPExcel.php
 Mobile_Detect.php
 .htaccess

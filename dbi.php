@@ -266,10 +266,10 @@ $ical_name = "Calendrier réservations et événements RAPCS" ; // Name of the i
 $ical_organizer = "RAPCS asbl" ; // Name of the organizer of the iCAL calendar
 
 // More Joomla dependencies
-$avatar_root_resized_uri = "https://www.spa-aviation.be/media/kunena/avatars/resized/size144" ;
-$avatar_root_resized_directory = "media/kunena/avatars/resized/size144" ;
-$avatar_root_uri = "https://www.spa-aviation.be/media/kunena/avatars" ;
-$avatar_root_directory = "media/kunena/avatars" ;
+$avatar_root_resized_uri = "https://www.spa-aviation.be/resa/images/members/resized/size144" ;
+$avatar_root_resized_directory = "resa/images/members/resized/size144" ;
+$avatar_root_uri = "https://www.spa-aviation.be/resa/images/members" ;
+$avatar_root_directory = "resa/images/members" ;
 
 // Aircraft Technical Log variables
 $atl_uploadfiles_path = "ATL/upload";

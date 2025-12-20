@@ -51,7 +51,7 @@ if ($error_message != '') {
 		CONVERT_TZ(l_start, 'UTC', 'Europe/Brussels') as log_start, CONVERT_TZ(l_end, 'UTC', 'Europe/Brussels') as log_end, 
 		l_from as log_from, l_to as log_to, l_id as log_id, l.l_pilot as log_pilot, l.l_instructor as log_instructor, l.l_plane as log_plane,
 		b_reason AS blocked_reason, b_when AS blocked_date
-		FROM $table_bookings JOIN $table_planes AS r ON r_plane = r.id JOIN $table_users AS p ON r_pilot = p.id JOIN jom_kunena_users k ON k.userid = r_pilot
+		FROM $table_bookings JOIN $table_planes AS r ON r_plane = r.id JOIN $table_users AS p ON r_pilot = p.id
 		LEFT JOIN $table_logbook AS l ON l.l_booking = r_id
 		LEFT JOIN $table_blocked ON b_jom_id = p.id,
 		$table_users AS w, $table_person
