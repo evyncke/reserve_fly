@@ -43,6 +43,7 @@ if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
     if ($result_login) {
         header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
         $joomla_user = JFactory::getUser() ;
+        $app = JFactory::getApplication('site');
         $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
         $joomla_user->save();
         $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
@@ -301,6 +302,7 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
         <p><b>OU</b> via:</p>
         <a href="<?=$facebookAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-primary"><i class="bi bi-facebook"></i> Facebook</a>
         <a href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Google</a>
+        <a href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Gmail</a>
         <a href="<?=$linkedInAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><i class="bi bi-linkedin"></i> LinkedIn</a>
     <div class="row">
         <p class="text-center text-muted mt-3">Les connexions via Google, Facebook, ou LinkedIn nécessitent que votre adresse email soit la même sur le système de réservation
