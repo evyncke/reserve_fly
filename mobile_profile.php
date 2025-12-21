@@ -55,7 +55,6 @@ $change_profile_message = '' ;
 $result = mysqli_query($mysqli_link, "SELECT *,u.username as username,u.email as email, date(p.birthdate) as birthdate
 	FROM $table_person p 
 		JOIN $table_users u on p.jom_id = u.id 
-		LEFT JOIN jom_kunena_users k on k.userid=u.id
 		LEFT JOIN $table_company_member AS cm ON cm.cm_member = $displayed_id
         LEFT JOIN $table_company AS c ON c.c_id = cm.cm_company
 	WHERE u.id = $displayed_id") or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
@@ -193,8 +192,8 @@ if (isset($_POST['action']) and $_POST['action'] == 'photo' and !$read_only) {
 		}
 	}
 	// Update the kunena line for this user
-	mysqli_query($mysqli_link, "update jom_kunena_users set avatar = 'users/avatar$displayed_id.$image_filetype' where userid = $displayed_id")
-                        or journalise($userId, "F", "Erreur systeme lors de la mise a jour de jom_kunena_users (avatar): " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "update $table_person set avatar = 'avatar$displayed_id.$image_filetype' where jom_id = $displayed_id")
+                        or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_person (avatar): " . mysqli_error($mysqli_link)) ;
 	if ($affected_rows > 0) 
 		journalise($userId, 'I', "Changement de photo($me[username]/$displayed_id)") ;
 }
@@ -227,15 +226,20 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'social' and !$read_on
 	$facebook = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['facebook'])) ;
 	$linkedin = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['linkedin'])) ;
 	$twitter = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['twitter'])) ;
-	$skype = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['skype'])) ;
-	// Do some sanity checks on the URL
-	mysqli_query($mysqli_link, "update jom_kunena_users set facebook='$facebook', twitter='$twitter', linkedin='$linkedin', skype='$skype'
-		where userid = $displayed_id")
-		or journalise($userId, "F", "Erreur systeme lors de la mise a jour de jom_kunena_users: " . mysqli_error($mysqli_link)) ;
-	$affected_rows += mysqli_affected_rows($mysqli_link) ;
-	$change_profile_message .= ($affected_rows > 0) ? "Changement(s) effectu&eacute;(s).<br/>" : "Aucun changement effectu&eacute;.<br/>" ;
+	$affected_rows = 0 ;
+	foreach (array('facebook', 'linkedin', 'twitter') as $social_network) {
+		$profile = ${$social_network} ;
+		if ($profile != '' ) {
+			mysqli_query($mysqli_link, "INSERT INTO $table_social(s_jom_id, s_network, s_profile)
+				VALUES($displayed_id, '$social_network', '$profile')
+				ON DUPLICATE KEY UPDATE s_profile='$profile'")
+				or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_social: " . mysqli_error($mysqli_link)) ;
+			$affected_rows += mysqli_affected_rows($mysqli_link) ;
+		}
+	}
+	$change_profile_message .= ($affected_rows > 0) ? "Changement(s) effectué(s).<br/>" : "Aucun changement effectué.<br/>" ;
 	if ($affected_rows > 0) 
-		journalise($userId, 'I', "Changement de profil($me[username]/$displayed_id): facebook: $facebook, twitter: $twitter, linkedin: $linkedin, skype: $skype") ;
+		journalise($userId, 'I', "Changement de profil($me[username]/$displayed_id): facebook: $facebook, twitter: $twitter, linkedin: $linkedin") ;
 }
 
 // Apply any change on validity before fetching all displayed_id information
@@ -351,19 +355,30 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'alt_contact' and !$re
 }
 
 // Fetch AGAIN all information about the user since they may have been modified by the above...
-$result = mysqli_query($mysqli_link, "SELECT *,u.username as username,u.email as email, date(p.birthdate) as birthdate
+$result = mysqli_query($mysqli_link, "SELECT *,u.username as username,u.email as email, date(p.birthdate) as birthdate,
+		GROUP_CONCAT(CONCAT(s_network, '-', s_profile) SEPARATOR ';') AS social_networks
 	FROM $table_person p 
 		JOIN $table_users u on p.jom_id = u.id 
-		LEFT JOIN jom_kunena_users k on k.userid=u.id
+		LEFT JOIN $table_social s ON s.s_jom_id = u.id
 		LEFT JOIN $table_company_member AS cm ON cm.cm_member = $displayed_id
         LEFT JOIN $table_company AS c ON c.c_id = cm.cm_company
-	WHERE u.id = $displayed_id") or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
+	WHERE u.id = $displayed_id
+	GROUP BY u.id") 
+		or journalise($userId, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) or journalise($userId, "F", "Utilisateur inconnu") ;
 $me['name'] = db2web($me['name']) ; 
 $me['username'] = db2web($me['username']) ; 
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
 $me['cell_phone'] = canonicalizePhone($me['cell_phone']) ;
+foreach(explode(';', $me['social_networks']) as $social_network) {
+	if (strpos($social_network, '-') === FALSE) continue ;
+	list($network, $profile) = explode('-', $social_network, 2) ;
+	$social_networks[$network] = $profile ;
+}
+$me['facebook'] = (isset($social_networks['facebook'])) ? $social_networks['facebook'] : '';
+$me['linkedin'] = (isset($social_networks['linkedin'])) ? $social_networks['linkedin'] : '';
+$me['twitter'] = (isset($social_networks['twitter'])) ? $social_networks['twitter'] : '';
 if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information only for admins & FI
 	$me['address'] = db2web($me['address']) ; 
 	$me['zipcode'] = db2web($me['zipcode']) ; 
@@ -771,7 +786,6 @@ if ($user_only) {
 <?php
 $facebook_img = ($me['facebook'] != '') ? "<a href=\"https://www.facebook.com/$me[facebook]\" target=\"_blank\"><img src=\"images/facebook_blue_100.png\" width=\”15\" height=\"15\"></a>\n" : '' ;
 $linkedin_img = ($me['linkedin'] != '') ? "<a href=\"https://www.linkedin.com/in/$me[linkedin]\" target=\"_blank\"><img src=\"images/linkedin.jpg\"></a>\n" : "" ;
-$skype_img = ($me['skype'] != '') ? "<a href=\"skype:$me[skype]\"><img src=\"images/skype.png\"></a>\n" : "" ;
 $twitter_img = ($me['twitter'] != '') ? "<a href=\"https://www.twitter.com/$me[twitter]\" target=\"_blank\"><img src=\"images/twitter.jpg\"></a>\n" : '' ;
 ?>
 <input type="hidden" name="action" value="social">
@@ -785,10 +799,6 @@ $twitter_img = ($me['twitter'] != '') ? "<a href=\"https://www.twitter.com/$me[t
 	<label for="linkedinId" class="col-form-label col-sm-2 col-md-1">LinkedIn <?=$linkedin_img?>:</label>
 	<span class="input-group-text">https://www.linkedin.com/in/</span>
 	<input type="text" class="form-control" name="linkedin" id="linkedinId" value="<?=$me['linkedin']?>" placeholder="Ce qui suit https://www.linkedin.com/in/ sur votre profil"<?=$read_only_attribute?>>
-</div> <!-- input-group -->
-<div class="input-group mb-3">
-	<label for="skypeId" class="col-form-label col-sm-2 col-md-1">Skype <?=$skype_img?>:</label>
-	<input type="text" class="form-control" name="skype" id="skypeId" value="<?=$me['skype']?>" <?=$read_only_attribute?>>
 </div> <!-- input-group -->
 <div class="input-group mb-3">
 	<label for="twitterId" class="col-form-label col-sm-2 col-md-1">Twitter <?=$twitter_img?>:</label>

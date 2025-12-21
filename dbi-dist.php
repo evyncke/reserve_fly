@@ -191,6 +191,7 @@ $table_flights_pilots = 'rapcs_flights_pilots' ;
 $table_pax = 'rapcs_pax' ;
 $table_pax_role = 'rapcs_pax_role' ;
 $table_news = 'rapcs_news' ;
+$table_social = 'rapcs_social' ;
 
 // Joomla specific table names
 $table_user_usergroup_map = 'jom_user_usergroup_map' ;

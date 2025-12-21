@@ -321,6 +321,7 @@ $table_device = 'rapcs_device' ;
 $table_device_doc = 'rapcs_device_doc' ;
 $table_plane_device = 'rapcs_plane_device' ;
 $table_planes_pics = 'rapcs_planes_pics' ;
+$table_social = 'rapcs_social' ;
 
 // Joomla specific table names
 $table_user_usergroup_map = 'jom_user_usergroup_map' ;
