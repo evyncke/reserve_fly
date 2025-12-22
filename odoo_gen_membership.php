@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2024 Eric Vyncke
+   Copyright 2023-2025 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -53,6 +53,20 @@ la base des membres Joomla n'ayant pas encore reçu de factures pour l'année <?
 </thead>
 <tbody class="table-divider">
 <?php    
+// First let's count the number of members
+$sql = "SELECT *
+        FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
+        JOIN $table_person AS p ON u.id=p.jom_id
+        WHERE group_id IN ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
+        AND u.block = 0 
+        GROUP BY p.jom_id" ;
+
+$result_count = mysqli_query($mysqli_link, $sql)
+            or journalise(0, "F", "Cannot count members: " . mysqli_error($mysqli_link)) ;
+$members_count = mysqli_num_rows($result_count) ;
+mysqli_free_result($result_count) ;
+
+// Now let's get the invoiced/paid fees
 $sql = "SELECT bkf_payment_date, COUNT(*) AS n, SUM(bkf_amount) AS s, GROUP_CONCAT(last_name ORDER BY last_name SEPARATOR ', ') AS names
     FROM $table_membership_fees JOIN $table_person ON bkf_user = jom_id
     WHERE bkf_year = '$membership_year'
@@ -78,6 +92,7 @@ while ($row = mysqli_fetch_array($result)) {
 </tbody>
 <tfoot class="table-divider">
     <tr class="table-info"><td>Total factures payées</td><td class="text-end"><?=$fees_count?></td><td class="text-end"><?=number_format($fees_total, 0, ',', '.')?> &euro;</td></tr>
+    <tr class="table-info"><td>Total membres</td><td class="text-end"><?=$members_count?></td><td></td></tr>
 </tfoot>
 </table>
 <p class="small">Laissez la souris quelques secondes sur une date pour visualiser qui a payé à cette date.</p>
@@ -89,31 +104,13 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require_once 'odoo.class.php' ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 
-
-// TODO
-// Don't invoice Joomla desactivated account
-// Partial fee after June
-// Eric = 62, Patrick = 66, Dominique = 348, Alain = 92, Bernard= 306,  Davin/élève 439, Gobron 198, René 353
-if (false) {
-    $jom_ids = "62, 66, 348, 92, 353, 439";
-    $jom_ids = "62, 66" ;
-    $jom_ids = "66" ;
-    $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS allgroups
-        FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id
+$sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS allgroups
+        FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
         JOIN $table_person AS p ON u.id=p.jom_id
-        WHERE p.jom_id IN ($jom_ids) 
+        WHERE group_id IN ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
         AND u.block = 0
         AND NOT EXISTS (SELECT * FROM $table_membership_fees AS f WHERE f.bkf_user = p.jom_id and f.bkf_year = '$membership_year')
         GROUP BY id";
-} else {
-    $sql = "SELECT u.id AS id, last_name, first_name, odoo_id, GROUP_CONCAT(group_id) AS allgroups
-            FROM $table_users AS u JOIN $table_user_usergroup_map ON u.id=user_id 
-            JOIN $table_person AS p ON u.id=p.jom_id
-            WHERE group_id IN ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
-            AND u.block = 0
-            AND NOT EXISTS (SELECT * FROM $table_membership_fees AS f WHERE f.bkf_user = p.jom_id and f.bkf_year = '$membership_year')
-            GROUP BY id";
-}				
 
 $result_members = mysqli_query($mysqli_link, $sql)
 			or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
