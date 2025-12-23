@@ -29,9 +29,6 @@ if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	if (! is_numeric($displayed_id)) journalise($userId, "F", "Numero d'utilisateur invalide: $displayed_id") ;
 	$read_only = ! ($userIsBoardMember or $userIsInstructor or $displayed_id == $userId) ;
 	$user_only = ($displayed_id == $userId) ;
-	if ($displayed_id != $userId)
-		mysqli_query($mysqli_link, "UPDATE jom_kunena_users SET uhits = uhits + 1 WHERE userid = $displayed_id")
-			or journalise($userId, "E", "Erreur systeme lors de la mise a jour de jom_kunena_users (uhits): " . mysqli_error($mysqli_link)) ;
 } else {
 	$displayed_id = $userId ;
 	$read_only = false ;
@@ -191,7 +188,7 @@ if (isset($_POST['action']) and $_POST['action'] == 'photo' and !$read_only) {
 			case IMAGETYPE_PNG: imagepng($new_image, "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/users/avatar$displayed_id.png") ; $image_filetype = 'png' ; break ;
 		}
 	}
-	// Update the kunena line for this user
+	// Update the avatar for this user
 	mysqli_query($mysqli_link, "update $table_person set avatar = 'avatar$displayed_id.$image_filetype' where jom_id = $displayed_id")
                         or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_person (avatar): " . mysqli_error($mysqli_link)) ;
 	if ($affected_rows > 0) 
