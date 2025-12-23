@@ -28,15 +28,13 @@ function resize($img, $width, $height, $size) {
 }
 
 $result = mysqli_query($mysqli_link, "SELECT * 
-	FROM jom_kunena_users k 
-		JOIN $table_person p ON p.jom_id = k.userid 
-		JOIN jom_users j ON j.id = k.userid
-	WHERE k.avatar IS NOT NULL AND p.odoo_id IS NOT NULL")
-//	WHERE k.avatar IS NOT NULL AND p.odoo_id IS NOT NULL AND j.block = 0 AND k.avatar NOT LIKE '%.jp%g'")
+	FROM $table_person p 
+		JOIN jom_users j ON j.id = p.jom_id
+	WHERE p.avatar IS NOT NULL AND p.odoo_id IS NOT NULL AND j.block = 0")
 	or print(mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
 	print("Processing #$row[jom_id], " . db2web($row['name']) . ": $row[avatar]\n") ;
-	$fname = '../media/kunena/avatars/' . $row['avatar'] ;
+	$fname = "$avatar_root_directory/$row[avatar]" ;
 	// TODO process gravatars ! https://www.gravatar.com/avatar/" . md5(strtolower(trim($row['email']))) . "?s=200&d=blank&r=pg\"
 	if (!file_exists($fname)) {
 		print("Skipping, file $fname does not exist.\n") ;
