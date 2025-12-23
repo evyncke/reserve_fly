@@ -339,24 +339,13 @@ function checkFields() {
         value=document.getElementById("id_courstheorique").value;
     	if(value=="") return false;
 	}
-	else {
-		document.getElementById("id_qualification_row").style.display="none";
-		document.getElementById("id_licence_row").style.display="none";
- 		document.getElementById("id_validitemedicale_row").style.display="none";
-		document.getElementById("id_validiteelp_row").style.display="none";
- 		document.getElementById("id_courstheorique_row").style.display="none";
-	}
 
     value=document.getElementById("id_cotisation").value;
     if(value=="") return false;
 
  	if(typemembre!="nonnaviguant") {
-		document.getElementById("id_caution_row").style.display="none";
 		value=document.getElementById("id_caution").value;
     	if(value=="") return false;
-	}
-	else {
-		document.getElementById("id_caution_row").style.display="none";
 	}
 
     value=document.getElementById("id_dateinscription").value;

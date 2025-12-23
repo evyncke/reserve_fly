@@ -2084,7 +2084,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
      //3. Insert the new member in the table $table_users = 'jom_users' (Name, username,...)
     $sql= "INSERT INTO $table_users (name, username, email, password, registerDate, params)
 		    VALUES ('$fullName', '$username', '$email', '$hashPassword', '$registerDate', '$params')";
-    print("OF_CreateNewMember:$sql<br>");
+    //print("OF_CreateNewMember:$sql<br>");
     if($insertFlag) {
        $result = mysqli_query($mysqli_link, $sql)
     	or journalise($userId, "E", "Cannot insert into $table_users: " . mysqli_error($mysqli_link)) ;
@@ -2098,7 +2098,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     //4. Insert the new member in the table $table_person = 'rapcs_person' (Name, address, contact, ...)
     $sql= "INSERT INTO $table_person (jom_id, name, first_name, last_name, email, address, zipcode, city, country, cell_phone, lang, birthdate, contact_name, contact_relationship, contact_phone,contact_email)
 		    VALUES ($jom_id, '$username', '$prenom', '$nom', '$email','$adresse', '$codepostal', '$ville', '$pays', '$telephone', 'francais','$datenaissance', '$contactnom','$contactlien', '$contactphone' ,'$contactmail')";
-    print("OF_CreateNewMember:$sql<br>");
+    //print("OF_CreateNewMember:$sql<br>");
     if($insertFlag) {
        $result = mysqli_query($mysqli_link, $sql)
     	or journalise($userId, "E", "Cannot insert into $table_person : " . mysqli_error($mysqli_link)) ;
@@ -2108,7 +2108,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     // Insert like a member
     $sql= "INSERT INTO $table_user_usergroup_map (user_id, group_id)
 		    VALUES($jom_id, $joomla_member_group)";
-    print("OF_CreateNewMember:$sql<br>");
+    //print("OF_CreateNewMember:$sql<br>");
     if($insertFlag) {
         $result = mysqli_query($mysqli_link, $sql)
         or journalise($userId, "E", "Cannot insert into $table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
@@ -2120,7 +2120,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
 
         $sql= "INSERT INTO $table_user_usergroup_map (user_id, group_id)
                 VALUES($jom_id, $groupId)";
-        print("OF_CreateNewMember:$sql<br>");
+        //print("OF_CreateNewMember:$sql<br>");
         if($insertFlag) {
             $result = mysqli_query($mysqli_link, $sql)
             or journalise($userId, "E", "Cannot insert into $table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
@@ -2131,7 +2131,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     if($societe=="oui") {
         $sql= "INSERT INTO $table_company(c_name, c_address, c_zipcode, c_city, c_country,c_bce)
         VALUES ( '$nomsociete', '$adressesociete', '$codepostalsociete', '$villesociete', '$payssociete', '$bcesociete)";
-        print("OF_CreateNewMember:$sql<br>");
+        //print("OF_CreateNewMember:$sql<br>");
         if($insertFlag) {
             $result = mysqli_query($mysqli_link, $sql)
             or journalise($userId, "E", "Cannot insert into $table_company: " . mysqli_error($mysqli_link)) ;
@@ -2139,7 +2139,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
         }
         $sql= "INSERT INTO $table_company_member(cm_member, cm_company)
         VALUES ( $jom_id, $societeId)";
-        print("OF_CreateNewMember:$sql<br>");
+        //print("OF_CreateNewMember:$sql<br>");
         if($insertFlag) {
             $result = mysqli_query($mysqli_link, $sql)
             or journalise($userId, "E", "Cannot insert into $table_company_member: " . mysqli_error($mysqli_link)) ;
@@ -2213,7 +2213,7 @@ function OF_AddPartnerInOdoo(
     ) 
 {
     global $mysqli_link,$table_person,$userId;
-    print("OF_AddPartnerInOdoo:started<br>");
+    //print("OF_AddPartnerInOdoo:started<br>");
     // Let's create a Odoo partner/client on request
     // Is the Jom_is defined?
     $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $jom_id")
@@ -2250,11 +2250,11 @@ function OF_AddPartnerInOdoo(
     // Link the odooid in the rapcs_person table
     mysqli_query($mysqli_link, "UPDATE $table_person SET odoo_id = $odooid WHERE jom_id = $jom_id") 
     or journalise($userId, "E", "Cannot set Odoo customer for user #$row[jom_id]") ;
-    print("OF_AddPartnerInOdoo: $jom_id inserted in odoo partner=$odooid<br>");
+    //print("OF_AddPartnerInOdoo: $jom_id inserted in odoo partner=$odooid<br>");
 }
 function GetOdooAccount($code, $fullName) {
     static $cache = array() ;
-    print("GetOdooAccount:started<br>");
+   // print("GetOdooAccount:started<br>");
   //if(1) return;
    $odooClient=OF_GetOdooClient();
     if (isset($cache[$code])) return $cache[$code] ;
