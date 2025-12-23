@@ -46,6 +46,7 @@ $customer_id = (isset($_REQUEST['customerId'])) ? intval(trim($_REQUEST['custome
 if (!is_numeric($customer_id)) journalise($userId, "F", "Invalid customerId") ;
 $booking_type = $_REQUEST['type'] ;
 if (!is_numeric($booking_type)) journalise($userId, "F", "Bien essayé... type: $booking_type") ;
+
 $start = mysqli_real_escape_string($mysqli_link, $_REQUEST['start']) ;
 $end = mysqli_real_escape_string($mysqli_link, $_REQUEST['end']) ;
 $comment = mysqli_real_escape_string($mysqli_link, $_REQUEST['comment']) ;
@@ -63,6 +64,8 @@ if (!$start_date) $response['error'] .= "$start is not a valid date<br/>" ;
 $end_date = new DateTime($end) ;
 if (!$end_date) $response['error'] .= "$end is not a valid date<br/>" ;
 if ($end_date <= $start_date) $response['error'] .= "La fin doit être après le début: $start -> $end.<br/>" ;
+$now = new DateTime() ;
+if ($start_date < $now) $response['error'] .= "Le début de la réservation doit être dans le futur: $start.<br/>" ;
 
 // Check on user ids
 if ($userId == 0) $response['error'] .= "Vous devez être connecté pour faire une réservation.<br/>" ;
