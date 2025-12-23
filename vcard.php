@@ -31,7 +31,8 @@ if ($userId < 0 or $userId == '') die("Vous devez être connecté") ;
 // Fetch all information about the user
 $result = mysqli_query($mysqli_link, "select *,u.username as username,u.email as email
 	from $table_person p join $table_users u on p.jom_id = u.id
-	where u.id = $displayed_id") or die("Erreur interne: " . mysqli_error($mysqli_link)) ;
+	where u.id = $displayed_id") 
+	or journalise(0, "F", "Erreur interne: " . mysqli_error($mysqli_link)) ;
 $me = mysqli_fetch_array($result) ;
 $name_db = $me['name'] ;
 $me['name'] = db2web($me['name']) ; 
@@ -48,18 +49,18 @@ N;charset=utf-8:$me[last_name];$me[first_name];;;
 FN;charset=utf-8:$me[name]
 LOGO;MEDIATYPE=image/x-icon:https://www.spa-aviation.be/favicon32x32.ico
 ORG;charset=utf-8:RAPCS\n" ;
-if (!isset($_REQUEST['qr']) and $me['avatar'] != '') {
-	$file_name = '../media/kunena/avatars/' . $me['avatar'] ;
-	$f = fopen($file_name, 'rb') ;
+if (!isset($_REQUEST['qr']) and $me['avatar'] != '' and file_exists("$avatar_root_directory/$me[avatar]")) {
+	$file_name = "$avatar_root_directory/$me[avatar]" ;
+	$f = fopen("$avatar_root_directory/$me[avatar]", 'rb') ;
 	$binary_photo = fread($f, filesize($file_name)) ;
 	fclose($f) ;
 	$base64_photo = base64_encode($binary_photo) ;
 	$base64_photo = chunk_split($base64_photo, 76, "\n ") ;
 	$s .= "PHOTO;ENCODING=b;TYPE=jpeg:\n $base64_photo" ;
 }
-if ($me['home_phone'] != '') $s .= "TEL;TYPE=HOME,VOICE:$me[home_phone]\n" ;
-if ($me['work_phone'] != '') $s .= "TEL;TYPE=WORK,VOICE:$me[work_phone]\n" ;
-if ($me['cell_phone'] != '') $s .= "TEL;TYPE=CELL,VOICE,TEXT:$me[cell_phone]\n" ;
+if ($me['home_phone'] != '') $s .= "TEL;TYPE=HOME,VOICE:" . canonicalizePhone($me['home_phone']) . "\n" ;
+if ($me['work_phone'] != '') $s .= "TEL;TYPE=WORK,VOICE:" . canonicalizePhone($me['work_phone']) . "\n" ;
+if ($me['cell_phone'] != '') $s .= "TEL;TYPE=CELL,VOICE,TEXT:" . canonicalizePhone($me['cell_phone']) . "\n" ;
 if ($me['sex'] == 1) $s .= "GENDER:M\n" ;
 if ($me['sex'] == 2) $s .= "GENDER:F\n" ;
 $s .= "TITLE:Membre
@@ -75,7 +76,7 @@ if (isset($_REQUEST['qr']) and $_REQUEST['qr'] != '') {
 <title>Contact QR-code pour <?=$me['first_name'] . ' ' . $me['last_name']?></title>
 </head>
 <body>
-<h1>Contact QR-code pour <?=$me['first_name'] . ' ' . $me['last_name']?></h1>
+<h2>Contact QR-code pour <?=$me['first_name'] . ' ' . $me['last_name']?></h2>
 <?php
 	print("<img src=\"qr-code.php?chs=300x300&chl=" . urlencode($s) . "\">") ;
 	journalise($userId, 'I', "QR-code for $me[name] displayed") ;
@@ -89,3 +90,5 @@ if (isset($_REQUEST['qr']) and $_REQUEST['qr'] != '') {
 		journalise($userId, 'I', "Downloading of vcard for $me[name]") ;
 }
 ?>
+</body>
+</html>
