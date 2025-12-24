@@ -210,7 +210,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
 </div><!-- row -->
 </div><!-- print only -->
 <?php
-if ($christmas_theme) {
+if ($christmas_theme and strpos($_SERVER['SCRIPT_NAME'], 'mobile_webcam') === false and strpos($_SERVER['SCRIPT_NAME'], 'mobile_streaming') === false) {
 ?>
 <!-- Christmas theme to be removed outside of season of course -->
 <div class="snowflakes" aria-hidden="true">
