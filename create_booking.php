@@ -398,7 +398,7 @@ if ($response['error'] == '') {
 //		$smtp_info['debug'] = True;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 		// Multiple part body to be able to attach .ICS and other files/images
-		$headers['MIME-Version'] = '1.0' ;
+		$email_header .= "MIME-Version: 1.0\r\n";
 		$delimiteur = "Part-".md5(uniqid(rand())) ;
 		$email_header .= "Content-Type: multipart/mixed; boundary=\"$delimiteur\"\r\n" ;
 		$email_message = "Ce texte est envoye en format MIME et HTML donc peut ne pas etre lisible sur cette plateforme.\r\n\r\n" .
