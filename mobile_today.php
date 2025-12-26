@@ -97,7 +97,7 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone per plane booking 
 <?php
 // TODO use ajax per day ?
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.name as iname, i.cell_phone as icell_phone, i.jom_id as iid,
-		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.name as pname, pi.cell_phone as pcell_phone, pi.jom_id as pid, pi.gravatar as avatar
+		pi.last_name as plast_name, pi.first_name as pfirst_name, pi.name as pname, pi.cell_phone as pcell_phone, pi.jom_id as pid, pi.avatar as avatar
 		FROM $table_bookings b
 		JOIN $table_person pi ON pi.jom_id = r_pilot
 		LEFT JOIN $table_person i ON i.jom_id = r_instructor		
