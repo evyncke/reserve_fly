@@ -114,12 +114,6 @@ $bccTo = "eric.vyncke@edpnet.be" ;
 $bccTo = "" ;
 $cache_directory = getcwd() ;
 $rapcs_metar = 'rapcs_metar' ;
-// SMTP local parameters
-$smtp_host = 'vyncke.org' ;
-$smtp_port = 785 ; // Unusual TCP port as OVH blocks the usual 587 :(
-// SMTP credentials are in auth.php
-//$smtp_user = 'xxx' ; 
-//$smtp_password = 'xxx' ;
 
 // The shared secret for direct access to booking is in auth.php
 //$shared_secret = "XXX" ;
@@ -133,11 +127,6 @@ $smtp_port = 785 ; // Unusual TCP port as OVH blocks the usual 587 :(
 // OVH credentials for (in auth.php)
 //$finances_smtp_user = 'xxx@spa-aviation.be' ;
 //$finances_smtp_password = 'xxx' ;
-
-// End of Vyncke.org server configuration
-$smtp_from = 'no-reply@spa-aviation.be' ;
-$smtp_localhost = 'spa-aviation.be' ;
-
 
 // Need to change when jom_usergroups content changes!!!!!
 //$joomla_member_group = 2 ; // "enregistrés"
@@ -565,7 +554,7 @@ function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
 	if (!isset($headers['Content-Type']) or $headers['Content-Type'] == '') {
 		// Ensure the body and its type are canonical
 		$plain_text_body = strip_tags($smtp_body) ;
-		$is_HTML = $smtp_body != $pain_text_body ;
+		$is_HTML = $smtp_body != $plain_text_body ;
 		$MIME_subtype = ($is_HTML) ? 'html' : 'plain' ;
 		$headers['Content-Type'] = "text/$MIME_subtype; charset=UTF-8" ;
 //		$headers['X-EVY-Debug'] = "Unspecified content-type, guessing $MIME_subtype" ;
@@ -586,10 +575,10 @@ function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
 		$mail->send($smtp_to, $headers, $smtp_body);
 	} 
 	catch(Exception $e) {
-  		Journalise($originUserId, 'E', "Cannot send mail to '$smtp_to': " . $e->getMessage() . '(' . $e->getCode() . ')');
+  		journalise($originUserId, 'E', "Cannot send mail to '$smtp_to': " . $e->getMessage() . '(' . $e->getCode() . ')');
   		return False ;
 	}
-//	Journalise($userId, "D", "Email sent to '$smtp_to' with subject: '" . $headers['Subject'] . "'") ;
+	journalise($userId, "D", "Email sent to '$smtp_to' with subject: '" . $headers['Subject'] . "'") ;
 	return True ;
 }
 
