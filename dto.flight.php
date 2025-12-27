@@ -37,6 +37,8 @@ require_once 'dto.class.php' ;
 
 if (isset($_REQUEST['flight']))
     if ($_REQUEST['flight'] == 'all' and isset($_REQUEST['student']) and is_numeric($_REQUEST['student'])) {
+        if (! ($userIsBoardMember or $userIsInstructor or $userId == $_REQUEST['student']))
+            journalise($userId, "F", "Vous devez être administrateur, instructeur, ou être l'élève pour voir cette page.") ;
         $flights = new Flights($_REQUEST['student']) ;
     } else if (is_numeric($_REQUEST['flight']) and $_REQUEST['flight'] != '') {
         $flight_id = $_REQUEST['flight'] ;
@@ -45,14 +47,14 @@ if (isset($_REQUEST['flight']))
         if (! $flight->id) {
             journalise($userId, "F", "The flight #$flight_id does not exist") ;
         }
+        if (! ($userIsBoardMember or $userIsInstructor or $userId == $flight->student))
+            journalise($userId, "F", "Vous devez être administrateur, instructeur, ou être l'élève pour voir ce vol.") ;
         $flights = array($flight) ;
     }  else {
         journalise($userId, 'F', "Invalid parameter flight=$_REQUEST[flight].") ;
 } else
     journalise($userId, 'F', "Missing parameter flight.") ;
 
-if (! ($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == $flight->student))
-    journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
 
 if (isset($_REQUEST['action']))
     $action = $_REQUEST['action'] ;
