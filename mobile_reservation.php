@@ -382,7 +382,7 @@ if (mysqli_num_rows($result_news) or $userIsAdmin) {
 }
 mysqli_free_result($result_news) ;
 ?>
-		<div class="col border rounded-3 mx-lg-3" id="reservationDetails" style="width: 30%;"></div>
+		<div class="col border rounded-3 mx-lg-3 text-bg-light" id="reservationDetails" style="width: 30%;"></div>
 		<div class="col d-none d-md-block" id="webcamCell">
 			<a href="" id="webcamURI" border="0"><img id="webcamImg" style="width: 256px; height: 192px;" alt="Webcam" onStalled="imgStalled();"></a>
 		</div><!--col-->
