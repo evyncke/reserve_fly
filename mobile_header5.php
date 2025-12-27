@@ -335,6 +335,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 <?php
   if ($userIsInstructor) {
 ?>
+      <li><hr class="dropdown-divider"/></li>
       <li><h6 class="dropdown-header">Réservé aux FIs</h6></li>
       <li><i><a class="dropdown-item" href="dto.students.php?fi=<?=$userId?>">Mes élèves</a></i></li>
       <li><i><a class="dropdown-item" href="dto.flights.php?fi=<?=$userId?>">Mes derniers vols</a></i></li>
