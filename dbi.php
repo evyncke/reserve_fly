@@ -567,7 +567,7 @@ function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
 	}
 	if ($smtp_info['debug']) {
 			print_r($headers) ;
-			print("Enveloppe To: $smtp_to") ;
+			print("Enveloppe To: $smtp_to\n") ;
 	}
 	
 	try {
