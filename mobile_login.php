@@ -1,5 +1,4 @@
 <?php
-// Test with https://www.spa-aviation.be/resa/mobile_login_oauth.php
 /*
    Copyright 2013-2025 Eric Vyncke
 
@@ -95,7 +94,7 @@ $facebook = new Facebook([
 $linkedin = new LinkedIn([
     'clientId' => $linkedin_client_id,
     'clientSecret' => $linkedin_client_secret,
-    'redirectUri' => 'https://www.spa-aviation.be/resa/oauth.php',
+    'redirectUri' => 'https://www.spa-aviation.be/resa/mobile_login.php',
 ]);
 
 // Check whether  OAuth callback
@@ -263,7 +262,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
 $googleAuthUrl = $google->getAuthorizationUrl();
 $_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 $facebookHelper = $facebook->getRedirectLoginHelper();
-$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login_oauth.php', ['email','public_profile','user_link']);
+$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login.php', ['email','public_profile','user_link']);
 $linkedInAuthUrl = $linkedin->getAuthorizationUrl(['scope' => ['openid', 'profile', 'email']]);
 //$linkedInAuthUrl = $linkedin->getAuthorizationUrl(['scope' => ['r_liteprofile', 'r_emailaddress']]);
 
