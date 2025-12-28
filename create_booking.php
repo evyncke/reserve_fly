@@ -430,7 +430,7 @@ if ($response['error'] == '') {
 			"--$delimiteur--\r\n"; // last delimiter must be followed by --
 		// Now let's send it !
 		if ($test_mode)
-			@smtp_mail("eric.vyncke@ulg.ac.be", $email_subject, $email_message, $email_header) ;
+			@smtp_mail("eric.vyncke@uliege.be", $email_subject, $email_message, $email_header) ;
 		else
 			@smtp_mail($email_recipients, $email_subject, $email_message, $email_header) ;
 		if ($booking_type == BOOKING_MAINTENANCE)
