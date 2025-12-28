@@ -674,7 +674,7 @@ $f = fopen("email.webmasters", "w") ;
 if (! $f) journalise(0, "E", "Cannot open email.webmasters for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
-		where block = 0 and group_id in ($joomla_admin_group, $joomla_sysadmin_group, $joomla_superuser_group)
+		where block = 0 and group_id in ($joomla_sysadmin_group, $joomla_superuser_group)
 		order by name") or die("Erreur SQL while creating webmasters: " . mysqli_error($mysqli_link));
 	$first = true ;
 	while ($row = mysqli_fetch_array($result)) {
@@ -685,7 +685,7 @@ else {
 	fclose($f) ;
 }
 
-# Generate email aliases for CA
+# Generate email aliases for OA
 $f = fopen("email.ca", "w") ;
 if (! $f) journalise(0, "E", "Cannot open email.ca for writing") ;
 else {
