@@ -489,7 +489,7 @@ $smtp_info['auth'] = True;
 $smtp_info['username'] = $smtp_user ;
 $smtp_info['password'] = $smtp_password ;
 $smtp_info['debug'] = False;
-$smtp_info['persist'] = False;
+$smtp_info['persist'] = True;
 $mail = NULL ;
 
 $mime_preferences = array(
