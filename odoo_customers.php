@@ -109,7 +109,7 @@ Cliquez sur un des badges pour activer/désactiver l'affichage:
 <?php
 if ($account == 'joomla') {
 ?>
-<p>Copie des données du site réservation vers Odoo... Cela inclut l'adresse (y compris longitude & latitude), les groupes, les numéros de téléphone, nom et prénom.</p>
+<p>Copie des données du site réservation vers Odoo... Cela inclut l'adresse, les groupes, les numéros de téléphone, nom et prénom.</p>
 <?php
 } else { # ($account == 'joomla') 
 ?>
@@ -119,39 +119,18 @@ if ($account == 'joomla') {
 <button type="submit" class="btn btn-primary">Copier les infos du site réservations vers Odoo</button>
 </form>
 <?php
-} # ($account == 'ciel') 
-
+} 
 
 // Let's get all Odoo customers
 $result = $odooClient->SearchRead('res.partner', array(), 
     array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id', 'total_due',
-        'street', 'street2', 'zip', 'city', 'country_id', 'country_code', 'category_id', 'partner_latitude', 'partner_longitude',
+        'street', 'street2', 'zip', 'city', 'country_id', 'country_code', 'category_id',
         'complete_name', 'email', 'phone', 'mobile', 'commercial_company_name'))) ;
 $odoo_customers = array() ;
 foreach($result as $client) {
     $email =  strtolower($client['email']) ;
     $odoo_customers[$email] = $client ; // Let's build a dict indexed by the email addresses
     $odoo_customers[$client['id']] = $client ; // Let's be dirty as associative PHP arrays allow is... let's also index by odoo id
-}
-
-function geoCode($address) {
-    global $gmap_api_key, $userId ;
-    // https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=$gmap_api_key
-    // https://developers.google.com/maps/documentation/geocoding/requests-geocoding?hl=fr
-    $content = file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address=' . urlencode($address) . 
-        '&key=' . urlencode($gmap_api_key)) ;
-    // Could return { "error_message" : "This IP, site or mobile application is not authorized to use this API key. Request received from IP address 51.68.11.231, with empty referer", 
-    //      "results" : [], 
-    //      "status" : "REQUEST_DENIED" }
-    $json = json_decode($content, true) ; // Get an associative array
-    if ($json['status'] != 'OK') {
-        journalise($userId, 'E', "GeoCode($address) return status=$json[status]") ;
-        if (isset($json['error_message']))
-            journalise($userId, 'E', "GeoCode($address) return error_message=$json[error_message]") ;
-        return false ;
-    }
-    $result = $json['results'][0]['geometry']['location'] ;
-    return $result ;
 }
 
 $fi_tag = $odooClient -> GetOrCreateCategory('FI') ;
@@ -208,25 +187,13 @@ while ($row = mysqli_fetch_array($result)) {
             else {  
                 if ($odoo_customer['street'] != db2web($row['address']) and $row['address'] != '') {
                     $updates['street'] = db2web($row['address']) ;
-                    $odoo_customer['partner_latitude'] = 0.0 ;
                 }
                 if ($odoo_customer['zip'] != db2web($row['zipcode']) and $row['zipcode'] != '') {
                     $updates['zip'] = db2web($row['zipcode']) ;
-                    $odoo_customer['partner_latitude'] = 0.0 ;
                 }
                 if ($odoo_customer['city'] != db2web($row['city']) and $row['city'] != '') {
                     $updates['city'] = db2web($row['city']) ;
-                    $odoo_customer['partner_latitude'] = 0.0 ;
                 } 
-                // If coordinates have changed, let's redo them
-                // evyncke geocode disabled on 2024-01-10 as it was causing too many Google Maps API calls
-                if (false and ($odoo_customer['partner_latitude'] == 0.0 or $odoo_customer['partner_longitude'] == 0.0)) {
-                    $coordinates = geoCode(db2web($row['address']) . "," . db2web($row['city']) . ', ' . db2web($row['country'])) ;
-                    if ($coordinates and count($coordinates) == 2) { 
-                        $updates['partner_latitude'] = $coordinates['lat'] ;
-                        $updates['partner_longitude'] = $coordinates['lng'] ;
-                    }
-                }
             }
             if ($odoo_customer['email'] != $row['email'] and $row['email'] != '')
                 $updates['email'] = $row['email'] ;    
