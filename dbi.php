@@ -63,12 +63,10 @@ if (filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
 // End of paranoid address blocking
 
 require_once('auth.php') ;
-$db_name = 'spaaviation' ;
-$db_user = 'spaaviation' ;
-// MySQL Credentials are in auth.php
+
+// MySQL Credentials & configuration are in auth.php
 
 $convertToUtf8 = false ;
-//	$db_host = 'spaaviation.mysql.db' ;
 $convertToUtf8 = true ;
 $joomla_session = true ;
 $joomla_connection_page = "https://www.spa-aviation.be/index.php/fr/" ;
