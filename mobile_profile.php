@@ -368,6 +368,8 @@ $me['username'] = db2web($me['username']) ;
 $me['first_name'] = db2web($me['first_name']) ; 
 $me['last_name'] = db2web($me['last_name']) ; 
 $me['cell_phone'] = canonicalizePhone($me['cell_phone']) ;
+$me['home_phone'] = canonicalizePhone($me['home_phone']) ;
+$me['work_phone'] = canonicalizePhone($me['work_phone']) ;
 foreach(explode(';', $me['social_networks']) as $social_network) {
 	if (strpos($social_network, '-') === FALSE) continue ;
 	list($network, $profile) = explode('-', $social_network, 2) ;
