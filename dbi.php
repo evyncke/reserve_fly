@@ -394,6 +394,7 @@ if ($http_referer != '') {
 // and add a +32 if starts with 0
 
 function canonicalizePhone($phone) {
+	if ($phone == null or $phone == '') return '' ;
 	$phone = preg_replace('/\s+/', '', $phone) ; // Remove spaces
 	$phone = str_replace('-', '', $phone) ; // Remove dashes
 	$phone = str_replace('.', '', $phone) ; // Remove dots
