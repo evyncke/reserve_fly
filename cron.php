@@ -453,11 +453,15 @@ while ($row = mysqli_fetch_array($result)) {
 	$paid_membership_users[$row['bkf_user']] = $row['bkf_user'] ;
 }
 
-// Préparation des fichiers .JS contenant des données statiques afin de permettre le cache
+// Synchronize the Odoo partners with profile information
+print(date('Y-m-d H:i:s').": synchronizing Odoo partners with RAPCS profile information.\n") ;
+require_once("odoo_synch.php") ;
+odooSynchronize() ;
+
 print(date('Y-m-d H:i:s').": preparing JS files.\n") ;
 
 $f = fopen("data/planes.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open data/planes.js for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open data/planes.js for writing") ;
 else {
 	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
 	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
@@ -465,7 +469,7 @@ else {
 	fwrite($f,"var planes = [ ") ;
 	$first = true ;
 	$result = mysqli_query($mysqli_link, "select upper(id) from $table_planes where actif != 0 and ressource = 0 order by id")
-		or journalise(0, "E", "Cannot read planes: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "E", "Cannot read planes: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		if ($first)
 			$first = false ;
@@ -478,7 +482,7 @@ else {
 }
 
 $f = fopen("data/allPlanes.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open data/allPlanes.js for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open data/allPlanes.js for writing") ;
 else {
 	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
 	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
@@ -486,7 +490,7 @@ else {
 	fwrite($f,"var allPlanes = [ ") ;
 	$first = true ;
 	$result = mysqli_query($mysqli_link, "select upper(id) from $table_planes where ressource = 0 order by id")
-		or journalise(0, "E", "Cannot read allPlanes: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "E", "Cannot read allPlanes: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		if ($first)
 			$first = false ;
@@ -499,7 +503,7 @@ else {
 }
 
 $f = fopen("data/ressources.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open data/ressources.js for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open data/ressources.js for writing") ;
 else {
 	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
 	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
@@ -520,7 +524,7 @@ else {
 }
 
 $f = fopen("data/pilots.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open data/pilots.js for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open data/pilots.js for writing") ;
 else {
 	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
 	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
@@ -551,7 +555,7 @@ else {
 }
 
 $f = fopen("data/instructors.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open data/instructors.js for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open data/instructors.js for writing") ;
 else {
 	fwrite($f, '// This file is generated automatically every hour from the SQL database' . "\n") ;
 	fwrite($f, '// It is therefore useless to update it ;-)' . "\n") ;
@@ -577,7 +581,7 @@ else {
 // Let's prepare the email aliases
 
 $e = fopen("email.tkis", "w") ;
-if (! $e) journalise(0, "E", "Cannot open email.tkis for writing") ;
+if (! $e) journalise($userId, "E", "Cannot open email.tkis for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id = $joomla_instructor_group2
@@ -589,7 +593,7 @@ else {
 }
 
 $f = fopen("data/members.js", "w") ;
-if (! $f) journalise(0, "E", "Cannot open data/members.js for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open data/members.js for writing") ;
 else {
 	$first = true ;
 	fwrite($f,"var members = [ ") ;
@@ -622,7 +626,7 @@ else {
 
 # Generate email aliases for pilots
 $f = fopen("email.pilotes", "w") ;
-if (! $f) journalise(0, "E", "Cannot open email.pilotes for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open email.pilotes for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id = $joomla_pilot_group
@@ -638,7 +642,7 @@ else {
 
 # Generate email aliases for students
 $f = fopen("email.eleves", "w") ;
-if (! $f) journalise(0, "E", "Cannot open email.eleves for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open email.eleves for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id in ($joomla_student_group, $joomla_instructor_group, $joomla_instructor_group2)
@@ -654,7 +658,7 @@ else {
 
 # Generate email aliases for members
 $f = fopen("email.membres", "w") ;
-if (! $f) journalise(0, "E", "Cannot open email.membres for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open email.membres for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group)
@@ -671,7 +675,7 @@ else {
 
 # Generate email aliases for admin
 $f = fopen("email.webmasters", "w") ;
-if (! $f) journalise(0, "E", "Cannot open email.webmasters for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open email.webmasters for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id in ($joomla_sysadmin_group, $joomla_superuser_group)
@@ -687,7 +691,7 @@ else {
 
 # Generate email aliases for OA
 $f = fopen("email.ca", "w") ;
-if (! $f) journalise(0, "E", "Cannot open email.ca for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open email.ca for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id in ($joomla_board_group)
@@ -703,7 +707,7 @@ else {
 
 # Generate email aliases for Fleet
 $f = fopen("email.fleet", "w") ;
-if (! $f) journalise(0, "E", "Cannot open email.fleet for writing") ;
+if (! $f) journalise($userId, "E", "Cannot open email.fleet for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id in ($joomla_mechanic_group)
@@ -732,41 +736,41 @@ else {
 // Some SQL clean-up
 print(date('Y-m-d H:i:s').": purging old journal entries.\n") ;
 mysqli_query($mysqli_link, "DELETE FROM $table_journal WHERE j_datetime < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
-	or journalise(0, "E", "Cannot purge old entries in journal: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot purge old entries in journal: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_journal") and mysqli_query($mysqli_link, "ALTER TABLE $table_journal ENGINE=INNODB")
-	or journalise(0, "E", "Cannot optimize $table_journal: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot optimize $table_journal: " . mysqli_error($mysqli_link)) ;
 
 mysqli_query($mysqli_link, "DELETE FROM $table_local_tracks WHERE lt_timestamp < DATE_SUB(CONVERT_TZ(NOW(), 'Europe/Paris', 'UTC'), INTERVAL 30 MINUTE)")
-	or journalise(0, "E", "Cannot purge old entries in $table_local_tracks: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot purge old entries in $table_local_tracks: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_local_tracks") and mysqli_query($mysqli_link, "ALTER TABLE $table_local_tracks ENGINE=INNODB")
-	or journalise(0, "E", "Cannot optimize $table_local_tracks: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot optimize $table_local_tracks: " . mysqli_error($mysqli_link)) ;
 		
 mysqli_query($mysqli_link, "DELETE FROM $table_tracks WHERE t_time < DATE_SUB(NOW(), INTERVAL 1 WEEK)")
-	or journalise(0, "E", "Cannot purge old entries in $table_tracks: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot purge old entries in $table_tracks: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_tracks") and mysqli_query($mysqli_link, "ALTER TABLE $table_tracks ENGINE=INNODB")
-	or journalise(0, "E", "Cannot optimize $table_tracks: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot optimize $table_tracks: " . mysqli_error($mysqli_link)) ;
 
 // Clean-up Joomla session table (growing for ever...)
 print(date('Y-m-d H:i:s').": purging database.\n") ;
 mysqli_query($mysqli_link, "DELETE FROM $table_session WHERE userid = 0")
-	or journalise(0, "E", "Cannot purge anonymous entries in $table_session: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot purge anonymous entries in $table_session: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_session") and mysqli_query($mysqli_link, "ALTER TABLE $table_session ENGINE=INNODB")
-	or journalise(0, "E", "Cannot optimize $table_session: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot optimize $table_session: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "DELETE FROM jom_action_logs WHERE log_date < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
-	or journalise(0, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "DELETE FROM jom_action_logs 
 		WHERE message_language_key = 'PLG_ACTIONLOG_JOOMLA_USER_LOGIN_FAILED' AND log_date < DATE_SUB(NOW(), INTERVAL 1 WEEK)") // Be more aggressive in case of dictionnary attacks
-	or journalise(0, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_action_logs") and mysqli_query($mysqli_link, "ALTER TABLE jom_action_logs ENGINE=INNODB")
-	or journalise(0, "E", "Cannot optimize jom_action_logs: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot optimize jom_action_logs: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "DELETE FROM jom_redirect_links WHERE published = 0")
-	or journalise(0, "E", "Cannot purge unpublished entries in jom_redirect_links: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot purge unpublished entries in jom_redirect_links: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_redirect_links")
-	or journalise(0, "E", "Cannot optimize jom_redirect_links: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot optimize jom_redirect_links: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "DELETE FROM jom_ucm_history WHERE save_date < DATE_SUB(NOW(), INTERVAL 24 MONTH)")
-	or journalise(0, "E", "Cannot purge old revisions in jom_ucm_history: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot purge old revisions in jom_ucm_history: " . mysqli_error($mysqli_link)) ;
 mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_ucm_history") and mysqli_query($mysqli_link, "ALTER TABLE jom_ucm_history ENGINE=INNODB")
-	or journalise(0, "E", "Cannot optimize jom_ucm_history: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot optimize jom_ucm_history: " . mysqli_error($mysqli_link)) ;
 
 // Get some system parameters
 
@@ -775,7 +779,7 @@ $load = sys_getloadavg();
 
 $result = mysqli_query($mysqli_link, "SELECT round(SUM(data_length + index_length) / 1024 / 1024, 0) 
 	FROM information_schema.tables where table_schema = '$db_name';") 
-	or journalise(0, "E", "Cannot get DB size: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot get DB size: " . mysqli_error($mysqli_link)) ;
 $row = mysqli_fetch_row($result) ;
 $db_size = $row[0] ;
 
@@ -809,14 +813,14 @@ if (time() + 3600 >= airport_opening_local_time($year, $month, $day) and time() 
 		values(current_date(), '$default_metar_station', $metar_unknown, $metar_vmc, $metar_mmc, $metar_imc)
 		on duplicate key update mh_unknown=mh_unknown+$metar_unknown, mh_vmc=mh_vmc+$metar_vmc,
 			mh_mmc=mh_mmc+$metar_mmc, mh_imc=mh_imc+$metar_imc")
-		or journalise(0, 'E', "Cannot update METAR history: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, 'E', "Cannot update METAR history: " . mysqli_error($mysqli_link)) ;
 	print(date('Y-m-d H:i:s').": Latest METAR for $default_metar_station: VMC=$metar_vmc, MMC=$metar_mmc, IMC=$metar_imc, UNKNOWN=$metar_unknown.\n") ;
 }
 
 print(date('Y-m-d H:i:s').": End of CRON.\n") ;
 if ($metar_unknown != 0)
-	journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2], DB size $db_size MB.") ;
+	journalise($userId, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2], DB size $db_size MB.") ;
 else
-	journalise(0, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, unknown METAR, CPU load $load[0]/$load[1]/$load[2], DB size $db_size MB.") ;
+	journalise($userId, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, unknown METAR, CPU load $load[0]/$load[1]/$load[2], DB size $db_size MB.") ;
 ?>
 </pre>
