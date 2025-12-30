@@ -538,9 +538,9 @@ if ($userId <= 0) {
               <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
               <a class="dropdown-item" href="notedefrais.php">Note de frais</a>
 <?php
-if ($userIsAdmin or $userIsInstructor) {
+if ($userIsBoardMember or $userIsInstructor) {
 ?>
-              <a class="dropdown-item text-warning" href="bondecommande.php">Bon de Commande</a>
+              <a class="dropdown-item text-warning" href="bondecommande.php"><i class="bi bi-bag-fill"></i> Bon de Commande</a>
 <?php
 }
 ?>
@@ -550,7 +550,7 @@ if ($userIsAdmin or $userIsInstructor) {
               <a class="dropdown-item" href="mobile_profile.php"><i class="bi bi-person-circle"></i> Mon profil</a>
 <?php
   if ($userIsStudent)
-      print("<a class=\"dropdown-item\" href=\"dto.student.php?student=$userId\">Ma progression</a>") ;
+      print("<a class=\"dropdown-item\" href=\"dto.student.php?student=$userId\"><i class=\"bi bi-clipboard2-pulse-fill\"></i> Ma progression</a>") ;
 ?>
               </li>
           </ul>
