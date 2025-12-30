@@ -34,10 +34,10 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	or print(mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
 	print("Processing #$row[jom_id], " . db2web($row['name']) . ": $row[avatar]\n") ;
-	$fname = "$avatar_root_directory/$row[avatar]" ;
+	$fname = "../$avatar_root_directory/$row[avatar]" ;
 	// TODO process gravatars ! https://www.gravatar.com/avatar/" . md5(strtolower(trim($row['email']))) . "?s=200&d=blank&r=pg\"
 	if (!file_exists($fname)) {
-		print("Skipping, file $fname does not exist.\n") ;
+		print("Skipping, file $fname does not exist in " . getcwd() . "\n") ;
 		continue ;
 	}
 	list($width, $height, $type, $attr) = getimagesize($fname) ;
