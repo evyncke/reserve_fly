@@ -45,13 +45,13 @@ function odooSynchronize() {
     $member_tag = $odooClient -> GetOrCreateCategory('Member') ;
     $board_member_tag = $odooClient -> GetOrCreateCategory('Board Member') ;
 
-    // Let's look at all our members
+    // Let's look at all our current and past members
     $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(m.group_id) AS allgroups 
         FROM $table_person AS p JOIN $table_users AS u ON u.id = p.jom_id
             LEFT JOIN $table_user_usergroup_map m ON u.id = m.user_id
             LEFT JOIN $table_blocked b ON b.b_jom_id = p.jom_id
             LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = YEAR(CURDATE())
-        WHERE jom_id IS NOT NULL AND u.block = 0
+        WHERE jom_id IS NOT NULL
         GROUP BY jom_id
         ORDER BY last_name, first_name") 
         or journalise($userId, "F", "Cannot list all members: " . mysqli_error($mysqli_link)) ;
@@ -65,9 +65,11 @@ function odooSynchronize() {
             $groups = explode(',', $row['allgroups']) ;
             $updates = array() ; 
             // TODO should also copy first_name and last_name in complete_name ?
-            if ($row['address'] == '' or $row['city'] == '')
-                journalise($userId, "W", "No address/city for $name_from_db") ;
-            else {  
+            if ($row['address'] == '' or $row['city'] == '') {
+                if ($row['block'] == 0) {
+                    journalise($userId, "W", "Member $name_from_db (#$row[jom_id]) has no address or city set in Ciel, but is active in Joomla/Odoo") ;
+                }
+            } else {  
                 if ($odoo_customer['street'] != db2web($row['address']) and $row['address'] != '') {
                     $updates['street'] = db2web($row['address']) ;
                 }
@@ -107,6 +109,10 @@ function odooSynchronize() {
             if (count(array_diff($tags, $odoo_customer['category_id'])) > 0 or count(array_diff($odoo_customer['category_id'], $tags)) > 0) // Compare arrays of Odoo and Ciel tags/groups
                 // cfr https://stackoverflow.com/questions/29643834/how-to-add-tags-category-id-while-creating-customer-res-partner-in-odoo 
                 // and https://www.odoo.com/documentation/12.0/developer/reference/orm.html#openerp-models-relationals-format 
+                // (5, _, _)
+                // removes all records from the set, equivalent to using the command 3 on every record explicitly. Can not be used in create().
+                // (6, _, ids)
+                // replaces all existing records in the set by the ids list, equivalent to using the command 5 followed by a command 4 for each id in ids.
                 $updates['category_id'] = (count($tags) > 0) ? array(array(6, 0, $tags)) : array(array(5, 0, 0)); 
             if (count($updates) > 0) { // There were some changes, let's update the Odoo record
                 $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
