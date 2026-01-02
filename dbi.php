@@ -376,11 +376,12 @@ if ($userId > 0 and $userId != 294) { // Only for logged-in users and not for SP
 		if ($_SERVER['PHP_SELF'] != '/resa/mobile_journal.php' && $_SERVER['PHP_SELF'] != '/resa/mobile_membership.php' && 
 			$_SERVER['PHP_SELF'] != '/resa/get_bookings.php' && $_SERVER['PHP_SELF'] != '/resa/get_fi_agenda.php')
 			if (!isset($_COOKIE['membership'])) {
-					journalise($userId, "I", "Unpaid membership, redirecting to membership page") ;
+					journalise($userId, "I", "Unpaid membership, redirecting to membership page (from $_SERVER[HTTP_REFERER])") ;
 					header("Location: https://www.spa-aviation.be/resa/mobile_membership.php?cb=" . urlencode($cb) , TRUE, 307) ;
 			}
 	}
-} else $row_fee = NULL ;// $userId > 0
+} else // not logged in
+	$row_fee = NULL ;
 
 // Get HTTP referer
 $http_referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
@@ -444,7 +445,7 @@ function journalise($userId, $severity, $message) {
 		@mail('eric@vyncke.org', "Cannot journalise in $table_journal", "Error message: $sql_error_message\nremote address = '$remote_address'\nuserId='$userId'\nserverity=$severity\nmessage=$message\nuri=$uri\nparams=$params") ;
 	}
 	if ($severity == 'F') // Fatal
-		die("Une erreur fatale a eu lieu. Impossible de continuer l'execution de $_SERVER[PHP_SELF]. Veuillez contacter eric@vyncke.org avec ce message:\n $message \n") ;
+		die("Une erreur fatale a eu lieu. Impossible de continuer l'execution de $_SERVER[PHP_SELF]. Veuillez contacter eric@vyncke.org avec ce message:\n <b>$message</b>\n") ;
 }
 
 // same function exists in js/reservation.js
