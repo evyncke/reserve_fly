@@ -176,7 +176,7 @@ $total_pct = round(($total_hours * 60 + $total_minutes) * 100 / (45 * 60)) ;
 </p>
 </div><!-- col -->
 <div class="col-sm-12 col-md-4">
-<img src="<?=$student->picture?>" width="80">
+<img src="<?=$student->picture?>" width="200px">
 </div><!-- col -->
 <div class="col-sm-12 col-md-4">
 <?php
