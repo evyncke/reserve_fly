@@ -143,10 +143,10 @@ if ($userId != 62) journalise($userId, "D", "Using smartphone per plane booking 
 			'gravatar' => md5(strtolower(trim($row['email']))), // Hash for gravatar
 			// add other fields as needed
 		] ;
-		if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
-			$rows[$row['r_id']]['avatar'] = $avatar_root_resized_uri . '/' . $row['avatar'] ;
-		elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
+		if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
 			$rows[$row['r_id']]['avatar'] = $avatar_root_uri . '/' . $row['avatar'] ;
+		elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
+			$rows[$row['r_id']]['avatar'] = $avatar_root_resized_uri . '/' . $row['avatar'] ;
 		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? "&nbsp;<a href=\"tel:$row[pcell_phone]\"><i class=\"bi bi-telephone-fill\" title=\"Téléphoner\"></i></span></a>" . 
 			"&nbsp;<a href=\"https://wa.me/$row[pcell_phone]\"><i class=\"bi bi-whatsapp\" title=\"Envoyer un message WhatsApp\"></i></a>" : '' ;
 		$pname = ($row['pfirst_name'] == '') ? $row['pname'] : 

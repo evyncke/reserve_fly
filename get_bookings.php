@@ -167,10 +167,10 @@ if ($error_message != '') {
 				$booking['home_phone'] = canonicalizePhone($row['home_phone']) ;
 				$booking['work_phone'] = canonicalizePhone($row['work_phone']) ;
 				$booking['cell_phone'] = canonicalizePhone($row['cell_phone']) ;
-				if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
-					$booking['avatar'] = $avatar_root_resized_uri . '/' . $row['avatar'] ;
-				elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
+				if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
 					$booking['avatar'] = $avatar_root_uri . '/' . $row['avatar'] ;
+				elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
+					$booking['avatar'] = $avatar_root_resized_uri . '/' . $row['avatar'] ;
 			}
 			// Now the logbook entries that may be before or after the current date when booking is for multiple days...
 			if ($row['log_id']) {
