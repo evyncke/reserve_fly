@@ -57,10 +57,12 @@ $start = (isset($_REQUEST['start']) and $_REQUEST['start'] > 0) ? $_REQUEST['sta
 $sql_filter = '' ;
 if (isset($_REQUEST['id']) and is_numeric($_REQUEST['id']))
 	$sql_filter = " AND j_jom_id = $_REQUEST[id]" ;
-  else if (isset($_REQUEST['usr']))
+else if (isset($_REQUEST['usr']))
 	$sql_filter = " AND name like '%" . web2db(mysqli_real_escape_string($mysqli_link, $_REQUEST['usr'])) . "%'" ;
- else if (isset($_REQUEST['msg']))
+else if (isset($_REQUEST['msg']))
 	$sql_filter = " AND j_message like '%" . web2db(mysqli_real_escape_string($mysqli_link, $_REQUEST['msg'])) . "%'" ;
+else if (isset($_REQUEST['ip']))
+	$sql_filter = " AND j_address like '%" . web2db(mysqli_real_escape_string($mysqli_link, $_REQUEST['ip'])) . "%'" ;
 $sql = "SELECT * FROM $table_journal
 			LEFT JOIN $table_person p ON j_jom_id = p.jom_id
 		WHERE j_id <= $start $sql_filter
