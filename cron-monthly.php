@@ -53,7 +53,6 @@ if (strpos($actions, 't') !== FALSE) $test_mode = true ;
 print(date('Y-m-d H:i:s').": starting for actions = {$actions}.\n") ;
 journalise(0, 'I', "Cron-monthly: starting for actions = {$actions}") ;
 
- 
 print(date('Y-m-d H:i:s').": preparing lists of plane bookings & logbook entries.\n") ;
 
 $email_body = "<p>Voici la liste mensuelle des diverses r&eacute;servations des avions du RAPCS.</p>" ;
@@ -90,16 +89,16 @@ $sql = "select r_plane, count(*)
 	where p.actif != 0 and p.ressource = 0 and r_cancel_date is null and r_start > date_sub(sysdate(), interval 1 month) and r_type != " . BOOKING_MAINTENANCE . "
 	group by r_plane" ;
 
-print_plane_table("R&eacute;servations du dernier mois", $sql, ['Avion', 'Nbr r&eacute;servations']) ;
+print_plane_table("Réservations du dernier mois", $sql, ['Avion', 'Nbr réservations']) ;
 
-$sql = "select name, count(*)
+$sql = "select name, count(*) as count_bookings
 	from $table_users p left join $table_bookings on p.id = r_pilot
 	where r_plane = 'OO-SPQ' and r_cancel_date is null and r_start > date_sub(sysdate(), interval 1 month) and r_type != " . BOOKING_MAINTENANCE . "
 	group by r_pilot
-	order by total_duration desc
+	order by count_bookings desc
 	limit 0,10" ;
 
-print_plane_table("R&eacute;servations OO-SPQ top-10 du dernier mois", $sql, ['Pilote', 'Nbr r&eacute;servations']) ;
+print_plane_table("Réservations OO-SPQ top-10 du dernier mois", $sql, ['Pilote', 'Nbr réservations']) ;
 
 }
 
@@ -171,19 +170,20 @@ $sql = "select *,u.name as full_name
 print(date('Y-m-d H:i:s') . ": executing: $sql\n") ; ob_flush() ;
 $result = mysqli_query($mysqli_link, $sql) or die(date('Y-m-d H:i:s') . ": Erreur systeme lors de la lecture des profils: " . mysqli_error($mysqli_link)) ;
 $all_rows = mysqli_fetch_all($result, MYSQLI_ASSOC) ;
+$email_count = 0 ;
 foreach ($all_rows as $row) {
         $profile_count = 0 ;
 		$missing_items = array() ;
 		$full_name = db2web($row['full_name']) ; 
 		$first_name = db2web($row['first_name']) ; 
         if ($row['email'] != '') $profile_count ++ ;
-        if ($row['first_name'] != '') $profile_count ++ ; else $missing_items[] = '<b>pr&eacute;nom</b>' ;
+        if ($row['first_name'] != '') $profile_count ++ ; else $missing_items[] = '<b>prénom</b>' ;
         if ($row['last_name'] != '') $profile_count ++ ; else $missing_items[] = '<b>nom de famille</b>' ;
-        if ($row['home_phone'] == '')  $missing_items[] = 't&eacute;l&eacute;phone priv&eacute;' ;
-        if ($row['work_phone'] == '') $missing_items[] = 't&eacute;l&eacute;phone travail' ;
-        if ($row['cell_phone'] != '') $profile_count ++ ; else $missing_items[] = '<b>t&eacute;l&eacute;phone mobile</b>' ;
+        if ($row['home_phone'] == '')  $missing_items[] = 'téléphone privé' ;
+        if ($row['work_phone'] == '') $missing_items[] = 'téléphone travail' ;
+        if ($row['cell_phone'] != '') $profile_count ++ ; else $missing_items[] = '<b>téléphone mobile</b>' ;
 		if ($row['contact_name'] == '') $missing_items[] = 'nom du contact' ;
-		if ($row['contact_phone'] == '') $missing_items[] = 't&eacute;l&eacute;phone du contact' ;
+		if ($row['contact_phone'] == '') $missing_items[] = 'téléphone du contact' ;
         if ($row['city'] != '') $profile_count ++ ; else $missing_items[] = 'ville' ;
         if ($row['country'] == '') $missing_items[] = 'pays' ; 
         if ($row['sex'] != '' and $row['sex'] != 0) $profile_count ++ ; else $missing_items[] = 'genre' ; 
@@ -230,6 +230,7 @@ foreach ($all_rows as $row) {
 		smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, "Content-Type: text/html; charset=\"UTF-8\"\r\n") ;
 	else
 		@smtp_mail($email_recipients, substr($email_subject, 9), $email_message, $email_header) ;
+	$email_count ++ ;
 }
 mysqli_free_result($result) ;
 print(date('Y-m-d H:i:s').": End of profile checks.\n") ; ob_flush() ;
@@ -237,7 +238,7 @@ mysqli_close($mysqli_link) ; // Sometimes OVH times out ...
 $mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
 if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
 if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
-journalise(0, 'I', "Cron-monthly: email reminders for missing profiles sent") ;
+journalise(0, 'I', "Cron-monthly: $email_count email reminders for missing profiles sent.") ;
 }
 
 if (strpos($actions, 'e') !== FALSE) {
