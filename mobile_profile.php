@@ -153,45 +153,63 @@ if (isset($_POST['action']) and $_POST['action'] == 'photo' and !$read_only) {
 	$image_size = getimagesize($source_file) ;
 	if ($image_size === FALSE) {
 		journalise($userId, 'E', "Ce fichier n'est pas une photo($displayed_id): " . $_FILES['photoFile']['name'] . '/' . $source_file) ;
-		journalise($userId, "F", "Ce fichier ne semble pas être une image (JPEG, PNG ou GIF), veuillez l'envoyer par email à webmaster@spa-aviation.be") ;
+		journalise($userId, "F", "Ce fichier ne semble pas être une image (JPEG, WEBP, PNG ou GIF), veuillez l'envoyer par email à webmaster@spa-aviation.be") ;
 	}
 	$image_width = $image_size[0] ;
 	$image_height = $image_size[1] ;
 	$image_type = $image_size[2] ;
 	$image_basename = basename($source_file) ;
-	$image_filetype = pathinfo($source_file, PATHINFO_EXTENSION) ;
-	$avatar_filename = "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/users/avatar$displayed_id.$image_filetype" ;
+	switch ($image_type) {
+		case IMAGETYPE_GIF: $image_filetype= "gif" ; break ;
+		case IMAGETYPE_JPEG: $image_filetype= "jpg" ; break ;
+		case IMAGETYPE_PNG: $image_filetype= "png" ; break ;
+		case IMAGETYPE_WEBP: $image_filetype= "webp" ; break ;
+		default: $image_filetype = pathinfo($source_file, PATHINFO_EXTENSION) ;
+	}
+	#	$avatar_filename = "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/users/avatar$displayed_id.$image_filetype" ;
+	$avatar_filename = "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/avatar$displayed_id.$image_filetype" ;
 	// Do we need to resize the image ?
 	if ($image_width <= 200 and $image_height <= 200) {
 		if (!move_uploaded_file($source_file, $avatar_filename)) {
-			journalise($userId, 'E', "Impossible de déplacer le fichier photo ($displayed_id) to $avatar_filename: $source_file") ;
-			$change_profile_message .= "Impossible de mettre à jour la photo.<br/>" ;
+			$error_code = $_FILES['photoFile']['error'] ;
+			journalise($userId, 'E', "Impossible de déplacer le fichier photo ($source_file) of $displayed_id to $avatar_filename, error code $error_code") ;
+			$change_profile_message .= "Impossible de mettre à jour la photo (error $error_code).<br/>" ;
 		}
-	} else {
+
+	} else { // Need to resize
 		$resize_ratio = ($image_width > $image_height) ? 200 / $image_width  : 200 / $image_height;
 		switch ($image_type) {
 			case IMAGETYPE_GIF: $upload_image = imagecreatefromgif($source_file) ; break ;
 			case IMAGETYPE_JPEG: $upload_image = imagecreatefromjpeg($source_file) ; break ;
 			case IMAGETYPE_PNG: $upload_image = imagecreatefrompng($source_file) ; break ;
+			case IMAGETYPE_WEBP: $upload_image = imagecreatefromwebp($source_file) ; break ;
 			default:
 				journalise($userId, 'E', "Format photo non supporté ($image_type) for $displayed_id: " . $_FILES['photoFile']['name'] . " == $source_file") ;
-				$change_profile_message .= "Impossible de mettre à jour la photo (format non supporté).<br/>" ;
+				$change_profile_message .= "Impossible de mettre à jour la photo (format non supporté, cela doit être JPG, WEBP, PNG, ou GIF).<br/>" ;
 		}
 		if (! $upload_image) journalise($userId, 'E', "Impossible de lire la photo pour $displayed_id: " . $_FILES['photoFile']['name']) ;
-// print("<hr>" . ($image_width * $resize_ratio) . " x " . ($image_height * $resize_ratio) . " => $_SERVER[DOCUMENT_ROOT]/${avatar_root_directory}/users/avatar${displayed_id}.gif") ;
 		$new_image = imagescale($upload_image, $image_width * $resize_ratio, $image_height * $resize_ratio) ;
 		if (! $new_image) journalise($userId, 'E', "Impossible de scaler ($resize_ratio) for $displayed_id: " . $_FILES['photoFile']['name']) ;
 		imagedestroy($upload_image) ;
-		switch ($image_type) {
-			case IMAGETYPE_GIF: imagegif($new_image, "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/users/avatar$displayed_id.gif") ; $image_filetype = 'gif' ; break ;
-			case IMAGETYPE_JPEG: imagejpeg($new_image, "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/users/avatar$displayed_id.jpg") ; $image_filetype = 'jpg' ; break ;
-			case IMAGETYPE_PNG: imagepng($new_image, "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/users/avatar$displayed_id.png") ; $image_filetype = 'png' ; break ;
+		// Delete all previous versions (if any, could be different filetypes)
+		foreach (glob("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/avatar$displayed_id.*") as $file) {
+			if (is_file($file)) {
+				unlink($file); // Delete the file
+				journalise($userId, 'D', "Deleted old avatar file $file for $displayed_id") ;
+			}
 		}
-	}
+		// Save the image with good quality
+		switch ($image_type) {
+			case IMAGETYPE_GIF: imagegif($new_image, "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/avatar$displayed_id.gif") ; break ;
+			case IMAGETYPE_JPEG: imagejpeg($new_image, "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/avatar$displayed_id.jpg", 90) ; break ;
+			case IMAGETYPE_PNG: imagepng($new_image, "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/avatar$displayed_id.png", 0) ; break ;
+			case IMAGETYPE_WEBP: imagewebp($new_image, "$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/avatar$displayed_id.webp", 80) ; break ;
+		}
+	} // End of resize
 	// Update the avatar for this user
 	mysqli_query($mysqli_link, "update $table_person set avatar = 'avatar$displayed_id.$image_filetype' where jom_id = $displayed_id")
-                        or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_person (avatar): " . mysqli_error($mysqli_link)) ;
-	if ($affected_rows > 0) 
+                        or journalise($userId, "F", "Erreur systeme lors de la mise à jour de $table_person (avatar): " . mysqli_error($mysqli_link)) ;
+	if ($mysqli_link->affected_rows > 0) 
 		journalise($userId, 'I', "Changement de photo($me[username]/$displayed_id)") ;
 }
 
