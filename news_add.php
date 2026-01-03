@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ require_once "dbi.php" ;
 MustBeLoggedIn() ;
 
 if (! $userIsAdmin)
-	die("Vous devez &ecirc;tre connect&eacute; et administrateur pour ajouter une nouvelle.") ;
+	journalise($userId, "F", "Vous devez être connecté et administrateur pour ajouter une nouvelle.") ;
 
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'news_add') {
 	$start = mysqli_real_escape_string($mysqli_link, web2db(trim($_REQUEST['start']))) ;	
@@ -33,8 +33,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'news_add') {
 		or die("Cannot add news about '$_REQUEST[subject]': " . mysqli_error($mysqli_link)) ;
 	// So far so good, redirect to the reservation page
 	journalise($userId, 'I', "News about $_REQUEST[subject] added") ;
-	header('Location: ' . 'https://www.spa-aviation.be/resa/') ;
-	die() ; 
+	header('Location: ' . 'https://www.spa-aviation.be/resa/mobile_reservations.php') ;
+	exit ; 
 }
 
 ?><html>
@@ -71,7 +71,7 @@ const
 <body>
 <div class="container-fluid">
 <div class="row">
-<h3>Ajout d'une nouvelle</h3>
+<h2>Ajout d'une nouvelle</h2>
 </div><!-- row -->
 
 <div class="row">
@@ -113,7 +113,7 @@ const
 <?php
 $version_php = date ("Y-m-d H:i:s.", filemtime('news_add.php')) ;
 ?>
-<div class="copyright">R&eacute;alisation: Eric Vyncke, avril 2018, pour RAPCS, Royal A&eacute;ro Para Club de Spa, ASBL<br>
+<div class="copyright">Réalisation: Eric Vyncke, avril 2018 - janvier 2026, pour RAPCS, Royal Aéro Para Club de Spa, ASBL<br>
 Versions: PHP=<?=$version_php?></div>
 </div> <!-- row-->
 
