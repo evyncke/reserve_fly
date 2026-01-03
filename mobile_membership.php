@@ -22,8 +22,14 @@ require_once "dbi.php" ;
 if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'delay') {
     $hours = ($membership_year == date('Y')) ? 1 : 24 ; // 1 hour if for this year else 24 hours
     setcookie('membership', 'ignore', time() + ($hours * 60 * 60), "/"); 
-    header("Location: https://www.spa-aviation.be/resa/" . urldecode($_REQUEST['cb']), TRUE, 307) ; // TODO avoid using hardcoded domain name
-    journalise($userId, "I", "Membership reminder delayed by $hours hours") ;
+    // Is there a call back URL ? 
+    // Also clean it a bit... to avoid a // in the redirection URL
+    $cb = (isset($_REQUEST['cb'])) ? urldecode($_REQUEST['cb']) : 'mobile.php' ;
+    if (str_starts_with($cb, '/'))
+        $cb = substr($cb, 1) ;
+    // TODO avoid using hardcoded domain name
+    header("Location: https://www.spa-aviation.be/$cb", TRUE, 307) ; 
+    journalise($userId, "I", "Membership reminder delayed by $hours hour(s)") ;
     exit ;
 }
 
@@ -31,9 +37,6 @@ if (isset($_REQUEST['radioMember']) and $_REQUEST['radioMember'] == 'quit') {
     // Ugly handling as bookkeepers wanted to have a 3 choice radio control...
     setcookie('membership', 'ignore', time() + (365 * 24 * 60 * 60), "/"); 
 }
-
-if (!isset($_REQUEST['cb']))
-    $_REQUEST['cb'] = 'mobile.php' ; // If the membership URL was shared by email, ...
 
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
