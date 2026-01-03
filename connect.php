@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ require_once 'dbi.php' ;
 
 // https://gist.github.com/alexandreelise/2fa2c5ce2a823bc2f08abbb91cd44274
 
-$callback = $_REQUEST['cb'] ;
+$callback = urldecode($_REQUEST['cb']) ;
 
 if ($userId > 0) {
     header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
@@ -75,8 +75,8 @@ if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
 
 <form method="post" action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="cb" value="<?=$callback?>">
-Identifiant: <input type="text" name="username" value="<?=$_REQUEST['username']?>"><br/>
-Mot de passe: <input type="password" name="password"><br/>
+Identifiant: <input type="text" name="username"  autocomplete="username" value="<?=$_REQUEST['username']?>"><br/>
+Mot de passe: <input type="password" name="password" autocomplete="current-password"><br/>
 <input type="submit" value="Connexion">
 </form>
 </body>
