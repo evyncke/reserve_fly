@@ -146,6 +146,8 @@ $total_pct = round(($total_hours * 60 + $total_minutes) * 100 / (45 * 60)) ;
 <div class="row">
 <div class="col-sm-12 col-md-4">
 <p><ul>
+    <li>Theoretical training year: <input type="text" value="<?=$student->theoreticalTrainingYear?>" class="Xform-control" readonly>
+        <i class="bi bi-pencil-square" title="Edit theoretical training year" onclick="alert('not implemented yet');"></i></li>
     <li>Flight count: <?=$flights->count?></li>
     <li>Last flight: <?=$last_flight?></li>
     <li>DC: <?="$dc_hours H $dc_minutes min"?><br/>

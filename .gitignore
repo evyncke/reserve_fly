@@ -49,3 +49,4 @@ odoo.php
 auth.php
 odoo.php
 odooFlight_InProgress.class.php
+dto_import.php

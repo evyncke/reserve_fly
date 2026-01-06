@@ -56,6 +56,7 @@ class DTOMember {
     public $daysSinceLastFlight ;
     public $validitiesDates = array() ;
     public $validitiesDaysLeft = array() ;
+    public $theoreticalTrainingYear ;
 
 
     function __construct($row = NULL) {
@@ -95,17 +96,25 @@ class DTOMember {
                     $this->validitiesDaysLeft[$validity_type_id] = -$days_since_expiry ;
                 }
             }
+            if (isset($row['ds_year'])) {
+                if ($row['ds_year'] != -1)
+                    $this->theoreticalTrainingYear = $row['ds_year'] ;
+                else
+                    $this->theoreticalTrainingYear = 'No' ;
+            } else
+                $this->theoreticalTrainingYear = NULL ;
         }
     }
 
     function getById($jom_id) {
-        global $mysqli_link, $table_blocked, $table_person, $table_user_usergroup_map, $table_membership_fees, $userId;
+        global $mysqli_link, $table_blocked, $table_person, $table_user_usergroup_map, $table_membership_fees, $table_dto_student, $userId;
 
         $result = mysqli_query($mysqli_link, "SELECT *, GROUP_CONCAT(DISTINCT m.group_id) AS group_ids 
                 FROM $table_person
                 LEFT JOIN $table_blocked ON b_jom_id = jom_id
                 JOIN $table_user_usergroup_map m ON jom_id = m.user_id  
                 LEFT JOIN $table_membership_fees ON bkf_user = jom_id AND bkf_year = YEAR(CURDATE())
+                LEFT JOIN $table_dto_student ON ds_jom_id = jom_id
                 WHERE jom_id = $jom_id")
             or journalise($userId, "F", "Cannot read from $table_person for $jom_id: " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
@@ -151,12 +160,12 @@ class Student extends DTOMember {
 class DTOMembers implements Iterator {
     public $group ;
     public $count ;
-    public $fi ; // SHould perhaps be private... a little ugle anyway
+    public $fi ; // Should perhaps be private... a little ugly anyway
     private $result ;
     private $row ;
 
     function __construct ($group, $fi = NULL) {
-        global $mysqli_link, $table_users, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_validity,
+        global $mysqli_link, $table_users, $table_person, $table_dto_flight, $table_dto_student, $table_user_usergroup_map, $table_validity,
             $table_logbook, $table_blocked, $table_membership_fees, $joomla_instructor_group, $userId,
             $joomla_instructor_group, $joomla_student_group, $joomla_pilot_group ;
 
@@ -182,6 +191,7 @@ class DTOMembers implements Iterator {
                     $dto_flight_join
                     LEFT JOIN $table_logbook ON $logbook_condition
                     LEFT JOIN $table_blocked ON b_jom_id = p.jom_id
+                    LEFT JOIN $table_dto_student ON ds_jom_id = jom_id
                     LEFT JOIN $table_membership_fees ON bkf_user = p.jom_id AND bkf_year = YEAR(CURDATE())
                     LEFT JOIN $table_validity AS v ON v.jom_id = p.jom_id
                 WHERE m.group_id = $this->group AND block = 0  $fi_condition

@@ -65,7 +65,7 @@ foreach($members as $member) {
 <div class="table-responsive">
 <table class="table table-striped table-hover">
 <thead>
-<th>Elèves</th><th>Premier/dernier vols</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th></tr>
+<th>Elèves</th><th>Cours théoriques</th><th>Premier/dernier vols</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th></tr>
 </thead>
 <tbody class="table-group-divider">
 
@@ -102,6 +102,7 @@ foreach($members as $member) {
                     <a href=\"mailto:$student->email\"><i class=\"bi bi-envelope-fill\" title=\"Send email\"></i></a>
                     $mobile_phone $membership_filled $blocked $bank_filled
             </td>
+            <td>$student->theoreticalTrainingYear</td>
             <td>$student->firstFlight <span class=\"badge text-bg-info\" title=\"Number of flights\"><i class=\"bi bi-airplane-fill\"></i> $student->countFlights</span><br/>
                 $student->lastFlight <span class=\"badge $daysColor\" title=\"Days since last flight\"><i class=\"bi bi-calendar3\"></i> $student->daysSinceLastFlight</span></td>
             <td class=\"d-none d-md-table-cell\"><a href=\"mailto:$student->email\">$student->email</a></td>
