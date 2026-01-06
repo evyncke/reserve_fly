@@ -720,12 +720,25 @@ if (! $read_only) {
 			'app_secret' => $fb_app_secret,
 			'default_graph_version' => 'v18.0',
 		]);
-		$fb_response = $facebookClient->get("/$me[facebook_id]/picture?type=large&redirect=false", $me['facebook_token']);
-		$fb_picture = $fb_response->getGraphUser();
-		print('<img src="' . $fb_picture['url'] . '" style="width: auto;" alt="Photo de profil Facebook">') ;
-		$fb_response = $facebookClient->get("/$me[facebook_id]?fields=link", $me['facebook_token']);
-		$fb_link = $fb_response->getGraphUser();
-		print('<a class="btn btn-primary" href="' . $fb_link->getLink() . '" target="_blank"><i class="bi bi-facebook"></i> Voir le profil Facebook <i class="bi bi-box-arrow-up-right"></i></a>') ;
+		try {
+			$fb_response = $facebookClient->get("/$me[facebook_id]?fields=picture.type(large){url}", $me['facebook_token']);
+			$fb_picture = $fb_response->getGraphUser();
+			print('<img src="' . $fb_picture['url'] . '" style="width: auto;" alt="Photo de profil Facebook">') ;
+			$fb_response = $facebookClient->get("/$me[facebook_id]?fields=link", $me['facebook_token']);
+			$fb_link = $fb_response->getGraphUser();
+			print('<a class="btn btn-primary" href="' . $fb_link->getLink() . '" target="_blank"><i class="bi bi-facebook"></i> Voir le profil Facebook <i class="bi bi-box-arrow-up-right"></i></a>') ;
+		} catch(Facebook\Exceptions\FacebookResponseException $e) {
+			// When Graph returns an error
+			print('Erreur Facebook Graph: ' . $e->getMessage());
+			journalise($userId, 'E', 'Erreur Facebook Graph lors de la récupération de la photo Facebook pour ' . $me['username'] . ': ' . $e->getMessage()) ;
+		} catch(Facebook\Exceptions\FacebookSDKException $e) {
+			// When validation fails or other local issues
+			print('Erreur Facebook SDK: ' . $e->getMessage());
+			journalise($userId, 'E', 'Erreur Facebook SDK lors de la récupération de la photo Facebook pour ' . $me['username'] . ': ' . $e->getMessage()) ;
+		} catch(Exception $e) {
+			print('Erreur inconnue: ' . $e->getMessage());
+			journalise($userId, 'E', 'Erreur inconnue lors de la récupération de la photo Facebook pour ' . $me['username'] . ': ' . $e->getMessage()) ;
+		}
 	} else {
 		print('<p>Compte Facebook inexistant ou pas lié au profil du site.</p>') ;
 		if (! $read_only) {
