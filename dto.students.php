@@ -23,6 +23,8 @@ if ($userId == 0) {
 }
 if (! ($userIsBoardMember or $userIsInstructor))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
+
+$header_postamble = '<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">' ;
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 
@@ -63,7 +65,7 @@ foreach($members as $member) {
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-7">
 <div class="table-responsive">
-<table class="table table-striped table-hover">
+<table class="table table-striped table-hover" id="students-table">
 <thead>
 <th>Elèves</th><th>Cours théoriques</th><th>Premier/dernier vols</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th></tr>
 </thead>
@@ -115,5 +117,18 @@ foreach($members as $member) {
 </div><!-- table responsive -->
 </div><!-- col -->
 </div><!-- row --> 
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+<script>
+    new window.simpleDatatables.DataTable("#students-table", {
+        searchable: true,
+        fixedHeight: false,
+        paging: false,
+        labels: {
+            placeholder: "Rechercher...",
+            noRows: "Aucune entrée trouvée",
+            info: "Affichage de {start} à {end} sur {rows} entrées",
+        }
+    });
+</script>
 </body>
 </html>

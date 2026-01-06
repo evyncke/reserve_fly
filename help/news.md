@@ -3,6 +3,10 @@
 Vous trouverez ici les diverses nouveautés à propos du site réservation du RAPCS. Les suggestions sont les bienvenues auprès de
 [Éric Vyncke](mobile_profile.php?displayed_id=62) et [Patrick Reginster](mobile_profile.php?displayed_id=66).
 
+## Janvier 2026
+
+- plusieurs tables peuvent être triées en cliquant sur l'intitulé d'une colonne, il est aussi possible d'afficher que certaines lignes via la case "Rechercher" au dessus de la table.
+
 ## Décembre 2025
 
 - il est possible de se connecter avec votre compte Facebook ou Google *si*

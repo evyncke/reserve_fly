@@ -23,6 +23,8 @@ if ($userId == 0) {
 }
 if (! ($userIsBoardMember or $userIsInstructor))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
+
+$header_postamble = '<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">' ;
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 
@@ -59,7 +61,7 @@ $sql_now = date('Y-m-d') ;
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-7">
 <div class="table-responsive">
-<table class="table table-striped table-hover">
+<table class="table table-striped table-hover" id="pilots-table">
 <thead>
 <th>Pilotes</th><th>Premier&nbsp;/&nbsp;dernier vols</th><th>Médical&nbsp;/&nbsp;ELP&nbsp;/&nbsp;SEP</th><th class="d-none d-xl-table-cell">Email</th><th class="d-none d-xl-table-cell">Mobile</th></tr>
 </thead>
@@ -144,6 +146,19 @@ $sql_now = date('Y-m-d') ;
 </table>
 </div><!-- table responsive -->
 </div><!-- col -->
-</div><!-- row --> 
+</div><!-- row -->
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+<script>
+    new window.simpleDatatables.DataTable("#pilots-table", {
+        searchable: true,
+        fixedHeight: false,
+        paging: false,
+        labels: {
+            placeholder: "Rechercher...",
+            noRows: "Aucune entrée trouvée",
+            info: "Affichage de {start} à {end} sur {rows} entrées",
+        }
+    });
+</script>
 </body>
 </html>
