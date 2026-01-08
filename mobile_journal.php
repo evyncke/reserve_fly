@@ -96,7 +96,7 @@ while ($row = mysqli_fetch_array($result)) {
 		<td$nameStyle class=\"text-nowrap$specialClass\">$name</td>
 		<td class=\"d-none d-lg-table-cell$specialClass\">$row[j_address]</td>
 		<td class=\"text-align$specialClass\">" . db2web($row['j_message']) . "</td>
-		<td class=\"text-align d-none d-lg-table-cell$specialClass\">" . db2web($row['j_uri']) . "</td>
+		<td class=\"text-align d-none d-lg-table-cell$specialClass\"><a href=\"" . db2web($row['j_uri']) . "\">" . db2web($row['j_uri']) . "</a></td>
 		</tr>\n") ;
 }
 $first_id += 25 ;
