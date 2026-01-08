@@ -361,6 +361,10 @@ $zenith = 90.5 ;
 $mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ; 
 if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
 if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
+// Trying to restore the right character set after PHP upgrade from 8.1 to 8.4
+// Eric Vyncke 2025-01-08
+$mysqli_link->set_charset('utf8mb4') ;
+$convertToUtf8 = false ;
 
 // Do we need to redirect to the membership renewal page ?
 $membership_year = date('Y') ;
