@@ -197,7 +197,6 @@ if (isset($_REQUEST['unactivated']) and $_REQUEST['unactivated'] != '') {
 		$displayWebDeactivated=true;
 	}
 }
-print("displayWebDeactivated=$displayWebDeactivated<br>");
 ?>
 <script type="text/javascript">
 
