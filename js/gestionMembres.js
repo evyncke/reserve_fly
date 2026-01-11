@@ -97,7 +97,7 @@ function blockFunction(PHP_Self, theBlockedFlag, theNom, theUserId, theSolde)
 	var aReason="";
 	if(theBlockedFlag=="Block") {
 		aReason=getReason(theSolde);
-		if (confirm("Confirmer que vous voulez bloquer " + theNom + "?\nRaison: "+aReason) == true) {			
+		if (confirm("Confirmez que vous voulez bloquer " + theNom + "?\nRaison: "+aReason) == true) {			
    		 	var aCommand=PHP_Self+"?block=true&personid="+theUserId+"&reason="+aReason;	
 			if(aSearchText!="")	 {
 				aCommand+="&search="+aSearchText;
@@ -106,7 +106,7 @@ function blockFunction(PHP_Self, theBlockedFlag, theNom, theUserId, theSolde)
 		}
 	}
 	else {
-		if (confirm("Confirmer que vous voulez débloquer " + theNom + "?") == true) {
+		if (confirm("Confirmez que vous voulez débloquer " + theNom + "?") == true) {
       		var aCommand=PHP_Self+"?unblock=true&personid="+theUserId;
  			if(aSearchText!="")	 {
  				aCommand+="&search="+aSearchText;
@@ -252,7 +252,7 @@ function filterRows(count, blocked, sign)
 			}
 			else if(sign=="eleve") {
 				var aMemberType=row.getElementsByTagName("TD")[aEleveColumn].innerHTML;
-				if(aMemberType!="") {
+				if(aMemberType.indexOf("checked")>=0) {
 					row.hidden=false;	
 					continue;
 				}
@@ -263,7 +263,7 @@ function filterRows(count, blocked, sign)
 			}
 			else if(sign=="pilote") {
 				var aMemberType=row.getElementsByTagName("TD")[aPiloteColumn].innerHTML;
-				if(aMemberType!="") {
+				if(aMemberType.indexOf("checked")>=0) {
 					row.hidden=false;	
 					continue;
 				}
@@ -274,7 +274,7 @@ function filterRows(count, blocked, sign)
 			}
 			else if(sign=="effectif") {
 				var aMemberType=row.getElementsByTagName("TD")[aEffectifColumn].innerHTML;
-				if(aMemberType!="") {
+				if(aMemberType.indexOf("checked")>=0) {
 					row.hidden=false;	
 					continue;
 				}
@@ -365,7 +365,7 @@ function submitBlocked(PHP_Self, blocked) {
 	var aReason="";
 	if(blocked=="Block") {
 		aReason=getReason("");
-		if (confirm("Confirmer que vous voulez bloquer " + aCount.toString() +" personne(s)" + "?\nRaison: "+aReason) == true) {			
+		if (confirm("Confirmez que vous voulez bloquer " + aCount.toString() +" personne(s)" + "?\nRaison: "+aReason) == true) {			
    		 	var aCommand=PHP_Self+"?block=true&listpersonid="+aListOfId+"&reason="+aReason;	
 			if(aSearchText!="")	 {
 				aCommand+="&search="+aSearchText;
@@ -374,7 +374,7 @@ function submitBlocked(PHP_Self, blocked) {
 		}
 	}
 	else {
-		if (confirm("Confirmer que vous voulez débloquer "+ aCount.toString() +" personne(s)" + "?") == true) {
+		if (confirm("Confirmez que vous voulez débloquer "+ aCount.toString() +" personne(s)" + "?") == true) {
       		var aCommand=PHP_Self+"?unblock=true&listpersonid="+aListOfId+"&reason="+aReason;
  			if(aSearchText!="")	 {
  				aCommand+="&search="+aSearchText;
@@ -414,6 +414,21 @@ function submitDownloadMail(PHP_Self, action) {
 		alert(aCount+" adresses mails sont copiées dans le clipboard. Utiliser le Paste (Cmd+V) pour le copier dans un document !");
 	}
 }
+function submitUnactivated(PHP_Self, action) {
+ 
+	if(action=="Unactivated") {
+		if (confirm("Confirmez que vous voulez affichez les membres déactivés ?") == true) {
+      		var aCommand=PHP_Self+"?unactivated=true";
+      		window.location.href = aCommand;
+		}		
+	}
+	else {
+		if (confirm("Confirmez que vous voulez affichez les membres actifs ?") == true) {
+      		var aCommand=PHP_Self+"?unactivated=false";
+      		window.location.href = aCommand;
+		}		
+	}
+}
 
 function createCotisationFunction(PHP_Self,action,theName,thePersonid,isMember) {
 	var aSearchText=document.getElementById("id_SearchInput").value;
@@ -430,10 +445,10 @@ function createCotisationFunction(PHP_Self,action,theName,thePersonid,isMember) 
 	// After 1 July: Proportional to the numer of mounth
 	aDate= new Date();
 	aMonth=aDate.getMonth()+1;
-	if(aMonth>6){
+	if(aMonth>6 && aMonth!=12){
 		aCotisationValue=aCotisationValue*(12-aMonth)/12.0;
 	}
-	if (confirm("Confirmer que vous voulez créer une facture de cotisation " + aCotisationTypeString + " de " + aCotisationValue.toString() + " € à " + theName + " (id="+thePersonid+")?") == true) {
+	if (confirm("Confirmez que vous voulez créer une facture de cotisation " + aCotisationTypeString + " de " + aCotisationValue.toString() + " € à " + theName + " (id="+thePersonid+")?") == true) {
       		var aCommand=PHP_Self+"?createcotisation=true&personid="+thePersonid+"&cotisationtype="+aCotisationType;
  			if(aSearchText!="")	 {
  				aCommand+="&search="+aSearchText;

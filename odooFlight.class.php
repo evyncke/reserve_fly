@@ -152,10 +152,9 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMember
     $month=date("m");
     $non_nav_membership_price_corrected=$non_nav_membership_price;
     $nav_membership_price_corrected=$nav_membership_price;
-    if($month>6) {
+    if($month>6&&$month!=12) {
         $non_nav_membership_price_corrected=$non_nav_membership_price_corrected*(12-$month)/12.0;
         $nav_membership_price_corrected=$nav_membership_price_corrected*(12-$month)/12.0;
-
     }
     $odooClient = OF_GetOdooClient();
     $invoice_lines = array() ;
@@ -189,7 +188,9 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMember
                     'invoice_origin' => "Manuellement par $userFullName " . date("Y-m-d"),
                     'invoice_line_ids' => $invoice_lines)) ;
     if(1) {
-        $result = $odooClient->Create('account.move', $params) ;
+        $result=array();
+        $result[0]=0;
+        if(1) $result = $odooClient->Create('account.move', $params) ;
         print("Invoicing result for #$odoo_id: $membership_price &euro;, " . implode(', ', $result) . "<br/>\n") ;
         mysqli_query($mysqli_link, "INSERT INTO $table_membership_fees(bkf_user, bkf_year, bkf_amount, bkf_invoice_id, bkf_invoice_date)
          VALUES($thePersonID, '$theMembership_year', $membership_price, $result[0], '$invoice_date')")
@@ -1998,6 +1999,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
 */
     global $table_users,$table_person,$table_user_usergroup_map,$table_company, $table_company_member;
     global $userId,$mysqli_link,$joomla_student_group,$joomla_pilote_group,$joomla_member_group;
+    global $membership_year;
 
     $insertFlag=true;
 /*
@@ -2184,7 +2186,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     $cotisationType="naviguant";
     if($typemembre=="nonnaviguant") $cotisationType="nonnaviguant";
     if($insertFlag) {
-        if(!OF_CreateFactureCotisation($jom_id, $cotisationType, substr($dateinscription,0,4))) {
+        if(!OF_CreateFactureCotisation($jom_id, $cotisationType,$membership_year)) {
             return "Impossible to create the invoice in Odoo!";
         }
     }

@@ -34,7 +34,7 @@ $header_postamble ='
 require_once 'mobile_header5.php' ;
 
 // Display or not Web deActicated member (Must be managed by a toggle button)
-$displayWebDeactivated=false;
+$displayWebDeactivated=true;
 $searchText=""; 	
 if (isset($_REQUEST['search']) and $_REQUEST['search'] != '') {
 	$searchText=$_REQUEST['search'];
@@ -191,6 +191,13 @@ if (isset($_REQUEST['checkboxId']) and $_REQUEST['checkboxId'] != '' and isset($
 	}
 	// TODO send an email to personId to inform him of the change
 }
+$displayWebDeactivated=false;
+if (isset($_REQUEST['unactivated']) and $_REQUEST['unactivated'] != '') {
+	if($_REQUEST['unactivated']=="true") {
+		$displayWebDeactivated=true;
+	}
+}
+print("displayWebDeactivated=$displayWebDeactivated<br>");
 ?>
 <script type="text/javascript">
 
@@ -289,7 +296,15 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 	<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitSelect\" onclick=\"submitSelect('Unselect')\")> &nbsp;&nbsp;
 	<input type=\"submit\" value=\"Block\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[PHP_SELF]','Block')\")> &nbsp;&nbsp;
     <input type=\"submit\" value=\"Unblock\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[PHP_SELF]', 'NotBlock')\">&nbsp;&nbsp;
-	<input type=\"submit\" value=\"Copy Mails\" id=\"id_SubmitDownloadMail\" onclick=\"submitDownloadMail('$_SERVER[PHP_SELF]', 'CopyMail')\">");
+	<input type=\"submit\" value=\"Copy Mails\" id=\"id_SubmitDownloadMail\" onclick=\"submitDownloadMail('$_SERVER[PHP_SELF]', 'CopyMail')\">&nbsp;&nbsp;");
+	if(!$displayWebDeactivated) {
+		print("<input type=\"submit\" value=\"Display Unactivated\" id=\"id_SubmitUnactivated\" onclick=\"submitUnactivated('$_SERVER[PHP_SELF]', 'Unactivated')\">");
+	}
+	else {
+		print("<input type=\"submit\" value=\"Display Activated\" id=\"id_SubmitUnactivated\" onclick=\"submitUnactivated('$_SERVER[PHP_SELF]', 'Activated')\">");
+	}
+	 
+	
 ?>
 </br>
 	<p></p>
@@ -420,8 +435,11 @@ datediff(current_date(), b_when) as days_blocked
 		}
 		if(abs($solde)<0.01) $solde=0.0;
 		
-		//Don't display webdeactivated member if solde == 0
-		if(!$displayWebDeactivated && $blocked == 1 && $solde == 0.0) {
+		//Don't display webdeactivated member 
+		if(!$displayWebDeactivated && $blocked == 1) {
+		   continue;
+		}
+		else if($displayWebDeactivated && $blocked != 1) {
 		   continue;
 		}
 		$count++;
