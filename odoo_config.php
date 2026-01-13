@@ -27,12 +27,14 @@ if ($userId == 0) {
 	exit ;
 }
 
+$cookie = isset($_COOKIE['odoo']) ? $_COOKIE['odoo'] : 'no cookie defined';
+
 require_once 'mobile_header5.php' ;
 
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
 ?>
 <h2>Configuration de la base de données Odoo@<?=$odoo_host?></h2>
-<p>Sur base du fichier <mark>dbi.php</mark> (modifiable par Éric ou Patrick) et du cookie 'odoo' (<b><?=$_COOKIE['odoo']?></b>).
+<p>Sur base du fichier <mark>dbi.php</mark> (modifiable par Éric ou Patrick) et du cookie 'odoo' (<b><?=$cookie?></b>).
 <ul>
     <li>Hostname: <b><a href="https://  <?=$odoo_host?>"><?=$odoo_host?></a></b></li>
     <li>Data base: <b><?=$odoo_db?></b></li>
