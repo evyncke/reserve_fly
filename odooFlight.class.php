@@ -2272,7 +2272,13 @@ $table_membership_fees = 'rapcs_bk_fees' ;
             return "Impossible to create the invoice in Odoo!";
         }
     }
-    //12. Send a mail
+
+    // 12. Create an invoice for the cours theorique
+    if($courstheorique=="oui") {
+        OF_CreateFactureCoursTheorique($jom_id,  $membership_year);
+    }
+
+    //11. Send a mail
      print("<a href=\"mailto:$email?cc=benoitmendes@hotmail.com,pendersbernard@gmail.com,vintens.ch@gmail.com,eric@vyncke.org,patrick.reginster@gmail.com&subject=Acces%20au%20site%20du%20RAPCS&body=Bonjour%20$fullName,%0D%0Aline1<br>line2\" target=\"_top\">Send mail to the new member!</a><br>");
     // Reste cours theorique et motivation ?
  

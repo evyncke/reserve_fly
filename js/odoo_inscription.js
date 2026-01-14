@@ -245,13 +245,13 @@ function updateFields(theField) {
  		document.getElementById("id_licence_row").style.display="";
  		document.getElementById("id_validitemedicale_row").style.display="";
  		document.getElementById("id_validiteelp_row").style.display="";
- 		document.getElementById("id_courstheorique_row").style.display="";	}
+ 		document.getElementById("id_courstheorique_row").style.display="none";	}
 	else {
 		document.getElementById("id_qualification_row").style.display="none";
 		document.getElementById("id_licence_row").style.display="none";
  		document.getElementById("id_validitemedicale_row").style.display="none";
 		document.getElementById("id_validiteelp_row").style.display="none";
- 		document.getElementById("id_courstheorique_row").style.display="none";
+ 		document.getElementById("id_courstheorique_row").style.display="";
 	}
 
   	value=document.getElementById("id_societe").value;

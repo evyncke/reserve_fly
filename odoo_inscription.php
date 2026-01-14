@@ -262,7 +262,7 @@ if (isset($_REQUEST['createmember']) and $_REQUEST['createmember'] == 'create') 
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_courstheorique_row">
-	<label for="courstheorique" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Participation cours théorique:</label>
+	<label for="courstheorique" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Participation cours théorique (Session <?=$membership_year?>):</label>
 	<div class="col-sm-4 col-md-4 col-lg-4">
         <select name="courstheorique" id="id_courstheorique" class="form-select">
             <option value="none">Choisir</option>
