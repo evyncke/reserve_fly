@@ -97,11 +97,15 @@ $tax_per_pax = 10.0 ;
 
 // Odoo integration
 // Analytic accounts and products are harcoded
-$non_nav_membership_product = 7 ;
+$non_nav_membership_product = 7 ;//product.product == cotisation club
 $nav_membership_product = 8 ;
 $non_nav_membership_price = 70.0 ; //2025
 $nav_membership_price = 200.0 ; //2025
-$membership_analytic_account = 25  ;
+$membership_analytic_account = 25  ;//account.analytic.account == cotication club
+
+$theoretical_tuition_price = 700;
+$theoretical_tuition_product = 108; //product.product == Minerval Théorique 
+$ecole_analytic_account=43; //account.analytic.account == aeroclub ecole
 
 $tracked_planes = array('OOALD', 'OOALE', 'OOAPV', 'OOFUN', 'OOJRB', 'OOFMX', 'OOSPQ') ;
 // array_push($tracked_planes, 'OOADO', 'OOG85', 'OOPEG', 'OOVMS', 'DELZA', 'DELZB', 'FJXRL') ; // For Air Spa Rallye

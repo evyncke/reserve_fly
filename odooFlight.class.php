@@ -14,6 +14,21 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+   Model Odoo:
+   ==========
+   account.move
+   account.account
+   account.analytic.account
+   account.move.line
+   account.bank.statement
+   account.bank.statement.line
+   documents.document
+   product.product
+   product.template
+   res.partner
+   res.partner.category
+   res.country
+
 */
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require __DIR__ . '/vendor/autoload.php' ; // EVY Is this needed here?
@@ -131,7 +146,7 @@ function OF_FillFlightMaps(&$theReferenceIDMap) {
 
 //============================================
 // Function: OF_CreateFactureCotisation
-// Purpose: Create an invoice for a member cotisation 
+// Purpose: Create an invoice for a member cotisation  + update la table table_membership_fees
 //           CotisationType="naviguant","nonnaviguant"
 //============================================
 function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMembership_year) {
@@ -201,6 +216,73 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMember
         var_dump($params);
         print("<br>");
     }
+    return true;
+}
+//============================================
+// Function: OF_CreateFactureCoursTheorique
+// Purpose: Create an invoice for cours theorique + update la table dto_student
+//           CotisationType="naviguant","nonnaviguant"
+//============================================
+function OF_CreateFactureCoursTheorique($thePersonID,  $theSessionYear) {
+    global $mysqli_link, $table_dto_student, $userId, $userFullName;
+    global $theoretical_tuition_product,$theoretical_tuition_price,$ecole_analytic_account;
+    //print("OF_CreateFactureCoursTheorique($thePersonID, $theSessionYear,$theoretical_tuition_price):started<br>");
+    $odoo_id=161;//Patrick Reginster test
+    $coursPrice=$theoretical_tuition_price;
+    $result=array();
+    $invoidId=1319;
+
+
+    $invoice_date =  date("Y-m-d") ;
+    $invoice_date_due =  date("Y-m-d", strtotime("+1 week")) ;
+     // Retrieve the odooid from joom_id
+    $odoo_id=OF_GetPartnerIDFromJomID($thePersonID);
+    if( $odoo_id==0) {
+        print("OF_CreateFactureCoursTheorique 3 ($thePersonID, $theSessionYear)<br>");
+        return false;
+    }
+    // Cotisation after 1 july is % of the year
+    $month=date("m");
+
+    $odooClient = OF_GetOdooClient();
+    $invoice_lines = array() ;
+    $invoice_lines[] = array(0, 0,
+        array(
+            'name' => "Cours theorique PPL pour la session $theSessionYear",
+            'product_id' => $theoretical_tuition_product, 
+            'quantity' => 1,
+            'price_unit' => $theoretical_tuition_price,
+            'analytic_distribution' => array($ecole_analytic_account => 100)
+    )) ;
+
+    $params =  array(array('partner_id' => intval($odoo_id), // Must be of INT type else Odoo does not accept
+    // Should the state set to 'posted' rather than 'draft' which is the default it seems?
+    //                'state' => 'posted', // Returns Vous ne pouvez pas créer une écriture déjà dans l'état comptabilisé. Veuillez créer un brouillon d'écriture et l'enregistrer après.
+                    'ref' => 'Inscription Cours theorique '.$theSessionYear,
+                    'move_type' => 'out_invoice',
+                    'invoice_date' => $invoice_date,
+                    'invoice_date_due' => $invoice_date_due,
+                    'invoice_origin' => "Manuellement par $userFullName " . date("Y-m-d"),
+                    'invoice_line_ids' => $invoice_lines)) ;
+    if(1) {
+        $result=array();
+        $result[0]=0;
+        if(1) $result = $odooClient->Create('account.move', $params) ;
+        print("Invoicing result for #$odoo_id: Inscription cours theorique $theoretical_tuition_price &euro;, " . implode(', ', $result) . "<br/>\n") ;
+        print("Invoicing result for #$odoo_id: $theoretical_tuition_price &euro;, " . implode(', ', $result) . "<br/>\n") ;
+        $sql="REPLACE INTO $table_dto_student(ds_jom_id, ds_year, ds_tuition_invoice_id)
+              VALUES($thePersonID, $theSessionYear, $result[0] )";
+        //print("$sql<br>");
+        if(1) mysqli_query($mysqli_link, $sql)
+            or journalise($userId, "F", "Cannot insert into $table_dto_student: " . mysqli_error($mysqli_link)) ;
+        journalise($userId, "I", "Odoo tuition invoice generated for $thePersonID by $userId ") ;	
+		
+    }
+    else {
+        var_dump($params);
+        print("<br>");
+    }
+
     return true;
 }
 

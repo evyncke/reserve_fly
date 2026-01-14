@@ -120,19 +120,37 @@ if (isset($_REQUEST['createcotisation'])) {
 		if (isset($_REQUEST['cotisationtype']) and $_REQUEST['cotisationtype'] != '') {
 			$cotisationtype=$_REQUEST['cotisationtype'];
 			if(OF_CreateFactureCotisation($personid, $cotisationtype, $membership_year)) {
-				print("<b>La facture de cotisation pour $personid de type $cotisationtype pour $membership_year a été créée dans ODOO!</b></br>");	
+				print("<div class=\"alert alert-info\" role=\"alert\"><b>La facture de cotisation pour $personid de type $cotisationtype pour $membership_year a été créée dans ODOO!</b></div>");	
 			}
 			else {
-				print("<b style='color: red;'>La facture de cotisation pour $personid de type $cotisationtype pour $membership_year  n'a pas été créée dans ODOO!</b></br>");	
+				print("<div class=\"alert alert-warning\" role=\"alert\"><b style='color: red;'>La facture de cotisation pour $personid de type $cotisationtype pour $membership_year  n'a pas été créée dans ODOO!</b></div>");	
 				journalise($userId, "E", "La facture de cotisation pour $personid de type $cotisationtype pour $membership_year  n'a pas été créée dans ODOO!") ;
 			}
 		}
 		else {
-			print("<b style='color: red;'>Impossible de créer une cotisation: Pas de cotisation type sélectionné!</b></br>");	
+			print("<div class=\"alert alert-warning\" role=\"alert\"><b style='color: red;'>Impossible de créer une cotisation: Pas de cotisation type sélectionné!</b></div");	
 		}
 	}
 	else  {
-		print("<b style='color: red;'>Impossible de créer une cotisation: Personne n'est sélectionné!</b></br>");	
+		print("<div class=\"alert alert-warning\" role=\"alert\"><b style='color: red;'>Impossible de créer une cotisation: Personne n'est sélectionné!</b></div>");	
+	}
+}
+
+//Create Cours theorique invoice
+if (isset($_REQUEST['createcourstheorique'])) {
+	$personid="";
+	if (isset($_REQUEST['personid']) and $_REQUEST['personid'] != '') {
+		$personid=$_REQUEST['personid'];
+		if(OF_CreateFactureCoursTheorique($personid, $membership_year)) {
+			print("<div class=\"alert alert-info\" role=\"alert\"><b>La facture pour cours theorique pour $personid pour $membership_year a été créée dans ODOO!</b></div>");	
+		}
+		else {
+			print("<div class=\"alert alert-warning\" role=\"alert\"><b style='color: red;'>La facture des cours theorique pour $personid  pour $membership_year  n'a pas été créée dans ODOO!</b></div>");	
+			journalise($userId, "E", "La facture de cotisation pour $personid  pour $membership_year  n'a pas été créée dans ODOO!") ;
+		}
+	}
+	else  {
+		print("<div class=\"alert alert-warning\" role=\"alert\"><b style='color: red;'>Impossible de créer une facture cours theorique: Personne n'est sélectionné!</b></div>");	
 	}
 }
 
@@ -143,53 +161,8 @@ if (isset($_REQUEST['checkboxId']) and $_REQUEST['checkboxId'] != '' and isset($
 	$personId = $parts[1];
 	if (! is_numeric($personId))
 		journalise($userId, "F", "Strange personId for checkbox toggling: " . $personId) ;
-	switch($parts[2]) {
-		case 'Member':
-			$groupId = $joomla_member_group;
-			break;
-		case 'Student':
-			$groupId = $joomla_student_group;
-			break;
-		case 'Pilot':
-			$groupId = $joomla_pilot_group;
-			break;
-		case 'Effectif':
-			$groupId = $joomla_effectif_group;
-			break;
-		default:
-			journalise($userId, "E", "Unknown group for checkbox toggling: " . $_REQUEST['checkboxId']) ;
-			break;
-	}
-	if ($checked == 'true') {
-		// Add to group
-		mysqli_report(MYSQLI_REPORT_OFF); // Disable exceptions (could also use try-catch)
-		$rc = mysqli_query($mysqli_link, "INSERT INTO $table_user_usergroup_map (user_id, group_id) 
-			VALUES ($personId, $groupId)") ;
-		if ($rc === FALSE)
-			if (mysqli_errno($mysqli_link) == 1062) {
-				// Duplicate entry, i.e., already in group
-				journalise($userId, 'W', "User $personId already in group $groupId/$parts[2]") ;
-				print("<div class=\"alert alert-warning\" role=\"alert\">
- 				 User $personId is already in group $groupId/$parts[2].</div>");
-			} else 
-				journalise($userId, 'F', "Cannot add user $personId to group $groupId/$parts[2]: " . mysqli_error($mysqli_link)) ;
-		else {
-			journalise($userId, 'I', "User $personId added to group $groupId/$parts[2]") ;
-			print("<div class=\"alert alert-info\" role=\"alert\">
- 				 User $personId added to group $groupId/$parts[2].</div>");
-		}
-	} else if ($checked == 'false') {
-		// Remove from group
-		mysqli_query($mysqli_link, "DELETE FROM $table_user_usergroup_map 
-			WHERE user_id = $personId AND group_id = $groupId")
-			or journalise($userId, 'F', "Cannot remove user $personId from group $groupId: " . mysqli_error($mysqli_link)) ;
-		journalise($userId, 'I', "User $personId removed from group $groupId/$parts[2]") ;
-		print("<div class=\"alert alert-info\" role=\"alert\">
- 			 User $personId removed from group $groupId/$parts[2].</div>");
-	} else {
-		journalise($userId, "E", "Strange value for checkbox toggling: " . $checked) ;
-	}
-	// TODO send an email to personId to inform him of the change
+	GM_SetMemberGroup($personId, $parts[2], $checked) ;
+	
 }
 $displayWebDeactivated=false;
 if (isset($_REQUEST['unactivated']) and $_REQUEST['unactivated'] != '') {
@@ -231,8 +204,13 @@ document.addEventListener("DOMContentLoaded", function () {
 			if(confirm("Confirmez que vous voulez changer le statut \""+values[2]+"\" de ce membre." +
 				"\nRappel: le membre doit être élève ou pilote sinon il est non-navigant." +
 				"\nNe pas oublier de prévenir les personnes responsables et de mettre à jour le fichier membres.xls sur OneDrive (Toujours utilisé - Seul endroit ou on gere l'historique des membres).")) {
-            	// Redirect to the same URL with the checkbox ID in the query string
-            	window.location.href = window.location.pathname + '?checkboxId=' + this.id + '&checked=' + this.checked;
+				var aSearchText=document.getElementById("id_SearchInput").value;
+				var aCommand='?checkboxId=' + this.id + '&checked=' + this.checked;
+				if(aCommand != "") {
+					aCommand+="&search="+aSearchText;
+				}
+					// Redirect to the same URL with the checkbox ID in the query string
+            	window.location.href = window.location.pathname + aCommand;
 			}
 			else { // Revert to previous checked state
 				// TODO can probably simply do this.checked = !this.checked; ;-)
@@ -338,17 +316,19 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 // TODO as now Odoo is well in full force, probably need to only process Odoo balance
 $sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
 odoo_id, block, b_reason, u.email as email, 
-bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_date, bkf_invoice_id,
+bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_date, bkf_invoice_id, ds_year,
 group_concat(group_id) as allGroups,
 datediff(current_date(), b_when) as days_blocked
-	from $table_users as u join $table_user_usergroup_map on u.id=user_id 
+	from $table_users as u 
+	join $table_user_usergroup_map on u.id=user_id 
 	join $table_person as p on u.id=p.jom_id
+    left join $table_dto_student on u.id=ds_jom_id
 	left join $table_membership_fees on bkf_user = p.jom_id and bkf_year = $cotisationYear
 	left join $table_blocked on u.id = b_jom_id
 	where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
 	group by user_id
 	order by last_name, first_name" ;
-//print($sql);
+//print("$sql<br>");
 //print("<br>");
 	$count=0;
 	$result = mysqli_query($mysqli_link, $sql)
@@ -401,6 +381,20 @@ datediff(current_date(), b_when) as days_blocked
 			: '<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Student">'  ;
 		$status=db2web($row['b_reason']);
 		$blocked=$row['block'];
+		$promotionEleve="";
+		if(in_array($joomla_student_group, $groups)) {
+			if(isset($row['ds_year']) && $row['ds_year']>2000) {
+				$promotionEleve="<br>P".$row['ds_year'];
+			}
+			else {
+				$promotionEleve="<a class=\"tooltip\" href=\"javascript:void(0);\" 
+					onclick=\"createCoursTheoriqueFunction('$_SERVER[PHP_SELF]','CoursTheorique','" .
+					str_replace("'", "\\'","$nom $prenom") . "','$personid',
+					'2026')\">
+					[2026?]<span class='tooltiptext'>Click pour facturer un cours theorique 2026</span>
+				</a>";
+			}
+		}
 		$odoo = (isset($odoo_customers[strtolower($row['email'])])) ? $odoo_customers[strtolower($row['email'])] : null ;
 		if($blocked==1) {
 			$status="Web désactivé";
@@ -469,6 +463,7 @@ datediff(current_date(), b_when) as days_blocked
 		}
 
 		$cotisation=$row['bkf_amount'];
+		//if($personid==328) print("personid=$personid, cotisation=$cotisation<br>");
 		$cotisationInvoiceDate="";
 		if(isset($row['bkf_invoice_date'])) $cotisationInvoiceDate=$row['bkf_invoice_date'];
 		$cotisationPaymentDate="";
@@ -529,7 +524,7 @@ datediff(current_date(), b_when) as days_blocked
 			<td style='text-align: left;'>$pays</td>
 			<td style='text-align: left;'>$email</td>
 			<td style='text-align: center;'>$member</td>
-			<td style='text-align: center;'>$student</td>
+			<td style='text-align: center;'>$student$promotionEleve</td>
 			<td style='text-align: center;'>$pilot</td>
 			<td style='text-align: center;'>$effectif</td>");
 
@@ -618,5 +613,113 @@ datediff(current_date(), b_when) as days_blocked
 </tbody>
 </table>
 </div>
+<?php
+// Tools in PHP
+
+// Change a user of group
+function GM_SetMemberGroup($personId, $memberType, $checked) 
+{
+	global  $joomla_member_group,$joomla_student_group,$joomla_pilot_group,$joomla_effectif_group;
+	global $userId;
+	global $mysqli_link,$table_user_usergroup_map;
+	//print("SetMemberGroup($personId, $memberType, $checked): Started");
+	switch($memberType) {
+		case 'Member':
+			$groupId = $joomla_member_group;
+			break;
+		case 'Student':
+			$groupId = $joomla_student_group;
+			break;
+		case 'Pilot':
+			$groupId = $joomla_pilot_group;
+			break;
+		case 'Effectif':
+			$groupId = $joomla_effectif_group;
+			break;
+		default:
+			journalise($userId, "E", "Unknown group for checkbox toggling: " . $_REQUEST['checkboxId']) ;
+			break;
+	}
+	if ($checked == 'true') {
+		// Add to group
+		mysqli_report(MYSQLI_REPORT_OFF); // Disable exceptions (could also use try-catch)
+		$rc = mysqli_query($mysqli_link, "INSERT INTO $table_user_usergroup_map (user_id, group_id) 
+			VALUES ($personId, $groupId)") ;
+		if ($rc === FALSE)
+			if (mysqli_errno($mysqli_link) == 1062) {
+				// Duplicate entry, i.e., already in group
+				journalise($userId, 'W', "User $personId already in group $groupId/$memberType") ;
+				print("<div class=\"alert alert-warning\" role=\"alert\">
+ 				 User $personId is already in group $groupId/$memberType.</div>");
+			} else 
+				journalise($userId, 'F', "Cannot add user $personId to group $groupId/$memberType: " . mysqli_error($mysqli_link)) ;
+		else {
+			journalise($userId, 'I', "User $personId added to group $groupId/$memberType") ;
+			print("<div class=\"alert alert-info\" role=\"alert\">
+ 				 User $personId added to group $groupId/$memberType.</div>");
+		}
+	} else if ($checked == 'false') {
+		// Remove from group
+		mysqli_query($mysqli_link, "DELETE FROM $table_user_usergroup_map 
+			WHERE user_id = $personId AND group_id = $groupId")
+			or journalise($userId, 'F', "Cannot remove user $personId from group $groupId: " . mysqli_error($mysqli_link)) ;
+		journalise($userId, 'I', "User $personId removed from group $groupId/$memberType") ;
+		print("<div class=\"alert alert-info\" role=\"alert\">
+ 			 User $personId removed from group $groupId/$memberType.</div>");
+	} else {
+		journalise($userId, "E", "Strange value for checkbox toggling: " . $checked) ;
+	}
+
+	// Specific use case
+	//If a member become Pilot it is no more Student
+	if($memberType=="Pilot" && $checked=='true') {
+		if(GM_IsMemberType($personId, "Student")) {
+    		GM_SetMemberGroup($personId, "Student", 'false') ;
+		}
+    }
+	if($memberType=="Student" && $checked=='true') {
+		if(GM_IsMemberType($personId, "Pilot")) {
+    		GM_SetMemberGroup($personId, "Pilot", 'false') ;
+		}
+    }
+	// TODO send an email to personId to inform him of the change
+}
+
+// Check the type of a person
+function GM_IsMemberType($personId, $memberType)
+{
+
+	global $joomla_member_group,$joomla_student_group,$joomla_pilot_group,$joomla_effectif_group;
+	global $userId;
+	global $mysqli_link,$table_user_usergroup_map;
+	//print("GM_IsMemberType($personId, $memberType): Started<br>");
+	switch($memberType) {
+		case 'Member':
+			$groupId = $joomla_member_group;
+			break;
+		case 'Student':
+			$groupId = $joomla_student_group;
+			break;
+		case 'Pilot':
+			$groupId = $joomla_pilot_group;
+			break;
+		case 'Effectif':
+			$groupId = $joomla_effectif_group;
+			break;
+		default:
+			print("%%%ERROR:GM_IsMemberType: Unknown member type $memberType") ;
+			return false;
+	}
+	
+	$result = mysqli_query($mysqli_link, "SELECT * FROM $table_user_usergroup_map WHERE user_id=$personId AND group_id=$groupId")
+    		or journalise($userId, "E", "Cannot read $table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+		//print("GM_IsMemberType:return true<br>");
+		return true;
+	}
+	//print("GM_IsMemberType:return false<br>");
+	return false;
+}
+?>
 </body>
 </html>

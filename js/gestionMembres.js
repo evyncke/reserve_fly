@@ -456,3 +456,20 @@ function createCotisationFunction(PHP_Self,action,theName,thePersonid,isMember) 
       		 window.location.href = aCommand;
 	}
 }
+
+function createCoursTheoriqueFunction(PHP_Self,action,theName,thePersonid, theYear) {
+	var aSearchText=document.getElementById("id_SearchInput").value;
+
+	// After 1 July: Proportional to the numer of mounth
+	aDate= new Date();
+	aMonth=aDate.getMonth()+1;
+	if(aMonth>6 && aMonth!=12){
+	}
+	if (confirm("Confirmez que vous voulez créer une facture pour les cours théorique session " + theYear + " à " + theName + " (id="+thePersonid+")?") == true) {
+      		var aCommand=PHP_Self+"?createcourstheorique=true&personid="+thePersonid;
+ 			if(aSearchText!="")	 {
+ 				aCommand+="&search="+aSearchText;
+ 			}
+      		 window.location.href = aCommand;
+	}
+}
