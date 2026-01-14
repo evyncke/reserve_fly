@@ -34,8 +34,10 @@ require_once 'incident.class.php' ;
 if (!($userIsAdmin or $userIsInstructor or $userIsMechanic)) journalise($userId, "F", "Vous devez être admin ou FI ou mecano pour voir cette page") ;
 
 $first_day = date('Y-m-d', time() - 7 * 24 * 60 * 60) ; // Go back 7 days
+//$first_day = "2025-12-01";
 $last_day = date('Y-m-d') ;
-$first_day_year = date('Y') . '-01-01' ;
+//PRE $first_day_year = date('Y') . '-01-01' ;
+$first_day_year = '2025-12-01' ;
 
 function Cell($m) {
     if ($m == '' or $m == 0)
@@ -72,13 +74,15 @@ function toHourMinute($totalMimutes) {
 <?php
 
 // Per plane: weekly counters (engine, flight, landings)
-$result = mysqli_query($mysqli_link, "SELECT UPPER(p.id) AS id, SUM(l_day_landing+l_night_landing) AS landings,
+$sql="SELECT UPPER(p.id) AS id, SUM(l_day_landing+l_night_landing) AS landings,
         SUM(60*(l_end_hour-l_start_hour) + l_end_minute-l_start_minute) AS engine_minutes,
         SUM(60*(l_flight_end_hour-l_flight_start_hour) + l_flight_end_minute-l_flight_start_minute) AS flight_minutes
     FROM $table_planes p JOIN $table_logbook ON p.id = l_plane
     WHERE p.ressource = 0 AND p.actif != 0 AND '$first_day' <= date(l_start) AND date(l_start) <= '$last_day'
     GROUP BY p.id
-    ORDER BY p.id")
+    ORDER BY p.id";
+//print("$sql<br>");
+$result = mysqli_query($mysqli_link, $sql)
 	or die("Cannot read weekly $tables_planes: " . mysqli_error($mysqli_link)) ;
 $weekly = array() ;
 while ($row = mysqli_fetch_array($result)) {
