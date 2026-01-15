@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2020-2024 Eric Vyncke
+   Copyright 2020-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,13 +31,11 @@ if ($userId == 0) {
 
 require_once 'mobile_header5.php' ;
 require_once 'incident.class.php' ;
-if (!($userIsAdmin or $userIsInstructor or $userIsMechanic)) journalise($userId, "F", "Vous devez être admin ou FI ou mecano pour voir cette page") ;
+if (!($userIsBoardMember or $userIsInstructor or $userIsMechanic)) journalise($userId, "F", "Vous devez être admin ou FI ou mecano pour voir cette page") ;
 
 $first_day = date('Y-m-d', time() - 7 * 24 * 60 * 60) ; // Go back 7 days
-//$first_day = "2025-12-01";
 $last_day = date('Y-m-d') ;
-//PRE $first_day_year = date('Y') . '-01-01' ;
-$first_day_year = '2025-12-01' ;
+$first_day_year = date('Y') . '-01-01' ;
 
 function Cell($m) {
     if ($m == '' or $m == 0)
@@ -73,37 +71,21 @@ function toHourMinute($totalMimutes) {
 <tbody>
 <?php
 
-// Per plane: weekly counters (engine, flight, landings)
-$sql="SELECT UPPER(p.id) AS id, SUM(l_day_landing+l_night_landing) AS landings,
-        SUM(60*(l_end_hour-l_start_hour) + l_end_minute-l_start_minute) AS engine_minutes,
-        SUM(60*(l_flight_end_hour-l_flight_start_hour) + l_flight_end_minute-l_flight_start_minute) AS flight_minutes
-    FROM $table_planes p JOIN $table_logbook ON p.id = l_plane
-    WHERE p.ressource = 0 AND p.actif != 0 AND '$first_day' <= date(l_start) AND date(l_start) <= '$last_day'
-    GROUP BY p.id
-    ORDER BY p.id";
-//print("$sql<br>");
-$result = mysqli_query($mysqli_link, $sql)
-	or die("Cannot read weekly $tables_planes: " . mysqli_error($mysqli_link)) ;
-$weekly = array() ;
-while ($row = mysqli_fetch_array($result)) {
-    $weekly[$row['id']] = $row ;
-}
 // Per plane: YTD counters (engine, flight, landings)
 $result = mysqli_query($mysqli_link, "SELECT UPPER(p.id) AS id, type_entretien, entretien, compteur_vol,
-        MAX(60*l_end_hour+l_end_minute) AS latest_engine,
-        MAX(l_flight_end_hour) AS latest_flight,
-        SUM(l_day_landing+l_night_landing) AS landings,
-        SUM(60*(l_end_hour-l_start_hour) + l_end_minute-l_start_minute) AS engine_minutes,
-        SUM(60*(l_flight_end_hour-l_flight_start_hour) + l_flight_end_minute-l_flight_start_minute) AS flight_minutes
-    FROM $table_planes p JOIN $table_logbook ON p.id = l_plane
-    WHERE p.ressource = 0 AND p.actif != 0 AND '$first_day_year' <= date(l_start) AND date(l_start) <= '$last_day'
-    GROUP BY p.id
+        60*l_end_hour+l_end_minute AS latest_engine
+    FROM $table_planes p JOIN $table_logbook l ON p.id = l_plane
+    WHERE p.ressource = 0 AND p.actif != 0 and l.l_id IN (
+        SELECT MAX(ll.l_id) FROM $table_logbook ll
+        WHERE ll.l_plane = p.id
+    )
     ORDER BY p.id")
-	or die("Cannot read weekly $tables_planes: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "F", "Cannot read weekly $tables_planes: " . mysqli_error($mysqli_link)) ;
 $ytd = array() ;
 while ($row = mysqli_fetch_array($result)) {
     $ytd[$row['id']] = $row ;
 }
+
 // Per plane: ATL
 $atl = array() ;
 $incidents = new Incidents(null, ['opened', 'inprogressnoaog', 'inprogressaog', 'camonoaog', 'camoaog']) ;
@@ -116,12 +98,7 @@ foreach($incidents as $incident) {
         $atl[$incident->plane] = $description ;
 }
 
-
 foreach($ytd as $id => $ytd_row) {
-    if (isset($weekly[$id])) // Some aircfrafts have not flown this week...
-        $weekly_row = $weekly[$id] ;
-    else
-        $weekly_row = array('engine_minutes' => '', 'flight_minutes' => '', 'landings' => '') ;
     print("<tr class=\"text-center\"><td class=\"text-nowrap\">$id</td>") ;
     if ($ytd_row['compteur_vol'] != 0)
         print("<td>".toHourMinute($ytd_row['latest_flight'])."</td>") ;
