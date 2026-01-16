@@ -34,7 +34,7 @@ require_once 'mobile_header5.php' ;
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
 ?>
 <h2>Configuration de la base de données Odoo@<?=$odoo_host?></h2>
-<p>Sur base du fichier <mark>dbi.php</mark> (modifiable par Éric ou Patrick) et du cookie 'odoo' (<b><?=$cookie?></b>).
+<p>Sur base du fichier <mark>auth.php</mark> (modifiable par Éric ou Patrick) et du cookie 'odoo' (<b><?=$cookie?></b>).
 <ul>
     <li>Hostname: <b><a href="https://  <?=$odoo_host?>"><?=$odoo_host?></a></b></li>
     <li>Data base: <b><?=$odoo_db?></b></li>
@@ -46,7 +46,7 @@ if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($us
     <ul>
     <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=default">par défaut</a>;</li>
     <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=spa-aviation">spa-aviation.odoo.com</a>;</li>
-    <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=spa-aviation-eric">spa-aviation-eric.odoo.com</a> (tests février 2024);</li>
+    <li><a href="<?=$_SERVER['PHP_SELF']?>?odoo=spa-aviation-test-19">spa-aviation-test-19.odoo.com</a> (tests janvier 2026);</li>
     </ul>
 </body>
 </html>
