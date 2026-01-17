@@ -16,10 +16,13 @@
 
 */
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once "dbi.php" ;
 $need_swiped_events = true ;
 require_once 'mobile_header5.php' ;
-
 
 $id = (isset($_REQUEST['id'])) ? $_REQUEST['id'] : '' ; // Direct access to a booking by id
 $me = (isset($_REQUEST['me'])) ? $_REQUEST['me'] : '' ; // Access to the closest booking for pilot/instructor 'me'
@@ -272,6 +275,107 @@ Vous n'avez pas encore encodé les index moteurs.
 		<button id="newLogbookButton" class="btn btn-success" onclick="newLogbookClick(<?=$id?>, '<?=$auth?>');">Introduction du vol dans carnet de routes</button>
 	</div><!-- col-->
 </div> <!-- row -->
+<?php
+}
+
+// If logged in, display the passkey prompt
+// Include WebAuthn library
+require_once 'vendor/autoload.php';
+use Webauthn\PublicKeyCredentialCreationOptions;
+use Webauthn\PublicKeyCredentialRequestOptions;
+use Webauthn\PublicKeyCredentialRpEntity;
+use Webauthn\AuthenticatorAssertionResponseValidator;
+use Webauthn\AuthenticatorAttestationResponseValidator;
+use Webauthn\PublicKeyCredentialUserEntity;
+use Webauthn\PublicKeyCredentialSource;
+
+
+if ($userId == 62 and $userId > 0) { // Eric only
+// Initialize WebAuthn Relying Party
+	$rp = PublicKeyCredentialRpEntity::create(
+		'SPA Aviation', // Relying Party name
+		'spa-aviation.be', // Optional ID (defaults to the origin's host)
+		// TODO 'data:image/png;base64,iVBORw0KGgoAA...' // Optional icon URI as inline data image/png;base64
+);
+?>
+<!-- Add WebAuthn buttons to the login form -->
+<div class="text-center">
+	<button id="webauthn-register" class="btn btn-outline-secondary"><i class="bi bi-fingerprint"></i> Register Passkey</button><br/>
+	<div id="feedback" class="mt-2"></div>
+</div>
+
+<script>
+function base64urlToBuffer(s) {
+  console.log('Decoding base64urlToBuffer:', s);	
+  s = s.replace(/-/g, '+').replace(/_/g, '/');
+  // Pad with '='
+  while (s.length % 4) {
+	s += '=';
+  }
+  return Uint8Array.from(atob(s), c => c.charCodeAt(0));
+}
+
+// WebAuthn Registration
+const feedback = document.getElementById('feedback');
+const registerButton = document.getElementById('webauthn-register');
+registerButton.addEventListener('click', async () => {
+	console.log('Button clicked: starting WebAuthn registration...');
+	feedback.innerHTML = '<div class="alert alert-info">Contacting server...</div>';
+	try {
+		const response = await fetch('passkey_handler.php?action=webauthn_register');
+		const options = await response.json();
+		feedback.innerHTML = '<div class="alert alert-info">Server response received.</div>';
+//		console.log('Response received for registration :-)') ;
+		// console.log('response:', response);
+		// console.log('options:', options);
+		// console.log('typeof(options):', typeof(options));
+		// console.log('Before decode, options.challenge: ', options.challenge);
+		// Decode Base64 from PHP to Buffer
+		options.challenge = base64urlToBuffer(options.challenge);
+		options.user.id = base64urlToBuffer(options.user.id);
+		console.log('After decode, options: ',options);
+		// Let's fetch the credential method using publicKey options
+		const credential = await navigator.credentials.create({ publicKey: options });
+		console.log('After credentials.create:', credential);
+		console.log('typeof(credential):', typeof(credential));
+// 		After credentials.create:
+// PublicKeyCredential
+// authenticatorAttachment: "platform"
+// id: "g9IVsShjL5mDTUnDkgh297pMWrs"
+// rawId: ArrayBuffer {byteLength: 20, resizable: false, maxByteLength: 20, detached: false}
+// response: AuthenticatorAttestationResponse {attestationObject: ArrayBuffer, getTransports: function, getAuthenticatorData: function, getPublicKey: function, getPublicKeyAlgorithm: function, …}
+// type: "public-key"
+// PublicKeyCredential Prototype
+
+		feedback.innerHTML = '<div class="alert alert-info">Got navigator credentials.</div>';
+		// Send back to handler
+		const verify = await fetch('passkey_handler.php?action=verify-registration', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({
+				id: credential.id,
+				rawId: btoa(String.fromCharCode(...new Uint8Array((credential.rawId)))),
+				// rawId: base64urlToBuffer(credential.rawId),
+				type: credential.type,
+				response: {
+					attestationObject: btoa(String.fromCharCode(...new Uint8Array(credential.response.attestationObject))),
+					// attestationObject: base64urlToBuffer(credential.response.attestationObject),
+					// clientDataJSON: base64urlToBuffer(credential.response.clientDataJSON),
+					clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON)))
+				}
+			})
+		});
+		console.log('After sending to verify-registration:', verify);
+		if (verify.ok) 
+			feedback.innerHTML = '<div class="alert alert-success">Passkey Saved!</div>';
+		else 
+			feedback.innerHTML = '<div class="alert alert-danger">Passkey Registration Failed!</div>';
+	} catch (e) {
+		feedback.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
+		console.error('Error during WebAuthn registration:', e);
+	}
+});
+</script>
 <?php
 }
 ?>
