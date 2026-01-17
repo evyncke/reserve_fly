@@ -57,6 +57,7 @@ $members = $odooClient->Read('res.partner',
 $odoo_customers = array() ;
 foreach($members as $member) {
 	$email =  strtolower($member['email']) ;
+    $member['email'] = $email ; // Be sure to store the lowercase version
 	$odoo_customers[$email] = $member ; // Let's build a dict indexed by the email addresses
 }
 ?>
@@ -81,7 +82,7 @@ foreach($members as $member) {
             $bank_filled = ($odoo_customer['total_due'] < 0) ? ' <i class="bi bi-piggy-bank-fill text-success" title="This member has paid ' .
                 (-$odoo_customer['total_due']) . '€ for future flights"></i>' : '' ;
         } else {
-            $blocked = '<span class="text-danger">Ce membre n\'est pas lié à un compte dans la comptabilité</span>' ;
+            $blocked = '<span class="text-danger">Ce membre n\'est pas lié à un compte dans la comptabilité' . " student->email=$student->email" . '</span>' ;
             $bank_filled = '' ;
         }
         if ($student->membershipPaid)
