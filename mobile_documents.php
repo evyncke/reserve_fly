@@ -50,7 +50,7 @@ function listPdfFiles($dir) {
         $filePath = $dir . '/' . $file;
         if (is_dir($filePath)) {
             // If it's a directory, create a nested list
-            echo '<li><i class="bi bi-folder"></i>' . htmlspecialchars($file) . '</li>';
+            echo '<li><i class="bi bi-folder"></i>&nbsp;' . htmlspecialchars($file) . '</li>';
             listPdfFiles($filePath); // Recursive call
         } elseif (pathinfo($file, PATHINFO_EXTENSION) === 'pdf') {
             // If it's a PDF file, list it
