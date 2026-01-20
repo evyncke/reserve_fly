@@ -305,14 +305,29 @@ if ($userId == 62 and $userId > 0) { // Eric only
 </div>
 
 <script>
-function base64urlToBuffer(s) {
-  console.log('Decoding base64urlToBuffer:', s);	
-  s = s.replace(/-/g, '+').replace(/_/g, '/');
-  // Pad with '='
-  while (s.length % 4) {
-	s += '=';
-  }
-  return Uint8Array.from(atob(s), c => c.charCodeAt(0));
+var helper = {
+	atb: b => {
+		let u = new Uint8Array(b), s = "";
+		for (let i = 0; i < u.byteLength; i++) s += String.fromCharCode(u[i]);
+			return btoa(s);
+		},
+
+	bta: o => {
+		let pre = "=?BINARY?B?", suf = "?=";
+		for (let k in o) {
+			if (typeof o[k] == "string") {
+				let s = o[k];
+				if (s.startsWith(pre) && s.endsWith(suf)) {
+					let raw = window.atob(s.slice(pre.length, -suf.length)),
+					u = new Uint8Array(raw.length);
+					for (let i = 0; i < raw.length; i++) u[i] = raw.charCodeAt(i);
+					o[k] = u.buffer;
+				}
+			} else {
+				helper.bta(o[k]);
+			}
+		}
+	}
 }
 
 // WebAuthn Registration
@@ -323,19 +338,20 @@ registerButton.addEventListener('click', async () => {
 	feedback.innerHTML = '<div class="alert alert-info">Contacting server...</div>';
 	try {
 		const response = await fetch('passkey_handler.php?action=webauthn_register');
-		const options = await response.json();
+		let options = await response.json();
 		feedback.innerHTML = '<div class="alert alert-info">Server response received.</div>';
-//		console.log('Response received for registration :-)') ;
-		// console.log('response:', response);
+		console.log('Response received for registration :-)') ;
+		console.log('response:', response);
 		// console.log('options:', options);
 		// console.log('typeof(options):', typeof(options));
 		// console.log('Before decode, options.challenge: ', options.challenge);
 		// Decode Base64 from PHP to Buffer
-		options.challenge = base64urlToBuffer(options.challenge);
-		options.user.id = base64urlToBuffer(options.user.id);
-		console.log('After decode, options: ',options);
+		// options.challenge = base64urlToBuffer(options.challenge);
+		// options.user.id = base64urlToBuffer(options.user.id);
+		helper.bta(options);
+		console.log('After decode, options: ', options);
 		// Let's fetch the credential method using publicKey options
-		const credential = await navigator.credentials.create({ publicKey: options });
+		const credential = await navigator.credentials.create(options);
 		console.log('After credentials.create:', credential);
 		console.log('typeof(credential):', typeof(credential));
 // 		After credentials.create:
@@ -357,13 +373,10 @@ registerButton.addEventListener('click', async () => {
 				rawId: btoa(String.fromCharCode(...new Uint8Array((credential.rawId)))),
 				// rawId: base64urlToBuffer(credential.rawId),
 				type: credential.type,
-				response: {
-					attestationObject: btoa(String.fromCharCode(...new Uint8Array(credential.response.attestationObject))),
-					// attestationObject: base64urlToBuffer(credential.response.attestationObject),
-					// clientDataJSON: base64urlToBuffer(credential.response.clientDataJSON),
-					clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON)))
-				}
-			})
+				// Below from the example with luchs component
+				transport: credential.response.getTransports ? credential.response.getTransports() : null,
+				client: helper.atb(credential.response.clientDataJSON),
+				attest: helper.atb(credential.response.attestationObject)			})
 		});
 		console.log('After sending to verify-registration:', verify);
 		if (verify.ok) 
