@@ -74,17 +74,16 @@ if ($action == 'webauthn_register') {
     $_SESSION['challenge'] = base64_encode($WebAuthn->getChallenge()->getBinaryString());
     header('Content-Type: application/json', true);
     echo json_encode($createArgs);
-    journalise($userId, "I", "WebAuthn registration options generated for user id $userId-$userName-$userFullName, body=" . json_encode($createArgs)) ;
+    journalise($userId, "I", "WebAuthn registration options generated, body=" . json_encode($createArgs)) ;
     exit;
 
 } elseif ($action === 'verify-registration') {
 
     $response = json_decode(file_get_contents('php://input'), true);
-    journalise($userId, "I", "Verifying WebAuthn registration for user id $userId-$userName, data=" . json_encode($response)) ;
 
     // Check if user is connected
     if ($userId == 0) {
-        journalise($user, "E", "Not connected for action=$action") ;
+        journalise($userId, "E", "Not connected for action=$action") ;
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Not connected']);
         exit;
@@ -98,50 +97,74 @@ if ($action == 'webauthn_register') {
             'required', true, false
         );
         @journalise($userId, "D", "after processCreate, data=" . print_r($data, true)) ;
-        @journalise($userId, "D", "after processCreate, credentialPublicKey=" . $data->credentialPublicKey) ;
-    //   $save = [
-    //     "uid" => $_SESSION["uid"],
-    //     "email" => $_SESSION["email"],
-    //     "name" => $_SESSION["name"],
-    //     "passkey" => $data
-    //   ];
-    //   if (! is_dir("users")) {
-    //     mkdir("users");
-    //   }
-    //   file_put_contents($userFile, serialize($save));
         } catch (Exception $e) {
             header('Content-Type: application/json', true);
             echo json_encode(['success' => false, 'message' => 'WebAuthn registration verification exception:' . $e->getMessage()]);
             journalise($userId, "E", 'WebAuthn registration verification exception:' . $e->getMessage()) ;
             exit ;
         } ;
-    mysqli_query($mysqli_link, "INSERT INTO $table_passkey(pk_username, pk_credential_id, pk_data, pk_registration) 
+    mysqli_query($mysqli_link, "INSERT INTO $table_passkey(pk_userid, pk_credential_id, pk_data, pk_registration) 
         VALUES ($userId, '" . mysqli_real_escape_string($mysqli_link, $response['id']) . "', '" 
-        . mysqli_real_escape_string($mysqli_link, serialize($data)) . "', NOW())") 
+        . mysqli_real_escape_string($mysqli_link, $data->credentialPublicKey) . "', NOW())") 
         or journalise($userId, "E", "Failed to store WebAuthn credential for user id $userId-$userName-$userFullName: " . mysqli_error($mysqli_link)) ;
     header('Content-Type: application/json', true);
-    echo json_encode(['success' => true, 'message' => 'WebAuthn registration verification not fully implemented in this example.']);
+    echo json_encode(['success' => true, 'message' => 'WebAuthn registration successful.']);
+    journalise($userId, "I", "WebAuthn registration verified and stored") ;
     exit;
 
 } elseif ($action === 'get-login-options') {
 
+    // Kind of useless as the request is empty
+    $response = json_decode(file_get_contents('php://input'), true);
+    journalise($userId, "I", "Generating WebAuthn login options, response=" . json_encode($response)) ;
+    $args = $WebAuthn->getGetArgs([], 30); // First parameter is the set of potential credentials but can also be empty
+    $_SESSION["challenge"] = base64_encode($WebAuthn->getChallenge()->getBinaryString());
     header('Content-Type: json/application');
-    echo $jsonObject;
+    echo json_encode($args);
+    journalise($userId, "D", "get-login-options: " . json_encode($args)) ;
+    exit;
+
+} elseif ($action === 'verify-login') {
+
+    $response = json_decode(file_get_contents('php://input'), true);
+    journalise($userId, "I", "Verifying WebAuthn login, response=" . json_encode($response)) ;
+    // Retrieve the credential from the database
+    $credentialId = $response['id'];
+    $result = mysqli_query($mysqli_link, "SELECT * 
+        FROM $table_passkey 
+        WHERE pk_credential_id = '" . mysqli_real_escape_string($mysqli_link, $credentialId) . "'")
+        or journalise($userId, "E", "Failed to retrieve WebAuthn credential (id=$credentialId): " . mysqli_error($mysqli_link)) ;
+    $row = mysqli_fetch_assoc($result)
+        or journalise($userId, "E", "No WebAuthn credential found for id $credentialId") ;
+    $credentialPublicKey = $row['pk_data'];
+    journalise($userId, "D", "Retrieved WebAuthn credential for id=$credentialId, public key: " . $credentialPublicKey) ;
+    // Process the login
+    try {
+        $WebAuthn->processGet(
+            base64_decode($response["client"]),
+            base64_decode($response["auth"]),
+            base64_decode($response["sig"]),
+            $credentialPublicKey,
+            base64_decode($_SESSION["challenge"])
+        );
+    } catch (Exception $ex) {
+        exit($ex->getMessage());
+    }
+    header('Content-Type: json/application');
+    echo json_encode(['success' => true, 'message' => 'Logged in successfully via WebAuthn!']);
+    mysqli_query($mysqli_link, "UPDATE $table_passkey 
+        SET pk_last_use = NOW() 
+        WHERE pk_credential_id = '" . mysqli_real_escape_string($mysqli_link, $credentialId) . "'")
+        or journalise($userId, "E", "Failed to update last_login for credentialId=$credentialId: " . mysqli_error($mysqli_link)) ;
+    journalise($row['pk_userid'], "I", "WebAuthn login verified successfully") ;
     exit;
 
 } else {
-    journalise($userId, "E", "Unknown action '$action' in WebAuthn request for user id $userId-$userName-$userFullName") ;
+    journalise($userId, "E", "Unknown action '$action' in WebAuthn request") ;
     header('Content-Type: application/json', true);
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Unknown action']);
     exit;
 }
 
-function base64url_decode(string $data): string {
-    $remainder = strlen($data) % 4;
-    if ($remainder) {
-        $data .= str_repeat('=', 4 - $remainder);
-    }
-    return base64_decode(strtr($data, '-_', '+/'));
-}
 ?>

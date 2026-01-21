@@ -281,26 +281,19 @@ Vous n'avez pas encore encodé les index moteurs.
 // If logged in, display the passkey prompt
 // Include WebAuthn library
 require_once 'vendor/autoload.php';
-use Webauthn\PublicKeyCredentialCreationOptions;
-use Webauthn\PublicKeyCredentialRequestOptions;
-use Webauthn\PublicKeyCredentialRpEntity;
-use Webauthn\AuthenticatorAssertionResponseValidator;
-use Webauthn\AuthenticatorAttestationResponseValidator;
-use Webauthn\PublicKeyCredentialUserEntity;
-use Webauthn\PublicKeyCredentialSource;
-
 
 if ($userId == 62 and $userId > 0) { // Eric only
 // Initialize WebAuthn Relying Party
-	$rp = PublicKeyCredentialRpEntity::create(
-		'SPA Aviation', // Relying Party name
-		'spa-aviation.be', // Optional ID (defaults to the origin's host)
-		// TODO 'data:image/png;base64,iVBORw0KGgoAA...' // Optional icon URI as inline data image/png;base64
-);
+	// $rp = PublicKeyCredentialRpEntity::create(
+	// 	'SPA Aviation', // Relying Party name
+	// 	'spa-aviation.be', // Optional ID (defaults to the origin's host)
+	// 	// TODO 'data:image/png;base64,iVBORw0KGgoAA...' // Optional icon URI as inline data image/png;base64
+// );
 ?>
 <!-- Add WebAuthn buttons to the login form -->
 <div class="text-center">
 	<button id="webauthn-register" class="btn btn-outline-secondary"><i class="bi bi-fingerprint"></i> Register Passkey</button><br/>
+	<button id="webauthn-login" class="btn btn-outline-secondary"><i class="bi bi-fingerprint"></i> Use Passkey</button><br/>
 	<div id="feedback" class="mt-2"></div>
 </div>
 
@@ -333,6 +326,8 @@ var helper = {
 // WebAuthn Registration
 const feedback = document.getElementById('feedback');
 const registerButton = document.getElementById('webauthn-register');
+const loginButton = document.getElementById('webauthn-login');
+
 registerButton.addEventListener('click', async () => {
 	console.log('Button clicked: starting WebAuthn registration...');
 	feedback.innerHTML = '<div class="alert alert-info">Contacting server...</div>';
@@ -342,12 +337,6 @@ registerButton.addEventListener('click', async () => {
 		feedback.innerHTML = '<div class="alert alert-info">Server response received.</div>';
 		console.log('Response received for registration :-)') ;
 		console.log('response:', response);
-		// console.log('options:', options);
-		// console.log('typeof(options):', typeof(options));
-		// console.log('Before decode, options.challenge: ', options.challenge);
-		// Decode Base64 from PHP to Buffer
-		// options.challenge = base64urlToBuffer(options.challenge);
-		// options.user.id = base64urlToBuffer(options.user.id);
 		helper.bta(options);
 		console.log('After decode, options: ', options);
 		// Let's fetch the credential method using publicKey options
@@ -376,7 +365,7 @@ registerButton.addEventListener('click', async () => {
 				// Below from the example with luchs component
 				transport: credential.response.getTransports ? credential.response.getTransports() : null,
 				client: helper.atb(credential.response.clientDataJSON),
-				attest: helper.atb(credential.response.attestationObject)			})
+				attest: helper.atb(credential.response.attestationObject)})
 		});
 		console.log('After sending to verify-registration:', verify);
 		if (verify.ok) 
@@ -388,6 +377,57 @@ registerButton.addEventListener('click', async () => {
 		console.error('Error during WebAuthn registration:', e);
 	}
 });
+
+loginButton.addEventListener('click', async () => {
+	console.log('Button clicked: starting WebAuthn login...');
+	feedback.innerHTML = '<div class="alert alert-info">Contacting server...</div>';
+	try {
+		const response = await fetch('passkey_handler.php?action=get-login-options', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({username: 62})
+		});
+		let options = await response.json();
+		feedback.innerHTML = '<div class="alert alert-info">Server response received.</div>';
+		console.log('Response received for login :-)') ;
+		console.log('response:', response);
+		helper.bta(options);
+		console.log('After decode, options: ', options);
+		// Let's fetch the credential method using publicKey options
+		const credential = await navigator.credentials.get(options);
+		console.log('After credentials.get:', credential);
+		console.log('typeof(credential):', typeof(credential));
+		console.log("id:", credential.id);
+		console.log("rawId:", credential.rawId);
+		console.log("helper.atb(credential.response.clientDataJSON),", helper.atb(credential.response.clientDataJSON));
+// 		After credentials.get:
+
+		feedback.innerHTML = '<div class="alert alert-info">Got navigator credentials.</div>';
+		// Send back to handler
+		const verify = await fetch('passkey_handler.php?action=verify-login', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({
+				id: credential.id,
+				rawId: helper.atb(credential.rawId),
+				client: helper.atb(credential.response.clientDataJSON),
+				auth: helper.atb(credential.response.authenticatorData),
+				sig: helper.atb(credential.response.signature),
+				user: credential.response.userHandle ? helper.atb(credential.response.userHandle) : null
+			})
+		});
+		console.log('After sending to verify-login:', verify);
+		if (verify.ok) 
+			feedback.innerHTML = '<div class="alert alert-success">Passkey Logged In!</div>';
+		else 
+			feedback.innerHTML = '<div class="alert alert-danger">Passkey Login Failed!</div>';
+	} catch (e) {
+		feedback.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
+		console.error('Error during WebAuthn login:', e);
+	}
+});
+
+
 </script>
 <?php
 }
