@@ -283,12 +283,6 @@ Vous n'avez pas encore encodé les index moteurs.
 require_once 'vendor/autoload.php';
 
 if ($userId == 62 and $userId > 0) { // Eric only
-// Initialize WebAuthn Relying Party
-	// $rp = PublicKeyCredentialRpEntity::create(
-	// 	'SPA Aviation', // Relying Party name
-	// 	'spa-aviation.be', // Optional ID (defaults to the origin's host)
-	// 	// TODO 'data:image/png;base64,iVBORw0KGgoAA...' // Optional icon URI as inline data image/png;base64
-// );
 ?>
 <!-- Add WebAuthn buttons to the login form -->
 <div class="text-center">
