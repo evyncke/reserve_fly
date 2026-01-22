@@ -101,6 +101,7 @@ foreach ($plane_pics as $pic) {
 <div class="col-md-8 col-sm-8">
 <table class="table table-responsive table-striped">
 	<tr><td>Consommation</td><td><?=$plane_row['consommation']?> litres/heure</td></tr>
+	<tr><td>Batterie</td><td><?=$plane_row['batterie']?> V</td></tr>
 	<tr><td>Prix de location</td><td><?=number_format($plane_row['cout'], 2, ',')?> &euro;/min (soit <?=number_format(60*$plane_row['cout'], 2, ',')?> &euro;/heure)</td></tr>
 	<tr><td>Maintenance</td><td><?=$plane_row['entretien']?></td></tr>
 <?php

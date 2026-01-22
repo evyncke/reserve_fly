@@ -207,10 +207,14 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMember
         $result[0]=0;
         if(1) $result = $odooClient->Create('account.move', $params) ;
         print("Invoicing result for #$odoo_id: $membership_price &euro;, " . implode(', ', $result) . "<br/>\n") ;
-        mysqli_query($mysqli_link, "INSERT INTO $table_membership_fees(bkf_user, bkf_year, bkf_amount, bkf_invoice_id, bkf_invoice_date)
-         VALUES($thePersonID, '$theMembership_year', $membership_price, $result[0], '$invoice_date')")
-         or journalise($userId, "F", "Cannot insert into $table_membership_fees: " . mysqli_error($mysqli_link)) ;
-        journalise($userId, "I", "Odoo membership invoice generated for $thePersonID by $userId ") ;		
+        $sql="INSERT INTO $table_membership_fees(bkf_user, bkf_year, bkf_amount, bkf_invoice_id, bkf_invoice_date)
+         VALUES($thePersonID, '$theMembership_year', $membership_price, $result[0], '$invoice_date')";
+        print("$sql<br>");
+        if(1) {
+            mysqli_query($mysqli_link, $sql)
+            or journalise($userId, "F", "Cannot insert into $table_membership_fees: " . mysqli_error($mysqli_link)) ;
+            journalise($userId, "I", "Odoo membership invoice generated for $thePersonID by $userId ") ;
+        }		
     }
     else {
         var_dump($params);
