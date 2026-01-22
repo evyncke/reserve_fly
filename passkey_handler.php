@@ -147,9 +147,23 @@ if ($action == 'webauthn_register') {
             $credentialPublicKey,
             base64_decode($_SESSION["challenge"])
         );
-    } catch (Exception $ex) {
-        exit($ex->getMessage());
+    } catch (Exception $e) {
+        journalise($userId, "E", "WebAuthn login verification failed for credentialId=$credentialId: " . $ex->getMessage()) ;
+        header('Content-Type: application/json', true);
+        echo json_encode(['success' => false, 'message' => 'WebAuthn login verification failed: ' . $e->getMessage()]);
+        exit($e->getMessage());
     }
+    // Let's do the Joomla login now
+    $joomla_user = JFactory::getUser($userId);
+    $app = JFactory::getApplication('site');
+    $session = JFactory::getSession();
+    $session->set('user', $joomla_user);
+    $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
+    $joomla_user->save();
+    $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
+    $app->triggerEvent('onUserLogin', array(
+        (array) $joomla_user,
+        $options));
     header('Content-Type: json/application');
     echo json_encode(['success' => true, 'message' => 'Logged in successfully via WebAuthn!']);
     mysqli_query($mysqli_link, "UPDATE $table_passkey 
