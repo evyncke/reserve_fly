@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2025 Eric Vyncke & Patrick Reginster
+   Copyright 2013-2026 Eric Vyncke & Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -70,6 +70,8 @@ $christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_mont
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
+<link rel="apple-touch-icon" sizes="32x32" href="<?=$favicon?>">
+<link rel="manifest" href="/resa/manifest.json">
 <title>Mobile RAPCS ASBL</title>
 
 <!-- Using latest bootstrap 5 -->
