@@ -153,6 +153,7 @@ if ($action == 'webauthn_register') {
         echo json_encode(['success' => false, 'message' => 'WebAuthn login verification failed: ' . $e->getMessage()]);
         exit($e->getMessage());
     }
+    $userId = $row['pk_userid'];
     // Let's do the Joomla login now
     $joomla_user = JFactory::getUser($userId);
     $app = JFactory::getApplication('site');
@@ -164,13 +165,14 @@ if ($action == 'webauthn_register') {
     $app->triggerEvent('onUserLogin', array(
         (array) $joomla_user,
         $options));
-    header('Content-Type: json/application');
-    echo json_encode(['success' => true, 'message' => 'Logged in successfully via WebAuthn!']);
+        
     mysqli_query($mysqli_link, "UPDATE $table_passkey 
         SET pk_last_use = NOW() 
         WHERE pk_credential_id = '" . mysqli_real_escape_string($mysqli_link, $credentialId) . "'")
         or journalise($userId, "E", "Failed to update last_login for credentialId=$credentialId: " . mysqli_error($mysqli_link)) ;
     journalise($row['pk_userid'], "I", "WebAuthn login verified successfully") ;
+    header('Content-Type: json/application');
+    echo json_encode(['success' => true, 'message' => 'Logged in successfully via WebAuthn!']);
     exit;
 
 } else {

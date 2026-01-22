@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2025 Eric Vyncke
+   Copyright 2013-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -303,11 +303,102 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
         <a href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Google</a>
         <a href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Gmail</a>
         <a href="<?=$linkedInAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><i class="bi bi-linkedin"></i> LinkedIn</a>
+    </div><!-- text-center -->
     <div class="row">
         <p class="text-center text-muted mt-3">Les connexions via Google, Facebook, ou LinkedIn nécessitent que votre adresse email soit la même sur le système de réservation
             et sur Facebook ou Google (trivial si votre email est ...@gmail.com) ou LinkedIn.
-            Si ce n'est pas le cas, veuillez utiliser la connexion classique et lier votre compte via votre profil sur ce site onglet Réseaux Sociaux.</p>
-    </div><!-- row -->   
+            Si ce n'est pas le cas, veuillez utiliser la connexion via identifiant et mot de passe 
+            et lier votre compte via votre profil sur ce site onglet Réseaux Sociaux.</p>
+    </div><!-- row -->
+    <div classs="row text-center">
+        <button id="webauthn-login" class="btn btn-outline-secondary"><i class="bi bi-fingerprint"></i></button><br/>
+        <div id="feedback" class="mt-2"></div>
+    </div>   
 </div> <!-- container -->
+<script>
+var helper = {
+	atb: b => {
+		let u = new Uint8Array(b), s = "";
+		for (let i = 0; i < u.byteLength; i++) s += String.fromCharCode(u[i]);
+			return btoa(s);
+		},
+
+	bta: o => {
+		let pre = "=?BINARY?B?", suf = "?=";
+		for (let k in o) {
+			if (typeof o[k] == "string") {
+				let s = o[k];
+				if (s.startsWith(pre) && s.endsWith(suf)) {
+					let raw = window.atob(s.slice(pre.length, -suf.length)),
+					u = new Uint8Array(raw.length);
+					for (let i = 0; i < raw.length; i++) u[i] = raw.charCodeAt(i);
+					o[k] = u.buffer;
+				}
+			} else {
+				helper.bta(o[k]);
+			}
+		}
+	}
+}
+
+// WebAuthn Login
+const feedback = document.getElementById('feedback');
+const loginButton = document.getElementById('webauthn-login');
+
+loginButton.addEventListener('click', async () => {
+	console.log('Button clicked: starting WebAuthn login...');
+	feedback.innerHTML = '<div class="alert alert-info">Contacting server...</div>';
+	try {
+		const response = await fetch('passkey_handler.php?action=get-login-options', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+		});
+		let options = await response.json();
+		feedback.innerHTML = '<div class="alert alert-info">Server response received.</div>';
+		console.log('Response received for login :-)') ;
+		console.log('response:', response);
+		helper.bta(options);
+		console.log('After decode, options: ', options);
+		// Let's fetch the credential method using publicKey options
+		const credential = await navigator.credentials.get(options);
+		console.log('After credentials.get:', credential);
+		console.log('typeof(credential):', typeof(credential));
+		console.log("id:", credential.id);
+		console.log("rawId:", credential.rawId);
+		console.log("helper.atb(credential.response.clientDataJSON),", helper.atb(credential.response.clientDataJSON));
+		feedback.innerHTML = '<div class="alert alert-info">Got navigator credentials.</div>';
+		// Send back to handler
+		const verify = await fetch('passkey_handler.php?action=verify-login', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({
+                callback: '<?=$callback?>',
+				id: credential.id,
+				rawId: helper.atb(credential.rawId),
+				client: helper.atb(credential.response.clientDataJSON),
+				auth: helper.atb(credential.response.authenticatorData),
+				sig: helper.atb(credential.response.signature),
+				user: credential.response.userHandle ? helper.atb(credential.response.userHandle) : null
+			})
+		});
+		console.log('After sending to verify-login:', verify);
+		if (verify.ok) {
+			feedback.innerHTML = '<div class="alert alert-success">Passkey Logged In!</div>';
+            // if (confirm("Connexion réussie via Passkey. Appuyez sur OK pour continuer vers vos réservations (<?=$callback?>).")) {
+            //    // User pressed OK 
+                window.location.href = "https://www.spa-aviation.be/<?=$callback?>";
+            // } else {
+            //     // User pressed Cancel
+            //     console.log("User stayed on the page.");
+            // }       
+		} else {
+			feedback.innerHTML = '<div class="alert alert-danger">Passkey Login Failed!</div>';
+		}
+	} catch (e) {
+		feedback.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
+		console.error('Error during WebAuthn login:', e);
+	}
+});
+</script>
 </body>
 </html>
