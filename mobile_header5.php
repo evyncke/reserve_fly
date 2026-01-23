@@ -549,6 +549,13 @@ if ($userIsBoardMember or $userIsInstructor) {
               <a class="dropdown-item" href="mobile_groups.php"><i class="bi bi-people-fill"></i> Mes groupes</a>
               <a class="dropdown-item" href="mobile_profile.php"><i class="bi bi-person-circle"></i> Mon profil</a>
 <?php
+if ($userIsBoardMember) {
+?>
+              <a class="dropdown-item text-warning" href="mobile_web_o_auth.php"><i class="bi bi-shield-fill"></i> Mes connexions</a>
+<?php
+}
+?>
+<?php
   if ($userIsStudent)
       print("<a class=\"dropdown-item\" href=\"dto.student.php?student=$userId\"><i class=\"bi bi-clipboard2-pulse-fill\"></i> Ma progression</a>") ;
 ?>
