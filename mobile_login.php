@@ -351,12 +351,12 @@ loginButton.addEventListener('click', async () => {
 	try {
 		const response = await fetch('passkey_handler.php?action=get-login-options', {
 			method: 'POST',
-			headers: {'Content-Type': 'application/json'},
+			headers: {'Content-Type': 'application/json'}
 		});
-		let options = await response.json();
-		feedback.innerHTML = '<div class="alert alert-info">Server response received.</div>';
 		console.log('Response received for login :-)') ;
 		console.log('response:', response);
+        feedback.innerHTML = "<div class=\"alert alert-info\">Server response received: " + response + "</div>";
+		let options = await response.json();
 		helper.bta(options);
 		console.log('After decode, options: ', options);
 		// Let's fetch the credential method using publicKey options
@@ -372,7 +372,6 @@ loginButton.addEventListener('click', async () => {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({
-                callback: '<?=$callback?>',
 				id: credential.id,
 				rawId: helper.atb(credential.rawId),
 				client: helper.atb(credential.response.clientDataJSON),
@@ -382,8 +381,9 @@ loginButton.addEventListener('click', async () => {
 			})
 		});
 		console.log('After sending to verify-login:', verify);
-		if (verify.ok) {
-			feedback.innerHTML = '<div class="alert alert-success">Passkey Logged In!</div>';
+		if (verify.ok) { // TODO check content?
+            const status = await verify.json();
+			feedback.innerHTML += '<div class="alert alert-success">Passkey Logged In! ' + status.message + '</div>';
             // if (confirm("Connexion réussie via Passkey. Appuyez sur OK pour continuer vers vos réservations (<?=$callback?>).")) {
             //    // User pressed OK 
                 window.location.href = "https://www.spa-aviation.be/<?=$callback?>";
@@ -392,11 +392,11 @@ loginButton.addEventListener('click', async () => {
             //     console.log("User stayed on the page.");
             // }       
 		} else {
-			feedback.innerHTML = '<div class="alert alert-danger">Passkey Login Failed!</div>';
+			feedback.innerHTML += "<div class=\"alert alert-danger\">Passkey Login Failed! </div>";
 		}
 	} catch (e) {
-		feedback.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
-		console.error('Error during WebAuthn login:', e);
+		feedback.innerHTML += `<div class="alert alert-danger">Exception: ${e.message}</div>`;
+		console.error('Error during WebAuthn login:', e.message, e.stack);
 	}
 });
 </script>
