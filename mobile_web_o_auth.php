@@ -21,25 +21,26 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 } ;
-$header_postamble = '
-' ;
 require_once 'mobile_header5.php' ;
+if ($userId != 62) journalise($userId, "I", "Accessing OAuth/WebAuthn registration page") ;
 ?>
 <h2>Connexion via OAuth et Webauthn</h2>
 <p>Il est possile de se connecter en utilisant un fournisseur d'identité OAuth2 (Google, LinkedIn, Facebook, etc.) 
 ou/et une clé de sécurité WebAuthn (Apple TouchID, FaceId, empreinte digitale, clé USB, clé NFC, clé Bluetooth 
 ou Passkey intégrée au téléphone ou à l'ordinateur).</p>
 <p>Ce sont des termes barbares mais qui permettent d'avoir une sécurité maximale sans avoir à retenir de mot de passe.</p>
+<p>Ces options doivent être activées via cette page ou dans l'onglet "Réseaux sociaux" de votre profil utilisateur. <mark>SAUF</mark> si l'adresse 
+	email de votre compte sur Spa-Aviation est la même que celle de votre compte Google, LinkedIn ou Facebook, auqel cas, il n'y a rien à faire.
+</p>
 
 <!-- Add WebAuthn buttons to the login form -->
 <div class="text-center">
 	<button id="webauthn-register" class="btn btn-outline-secondary"><i class="bi bi-fingerprint"></i> Register Passkey (par exemple, Apple FaceId)</button><br/>
     <div id="feedback" class="mt-2"></div>
 </div>
-<hr>
-<p class="lead">Le site web ne voit aucune information de vos comptes Facebook, Googgle, ou LinkedIn en dehors de votre nom, 
+<div class="mt-4 pt-2 border-top small text-body-secondary">Le site web ne voit aucune information de vos comptes Facebook, Googgle, ou LinkedIn en dehors de votre nom, 
     adresse email et photo de profil. Toutes les informations d'authentification sont gérées par votre fournisseur d'identité.
-    Il en est de même pour les empreintes digitales, FaceID, TouchID ou Passkeys qui ne sont jamais transmises au site web.</p>
+    Il en est de même pour les empreintes digitales, FaceID, TouchID ou Passkeys qui ne sont jamais transmises au site web.</div>
 <script>
 var helper = {
 	atb: b => {
