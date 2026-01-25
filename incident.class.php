@@ -60,7 +60,10 @@ class IncidentEvent {
                 WHERE ih_id = $id")
             or journalise($userId, "F", "Cannot read from $table_incident_history for id: " . mysqli_error($mysqli_link)) ;
         $row = mysqli_fetch_array($result) ;
-        if (! $row) return NULL ;
+        if (! $row) {
+            journalise($userId, "W", "Incident event with id $id not found.") ;
+            return NULL ;
+        }
         $this->__construct($row) ;
     }
 

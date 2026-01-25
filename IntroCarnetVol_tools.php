@@ -173,17 +173,20 @@ function CheckIncidentCoherency($theLogid)
     $result = mysqli_query($mysqli_link, $sql)
         or  journalise($userId, "F", "Cannot retrieve incident by log id ($theLogid): " . mysqli_error($mysqli_link)) ;
     $row = mysqli_fetch_array($result) ;
+    // TODO: check if multiple incidents for same logid...
     if ($row) {
         $id=$row['i_id'];
         $sql = "SELECT * FROM $table_incident_history WHERE ih_incident = $id";
         $result = mysqli_query($mysqli_link, $sql)
             or  journalise($userId, "F", "Cannot retrieve incident history by id ($id): " . mysqli_error($mysqli_link)) ;
-            $row = mysqli_fetch_array($result) ;
+        $row = mysqli_fetch_array($result) ;
         if(!$row) {
             // Incoherent: no history associated to an incident
             print("<p style=\"color: red;\"><b>ERROR:CheckIncidentCoherency($theLogid): No history associated to incident id=$id. Deleting this entry.</b></p><br>");
-            $sql = "delete from $table_incident where i_log = $theLogid";
-            mysqli_query($mysqli_link, $sql) or die("Cannot delete: " . mysqli_error($mysqli_link)) ;
+            journalise($userId, "W", "Incoherent incident found for log id $theLogid: no history associated to incident id=$id. Deleting this entry.") ;
+            $sql = "DELETE FROM $table_incident WHERE i_log = $theLogid";
+            mysqli_query($mysqli_link, $sql) 
+                or journalise($userId, "F", "Cannot delete incident #$theLogid: " . mysqli_error($mysqli_link)) ;
             return false;
         }
     }
