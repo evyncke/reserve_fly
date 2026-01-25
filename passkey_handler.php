@@ -97,9 +97,7 @@ if ($action == 'webauthn_register') {
 
 } elseif ($action === 'get-login-options') {
 
-    // Kind of useless as the request is empty
-    $response = json_decode(file_get_contents('php://input'), true);
-    journalise($userId, "I", "Generating WebAuthn login options, response=" . json_encode($response)) ;
+    journalise($userId, "I", "Generating WebAuthn login options") ;
     $args = $WebAuthn->getGetArgs([], 30); // First parameter is the set of potential credentials but can also be empty
     $_SESSION["challenge"] = base64_encode($WebAuthn->getChallenge()->getBinaryString());
     header('Content-Type: json/application');
