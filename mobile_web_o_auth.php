@@ -90,18 +90,16 @@ registerButton.addEventListener('click', async () => {
 		const verify = await fetch('passkey_handler.php?action=verify-registration', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({
+			body: JSON.stringify({ // TODO double-check all fields needed?
 				id: credential.id,
 				rawId: btoa(String.fromCharCode(...new Uint8Array((credential.rawId)))),
-				// rawId: base64urlToBuffer(credential.rawId),
 				type: credential.type,
-				// Below from the example with luchs component
 				transport: credential.response.getTransports ? credential.response.getTransports() : null,
 				client: helper.atb(credential.response.clientDataJSON),
 				attest: helper.atb(credential.response.attestationObject)})
 		});
 		console.log('After sending to verify-registration:', verify);
-		if (verify.ok) 
+		if (verify.ok) // TODO check whether success=true in the response
 			feedback.innerHTML = '<div class="alert alert-success">Passkey Saved!</div>';
 		else 
 			feedback.innerHTML = '<div class="alert alert-danger">Passkey Registration Failed!</div>';

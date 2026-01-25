@@ -28,28 +28,11 @@ if (!isset($_GET['action'])) {
 }
 
 $action = $_GET['action'];
-journalise($userId, "I", "WebAuthn request received for action '$action' for user id $userId-$userName-$userFullName") ;
 
 // Include WebAuthn library
 require_once 'vendor/autoload.php';
 $WebAuthn = new lbuchs\WebAuthn\WebAuthn('Spa Aviation', 'spa-aviation.be', array('android-key', 'android-safetynet', 'apple', 'fido-u2f', 'none', 'packed', 'tpm'));
 
-function fullDebug() {
-    // Clear any existing exception handlers to show the raw PHP backtrace
-    restore_exception_handler();
-    restore_error_handler();
-
-    // Enable all possible errors, warnings, and notices
-    error_reporting(E_ALL);
-
-    // Force errors to be printed to the browser
-    ini_set('display_errors', '1');
-    ini_set('display_startup_errors', '1');
-
-    // Optional: Ensure errors are also written to a log file in your directory
-    ini_set('log_errors', '1');
-    ini_set('error_log', __DIR__ . '/php_error.log');
-}
 
 // Initialize WebAuthn Relying Party
 // $rpEntity = PublicKeyCredentialRpEntity::create(
