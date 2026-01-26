@@ -79,16 +79,17 @@ if ($action == 'webauthn_register') {
             base64_decode($_SESSION["challenge"]),
             'required', true, false
         );
-        @journalise($userId, "D", "after processCreate, data=" . print_r($data, true)) ;
+        journalise($userId, "D", "after processCreate, data=" . print_r($data, true)) ;
         } catch (Exception $e) {
             header('Content-Type: application/json', true);
             echo json_encode(['success' => false, 'message' => 'WebAuthn registration verification exception:' . $e->getMessage()]);
             journalise($userId, "E", 'WebAuthn registration verification exception:' . $e->getMessage()) ;
             exit ;
         } ;
-    mysqli_query($mysqli_link, "INSERT INTO $table_passkey(pk_userid, pk_credential_id, pk_data, pk_registration) 
-        VALUES ($userId, '" . mysqli_real_escape_string($mysqli_link, $response['id']) . "', '" 
-        . mysqli_real_escape_string($mysqli_link, $data->credentialPublicKey) . "', NOW())") 
+    mysqli_query($mysqli_link, "INSERT INTO $table_passkey(pk_userid, pk_credential_id, pk_data, pk_registration, pk_last_device) 
+        VALUES ($userId, '" . mysqli_real_escape_string($mysqli_link, $response['id']) . "', '" .
+        mysqli_real_escape_string($mysqli_link, $data->credentialPublicKey) . "', NOW(), '" .
+        mysqli_real_escape_string($mysqli_link, $response['browser']) . "')") 
         or journalise($userId, "E", "Failed to store WebAuthn credential for user id $userId-$userName-$userFullName: " . mysqli_error($mysqli_link)) ;
     header('Content-Type: application/json', true);
     echo json_encode(['success' => true, 'message' => 'WebAuthn registration successful.']);
@@ -115,8 +116,13 @@ if ($action == 'webauthn_register') {
         FROM $table_passkey 
         WHERE pk_credential_id = '" . mysqli_real_escape_string($mysqli_link, $credentialId) . "'")
         or journalise($userId, "E", "Failed to retrieve WebAuthn credential (id=$credentialId): " . mysqli_error($mysqli_link)) ;
-    $row = mysqli_fetch_assoc($result)
-        or journalise($userId, "E", "No WebAuthn credential found for id $credentialId") ;
+    $row = mysqli_fetch_assoc($result) ;
+    if (! $row) {
+        journalise($userId, "E", "No WebAuthn credential found for id $credentialId") ;
+        header('Content-Type: application/json', true);
+        echo json_encode(['success' => false, 'message' => 'WebAuthn login verification failed: no passkey found for this credential ID']);
+        exit;
+    }
     $credentialPublicKey = $row['pk_data'];
     journalise($userId, "D", "Retrieved WebAuthn credential for id=$credentialId, public key: " . $credentialPublicKey) ;
     // Process the login
@@ -129,10 +135,10 @@ if ($action == 'webauthn_register') {
             base64_decode($_SESSION["challenge"])
         );
     } catch (Exception $e) {
-        journalise($userId, "E", "WebAuthn login verification failed for credentialId=$credentialId: " . $ex->getMessage()) ;
+        journalise($userId, "E", "WebAuthn login verification failed for credentialId=$credentialId: " . $e->getMessage()) ;
         header('Content-Type: application/json', true);
         echo json_encode(['success' => false, 'message' => 'WebAuthn login verification failed: ' . $e->getMessage()]);
-        exit($e->getMessage());
+        exit;
     }
     $userId = $row['pk_userid'];
     // Let's do the Joomla login now
@@ -148,7 +154,7 @@ if ($action == 'webauthn_register') {
         $options));
         
     mysqli_query($mysqli_link, "UPDATE $table_passkey 
-        SET pk_last_use = NOW() 
+        SET pk_last_use = NOW(), pk_last_device = '" . mysqli_real_escape_string($mysqli_link, $response['browser']) . "' 
         WHERE pk_credential_id = '" . mysqli_real_escape_string($mysqli_link, $credentialId) . "'")
         or journalise($userId, "E", "Failed to update last_login for credentialId=$credentialId: " . mysqli_error($mysqli_link)) ;
     journalise($row['pk_userid'], "I", "WebAuthn login verified successfully") ;

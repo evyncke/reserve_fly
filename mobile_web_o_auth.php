@@ -33,9 +33,35 @@ ou Passkey intégrée au téléphone ou à l'ordinateur).</p>
 	email de votre compte sur Spa-Aviation est la même que celle de votre compte Google, LinkedIn ou Facebook, auqel cas, il n'y a rien à faire.
 </p>
 
+<hr>
+<h3>Clé de sécurité WebAuthn (Passkey, TouchID, FaceID, clé USB, clé NFC, clé Bluetooth)</h3>
+<p>Il y a une clé par appareil (téléphone, tablette, ordinateur). Vous pouvez en enregistrer plusieurs. 
+	Cela vous permet de vous connecter sans mot de passe en utilisant la reconnaissance faciale, l'empreinte digitale ou une clé physique.</p>
+<table class="table table-striped table-bordered w-auto">
+	<thead>
+		<tr><th>Dernière utilisation</th><th>Appareil</th><th>Depuis le</th></tr>
+	</thead>
+	<tbody>
+<?php
+$result = mysqli_query($mysqli_link, "SELECT * 
+	FROM $table_passkey 
+	WHERE pk_userid = $userId 
+	ORDER BY pk_last_use DESC") 
+	or journalise($userId, "E", "Cannot query passkeys: " . mysqli_error($mysqli_link)) ;
+if (mysqli_num_rows($result) == 0) {
+	print("<tr><td colspan='3'>Aucune clé de sécurité enregistrée pour cet utilisateur.</td></tr>") ;
+} else {
+	while ($row = mysqli_fetch_array($result)) {
+		print("<tr><td>$row[pk_last_use]</td><td>" . htmlspecialchars($row['pk_last_device']) . "</td>
+			<td>$row[pk_registration]</td></tr>") ;
+	}
+} ;
+?>
+	</tbody>
+</table>	
 <!-- Add WebAuthn buttons to the login form -->
 <div class="text-center">
-	<button id="webauthn-register" class="btn btn-outline-secondary"><i class="bi bi-fingerprint"></i> Register Passkey (par exemple, Apple FaceId)</button><br/>
+	<button id="webauthn-register" class="btn btn-primary"><i class="bi bi-fingerprint"></i> Activer Passkey sur cet appareil/browser</button><br/>
     <div id="feedback" class="mt-2"></div>
 </div>
 <div class="mt-4 pt-2 border-top small text-body-secondary">Le site web ne voit aucune information de vos comptes Facebook, Googgle, ou LinkedIn en dehors de votre nom, 
@@ -88,10 +114,12 @@ registerButton.addEventListener('click', async () => {
 		console.log('typeof(credential):', typeof(credential));
 		feedback.innerHTML = '<div class="alert alert-info">Got navigator credentials.</div>';
 		// Send back to handler
+		const browser = await getBrowser();
 		const verify = await fetch('passkey_handler.php?action=verify-registration', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({ // TODO double-check all fields needed?
+				browser: browser,
 				id: credential.id,
 				rawId: btoa(String.fromCharCode(...new Uint8Array((credential.rawId)))),
 				type: credential.type,
@@ -109,6 +137,26 @@ registerButton.addEventListener('click', async () => {
 		console.error('Error during WebAuthn registration:', e);
 	}
 });
+
+async function getBrowser() {
+  // Modern path
+  if ('userAgentData' in navigator) {
+    const brands = navigator.userAgentData.brands;
+    const main = brands.find(b => b.brand !== 'Not.A/Brand') ?? brands[0];
+    return main.brand;
+  }
+
+  // Legacy fallback
+  const ua = navigator.userAgent;
+  if (/Edg\//.test(ua)) return 'Microsoft Edge';
+  if (/OPR\//.test(ua)) return 'Opera';
+  if (/Firefox\//.test(ua)) return 'Firefox';
+  if (/Chrome\//.test(ua)) return 'Google Chrome';
+  if (/Safari\//.test(ua)) return 'Safari';
+
+  return 'Unknown';
+}
+
 </script>
 </body>
 </html>

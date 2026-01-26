@@ -367,11 +367,13 @@ loginButton.addEventListener('click', async () => {
 		console.log("rawId:", credential.rawId);
 		console.log("helper.atb(credential.response.clientDataJSON),", helper.atb(credential.response.clientDataJSON));
 		feedback.innerHTML = '<div class="alert alert-info">Got navigator credentials.</div>';
+        const browser = await getBrowser();
 		// Send back to handler
 		const verify = await fetch('passkey_handler.php?action=verify-login', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({
+                browser: browser,
 				id: credential.id,
 				rawId: helper.atb(credential.rawId),
 				client: helper.atb(credential.response.clientDataJSON),
@@ -399,6 +401,26 @@ loginButton.addEventListener('click', async () => {
 		console.error('Error during WebAuthn login:', e.message, e.stack);
 	}
 });
+
+async function getBrowser() {
+  // Modern path
+  if ('userAgentData' in navigator) {
+    const brands = navigator.userAgentData.brands;
+    const main = brands.find(b => b.brand !== 'Not.A/Brand') ?? brands[0];
+    return main.brand;
+  }
+
+  // Legacy fallback
+  const ua = navigator.userAgent;
+  if (/Edg\//.test(ua)) return 'Microsoft Edge';
+  if (/OPR\//.test(ua)) return 'Opera';
+  if (/Firefox\//.test(ua)) return 'Firefox';
+  if (/Chrome\//.test(ua)) return 'Google Chrome';
+  if (/Safari\//.test(ua)) return 'Safari';
+
+  return 'Unknown';
+}
+
 </script>
 </body>
 </html>
