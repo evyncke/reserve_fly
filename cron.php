@@ -616,7 +616,7 @@ else {
 			fwrite($f, ",\n\t") ;
 		$groups = explode(',', $row['allgroups']) ;
 		$pilot = (in_array($joomla_pilot_group, $groups)) ? 'true' : 'false' ;
-		$student = (in_array($joomla_student_group, $groups)) ? 'true' : 'false' ;
+		$student = (in_array($joomla_flying_student_group, $groups) or in_array($joomla_theory_student_group, $groups)) ? 'true' : 'false' ;
 		$membership = isset($paid_membership_users[$row['id']]) ? 'true' : 'false' ;
 		fwrite($f, "{ id: $row[id], name: \"$row[name]\", first_name: \"$row[first_name]\", last_name: \"$row[last_name]\", email: \"$row[email]\", pilot: $pilot, student: $student, membership: $membership}") ;
 	}
@@ -645,7 +645,7 @@ $f = fopen("email.eleves", "w") ;
 if (! $f) journalise($userId, "E", "Cannot open email.eleves for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
-		where block = 0 and group_id in ($joomla_student_group, $joomla_instructor_group, $joomla_instructor_group2)
+		where block = 0 and group_id in ($joomla_flying_student_group, $joomla_theory_student_group, $joomla_instructor_group, $joomla_instructor_group2)
 		order by name") ;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
@@ -668,7 +668,6 @@ else {
 	}
 	fwrite($f, "aeroclub.spa@gmail.com\n") ;
 	fwrite($f, "dto118@spa-aviation.be\n") ;
-	fwrite($f, "event@spa-aviation.be\n") ;
 	fclose($f) ;
 }
 

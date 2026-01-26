@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2025 Eric Vyncke
+   Copyright 2023-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ require_once('dbi.php') ;
 
 class DTO {
     function Students($fi) {
-        global $joomla_student_group ;
-        return new DTOMembers($joomla_student_group, $fi) ;
+        global $joomla_flying_student_group, $joomla_theory_student_group ;
+        return new DTOMembers([$joomla_theory_student_group, $joomla_flying_student_group], $fi) ;
     }
 
     function Pilots() {
@@ -57,11 +57,12 @@ class DTOMember {
     public $validitiesDates = array() ;
     public $validitiesDaysLeft = array() ;
     public $theoreticalTrainingYear ;
-
+    public $theoryStudent = false;
+    public $flightStudent = false;
 
     function __construct($row = NULL) {
-        global $avatar_root_uri , $avatar_root_directory, 
-            $avatar_root_resized_uri, $avatar_root_resized_directory ;
+        global $avatar_root_uri , $avatar_root_directory, $avatar_root_resized_uri, $avatar_root_resized_directory,
+            $joomla_theory_student_group, $joomla_flying_student_group ;
         if ($row) {
             $this->firstName = db2web($row['first_name']) ;
             $this->lastName = db2web($row['last_name']) ;
@@ -76,6 +77,8 @@ class DTOMember {
             $this->blockedMessage = db2web($row['b_reason']) ;
             $this->membershipPaid = ($row['bkf_payment_date'] != '') ;
             $this->groupMembership = $row['group_ids'] ;
+            $this->theoryStudent = in_array($joomla_theory_student_group, explode(',', $this->groupMembership));
+            $this->flightStudent = in_array($joomla_flying_student_group, explode(',', $this->groupMembership));
             if (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_directory/$row[avatar]"))
                 $this->picture = $avatar_root_uri . '/' . $row['avatar'] ;
             elseif (is_file("$_SERVER[DOCUMENT_ROOT]/$avatar_root_resized_directory/$row[avatar]"))
@@ -122,10 +125,20 @@ class DTOMember {
         $this->__construct($row) ;
     }
 
-    function isStudent() {
-        global $joomla_student_group ;
+    function isFlyingStudent() {
+        global $joomla_flying_student_group ;
 
-        return in_array($joomla_student_group, explode(',', $this->groupMembership)) ;  
+        return in_array($joomla_flying_student_group, explode(',', $this->groupMembership)) ;  
+    }
+
+    function isTheoryStudent() {
+        global $joomla_theory_student_group ;
+
+        return in_array($joomla_theory_student_group, explode(',', $this->groupMembership)) ;  
+    }
+
+    function isStudent() {
+        return $this->isTheoryStudent() or $this->isFlyingStudent() ;
     }
 
     function isPilot() {
@@ -149,7 +162,15 @@ class TKI extends DTOMember {
 class Student extends DTOMember {
 
     function __construct($row = NULL) {
+        global $joomla_theory_student_group, $joomla_flying_student_group ;
+
         parent::__construct($row) ; 
+        if ($row) {
+            $groups = explode(',', $this->groupMembership) ;
+            $this->theoryStudent = in_array($joomla_theory_student_group, $groups) ;
+            $this->flightStudent = in_array($joomla_flying_student_group, $groups) ;
+            global $userId ; if ($userId == 62) print("Name: $this->lastName, groups=$this->groupMembership, theoryStudent=$this->theoryStudent, flightStudent=$this->flightStudent<br>") ;
+        }
     }
 
     function Flights() {
@@ -164,21 +185,32 @@ class DTOMembers implements Iterator {
     private $result ;
     private $row ;
 
-    function __construct ($group, $fi = NULL) {
+    function __construct ($groups, $fi = NULL) {
         global $mysqli_link, $table_users, $table_person, $table_dto_flight, $table_dto_student, $table_user_usergroup_map, $table_validity,
             $table_logbook, $table_blocked, $table_membership_fees, $joomla_instructor_group, $userId,
-            $joomla_instructor_group, $joomla_student_group, $joomla_pilot_group ;
+            $joomla_instructor_group, $joomla_flying_student_group, $joomla_theory_student_group, $joomla_pilot_group ;
 
-        $this->group = $group ; // FI, TKI, Student, ...
+        if (! is_array($groups)) {
+            $this->group = [$groups] ;
+            $group_condition = 'm.group_id = ' . $this->group[0] ;
+        } else {
+            $this->group = $groups ; // FI, TKI, Student, ...
+            $group_condition = 'm.group_id IN (' . implode(',', $this->group) . ')' ;
+        }
         if ($fi)
             $fi_condition = "AND l_instructor = $fi " ;
         else 
             $fi_condition = '' ;
-        switch ($this->group) {
-            case $joomla_instructor_group: $logbook_condition = 'jom_id = l_instructor' ; $dto_flight_join = '' ; break ;
-            case $joomla_student_group: $logbook_condition = 'df_flight_log = l_id' ; $dto_flight_join = "LEFT JOIN $table_dto_flight ON df_student = jom_id" ; break ;
-            case $joomla_pilot_group: $logbook_condition = 'jom_id = l_pilot' ; $dto_flight_join = '' ; break ;
-            default: journalise($userId, "F", "DTOMembers instantiated with unknown group $this->group") ;
+        if (in_array($joomla_instructor_group, $this->group)) {
+                $logbook_condition = 'jom_id = l_instructor' ; $dto_flight_join = '' ;
+        } else if (in_array($joomla_flying_student_group, $this->group)) {
+                $logbook_condition = 'jom_id = l_pilot OR df_flight_log = l_id' ; $dto_flight_join = "LEFT JOIN $table_dto_flight ON df_student = jom_id" ;
+        } else if (in_array($joomla_theory_student_group, $this->group)) { // TODO double check
+                $logbook_condition = 'jom_id = l_pilot OR df_flight_log = l_id' ; $dto_flight_join = "LEFT JOIN $table_dto_flight ON df_student = jom_id" ;
+        } else if (in_array($joomla_pilot_group, $this->group)) {
+                $logbook_condition = 'jom_id = l_pilot' ; $dto_flight_join = '' ;
+        } else {
+            journalise($userId, "F", "DTOMembers instantiated with unknown groups (" . implode(',', $this->group) . ")");
         }
         $sql = "SELECT *, p.jom_id AS jom_id, 
                     MIN(DATE(l_start)) AS first_flight, MAX(DATE(l_start)) AS last_flight, COUNT(DISTINCT l_start) AS count_flights, 
@@ -194,7 +226,7 @@ class DTOMembers implements Iterator {
                     LEFT JOIN $table_dto_student ON ds_jom_id = jom_id
                     LEFT JOIN $table_membership_fees ON bkf_user = p.jom_id AND bkf_year = YEAR(CURDATE())
                     LEFT JOIN $table_validity AS v ON v.jom_id = p.jom_id
-                WHERE m.group_id = $this->group AND block = 0  $fi_condition
+                WHERE $group_condition AND block = 0  $fi_condition
                 GROUP BY p.jom_id
                 ORDER BY last_name, first_name" ;
 
@@ -210,11 +242,13 @@ class DTOMembers implements Iterator {
     }
 
     public function current(): mixed {
-        global $joomla_instructor_group, $joomla_student_group ;
+        global $joomla_instructor_group, $joomla_flying_student_group, $joomla_theory_student_group ;
 
         switch ($this->group) {
             case $joomla_instructor_group: return new FI($this->row) ; break ;
-            case $joomla_student_group: return new Student($this->row) ; break ;
+            case $joomla_flying_student_group: 
+            case $joomla_theory_student_group:
+                return new Student($this->row) ; break ;
             default: return new DTOMember($this->row);
         }
     }
@@ -376,7 +410,7 @@ class Flights implements Iterator {
     private $row ;
 
     function __construct ($studentId = NULL) {
-        global $mysqli_link, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
+        global $mysqli_link, $table_person, $table_dto_flight, $table_logbook, $userId ;
 
         if (!$studentId) return ;
         $this->studentId = $studentId ; 
@@ -400,7 +434,7 @@ class Flights implements Iterator {
     }
 
     function getUnprocessedByFI($fiId) {
-        global $mysqli_link, $table_person, $table_dto_flight, $table_user_usergroup_map, $table_logbook, $userId ;
+        global $mysqli_link, $table_person, $table_dto_flight, $table_logbook, $userId ;
 
         $this->studentId = NULL; 
         if ($this->result) mysqli_free_result($this->result) ;

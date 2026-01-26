@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2025 Eric Vyncke
+   Copyright 2023-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ foreach($members as $member) {
 ?>
 
 <h2>Liste des élèves en cours de formation</h2>
+<mark>Buggy pour l'instant -- en cours de développement</mark>
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-7">
 <div class="table-responsive">
@@ -104,11 +105,17 @@ foreach($members as $member) {
                 <a href=\"dto.student.php?student=$student->jom_id\" title=\"Display all flights\">$student->lastName, $student->firstName <i class=\"bi bi-binoculars-fill\"></i></a>
                     <a href=\"mailto:$student->email\"><i class=\"bi bi-envelope-fill\" title=\"Send email\"></i></a>
                     $mobile_phone $membership_filled $blocked $bank_filled
-            </td>
-            <td>$student->theoreticalTrainingYear</td>
-            <td>$student->firstFlight <span class=\"badge text-bg-info\" title=\"Number of flights\"><i class=\"bi bi-airplane-fill\"></i> $student->countFlights</span><br/>
-                $student->lastFlight <span class=\"badge $daysColor\" title=\"Days since last flight\"><i class=\"bi bi-calendar3\"></i> $student->daysSinceLastFlight</span></td>
-            <td class=\"d-none d-md-table-cell\"><a href=\"mailto:$student->email\">$student->email</a></td>
+            </td>") ;
+        //if ($student->theoryStudent)
+        print("<td>$student->theoreticalTrainingYear</td>\n") ;
+        // else
+        //     print("<td>No theory</td>\n") ;
+        if ($student->flightStudent)
+            print("<td>$student->firstFlight <span class=\"badge text-bg-info\" title=\"Number of flights\"><i class=\"bi bi-airplane-fill\"></i> $student->countFlights</span><br/>
+                $student->lastFlight <span class=\"badge $daysColor\" title=\"Days since last flight\"><i class=\"bi bi-calendar3\"></i> $student->daysSinceLastFlight</span></td>\n") ;
+        else
+            print("<td>Not flying</td>\n") ;
+        print("<td class=\"d-none d-md-table-cell\"><a href=\"mailto:$student->email\">$student->email</a></td>
             <td class=\"d-none d-md-table-cell\"><a href=\"tel:$student->mobilePhone\">$student->mobilePhone</a></td>
             </tr>\n") ;
     }

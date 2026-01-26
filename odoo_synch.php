@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2025 Eric Vyncke
+   Copyright 2023-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ if (!isset($odooClient))
 function odooSynchronize() {
     global $odooClient, $mysqli_link, $table_person, $table_users, $table_user_usergroup_map, 
         $table_blocked, $table_membership_fees,
-        $joomla_instructor_group, $joomla_pilot_group, $joomla_student_group, 
+        $joomla_instructor_group, $joomla_pilot_group, $joomla_flying_student_group, $joomla_theory_student_group, 
         $joomla_member_group, $joomla_board_group, $userId ;
         
     // Let's get all Odoo customers
@@ -41,6 +41,7 @@ function odooSynchronize() {
 
     $fi_tag = $odooClient -> GetOrCreateCategory('FI') ;
     $student_tag = $odooClient -> GetOrCreateCategory('Student') ;
+    $theory_student_tag = $odooClient -> GetOrCreateCategory('Theory Student') ;
     $pilot_tag = $odooClient -> GetOrCreateCategory('Pilot') ;
     $member_tag = $odooClient -> GetOrCreateCategory('Member') ;
     $board_member_tag = $odooClient -> GetOrCreateCategory('Board Member') ;
@@ -100,8 +101,10 @@ function odooSynchronize() {
                 $tags[] = $fi_tag ;
             if (in_array($joomla_pilot_group, $groups) and $row['block'] == 0)
                 $tags[] = $pilot_tag ;
-            if (in_array($joomla_student_group, $groups) and $row['block'] == 0)
+            if (in_array($joomla_flying_student_group, $groups) and $row['block'] == 0)
                 $tags[] = $student_tag ;
+            if (in_array($joomla_theory_student_group, $groups) and $row['block'] == 0)
+                $tags[] = $theory_student_tag ;
             if (in_array($joomla_member_group, $groups) and $row['block'] == 0)
                 $tags[] = $member_tag ;
             if (in_array($joomla_board_group, $groups)  and $row['block'] == 0)

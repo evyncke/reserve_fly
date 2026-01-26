@@ -138,7 +138,9 @@ $joomla_board_group = 22 ; // Board member
 $joomla_sysadmin_group = 6 ;
 $joomla_superuser_group = 8 ;
 $joomla_pilot_group = 13 ;
-$joomla_student_group = 16 ;
+$joomla_student_group = 16 ; // Flying students
+$joomla_flying_student_group = 16 ; // Flying students
+$joomla_theory_student_group = 26 ; // Theory only students
 $joomla_instructor_group = 14 ;
 $joomla_instructor_group2 = 15 ;
 $joomla_mechanic_group = 17 ;
@@ -168,10 +170,11 @@ $joomla_session = JFactory::getSession() ;
 $joomla_session->start() ; // Keep alive?
 
 function CheckJoomlaUser($joomla_user) {
-	global $userIsPilot, $userIsAdmin, $userIsBoardMember, $userIsInstructor, $userIsMechanic,$userIsStudent, $userIsFlightPilot, $userIsFlightManager, $userNoFlight ;
+	global $userIsPilot, $userIsAdmin, $userIsBoardMember, $userIsInstructor, $userIsMechanic,$userIsStudent, $userIsTheoryStudent, $userIsFlyingStudent,
+		$userIsFlightPilot, $userIsFlightManager, $userNoFlight ;
 	global $userName, $userFullName, $userId, $originUserId ;
 	global $joomla_member_group, $joomla_admin_group, $joomla_sysadmin_group, $joomla_superuser_group, $joomla_board_group ;
-	global $joomla_pilot_group, $joomla_student_group, $joomla_instructor_group, $joomla_instructor_group2, $joomla_mechanic_group ;
+	global $joomla_pilot_group, $joomla_flying_student_group, $joomla_theory_student_group, $joomla_instructor_group, $joomla_instructor_group2, $joomla_mechanic_group ;
 	global $joomla_flight_group, $joomla_flight_pilot_group, $joomla_flight_manager_group, $joomla_no_flight ;
 
 	// And now use this information
@@ -197,7 +200,9 @@ function CheckJoomlaUser($joomla_user) {
 	$userIsInstructor = array_key_exists($joomla_instructor_group, $joomla_groups) ;
 	$userIsBoardMember = array_key_exists($joomla_board_group, $joomla_groups) ;
 	$userIsMechanic = array_key_exists($joomla_mechanic_group, $joomla_groups) ;
-	$userIsStudent = array_key_exists($joomla_student_group, $joomla_groups) ;
+	$userIsFlyingStudent = array_key_exists($joomla_flying_student_group, $joomla_groups) ;
+	$userIsTheoryStudent = array_key_exists($joomla_theory_student_group, $joomla_groups) ;
+	$userIsStudent = $userIsFlyingStudent || $userIsTheoryStudent ;
 	$userIsFlightPilot = array_key_exists($joomla_flight_pilot_group, $joomla_groups) || array_key_exists($joomla_flight_group, $joomla_groups);
 	$userIsFlightManager = array_key_exists($joomla_flight_manager_group, $joomla_groups) ;
 	$userNoFlight = array_key_exists($joomla_no_flight, $joomla_groups) ;
