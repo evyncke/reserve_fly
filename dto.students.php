@@ -63,7 +63,6 @@ foreach($members as $member) {
 ?>
 
 <h2>Liste des élèves en cours de formation</h2>
-<mark>Buggy pour l'instant -- en cours de développement</mark>
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-7">
 <div class="table-responsive">
