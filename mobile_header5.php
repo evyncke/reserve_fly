@@ -527,6 +527,13 @@ if ($userId <= 0) {
           <ul class="dropdown-menu">
               <li id="logoutElem">
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
+<?php
+if ($userIsBoardMember) {
+?>
+              <a class="dropdown-item text-warning" href="mobile_web_o_auth.php"><i class="bi bi-shield"></i> Mes connexions</a>
+<?php
+}
+?>              
               <a class="dropdown-item" href="?theme=dark"><i class="bi bi-moon-stars-fill"></i> Mode nuit</a>
               <a class="dropdown-item" href="?theme=light"><i class="bi bi-sun-fill"></i> Mode jour</a>
               <a class="dropdown-item" href="mobile_mylog.php"><i class="bi bi-journals"></i> Mon carnet de vols</a>
@@ -548,13 +555,7 @@ if ($userIsBoardMember or $userIsInstructor) {
               <li><h6 class="dropdown-header">Données personnelles</h6></li>
               <a class="dropdown-item" href="mobile_groups.php"><i class="bi bi-people-fill"></i> Mes groupes</a>
               <a class="dropdown-item" href="mobile_profile.php"><i class="bi bi-person-circle"></i> Mon profil</a>
-<?php
-if ($userIsBoardMember) {
-?>
-              <a class="dropdown-item text-warning" href="mobile_web_o_auth.php"><i class="bi bi-shield-fill"></i> Mes connexions</a>
-<?php
-}
-?>
+
 <?php
   if ($userIsStudent)
       print("<a class=\"dropdown-item\" href=\"dto.student.php?student=$userId\"><i class=\"bi bi-clipboard2-pulse-fill\"></i> Ma progression</a>") ;
