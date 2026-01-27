@@ -28,10 +28,39 @@ if ($userId != 62) journalise($userId, "I", "Accessing OAuth/WebAuthn registrati
 <p>Il est possile de se connecter en utilisant un fournisseur d'identité OAuth2 (Google, LinkedIn, Facebook, etc.) 
 ou/et une clé de sécurité WebAuthn (Apple TouchID, FaceId, empreinte digitale, clé USB, clé NFC, clé Bluetooth 
 ou Passkey intégrée au téléphone ou à l'ordinateur).</p>
-<p>Ce sont des termes barbares mais qui permettent d'avoir une sécurité maximale sans avoir à retenir de mot de passe.</p>
+<p>Ce sont des termes barbares mais qui permettent d'avoir une sécurité maximale sans avoir à retenir de mot de passe. Et vous pouvez évidemment combiner
+	tous les systèmes pour plus de flexibilités.
+</p>
+
+<hr>
+<h3>Fournisseur d'identité OAuth2 (Facebook, Google, LinkedIn, etc.)</h3>
+<p>Il est possible de se connecter en utilisant un fournisseur d'identité OAuth2 (Google, LinkedIn, Facebook, etc.). 
+	Cela vous permet de vous connecter sans mot de passe en utilisant votre compte existant chez l'un de ces fournisseurs.</p>
 <p>Ces options doivent être activées via cette page ou dans l'onglet "Réseaux sociaux" de votre profil utilisateur. <mark>SAUF</mark> si l'adresse 
 	email de votre compte sur Spa-Aviation est la même que celle de votre compte Google, LinkedIn ou Facebook, auqel cas, il n'y a rien à faire.
 </p>
+<?php
+$result = mysqli_query($mysqli_link, "SELECT * 
+	FROM $table_person 
+	WHERE jom_id = $userId") 
+	or journalise($userId, "E", "Cannot query OAuth providers: " . mysqli_error($mysqli_link)) ;
+$row = mysqli_fetch_array($result) or journalise($userId, "F", "User not found...") ;
+if (str_ends_with($row['email'], "@gmail.com") && ! $row['google_id']) {
+	$gmail_msg = "Votre adresse email est une adresse Gmail. Vous pouvez vous connecter avec Google sans autre action de votre part." ;
+} else {
+	$gmail_msg = '' ;
+}
+?>
+<table class="table table-striped table-bordered w-auto">
+	<thead>
+		<tr><th>Fournisseur d'identité</th><th>Activé</th><th>Note</th></tr>
+	</thead>
+	<tbody>
+		<tr><td>Facebook</td><td><?php print($row['facebook_id'] ? "Oui" : "Non") ; ?></td><td></td></tr>
+		<tr><td>Google</td><td><?php print($row['google_id'] ? "Oui" : "Non") ; ?></td><td><?php print($gmail_msg)?></td></tr>
+		<tr><td>LinkedIn</td><td><?php print($row['linkedin_id'] ? "Oui" : "Non") ; ?></td><td></td></tr>
+	</tbody>
+</table>
 
 <hr>
 <h3>Clé de sécurité WebAuthn (Passkey, TouchID, FaceID, clé USB, clé NFC, clé Bluetooth)</h3>
