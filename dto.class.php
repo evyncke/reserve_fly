@@ -169,7 +169,7 @@ class Student extends DTOMember {
             $groups = explode(',', $this->groupMembership) ;
             $this->theoryStudent = in_array($joomla_theory_student_group, $groups) ;
             $this->flightStudent = in_array($joomla_flying_student_group, $groups) ;
-            global $userId ; if ($userId == 62) print("Name: $this->lastName, groups=$this->groupMembership, theoryStudent=$this->theoryStudent, flightStudent=$this->flightStudent<br>") ;
+            // global $userId ; if ($userId == 62) print("Name: $this->lastName, groups=$this->groupMembership, theoryStudent=$this->theoryStudent, flightStudent=$this->flightStudent<br>") ;
         }
     }
 

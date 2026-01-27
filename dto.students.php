@@ -42,7 +42,7 @@ $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_passwor
 $sql = "SELECT odoo_id
 	FROM $table_person
     JOIN $table_user_usergroup_map ON jom_id = user_id 
-    WHERE group_id = $joomla_student_group
+    WHERE group_id IN ($joomla_flying_student_group, $joomla_theory_student_group)
     GROUP BY jom_id" ;
 $result = mysqli_query($mysqli_link, $sql)
 	or journalise($userId, "F", "Cannot retrieve all Odoo ids: " . mysqli_error($mysqli_link)) ;
@@ -68,7 +68,7 @@ foreach($members as $member) {
 <div class="table-responsive">
 <table class="table table-striped table-hover" id="students-table">
 <thead>
-<th>Elèves</th><th>Cours théoriques</th><th>Premier/dernier vols</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th></tr>
+<th>Élèves</th><th>Cours théoriques</th><th>Premier/dernier vols</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th></tr>
 </thead>
 <tbody class="table-group-divider">
 
@@ -105,15 +105,15 @@ foreach($members as $member) {
                     <a href=\"mailto:$student->email\"><i class=\"bi bi-envelope-fill\" title=\"Send email\"></i></a>
                     $mobile_phone $membership_filled $blocked $bank_filled
             </td>") ;
-        //if ($student->theoryStudent)
+        // if ($student->theoryStudent)
         print("<td>$student->theoreticalTrainingYear</td>\n") ;
         // else
         //     print("<td>No theory</td>\n") ;
         if ($student->flightStudent)
             print("<td>$student->firstFlight <span class=\"badge text-bg-info\" title=\"Number of flights\"><i class=\"bi bi-airplane-fill\"></i> $student->countFlights</span><br/>
                 $student->lastFlight <span class=\"badge $daysColor\" title=\"Days since last flight\"><i class=\"bi bi-calendar3\"></i> $student->daysSinceLastFlight</span></td>\n") ;
-        else
-            print("<td>Not flying</td>\n") ;
+        else 
+            print("<td>Not flying (theory only)</td>\n") ;
         print("<td class=\"d-none d-md-table-cell\"><a href=\"mailto:$student->email\">$student->email</a></td>
             <td class=\"d-none d-md-table-cell\"><a href=\"tel:$student->mobilePhone\">$student->mobilePhone</a></td>
             </tr>\n") ;
