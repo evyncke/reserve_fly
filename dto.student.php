@@ -67,12 +67,18 @@ if (isset($_POST['action']) and $_POST['action'] == 'upload') {
     <li class="nav-item">
   		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#documents" aria-current="page" href="#documents">Documents</a>
 	</li>
+<?php
+if ($student->isFlyingStudent()) {
+?>
     <li class="nav-item">
   		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#flights" aria-current="page" href="#flights">Flights</a>
 	</li>
     <li class="nav-item">
   		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#exercices" aria-current="page" href="#exercices">Exercices</a>
 	</li>
+<?php
+} // isFlyingStudent
+?>
 </ul>
 
 <div class="tab-content">
@@ -148,6 +154,9 @@ $total_pct = round(($total_hours * 60 + $total_minutes) * 100 / (45 * 60)) ;
 <p><ul>
     <li>Theoretical training year: <input type="text" value="<?=$student->theoreticalTrainingYear?>" class="Xform-control" readonly>
         <i class="bi bi-pencil-square" title="Edit theoretical training year" onclick="alert('not implemented yet');"></i></li>
+<?php
+if ($student->isFlyingStudent()) {
+?>
     <li>Flight count: <?=$flights->count?></li>
     <li>Last flight: <?=$last_flight?></li>
     <li>DC: <?="$dc_hours H $dc_minutes min"?><br/>
@@ -174,6 +183,9 @@ $total_pct = round(($total_hours * 60 + $total_minutes) * 100 / (45 * 60)) ;
         </div>
     </li>
     <li><span id="progressMessageSpan"></span></li>
+<?php
+} // isFlyingStudent
+?>
 </ul>
 </p>
 </div><!-- col -->
