@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023 Eric Vyncke
+   Copyright 2023-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -47,7 +47,8 @@ $userIsInstructor = array_key_exists($joomla_instructor_group, $joomla_groups) ;
 $userIsBoardMember = array_key_exists($joomla_board_group, $joomla_groups) ;
 $userIsEffectiveMember = array_key_exists($joomla_effectif_group, $joomla_groups) ;
 $userIsMechanic = array_key_exists($joomla_mechanic_group, $joomla_groups) ;
-$userIsStudent = array_key_exists($joomla_student_group, $joomla_groups) ;
+$userIsFlyingStudent = array_key_exists($joomla_flying_student_group, $joomla_groups) ;
+$userIsTheoryStudent = array_key_exists($joomla_theory_student_group, $joomla_groups) ;
 $userIsFlightPilot = array_key_exists($joomla_flight_pilot_group, $joomla_groups) || array_key_exists($joomla_flight_group, $joomla_groups);
 $userIsFlightManager = array_key_exists($joomla_flight_manager_group, $joomla_groups) ;
 $userNoFlight = array_key_exists($joomla_no_flight, $joomla_groups) ;
@@ -67,7 +68,7 @@ $blocked_when = $pilot['b_when'] ;
 <div class="container">
 
 <div class="page-header">
-<h3>Les groupes de <?=$userName?></h3>
+<h2>Les groupes de <?=$userName?></h2>
 </div> <!-- row -->
 
 <div class="row">
@@ -75,7 +76,8 @@ $blocked_when = $pilot['b_when'] ;
 <p>Voici les divers groupes auxquels <?=$userName?> appartient:
     <ul>
 <?php
-if ($userIsStudent) print("<li>élève</li>") ;
+if ($userIsFlyingStudent) print("<li>élève navigant</li>") ;
+if ($userIsTheoryStudent) print("<li>élève théorique</li>") ;
 if ($userIsPilot) print("<li>pilote</li>") ;
 if ($userIsMechanic) print("<li>mécano</li>") ;
 if ($userIsInstructor) print("<li>instructeur</li>") ;
