@@ -56,9 +56,9 @@ if (str_ends_with($row['email'], "@gmail.com") && ! $row['google_id']) {
 		<tr><th>Fournisseur d'identité</th><th>Activé</th><th>Note</th></tr>
 	</thead>
 	<tbody>
-		<tr><td>Facebook</td><td><?php print($row['facebook_id'] ? "Oui" : "Non") ; ?></td><td></td></tr>
-		<tr><td>Google</td><td><?php print($row['google_id'] ? "Oui" : "Non") ; ?></td><td><?php print($gmail_msg)?></td></tr>
-		<tr><td>LinkedIn</td><td><?php print($row['linkedin_id'] ? "Oui" : "Non") ; ?></td><td></td></tr>
+		<tr><td><i class="bi bi-facebook"></i> Facebook</td><td><?php print($row['facebook_id'] ? "Oui" : "Non") ; ?></td><td></td></tr>
+		<tr><td><i class="bi bi-google"></i> Google</td><td><?php print($row['google_id'] ? "Oui" : "Non") ; ?></td><td><?php print($gmail_msg)?></td></tr>
+		<tr><td><i class="bi bi-linkedin"></i> LinkedIn</td><td><?php print($row['linkedin_id'] ? "Oui" : "Non") ; ?></td><td></td></tr>
 	</tbody>
 </table>
 
