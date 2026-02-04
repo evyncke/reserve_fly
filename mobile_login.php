@@ -77,6 +77,7 @@ use League\OAuth2\Client\Provider\LinkedIn;
 // session_start(); // Probably already started in mobile_header5.php or via dbi.php
 
 // Initialize Google Client
+// See https://console.cloud.google.com/apis/credentials?authuser=1&project=regal-throne-481610-u7
 $google = new Google([
     'clientId'     => $google_client_id,
     'clientSecret' => $google_client_secret,
@@ -84,6 +85,7 @@ $google = new Google([
 ]);
 
 // Initialize Facebook Client
+// See also https://developers.facebook.com/apps/1070912613042275/dashboard/?business_id=363522343467274
 $facebook = new Facebook([
     'app_id' => $fb_app_id,
     'app_secret' => $fb_app_secret,
