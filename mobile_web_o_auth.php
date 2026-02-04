@@ -23,6 +23,53 @@ if ($userId == 0) {
 } ;
 require_once 'mobile_header5.php' ;
 if ($userId != 62) journalise($userId, "I", "Accessing OAuth/WebAuthn registration page") ;
+
+require_once 'vendor/autoload.php'; // Ensure you have the Google and Facebook SDKs installed via Composer
+use Facebook\Facebook;
+use League\OAuth2\Client\Provider\Google;
+use League\OAuth2\Client\Provider\LinkedIn;
+
+// session_start(); // Probably already started in mobile_header5.php or via dbi.php
+
+// Initialize Facebook Client
+$facebook = new Facebook([
+    'app_id' => $fb_app_id,
+    'app_secret' => $fb_app_secret,
+    'default_graph_version' => 'v19.0',
+]);
+
+// Initialize Google Client
+$google = new Google([
+    'clientId'     => $google_client_id,
+    'clientSecret' => $google_client_secret,
+    'redirectUri'  => 'https://www.spa-aviation.be/resa/mobile_login.php', // Doit être identique à la console Google
+]);
+
+// Initialize LinkedIn Client
+$linkedin = new LinkedIn([
+    'clientId' => $linkedin_client_id,
+    'clientSecret' => $linkedin_client_secret,
+    'redirectUri' => 'https://www.spa-aviation.be/resa/mobile_login.php',
+]);
+
+// Generate OAuth URLs
+$facebookHelper = $facebook->getRedirectLoginHelper();
+$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_web_o_auth.php', ['email','public_profile','user_link']);
+// TODO find the equivalent $_SESSION['facebook_oauth2state'] = $facebook->getState(); // Unsure if used later...
+$googleAuthUrl = $google->getAuthorizationUrl();
+$_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later...
+$linkedinAuthUrl = $linkedin->getAuthorizationUrl();
+$_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used later...
+
+// Check for deactivation requests
+if (isset($_REQUEST['deactivate'])) {
+	$provider = $_REQUEST['deactivate'];
+	if ($provider == 'facebook') {
+		mysqli_query($mysqli_link, "UPDATE $table_person SET facebook_id = NULL, facebook_token = NULL WHERE jom_id = $userId")
+			or journalise($userId, "F", "Cannot deactivate Facebook OAuth: " . mysqli_error($mysqli_link)) ;
+		journalise($userId, "I", "Deactivated Facebook OAuth") ;
+	}
+}
 ?>
 <h2>Connexion via OAuth et Webauthn</h2>
 <p>Il est possile de se connecter en utilisant un fournisseur d'identité OAuth2 (Google, LinkedIn, Facebook, etc.) 
@@ -56,9 +103,11 @@ if (str_ends_with($row['email'], "@gmail.com") && ! $row['google_id']) {
 		<tr><th>Fournisseur d'identité</th><th>Activé</th><th>Note</th></tr>
 	</thead>
 	<tbody>
-		<tr><td><i class="bi bi-facebook"></i> Facebook</td><td><?php print($row['facebook_id'] ? "Oui" : "Non") ; ?></td><td></td></tr>
-		<tr><td><i class="bi bi-google"></i> Google</td><td><?php print($row['google_id'] ? "Oui" : "Non") ; ?></td><td><?php print($gmail_msg)?></td></tr>
-		<tr><td><i class="bi bi-linkedin"></i> LinkedIn</td><td><?php print($row['linkedin_id'] ? "Oui" : "Non") ; ?></td><td></td></tr>
+		<tr><td><i class="bi bi-facebook"></i> Facebook</td><td><?php print($row['facebook_id'] ? 
+			"Oui<br/><a href='$_SERVER[PHP_SELF]?deactivate=facebook'>Désactiver</a>" : 
+			"Non<br/><a href='$facebookAuthUrl'>Activer</a>") ; ?></td><td></td></tr>
+		<tr><td><i class="bi bi-google"></i> Google</td><td><?php print($row['google_id'] ? "Oui" : "Non<br/><a href='$googleAuthUrl'>Activer</a>") ; ?></td><td><?php print($gmail_msg)?></td></tr>
+		<tr><td><i class="bi bi-linkedin"></i> LinkedIn</td><td><?php print($row['linkedin_id'] ? "Oui" : "Non<br/><a href='$linkedinAuthUrl'>Activer</a>") ; ?></td><td></td></tr>
 	</tbody>
 </table>
 
