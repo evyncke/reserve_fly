@@ -71,7 +71,7 @@ $christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_mont
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <link rel="apple-touch-icon" sizes="32x32" href="<?=$favicon?>">
-<link rel="manifest" href="/resa/manifest.json">
+<link rel="manifest" href="/resa/manifest.webmanifest">
 <title>Mobile RAPCS ASBL</title>
 
 <!-- Using latest bootstrap 5 -->
