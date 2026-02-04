@@ -3,6 +3,12 @@
 Vous trouverez ici les diverses nouveautés à propos du site réservation du RAPCS. Les suggestions sont les bienvenues auprès de
 [Éric Vyncke](mobile_profile.php?displayed_id=62) et [Patrick Reginster](mobile_profile.php?displayed_id=66).
 
+## Février 2026
+
+- le site est aussi disponible en tant qu'application (donc sur votre écran de départ, votre Dock sur MacOs, votre menu Démarrer sous Windows, ...) car il est supporté maintenant en tant que Progressive Web Application (WPA). Comment faire pour l'installer ?
+   - Chrome: cliquer sur l'icone télécharger à droite de la barre d'adresse
+   - Safari: soit Fichier/Ajouter au Dock soit l'icone partager et 'Ajouter au Dock'
+
 ## Janvier 2026
 
 - plusieurs tables peuvent être triées en cliquant sur l'intitulé d'une colonne, il est aussi possible d'afficher que certaines lignes via la case "Rechercher" au dessus de la table.
