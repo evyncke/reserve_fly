@@ -1,11 +1,11 @@
 {
-  "name": "Spa Aviation (RAPCS)",
+  "name": "Réservations Spa Aviation (RAPCS)",
   "short_name": "Spa Aviation",
   "description": "Accès aux réservations des avions de Spa Aviation (RAPCS ASBL)",
-  "start_url": "/resa/mobile.php",
+  "start_url": "/resa/mobile.php?news=true&wpa=true",
   "scope": "/resa/",
-  "_commented_out_display": "standalone",
-  "display": "browser",
+  "_commented_out_display": "browser",
+  "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#198754",
   "icons": [
