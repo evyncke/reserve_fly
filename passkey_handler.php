@@ -98,12 +98,10 @@ if ($action == 'webauthn_register') {
 
 } elseif ($action === 'get-login-options') {
 
-    journalise($userId, "I", "Generating WebAuthn login options") ;
     $args = $WebAuthn->getGetArgs([], 30); // First parameter is the set of potential credentials but can also be empty
     $_SESSION["challenge"] = base64_encode($WebAuthn->getChallenge()->getBinaryString());
     header('Content-Type: json/application');
     echo json_encode($args);
-    journalise($userId, "D", "get-login-options: " . json_encode($args)) ;
     exit;
 
 } elseif ($action === 'verify-login') {
@@ -124,7 +122,6 @@ if ($action == 'webauthn_register') {
         exit;
     }
     $credentialPublicKey = $row['pk_data'];
-    journalise($userId, "D", "Retrieved WebAuthn credential for id=$credentialId, public key: " . $credentialPublicKey) ;
     // Process the login
     try {
         $WebAuthn->processGet(
