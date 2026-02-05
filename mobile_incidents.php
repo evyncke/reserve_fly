@@ -127,9 +127,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-12">
 <div class="table-responsive">
-<table class="table table-striped table-hover">
+<table class="table table-striped table-hover" id="incidents-table">
 <thead>
-<tr><th class="text-center" colspan="6">Report</th><th class="text-center border-start" colspan="4">Latest status</th></tr>
+<tr><th class="text-center" colspan="6"  data-hidden="true">Report</th><th class="text-center border-start" colspan="4" data-hidden="true">Latest status</th></tr>
 <tr><th>#Entry</th><th>Aircraft</th><th>Severity</th><th>Date</th><th>Description</th><th>By</th><th class="border-start">Status</th><th>Action</th><th>Date</th><th>By</th></tr>
 </thead>
 <tbody class="table-group-divider">
@@ -217,5 +217,21 @@ if($plane != "") {
     print("<p><input class=\"button\" type=\"button\" value=\"Display all Aircrafts\" onclick=\"javascript:document.location.href='mobile_incidents.php';\"></input>");
 }
 ?>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+<XXXscript>
+    new window.simpleDatatables.DataTable("#incidents-table", {
+        searchable: true,
+        fixedHeight: false,
+        paging: false,
+        labels: {
+            placeholder: "Rechercher...",
+            noRows: "Aucune entrée trouvée",
+            info: "Affichage de {start} à {end} sur {rows} entrées",
+        },
+        data: {
+            headings: ["#Entry", "Aircraft", "Severity", "Date", "Description", "By", "Status", "Action", "Date", "By"]
+    }      
+    });
+</XXXscript>
 </body>
 </html>
