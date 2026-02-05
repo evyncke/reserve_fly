@@ -119,7 +119,7 @@ if (false) {
 $result_members = mysqli_query($mysqli_link, $sql)
 			or journalise(0, "F", "Cannot read members: " . mysqli_error($mysqli_link)) ;
 $invoiceCount = 0 ;
-print("<p>Génération des factures pour les vols membres depuis le " . $folio_start->format('Y-m-d') . " (compris) et avant le " . $folio_end->format('Y-m-d') . " (non compris).</p>") ;
+print("<p>Génération des factures pour les vols membres depuis le " . $folio_start->format('Y-m-d') . " (compris) et avant le " . $folio_end->format('Y-m-d') . " (non compris). Mois:".$folio_start->format('M').".</p>") ;
 while ($row = mysqli_fetch_array($result_members)) {
 	$member=$row['id'];
     if ($row['odoo_id'] == '') continue ; 
@@ -195,7 +195,8 @@ while ($row = mysqli_fetch_array($result_members)) {
     
 	if ($total_folio > 0) {
         $params =  array(array('partner_id' => intval($row['odoo_id']), // Must be of INT type else Odoo does not accept
-                    'ref' => db2web("Vols de $row[last_name] $row[first_name]"),
+                    //'ref' => db2web("Vols de $row[last_name] $row[first_name]"),
+                    'ref' => db2web("Vols du mois de ".$folio_start->format('F')),
                     'move_type' => 'out_invoice',
                     'invoice_date' => $invoice_date,
                     'invoice_date_due' => $invoice_date_due,
