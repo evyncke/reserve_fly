@@ -22,6 +22,8 @@ if ($userId == 0) {
 	exit ;
 }
 
+$header_postamble = '<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>' ;
 require_once 'mobile_header5.php' ;
 
 if (!$userIsAdmin and !$userIsBoardMember and !$userIsInstructor) journalise($userId, "F", "This admin page is reserved to administrators") ;
@@ -73,14 +75,13 @@ function pretty_print($value, $prefix) {
 if ($id != '') { // Display all field of this line
     $result = $odooClient->SearchRead($model, array(array(array('id','=',$id))), array()) ;
     if ($result) {
-        print("<table class=\"table table-striped table-hover caption-top\">
+        print("<table class=\"table table-striped table-hover caption-top\" id=\"model-table\">
             <caption>All values for record #$id<caption>
             <thead><tr><th>Field Name</th><th>Field Value</th></tr><tbody class=\"table-divider\">\n") ;
         $fields = $result[0] ;
         ksort($fields) ;
         foreach($fields as $f=>$desc) {
             $value = pretty_print((isset($desc)) ? $desc : '', '') ;
-            // if (is_array($value)) $value = '[' . nl2br(print_r($value, true)) . ']';
             print("<tr><td><a href=\"?model=$model&name=$f\">$f</a></td><td>$value</td></tr>\n") ;
         }
     } else
@@ -89,7 +90,7 @@ if ($id != '') { // Display all field of this line
 } else if ($name != '') { // Display all lines with this field
     $result = $odooClient->SearchRead($model, array(), array('fields' => array('id', 'name', $name))) ;
     if ($result) {
-           print("<table class=\"table table-striped table-hover caption-top\">
+           print("<table class=\"table table-striped table-hover caption-top\" id=\"model-table\">
             <caption>All values for field name '$name'<caption>
             <thead><tr><th>Id</th><th>Name</th><th>Field Name</th><th>Field Value</th></tr><tbody class=table-divider>\n") ;
         foreach($result as $f=>$desc) {
@@ -103,8 +104,7 @@ if ($id != '') { // Display all field of this line
 } else {
     // Let's get all Odoo fields from the model
     $result = $odooClient->GetFields($model, array('string', 'type','help', 'description', 'default', 'index', 'states', 'selection')) ;
- //   print("<pre>") ; var_dump($result) ; print("</pre>") ;
-    print("<table class=\"table table-striped table-hover\">
+    print("<table class=\"table table-striped table-hover\" id=\"model-table\">
         <thead><tr><th>Field</th><th>Description<br/>Help</th><th>Type</th><th>Information</th></tr><tbody class=table-divider>\n") ;
     foreach($result as $f=>$desc) {
         $help = (isset($desc['help'])) ? $desc['help'] : '' ;
@@ -114,5 +114,17 @@ if ($id != '') { // Display all field of this line
 ?>
 </tbody>
 </table>
+<script>
+    new window.simpleDatatables.DataTable("#model-table", {
+        searchable: true,
+        fixedHeight: false,
+        paging: false,
+        labels: {
+            placeholder: "Rechercher...",
+            noRows: "Aucune entrée trouvée",
+            info: "Affichage de {start} à {end} sur {rows} entrées",
+        }
+    });
+</script>
 </body>
 </html>
