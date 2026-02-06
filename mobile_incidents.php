@@ -3,7 +3,7 @@
 // apparently because of +AND+ triggering a Web Application Firewall rule...
 // Passengers headset bolt on the jack is loose. Gave the bolt and ring to René V
 /*
-   Copyright 2023-2024 Eric Vyncke
+   Copyright 2023-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 
 require_once "dbi.php" ;
-require_once "IntroCarnetVol_tools.php" ;
+
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
@@ -32,8 +32,11 @@ if (isset($_REQUEST['plane']) and $_REQUEST['plane'] != '') {
     $plane = NULL ;
 }
 
+$header_postamble = '<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">' ;
+
 require_once 'mobile_header5.php' ;
 require_once 'incident.class.php' ;
+require_once "IntroCarnetVol_tools.php" ; // even if only for function SentIncidentMail($theATLId, $thePlane, $theSeverity, $theRemark) 
 require_once 'mobile_tools.php' ;
 
 $maxFileSizeString=MemoryToString($atl_maxFileSize);
@@ -127,10 +130,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'create') {
 <div class="row">
 <div class="col-sm-12 col-md-12 col-lg-12">
 <div class="table-responsive">
-<table class="table table-striped table-hover">
+<table class="table table-striped table-hover" id="incidents-table">
 <thead>
-<tr><th class="text-center" colspan="6">Report</th><th class="text-center border-start" colspan="4">Latest status</th></tr>
-<tr><th>#Entry</th><th>Aircraft</th><th>Severity</th><th>Date</th><th>Description</th><th>By</th><th class="border-start">Status</th><th>Action</th><th>Date</th><th>By</th></tr>
+<tr><th>#Entry</th><th>Aircraft</th><th>Severity</th><th>Report Date</th><th>Description</th><th>Reported By</th><th class="border-start">Last Status</th><th>Action</th><th>Update Date</th><th>Updated By</th></tr>
 </thead>
 <tbody class="table-group-divider">
 <script type="text/javascript">
@@ -217,5 +219,18 @@ if($plane != "") {
     print("<p><input class=\"button\" type=\"button\" value=\"Display all Aircrafts\" onclick=\"javascript:document.location.href='mobile_incidents.php';\"></input>");
 }
 ?>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+<script>
+    new window.simpleDatatables.DataTable("#incidents-table", {
+        searchable: true,
+        fixedHeight: false,
+        paging: false,
+        labels: {
+            placeholder: "Rechercher...",
+            noRows: "Aucune entrée trouvée",
+            info: "Affichage de {start} à {end} sur {rows} entrées",
+        }  
+    });
+</script>
 </body>
 </html>
