@@ -82,11 +82,12 @@ function odooSynchronize() {
                 } 
             }
             if ($odoo_customer['email'] != $row['email'] and $row['email'] != '')
-                $updates['email'] = $row['email'] ;    
-            if ($odoo_customer['phone'] != db2web($row['home_phone']) and $row['home_phone'] != '')
-                $updates['phone'] = db2web($row['home_phone']) ;
-//            if ($odoo_customer['mobile'] != db2web($row['cell_phone']) and $row['cell_phone'] != '')
-//                $updates['mobile'] = db2web($row['cell_phone']) ;
+                $updates['email'] = $row['email'] ;     
+            // Odoo (since v19) only supports mobile phones.  
+            if ($odoo_customer['phone'] != db2web($row['cell_phone']) and $row['cell_phone'] != '')
+                $updates['phone'] = canonicalizePhone(db2web($row['cell_phone'])) ;
+            elseif ($odoo_customer['phone'] != db2web($row['home_phone']) and $row['home_phone'] != '')
+                $updates['phone'] = canonicalizePhone(db2web($row['home_phone'])) ;
             if ($odoo_customer['name'] != $name_from_db and $name_from_db != '')
                 $updates['name'] = $name_from_db ;
             if ($odoo_customer['complete_name'] != $name_from_db and $name_from_db != '')

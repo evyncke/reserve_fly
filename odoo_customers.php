@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2025 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -47,8 +47,7 @@ if ($create) {
         'zip' => db2web($row['zipcode']),
         'city' => db2web($row['city']),
         'email' => db2web($row['email']),
-        'phone' => db2web($row['home_phone']),
-        'mobile' => db2web($row['cell_phone'])
+        'phone' => db2web($row['cell_phone'])
     )) ;
     // TODO also copy the Joomla groups into Odoo categories !!!
 }
@@ -125,7 +124,7 @@ if ($account == 'joomla') {
 $result = $odooClient->SearchRead('res.partner', array(), 
     array('fields'=>array('id', 'name', 'vat', 'property_account_receivable_id', 'total_due',
         'street', 'street2', 'zip', 'city', 'country_id', 'country_code', 'category_id',
-        'complete_name', 'email', 'phone', 'mobile', 'commercial_company_name'))) ;
+        'complete_name', 'email', 'phone', 'commercial_company_name'))) ;
 $odoo_customers = array() ;
 foreach($result as $client) {
     $email =  strtolower($client['email']) ;
@@ -199,8 +198,11 @@ while ($row = mysqli_fetch_array($result)) {
                 $updates['email'] = $row['email'] ;    
             if ($odoo_customer['phone'] != db2web($row['home_phone']) and $row['home_phone'] != '')
                 $updates['phone'] = db2web($row['home_phone']) ;
-            if ($odoo_customer['mobile'] != db2web($row['cell_phone']) and $row['cell_phone'] != '')
-                $updates['mobile'] = db2web($row['cell_phone']) ;
+            // Odoo (since v19) only supports mobile phones.  
+            if ($odoo_customer['phone'] != db2web($row['cell_phone']) and $row['cell_phone'] != '')
+                $updates['phone'] = canonicalizePhone(db2web($row['cell_phone'])) ;
+            elseif ($odoo_customer['phone'] != db2web($row['home_phone']) and $row['home_phone'] != '')
+                $updates['phone'] = canonicalizePhone(db2web($row['home_phone'])) ;
             if ($odoo_customer['name'] != $name_from_db and $name_from_db != '')
                 $updates['name'] = $name_from_db ;
             if ($odoo_customer['complete_name'] != $name_from_db and $name_from_db != '')
