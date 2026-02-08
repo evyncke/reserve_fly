@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2025 Eric Vyncke
+   Copyright 2013-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -67,7 +67,6 @@ $day_before_nice = datefmt_format($short_fmt, $dt_before) ; // Nicely locally fo
 $day_after_nice = datefmt_format($short_fmt, $dt_after) ; // Nicely locally formatted date
 $sql_today = date('Y-m-d') ;
 $sql_now = date('Y-m-d H:i:s') ;
-if ($userId != 62) journalise($userId, "D", "Using smartphone booking page for $today_nice") ;
 // Need to know the booking type for the current user in order to create bookings
 if ($userIsInstructor)			
 	$bookingType = BOOKING_INSTRUCTOR ;
@@ -75,7 +74,6 @@ else if ($userIsAdmin)
 	$bookingType = BOOKING_ADMIN ;
 else
 	$bookingType = BOOKING_PILOT ;
-if ($userId != 62) journalise($userId, "D", "Using smartphone per plane booking page for $today_nice") ;
 ?> 
 <div class="container-fluid">
 
