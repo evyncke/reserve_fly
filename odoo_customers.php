@@ -201,7 +201,7 @@ while ($row = mysqli_fetch_array($result)) {
             // Odoo (since v19) only supports mobile phones.  
             if ($odoo_customer['phone'] != db2web($row['cell_phone']) and $row['cell_phone'] != '')
                 $updates['phone'] = canonicalizePhone(db2web($row['cell_phone'])) ;
-            elseif ($odoo_customer['phone'] != db2web($row['home_phone']) and $row['home_phone'] != '')
+            elseif ($odoo_customer['phone'] != db2web($row['cell_phone']) and $row['home_phone'] != '')
                 $updates['phone'] = canonicalizePhone(db2web($row['home_phone'])) ;
             if ($odoo_customer['name'] != $name_from_db and $name_from_db != '')
                 $updates['name'] = $name_from_db ;

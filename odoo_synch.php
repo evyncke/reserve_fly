@@ -84,9 +84,9 @@ function odooSynchronize() {
             if ($odoo_customer['email'] != $row['email'] and $row['email'] != '')
                 $updates['email'] = $row['email'] ;     
             // Odoo (since v19) only supports mobile phones.  
-            if ($odoo_customer['phone'] != db2web($row['cell_phone']) and $row['cell_phone'] != '')
+            if ($odoo_customer['phone'] != canonicalizePhone(db2web($row['cell_phone'])) and $row['cell_phone'] != '')
                 $updates['phone'] = canonicalizePhone(db2web($row['cell_phone'])) ;
-            elseif ($odoo_customer['phone'] != db2web($row['home_phone']) and $row['home_phone'] != '')
+            elseif ($odoo_customer['phone'] != canonicalizePhone(db2web($row['cell_phone'])) and $row['home_phone'] != '')
                 $updates['phone'] = canonicalizePhone(db2web($row['home_phone'])) ;
             if ($odoo_customer['name'] != $name_from_db and $name_from_db != '')
                 $updates['name'] = $name_from_db ;
@@ -120,7 +120,7 @@ function odooSynchronize() {
                 $updates['category_id'] = (count($tags) > 0) ? array(array(6, 0, $tags)) : array(array(5, 0, 0)); 
             if (count($updates) > 0) { // There were some changes, let's update the Odoo record
                 $response = $odooClient->Update('res.partner', array($odoo_customer['id']), $updates) ;
-                journalise($userId, "I", "Odoo partner " . $odoo_customer['id'] . " (" . $odoo_customer['email'] . ") updated for member $name_from_db: " . json_encode($updates)) ;
+                journalise($row['jom_id'], "I", "Odoo partner " . $odoo_customer['id'] . " (" . $odoo_customer['email'] . ") updated for member $name_from_db: " . json_encode($updates)) ;
             } 
         } // Join over email is possible
     } // While all members
