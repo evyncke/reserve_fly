@@ -183,6 +183,17 @@ function submitSelect(theSelect)
 	}
 }
 
+function submitExport()
+{
+    var table = document.getElementById("myTable");
+    var rows = table.rows;
+	var aSelectToggleColumn=0;
+   	for (i = 0; i < rows.length; i++) {
+		var row = rows[i];
+		var aColumn1Row = row.getElementsByTagName("TD")[aSelectToggleColumn];
+	}
+}
+
 function filterRows(count, blocked, sign)
 {
 	// Untoggle other checkboxs
