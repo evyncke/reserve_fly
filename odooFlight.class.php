@@ -738,7 +738,7 @@ function OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids) {
 }
 //============================================
 // Function: OF_createNoteDeFrais
-// Purpose: Creation d'une note de frais
+// Purpose: Creation d'un bon de commande
 //============================================
 function OF_createBonDeCommande($theMemberID, $theBonDeCommandeJSON, &$theUploadFolder, &$theFactureMailTo)
 {
