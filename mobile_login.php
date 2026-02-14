@@ -408,7 +408,9 @@ loginButton.addEventListener('click', async () => {
 async function getDeviceBrowserLabel() {
   const os = await detectOS();
   const browser = detectBrowser();
-  return `${os} · ${browser}`;
+  const formFactor = detectFormFactor();
+  const displayMode = detectDisplayMode();
+  return `${os} · ${browser} · ${formFactor} · ${displayMode}`;
 }
 
 function detectBrowser() {
@@ -446,6 +448,28 @@ async function detectOS() {
   return 'Unknown OS';
 }
 
+function detectFormFactor() {
+  if ('userAgentData' in navigator) {
+    return navigator.userAgentData.mobile ? 'mobile' : 'desktop';
+  }
+
+  return /Mobi|Android|iPhone|iPad/.test(navigator.userAgent)
+    ? 'mobile'
+    : 'desktop';
+}
+
+function detectDisplayMode() {
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    return 'PWA';
+  }
+
+  // iOS legacy
+  if (window.navigator.standalone === true) {
+    return 'PWA';
+  }
+
+  return 'browser';
+}
 </script>
 </body>
 </html>
