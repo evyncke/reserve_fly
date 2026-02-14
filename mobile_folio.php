@@ -27,7 +27,7 @@ require_once "folio.php" ;
 $originalUserId = $userId ;
 
 if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember or $userIsInstructor)) {
-	if ($userId != 62) journalise($userId, "I", "Start of myfolio, setting user to $_REQUEST[user]") ;
+	if ($userId != 62) journalise($userId, "I", "Start of mobile_folio, setting user to $_REQUEST[user]") ;
 	$userId = intval($_REQUEST['user']) ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
 }

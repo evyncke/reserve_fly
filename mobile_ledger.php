@@ -28,12 +28,11 @@ require_once "folio.php" ;
 $originalUserId = $userId ;
 
 if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
-	if ($originalUserId != 62) journalise($userId, "I", "Start of myfolio, setting user to $_REQUEST[user]") ;
+	if ($originalUserId != 62) journalise($userId, "I", "Start of mobile_ledger, setting user to $_REQUEST[user]") ;
 	$userId = $_REQUEST['user'] ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
 } else
-	if ($originalUserId != 62) journalise($originalUserId, "I", "Start of myfolio") ; // Eric Vyncke doing too many tests
-
+	if ($originalUserId != 62) journalise($originalUserId, "I", "Start of mobile_ledger") ; // Eric Vyncke doing too many tests
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person 
 		LEFT JOIN $table_company_member ON cm_member = jom_id
 		LEFT JOIN $table_company ON cm_company = c_id

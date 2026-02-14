@@ -26,12 +26,11 @@ require_once 'mobile_header5.php' ;
 $originalUserId = $userId ;
 
 if (isset($_REQUEST['user']) and ($userIsAdmin or $userIsBoardMember)) {
-	if ($userId != 62) journalise($userId, "I", "Start of myinvoices, setting user to $_REQUEST[user]") ;
+	if ($userId != 62) journalise($userId, "I", "Start of mobile_invoices, setting user to $_REQUEST[user]") ;
 	$userId = intval($_REQUEST['user']) ;
 	if (! is_numeric($userId)) die("Invalid user ID") ;
 } else
-	if ($userId != 62) journalise($userId, "I", "Start of myinvoices") ;
-
+	if ($userId != 62) journalise($userId, "I", "Start of mobile_invoices") ;
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_person WHERE jom_id = $userId")
 	or journalise(0, 'F', "Impossible de lire le membre $userId: " . mysqli_error($mysqli_link)) ;
 $pilot = mysqli_fetch_array($result) or journalise(0, 'F', "Membre $userId inconnu") ;
