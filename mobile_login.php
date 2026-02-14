@@ -275,7 +275,7 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
 <div class="container">
     <h2>Connexion</h2>
     <p class="bg-danger"><?=$connect_msg?></p>
-    <p class="bg-info">Pour accéder au site vous devez vous connecter soit via votre identifiant et mot de passe,</p>
+    <p class="bg-info">Pour accéder au site vous devez vous connecter soit via votre identifiant et mot de passe, ou les méthodes via un fournisseur d'identité ou une clé secrète (FaceID, TouchID, ...).</p>
 
     <form method="post" action="<?=$_SERVER['PHP_SELF']?>">
         <input type="hidden" name="cb" value="<?=$callback?>">
@@ -307,15 +307,16 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
         <a href="<?=$linkedInAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><i class="bi bi-linkedin"></i> LinkedIn</a>
     </div><!-- text-center -->
     <div class="row">
-        <p class="text-center text-muted mt-3">Les connexions via Google, Facebook, ou LinkedIn nécessitent que votre adresse email soit la même sur le système de réservation
+        <p class="text-muted mt-3">Les connexions via Google, Facebook, ou LinkedIn nécessitent que votre adresse email soit la même sur le système de réservation
             et sur Facebook ou Google (trivial si votre email est ...@gmail.com) ou LinkedIn.
             Si ce n'est pas le cas, veuillez utiliser la connexion via identifiant et mot de passe 
-            et lier votre compte via votre profil sur ce site onglet Réseaux Sociaux.</p>
+            et lier votre compte via votre profil sur ce site via le menu déroulant associé à votre nom et l'option
+            <b><i class="bi bi-shield"></i> Mes connexions</b>.</p>
     </div><!-- row -->
-    <div classs="row text-center">
-        <button id="webauthn-login" class="btn btn-outline-secondary"><i class="bi bi-fingerprint"></i></button><br/>
+    <div classs="row">
+        <button id="webauthn-login" class="btn btn-outline-secondary"><i class="bi bi-fingerprint"></i> Clé secrète (FaceID, TouchID, ...)</button><br/>
         <div id="feedback" class="mt-2"></div>
-    </div>   
+    </div><!-- row -->   
 </div> <!-- container -->
 <script>
 var helper = {
