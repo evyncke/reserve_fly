@@ -358,7 +358,7 @@ loginButton.addEventListener('click', async () => {
 		});
 		console.log('Response received for login :-)') ;
 		console.log('response:', response);
-        feedback.innerHTML = "<div class=\"alert alert-info\">Server response received: " + response + "</div>";
+        feedback.innerHTML += '<div class="alert alert-info">Server response received.</div>';
 		let options = await response.json();
 		helper.bta(options);
 		console.log('After decode, options: ', options);
@@ -369,8 +369,8 @@ loginButton.addEventListener('click', async () => {
 		console.log("id:", credential.id);
 		console.log("rawId:", credential.rawId);
 		console.log("helper.atb(credential.response.clientDataJSON),", helper.atb(credential.response.clientDataJSON));
-		feedback.innerHTML = '<div class="alert alert-info">Got navigator credentials.</div>';
-        const browser = await getBrowser();
+		feedback.innerHTML += '<div class="alert alert-info">Got navigator credentials.</div>';
+        const browser = await getDeviceBrowserLabel();
 		// Send back to handler
 		const verify = await fetch('passkey_handler.php?action=verify-login', {
 			method: 'POST',
@@ -405,7 +405,13 @@ loginButton.addEventListener('click', async () => {
 	}
 });
 
-async function getBrowser() {
+async function getDeviceBrowserLabel() {
+  const os = await detectOS();
+  const browser = detectBrowser();
+  return `${os} · ${browser}`;
+}
+
+function detectBrowser() {
   // Modern path
   if ('userAgentData' in navigator) {
     const brands = navigator.userAgentData.brands;
@@ -422,6 +428,22 @@ async function getBrowser() {
   if (/Safari\//.test(ua)) return 'Safari';
 
   return 'Unknown';
+}
+
+async function detectOS() {
+  if ('userAgentData' in navigator) {
+    return navigator.userAgentData.platform;
+  }
+
+  const ua = navigator.userAgent;
+
+  if (/Windows/.test(ua)) return 'Windows';
+  if (/Mac OS X/.test(ua) && !/like Mac OS X/.test(ua)) return 'macOS';
+  if (/Android/.test(ua)) return 'Android';
+  if (/iPhone|iPad|iPod/.test(ua)) return 'iOS';
+  if (/Linux/.test(ua)) return 'Linux';
+
+  return 'Unknown OS';
 }
 
 </script>
