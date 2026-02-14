@@ -241,9 +241,9 @@ $members = $odooClient->Read('res.partner',
 	[$ids], 
 	['fields' => ['email', 'total_due']]) ;
 $odoo_customers = array() ;
-foreach($members as $member) {
-	$email =  strtolower($member['email']) ;
-	$odoo_customers[$email] = $member ; // Let's build a dict indexed by the email addresses
+foreach($members as $memberOdoo) {
+	$email =  strtolower($memberOdoo['email']) ;
+	$odoo_customers[$email] = $memberOdoo ; // Let's build a dict indexed by the email addresses
 }
 ?>
 <h2>Gestion des membres</h2>
@@ -275,12 +275,13 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
     <input type=\"submit\" value=\"Unblock\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[PHP_SELF]', 'NotBlock')\">&nbsp;&nbsp;
 	<input type=\"submit\" value=\"Copy Mails\" id=\"id_SubmitDownloadMail\" onclick=\"submitDownloadMail('$_SERVER[PHP_SELF]', 'CopyMail')\">&nbsp;&nbsp;");
 	if(!$displayWebDeactivated) {
-		print("<input type=\"submit\" value=\"Display Unactivated\" id=\"id_SubmitUnactivated\" onclick=\"submitUnactivated('$_SERVER[PHP_SELF]', 'Unactivated')\">");
+		print("<input type=\"submit\" value=\"Display Unactivated\" id=\"id_SubmitUnactivated\" onclick=\"submitUnactivated('$_SERVER[PHP_SELF]', 'Unactivated')\">&nbsp;&nbsp;");
 	}
 	else {
-		print("<input type=\"submit\" value=\"Display Activated\" id=\"id_SubmitUnactivated\" onclick=\"submitUnactivated('$_SERVER[PHP_SELF]', 'Activated')\">");
+		print("<input type=\"submit\" value=\"Display Activated\" id=\"id_SubmitUnactivated\" onclick=\"submitUnactivated('$_SERVER[PHP_SELF]', 'Activated')\">&nbsp;&nbsp;");
 	}
-	 
+	print("<input type=\"submit\" value=\"Export\" id=\"id_SubmitExport\" onclick=\"submitExport('$_SERVER[PHP_SELF]')\">&nbsp;&nbsp;");
+
 	
 ?>
 </br>
@@ -316,7 +317,7 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 // TODO as now Odoo is well in full force, probably need to only process Odoo balance
 $sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
 odoo_id, block, b_reason, u.email as email, 
-bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_date, bkf_invoice_id, ds_year,
+bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_date, bkf_invoice_id, ds_year, cm_company,
 group_concat(group_id) as allGroups,
 datediff(current_date(), b_when) as days_blocked
 	from $table_users as u 
@@ -325,7 +326,8 @@ datediff(current_date(), b_when) as days_blocked
     left join $table_dto_student on u.id=ds_jom_id
 	left join $table_membership_fees on bkf_user = p.jom_id and bkf_year = $cotisationYear
 	left join $table_blocked on u.id = b_jom_id
-	where group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
+    left join $table_company_member on u.id=cm_member
+	where group_id in ($joomla_member_group, $joomla_theory_student_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
 	group by user_id
 	order by last_name, first_name" ;
 //print("$sql<br>");
@@ -382,7 +384,9 @@ datediff(current_date(), b_when) as days_blocked
 		$status=db2web($row['b_reason']);
 		$blocked=$row['block'];
 		$promotionEleve="";
-		if(in_array($joomla_student_group, $groups)) {
+		$theoryStudent="";
+		if(in_array($joomla_student_group, $groups) || in_array($joomla_theory_student_group, $groups)) {
+			//print("personid=$personid: is a student or theory<br>");
 			if(isset($row['ds_year']) && $row['ds_year']>2000) {
 				$promotionEleve="<br>P".$row['ds_year'];
 			}
@@ -393,6 +397,17 @@ datediff(current_date(), b_when) as days_blocked
 					'2026')\">
 					[2026?]<span class='tooltiptext'>Click pour facturer un cours theorique 2026</span>
 				</a>";
+			}
+		}
+		$company="";
+		if(isset($row['cm_company'])) {
+			$sqlCompany="SELECT * FROM $table_company WHERE c_id=".$row['cm_company'];
+			//print("sqlCompany=$sqlCompany<br>");
+			$resultCompany = mysqli_query($mysqli_link, $sqlCompany)
+    			or journalise($userId, "E", "Cannot read $table_company: " . mysqli_error($mysqli_link)) ;
+    		while ($rowCompany= mysqli_fetch_array($resultCompany)) {
+				$company="<br>Company=".$rowCompany['c_name'];
+				break;
 			}
 		}
 		$odoo = (isset($odoo_customers[strtolower($row['email'])])) ? $odoo_customers[strtolower($row['email'])] : null ;
@@ -418,9 +433,14 @@ datediff(current_date(), b_when) as days_blocked
 			*/
 		}
 		if($status=="") $status="OK";
-		$member='<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Member" checked disabled>' ;
 		if($blocked==1 || strpos($pilot, "checked") !== false || strpos($student, "checked") !== false) {
 			$member='';
+		}
+		else {
+			$member='<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Member" checked disabled>' ;
+			if(GM_IsMemberType($personid, "TheoryStudent")) {
+				$member.="<br>TheoryStudent$promotionEleve";
+			}
 		}
 		$solde=0.;
 		if($odoo) {
@@ -577,7 +597,7 @@ datediff(current_date(), b_when) as days_blocked
 				<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Block','" .
 				str_replace("'", "\\'","$nom $prenom") . "','$personid','$solde')\">&#x2714;<span class='tooltiptext'>Click pour BLOQUER</span></a></td>");
 		}
-		print("<td style='text-align: left;'>$invoiceDueDate$status</td>");
+		print("<td style='text-align: left;'>$invoiceDueDate$status$company</td>");
 		/*
 		print("<td style='text-align: left;'><select id='id_blocked_$personid' name='blocked_$personid'>
 			<option value='OK'>$status</option>
@@ -619,7 +639,7 @@ datediff(current_date(), b_when) as days_blocked
 // Change a user of group
 function GM_SetMemberGroup($personId, $memberType, $checked) 
 {
-	global  $joomla_member_group,$joomla_student_group,$joomla_pilot_group,$joomla_effectif_group;
+	global  $joomla_member_group,$joomla_student_group,$joomla_pilot_group,$joomla_theory_student_group,$joomla_effectif_group;
 	global $userId;
 	global $mysqli_link,$table_user_usergroup_map;
 	//print("SetMemberGroup($personId, $memberType, $checked): Started");
@@ -689,9 +709,10 @@ function GM_SetMemberGroup($personId, $memberType, $checked)
 function GM_IsMemberType($personId, $memberType)
 {
 
-	global $joomla_member_group,$joomla_student_group,$joomla_pilot_group,$joomla_effectif_group;
+	global $joomla_member_group,$joomla_student_group,$joomla_pilot_group,$joomla_effectif_group,$joomla_flying_student_group,$joomla_theory_student_group;
 	global $userId;
 	global $mysqli_link,$table_user_usergroup_map;
+
 	//print("GM_IsMemberType($personId, $memberType): Started<br>");
 	switch($memberType) {
 		case 'Member':
@@ -699,6 +720,12 @@ function GM_IsMemberType($personId, $memberType)
 			break;
 		case 'Student':
 			$groupId = $joomla_student_group;
+			break;
+		case 'TheoryStudent':
+			$groupId = $joomla_theory_student_group;
+			break;
+		case 'FlyingStudent':
+			$groupId = $joomla_flying_student_group;
 			break;
 		case 'Pilot':
 			$groupId = $joomla_pilot_group;
@@ -710,8 +737,9 @@ function GM_IsMemberType($personId, $memberType)
 			print("%%%ERROR:GM_IsMemberType: Unknown member type $memberType") ;
 			return false;
 	}
-	
-	$result = mysqli_query($mysqli_link, "SELECT * FROM $table_user_usergroup_map WHERE user_id=$personId AND group_id=$groupId")
+	$sql="SELECT * FROM $table_user_usergroup_map WHERE user_id=$personId AND group_id=$groupId";
+	//print("GM_IsMemberType:sql=$sql<br>");
+	$result = mysqli_query($mysqli_link, $sql)
     		or journalise($userId, "E", "Cannot read $table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
     while ($row = mysqli_fetch_array($result)) {
 		//print("GM_IsMemberType:return true<br>");

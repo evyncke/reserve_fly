@@ -116,7 +116,6 @@ if (isset($_REQUEST['notedefrais_json'])) {
 $selectorDisabled="disabled";
 if ($userIsAdmin or $userIsBoardMember) $selectorDisabled="";
 
-
 //print("<script>var notedefraisJSONString='toto';</script>");
 ?>
 <h2>Introduction d'une note de frais</h2>

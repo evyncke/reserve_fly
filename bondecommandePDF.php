@@ -30,7 +30,9 @@ function PDF_createBonDeCommande($BonDeCommandelines, $expenseReport_date, $part
 	$communication="communication ???";
 	$entrepriseName="";
 	$bce="";
-	$nextExpenseReport="BC-2025-".$nextExpenseReport;
+	$date=date_create();
+	$year=date_format($date,"Y");
+	$nextExpenseReport="BC-".$year."-".$nextExpenseReport;
 	$facturesMail="bon_de_commande@spa-aviation.odoo.com";
 	$theFactureMailTo=$facturesMail;
 	$BonDeCommandeFile=$nextExpenseReport.".pdf";
