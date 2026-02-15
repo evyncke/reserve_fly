@@ -88,26 +88,47 @@ ou Passkey intégrée au téléphone ou à l'ordinateur).</p>
 </p>
 <?php
 $result = mysqli_query($mysqli_link, "SELECT * 
+	FROM $table_oauth 
+	WHERE oa_jom_id = $userId") 
+	or journalise($userId, "E", "Cannot query OAuth providers: " . mysqli_error($mysqli_link)) ;
+$idp_rows = array() ;
+while ($row = mysqli_fetch_array($result)) {
+	$idp_rows[$row['oa_idp']] = $row ;
+} ;
+mysqli_free_result($result) ;
+$result = mysqli_query($mysqli_link, "SELECT * 
 	FROM $table_person 
 	WHERE jom_id = $userId") 
-	or journalise($userId, "E", "Cannot query OAuth providers: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "E", "Cannot query $table_person: " . mysqli_error($mysqli_link)) ;
+
 $row = mysqli_fetch_array($result) or journalise($userId, "F", "User not found...") ;
 if (str_ends_with($row['email'], "@gmail.com") && ! $row['google_id']) {
 	$gmail_msg = "Votre adresse email est une adresse Gmail. Vous pouvez vous connecter avec Google sans autre action de votre part." ;
 } else {
 	$gmail_msg = '' ;
 }
+
+function printIdp($idp, $authUrl, $note = '') {
+	global $idp_rows ;
+	if (isset($idp_rows[$idp])) {
+		print("<td>Depuis {$idp_rows[$idp]['oa_registration']}</td><td>{$idp_rows[$idp]['oa_last_use']}</td><td>{$idp_rows[$idp]['oa_last_device']}</td><td>$note</td>") ;
+	} else {
+		print("<td>Non<br/><a href='$authUrl'>Activer</a></td><td></td><td></td><td>$note</td>") ;
+	}
+}
+
 ?>
 <table class="table table-striped table-bordered w-auto">
 	<thead>
-		<tr><th>Fournisseur d'identité</th><th>Activé</th><th>Note</th></tr>
+		<tr><th>Fournisseur d'identité</th><th>Lié</th><th>Dernière fois</th><th>Dernier appareil</th><th>Note</th></tr>
 	</thead>
 	<tbody>
-		<tr><td><i class="bi bi-facebook"></i> Facebook</td><td><?php print($row['facebook_id'] ? 
-			"Oui<br/><a href='$_SERVER[PHP_SELF]?deactivate=facebook'>Désactiver</a>" : 
-			"Non<br/><a href='$facebookAuthUrl'>Activer</a>") ; ?></td><td></td></tr>
-		<tr><td><i class="bi bi-google"></i> Google</td><td><?php print($row['google_id'] ? "Oui" : "Non<br/><a href='$googleAuthUrl'>Activer</a>") ; ?></td><td><?php print($gmail_msg)?></td></tr>
-		<tr><td><i class="bi bi-linkedin"></i> LinkedIn</td><td><?php print($row['linkedin_id'] ? "Oui" : "Non<br/><a href='$linkedinAuthUrl'>Activer</a>") ; ?></td><td></td></tr>
+		<tr><td><i class="bi bi-facebook"></i> Facebook</td>
+		<?php printIdp('Facebook', $facebookAuthUrl, "<a href='$_SERVER[PHP_SELF]?deactivate=facebook'>Désactiver</a>"); ?></tr>
+		<tr><td><i class="bi bi-google"></i> Google</td>
+		<?php printIdp('Google', $googleAuthUrl, $gmail_msg); ?></tr>
+		<tr><td><i class="bi bi-linkedin"></i> LinkedIn</td>
+		<?php printIdp('LinkedIn', $linkedinAuthUrl); ?></tr>
 	</tbody>
 </table>
 
@@ -139,7 +160,7 @@ if (mysqli_num_rows($result) == 0) {
 </table>	
 <!-- Add WebAuthn buttons to the login form -->
 <div class="text-center">
-	<button id="webauthn-register" class="btn btn-primary"><i class="bi bi-fingerprint"></i> Activer Passkey sur cet appareil/browser</button><br/>
+	<button id="webauthn-register" class="btn btn-primary"><i class="bi bi-fingerprint"></i> Activer Passkey sur cet appareil <i><span id="browser-label"></span></i></button><br/>
     <div id="feedback" class="mt-2"></div>
 </div>
 <div class="mt-4 pt-2 border-top small text-body-secondary">Le site web ne voit aucune information de vos comptes Facebook, Googgle, ou LinkedIn en dehors de votre nom, 
@@ -174,6 +195,11 @@ var helper = {
 // WebAuthn Registration
 const feedback = document.getElementById('feedback');
 const registerButton = document.getElementById('webauthn-register');
+
+(async () => {
+	const browser = await getDeviceBrowserLabel();
+	document.getElementById('browser-label').innerText = browser;
+})();
 
 registerButton.addEventListener('click', async () => {
 	console.log('Button clicked: starting WebAuthn registration...');

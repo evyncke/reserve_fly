@@ -99,6 +99,8 @@ $linkedin = new LinkedIn([
     'redirectUri' => 'https://www.spa-aviation.be/resa/mobile_login.php',
 ]);
 
+$browser = ($_REQUEST['browser'] != '') ? mysqli_real_escape_string($mysqli_link, $_REQUEST['browser']) : 'unknown' ;
+
 // Check whether  OAuth callback
 if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
     // Is is Google or Facebook or LinkedIn?
@@ -113,8 +115,11 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                 // Check if user exists with this google id or email
                 $query = "SELECT jom_id 
                     FROM $table_person AS p JOIN $table_users AS u ON p.jom_id = u.id
-                    WHERE u.block = 0 AND (google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "' 
-                        OR p.email='" . mysqli_real_escape_string($mysqli_link, $googleUser->getEmail()) . "')";
+                    WHERE u.block = 0 AND p.email='" . mysqli_real_escape_string($mysqli_link, $googleUser->getEmail()) . "'
+                UNION
+                    SELECT oa_jom_id AS jom_id
+                    FROM $table_oauth AS o JOIN $table_users AS u ON o.oa_jom_id = u.id
+                    WHERE u.block = 0 AND o.oa_idp='Google' AND o.oa_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "'";
                 $result = mysqli_query($mysqli_link, $query)
                     or journalise(0, "F", "Error querying for google user: " . mysqli_error($mysqli_link));
                 $row = mysqli_fetch_assoc($result);
@@ -131,11 +136,16 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                     $app->triggerEvent('onUserLogin', array(
                         (array) $joomla_user,
                         $options));
-                    journalise($userId, "I", "Google login for user id $userId (" . $googleUser->getEmail() . ") from $callback.") ;
+                    journalise($userId, "I", "Google login for user id $userId (" . $googleUser->getEmail() . ") from $callback, browser=$browser.") ;
                     mysqli_query($mysqli_link, "UPDATE $table_person SET google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "', " .
                         " google_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
                         WHERE jom_id = $userId") 
                         or journalise($userId, "E", "Error updating google_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
+                    mysqli_query($mysqli_link, "INSERT INTO $table_oauth(oa_idp, oa_jom_id, oa_id, oa_token, oa_registration, oa_last_device) 
+                        VALUES ('Google', $userId, '" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "', '" . 
+                            mysqli_real_escape_string($mysqli_link, $accessToken) . "', NOW(), '$browser')
+                        ON DUPLICATE KEY UPDATE oa_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "', oa_last_use=NOW(), oa_last_device='$browser'")
+                        or journalise($userId, "E", "Error inserting google_id/token for user id $userId in $table_oauth: " . mysqli_error($mysqli_link)) ;
                     unset($_SESSION['google_oauth2state']); // Clear Google state
                     header("Location: https://www.spa-aviation.be/$callback", TRUE, 307);
                     exit;
@@ -266,7 +276,6 @@ $_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later..
 $facebookHelper = $facebook->getRedirectLoginHelper();
 $facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login.php', ['email','public_profile','user_link']);
 $linkedInAuthUrl = $linkedin->getAuthorizationUrl(['scope' => ['openid', 'profile', 'email']]);
-//$linkedInAuthUrl = $linkedin->getAuthorizationUrl(['scope' => ['r_liteprofile', 'r_emailaddress']]);
 
 $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 
@@ -302,8 +311,8 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
     <div class="text-center">
         <p><b>OU</b> via:</p>
         <a href="<?=$facebookAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-primary"><i class="bi bi-facebook"></i> Facebook</a>
-        <a href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Google</a>
-        <a href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Gmail</a>
+        <a id="google-auth-link" href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Google</a>
+        <a id="gmail-auth-link" href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Gmail</a>
         <a href="<?=$linkedInAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><i class="bi bi-linkedin"></i> LinkedIn</a>
     </div><!-- text-center -->
     <div class="row">
@@ -319,6 +328,16 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
     </div><!-- row -->   
 </div> <!-- container -->
 <script>
+(async () => {
+	const browser = await getDeviceBrowserLabel();
+	document.getElementById('google-auth-link').href += '&browser=foo';
+	document.getElementById('gmail-auth-link').href += '&browser=' + encodeURIComponent(browser);
+	// document.getElementById('google-auth-link').href += '&browser=' + encodeURIComponent(browser);
+	// document.getElementById('gmail-auth-link').href += '&browser=' + encodeURIComponent(browser);
+    console.log('Browser label added to OAuth links:', browser);
+    console.log('Google Auth URL:', document.getElementById('google-auth-link').href);
+})();
+
 var helper = {
 	atb: b => {
 		let u = new Uint8Array(b), s = "";
@@ -405,71 +424,6 @@ loginButton.addEventListener('click', async () => {
 	}
 });
 
-async function getDeviceBrowserLabel() {
-  const os = await detectOS();
-  const browser = detectBrowser();
-  const formFactor = detectFormFactor();
-  const displayMode = detectDisplayMode();
-  return `${os} · ${browser} · ${formFactor} · ${displayMode}`;
-}
-
-function detectBrowser() {
-  // Modern path
-  if ('userAgentData' in navigator) {
-    const brands = navigator.userAgentData.brands;
-    const main = brands.find(b => b.brand !== 'Not.A/Brand') ?? brands[0];
-    return main.brand;
-  }
-
-  // Legacy fallback
-  const ua = navigator.userAgent;
-  if (/Edg\//.test(ua)) return 'Microsoft Edge';
-  if (/OPR\//.test(ua)) return 'Opera';
-  if (/Firefox\//.test(ua)) return 'Firefox';
-  if (/Chrome\//.test(ua)) return 'Google Chrome';
-  if (/Safari\//.test(ua)) return 'Safari';
-
-  return 'Unknown';
-}
-
-async function detectOS() {
-  if ('userAgentData' in navigator) {
-    return navigator.userAgentData.platform;
-  }
-
-  const ua = navigator.userAgent;
-
-  if (/Windows/.test(ua)) return 'Windows';
-  if (/Mac OS X/.test(ua) && !/like Mac OS X/.test(ua)) return 'macOS';
-  if (/Android/.test(ua)) return 'Android';
-  if (/iPhone|iPad|iPod/.test(ua)) return 'iOS';
-  if (/Linux/.test(ua)) return 'Linux';
-
-  return 'Unknown OS';
-}
-
-function detectFormFactor() {
-  if ('userAgentData' in navigator) {
-    return navigator.userAgentData.mobile ? 'mobile' : 'desktop';
-  }
-
-  return /Mobi|Android|iPhone|iPad/.test(navigator.userAgent)
-    ? 'mobile'
-    : 'desktop';
-}
-
-function detectDisplayMode() {
-  if (window.matchMedia('(display-mode: standalone)').matches) {
-    return 'PWA';
-  }
-
-  // iOS legacy
-  if (window.navigator.standalone === true) {
-    return 'PWA';
-  }
-
-  return 'browser';
-}
 </script>
 </body>
 </html>
