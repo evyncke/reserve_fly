@@ -566,7 +566,7 @@ else {
 	$result = mysqli_query($mysqli_link, "select id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id = $joomla_instructor_group
 		order by name")
-	or journalise(0, "E", "Cannot read instructors: " . mysqli_error($mysqli_link)) ;
+	or journalise(0, "E", "Cannot read FI instructors: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($e, "$row[email]\n") ;
 		$row['name'] = db2web($row['name']) ;
@@ -585,7 +585,8 @@ if (! $e) journalise($userId, "E", "Cannot open email.tkis for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id = $joomla_instructor_group2
-		order by name") ;
+		order by name") 
+	or journalise(0, "E", "Cannot read TKI instructors: " . mysqli_error($mysqli_link)) ;;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($e, "$row[email]\n") ;
 	}
@@ -630,7 +631,8 @@ if (! $f) journalise($userId, "E", "Cannot open email.pilotes for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id = $joomla_pilot_group
-		order by name") ;
+		order by name") 	
+	or journalise(0, "E", "Cannot read pilots: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
@@ -646,7 +648,8 @@ if (! $f) journalise($userId, "E", "Cannot open email.eleves for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id in ($joomla_flying_student_group, $joomla_theory_student_group, $joomla_instructor_group, $joomla_instructor_group2)
-		order by name") ;
+		order by name") 
+	or journalise(0, "E", "Cannot read students: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
@@ -662,7 +665,8 @@ if (! $f) journalise($userId, "E", "Cannot open email.membres for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group)
-		order by name") ;
+		order by name") 
+	or journalise(0, "E", "Cannot read members: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
@@ -724,7 +728,8 @@ if (! $f) journalise(0, "E", "Cannot open email.eric for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and id=62
-		order by name") ;
+		order by name") 
+	or journalise(0, "E", "Cannot read eric: " . mysqli_error($mysqli_link)) ;;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
