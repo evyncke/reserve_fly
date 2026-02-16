@@ -328,15 +328,13 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
     </div><!-- row -->   
 </div> <!-- container -->
 <script>
-(async () => {
-	const browser = await getDeviceBrowserLabel();
-	document.getElementById('google-auth-link').href += '&browser=foo';
-	document.getElementById('gmail-auth-link').href += '&browser=' + encodeURIComponent(browser);
+// (async () => {
+// 	const browser = await getDeviceBrowserLabel();
 	// document.getElementById('google-auth-link').href += '&browser=' + encodeURIComponent(browser);
 	// document.getElementById('gmail-auth-link').href += '&browser=' + encodeURIComponent(browser);
-    console.log('Browser label added to OAuth links:', browser);
-    console.log('Google Auth URL:', document.getElementById('google-auth-link').href);
-})();
+//     console.log('Browser label added to OAuth links:', browser);
+//     console.log('Google Auth URL:', document.getElementById('google-auth-link').href);
+// })();
 
 var helper = {
 	atb: b => {
