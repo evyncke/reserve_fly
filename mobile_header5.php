@@ -527,7 +527,7 @@ if ($userId <= 0) {
           <ul class="dropdown-menu">
               <li id="logoutElem">
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
-              <a class="dropdown-item text-warning" href="mobile_web_o_auth.php"><i class="bi bi-shield"></i> Mes connexions</a>
+              <a class="dropdown-item" href="mobile_web_o_auth.php"><i class="bi bi-shield"></i> Mes connexions</a>
               <a class="dropdown-item" href="?theme=dark"><i class="bi bi-moon-stars-fill"></i> Mode nuit</a>
               <a class="dropdown-item" href="?theme=light"><i class="bi bi-sun-fill"></i> Mode jour</a>
               <a class="dropdown-item" href="mobile_mylog.php"><i class="bi bi-journals"></i> Mon carnet de vols</a>
