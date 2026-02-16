@@ -99,6 +99,7 @@ $linkedin = new LinkedIn([
     'redirectUri' => 'https://www.spa-aviation.be/resa/mobile_login.php',
 ]);
 
+// TODO should come from the "state" parameter and be stored in session to prevent forgery and to differentiate between multiple OAuth providers if needed
 $browser = ($_REQUEST['browser'] != '') ? mysqli_real_escape_string($mysqli_link, $_REQUEST['browser']) : 'unknown' ;
 
 // Check whether  OAuth callback
@@ -199,10 +200,16 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                         (array) $joomla_user,
                         $options));
                     journalise($userId, "I", "LinkedIn login for user id $userId (" . $linkedInUser['email'] . ") from $callback.") ;
+                    // TODO next UPDATE is to be deleted once the 2nd is checked working fine.
                     mysqli_query($mysqli_link, "UPDATE $table_person SET linkedin_id='" . mysqli_real_escape_string($mysqli_link, $linkedInUser['sub']) . "', " .
                         " linkedin_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
                         WHERE jom_id = $userId") 
                         or journalise($userId, "E", "Error updating linkedin_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
+                    mysqli_query($mysqli_link, "INSERT INTO $table_oauth(oa_idp, oa_jom_id, oa_id, oa_token, oa_registration, oa_last_device) 
+                        VALUES ('LinkedIn', $userId, '" . mysqli_real_escape_string($mysqli_link, $linkedInUser['sub']) . "', '" . 
+                            mysqli_real_escape_string($mysqli_link, $accessToken) . "', NOW(), '$browser')
+                        ON DUPLICATE KEY UPDATE oa_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "', oa_last_use=NOW(), oa_last_device='$browser'")
+                        or journalise($userId, "E", "Error inserting linkedin_id/token for user id $userId in $table_oauth: " . mysqli_error($mysqli_link)) ;
                     unset($_SESSION['linkedin_oauth2state']); // Clear LinkedIn state
                     header("Location: https://www.spa-aviation.be/$callback", TRUE, 307);
                     exit;
@@ -248,10 +255,17 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                         (array) $joomla_user,
                         $options));
                     journalise($userId, "I", "Facebook login for user id $userId ($facebookUser[email]) from $callback.") ;
+                    // TODO next UPDATE is to be deleted once the 2nd is checked working fine.
                     mysqli_query($mysqli_link, "UPDATE $table_person SET facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "', " .
                         " facebook_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
                         WHERE jom_id = $userId") 
                         or journalise($userId, "E", "Error updating facebook_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
+                    mysqli_query($mysqli_link, "INSERT INTO $table_oauth(oa_idp, oa_jom_id, oa_id, oa_token, oa_registration, oa_last_device) 
+                        VALUES ('Facebook', $userId, '" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "', '" . 
+                            mysqli_real_escape_string($mysqli_link, $accessToken) . "', NOW(), '$browser')
+                        ON DUPLICATE KEY UPDATE oa_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "', oa_last_use=NOW(), oa_last_device='$browser'")
+                        or journalise($userId, "E", "Error inserting facebook_id/token for user id $userId in $table_oauth: " . mysqli_error($mysqli_link)) ;
+
                     header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
                     exit ;  
                 } else {
