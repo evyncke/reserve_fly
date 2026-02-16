@@ -408,9 +408,6 @@ while ($row = mysqli_fetch_array($result)) {
 			journalise($row['j_id'], 'E', mysqli_error($mysqli_link) . " for row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
 		}
 	}
-	if ($row['p_name'] != $row['j_name']) {
-		print(date('Y-m-d H:i:s').": $row[j_name]/$row[j_id] '$row[p_name]' (RAPCS) != '$row[j_name]' (Joomla)\n") ; flush() ;
-	}
 }
 
 
