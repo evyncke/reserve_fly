@@ -111,16 +111,16 @@ if (str_ends_with($row['email'], "@gmail.com") && ! $row['google_id']) {
 function printIdp($idp, $authUrl, $note = '') {
 	global $idp_rows ;
 	if (isset($idp_rows[$idp])) {
-		print("<td>Depuis {$idp_rows[$idp]['oa_registration']}</td><td>{$idp_rows[$idp]['oa_last_use']}</td><td>{$idp_rows[$idp]['oa_last_device']}</td><td>$note</td>") ;
+		print("<td>{$idp_rows[$idp]['oa_last_use']}</td><td>{$idp_rows[$idp]['oa_last_device']}</td><td>{$idp_rows[$idp]['oa_registration']}</td><td>$note</td>") ;
 	} else {
-		print("<td>Non<br/><a href='$authUrl'>Activer</a></td><td></td><td></td><td>$note</td>") ;
+		print("<td></td><td></td><td><a href='$authUrl'>Activer</a></td><td>$note</td>") ;
 	}
 }
 
 ?>
 <table class="table table-striped table-bordered w-auto">
 	<thead>
-		<tr><th>Fournisseur d'identité</th><th>Lié</th><th>Dernière fois</th><th>Dernier appareil</th><th>Note</th></tr>
+		<tr><th>Fournisseur d'identité</th><th>Dernière utilisation</th><th>Appareil</th><th>Depuis</th><th>Note</th></tr>
 	</thead>
 	<tbody>
 		<tr><td><i class="bi bi-facebook"></i> Facebook</td>
@@ -138,7 +138,7 @@ function printIdp($idp, $authUrl, $note = '') {
 	Cela vous permet de vous connecter sans mot de passe en utilisant la reconnaissance faciale, l'empreinte digitale ou une clé physique.</p>
 <table class="table table-striped table-bordered w-auto">
 	<thead>
-		<tr><th>Dernière utilisation</th><th>Appareil</th><th>Depuis le</th></tr>
+		<tr><th>Dernière utilisation</th><th>Appareil</th><th>Depuis</th></tr>
 	</thead>
 	<tbody>
 <?php
@@ -160,7 +160,7 @@ if (mysqli_num_rows($result) == 0) {
 </table>	
 <!-- Add WebAuthn buttons to the login form -->
 <div class="text-center">
-	<button id="webauthn-register" class="btn btn-primary"><i class="bi bi-fingerprint"></i> Activer Passkey sur cet appareil <i><span id="browser-label"></span></i></button><br/>
+	<button id="webauthn-register" class="btn btn-primary"><i class="bi bi-fingerprint"></i> Activer Passkey sur cet appareil <i>(<span id="browser-label"></span>)</i></button><br/>
     <div id="feedback" class="mt-2"></div>
 </div>
 <div class="mt-4 pt-2 border-top small text-body-secondary">Le site web ne voit aucune information de vos comptes Facebook, Googgle, ou LinkedIn en dehors de votre nom, 
