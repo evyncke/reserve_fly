@@ -819,7 +819,7 @@ if (time() + 3600 >= airport_opening_local_time($year, $month, $day) and time() 
 }
 
 print(date('Y-m-d H:i:s').": End of CRON.\n") ;
-if ($metar_unknown != 0)
+if (isset($metar['condition']))
 	journalise($userId, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2], DB size $db_size MB.") ;
 else
 	journalise($userId, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, unknown METAR, CPU load $load[0]/$load[1]/$load[2], DB size $db_size MB.") ;
