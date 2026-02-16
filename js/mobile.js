@@ -555,7 +555,7 @@ function detectBrowser() {
   // Modern path
   if ('userAgentData' in navigator) {
     const brands = navigator.userAgentData.brands;
-    const main = brands.find(b => b.brand !== 'Not.A/Brand') ?? brands[0];
+    const main = brands.find(b => !/^Not.A.Brand/.test(b.brand)) ?? brands[0];
     return main.brand;
   }
 
