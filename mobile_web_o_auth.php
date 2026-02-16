@@ -218,7 +218,7 @@ registerButton.addEventListener('click', async () => {
 		console.log('typeof(credential):', typeof(credential));
 		feedback.innerHTML = '<div class="alert alert-info">Got navigator credentials.</div>';
 		// Send back to handler
-		const browser = await getBrowser();
+		const browser = await getDeviceBrowserLabel();
 		const verify = await fetch('passkey_handler.php?action=verify-registration', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
@@ -241,25 +241,6 @@ registerButton.addEventListener('click', async () => {
 		console.error('Error during WebAuthn registration:', e);
 	}
 });
-
-async function getBrowser() {
-  // Modern path
-  if ('userAgentData' in navigator) {
-    const brands = navigator.userAgentData.brands;
-    const main = brands.find(b => b.brand !== 'Not.A/Brand') ?? brands[0];
-    return main.brand;
-  }
-
-  // Legacy fallback
-  const ua = navigator.userAgent;
-  if (/Edg\//.test(ua)) return 'Microsoft Edge';
-  if (/OPR\//.test(ua)) return 'Opera';
-  if (/Firefox\//.test(ua)) return 'Firefox';
-  if (/Chrome\//.test(ua)) return 'Google Chrome';
-  if (/Safari\//.test(ua)) return 'Safari';
-
-  return 'Unknown';
-}
 
 </script>
 </body>
