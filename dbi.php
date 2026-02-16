@@ -138,7 +138,7 @@ $joomla_board_group = 22 ; // Board member
 $joomla_sysadmin_group = 6 ;
 $joomla_superuser_group = 8 ;
 $joomla_pilot_group = 13 ;
-$joomla_student_group = 16 ; // Flying students
+$joomla_student_group = 16 ;
 $joomla_flying_student_group = 16 ; // Flying students
 $joomla_theory_student_group = 26 ; // Theory only students
 $joomla_instructor_group = 14 ;
@@ -215,6 +215,23 @@ function MustBeLoggedIn() {
 		header("Location: https://www.spa-aviation.be/resa/connect.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 		exit ;
 	}
+}
+
+function fullDebug() {
+    // Clear any existing exception handlers to show the raw PHP backtrace
+    restore_exception_handler();
+    restore_error_handler();
+
+    // Enable all possible errors, warnings, and notices
+    error_reporting(E_ALL);
+
+    // Force errors to be printed to the browser
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+
+    // Optional: Ensure errors are also written to a log file in your directory
+    ini_set('log_errors', '1');
+    ini_set('error_log', __DIR__ . '/php_error.log');
 }
 
 // Opening / closing hour of airports vary... hence the use of a PHP function
@@ -318,6 +335,7 @@ $table_device_doc = 'rapcs_device_doc' ;
 $table_plane_device = 'rapcs_plane_device' ;
 $table_planes_pics = 'rapcs_planes_pics' ;
 $table_social = 'rapcs_social' ;
+$table_oauth = 'rapcs_oauth' ;
 $table_passkey = 'rapcs_passkey' ;
 
 // Joomla specific table names
