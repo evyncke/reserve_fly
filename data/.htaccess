@@ -1,0 +1,10 @@
+DirectoryIndex disabled
+Options +Indexes
+
+# 1 hour for JS as they keep changing
+<filesMatch ".(js)$">
+        Header set Cache-Control "max-age=3600, public"
+</filesMatch>
+
+ExpiresActive On
+ExpiresByType application/javascript "access plus 1 hour"

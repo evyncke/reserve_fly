@@ -1,0 +1,61 @@
+# Right CSS type by Eric Vyncke
+AddType text/css .css
+AddType application/manifest+json .webmanifest
+
+# Cache optimization by Eric Vyncke
+
+# 1 month for PDF
+<filesMatch ".(pdf)$">
+	Header set Cache-Control "max-age=2592000, public"
+</filesMatch>
+
+# 1 day for graphic elements
+<filesMatch ".(jpg|png|ico|gif)$">
+	Header set Cache-Control "max-age=86400, public"
+</filesMatch>
+
+# 1 day for CSS as they keep changing
+<filesMatch ".(css)$">
+	Header set Cache-Control "max-age=86400, public"
+</filesMatch>
+
+# 1 day for JS as they keep changing
+<filesMatch ".(js)$">
+	Header set Cache-Control "max-age=86640, public"
+</filesMatch>
+
+ExpiresActive On
+ExpiresByType image/gif "access plus 1 week"
+ExpiresByType image/png "access plus 1 week"
+ExpiresByType image/jpg "access plus 1 day"
+ExpiresByType image/jpeg "access plus 1 day"
+ExpiresByType text/css "access plus 1 week"
+ExpiresByType application/javascript "access plus 1 day"
+ExpiresByType application/pdf "access plus 1 month"
+
+# Try to be as close as REST as possible
+Options -MultiViews
+RewriteEngine on
+RewriteRule ^metar/(.*)$ /resa/metar.php?station=$1 [L]
+RewriteRule ^get_ephemerides/(.*)/(.*)/(.*)$ /resa/get_ephemerides.php?year=$1&month=$2&day=$3 [L]
+
+# Uncomment following line if your webserver's URL
+# is not directly related to physical file paths.
+# Update Your Joomla! Directory (just / for root).
+##
+
+# RewriteBase /
+
+## Begin - Joomla! core SEF Section.
+#
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+#
+# If the requested path and file is not /index.php and the request
+# has not already been internally rewritten to the index.php script
+RewriteCond %{REQUEST_URI} !^/index\.php
+# and the requested path and file doesn't directly match a physical file
+RewriteCond %{REQUEST_FILENAME} !-f
+# and the requested path and file doesn't directly match a physical folder
+RewriteCond %{REQUEST_FILENAME} !-d
+# internally rewrite the request to the index.php script
+RewriteRule .* reservation.php [L]

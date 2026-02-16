@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2025 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
    limitations under the License.
 
 */
-
-// TODO
-// - ensure consistency of email in rapcs_person and jom_user
 
 require_once "dbi.php" ;
 if ($userId == 0) {
@@ -718,7 +715,7 @@ if (! $read_only) {
 		$facebookClient = new Facebook([
 			'app_id' => $fb_app_id,
 			'app_secret' => $fb_app_secret,
-			'default_graph_version' => 'v18.0',
+			'default_graph_version' => 'v19.0',
 		]);
 		try {
 			$fb_response = $facebookClient->get("/$me[facebook_id]?fields=picture.type(large){url}", $me['facebook_token']);
@@ -842,7 +839,7 @@ if (! $read_only) {
 	$facebookClient = new Facebook([
 		'app_id' => $fb_app_id,
 		'app_secret' => $fb_app_secret,
-		'default_graph_version' => 'v18.0',
+		'default_graph_version' => 'v19.0',
 	]);
 	// Initialize Google Client
 	$google = new Google([
@@ -858,7 +855,7 @@ if (! $read_only) {
 	print('<div class="form-group">Faciliter la connexion/login en 
 		<a class="col-sm-offset-2 col-md-offset-1 btn btn-primary" href="' . $facebookAuthUrl . '">
 			<i class="bi bi-facebook"></i> liant mon compte Facebook</a> ou en
-		<a class="col-sm-offset-2 col-md-offset-1 btn btn-outline-secondary" href="' . $googleAuthUrl . '">
+		<a class="col-sm-offset-2 col-md-offset-1 btn btn-outline-primary" href="' . $googleAuthUrl . '">
 			<i class="bi bi-google"></i> liant mon compte Google</a></div>') ;
 }
 ?>

@@ -3,13 +3,20 @@
 Vous trouverez ici les diverses nouveautés à propos du site réservation du RAPCS. Les suggestions sont les bienvenues auprès de
 [Éric Vyncke](mobile_profile.php?displayed_id=62) et [Patrick Reginster](mobile_profile.php?displayed_id=66).
 
+## Février 2026
+
+- le site est aussi disponible en tant qu'application (donc sur votre écran de départ sur smartphone, votre Dock sur MacOs, votre menu Démarrer sous Windows, ...) car il est supporté maintenant en tant que Progressive Web Application (PWA). Comment faire pour l'installer ?
+   - Chrome: cliquer sur l'icone télécharger à droite de la barre d'adresse
+   - Safari: soit Fichier/Ajouter au Dock soit l'icone partager et 'Ajouter au Dock'
+- présentations plus lisibles des [Documents <span class="bi bi-download"></span>](https://www.spa-aviation.be/resa/mobile_documents.php)
+
 ## Janvier 2026
 
 - plusieurs tables peuvent être triées en cliquant sur l'intitulé d'une colonne, il est aussi possible d'afficher que certaines lignes via la case "Rechercher" au dessus de la table.
 
 ## Décembre 2025
 
-- il est possible de se connecter avec votre compte Facebook ou Google *si*
+- il est possible de se connecter avec votre compte Facebook, Google, ou LinkedIn *si*
     - votre adresse email sur le site du club est identique à l'adresse email de votre compte Facebook ou Google (par exemple une adresse email @gmail.com) *ou*
     - vous avez lié vos comptes du club et Facebook & Facebook en allant sur votre profil [<i class="bi bi-person"></i> votre nom -> <i class="bi bi-person-circle"></i> Mon profil](https://www.spa-aviation.be/resa/mobile_profile.php), partie _Réseaux Sociaux_ et avez cliqué sur <span class="btn btn-primary"><i class="bi bi-facebook"></i> liant mon compte Facebook</span> et idem pour Google.
 - dans le carnet de vol [<i class="bi bi-person"></i> votre nom -> <i class="bi bi-journals"></i> Mon carnet de vol](https://www.spa-aviation.be/resa/mobile_mylog.php) il est possible de choisir la période des 12 mois utilisée pour la prorogation de votre SEP.
