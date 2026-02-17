@@ -2336,7 +2336,7 @@ function OF_AddPartnerInOdoo(
         'city' => db2web($ville),
         'email' => db2web($email),
         'phone' => db2web($telephone),
-        'mobile' => db2web($telephone),
+        'phone' => db2web($telephone),
         'country_id' => db2web($countryid)
         //'category_id' => db2web($categoryid);
     )) ;
