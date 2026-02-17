@@ -408,9 +408,6 @@ while ($row = mysqli_fetch_array($result)) {
 			journalise($row['j_id'], 'E', mysqli_error($mysqli_link) . " for row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
 		}
 	}
-	if ($row['p_name'] != $row['j_name']) {
-		print(date('Y-m-d H:i:s').": $row[j_name]/$row[j_id] '$row[p_name]' (RAPCS) != '$row[j_name]' (Joomla)\n") ; flush() ;
-	}
 }
 
 
@@ -566,7 +563,7 @@ else {
 	$result = mysqli_query($mysqli_link, "select id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id = $joomla_instructor_group
 		order by name")
-	or journalise(0, "E", "Cannot read instructors: " . mysqli_error($mysqli_link)) ;
+	or journalise(0, "E", "Cannot read FI instructors: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($e, "$row[email]\n") ;
 		$row['name'] = db2web($row['name']) ;
@@ -585,7 +582,8 @@ if (! $e) journalise($userId, "E", "Cannot open email.tkis for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id = $joomla_instructor_group2
-		order by name") ;
+		order by name") 
+	or journalise(0, "E", "Cannot read TKI instructors: " . mysqli_error($mysqli_link)) ;;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($e, "$row[email]\n") ;
 	}
@@ -630,7 +628,8 @@ if (! $f) journalise($userId, "E", "Cannot open email.pilotes for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id = $joomla_pilot_group
-		order by name") ;
+		order by name") 	
+	or journalise(0, "E", "Cannot read pilots: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
@@ -646,7 +645,8 @@ if (! $f) journalise($userId, "E", "Cannot open email.eleves for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id in ($joomla_flying_student_group, $joomla_theory_student_group, $joomla_instructor_group, $joomla_instructor_group2)
-		order by name") ;
+		order by name") 
+	or journalise(0, "E", "Cannot read students: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
@@ -662,7 +662,8 @@ if (! $f) journalise($userId, "E", "Cannot open email.membres for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and group_id in ($joomla_member_group, $joomla_student_group, $joomla_pilot_group)
-		order by name") ;
+		order by name") 
+	or journalise(0, "E", "Cannot read members: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
@@ -724,7 +725,8 @@ if (! $f) journalise(0, "E", "Cannot open email.eric for writing") ;
 else {
 	$result = mysqli_query($mysqli_link, "select distinct id, name, email from $table_users join $table_user_usergroup_map on id=user_id
 		where block = 0 and id=62
-		order by name") ;
+		order by name") 
+	or journalise(0, "E", "Cannot read eric: " . mysqli_error($mysqli_link)) ;;
 	while ($row = mysqli_fetch_array($result)) {
 		fwrite($f, "$row[email]\n") ;
 	}
@@ -817,7 +819,7 @@ if (time() + 3600 >= airport_opening_local_time($year, $month, $day) and time() 
 }
 
 print(date('Y-m-d H:i:s').": End of CRON.\n") ;
-if ($metar_unknown != 0)
+if (isset($metar['condition']))
 	journalise($userId, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, $metar[condition], CPU load $load[0]/$load[1]/$load[2], DB size $db_size MB.") ;
 else
 	journalise($userId, "I", "End of hourly cron; $flight_reminders flight, $engine_reminders engine reminder emails sent, unknown METAR, CPU load $load[0]/$load[1]/$load[2], DB size $db_size MB.") ;

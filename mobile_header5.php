@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2025 Eric Vyncke & Patrick Reginster
+   Copyright 2013-2026 Eric Vyncke & Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -70,6 +70,8 @@ $christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_mont
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
+<link rel="apple-touch-icon" sizes="32x32" href="<?=$favicon?>">
+<link rel="manifest" href="/resa/manifest.webmanifest">
 <title>Mobile RAPCS ASBL</title>
 
 <!-- Using latest bootstrap 5 -->
@@ -525,6 +527,7 @@ if ($userId <= 0) {
           <ul class="dropdown-menu">
               <li id="logoutElem">
               <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
+              <a class="dropdown-item" href="mobile_web_o_auth.php"><i class="bi bi-shield"></i> Mes connexions</a>
               <a class="dropdown-item" href="?theme=dark"><i class="bi bi-moon-stars-fill"></i> Mode nuit</a>
               <a class="dropdown-item" href="?theme=light"><i class="bi bi-sun-fill"></i> Mode jour</a>
               <a class="dropdown-item" href="mobile_mylog.php"><i class="bi bi-journals"></i> Mon carnet de vols</a>
@@ -546,6 +549,7 @@ if ($userIsBoardMember or $userIsInstructor) {
               <li><h6 class="dropdown-header">Données personnelles</h6></li>
               <a class="dropdown-item" href="mobile_groups.php"><i class="bi bi-people-fill"></i> Mes groupes</a>
               <a class="dropdown-item" href="mobile_profile.php"><i class="bi bi-person-circle"></i> Mon profil</a>
+
 <?php
   if ($userIsStudent)
       print("<a class=\"dropdown-item\" href=\"dto.student.php?student=$userId\"><i class=\"bi bi-clipboard2-pulse-fill\"></i> Ma progression</a>") ;

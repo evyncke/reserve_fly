@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2025 Eric Vyncke
+   Copyright 2013-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -77,6 +77,7 @@ use League\OAuth2\Client\Provider\LinkedIn;
 // session_start(); // Probably already started in mobile_header5.php or via dbi.php
 
 // Initialize Google Client
+// See https://console.cloud.google.com/apis/credentials?authuser=1&project=regal-throne-481610-u7
 $google = new Google([
     'clientId'     => $google_client_id,
     'clientSecret' => $google_client_secret,
@@ -84,6 +85,7 @@ $google = new Google([
 ]);
 
 // Initialize Facebook Client
+// See also https://developers.facebook.com/apps/1070912613042275/dashboard/?business_id=363522343467274
 $facebook = new Facebook([
     'app_id' => $fb_app_id,
     'app_secret' => $fb_app_secret,
@@ -96,6 +98,9 @@ $linkedin = new LinkedIn([
     'clientSecret' => $linkedin_client_secret,
     'redirectUri' => 'https://www.spa-aviation.be/resa/mobile_login.php',
 ]);
+
+// TODO should come from the "state" parameter and be stored in session to prevent forgery and to differentiate between multiple OAuth providers if needed
+$browser = ($_REQUEST['browser'] != '') ? mysqli_real_escape_string($mysqli_link, $_REQUEST['browser']) : 'unknown' ;
 
 // Check whether  OAuth callback
 if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
@@ -111,8 +116,11 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                 // Check if user exists with this google id or email
                 $query = "SELECT jom_id 
                     FROM $table_person AS p JOIN $table_users AS u ON p.jom_id = u.id
-                    WHERE u.block = 0 AND (google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "' 
-                        OR p.email='" . mysqli_real_escape_string($mysqli_link, $googleUser->getEmail()) . "')";
+                    WHERE u.block = 0 AND p.email='" . mysqli_real_escape_string($mysqli_link, $googleUser->getEmail()) . "'
+                UNION
+                    SELECT oa_jom_id AS jom_id
+                    FROM $table_oauth AS o JOIN $table_users AS u ON o.oa_jom_id = u.id
+                    WHERE u.block = 0 AND o.oa_idp='Google' AND o.oa_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "'";
                 $result = mysqli_query($mysqli_link, $query)
                     or journalise(0, "F", "Error querying for google user: " . mysqli_error($mysqli_link));
                 $row = mysqli_fetch_assoc($result);
@@ -129,11 +137,16 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                     $app->triggerEvent('onUserLogin', array(
                         (array) $joomla_user,
                         $options));
-                    journalise($userId, "I", "Google login for user id $userId (" . $googleUser->getEmail() . ") from $callback.") ;
+                    journalise($userId, "I", "Google login for user id $userId (" . $googleUser->getEmail() . ") from $callback, browser=$browser.") ;
                     mysqli_query($mysqli_link, "UPDATE $table_person SET google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "', " .
                         " google_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
                         WHERE jom_id = $userId") 
                         or journalise($userId, "E", "Error updating google_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
+                    mysqli_query($mysqli_link, "INSERT INTO $table_oauth(oa_idp, oa_jom_id, oa_id, oa_token, oa_registration, oa_last_device) 
+                        VALUES ('Google', $userId, '" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "', '" . 
+                            mysqli_real_escape_string($mysqli_link, $accessToken) . "', NOW(), '$browser')
+                        ON DUPLICATE KEY UPDATE oa_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "', oa_last_use=NOW(), oa_last_device='$browser'")
+                        or journalise($userId, "E", "Error inserting google_id/token for user id $userId in $table_oauth: " . mysqli_error($mysqli_link)) ;
                     unset($_SESSION['google_oauth2state']); // Clear Google state
                     header("Location: https://www.spa-aviation.be/$callback", TRUE, 307);
                     exit;
@@ -187,10 +200,16 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                         (array) $joomla_user,
                         $options));
                     journalise($userId, "I", "LinkedIn login for user id $userId (" . $linkedInUser['email'] . ") from $callback.") ;
+                    // TODO next UPDATE is to be deleted once the 2nd is checked working fine.
                     mysqli_query($mysqli_link, "UPDATE $table_person SET linkedin_id='" . mysqli_real_escape_string($mysqli_link, $linkedInUser['sub']) . "', " .
                         " linkedin_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
                         WHERE jom_id = $userId") 
                         or journalise($userId, "E", "Error updating linkedin_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
+                    mysqli_query($mysqli_link, "INSERT INTO $table_oauth(oa_idp, oa_jom_id, oa_id, oa_token, oa_registration, oa_last_device) 
+                        VALUES ('LinkedIn', $userId, '" . mysqli_real_escape_string($mysqli_link, $linkedInUser['sub']) . "', '" . 
+                            mysqli_real_escape_string($mysqli_link, $accessToken) . "', NOW(), '$browser')
+                        ON DUPLICATE KEY UPDATE oa_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "', oa_last_use=NOW(), oa_last_device='$browser'")
+                        or journalise($userId, "E", "Error inserting linkedin_id/token for user id $userId in $table_oauth: " . mysqli_error($mysqli_link)) ;
                     unset($_SESSION['linkedin_oauth2state']); // Clear LinkedIn state
                     header("Location: https://www.spa-aviation.be/$callback", TRUE, 307);
                     exit;
@@ -236,10 +255,17 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                         (array) $joomla_user,
                         $options));
                     journalise($userId, "I", "Facebook login for user id $userId ($facebookUser[email]) from $callback.") ;
+                    // TODO next UPDATE is to be deleted once the 2nd is checked working fine.
                     mysqli_query($mysqli_link, "UPDATE $table_person SET facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "', " .
                         " facebook_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
                         WHERE jom_id = $userId") 
                         or journalise($userId, "E", "Error updating facebook_id/token for user id $userId in $table_person: " . mysqli_error($mysqli_link)) ;
+                    mysqli_query($mysqli_link, "INSERT INTO $table_oauth(oa_idp, oa_jom_id, oa_id, oa_token, oa_registration, oa_last_device) 
+                        VALUES ('Facebook', $userId, '" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "', '" . 
+                            mysqli_real_escape_string($mysqli_link, $accessToken) . "', NOW(), '$browser')
+                        ON DUPLICATE KEY UPDATE oa_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "', oa_last_use=NOW(), oa_last_device='$browser'")
+                        or journalise($userId, "E", "Error inserting facebook_id/token for user id $userId in $table_oauth: " . mysqli_error($mysqli_link)) ;
+
                     header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
                     exit ;  
                 } else {
@@ -264,7 +290,6 @@ $_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later..
 $facebookHelper = $facebook->getRedirectLoginHelper();
 $facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login.php', ['email','public_profile','user_link']);
 $linkedInAuthUrl = $linkedin->getAuthorizationUrl(['scope' => ['openid', 'profile', 'email']]);
-//$linkedInAuthUrl = $linkedin->getAuthorizationUrl(['scope' => ['r_liteprofile', 'r_emailaddress']]);
 
 $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 
@@ -273,7 +298,7 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
 <div class="container">
     <h2>Connexion</h2>
     <p class="bg-danger"><?=$connect_msg?></p>
-    <p class="bg-info">Pour accéder au site vous devez vous connecter soit via votre identifiant et mot de passe,</p>
+    <p class="bg-info">Pour accéder au site vous devez vous connecter soit via votre identifiant et mot de passe, ou les méthodes via un fournisseur d'identité ou une clé secrète (FaceID, TouchID, ...).</p>
 
     <form method="post" action="<?=$_SERVER['PHP_SELF']?>">
         <input type="hidden" name="cb" value="<?=$callback?>">
@@ -300,14 +325,117 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
     <div class="text-center">
         <p><b>OU</b> via:</p>
         <a href="<?=$facebookAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-primary"><i class="bi bi-facebook"></i> Facebook</a>
-        <a href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Google</a>
-        <a href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Gmail</a>
+        <a id="google-auth-link" href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Google</a>
+        <a id="gmail-auth-link" href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Gmail</a>
         <a href="<?=$linkedInAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><i class="bi bi-linkedin"></i> LinkedIn</a>
+    </div><!-- text-center -->
     <div class="row">
-        <p class="text-center text-muted mt-3">Les connexions via Google, Facebook, ou LinkedIn nécessitent que votre adresse email soit la même sur le système de réservation
+        <p class="text-muted mt-3">Les connexions via Google, Facebook, ou LinkedIn nécessitent que votre adresse email soit la même sur le système de réservation
             et sur Facebook ou Google (trivial si votre email est ...@gmail.com) ou LinkedIn.
-            Si ce n'est pas le cas, veuillez utiliser la connexion classique et lier votre compte via votre profil sur ce site onglet Réseaux Sociaux.</p>
+            Si ce n'est pas le cas, veuillez utiliser la connexion via identifiant et mot de passe 
+            et lier votre compte via votre profil sur ce site via le menu déroulant associé à votre nom et l'option
+            <b><i class="bi bi-shield"></i> Mes connexions</b>.</p>
+    </div><!-- row -->
+    <div classs="row">
+        <button id="webauthn-login" class="btn btn-outline-secondary"><i class="bi bi-fingerprint"></i> Clé secrète (FaceID, TouchID, ...)</button><br/>
+        <div id="feedback" class="mt-2"></div>
     </div><!-- row -->   
 </div> <!-- container -->
+<script>
+// (async () => {
+// 	const browser = await getDeviceBrowserLabel();
+	// document.getElementById('google-auth-link').href += '&browser=' + encodeURIComponent(browser);
+	// document.getElementById('gmail-auth-link').href += '&browser=' + encodeURIComponent(browser);
+//     console.log('Browser label added to OAuth links:', browser);
+//     console.log('Google Auth URL:', document.getElementById('google-auth-link').href);
+// })();
+
+var helper = {
+	atb: b => {
+		let u = new Uint8Array(b), s = "";
+		for (let i = 0; i < u.byteLength; i++) s += String.fromCharCode(u[i]);
+			return btoa(s);
+		},
+
+	bta: o => {
+		let pre = "=?BINARY?B?", suf = "?=";
+		for (let k in o) {
+			if (typeof o[k] == "string") {
+				let s = o[k];
+				if (s.startsWith(pre) && s.endsWith(suf)) {
+					let raw = window.atob(s.slice(pre.length, -suf.length)),
+					u = new Uint8Array(raw.length);
+					for (let i = 0; i < raw.length; i++) u[i] = raw.charCodeAt(i);
+					o[k] = u.buffer;
+				}
+			} else {
+				helper.bta(o[k]);
+			}
+		}
+	}
+}
+
+// WebAuthn Login
+const feedback = document.getElementById('feedback');
+const loginButton = document.getElementById('webauthn-login');
+
+loginButton.addEventListener('click', async () => {
+	console.log('Button clicked: starting WebAuthn login...');
+	feedback.innerHTML = '<div class="alert alert-info">Contacting server...</div>';
+	try {
+		const response = await fetch('passkey_handler.php?action=get-login-options', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'}
+		});
+		console.log('Response received for login :-)') ;
+		console.log('response:', response);
+        feedback.innerHTML += '<div class="alert alert-info">Server response received.</div>';
+		let options = await response.json();
+		helper.bta(options);
+		console.log('After decode, options: ', options);
+		// Let's fetch the credential method using publicKey options
+		const credential = await navigator.credentials.get(options);
+		console.log('After credentials.get:', credential);
+		console.log('typeof(credential):', typeof(credential));
+		console.log("id:", credential.id);
+		console.log("rawId:", credential.rawId);
+		console.log("helper.atb(credential.response.clientDataJSON),", helper.atb(credential.response.clientDataJSON));
+		feedback.innerHTML += '<div class="alert alert-info">Got navigator credentials.</div>';
+        const browser = await getDeviceBrowserLabel();
+		// Send back to handler
+		const verify = await fetch('passkey_handler.php?action=verify-login', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({
+                browser: browser,
+				id: credential.id,
+				rawId: helper.atb(credential.rawId),
+				client: helper.atb(credential.response.clientDataJSON),
+				auth: helper.atb(credential.response.authenticatorData),
+				sig: helper.atb(credential.response.signature),
+				user: credential.response.userHandle ? helper.atb(credential.response.userHandle) : null
+			})
+		});
+		console.log('After sending to verify-login:', verify);
+		if (verify.ok) { // TODO check content?
+            const status = await verify.json();
+			feedback.innerHTML += '<div class="alert alert-success">Passkey Logged In! ' + status.message + '</div>';
+            // if (confirm("Connexion réussie via Passkey. Appuyez sur OK pour continuer vers vos réservations (<?=$callback?>).")) {
+            //    // User pressed OK 
+                window.location.href = "https://www.spa-aviation.be/<?=$callback?>";
+            // } else {
+            //     // User pressed Cancel
+            //     console.log("User stayed on the page.");
+            // }       
+		} else {
+			feedback.innerHTML += "<div class=\"alert alert-danger\">Passkey Login Failed! </div>";
+		}
+	} catch (e) {
+		feedback.innerHTML += `<div class="alert alert-danger">Exception: ${e.message}</div>`;
+		console.error('Error during WebAuthn login:', e.message, e.stack);
+	}
+});
+
+</script>
 </body>
 </html>
