@@ -184,7 +184,7 @@ print("<button id=\"id_submit_bondecommande\" name=\"submit_bondecommande\" clas
 </thead>
 <tbody class="table-group-divider">
 <?php
-    for($i=0;$i<$bonDeCommandeCount;$i++) {
+    for($i=$bonDeCommandeCount-1;$i>=0;$i--) {
         print("<tr>");
         print("<td><a href=\"javascript:void(0);\" onclick=\"deletebondecommandeFiles('$_SERVER[PHP_SELF]','$theBonsDeCommande[$i]')\" title=\"Effacer les fichiers associés au bon de commande sur le serveur\"><i class=\"bi bi-trash-fill\"></i></a></td>");
         print("<td><a href=\"$theUploadFolder/$theBonsDeCommande[$i]\" target=\"_blank\"><i class=\"bi bi-file-earmark-pdf\" style=\"font-size:36px;\"></i>$theBonsDeCommande[$i]</a></td>");

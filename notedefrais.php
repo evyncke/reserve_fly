@@ -213,7 +213,7 @@ print("<button id=\"id_submit_notedefrais\" name=\"submit_notedefrais\" class=\"
 </thead>
 <tbody class="table-group-divider">
 <?php
-    for($i=0;$i<$nodeDeFraisCount;$i++) {
+    for($i=$nodeDeFraisCount-1;$i>=0;$i--) {
         print("<tr>");
         print("<td><a href=\"javascript:void(0);\" onclick=\"deleteNoteDeFraisFiles('$_SERVER[PHP_SELF]','$theNotesDeFrais[$i]')\" title=\"Effacer les fichiers associés à la note de frais sur le serveur\"><i class=\"bi bi-trash-fill\"></i></a></td>");
         print("<td><a href=\"$theUploadFolder/$theNotesDeFrais[$i]\" target=\"_blank\"><i class=\"bi bi-file-earmark-pdf\" style=\"font-size:36px;\"></i>$theNotesDeFrais[$i]</a></td>");

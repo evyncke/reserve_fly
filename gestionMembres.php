@@ -295,19 +295,20 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 <th onclick="sortTable(2, true)">Ré	f. Odoo</th>
 <th onclick="sortTable(3, false)">Nom</th>
 <th onclick="sortTable(4, false)">Prénom</th>
-<th onclick="sortTable(5, false)">Adresse</th>
-<th onclick="sortTable(6, false)">Code</th>
-<th onclick="sortTable(7, false)">Ville</th>
-<th onclick="sortTable(8, false)">Pays</th>
-<th onclick="sortTable(9, false)">Email</th>
-<th onclick="sortTable(10, false)">Membre non-navigant</th>
-<th onclick="sortTable(11, false)">Élève</th>
-<th onclick="sortTable(12, false)">Pilote</th>
-<th onclick="sortTable(13, false)">Membre Effectif</th>
-<th onclick="sortTable(14, true)">Cotisation</th>
-<th onclick="sortTable(15, true)">Solde</th>
-<th onclick="sortTable(16, false)">Status</th>
-<th onclick="sortTable(17, false)">Raison</th>
+<th onclick="sortTable(5, false)">Photo</th>
+<th onclick="sortTable(6, false)">Adresse</th>
+<th onclick="sortTable(7, false)">Code</th>
+<th onclick="sortTable(8, false)">Ville</th>
+<th onclick="sortTable(9, false)">Pays</th>
+<th onclick="sortTable(10, false)">Email</th>
+<th onclick="sortTable(11, false)">Membre non-navigant</th>
+<th onclick="sortTable(12, false)">Élève</th>
+<th onclick="sortTable(13, false)">Pilote</th>
+<th onclick="sortTable(14, false)">Membre Effectif</th>
+<th onclick="sortTable(15, true)">Cotisation</th>
+<th onclick="sortTable(16, true)">Solde</th>
+<th onclick="sortTable(17, false)">Status</th>
+<th onclick="sortTable(18, false)">Raison</th>
 </tr>
 </thead>
 <tbody id="myTable">
@@ -315,7 +316,7 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 
 // The subquery should retrieve the max date for this specific user...but it burns time
 // TODO as now Odoo is well in full force, probably need to only process Odoo balance
-$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country,
+$sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country, avatar,
 odoo_id, block, b_reason, u.email as email, 
 bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_date, bkf_invoice_id, ds_year, cm_company,
 group_concat(group_id) as allGroups,
@@ -348,7 +349,6 @@ datediff(current_date(), b_when) as days_blocked
 	$cotisationPayeCount=0;
 	$cotisationNonRenouveleeCount=0;
 	$cotisationRenouveleeCount=0;
-	
 	$CheckMark="&#9989;";
 	
 	while ($row = mysqli_fetch_array($result)) {
@@ -370,7 +370,11 @@ datediff(current_date(), b_when) as days_blocked
 		if($row['last_name']=="") {
 			$row['last_name']="xxxxx";
 		}
-			
+		$photo="images/avatar.jpg";
+		if(isset($row['avatar'])) {
+			$photo=$avatar_root_uri."/".$row['avatar'];
+		}
+		$photo='<a href="'.$photo.'"><img src="'.$photo.'" alt="photo" width="50" height="66"></a>';
 		$groups = explode(',', $row['allGroups']) ;
 		$effectif = (in_array($joomla_effectif_group, $groups)) ? 
 			'<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Effectif" checked>' 
@@ -538,6 +542,7 @@ datediff(current_date(), b_when) as days_blocked
 		print("<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_ledger.php?user=$personid\">$odooReference<span class='tooltiptext'>Click pour afficher les opérations comptables</span></a></td>
 			<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_profile.php?displayed_id=$personid\">$row[last_name]<span class='tooltiptext'>Click pour editer le profile</span></a></td>
 			<td style='text-align: left;'>$row[first_name]</td>
+			<td style='text-align: left;'>$photo</td>
 			<td style='text-align: left;'>$address</td>
 			<td style='text-align: left;'>$code</td>
 			<td style='text-align: left;'>$ville</td>
