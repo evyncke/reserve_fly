@@ -89,13 +89,20 @@ if($voldansles12mois=="oui") {
 $remarques=explode ( "\n" ,$remarque);
 $messagesforgift=explode ( "\n" ,$messageforgift);
 
-$from='"Reservation RAPCS asbl" <reservation@spa-aviation.be>';
-$to = '"Reservation RAPCS asbl" <reservation@spa-aviation.be>';
-$replyto='"Reservation RAPCS asbl" <reservation@spa-aviation.be>';
-$sender='"Reservation RAPCS asbl" <reservation@spa-aviation.be>';
+$from='reservation@spa-aviation.be';
+$to = 'reservation@spa-aviation.be';
+$replyto='reservation@spa-aviation.be';
+$sender='reservation@spa-aviation.be';
+$testingto='patrick.reginster@me.com';
+$testingreplyto='patrick.reginster@me.com>';
 
-$testingto='"Reservation RAPCS asbl" <patrick.reginster@me.com>';
-$testingreplyto='"Reservation RAPCS asbl" <patrick.reginster@me.com>';
+//Sometimes doesn't work. Why?
+//$from='"Reservation RAPCS asbl" <reservation@spa-aviation.be>';
+//$to = '"Reservation RAPCS asbl" <reservation@spa-aviation.be>';
+//$replyto='"Reservation RAPCS asbl" <reservation@spa-aviation.be>';
+//$sender='"Reservation RAPCS asbl" <reservation@spa-aviation.be>';
+//$testingto='"Reservation RAPCS asbl" <patrick.reginster@me.com>';
+//$testingreplyto='"Reservation RAPCS asbl" <patrick.reginster@me.com>';
 
 $testingflag=false;
 
@@ -352,7 +359,8 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 			}
 		}
     }
-	$contactmail='"'.$firstname1.' '.$lastname1.'" <'.$contactmail.'>';
+	//Sometimes doesn't work. Why?
+	//$contactmail='"'.$firstname1.' '.$lastname1.'" <'.$contactmail.'>';
 	
 	$MessageBody='<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>'.$message."</body></html>";
 	

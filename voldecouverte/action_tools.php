@@ -145,7 +145,7 @@ function mail_attachment($mailto, $from_mail, $from_name, $replyto, $subject, $m
 		   //if(mail($mailto, $subject, $message, $headers)) {
 	         //echo("mail 1 send ... OK<br/>"); // or use booleans here
 	       } else {
-	         echo("mail 1 send ... ERROR!<br/>");
+	         echo("mail 1 send ... $mailto $replyto ERROR!<br/>");
 	       }
 	    }
 	    else {
@@ -166,7 +166,7 @@ function mail_attachment($mailto, $from_mail, $from_name, $replyto, $subject, $m
 		   if(smtp_mail($mailto, $subject, $filecontent, $headers)) {
 	         //echo("mail 1 send ... OK<br/>"); // or use booleans here
 	       } else {
-	         echo("mail (2) send with ERROR! Please contact vols.decouvertes.spa@gmail.com<br/>");
+	         echo("mail (2) send with ERROR! Please contact reservation@spa-aviation.be<br/>");
 	       }
 	    }
 	}
