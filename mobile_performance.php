@@ -46,8 +46,8 @@ print("</script>\n");
 <h2 class="d-none d-md-block">Aircraft Performance</h2>
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form" class="form-horizontal">
 <!--div class="row m-0-xs"-->
-    <label for="id_plane_select" class="col-form-label col-1 col-md-1">Plane:</label>
-    <select id="id_plane_select" class="col-form-select col-1" name="plane_select"></select>
+    <label for="id_plane_select" class="col-form-label">&nbsp;Plane:</label>
+    <select id="id_plane_select" class="col-form-select" name="plane_select"></select>
     &nbsp;&nbsp;&nbsp;POH:&nbsp;<span id="id_plane_poh">POH</span>
 <!--/div> <!-- row -->
 

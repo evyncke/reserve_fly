@@ -58,8 +58,8 @@ require_once 'mobile_header5.php' ;
 <h2 class="d-none d-md-block">Devis masse et centrage <?=$plane?></h2>
 <form action="<?=$_SERVER['PHP_SELF']?>" method="GET" role="form" class="form-horizontal">
 <!--div class="row m-0-xs"-->
-	<label for="planeSelect" class="col-form-label col-1 col-md-1">Plane:</label>
-    <select id="planeSelect" class="col-form-select col-1" name="plane" onchange="document.location.href='<?=$_SERVER['PHP_SELF']?>?displayallcolumns=<?=$displayAllColumns?>&plane=' + this.value ;">$plane</select>
+	<label for="planeSelect" class="col-form-label">&nbsp;Plane:</label>
+    <select id="planeSelect" class="col-form-select" name="plane" onchange="document.location.href='<?=$_SERVER['PHP_SELF']?>?displayallcolumns=<?=$displayAllColumns?>&plane=' + this.value ;">$plane</select>
 <!--/div> <!-- row -->
 
 <?php
