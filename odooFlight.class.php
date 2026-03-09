@@ -226,12 +226,14 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMember
 // Function: OF_CreateFactureCoursTheorique
 // Purpose: Create an invoice for cours theorique + update la table dto_student
 //           CotisationType="naviguant","nonnaviguant"
+//           theFacture==1: On cree un facture dans ODOO + intro dans table table_dto_student
+//            theFacture--0: On ne cree pas de facture (Facture existe deja). On introduit seulement dans table_dto_student
 //============================================
-function OF_CreateFactureCoursTheorique($thePersonID,  $theSessionYear) {
+function OF_CreateFactureCoursTheorique($thePersonID,  $theSessionYear, $theFacture) {
     global $mysqli_link, $table_dto_student, $userId, $userFullName;
     global $theoretical_tuition_product,$theoretical_tuition_price,$ecole_analytic_account;
     //print("OF_CreateFactureCoursTheorique($thePersonID, $theSessionYear,$theoretical_tuition_price):started<br>");
-    $odoo_id=161;//Patrick Reginster test
+
     $coursPrice=$theoretical_tuition_price;
     $result=array();
     $invoidId=1319;
@@ -242,11 +244,20 @@ function OF_CreateFactureCoursTheorique($thePersonID,  $theSessionYear) {
      // Retrieve the odooid from joom_id
     $odoo_id=OF_GetPartnerIDFromJomID($thePersonID);
     if( $odoo_id==0) {
-        print("OF_CreateFactureCoursTheorique 3 ($thePersonID, $theSessionYear)<br>");
+        print("OF_CreateFactureCoursTheorique 3 ($thePersonID, $theSessionYear, $theFacture)<br>");
         return false;
     }
-    // Cotisation after 1 july is % of the year
-    $month=date("m");
+ 
+    if($theFacture=="0") {
+        $dummyInvoice=0;
+        $sql="REPLACE INTO $table_dto_student(ds_jom_id, ds_year, ds_tuition_invoice_id)
+              VALUES($thePersonID, $theSessionYear, $dummyInvoice )";
+        print("$sql<br>");
+        mysqli_query($mysqli_link, $sql)
+            or journalise($userId, "F", "Cannot insert into $table_dto_student: " . mysqli_error($mysqli_link)) ;
+        journalise($userId, "I", "Student $thePersonID  added in $table_dto_student by $userId ") ;	
+        return true;
+    }
 
     $odooClient = OF_GetOdooClient();
     $invoice_lines = array() ;
@@ -2279,7 +2290,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
 
     // 12. Create an invoice for the cours theorique
     if($courstheorique=="oui") {
-        OF_CreateFactureCoursTheorique($jom_id,  $membership_year);
+        OF_CreateFactureCoursTheorique($jom_id,  $membership_year, 1);
     }
 
     //11. Send a mail
