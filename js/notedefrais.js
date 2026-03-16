@@ -2,11 +2,11 @@
 //
 function notedefrais_page_loaded() {
 
-  document.getElementById("id_notedefrais_input_total").readOnly=true;;
+  document.getElementById("id_notedefrais_input_total").readOnly=true;
   document.getElementById("id_notedefrais_input_total").style.backgroundColor = ReadOnlyColor;
-  document.getElementById("id_notedefrais_input_odooreference").readOnly=true;;
+  document.getElementById("id_notedefrais_input_odooreference").readOnly=true;
   document.getElementById("id_notedefrais_input_odooreference").style.backgroundColor = ReadOnlyColor;
-  document.getElementById("id_notedefrais_input_odooanalytic").readOnly=true;;
+  document.getElementById("id_notedefrais_input_odooanalytic").readOnly=true;
   document.getElementById("id_notedefrais_input_odooanalytic").style.backgroundColor = ReadOnlyColor;
 
   //document.getElementById("id_cdv_segment_count").readOnly=true;
@@ -87,7 +87,11 @@ function updateSubmitButton()
     }
     // Check Remboursable
     if(document.getElementById("id_notedefrais_input_remboursable").value=="") {
+        document.getElementById("id_notedefrais_input_remboursable").style.backgroundColor = ErrorColor;
         return;
+    }
+    else {
+        document.getElementById("id_notedefrais_input_remboursable").style.backgroundColor = "White";       
     }
     if(!checkLastInput()) {
         document.getElementById("id_add_row").disabled=true;
@@ -145,10 +149,15 @@ function updateSubmitButton()
         // Check if type = TKI => pas besoin de fiches justificatives
         for(var i=0;i<nodedefrais_size;i++){
             if(notedefrais_type[i]!="TKI") {
+                document.getElementById("id_notedefrais_input_justificatif").style.backgroundColor = ErrorColor;
                 return;
             }
-        }
+         }
     }
+    else {
+        document.getElementById("id_notedefrais_input_justificatif").style.backgroundColor = "White";       
+    }
+
  
     document.getElementById("id_submit_notedefrais").disabled=false;
 }
@@ -218,17 +227,31 @@ function checkLastInput()
     if(document.getElementById("id_notedefrais_rowinput").style.display!="none") {
         // Check Type
         if(document.getElementById("id_notedefrais_input_type").value=="") {
+            document.getElementById("id_notedefrais_input_type").style.backgroundColor = ErrorColor;
             return false;
         }
+        else {
+            document.getElementById("id_notedefrais_input_type").style.backgroundColor = "White";
+        }
+
         // Check Description
         if(document.getElementById("id_notedefrais_input_description").value=="") {
+            document.getElementById("id_notedefrais_input_description").style.backgroundColor = ErrorColor;
             return false;
         }
+        else {
+            document.getElementById("id_notedefrais_input_description").style.backgroundColor = "White";
+        }
+
         // Check Montant
         var aValue=document.getElementById("id_notedefrais_input_total").value;
         if(document.getElementById("id_notedefrais_input_total").value=="0" ||
             document.getElementById("id_notedefrais_input_total").value=="0.00") {
+            document.getElementById("id_notedefrais_input_unitaryprice").style.backgroundColor = ErrorColor;
             return false;
+        }
+        else {
+            document.getElementById("id_notedefrais_input_unitaryprice").style.backgroundColor = "White";
         }
     }
     return true;
@@ -568,6 +591,7 @@ function prefillDropdownMenus(selectName, valuesArray, theDefaultId) {
 //===============================================
 // Main
 var ReadOnlyColor="AliceBlue";
+var ErrorColor="LightPink";
 const notedefrais_date=[];
 const notedefrais_type=[];
 const notedefrais_description=[];
