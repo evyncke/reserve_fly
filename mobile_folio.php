@@ -16,7 +16,7 @@
 
 */
 
-require_once "dbi.php" ;
+require_once "dbi.php" ; 
 if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
@@ -101,7 +101,12 @@ if (isset($_REQUEST['csv']) and $_REQUEST['csv'] != '') {
 	foreach ($folio as $line)	{
 		print("$line->date;$line->from;$line->time_start;$line->to;$line->time_end;$line->model;$line->plane;$line->duration_hh;$line->duration_mm;") ;
 		if ($line->instructor_code != $userId  and  $line->is_pic) { // PIC 
-			print("SELF;") ; //Pilot Point of View. A PIC-Recheck is SELF
+			if($line->pilot_code!=$userId) {
+				print("PASSENGER;") ; //Passenger Point of View. 
+			}
+			else {
+				print("SELF;") ; //Pilot Point of View. A PIC-Recheck is SELF
+			}
 		} else  // Dual command
 			if ($userId == $line->instructor_code)
 				print("\"$line->pilot_name\";") ; //Point of view of the Instructor. A PIC Recheck is a DC
@@ -330,7 +335,12 @@ foreach ($folio as $line)	{
 		<td class=\"text-end\">$duration_mm</td>\n") ;
 
 	if ($line->instructor_code != $userId  and  $line->is_pic) { // PIC 
-		print("<td class=\"text-center\">SELF</td>\n") ; //Pilot Point of View. A PIC-Recheck is SELF
+	 	if($line->pilot_code!=$userId) {
+			print("<td class=\"text-center\">PASSENGER</td>\n") ; //Passenger Point of View. 
+		}
+		else {
+			print("<td class=\"text-center\">SELF</td>\n") ; //Pilot Point of View. A PIC-Recheck is SELF
+		}
 	} else  // Dual command
 		if ($userId == $line->instructor_code)
 			print("<td class=\"text-center\">$line->pilot_name</td>\n") ; //Point of view of the Instructor. A PIC Recheck is a DC
