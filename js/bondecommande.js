@@ -140,17 +140,29 @@ function checkLastInput()
     if(document.getElementById("id_bondecommande_rowinput").style.display!="none") {
         // Check Type
         if(document.getElementById("id_bondecommande_input_type").value=="") {
+             document.getElementById("id_bondecommande_input_type").style.backgroundColor = ErrorColor;
             return false;
         }
-        // Check Reference
+        else {
+            document.getElementById("id_bondecommande_input_type").style.backgroundColor = "White";
+        }
+       // Check Reference
         if(document.getElementById("id_bondecommande_input_reference").value=="") {
+            document.getElementById("id_bondecommande_input_reference").style.backgroundColor = ErrorColor;
             return false;
+        }
+        else {
+            document.getElementById("id_bondecommande_input_reference").style.backgroundColor = "White";
         }
         // Check Montant
         var aValue=document.getElementById("id_bondecommande_input_total").value;
         if(document.getElementById("id_bondecommande_input_total").value=="0" ||
             document.getElementById("id_bondecommande_input_total").value=="0.00") {
+            document.getElementById("id_bondecommande_input_total").style.backgroundColor = ErrorColor;
             return false;
+       }
+       else {
+            document.getElementById("id_bondecommande_input_total").style.backgroundColor = "White";
         }
     }
     return true;
@@ -418,6 +430,7 @@ function prefillDropdownMenus(selectName, valuesArray, theDefaultId) {
 //===============================================
 // Main
 var ReadOnlyColor="AliceBlue";
+var ErrorColor="LightPink";
 const bondecommande_date=[];
 const bondecommande_type=[];
 const bondecommande_reference=[];
