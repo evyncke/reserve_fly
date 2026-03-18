@@ -236,6 +236,8 @@ print("<button id=\"id_submit_notedefrais\" name=\"submit_notedefrais\" class=\"
         }
         print("</tr>");
     }
+
+    MT_DeleteFilesOlderThan($theUploadFolder, "P2M");
 ?>
 </tbody>
 </table>

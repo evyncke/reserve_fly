@@ -603,15 +603,21 @@ function MT_GetNoteDeFraisFiles(&$theNotesDeFrais, &$theAttachedFiles, &$theUplo
 	//print("MT_GetNoteDeFraisFile:start<br>");
 	$theUploadFolder="uploads/notedefrais";
 	$fileList = scandir($theUploadFolder);
+
+	// Filtrer les fichiers (enlever . et ..) et associer les dates
+	$filesSorted = [];
+
 	$previousFile="";
 	$count=-1;
 	foreach ($fileList as $file) {
+		$flag=false;
 		if($file=="." || $file==".." || $file=="notedefrais_number.txt") continue;
 		if($previousFile==""){
 			$count++;
 			$previousFile=$file;
 			$theNotesDeFrais[$count]=$file;
 			$theAttachedFiles[$count]="";
+			$flag=true;
 		}
 		else if(strcmp(substr($previousFile,0,17),substr($file,0,17))==0) {
 			$theAttachedFiles[$count]=$file;
@@ -621,9 +627,48 @@ function MT_GetNoteDeFraisFiles(&$theNotesDeFrais, &$theAttachedFiles, &$theUplo
 			$previousFile=$file;
 			$theNotesDeFrais[$count]=$file;
 			$theAttachedFiles[$count]="";
+			$flag=true;
 		}
+		$path = $theUploadFolder . '/' . $file;
+        $filesSorted[$file] = filemtime($path);
 		//echo "$count file=$theNotesDeFrais[$count] : Attached=$theAttachedFiles[$count] <br>";
 	}
+/*
+	// Trier par date (dernière modification) Descendant
+	arsort($filesSorted);
+
+
+// Afficher le résultat trié
+foreach ($filesSorted as $file => $timestamp) {
+    echo $file . " - " . date("d-m-Y H:i:s", $timestamp) . "<br>";
+}
+*/
 	return $count+1;
+}
+
+
+// Function: Returns the list of Note de frais and attached file
+// 2 months = "P2M'
+function MT_DeleteFilesOlderThan($theUploadFolder, $olderTime)
+{
+	$now = new DateTime();
+
+	$monthBefore = new DateTime() ;
+	$monthInterval = new DateInterval($olderTime) ; // Two month
+	//$monthInterval = new DateInterval('P2M') ; // Two month
+	$monthBefore = $monthBefore->sub($monthInterval) ;
+
+	$fileList = scandir($theUploadFolder);
+	$count=-1;
+	foreach ($fileList as $file) {
+		if($file=="." || $file==".." || $file=="notedefrais_number.txt") continue;
+		$path = $theUploadFolder . '/' . $file;
+        $fileDate = filemtime($path);
+		//echo "file $file: ".date("Y-m-d H:i:s",$fileDate)."<br>";
+		if(date("Y-m-d H:i:s",$fileDate)<$monthBefore->format('Y-m-d H:i:s') ) {
+			//echo "DELETE File $path OLDER than : ".$monthBefore->format('Y-m-d H:i:s')."<br>";
+			unlink($path);
+		}
+	}
 }
 ?>

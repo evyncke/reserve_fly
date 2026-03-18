@@ -207,6 +207,8 @@ print("<button id=\"id_submit_bondecommande\" name=\"submit_bondecommande\" clas
         }
         print("</tr>");
     }
+
+    MT_DeleteFilesOlderThan($theUploadFolder, "P2M");
 ?>
 </tbody>
 </table>
