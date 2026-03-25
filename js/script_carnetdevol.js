@@ -227,6 +227,10 @@ function carnetdevol_page_loaded() {
   }
   document.getElementById("id_cdv_qrcode_montant_total_pilote_row").style.display="none";
   document.getElementById("id_cdv_qrcode_communication_pilote_row").style.display="none";
+
+	if(default_bookingid==0) {
+		alert("ATTENTION: Vous introduisez un vol sans passer par une réservation.\nSi vous aviez fait une réservation, vous ne cloturerez pas votre réservation.\nVous recevrez des messages disants que vous n'avez pas introduit votre vol.\nEst ce bien ce que vous voulez faire?\nSinon passez par la réservation!");
+	}
 }
 
 //==============================================
