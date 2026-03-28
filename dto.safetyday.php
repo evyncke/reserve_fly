@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2025 Eric Vyncke
+   Copyright 2023-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ if ($userId == 0) {
 	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
+$header_postamble = '<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">' ;
 require_once 'mobile_header5.php' ;
 
 if (! ($userIsAdmin or $userIsBoardMember or $userIsInstructor))
@@ -38,7 +39,7 @@ The table below only lists members/students who entered the code or clicked on t
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">
 <div class="table-responsive">
-<table class="table table-striped table-hover">
+<table class="table table-striped table-hover" id="attestation-table">
 <thead>
 <tr><th>Member</th><th>Date attested</th><th>Valid until</th></tr>
 </thead>
@@ -70,6 +71,18 @@ while ($row = mysqli_fetch_array($result)) {
 </div><!-- table responsive -->
 </div><!-- col -->
 </div><!-- row --> 
-
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+<script>
+    new window.simpleDatatables.DataTable("#attestation-table", {
+        searchable: true,
+        fixedHeight: false,
+        paging: false,
+        labels: {
+            placeholder: "Rechercher...",
+            noRows: "Aucune entrée trouvée",
+            info: "Affichage de {start} à {end} sur {rows} entrées",
+        }
+    });
+</script>
 </body>
 </html>
