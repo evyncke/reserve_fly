@@ -3,11 +3,16 @@
 Vous trouverez ici les diverses nouveautés à propos du site réservation du RAPCS. Les suggestions sont les bienvenues auprès de
 [Éric Vyncke](mobile_profile.php?displayed_id=62) et [Patrick Reginster](mobile_profile.php?displayed_id=66).
 
+## Mars 2026
+
+- dans le folio, si c'est d'application, il est mentionné 'PASSENGER' au lieu de 'SELF'
+- lors de l'entrée des compteurs après un vol, un avertissement est affiché si vous n'utilisez pas une réservation existante pour entrer ces compteurs
+
 ## Février 2026
 
 - le site est aussi disponible en tant qu'application (donc sur votre écran de départ sur smartphone, votre Dock sur MacOs, votre menu Démarrer sous Windows, ...) car il est supporté maintenant en tant que Progressive Web Application (PWA). Comment faire pour l'installer ?
    - Chrome: cliquer sur l'icone télécharger à droite de la barre d'adresse
-   - Safari: soit Fichier/Ajouter au Dock soit l'icone partager et 'Ajouter au Dock'
+   - Safari: soit Fichier/Ajouter au Dock soit l'icone partager et 'Ajouter au Dock' ou 'Ajouter à l'écran d'acceuil'
 - présentations plus lisibles des [Documents <span class="bi bi-download"></span>](https://www.spa-aviation.be/resa/mobile_documents.php)
 
 ## Janvier 2026
