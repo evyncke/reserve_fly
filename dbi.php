@@ -334,6 +334,7 @@ $table_device = 'rapcs_device' ;
 $table_device_doc = 'rapcs_device_doc' ;
 $table_plane_device = 'rapcs_plane_device' ;
 $table_planes_pics = 'rapcs_planes_pics' ;
+$table_planes_topup = 'rapcs_planes_topup' ;
 $table_social = 'rapcs_social' ;
 $table_oauth = 'rapcs_oauth' ;
 $table_passkey = 'rapcs_passkey' ;
