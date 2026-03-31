@@ -48,7 +48,7 @@ function getAvion2() {
 }
 
 function update_aircraft($avion, $cout, $compteur, $compteur_vol_valeur, $entretien, $type_entretien, 
-	$consommation, $batterie, $fabrication, $cn, $limite_moteur_12ans, $limite_moteur_heure,
+	$consommation, $batterie, $batterie_date, $fabrication, $cn, $limite_moteur_12ans, $limite_moteur_heure,
 	$limite_helice, $limite_magnetos, $pesage, $plb_date_limite, $instrument_date_limite, $commentaire, $poids, $bras, $wb_date) {
 	global $db, $savesuccess, $user ;
 
@@ -67,6 +67,7 @@ function update_aircraft($avion, $cout, $compteur, $compteur_vol_valeur, $entret
 		);
 		$fields[] =	$db->quoteName('consommation'). "= " . $db->quote(web2db($consommation)) ;
 		$fields[] =	$db->quoteName('batterie'). "= " . $db->quote(web2db($batterie)) ;
+		$fields[] =	$db->quoteName('batterie_date'). "= " . $db->quote(web2db($batterie_date)) ;
 		$fields[] =	$db->quoteName('fabrication'). "= " . $db->quote(web2db($fabrication)) ;
 		$fields[] =	$db->quoteName('cn'). "= " . $db->quote(web2db($cn)) ;
 		$fields[] =	$db->quoteName('limite_moteur_12ans'). "= " . $db->quote(web2db($limite_moteur_12ans)) ;
@@ -228,7 +229,7 @@ if($canedit and isset($_POST["Enregistrer"]) and $_POST["Enregistrer"] == "Enreg
 	$db = &JFactory::getDBO();
 	$savesuccess = '' ;
 	update_aircraft(getAvion2(), $_POST['cout'], $_POST['compteur'], $_POST['compteur_vol_valeur'], $_POST['entretien'], $_POST['type_entretien'], 
-		$_POST['consommation'],$_POST['batterie'], $_POST['fabrication'], $_POST['cn'], $_POST['limite_moteur_12ans'], $_POST['limite_moteur_heure'], $_POST['limite_helice'],
+		$_POST['consommation'],$_POST['batterie'],$_POST['batterie_date'], $_POST['fabrication'], $_POST['cn'], $_POST['limite_moteur_12ans'], $_POST['limite_moteur_heure'], $_POST['limite_helice'],
 		$_POST['limite_magnetos'], $_POST['pesage'], $_POST['plb_date_limite'], $_POST['instrument_date_limite'], 
 		$_POST['commentaire'], $_POST['poids'], $_POST['bras'], $_POST['wb_date']) ;
 } else if ($canedit and isset($_POST["Enregistrer_tout"]) and $_POST["Enregistrer_tout"] != "") {
@@ -243,6 +244,7 @@ if($canedit and isset($_POST["Enregistrer"]) and $_POST["Enregistrer"] == "Enreg
 		$type_entretien = $_POST['type_entretien'][$i] ;
 		$consommation = $_POST['consommation'][$i] ;
 		$batterie = $_POST['batterie'][$i] ;
+		$batterie_date = $_POST['batterie_date'][$i] ;
 		$fabrication = $_POST['fabrication'][$i] ;
 		$cn = $_POST['cn'][$i] ;
 		$limite_moteur_12ans = $_POST['limite_moteur_12ans'][$i] ;
@@ -256,7 +258,7 @@ if($canedit and isset($_POST["Enregistrer"]) and $_POST["Enregistrer"] == "Enreg
 		$bras = $_POST['bras'][$i] ;
 		$wb_date = $_POST['wb_date'][$i] ;
 		update_aircraft($id, $cout, $compteur, $compteur_vol_valeur, $entretien, $type_entretien, 
-			$consommation, $batterie, $fabrication, $cn, $limite_moteur_12ans, $limite_moteur_heure,
+			$consommation, $batterie, $batterie_date, $fabrication, $cn, $limite_moteur_12ans, $limite_moteur_heure,
 	 		$limite_helice, $limite_magnetos, $pesage, $plb_date_limite, $instrument_date_limite, FALSE, $poids, $bras, $wb_date) ;
 	}
 }
@@ -311,6 +313,7 @@ if ($canview) {
 		      <INPUT type="text" name="type_entretien" value="<?=db2web($info[0]->type_entretien)?>"></TD></TR>
 		<TR><TD><B>Consommation:</B></TD><TD><INPUT type="number" step="0.1" name="consommation" value="<?=$info[0]->consommation?>"> litres/heure </TD></TR>
 		<TR><TD><B>Batterie:</B></TD><TD><INPUT type="number" step="0.1" name="batterie" value="<?=$info[0]->batterie?>"> V </TD></TR>
+		<TR><TD><B>Date Batterie:</B></TD><TD><INPUT type="date"  name="batterie_date" value="<?=$info[0]->batterie_date?>"> </TD></TR>
 		<TR><TD><B>Certificat de navigabilité:</B></TD><TD><INPUT type="text" name="cn" value="<?=$info[0]->cn?>"> </TD></TR>
 		<TR><TD><B>Ann&eacute;e de fabrication:</B></TD><TD><INPUT type="text" name="fabrication" value="<?=$info[0]->fabrication?>"> </TD></TR>
 		<TR><TD><B>Limite moteur 12 ans:</B></TD><TD><INPUT type="date" name="limite_moteur_12ans" value="<?=$info[0]->limite_moteur_12ans?>"> </TD></TR>
@@ -347,7 +350,7 @@ if ($canview) {
 	        <tr style="background-color: lightblue;"><td style="">Avion</td>
 	        	<td>Co&ucirc;t</td>
 	        	<td>Dernier CT moteur</td><td>Dernier index vol</td><td>Prochaine immobilisation</td><td>Type<br/>entretien</td>
-	        	<td>Consommation</td><td>Batterie</td><td>Fabrication</td><td>CN</td><td>Limite moteur<br/>12 ans</td><td>Limite moteur<br/>heure</td><td>Limite<br/>h&eacute;lice</td><td>Limite<br/>magn&eacute;tos</td><td>Limite PLB</td><td>Limite Instruments</td>
+	        	<td>Consommation</td><td>Batterie</td><td>Date Batterie</td><td>Fabrication</td><td>CN</td><td>Limite moteur<br/>12 ans</td><td>Limite moteur<br/>heure</td><td>Limite<br/>h&eacute;lice</td><td>Limite<br/>magn&eacute;tos</td><td>Limite PLB</td><td>Limite Instruments</td>
 	        	<td>Pesage</td><td>Poids &agrave; vide<br/>(pounds)</td><td>Bras<br/>(inches)</td><td>Date W&B<br/>(JJ-MM-AAAA)</td>
 	        	</tr>
 	        <?php
@@ -362,6 +365,7 @@ if ($canview) {
 		                <td><input type=text name=\"type_entretien[$i]\" value=\"" . db2web($plane->type_entretien) . "\"></td>
 		                <td><input type=number step=\"0.1\" name=\"consommation[$i]\" value=\"$plane->consommation\" size=3></td>
 		                <td><input type=number step=\"0.1\" name=\"batterie[$i]\" value=\"$plane->batterie\" size=3></td>
+		                <td><input type=date name=\"batterie_date[$i]\" value=\"$plane->batterie_date\" size=3></td>
 		                <td><input type=number name=\"fabrication[$i]\" value=\"$plane->fabrication\" size=5></td>
 		                <td><input type=text name=\"cn[$i]\" value=\"$plane->cn\" size=4></td>
 		                <td><input type=date name=\"limite_moteur_12ans[$i]\" value=\"$plane->limite_moteur_12ans\" size=8></td>
@@ -410,6 +414,7 @@ if ($canview) {
 		  <?php } ?>
 			<LI><B>Consommation:</B> <?=$info[0]->consommation?> litres/heure</LI>
 			<LI><B>Batterie:</B> <?=$info[0]->batterie?> V</LI>
+			<LI><B>Date Batterie:</B> <?=$info[0]->batterie_date?> </LI>
 			<LI><B>Certificat de navigabilit&eacute;:</B> <?=$info[0]->cn?></LI>
 			<LI><B>Ann&eacute;e de fabrication:</B> <?=$info[0]->fabrication?></LI>
 			<LI><B>Limite moteur 12 ans:</B> <?=$info[0]->limite_moteur_12ans?></LI>
