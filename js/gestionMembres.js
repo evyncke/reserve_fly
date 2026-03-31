@@ -471,16 +471,15 @@ function createCotisationFunction(PHP_Self,action,theName,thePersonid,isMember) 
 function createCoursTheoriqueFunction(PHP_Self,action,theName,thePersonid, theYear) {
 	var aSearchText=document.getElementById("id_SearchInput").value;
 
-	// After 1 July: Proportional to the numer of mounth
-	aDate= new Date();
-	aMonth=aDate.getMonth()+1;
-	if(aMonth>6 && aMonth!=12){
-	}
-	if (confirm("Confirmez que vous voulez créer une facture pour les cours théorique session " + theYear + " à " + theName + " (id="+thePersonid+")?") == true) {
-      		var aCommand=PHP_Self+"?createcourstheorique=true&personid="+thePersonid;
- 			if(aSearchText!="")	 {
- 				aCommand+="&search="+aSearchText;
- 			}
-      		 window.location.href = aCommand;
+	if (confirm("Confirmez que vous voulez introduire "+ theName + " (id="+thePersonid+") dans la session théorique "+theYear+ " ?") == true) {
+		var facture=0;
+		if (confirm("Voulez vous créer une facture pour les cours théorique session " + theYear + " à " + theName + " (id="+thePersonid+")?\nSinon la facture existe déjà.") == true) {
+			facture=1;
+		}
+		var aCommand=PHP_Self+"?createcourstheorique=true&personid="+thePersonid+"&facture="+facture;
+		if(aSearchText!="")	 {
+			aCommand+="&search="+aSearchText;
+		}
+		window.location.href = aCommand;
 	}
 }
