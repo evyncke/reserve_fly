@@ -34,7 +34,7 @@ $validity = 13 ; // Hard coded :-()
 <h2>Safety Day <?=$this_year?> Attendance</h2>
 
 <div class="row text-info px-3">
-The table below only lists members/students who entered the code or clicked on the QR-code in the slides.
+The table below only lists members/students who entered the code or clicked on the QR-code in the slides. <span id="search-count"></span>
 </div>
 <div class="row">
 <div class="col-sm-12 col-md-9 col-lg-7">
@@ -73,7 +73,7 @@ while ($row = mysqli_fetch_array($result)) {
 </div><!-- row --> 
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
 <script>
-    new window.simpleDatatables.DataTable("#attestation-table", {
+    const dataTable = new window.simpleDatatables.DataTable("#attestation-table", {
         searchable: true,
         fixedHeight: false,
         paging: false,
@@ -82,6 +82,18 @@ while ($row = mysqli_fetch_array($result)) {
             noRows: "Aucune entrée trouvée",
             info: "Affichage de {start} à {end} sur {rows} entrées",
         }
+    });
+    // 1. Initial count on load
+    const countElement = document.querySelector("#search-count");
+    countElement.innerHTML = `Showing ${dataTable.data.data.length} total entries.` ;
+
+    // 2. Update count on search
+    dataTable.on("datatable.search", (query, matched) => {
+        // 'matched' is an array of the rows that fit the search criteria
+        const total = dataTable.data.data.length;
+        const count = matched.length;
+        
+        countElement.innerHTML = `Showing ${count} of ${total} total entries`;
     });
 </script>
 </body>
