@@ -138,11 +138,20 @@ if (isset($_REQUEST['createcotisation'])) {
 
 //Create Cours theorique invoice
 if (isset($_REQUEST['createcourstheorique'])) {
+	$facture="0";
+	if (isset($_REQUEST['facture']) and $_REQUEST['facture'] != '') {
+		$facture=$_REQUEST['facture'];
+	}
 	$personid="";
 	if (isset($_REQUEST['personid']) and $_REQUEST['personid'] != '') {
 		$personid=$_REQUEST['personid'];
-		if(OF_CreateFactureCoursTheorique($personid, $membership_year)) {
-			print("<div class=\"alert alert-info\" role=\"alert\"><b>La facture pour cours theorique pour $personid pour $membership_year a été créée dans ODOO!</b></div>");	
+		if(OF_CreateFactureCoursTheorique($personid, $membership_year, $facture)) {
+			if($facture=="1") {
+				print("<div class=\"alert alert-info\" role=\"alert\"><b>La facture pour cours theorique pour $personid pour $membership_year a été créée dans ODOO et les tables RAPCS!</b></div>");	
+			}
+			else {
+				print("<div class=\"alert alert-info\" role=\"alert\"><b>L'élève a été intruit dans la liste des élèves $membership_year (Table RAPCS)</b></div>");	
+			}
 		}
 		else {
 			print("<div class=\"alert alert-warning\" role=\"alert\"><b style='color: red;'>La facture des cours theorique pour $personid  pour $membership_year  n'a pas été créée dans ODOO!</b></div>");	
@@ -374,7 +383,7 @@ datediff(current_date(), b_when) as days_blocked
 		if(isset($row['avatar'])) {
 			$photo=$avatar_root_uri."/".$row['avatar'];
 		}
-		$photo='<a href="'.$photo.'"><img src="'.$photo.'" alt="photo" width="50" height="66"></a>';
+		$photo='<a href="'.$photo.'"><img style="object-fit: cover;"src="'.$photo.'" alt="photo" width="50" height="66"></a>';
 		$groups = explode(',', $row['allGroups']) ;
 		$effectif = (in_array($joomla_effectif_group, $groups)) ? 
 			'<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Effectif" checked>' 

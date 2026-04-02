@@ -60,6 +60,7 @@ print("var default_date_heure_arrivee=\"\";\n");
 print("var default_day_landing=1;\n");
 print("var default_crew_count=1;\n");
 print("var default_pax_count=0;\n");
+
 print("var default_flight_type=\"Local\";\n");	
 print("var default_from=\"EBSP\";\n");	
 print("var default_to=\"EBSP\";\n");
@@ -76,6 +77,7 @@ print("var default_flight_reference=\"\";\n");
 print("var default_flight_id=0;\n");
 print("var default_ATL_level=\"select\";\n");
 print("var default_ATL_description=\"\";\n");
+print("var default_huile_quantity=\"select\";\n");
 print("var default_qrcode_communication_pilote=\"\";\n");
 print("var default_fqrcode_montant_total_pilote=0;\n");	
 
@@ -297,6 +299,7 @@ if (isset($_REQUEST['audit_time']) and $_REQUEST['audit_time'] != '') {
 		$insert_message = "Impossible d'effacer la ligne dans le carnet de routes" ;
 		journalise($userId, 'E', "Error (" . mysqli_error($mysqli_link). ") while deleting logbook entry for booking $bookingid (done at $audit_time).") ;
 	}
+	RemoveHuileQuantity($logid);
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -310,6 +313,9 @@ if (isset($_REQUEST['bookingtable']) and $_REQUEST['bookingtable'] == '1') {
 	// Delete all DTO flights associated to this bookingid
 	// All DTO flight associated to all segments behing this bookingid
 	RemoveAllDTOFlightBehindBooking($bookingid);
+
+	//All Oil quantity associated to a bookingID
+	RemoveAllHuileQuantityBooking($bookingid);
 	
 	// Delete all already logged segments associated to this bookingid
 	mysqli_query($mysqli_link, "delete from $table_logbook where l_booking=$bookingid") 
@@ -431,6 +437,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$cdv_frais_DC=$_REQUEST['cdv_frais_DC'];
 	$cdv_ATL_level=$_REQUEST['cdv_ATL_level'];
 	$cdv_ATL_description=$_REQUEST['cdv_ATL_description']; 
+	$cdv_huile_quantity=$_REQUEST['cdv_huile_quantity']; 	
 	$cdv_qrcode_montant_total_pilote=$_REQUEST['cdv_qrcode_montant_total_pilote'];
 	$cdv_qrcode_communication_pilote=$_REQUEST['cdv_qrcode_communication_pilote'];
 	print("<script>\n");
@@ -475,7 +482,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	$ATLLevel=$cdv_ATL_level;
 	$ATLDescription=$cdv_ATL_description;
     //print("PRE1 ATLLevel=$ATLLevel; ATLDescription=$ATLDescription<br>");
-    
+    $huileQuantity=$cdv_huile_quantity;
+
     // Vol IF or INIT
 	$numeroVol=CheckVar($cdv_frais_numero_vol); // May return the string NULL
 	//print("numeroVol1:$numeroVol</br>\n");
@@ -654,6 +662,13 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
     	}
     }
     
+	//----------------------------------------------------
+    //Manage Oil Log
+	//----------------------------------------------------
+	$topupId=ManageHuileQuantity($l_id, $planeId, $huileQuantity, $pilotId, $startDayTime, $engineStartHour,$engineStartMinute);
+	if($topupId>0) {
+		print("<p style=\"color: red;\"><b>$huileQuantity oil liter(s) added  for the plane $planeId.</b></p>") ;
+	}
 		
 	//----------------------------------------------------
 	// Associate the flight with a DTO fligth
@@ -899,6 +914,7 @@ if (isset($_REQUEST['edit']) and $_REQUEST['edit'] != '') {
 			print("var default_date_heure_arrivee=\"$end_UTC\";\n");
 			print("var default_day_landing=$row[l_day_landing];\n");
 			print("var default_pax_count=$row[l_pax_count];\n");
+			print("var default_huile_quantity=1.0;\n");
 			if($row['l_crew_count'] != NULL){
 				print("var default_crew_count=$row[l_crew_count];\n");
 			}
@@ -965,7 +981,10 @@ if (isset($_REQUEST['edit']) and $_REQUEST['edit'] != '') {
                 print("var default_ATL_level=\"nothing\";\n");
                 print("var default_ATL_description=\"\";\n");
             }
-		 }
+
+			$huileQuantity = GetHuileQuantity($logid);
+            print("var default_huile_quantity=\"$huileQuantity\";\n");
+		}
 	 }
    }
 }
@@ -1245,6 +1264,18 @@ else {
 </select></td>
 </tr>
 
+<tr>
+<td class="segmentLabel">Huile ajoutée</td>
+<td class="segmentInput"><select id="id_cdv_huile_quantity" name="cdv_huile_quantity">
+<option selected="selected" value="select">Select</option>
+<option value="0.0">0.0</option>
+<option value="1.0">1.0</option>
+<option value="2.0">2.0</option>
+<option value="3.0">3.0</option>
+</select> litre(s)</td>
+</tr>
+
+
 <tr id="id_cdv_ATL_row">
 <td class="segmentLabel"style="vertical-align: top;">Aircraft Technical Log<br><i>(ne pas introduire 2 fois le même problème)</i>
 </td>
@@ -1351,7 +1382,7 @@ Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 
 <script src="data/pilots.js"></script>
 <!---<script src="https://www.spa-aviation.be/resa/CP_frais_type.js"\></script>-->
 <script src="https://www.spa-aviation.be/resa/data/prix.js"></script>
-<!---<script src="https://www.spa-aviation.be/resa/script_carnetdevol_InProgress.js"></script>-->
+<!---<script src="https://www.spa-aviation.be/resa/js/script_carnetdevol_InProgress.js"></script>-->
 <script src="https://www.spa-aviation.be/resa/js/script_carnetdevol.js"></script>
 </body>
 </html>

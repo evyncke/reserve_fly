@@ -164,6 +164,100 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
     return 0;
 }
 
+// Remove all oil quantity associated to a BookId
+function RemoveAllHuileQuantityBooking($bookingid) {
+	global $mysqli_link, $table_logbook ;
+	$result = mysqli_query($mysqli_link, "select l_id
+			from $table_logbook where l_booking = $bookingid")
+		or die("Impossible de lire les entrees pour reservation $bookingid: " . mysqli_error($mysqli_link)) ;
+
+	while ($row = mysqli_fetch_array($result)) {
+			$logid=$row['l_id'];
+            RemoveHuileQuantity($logid);
+	}
+}
+
+//Remove Entry in the Topup table
+function RemoveHuileQuantity($logid)
+{   
+    global $mysqli_link, $table_planes_topup ;
+    $sql = "DELETE FROM $table_planes_topup WHERE pt_log_id = $logid AND pt_item='oil'";
+    mysqli_query($mysqli_link, $sql) 
+         or journalise($userId, "F", "Cannot delete topup $logid: " . mysqli_error($mysqli_link)) ;
+}
+
+// Retieve the oil quantity assocated to a log
+function GethuileQuantity($logid) 
+{
+    //print("GethuileQuantity($logid) <br>");
+    global $mysqli_link, $table_planes_topup ;
+    $sql = "SELECT pt_quantity FROM $table_planes_topup WHERE pt_log_id = $logid AND pt_item='oil'";
+    //print("sql=$sql<br>");
+    //if(1) return 3.0;
+    $result = mysqli_query($mysqli_link, $sql)
+        or  journalise($userId, "F", "Cannot retrieve topup by log id ($logid): " . mysqli_error($mysqli_link)) ;
+    $row = mysqli_fetch_array($result) ;
+    $quantity=0.0;
+    if ($row) {
+        $quantity=$row['pt_quantity'];
+    }
+    //print("GethuileQuantity(Quantity=$quantity <br>");
+    return $quantity;
+}
+
+// Manage the oil quantity stored in the table $table_planes_topup = 'rapcs_planes_topup' ;
+function ManageHuileQuantity($logid, $planeId, $huileQuantity, $pilotId, $startDayTime, $engineStartHour,$engineStartMin)
+{
+    global $userId, $mysqli_link, $table_planes_topup ;
+
+    //print("ManageHuileQuantity started ($logid, $planeId, $huileQuantity, $pilotId, $startDayTime, $engineStartHour,$engineStartMin<br>)");
+
+    $sql = "SELECT * FROM $table_planes_topup WHERE pt_log_id = $logid AND pt_item='oil'";
+    //print("sql=$sql<br>");
+    $result = mysqli_query($mysqli_link, $sql)
+        or  journalise($userId, "F", "Cannot retrieve topup by log id ($logid): " . mysqli_error($mysqli_link)) ;
+    $row = mysqli_fetch_array($result) ;
+    $ptLogID=0;
+    if ($row) {
+        $ptLogID=$row['pt_log_id'];
+    }
+    if($huileQuantity==0.0) {
+        if($ptLogID==0) {
+            //print("ManageHuileQuantity: Nothing to do<br>");
+            // Nothing to do
+            return 0;
+        }
+        else {
+            // Delete the entry in the table
+            //print("ManageHuileQuantity: Delete entry<br>");
+            RemoveHuileQuantity($logid);
+            return 0;
+        }
+    }
+    if($ptLogID==0) {
+        // Create a new entry in the topup 
+        //print("ManageHuileQuantity: Create new entry<br>");
+        $sql="insert into $table_planes_topup(pt_plane, pt_date, pt_item, pt_quantity, pt_who, pt_log_id, pt_index_hour, pt_index_minute)
+					values ('$planeId', '$startDayTime', 'oil', $huileQuantity, $pilotId, $logid, $engineStartHour,$engineStartMin);";
+        //print("sql=$sql<br>");
+        mysqli_query($mysqli_link, $sql)
+			or journalise($userId, "F", "Impossible d'ajouter dans le TOPUP: " . mysqli_error($mysqli_link)) ;
+		$ptLogID= $logid ; 
+        //print("ManageHuileQuantity:ptLogID=$ptLogID");
+    }
+    else {
+        // Replace in the Topup table
+        //print("ManageHuileQuantity: Replace entry<br>");
+        $sql="UPDATE $table_planes_topup
+			SET pt_plane='$planeId', pt_date='$startDayTime', 
+            pt_quantity=$huileQuantity, pt_who=$pilotId, pt_index_hour=$engineStartHour, pt_index_minute=$engineStartMin
+			WHERE pt_log_id = $logid AND pt_item='oil'";
+        mysqli_query($mysqli_link, $sql)
+		    or journalise($userId, "F", "Impossible de mettre à jour la table TOPUP $sql: " . mysqli_error($mysqli_link)) ;		
+    }
+    return $ptLogID;
+}
+
 // Check if the two table rapcs_incident and rapcs_incident_history are coherent
 function CheckIncidentCoherency($theLogid)
 {
