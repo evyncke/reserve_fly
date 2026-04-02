@@ -193,6 +193,13 @@ function carnetdevol_page_loaded() {
         compute_prix();
   };
 
+  // Ajout huile
+ document.getElementById("id_cdv_huile_quantity").onchange = function() {
+	  	check_huile();
+		compute_prix();
+  };
+
+
   document.getElementById("id_cdv_prix_solde_row").style.display="none";
   document.getElementById("id_cdv_prix_reference_row").style.display="none";
   
@@ -205,6 +212,7 @@ function carnetdevol_page_loaded() {
   check_heure("id_cdv_heure_depart");
   compute_prix();
   check_techlog("");
+  check_huile("");
   displayATL(document.getElementById("id_cdv_aircraft").value);
 
 
@@ -228,9 +236,11 @@ function carnetdevol_page_loaded() {
   document.getElementById("id_cdv_qrcode_montant_total_pilote_row").style.display="none";
   document.getElementById("id_cdv_qrcode_communication_pilote_row").style.display="none";
 
-	if(default_bookingid==0) {
-		alert("ATTENTION: Vous introduisez un vol sans passer par une réservation.\nSi vous aviez fait une réservation, vous ne cloturerez pas votre réservation.\nVous recevrez des messages disants que vous n'avez pas introduit votre vol.\nEst ce bien ce que vous voulez faire?\nSinon passez par la réservation!");
-	}
+  // Intro vol sans réservation!
+  if(default_bookingid==0) {
+	alert("ATTENTION: Vous introduisez un vol sans passer par une réservation.\nSi vous aviez fait une réservation, vous ne cloturerez pas votre réservation.\nVous recevrez des messages disants que vous n'avez pas introduit votre vol.\nEst ce bien ce que vous voulez faire?\nSinon passez par la réservation!");
+  }
+
 }
 
 //==============================================
@@ -239,6 +249,23 @@ function carnetdevol_page_after_loaded() {
    //("Page loaded !");
 }
 
+//==============================================
+// Function: check_huile
+// Purpose: Check if oil is added
+//==============================================
+
+function check_huile()
+{
+	var aHuileQuantity=document.getElementById("id_cdv_huile_quantity").value;
+	if(aHuileQuantity=="select") {
+       document.getElementById("id_cdv_huile_quantity").style.backgroundColor = 'orange';
+	   return false;
+ 	}
+	else {
+       document.getElementById("id_cdv_huile_quantity").style.backgroundColor = 'white';
+	}
+	return true;
+}
 //==============================================
 // Function: check_techlog
 // Purpose: Check the Aircraft Techiical log 
@@ -713,7 +740,7 @@ function compute_prix()
 		check_heure("id_cdv_heure_depart") && check_heure("id_cdv_heure_arrivee") &&
 		check_airport("id_cdv_departure_airport") && check_airport("id_cdv_arrival_airport") &&
 		check_CP() &&
-		check_IFINIT() && check_techlog()
+		check_IFINIT() && check_techlog() && check_huile()
 	) 
 	{
 		 document.getElementById("id_submitButton").disabled=false;
@@ -1023,6 +1050,8 @@ function compute_defaultValues()
     
 	document.getElementById("id_cdv_ATL_level").value=default_ATL_level;
 	document.getElementById("id_cdv_ATL_description").value=default_ATL_description;
+
+	document.getElementById("id_cdv_huile_quantity").value=default_huile_quantity;
 
 	compute_defaultPartageFrais();
 	

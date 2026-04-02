@@ -160,6 +160,7 @@ if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0)
 <th class="text-center border-bottom-0">Pax/crew</th>
 <th class="text-center border-bottom-0">Type of</th>
 <th class="text-center border-bottom-0" colspan="2">Engine index</th>
+<th class="text-center border-bottom-0">Oil</th>
 <?php 
 if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0)
 	print("<th class=\"text-center border-bottom-0\" colspan=\"2\">Flight index</th>\n") ;
@@ -186,6 +187,7 @@ if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0)
 <th class="text-center border-top-0">flight</th>
 <th class="text-center border-top-0">Begin</th>
 <th class="text-center border-top-0">End</th>
+<th class="text-center border-top-0">Added(l)</th>
 <?php 
 if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0)
 	print("<th class=\"text-center border-top-0\">Begin</th>\n
@@ -201,14 +203,18 @@ $sql = "SELECT l_plane, DATE_FORMAT(l_start, '%d/%m/%y') as date, l_start, l_end
 			l_flight_end_hour, l_flight_end_minute, l_flight_start_hour, l_flight_start_minute,
 			UPPER(l_from) as l_from, UPPER(l_to) as l_to, l_flight_type, p.name as pilot_name, i.name as instructor_name, l_remark, l_pax_count, l_crew_count, 
 			l_share_type, l_share_member,
-			l_booking, l_pilot, l_instructor
+			l_booking, l_pilot, l_instructor, pt_quantity
 	FROM $table_logbook l 
 		JOIN $table_users p ON l_pilot=p.id
 		LEFT JOIN $table_users i ON l_instructor = i.id
+		LEFT JOIN $table_planes_topup pt ON pt_log_id=l.l_id AND pt_item='oil'
 	WHERE $plane_sql_filter
 		'$since' <= l_start AND l_start < '$monthAfterString'
 		AND l_start_hour != 0
 	ORDER BY l_plane ASC, l_start ASC" ;
+
+//print("sql=$sql<br>");
+
 $result = mysqli_query($mysqli_link, $sql) 
 	or journalise($userId, "F", "Erreur système à propos de l'accès au carnet de routes: " . mysqli_error($mysqli_link)) ;
 $duration_total_hour = 0 ;
@@ -222,6 +228,7 @@ $fi_total_minute =  0;
 $line_count = 0 ;
 $engine_total_minute = 0 ;
 $flight_total_minute = 0 ;
+$huileQuantityTotal=0;
 $previous_airport = false ;
 $previous_plane = '' ;
 $col_span = ($plane == 'TOUS') ? 16 : (($plane_details[$plane]['compteur_vol'] != 0) ? 15 : 13) ;
@@ -310,6 +317,8 @@ while ($row = mysqli_fetch_array($result)) {
 	$l_start = substr($row['l_start'], 11, 5) ;
 	$l_end = substr($row['l_end'], 11, 5) ;
 	$instructor = ($instructor_name != '') ? " /<br/>$instructor_name" : '' ;
+	$huileQuantity=$row['pt_quantity'];
+	$huileQuantityTotal+=$huileQuantity;
 	$bookingLink = ($userIsAdmin) ? " <a href=\"https://www.spa-aviation.be/resa/IntroCarnetVol.php?id=$row[l_booking]\" title=\"Go to booking $row[l_booking]\" target=\"_blank\"> <i class=\"bi bi-box-arrow-up-right\"></a>" : '' ;
 	if ($row['l_start_minute'] < 10)
 			$row['l_start_minute'] = "0$row[l_start_minute]" ;
@@ -330,15 +339,16 @@ while ($row = mysqli_fetch_array($result)) {
 		<td class=\"text-center\">$l_start</td>
 		<td class=\"text-center\">$l_end</td>
 		<td class=\"text-center\">$duration</td>\n") ;
-		if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0) {
-			$flight_duration = 60 * ($row['l_flight_end_hour'] - $row['l_flight_start_hour']) + $row['l_flight_end_minute'] - $row['l_flight_start_minute'] ;
-			$flight_total_minute += $flight_duration ;
-			print("<td class=\"text-center\">$flight_duration</td>\n") ;
-		}
-		print("<td class=\"text-center\">$row[l_pax_count]/$row[l_crew_count]</td>
+	if ($plane == 'TOUS' or $plane_details[$plane]['compteur_vol'] != 0) {
+		$flight_duration = 60 * ($row['l_flight_end_hour'] - $row['l_flight_start_hour']) + $row['l_flight_end_minute'] - $row['l_flight_start_minute'] ;
+		$flight_total_minute += $flight_duration ;
+		print("<td class=\"text-center\">$flight_duration</td>\n") ;
+	}
+	print("<td class=\"text-center\">$row[l_pax_count]/$row[l_crew_count]</td>
 		<td class=\"text-center\">$row[l_flight_type]</td>
 		<td class=\"text-center\">$row[l_start_hour]:$row[l_start_minute]</td>
 		<td class=\"text-center\">$row[l_end_hour]:$row[l_end_minute]</td>\n") ;
+	print("<td class=\"text-center\">$huileQuantity</td>") ;
 	if ($plane != 'TOUS' and $plane_details[$plane]['compteur_vol'] != 0) {
 		print("<td class=\"text-center\">$row[l_flight_start_hour]:$row[l_flight_start_minute]</td>\n") ;
 		print("<td class=\"text-center\">$row[l_flight_end_hour]:$row[l_flight_end_minute]</td>\n") ;
@@ -394,16 +404,24 @@ if ($plane == 'TOUS') {
 	print('<tr class="table-info"><td colspan="7" class="text-end"><strong>Logged total</strong></td>') ;
 	print('<td class="text-center"><strong>' . "$engine_total_hour:$engine_total_minute" . '</strong></td>') ;
 	print("<td class=\"text-center\"><strong>$flight_total_hour:$flight_total_minute</strong></td>") ;
-	print('<td colspan="7" class="text-center"></td>') ;
+	print('<td colspan="4" class="text-center"></td>') ;
+	print('<td class="text-center"><strong>'.number_format($huileQuantityTotal,1).'</strong></td>') ;
+	print('<td colspan="3" class="text-center"></td>') ;
+	print('</tr>');
 } else if ($plane != 'TOUS' and $plane_details[$plane]['compteur_vol'] != 0) {
-		print('<tr class="table-info"><td colspan="6" class="text-end"><strong>Logged total</strong></td>') ;
-		print('<td class="text-center"><strong>' . "$engine_total_hour:$engine_total_minute" . '</strong></td>') ;
-		print("<td class=\"text-center\"><strong>$flight_total_hour:$flight_total_minute</strong></td>") ;
-		print('<td colspan="7" class="text-center"></td>') ;
-} else {
 	print('<tr class="table-info"><td colspan="6" class="text-end"><strong>Logged total</strong></td>') ;
 	print('<td class="text-center"><strong>' . "$engine_total_hour:$engine_total_minute" . '</strong></td>') ;
+	print("<td class=\"text-center\"><strong>$flight_total_hour:$flight_total_minute</strong></td>") ;
+	print('<td colspan="7" class="text-center"></td>') ;
+	print('<td class="text-center"><strong>'.number_format($huileQuantityTotal,1).'</strong></td>') ;
+	print('</tr>');
+} else {
+	print('<tr class="table-info"><td colspan="5" class="text-end"><strong>Logged total</strong></td>') ;
+	print('<td class="text-center"><strong>' . "$engine_total_hour:$engine_total_minute" . '</strong></td>') ;
 	print('<td colspan="5" class="text-center"></td>') ;
+	print('<td class="text-center"><strong>'.number_format($huileQuantityTotal,1).'</strong></td>') ;
+	print('<td colspan="1" class="text-center"></td>') ;
+	print('</tr>');
 }
 ?>
 </tfoot>
