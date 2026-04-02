@@ -84,7 +84,7 @@ ou Passkey intégrée au téléphone ou à l'ordinateur).</p>
 <p>Il est possible de se connecter en utilisant un fournisseur d'identité OAuth2 (Google, LinkedIn, Facebook, etc.). 
 	Cela vous permet de vous connecter sans mot de passe en utilisant votre compte existant chez l'un de ces fournisseurs.</p>
 <p>Ces options doivent être activées via cette page ou dans l'onglet "Réseaux sociaux" de votre profil utilisateur. <mark>SAUF</mark> si l'adresse 
-	email de votre compte sur Spa-Aviation est la même que celle de votre compte Google, LinkedIn ou Facebook, auqel cas, il n'y a rien à faire.
+	email de votre compte sur Spa-Aviation est la même que celle de votre compte Google, LinkedIn ou Facebook, auquel cas, il n'y a rien à faire.
 </p>
 <?php
 $result = mysqli_query($mysqli_link, "SELECT * 

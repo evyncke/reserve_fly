@@ -286,11 +286,12 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
 
 // Generate OAuth URLs
 $googleAuthUrl = $google->getAuthorizationUrl();
-$_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 $facebookHelper = $facebook->getRedirectLoginHelper();
 $facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login.php', ['email','public_profile','user_link']);
 $linkedInAuthUrl = $linkedin->getAuthorizationUrl(['scope' => ['openid', 'profile', 'email']]);
-
+// Save the state generated for each provider to validate in the callback and prevent CSRF attacks
+// TODO as the state can be extended by JS to include browser info, only CSRF token should be stored in session and checked here, the browser info should be passed via a different parameter to avoid confusion and potential security issues.
+$_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 
 ?>
