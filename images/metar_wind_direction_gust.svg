@@ -1,0 +1,70 @@
+<svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">
+   <line y2="1000" x2="500" y1="0" x1="500" style="stroke:black;stroke-width:2"/>
+   <path d="M80 970 L100 1000 L 120 970 Z" transform="translate(400 0)" style="fill:#A4FFFF;stroke:black;stroke-width:2"/>
+      
+<g id="id_rapcs_arrows" style="fill:#A4FFFF;stroke:black;stroke-width:2">
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(50 -20)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(-50 -20)"/>
+
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(0 333)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(50 313)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(-50 313)"/>
+
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(0 666)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(50 646)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(-50 646)"/>
+
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(0 -333)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(50 -353)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(-50 -353)"/>
+
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(0 -666)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(50 -686)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(-50 -686)"/>
+
+
+       <animateTransform id="id_rapcs_arrows_animate" 
+         attributeName="transform"
+         begin="0s"
+         dur="10s"
+         type="translate"
+         from="400 0 "
+         to="400 1000"
+         repeatCount="indefinite" >
+         </animateTransform>   
+</g>
+<g id="id_rapcs_arrows" style="fill:#eb3831ff;stroke:black;stroke-width:2">
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(50 -20)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(-50 -20)"/>
+
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(0 333)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(50 313)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(-50 313)"/>
+
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(0 666)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(50 646)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(-50 646)"/>
+
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(0 -333)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(50 -353)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(-50 -353)"/>
+
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(0 -666)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(50 -686)"/>
+   <path d="M100 50 L85 35 L 95 35 L95 0 L105 0 L105 35  L115 35 Z" transform="translate(-50 -686)"/>
+
+
+       <animateTransform id="id_rapcs_arrows_animate" 
+         attributeName="transform"
+         begin="0s"
+         dur="2s"
+         type="translate"
+         from="400 0 "
+         to="400 1000"
+         repeatCount="indefinite" >
+         </animateTransform>   
+</g>
+
+</svg>

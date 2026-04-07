@@ -18,6 +18,7 @@
 
 require_once "dbi.php" ;
 require_once 'mobile_header5.php' ;
+require_once "mobile_metar_tools.php";
 
 $station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(strtoupper($_REQUEST['station'])) : $default_metar_station ;
 ?> 
@@ -27,6 +28,12 @@ $station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(s
 
 <div class="row">
 	<div id="metarMessage" class="col-12 bg-muted">... fetching data over the Internet ...</div> 
+</div> <!-- row -->
+
+<div class="row">
+	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-4">
+		<?php rapcs_display_metar($station, "picture"); ?>
+	</div>
 </div> <!-- row -->
 
 <div class="row d-sm-none d-md-block">
