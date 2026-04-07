@@ -1050,8 +1050,8 @@ function compute_defaultValues()
     
 	document.getElementById("id_cdv_ATL_level").value=default_ATL_level;
 	document.getElementById("id_cdv_ATL_description").value=default_ATL_description;
-
-	document.getElementById("id_cdv_huile_quantity").value=default_huile_quantity;
+    var huile=Number(default_huile_quantity);
+	document.getElementById("id_cdv_huile_quantity").value=huile.toFixed(1);
 
 	compute_defaultPartageFrais();
 	
