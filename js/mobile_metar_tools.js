@@ -411,8 +411,8 @@ function wprapcs_setRunway(station, metar)
 
 //===============================================
 // Main
-{
-
-    window.onload=display_metar_page_loaded(metar_rapcs_station, metar_rapcs_displayType);
-
-}
+// Use the modern onload event to display the METAR page and avoid conflict with the BODY onload=
+//===============================================
+window.addEventListener('load', (event) => {
+    display_metar_page_loaded(metar_rapcs_station, metar_rapcs_displayType);
+}) ;
