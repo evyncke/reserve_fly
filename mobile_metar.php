@@ -32,7 +32,7 @@ $station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(s
 
 <div class="row">
 	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-4">
-		<?php rapcs_display_metar($station, "picture"); ?>
+		<?php rapcs_display_metar($station, (isset($_REQUEST['kiosk'])) ? "text" : "picture"); ?>
 	</div>
 </div> <!-- row -->
 
@@ -62,7 +62,7 @@ $station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(s
 } // $userId > 0
 ?>
 <script>
-	displayMobileMETAR('<?=$station?>') ;
+	displayMobileMETAR('<?=$station?>', '<?= (isset($_REQUEST['kiosk'])) ? "text" : "picture" ?>') ;
 </script>
 
 </div> <!-- container-->
