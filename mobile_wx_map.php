@@ -55,7 +55,7 @@ $header_postamble = '
 }
 </style>
 <script type="text/javascript" src="//www.google.com/jsapi"></script>
-<script async defer type="text/javascript" src="//maps.googleapis.com/maps/api/js?libraries=geometry,marker&key=AIzaSyAN-Kv1_frzFl4gYutO9zsMEI_goTs3h4Y"></script>
+<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?libraries=geometry,marker&loading=async&callback=loadWxMap&key=AIzaSyAN-Kv1_frzFl4gYutO9zsMEI_goTs3h4Y" async></script>
 <script language=javascript>
 var CenterLat = ' . $center_lat .' ;
 var CenterLng = ' . $center_long . ' ;
@@ -63,7 +63,8 @@ var CenterZoom = ' . $center_zoom . ' ;
 var displayAirport =  ' . ((isset($_REQUEST['disp_apt']) && strtoupper($_REQUEST['disp_apt'] != 'N')) ? 'true' : 'false') . ' ;
 </script>
 <script type="text/javascript" src="js/mobile_wx_map.js"></script> ' ;
-$body_attributes = 'onload="loadWxMap();init();"' ;
+# $body_attributes = 'onload="loadWxMap();init();"' ;
+$body_attributes = 'onload="init();"' ;
 require_once 'mobile_header5.php' ;
 ?>
 <h2>Conditions météo <?=$apt?></h2>
