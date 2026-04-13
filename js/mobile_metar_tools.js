@@ -350,7 +350,13 @@ function wprapcs_setMETAR(metar)
 function wprapcs_setRunway(station, metar) 
 {
     station=station.toUpperCase();
-     if(station=="") {
+    if(station=="EBSP") {
+        metar.runway_type="Asphalt";
+        metar.runway=5;
+        wprapcs_displayMETAR(metar);
+        return;
+    }
+    if(station=="") {
         // We keep inputs
         return;
     }
