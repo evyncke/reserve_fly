@@ -1622,7 +1622,7 @@ function interpolateMapTable(columnIndex, columnInputValues, columnMap)
 //==============================================
 function setMETAR(station) 
 {
-    station=station.toUpperCase();
+    station=station.toUpperCase(); 
     if(station=="") {
         // We keep inputs
         return;
@@ -1687,7 +1687,37 @@ function setMETAR(station)
 function setRunway(station) 
 {
     station=station.toUpperCase();
-     if(station=="") {
+    if(station=="EBSP") {
+        var wind_direction=Inputs["wind_direction"];
+        var wind_speed=10.0;
+        var windRunway=-10.0;
+        var runwayNumber=5;
+        var runwayLength=799;
+        var runway_direction=runwayNumber*10;
+
+        Inputs["runway_type"]="Asphalt";
+        document.getElementById("id_takeoff_i_runway_type").value=Inputs["runway_type"];
+        document.getElementById("id_landing_i_runway_type").value=Inputs["runway_type"];;
+
+        var windHeadSpeed=computeWindHeadSpeed(runway_direction, wind_speed, wind_direction);
+        if(windHeadSpeed<0.) {
+            runwayNumber=23;
+        }
+        if(runwayNumber<10) {
+            runwayNumber="0"+runwayNumber;
+        }
+        Inputs["runway_number"]=runwayNumber;
+        document.getElementById("id_takeoff_i_runway_number").value=runwayNumber;
+        document.getElementById("id_landing_i_runway_number").value=runwayNumber;    
+        Inputs["runway_length"]=Number(runwayLength);
+        Inputs["runway_length/unit"]="m";
+        document.getElementById("id_takeoff_i_runway_length").value=getDisplayedValue(Inputs,"runway_length").toFixed(0);
+        document.getElementById("id_landing_i_runway_length").value=getDisplayedValue(Inputs,"runway_length").toFixed(0);
+        updateAll();
+        return;
+    }
+
+    if(station=="") {
         // We keep inputs
         return;
     }
