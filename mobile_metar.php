@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2023 Eric Vyncke
+   Copyright 2013-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 */
 
 require_once "dbi.php" ;
+# HTTP/2 push of some JS scripts via header()
+$additional_preload = '</resa/js/mobile_metar_tools.js>;rel=preload;as=script,' .
+	'</resa/images/metar_rose.png>;rel=preload;as=image' ;
 require_once 'mobile_header5.php' ;
 require_once "mobile_metar_tools.php";
 
