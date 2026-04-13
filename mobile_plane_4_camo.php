@@ -29,6 +29,7 @@ if ($userId == 0) {
 	exit ;
 }
 
+$header_postamble = '<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">' ;
 require_once 'mobile_header5.php' ;
 require_once 'incident.class.php' ;
 if (!($userIsBoardMember or $userIsInstructor or $userIsMechanic)) journalise($userId, "F", "Vous devez être admin ou FI ou mecano pour voir cette page") ;
@@ -64,7 +65,7 @@ function toHourMinute($totalMimutes) {
 ?>
 <div class="container-fluid">
 <h2>Rapport hebdomadaire de la flotte du RAPCS pour le  CAMO</h2>
-<table class="col-sm-12 col-lg-8 table table-hover table-bordered table-striped">
+<table class="col-sm-12 col-lg-8 table table-hover table-bordered table-striped" id="planes-table">
 <thead>
 <tr class="text-center"><th>Avion</th><th>Compteur Moteur</th><th>Compteur limite</th><th>Delta</th><th>Prochaine maintenance</th><th>Problèmes techniques - ATL</th></tr>
 </thead>
@@ -122,5 +123,18 @@ foreach($ytd as $id => $ytd_row) {
 </tbody>
 </table>
 </div><!-- container-fluid -->
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+<script>
+    new window.simpleDatatables.DataTable("#planes-table", {
+        searchable: true,
+        fixedHeight: false,
+        paging: false,
+        labels: {
+            placeholder: "Rechercher...",
+            noRows: "Aucune entrée trouvée",
+            info: "Affichage de {start} à {end} sur {rows} entrées",
+        }  
+    });
+</script>
 </body>
 </html>

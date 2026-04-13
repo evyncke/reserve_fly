@@ -4,6 +4,15 @@ var
 	airportMarker, airportsMarkers = [] ;
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
+const createMarkerImage = (url, size = 32) => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.style.width = `${size}px`;
+    img.style.height = `${size}px`;
+    
+    return img;
+};
+
 function loadWxMap() {
 	var myOptions, i ;
 
@@ -21,7 +30,8 @@ function loadWxMap() {
 		panControl: false,
 		scaleControl: true,
 		overviewMapControl: false,
-		mapTypeId: google.maps.MapTypeId.TERRAIN
+		mapTypeId: google.maps.MapTypeId.TERRAIN,
+		mapId: 'WX_MAP_ID', // Map ID is required for advanced markers.
 	    };
 	map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
 
@@ -45,6 +55,14 @@ function loadWxMap() {
 		new google.maps.Size(32, 32), // Size
 		new google.maps.Point(0,0), // origin
 		new google.maps.Point(16, 16)); // anchor
+	// Failed attemps to use the AdvancedMarker causing:
+	// main.js:182 InvalidValueError: setIcon: not a string; and should be a PinView; and no url property; and no path property
+	// for case 'VMC': metarsMarkers[i].setIcon(vfrMarker) ; break ;
+	// in function updateMetarMarker(response) {
+		// 		vfrMarker = new google.maps.marker.AdvancedMarkerElement({
+	// 	map: map,
+	// 	content: createMarkerImage('images/meteo_v.png', 32) ,
+	// }) ;	
 	airportMarker = new google.maps.MarkerImage('images/apt-marker.png',
 		new google.maps.Size(20, 20), // Size
 		new google.maps.Point(0,0), // origin
