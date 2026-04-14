@@ -22,6 +22,12 @@ error_reporting(E_ALL);
 
 require_once "dbi.php" ;
 $need_swiped_events = true ;
+
+// Log progressive web application
+if (isset($_REQUEST['wpa']) and $_REQUEST['wpa']) {
+	journalise($userId, "D", "Mobile Web Application start") ;
+}
+
 require_once 'mobile_header5.php' ;
 
 $id = (isset($_REQUEST['id'])) ? $_REQUEST['id'] : '' ; // Direct access to a booking by id
@@ -142,11 +148,6 @@ if ($userId <= 0) {
 <?php
 exit ;
 } # if ($userId <= 0)
-
-// Log progress web application
-if (isset($_REQUEST['wpa']) and $_REQUEST['wpa']) {
-	journalise($userId, "D", "Mobile Web Application start") ;
-}
 
 // Do we need to display the news ?
 
