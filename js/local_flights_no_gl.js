@@ -189,7 +189,7 @@ function insertTrackPoints(flights) {
 		pointToLayer: function(feature, latlng) {
 			console.log("Creating marker for flight " + feature.properties.title + " at location " + latlng.toString() + 
 				" bearing: " + feature.properties.bearing + " with color " + feature.properties.color) ;
-			var html = '<div style="width: 24px; height: 24px; border: 2px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center;">' +
+			var html = '<div style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">' +
 						'<i class="bi bi-airplane-fill" style="color: ' + feature.properties.color + '; font-size: 14px;"></i></div>' ;
 			return L.marker(latlng, {
 				icon: L.divIcon({
