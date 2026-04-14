@@ -68,7 +68,7 @@ foreach($members as $member) {
 <div class="table-responsive">
 <table class="table table-striped table-hover" id="students-table">
 <thead>
-<th>Élèves</th><th>Cours théoriques</th><th>Premier/dernier vols</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th></tr>
+<th>Élève</th><th>Cours théoriques</th><th>Premier/dernier vols</th><th class="d-none d-md-table-cell">Email</th><th class="d-none d-md-table-cell">Mobile</th></tr>
 </thead>
 <tbody class="table-group-divider">
 

@@ -68,7 +68,7 @@ if (isset($_POST['action']) and $_POST['action'] == 'upload') {
   		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#documents" aria-current="page" href="#documents">Documents</a>
 	</li>
 <?php
-if ($student->isFlyingStudent()) {
+if ($student->isFlyingStudent() or isset($_REQUEST['previous'])) {
 ?>
     <li class="nav-item">
   		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#flights" aria-current="page" href="#flights">Flights</a>

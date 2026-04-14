@@ -328,6 +328,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
     <ul class="dropdown-menu">
       <li><h6 class="dropdown-header">Réservé aux FIs & admins</h6></li>
       <li><a class="dropdown-item" href="dto.students.php">Liste des élèves</a></li>
+      <li><a class="dropdown-item" href="dto.students_previous.php">Liste des anciens élèves</a></li>
       <li><a class="dropdown-item" href="dto.exercices.php">Liste des exercices</a></li>
       <li><a class="dropdown-item" href="dto.safetyday.php">Participation au Safety Day</a></li>
       <li><hr class="dropdown-divider"/></li>
