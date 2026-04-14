@@ -33,7 +33,7 @@ require_once 'dto.class.php' ;
 <div class="row">
     <p>Cette liste reprend les membres (actuels et anciens) qui ont effectué au moins un vol en tant qu'élèves. L'année des cours théoriques
         n'existe que depuis 2024 environ. <i class="bi bi-person-check-fill text-success"></i> indique un membre en règle de cotisation pour
-        cette année calendrier.
+        cette année calendrier; <i class="bi bi-award-fill text-success" title="PPL SEP(L) license"></i> indique un membre qui a obtenu sa licence PPL SEP(L).
     </p>
 </div>
 <div class="row">
@@ -52,6 +52,7 @@ $sql = "SELECT *, DATE(MIN(df_when)) AS first_flight, DATE(MAX(df_when)) AS last
     JOIN $table_dto_flight ON p.jom_id = df_student
     LEFT JOIN $table_dto_student ON p.jom_id = ds_jom_id
     LEFT JOIN $table_membership_fees ON bkf_user = p.jom_id AND bkf_year = YEAR(CURDATE())
+    LEFT JOIN $table_validity AS v ON p.jom_id = v.jom_id AND validity_type_id = 1
     WHERE NOT EXISTS (SELECT 1 FROM $table_user_usergroup_map 
             WHERE user_id = p.jom_id AND group_id IN ($joomla_flying_student_group, $joomla_theory_student_group))
     GROUP BY p.jom_id
@@ -60,10 +61,14 @@ $result = mysqli_query($mysqli_link, $sql)
 	or journalise($userId, "F", "Cannot retrieve all previous students: " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
     if ($row['bkf_payment_date'] != '')
-        $membership_filled = '<i class="bi bi-person-check-fill text-success" title="Membership paid"><i>' ;
+        $membership = '<i class="bi bi-person-check-fill text-success" title="Membership paid"><i>' ;
     else
-        $membership_filled = '<i class="bi bi-person-fill-exclamation text-danger" title="Membership NOT paid"><i>' ;
-    print("<tr><td><a href=\"dto.student.php?student=$row[jom_id]&previous=y\"><b>$row[last_name]</b>, $row[first_name]</a> $membership_filled</td>
+        $membership = '' ;
+    if ($row['grant_date'] != '')
+        $sep = '<i class="bi bi-award-fill text-success" title="PPL SEP(L) license"></i>' ;
+    else
+        $sep = '' ;
+    print("<tr><td><a href=\"dto.student.php?student=$row[jom_id]&previous=y\"><b>$row[last_name]</b>, $row[first_name]</a> $membership $sep</td>
         <td>$row[ds_year]</td>
         <td>$row[first_flight]<br>$row[last_flight]</td>
         <td><a href=\"mailto:$row[email]\">$row[email]</a></td>
