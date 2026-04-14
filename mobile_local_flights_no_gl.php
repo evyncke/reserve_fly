@@ -29,7 +29,8 @@ $header_postamble = "<!-- Load the MAP BOX scripts & CSS -->
 <script type='text/javascript' src='js/local_flights_no_gl.js'></script>
 " ;
 $body_attributes = "onload=\"init();initLocalFlights($apt_longitude, $local_longitude_bound, $apt_latitude, $local_latitude_bound, $local_altimeter_bound, '$mapbox_token', $zoom_level, 'get_local_tracks.php?mult=0.5');\"" ;
-
+# HTTP/2 push of some JS scripts via header()
+$additional_preload = '</resa/js/local_flights_no_gl.js>;rel=preload;as=script' ;
 require_once 'mobile_header5.php' ;
 ?> 
 
