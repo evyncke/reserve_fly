@@ -2137,6 +2137,10 @@ $table_membership_fees = 'rapcs_bk_fees' ;
      ");
      */
     $fullName=$prenom." ".$nom;
+    if(strpos($fullName,"'")> -1 || strpos($adresse,"'")> -1 || strpos($ville,"'")> -1 || strpos($pays,"'")> -1) {
+        return "No ' allowed today in name, adresse country, town.  The new member is not created.";
+    }
+
     if($password!="Rapcs123!") {
         return "Today the password must be Rapcs123!. Other password not yet implemented!";
     }

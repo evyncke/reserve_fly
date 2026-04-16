@@ -1050,11 +1050,19 @@ function compute_defaultValues()
     
 	document.getElementById("id_cdv_ATL_level").value=default_ATL_level;
 	document.getElementById("id_cdv_ATL_description").value=default_ATL_description;
+    var huile=Number(default_huile_quantity);
+	if(default_huile_quantity=0.5 || default_is_instructor==1) {
+		// On autorise 0.5l en plus
+		var selectHuile=document.getElementById("id_cdv_huile_quantity");
+		var option = document.createElement("option");
+		option.text = "0.5"
+		option.value = "0.5"
+		selectHuile.add(option) ;
+	}
 	if(default_huile_quantity=="select") {
 		document.getElementById("id_cdv_huile_quantity").value=default_huile_quantity
 	}
 	else {
-    	var huile=Number(default_huile_quantity);
 		document.getElementById("id_cdv_huile_quantity").value=huile.toFixed(1);
 	}
 

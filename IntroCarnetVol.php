@@ -80,6 +80,13 @@ print("var default_ATL_description=\"\";\n");
 print("var default_huile_quantity=\"select\";\n");
 print("var default_qrcode_communication_pilote=\"\";\n");
 print("var default_fqrcode_montant_total_pilote=0;\n");	
+// Les instructeurs peuvent introduire des 1/2 litre d'huile + Patrick pour pouvoir tester!
+if ($userId==66 or $userIsInstructor)  {
+	print("var default_is_instructor=1;\n");	
+}
+else {
+	print("var default_is_instructor=0;\n");	
+}
 
 // bookingid is defined by the key "id" (coming from the booking) or by the key "cdv_booking" (coming from this page)
 $auth="";
