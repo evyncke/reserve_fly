@@ -1055,6 +1055,9 @@ else {
 		}
 		//printf("r_plane=$row[r_plane]</br>");
 		//printf("r_start=$row[r_start]</br>");
+		if(isset($cdv_compteur_arrivee)) {
+			print("var default_compteur_moteur_start=\"$cdv_compteur_arrivee\";");
+		}
 	}
 	else {
 		//print("</br>1111 SELECT f_id, f_reference FROM $table_flight WHERE f_id = $bookingid</br>");
@@ -1087,7 +1090,6 @@ else {
 			print("var default_segment=$segmentcount;\n");	
 		} ;	
 		print("var default_segment=$segmentcount;\n");
-
 	}
 	else {
 		print("var default_segment=1;\n");	
