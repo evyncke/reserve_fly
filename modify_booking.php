@@ -105,15 +105,14 @@ $result_blocked = mysqli_query($mysqli_link, "SELECT * FROM $table_blocked WHERE
 $row_blocked = mysqli_fetch_array($result_blocked) ;
 if ($row_blocked) {
 	journalise($userId, "W", "This pilot $pilot_id is blocked: $row_blocked[b_reason]") ;
-	$response['error'] .= "Vous êtes interdit(e) de vol: " . db2web($row_blocked['b_reason']) . ". Contactez info@spa-aviation.be" ;
+	$response['error'] .= "Ce pilote est interdit(e) de vol: " . db2web($row_blocked['b_reason']) . ". Contactez info@spa-aviation.be" ;
 	$blocked_user = true ;
 }
 
 // Check whether membership fee is paid
 if ($membership_year == date('Y') and (!isset($row_fee) or $row_fee['bkf_payment_date'] == '')) {
-	$response['error'] .= "Vous n'êtes pas en règle de cotisation." ;
+	$response['error'] .= "Ce pilote n'est pas en règle de cotisation." ;
 	$blocked_user = true ;
-	$blocked_msg = "<p>Vous n'êtes pas en règle de cotisation." ;
 	journalise($userId, "E", "Unpaid membership fee") ;
 }
 
