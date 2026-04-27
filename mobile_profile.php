@@ -455,7 +455,7 @@ $user_only_attribute = (! $user_only) ? ' readonly disabled' : '' ;
 if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
 ?>
 	<li class="nav-item">
-  		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#emergency_contact" aria-current="page" href="#main">Contact alternatif</a>
+  		<a class="nav-link" role="presentation" data-bs-toggle="tab" data-bs-target="#emergency_contact" aria-current="page" href="#main">Contact alternatif  <i class="bi bi-eye-slash text-warning"></i></a>
 	</li>
 <?php
 } // end of private information tab
@@ -548,7 +548,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Private information is only for admins & FI
 ?>
 <div class="row mb-3">
-        <label for="addressId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Rue:</label>
+        <label for="addressId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Rue <i class="bi bi-eye-slash text-warning"></i>:</label>
         <div class="col-sm-4">
         	<div class="input-group">
                 <input type="text" class="form-control" name="address" id="addressId" value="<?=$me['address']?>" autocomplete="street-address" <?=$read_only_attribute?>>
@@ -556,7 +556,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label for="zipcodeId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Code postal:</label>
+        <label for="zipcodeId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Code postal <i class="bi bi-eye-slash text-warning"></i>:</label>
         <div class="col-sm-4">
         	<div class="input-group">
                 <input type="text" class="form-control" name="zipcode" id="zipcodeId" value="<?=$me['zipcode']?>" autocomplete="postal-code" <?=$read_only_attribute?>>
@@ -564,7 +564,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label for="cityId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Commune:</label>
+        <label for="cityId" class="col-form-label col-sm-4 col-md-2 col-lg-2">Commune <i class="bi bi-eye-slash text-warning"></i>:</label>
         <div class="col-sm-4">
         	<div class="input-group">
                 <input type="text" class="form-control" name="city" id="cityId" value="<?=$me['city']?>" autocomplete="address-level2" <?=$read_only_attribute?>>
@@ -572,7 +572,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	</div> <!-- col -->
 </div> <!-- row -->
 <div for="countryId" class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Pays:</label>
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Pays <i class="bi bi-eye-slash text-warning"></i>:</label>
         <div class="col-sm-4">
         	<div class="input-group">
                 <input type="text" class="form-control" name="country" id="countryId" value="<?=$me['country']?>" autocomplete="country-name" <?=$read_only_attribute?>>
@@ -580,7 +580,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Date de naissance:</label>
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Date de naissance <i class="bi bi-eye-slash text-warning"></i>:</label>
         <div class="col-sm-4">
         	<div class="input-group">
                 <input type="date" class="form-control" name="birthdate" placeholder="AAAA-MM-JJ" value="<?=$me['birthdate']?>" autocomplete="bday" <?=$user_only_attribute?>>
@@ -589,10 +589,10 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Genre:</label>
+        <label class="col-form-label col-sm-4 col-md-2 col-lg-2">Genre <i class="bi bi-eye-slash text-warning"></i>:</label>
         <div class="col-sm-4">
         	<div class="input-group">
-				<select class="form-control" name="sex" <?=$user_only_attribute?>>
+				<select class="form-control" name="sex" <?=$user_only_attribute?>>@
 					<option value="0" <?=($me['sex'] == 0) ? 'selected':''?>>Inconnu</option>
 					<option value="1" <?=($me['sex'] == 1) ? 'selected':''?>>Masculin</option>
 					<option value="2" <?=($me['sex'] == 2) ? 'selected':''?>>Féminin</option>
@@ -616,6 +616,8 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
             </div><!-- input group -->
 	</div> <!-- col -->
 </div> <!-- row -->
+
+<p><i class="bi bi-eye-slash text-warning"></i> Ces informations sont exclusivement visibles par les instructeurs et les membres de l'Organisme d'Administration du club.</p>
 
 <?php
 if (! $read_only) {
@@ -757,7 +759,7 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 ?>
 <div id="emergency_contact" class="tab-pane fade" role="tabpanel">
 <div class="row">
-<p>Veuillez introduire les informations de contact d'un proche (famille, ami, ...). Ces informations,
+<p>Veuillez introduire les informations de contact d'un proche (famille, ami, ...).  <i class="bi bi-eye-slash text-warning"></i> Ces informations,
 	exclusivement visibles par les instructeurs et les membres de l'Organisme d'Administration du club,
 	sont nécessaires en cas d'urgence ou de nécessité absolue ( accident , impossibilité de vous joindre, ..). 
 	Il ne sera fait usage de ce contact qu'en cas d'extrême obligation.</p>
@@ -769,25 +771,25 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 <input type="hidden" name="action" value="alt_contact">
 <input type="hidden" name="displayed_id" value="<?=$displayed_id?>">
 <div class="input-group mb-3">
-	<label for="contactNameId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Nom du contact:</label>
+	<label for="contactNameId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Nom du contact <i class="bi bi-eye-slash text-warning"></i>:</label>
 	<div class="col-sm-4">
 		<input type="text" class="form-control" name="c_name" id="contactNameId" value="<?=$me['contact_name']?>" <?=$user_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- input-group -->
 <div class="input-group mb-3">
-	<label for="contactRelationshipId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Relation:</label>
+	<label for="contactRelationshipId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Relation <i class="bi bi-eye-slash text-warning"></i>:</label>
 	<div class="col-sm-4">
 		<input type="text" class="form-control" name="c_relationship" id="contactRelationshipId" value="<?=$me['contact_relationship']?>" placeholder="Conjoint(e), parent, partenaire, ..." <?=$user_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- input-group -->
 <div class="input-group mb-3">
-	<label for="contactPhoneId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Téléphone<?=$phoneIcon?><?=$whatsAppIcon?>:</label>
+	<label for="contactPhoneId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Téléphone <i class="bi bi-eye-slash text-warning"></i> <?=$phoneIcon?><?=$whatsAppIcon?>:</label>
 	<div class="col-sm-4">
 		<input type="text" class="form-control" name="c_phone" id="contactRelationshipId" value="<?=$me['contact_phone']?>" placeholder="Sous la forme +32471234567 sans les 0 ou les '.'" <?=$user_only_attribute?>>
 	</div> <!-- col -->
 </div> <!-- input-group -->
 <div class="input-group mb-3">
-	<label for="contactEmailId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Adresse e-mail<?=$emailIcon?>:</label>
+	<label for="contactEmailId" class="col-form-label col-sm-4 col-md-3 col-lg-2">Adresse e-mail<?=$emailIcon?> <i class="bi bi-eye-slash text-warning"></i>:</label>
 	<div class="col-sm-4">
 		<input type="email" class="form-control" name="c_email" id="contactEmailId" value="<?=$me['contact_email']?>" <?=$user_only_attribute?>>
 	</div> <!-- col -->
@@ -932,7 +934,7 @@ while ($row = mysqli_fetch_array($result)) {
 		if ($row['mandatory_access_control'] == 0)
 			$private_validity = '' ;
 		else if ($userId == $displayed_id or $userIsInstructor or $userIsBoardMember)
-			$private_validity = ' (seuls le pilote, les administrateurs, et les instructeurs voient cette ligne) ' ;
+			$private_validity = ' (<i class="bi bi-eye-slash text-warning"></i> seuls le membre, les administrateurs, et les instructeurs voient cette ligne) ' ;
 		else
 			continue ;
 		print("<tr><td class=\"validityNameCell\">" . db2web($row['name']) . "$private_validity$delete</td>\n") ;
