@@ -336,8 +336,11 @@ function displayMETAR() {
 					if ((userId == 62 || userId == 102) && metar_response.pressure_altitude) {
 						elem.innerHTML += '<br/><i>Pressure altitude at ' +  metar_response.station + ': ' +  metar_response.pressure_altitude + ' ft</i>' ;
 					}
+					console.log('Response received for METAR condition: ' + metar_response.condition + ", error: " + metar_response.error) ;
 					if (metar_response.condition != null &&  metar_response.condition == 'VMC')
 						elem.className += ' text-bg-success' ;
+					else if (metar_response.condition != null && metar_response.condition == 'TVMC')
+						elem.className += 'text-bg-success opacity-50' ;
 					else if ( metar_response.condition != null &&  metar_response.condition == 'MMC')
 						elem.className += ' text-bg-warning' ;
 					else if ( metar_response.condition != null &&  metar_response.condition == 'IMC')

@@ -202,7 +202,7 @@ if ($reply['error'] == '') {
 	$index = 2 ;
 	if ($tokens[$index] == 'AUTO') $index++ ; // Let's skip the AUTO
 	if ($tokens[$index] == 'NIL') { // Automated station having a problem...
-		$reply['condition'] = '?' ;
+		$reply['error'] = 'NIL in the METAR, probably an automated station having a problem' ;
 		goto emit ; // Ugly...
 	}
 
@@ -329,14 +329,16 @@ if ($reply['error'] == '') {
 		$reply['pressure_altitude'] = round($metar_altitude + (1013.25 - $reply['QNH']) * $PLR) ;
 	}
 	// Check weather conditions
-	if ($reply['visibility'] == '?' or $reply['ceiling'] == '?')
-		$reply['condition'] = '?' ;
-	elseif ($reply['visibility'] >= 9999 and $reply['aero_ceiling'] >= 1000)
-		$reply['condition'] = 'VMC' ;
-	elseif ($reply['visibility'] >= 1500 and $reply['aero_ceiling'] >= 500)
-		$reply['condition'] = 'MMC' ;
+	if ($reply['visibility'] == '?')
+			$reply['condition'] = '?' ;
+	elseif ($reply['visibility'] >= 8000 and $reply['ceiling'] == '?' and isset($reply['clouds_base']) and $reply['clouds_base'] > 2000)
+			$reply['condition'] = 'TVMC' ; // Theoritical VFR
+	elseif ($reply['visibility'] >= 8000 and $reply['aero_ceiling'] > 2000)
+			$reply['condition'] = 'VMC' ;
+	elseif ($reply['visibility'] >= 5000 and $reply['aero_ceiling'] > 1000)
+			$reply['condition'] = 'MMC' ;
 	else
-		$reply['condition'] = 'IMC' ;
+			$reply['condition'] = 'IMC' ;
 	} else // no error in getting METAR
 		$reply['condition'] = '?' ;
 

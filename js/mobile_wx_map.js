@@ -51,7 +51,16 @@ function loadWxMap() {
 		new google.maps.Size(32, 32), // Size
 		new google.maps.Point(0,0), // origin
 		new google.maps.Point(16, 16)); // anchor
+	offMarker = new google.maps.MarkerImage('images/meteo_off.png',
+		new google.maps.Size(32, 32), // Size
+		new google.maps.Point(0,0), // origin
+		new google.maps.Point(16, 16)); // anchor
 	vfrMarker = new google.maps.MarkerImage('images/meteo_v.png',
+		new google.maps.Size(32, 32), // Size
+		new google.maps.Point(0,0), // origin
+		new google.maps.Point(16, 16)); // anchor
+	// tvfr= theoritical VFR based on clouds based computed on relative humidity, not on reported cloud base, so more optimistic than VFR, but still not IFR
+	tvfrMarker = new google.maps.MarkerImage('images/meteo_v_theory.png',
 		new google.maps.Size(32, 32), // Size
 		new google.maps.Point(0,0), // origin
 		new google.maps.Point(16, 16)); // anchor
@@ -77,6 +86,7 @@ function loadWxMap() {
 	setInterval(refreshMarkers, 10 * 60 * 1000) ;
 }
 
+// Attempt to use the modern AdvancedMarkerElement, but it seems to cause more issues than it solves, so we stick to the old MarkerImage for now
 function createMarker(pointLatLng, type, code, name, heading) {
 	var marker, furtherActions ;
 
@@ -125,22 +135,25 @@ function updateMetarMarker(response) {
 				case 'IMC': metarsMarkers[i].setIcon(ifrMarker) ; break ;
 				case 'MMC': metarsMarkers[i].setIcon(mfrMarker) ; break ;
 				case 'VMC': metarsMarkers[i].setIcon(vfrMarker) ; break ;
+				case 'TVMC': metarsMarkers[i].setIcon(tvfrMarker) ; break ;
 				default: metarsMarkers[i].setIcon(ufrMarker) ; 
 			}
 			var metarAgeWarning = '' ;
 			if (response.age == 'invalid') {
 				metarAgeWarning = '<br/>Datetime group is invalid' ;
-				metarsMarkers[i].setIcon(ufrMarker) ;
+				metarsMarkers[i].setIcon(offMarker) ;
 			} else if (response.age > 60) {
 				metarAgeWarning = '<br/>Old METAR : ' + response.age + ' minutes' ;
-				metarsMarkers[i].setIcon(ufrMarker) ;
+				metarsMarkers[i].setIcon(offMarker) ;
 			}
 			var metarError = '' ;
-			if (response.error)
+			if (response.error) {
 				metarError = '<br/>Error : ' + response.error ;
+				metarsMarkers[i].setIcon(offMarker) ;
+			}
 			var cloudBase = (response.temperature && response.dew_point) ? '<br/>Computed cloud base: ' + 400 * (response.temperature - response.dew_point) + 'ft' : '';
 			var infowindow = new google.maps.InfoWindow({
-				content: '<div style="white-space: nowrap;">' + response.METAR + cloudBase + metarAgeWarning + metarError + '</div>' 
+				content: '<div style="white-space: nowrap;" class="text-dark">' + response.METAR + cloudBase + metarAgeWarning + metarError + '</div>' 
 			});
 			var marker = metarsMarkers[i] ;
 			google.maps.event.clearListeners(marker, 'mouseover') ;

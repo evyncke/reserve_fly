@@ -68,8 +68,11 @@ function displayMobileMETAR(station) {
 					elem.innerHTML = response.error ;
 				} else {
 					setTimeout(function () { displayMobileMETAR(station);} , 1000 * 60 * 5) ; // Refresh every 5 minutes
+					console.log('Response received for METAR ' + station + ': ' + response.METAR + ", condition: " + response.condition + ", age: " + response.age + ' minutes, error: ' + response.error) ;
 					if (response.condition != null && response.condition == 'VMC')
 						elem.className += 'text-bg-success' ;
+					else if (response.condition != null && response.condition == 'TVMC')
+						elem.className += 'text-bg-success text-bg-opacity-50' ;
 					else if (response.condition != null && response.condition == 'MMC')
 						elem.className += 'text-bg-warning' ;
 					else if (response.condition != null && response.condition == 'IMC')

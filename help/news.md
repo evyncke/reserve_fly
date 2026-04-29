@@ -3,6 +3,10 @@
 Vous trouverez ici les diverses nouveautés à propos du site réservation du RAPCS. Les suggestions sont les bienvenues auprès de
 [Éric Vyncke](mobile_profile.php?displayed_id=62) et [Patrick Reginster](mobile_profile.php?displayed_id=66).
 
+## Avril 2026
+
+- en absence d'information sur la station automatique METAR quant aux nuages, le fameux `// VV///`, le plafond 'théorique' est calculé via l'humidité relative (via l'écart entre la température et le point de rosée), si ce plafond théorique est > 2000 ft, alors les conditions météo sont supposée être 'TVMC' (theorical VMC) et l'affichage du METAR devient vert foncé.
+
 ## Mars 2026
 
 - dans le folio, si c'est d'application, il est mentionné 'PASSENGER' au lieu de 'SELF'
