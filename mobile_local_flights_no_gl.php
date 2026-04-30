@@ -50,6 +50,11 @@ require_once 'mobile_header5.php' ;
 
 </div><!-- row -->
 
+<div class="row text-center small">
+Réalisation: Eric Vyncke, mars 2021-avril 2026, pour RAPCS, Royal Aéro Para Club de Spa, ASBL. <b>Ne pas utiliser comme outil en vol</b><br/>
+Données via Flight Aware (avec maximum 15 minutes de délai), via quelques récepteurs ADS-B / MLAT (avec maximum 10 secondes de délai), via SafeSky, et via glidernet.org (planeurs FLARM et intégration SafeSky et un délai d'une minute).
+</div><!-- row -->
+
 </div> <!-- container-->
 
 </body>
