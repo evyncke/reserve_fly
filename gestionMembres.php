@@ -632,6 +632,7 @@ datediff(current_date(), b_when) as days_blocked
 		<td></td>
 		<td></td>
 		<td></td>
+		<td></td>
 		<td>$memberCount</td>
 		<td>$studentCount</td>
 		<td>$pilotCount</td>

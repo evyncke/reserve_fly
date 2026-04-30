@@ -291,6 +291,11 @@ function wprapcs_setMETAR(metar)
                     else if(response.condition=="VMC") {
                         metar.condition="VFR";
                     }
+                   else if(response.condition=="TVMC") { 
+                        // No cloud base METAR= //VV//
+                        metar.clouds_base=9999;
+                        metar.condition="VFR";
+                    }
                     else if(response.condition=="IMC") {
                         metar.condition="IFR";
                     }    
