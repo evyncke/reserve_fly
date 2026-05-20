@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2025 Eric Vyncke
+   Copyright 2013-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,6 +26,10 @@ $need_swiped_events = true ;
 // Log progressive web application
 if (isset($_REQUEST['wpa']) and $_REQUEST['wpa']) {
 	journalise($userId, "D", "Mobile Web Application start") ;
+}
+if ($userId == 0) {
+	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF']) , TRUE, 307) ;
+	exit ;
 }
 
 require_once 'mobile_header5.php' ;
