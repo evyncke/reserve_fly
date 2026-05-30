@@ -389,14 +389,15 @@ function getCompteurValueInMinute($thePlane, $theDateFilter)
 	while ($row = mysqli_fetch_array($result)) {
 		$minHour=$row['l_start_hour'];
 		$minMinute=$row['l_start_minute'];
-		//print("$plane $minHour : $minMinute  startdate=$row[l_start]<br>\n") ;
+		//print("$thePlane START: $minHour : $minMinute  startdate=$row[l_start]<br>\n") ;
 	}
 	$sql="SELECT l_plane,l_end, l_end_hour , l_end_minute FROM $table_logbook WHERE l_end like '$theDateFilter' and l_plane='$thePlane' ORDER BY l_end desc LIMIT 1";
+	//print("getCompteurValueInMinute:sql=$sql<br>\n");
 	$result = mysqli_query($mysqli_link, $sql) ;
 	while ($row = mysqli_fetch_array($result)) {
 		$maxHour=$row['l_end_hour'];
 		$maxMinute=$row['l_end_minute'];
-		//print("$plane $maxHour : $maxMinute  startdate=$row[l_end]<br>\n") ;
+		//print("$thePlane  END: $maxHour : $maxMinute  enddate=$row[l_end]<br>\n") ;
 	}
 	
 	$timeInMinute=($maxHour-$minHour)*60+$maxMinute-$minMinute;

@@ -432,8 +432,11 @@ carnet de route des avions. Heure affichée en heure universelle.</em></p>
 </div><!-- container -->
 <script>
 // Swipe to change to next month/next plane
-document.addEventListener('swiped-left', function(e) {location.href='<?="$_SERVER[PHP_SELF]?plane=$plane&since=$monthAfterString"?>' }) ;
-document.addEventListener('swiped-right', function(e) {location.href='<?="$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString"?>' }) ;
+if(0) {
+	// Sur Smartphone, impossible de lire tout le texte à droite sans passer à la page suivante
+	document.addEventListener('swiped-left', function(e) {location.href='<?="$_SERVER[PHP_SELF]?plane=$plane&since=$monthAfterString"?>' }) ;
+	document.addEventListener('swiped-right', function(e) {location.href='<?="$_SERVER[PHP_SELF]?plane=$plane&since=$monthBeforeString"?>' }) ;
+}
 </script>
 </div> <!-- container-fluid -->
 </body>
