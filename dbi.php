@@ -107,6 +107,10 @@ $theoretical_tuition_price = 700;
 $theoretical_tuition_product = 108; //product.product == Minerval Théorique 
 $ecole_analytic_account=43; //account.analytic.account == aeroclub ecole
 
+// Whether to send emails to the manager when a booking is created or modified
+$send_no_recent_flight_email = false ; // Whether to send an email to the manager when a booking is created or modified and the pilot has no recent flight
+$send_missing_validity_email = false ; // Whether to send an email to the manager when a booking is created or modified and the pilot has no valid medical or license
+
 $tracked_planes = array('OOALD', 'OOALE', 'OOAPV', 'OOFUN', 'OOJRB', 'OOFMX', 'OOSPQ') ;
 // array_push($tracked_planes, 'OOADO', 'OOG85', 'OOPEG', 'OOVMS', 'DELZA', 'DELZB', 'FJXRL') ; // For Air Spa Rallye
 // array_push($tracked_planes, 'OOCEK', 'FAZMX', 'FAYAC', 'GIIIG') ; // For 75 ans avions externes
@@ -162,7 +166,8 @@ if ($joomla_user->guest and isset($_SESSION['jom_id'])) { // User is not logged 
 	$userId = intval($_SESSION['jom_id']) ;
 	$originUserId = $userId ;
 	$joomla_user = JFactory::getUser($userId) ;
-}
+} else
+	$userId = 0 ;
 CheckJoomlaUser($joomla_user) ;
 if ($userId == 62 or $userId == 66)
 	ini_set('display_errors', 1) ; // extensive error reporting for debugging
@@ -173,7 +178,7 @@ function CheckJoomlaUser($joomla_user) {
 	global $userIsPilot, $userIsAdmin, $userIsBoardMember, $userIsInstructor, $userIsMechanic,$userIsStudent, $userIsTheoryStudent, $userIsFlyingStudent,
 		$userIsFlightPilot, $userIsFlightManager, $userNoFlight ;
 	global $userName, $userFullName, $userId, $originUserId ;
-	global $joomla_member_group, $joomla_admin_group, $joomla_sysadmin_group, $joomla_superuser_group, $joomla_board_group ;
+	global $joomla_admin_group, $joomla_sysadmin_group, $joomla_superuser_group, $joomla_board_group ;
 	global $joomla_pilot_group, $joomla_flying_student_group, $joomla_theory_student_group, $joomla_instructor_group, $joomla_instructor_group2, $joomla_mechanic_group ;
 	global $joomla_flight_group, $joomla_flight_pilot_group, $joomla_flight_manager_group, $joomla_no_flight ;
 
@@ -520,6 +525,7 @@ $smtp_info['localhost'] = $smtp_localhost ;
 $smtp_info['port'] = $smtp_port ;
 $smtp_info['auth'] = True;
 $smtp_info['username'] = $smtp_user ;
+$smtp_info['secure'] = $smtp_secure ;
 $smtp_info['password'] = $smtp_password ;
 $smtp_info['debug'] = False;
 $smtp_info['persist'] = True;
