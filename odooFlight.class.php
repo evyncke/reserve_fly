@@ -2095,10 +2095,12 @@ $table_membership_fees = 'rapcs_bk_fees' ;
 
 */
     global $table_users,$table_person,$table_user_usergroup_map,$table_company, $table_company_member;
-    global $userId,$mysqli_link,$joomla_student_group,$joomla_pilote_group,$joomla_member_group;
+    global $userId,$mysqli_link,$joomla_flying_student_group,$joomla_pilot_group,$joomla_member_group;
     global $membership_year;
 
     $insertFlag=true;
+    $checkUsername=true;
+    $insertOdooFlag=true;
 /*
     print("<br> OF_CreateNewMember:Started:<br>
         prenom=$prenom<br>
@@ -2157,7 +2159,12 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     	or journalise($userId, "E", "Cannot read $table_users  " . mysqli_error($mysqli_link)) ;
     while ($row = mysqli_fetch_array($result)) {
         // The email address already exist then stop
-        return "The email address $email is aready used ($table_users): Use a new email. The new member is not created.";
+        if($checkUsername) {
+            return "The email address $email is aready used ($table_users): Use a new email. The new member is not created.";
+        }
+        else {
+            print("E-mail already exists but check is OFF  (Table: $table_users) <br>");
+        }
     }
     $sql= "SELECT username FROM $table_users WHERE username='$username'";
     // TODO could also use mysqli_num_rows to check if there is already a user with this username
@@ -2166,7 +2173,12 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     	or journalise($userId, "E", "Cannot read $table_users  " . mysqli_error($mysqli_link)) ;
     while ($row = mysqli_fetch_array($result)) {
         // The email address already exist then stop
-        return "The username $username is aready used ($table_users): Use a new email. The new member is not created.";
+        if($checkUsername) {
+            return "The username $username is aready used ($table_users): Use a new email. The new member is not created.";
+        }
+       else {
+            print("Username already exists but check is OFF (Table: $table_users)<br>");
+        }
     }
 
     if($societe=="oui") {
@@ -2181,7 +2193,12 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     	or journalise($userId, "E", "Cannot read $table_person: " . mysqli_error($mysqli_link)) ;
     while ($row = mysqli_fetch_array($result)) {
         // The email address already exist then stop
-        return "The email address is aready used ($table_person): Use another email. The new member is not created.";
+        if($checkUsername) {
+            return "The email address is aready used ($table_person): Use another email. The new member is not created.";
+        }
+        else {
+             print("Email already exists but check is OFF (Table: $table_person)<br>");           
+        }
     }
 
      //3. Insert the new member in the table $table_users = 'jom_users' (Name, username,...)
@@ -2194,7 +2211,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
 		$jom_id = mysqli_insert_id($mysqli_link) ; 
     }
     else {
-        $jom_id=560;
+        $jom_id=586;
     }
 
  	//	    or journalise($userId, "F", "Impossible d'ajouter un paiement: " . mysqli_error($mysqli_link)) ;
@@ -2218,9 +2235,10 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     }
     if($typemembre!="nonnaviguant") {
         // Insert like a pilot or a student
-        $groupId=$joomla_student_group;
-        if($typemembre=="pilote") $groupId=$joomla_pilote_group;
+        $groupId=$joomla_flying_student_group;
+        if($typemembre=="pilote") $groupId=$joomla_pilot_group;
 
+        //print("OF_CreateNewMember:typemembre=$typemembre joomla_flying_student_group=$joomla_flying_student_group groupId=$groupId joomla_pilot_group=$joomla_pilot_group<br>");
         $sql= "INSERT INTO $table_user_usergroup_map (user_id, group_id)
                 VALUES($jom_id, $groupId)";
         //print("OF_CreateNewMember:$sql<br>");
@@ -2251,7 +2269,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
 
     //7. Insert the validity of new member in the table  $table_validity = 'rapcs_validity' + $table_validity_type = 'rapcs_validity_type' ;
     //8. Insert the new member in Odoo + adapt rapcs_person
-    if($insertFlag) {
+    if($insertOdooFlag) {
         OF_AddPartnerInOdoo(
             $jom_id,
             $prenom,
@@ -2286,7 +2304,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     //11. Create the invoice for caution + cotisation
     $cotisationType="naviguant";
     if($typemembre=="nonnaviguant") $cotisationType="nonnaviguant";
-    if($insertFlag) {
+    if($insertOdooFlag) {
         if(!OF_CreateFactureCotisation($jom_id, $cotisationType,$membership_year)) {
             return "Impossible to create the invoice in Odoo!";
         }
