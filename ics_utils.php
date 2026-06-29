@@ -54,7 +54,7 @@ function emit_header($headers) {
 		"CALSCALE:GREGORIAN" . $eol .
 		"METHOD:PUBLISH" . $eol .
 		"X-WR-CALNAME:$ical_name" . (($test_mode) ? ' test' : '') . $eol . 
-		"ORGANIZER:$ical_organizer:mailto:bounce@spa-aviation.be" . $eol .
+		"ORGANIZER:$ical_organizer:mailto:no-reply@spa-aviation.be" . $eol .
 		"DESCRIPTION:$ical_name" . $eol .
 		"X-WR-CALDESC:$ical_name" . $eol .
 		"IMAGE;VALUE=URI;DISPLAY=BADGE:$favicon" . $eol .
@@ -85,7 +85,7 @@ function emit_booking($booking) {
 		"DTSTAMP:$date_time_booking" . $eol .
 	    	"DTSTART:$date_flight_start" . $eol .
 		"DTEND:$date_flight_end" . $eol .
-		"ORGANIZER;CN=$ical_organizer:mailto:bounce@spa-aviation.be" . $eol .
+		"ORGANIZER;CN=$ical_organizer:mailto:no-reply@spa-aviation.be" . $eol .
 		"UID:booking-$booking[r_id]@$_SERVER[HTTP_HOST]" . $eol .
 		// DESCRIPTION: the details in the description
 		"DESCRIPTION:Réservation du $booking[r_plane] du " . $eol .
