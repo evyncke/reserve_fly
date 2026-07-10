@@ -1596,7 +1596,7 @@ function fillQRCode(communication, amount, theAfterString) {
 	// There should be 2 reasons, first one is structured, the second one is free text
 	var epcPurpose = '' ; // No clue what to put in this 4-char field
 	//var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount.toFixed(2) + "\n" + epcPurpose + "\n" + "\n" + "TEXT"+ "\n"+ communication + "\n";
-	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount.toFixed(2) + "\n" + epcPurpose + "\n" + communication + "\n"+ "\n";
+	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount.toFixed(2) + "\n" + epcPurpose + "\n" + "\n" + communication + "\n";
 	document.getElementById('id_payment_qr_code'+theAfterString).src = "https://spa-aviation.be/resa/qr-code.php?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 	//document.getElementById('id_payment_qr_code'+theAfterString).src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 
