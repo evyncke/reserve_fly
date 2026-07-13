@@ -217,7 +217,7 @@ if ($userIsInstructor or $userIsAdmin or $userIsBoardMember) {
 }
 
 if ($previous_month)	
-	$document_title = 'Folio (estimation de la facture provisoire)' ;
+	$document_title = 'Folio (estimation de la facture mensuelle)' ;
 else
 	$document_title = 'Reconstruction d\'une facture' ;
 // Display today in the local language in human language
