@@ -176,7 +176,7 @@ $joomla_session->start() ; // Keep alive?
 
 function CheckJoomlaUser($joomla_user) {
 	global $userIsPilot, $userIsAdmin, $userIsBoardMember, $userIsInstructor, $userIsMechanic,$userIsStudent, $userIsTheoryStudent, $userIsFlyingStudent,
-		$userIsFlightPilot, $userIsFlightManager, $userNoFlight ;
+		$userIsFlightPilot, $userIsFlightManager, $userNoFlight, $userIsManualManager ;
 	global $userName, $userFullName, $userId, $originUserId ;
 	global $joomla_admin_group, $joomla_sysadmin_group, $joomla_superuser_group, $joomla_board_group ;
 	global $joomla_pilot_group, $joomla_flying_student_group, $joomla_theory_student_group, $joomla_instructor_group, $joomla_instructor_group2, $joomla_mechanic_group ;
@@ -211,6 +211,7 @@ function CheckJoomlaUser($joomla_user) {
 	$userIsFlightPilot = array_key_exists($joomla_flight_pilot_group, $joomla_groups) || array_key_exists($joomla_flight_group, $joomla_groups);
 	$userIsFlightManager = array_key_exists($joomla_flight_manager_group, $joomla_groups) ;
 	$userNoFlight = array_key_exists($joomla_no_flight, $joomla_groups) ;
+	$userIsManualManager = ($userId==429) ; // Daniel Albrech manage manuals
 }
 
 function MustBeLoggedIn() {

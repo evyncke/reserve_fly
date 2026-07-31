@@ -540,7 +540,7 @@ if ($userId <= 0) {
               <a class="dropdown-item" href="mobile_ledger.php">Mes opérations comptables</a>
               <a class="dropdown-item" href="notedefrais.php">Note de frais</a>
 <?php
-if ($userIsBoardMember or $userIsInstructor) {
+if ($userIsBoardMember or $userIsInstructor or $userIsManualManager) {
 ?>
               <a class="dropdown-item text-warning" href="bondecommande.php"><i class="bi bi-bag-fill"></i> Bon de Commande</a>
 <?php

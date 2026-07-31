@@ -73,7 +73,22 @@ function updateSubmitButton()
     if(nodedefrais_size==0) {
         return;
     }
- 
+    var manuelFlag=false;
+    for(var i=0; i<nodedefrais_size; i++) {
+        var manualRef=bondecommande_reference[i].substring(0,2);
+        if(i==0) {
+            if(manualRef=="M.") {
+                manuelFlag=true;
+            }
+        }
+        else {
+           if((manualRef=="M."&& !manuelFlag) || manualRef!="M."&& manuelFlag) {
+                alert("Dans un bon de commande, on ne peut pas mélanger des manuels avec d'autres types d'articles.\nLes facturations ne sont pas traitées de la même façon et par les mêmes personnes.\nVeuillez créer 2 Bons de Commandes séparés!.");
+                return;
+            }
+        }
+    }
+
     document.getElementById("id_submit_bondecommande").disabled=false;
 }
 //==============================================

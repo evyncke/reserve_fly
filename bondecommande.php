@@ -103,7 +103,8 @@ if (isset($_REQUEST['bondecommande_json'])) {
 
 
 $selectorDisabled="disabled";
-if ($userIsAdmin or $userIsBoardMember) $selectorDisabled="";
+//print("BonCommande: userID=$userId, userIsManualManager=$userIsManualManager<br>");
+if ($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userIsManualManager) $selectorDisabled="";
 
 
 //print("<script>var bondecommandeJSONString='toto';</script>");

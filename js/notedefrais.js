@@ -148,7 +148,7 @@ function updateSubmitButton()
     if(document.getElementById("id_notedefrais_input_justificatif").value=="") {
         // Check if type = TKI => pas besoin de fiches justificatives
         for(var i=0;i<nodedefrais_size;i++){
-            if(notedefrais_type[i]!="TKI") {
+            if(notedefrais_type[i]!="TKI" && notedefrais_type[i]!="deplacement") {
                 document.getElementById("id_notedefrais_input_justificatif").style.backgroundColor = ErrorColor;
                 return;
             }

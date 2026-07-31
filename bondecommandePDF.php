@@ -26,14 +26,20 @@ function PDF_createBonDeCommande($BonDeCommandelines, $expenseReport_date, $part
 	//print("<br>PDF_createBonDeCommande: PDF Version<br>");
 	$BonDeCommandeFolder="uploads/bondecommande";
 	$theUploadFolder=$BonDeCommandeFolder;
-	$nextExpenseReport=PDF_getBonDeCommandeNumber();
+	$nextExpenseReportNumber=PDF_getBonDeCommandeNumber();
 	$communication="communication ???";
 	$entrepriseName="";
 	$bce="";
 	$date=date_create();
 	$year=date_format($date,"Y");
-	$nextExpenseReport="BC-".$year."-".$nextExpenseReport;
+	$nextExpenseReport="BC-".$year."-".$nextExpenseReportNumber;
 	$facturesMail="bon_de_commande@spa-aviation.odoo.com";
+	if(PDF_isBonDeCommandeForManuel($BonDeCommandelines)) {
+		// It Bon de commande for manual => mail to Daniel
+		$facturesMail="bon.commande.manuel@spa-aviation.be";
+		//$facturesMail="albrechtd75@gmail.com";
+		$nextExpenseReport="BCM-".$year."-".$nextExpenseReportNumber;
+	}
 	$theFactureMailTo=$facturesMail;
 	$BonDeCommandeFile=$nextExpenseReport.".pdf";
 	$aNewAttachedFileName="";
@@ -79,6 +85,25 @@ function PDF_createBonDeCommande($BonDeCommandelines, $expenseReport_date, $part
 
 	//print("<br>PDF_createBonDeCommande: PDF Version: End<br>");
  	return $BonDeCommandeFile;
+}
+//Check if it a "bon de commande" for manuel => Not the same facture mail address
+function PDF_isBonDeCommandeForManuel($BonDeCommandelines)
+{
+	printf("PDF_isBonDeCommandeForManuel:start<br>");
+	$BonDeCommandeSize=sizeof($BonDeCommandelines);
+    for($i=0;$i<$BonDeCommandeSize;$i++) {
+        $nodedefraisLine=$BonDeCommandelines[$i];
+        $reference=$nodedefraisLine["reference"];
+		$pos = strpos($reference, "M.");
+		if ($pos !== false) {
+			if ($pos == 0) {
+				printf("PDF_isBonDeCommandeForManuel:It is a manual<br>");
+				return true;
+			}
+		}
+    }	
+	printf("PDF_isBonDeCommandeForManuel:It is NOT a manual<br>");
+	return false;
 }
 
 // Get the next bon de commande number
