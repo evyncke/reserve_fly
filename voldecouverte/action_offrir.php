@@ -158,38 +158,75 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$flight_type = 'B' ; 
 	else 
 		$flight_type = '?' ;
-	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_street, p_zip, p_city, p_country)
-			VALUES(
-			'" . mysqli_real_escape_string($mysqli_link, web2db($lastname1)) . "',
-			'" . mysqli_real_escape_string($mysqli_link, web2db($firstname1)) . "',
-			'" . mysqli_real_escape_string($mysqli_link, $_REQUEST['contactmail']) . "',
-			'" . mysqli_real_escape_string($mysqli_link, $contactphone) . "', 
-			'" . mysqli_real_escape_string($mysqli_link, web2db("$rue $boitelettre")) . "', 
-			'" . mysqli_real_escape_string($mysqli_link, $codepostal) . "',
-			'" . mysqli_real_escape_string($mysqli_link, web2db("$ville")) . "', 
-			'" . mysqli_real_escape_string($mysqli_link, web2db("$pays")) . "')")
-			or journalise(0, "E", "Cannot add contact, system error: " . mysqli_error($mysqli_link)) ;
-	$contact_id = mysqli_insert_id($mysqli_link) ;
-	mysqli_query($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel)
-			VALUES(
-			'" . mysqli_real_escape_string($mysqli_link, web2db($lastname2)) . "',
-			'" . mysqli_real_escape_string($mysqli_link, web2db($firstname2)) . "',
-			'" . mysqli_real_escape_string($mysqli_link, $destinatairemail) . "',
-			'" . mysqli_real_escape_string($mysqli_link, $destinatairephone) . "')")
-			or journalise(0, "E", "Cannot add pilot, system error: " . mysqli_error($mysqli_link)) ;
-	$pax_id = mysqli_insert_id($mysqli_link) ;
-	mysqli_query($mysqli_link, "INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_gift, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_pilot)
-			VALUES(SYSDATE(), 0, '$flight_type', 1, $numberofpassagers, $circuitnumber, NULL, NULL, NULL,
-			'" . mysqli_real_escape_string($mysqli_link, web2db("$remarque\n$messageforgift")) . "',
-			NULL)")
-			or journalise(0, "E", "Cannot add flight, system error: " . mysqli_error($mysqli_link)) ;
-	$flight_id = mysqli_insert_id($mysqli_link) ;
-	mysqli_query($mysqli_link, "INSERT INTO $table_pax_role(pr_flight, pr_pax, pr_role)
-			VALUES($flight_id, $contact_id, 'C')")
-			or journalise(0, "E", "Cannot add contact role C, system error: " . mysqli_error($mysqli_link)) ;
-	mysqli_query($mysqli_link, "INSERT INTO $table_pax_role(pr_flight, pr_pax, pr_role)
-		VALUES($flight_id, $pax_id, 'S')")
-		or journalise(0, "E", "Cannot add student role $role, system error: " . mysqli_error($mysqli_link)) ;
+	// Insert contact using prepared statement
+	$stmt = mysqli_prepare($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel, p_street, p_zip, p_city, p_country) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+	if ($stmt) {
+		$lname = web2db($lastname1);
+		$fname = web2db($firstname1);
+		$email = $_REQUEST['contactmail'];
+		$tel = $contactphone;
+		$street = web2db("$rue $boitelettre");
+		$zip = $codepostal;
+		$city = web2db("$ville");
+		$country = web2db("$pays");
+		mysqli_stmt_bind_param($stmt, 'ssssssss', $lname, $fname, $email, $tel, $street, $zip, $city, $country);
+		if (!mysqli_stmt_execute($stmt)) {
+			journalise(0, "E", "Cannot add contact, system error: " . mysqli_error($mysqli_link));
+		}
+		$contact_id = mysqli_insert_id($mysqli_link);
+		mysqli_stmt_close($stmt);
+	} else {
+		journalise(0, "E", "Cannot prepare statement for adding contact: " . mysqli_error($mysqli_link));
+	}
+	// Insert recipient/pax using prepared statement
+	$stmt = mysqli_prepare($mysqli_link, "INSERT INTO $table_pax (p_lname, p_fname, p_email, p_tel) VALUES (?, ?, ?, ?)");
+	if ($stmt) {
+		$lname2 = web2db($lastname2);
+		$fname2 = web2db($firstname2);
+		$destmail = $destinatairemail;
+		$desttel = $destinatairephone;
+		mysqli_stmt_bind_param($stmt, 'ssss', $lname2, $fname2, $destmail, $desttel);
+		if (!mysqli_stmt_execute($stmt)) {
+			journalise(0, "E", "Cannot add pilot, system error: " . mysqli_error($mysqli_link));
+		}
+		$pax_id = mysqli_insert_id($mysqli_link);
+		mysqli_stmt_close($stmt);
+	} else {
+		journalise(0, "E", "Cannot prepare statement for adding pilot: " . mysqli_error($mysqli_link));
+	}
+	// Insert flight using prepared statement
+	$stmt = mysqli_prepare($mysqli_link, "INSERT INTO $table_flight (f_date_created, f_who_created, f_type, f_gift, f_pax_cnt, f_circuit, f_date_1, f_date_2, f_schedule, f_description, f_pilot) VALUES (SYSDATE(), 0, ?, 1, ?, ?, NULL, NULL, NULL, ?, NULL)");
+	if ($stmt) {
+		$ftype = $flight_type;
+		$paxcnt = (int)$numberofpassagers;
+		$circ = (int)$circuitnumber;
+		$desc = web2db("$remarque\n$messageforgift");
+		mysqli_stmt_bind_param($stmt, 'siis', $ftype, $paxcnt, $circ, $desc);
+		if (!mysqli_stmt_execute($stmt)) {
+			journalise(0, "E", "Cannot add flight, system error: " . mysqli_error($mysqli_link));
+		}
+		$flight_id = mysqli_insert_id($mysqli_link);
+		mysqli_stmt_close($stmt);
+	} else {
+		journalise(0, "E", "Cannot prepare statement for adding flight: " . mysqli_error($mysqli_link));
+	}
+	// Insert pax roles with prepared statements
+	$stmt = mysqli_prepare($mysqli_link, "INSERT INTO $table_pax_role(pr_flight, pr_pax, pr_role) VALUES (?, ?, ?)");
+	if ($stmt) {
+		$roleC = 'C';
+		$roleS = 'S';
+		mysqli_stmt_bind_param($stmt, 'iis', $flight_id, $contact_id, $roleC);
+		if (!mysqli_stmt_execute($stmt)) {
+			journalise(0, "E", "Cannot add contact role C, system error: " . mysqli_error($mysqli_link));
+		}
+		mysqli_stmt_bind_param($stmt, 'iis', $flight_id, $pax_id, $roleS);
+		if (!mysqli_stmt_execute($stmt)) {
+			journalise(0, "E", "Cannot add student role $role, system error: " . mysqli_error($mysqli_link));
+		}
+		mysqli_stmt_close($stmt);
+	} else {
+		journalise(0, "E", "Cannot prepare statement for inserting pax_role: " . mysqli_error($mysqli_link));
+	}
 	$prefix = 'V-'  ; // As it is a voucher
 	$type = 'IF-';
     if($flight_type == 'I')
@@ -200,10 +237,19 @@ if(!empty($errormessage) || empty($valeur_versement)) {
         $type='IF-';
     
 	$flight_reference = $prefix . $type . sprintf("%06d", $flight_id) ;
-	mysqli_query($mysqli_link, "UPDATE $table_flight 
-							SET f_reference='$flight_reference' 
-							WHERE f_id=$flight_id")
-				or journalise(0, 'E', "Cannot update reference in $table_flight to $flight_reference: " . mysqli_error($mysqli_link)) ;
+	// Update flight reference using prepared statement
+	$stmt = mysqli_prepare($mysqli_link, "UPDATE $table_flight SET f_reference=? WHERE f_id=?");
+	if ($stmt) {
+		$ref = $flight_reference;
+		$id = (int)$flight_id;
+		mysqli_stmt_bind_param($stmt, 'si', $ref, $id);
+		if (!mysqli_stmt_execute($stmt)) {
+			journalise(0, 'E', "Cannot update reference in $table_flight to $flight_reference: " . mysqli_error($mysqli_link));
+		}
+		mysqli_stmt_close($stmt);
+	} else {
+		journalise(0, 'E', "Cannot prepare statement for updating flight reference: " . mysqli_error($mysqli_link));
+	}
 	journalise(0, 'I', "Discovery flight ($flight_reference) created for $lastname1 $firstname1 ($remarque)") ;
 	if($language=="french") {
 		$message = "Date demande: ".$today."<br/>";
@@ -382,7 +428,8 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 }
 ?>
         <p>
-		<h2><?php if($language=="french") {
+		<h2><?php 
+		if($language=="french") {
 			echo("R&eacute;sum&eacute; de votre demande $flight_reference");
 		}
 		else {
