@@ -1,4 +1,22 @@
 <?php
+
+/*
+   Copyright 2026-2026 Eric Vyncke
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
+
 // MCP Agent API - provides access to bookings, users, invoices, folios and students
 // Authentication: require $userIsMember != 0
 
@@ -52,9 +70,13 @@ function respondJson($payload, $statusCode = 200) {
 }
 
 function qFetchAll($sql) {
-    global $mysqli_link;
+    global $mysqli_link, $userId;
+    journalise($userId, 'D', "qFetchAll: executing SQL: $sql");
     $res = mysqli_query($mysqli_link, $sql);
-    if ($res === false) return ['error' => mysqli_error($mysqli_link)];
+    if ($res === false) {
+        journalise($userId, 'E', "qFetchAll: SQL error: " . mysqli_error($mysqli_link) . " for query: $sql");
+        return ['error' => mysqli_error($mysqli_link)];
+    }
     $rows = [];
     while ($r = mysqli_fetch_assoc($res)) $rows[] = $r;
     mysqli_free_result($res);
@@ -62,19 +84,33 @@ function qFetchAll($sql) {
 }
 
 function fetchResourceData($resource, $id = 0, $limit = 200) {
-    global $table_bookings, $table_users, $table_bk_invoices, $table_flights, $table_dto_student, $table_logbook, $table_planes, $table_incident;
+    global $table_bookings, $table_person, $table_bk_invoices, $table_flights, $table_dto_student, $table_logbook, $table_planes, $table_incident;
 
     switch ($resource) {
         case 'bookings':
             if ($id > 0) {
-                $sql = "SELECT r_id AS id, r_plane, r_pilot, r_instructor, r_start, r_stop, r_type, CONVERT(r_comment USING UTF8) AS comment, r_date FROM $table_bookings WHERE r_id = $id";
+                $sql = "SELECT r_id AS id, r_plane, r_pilot, r_instructor, r_start, r_stop, r_type, CONVERT(r_comment USING UTF8) AS comment, r_date 
+                    FROM $table_bookings 
+                    WHERE r_id = $id";
                 return qFetchAll($sql);
             }
-            $sql = "SELECT r_id AS id, r_plane, r_pilot, r_instructor, r_start, r_stop, r_type, CONVERT(r_comment USING UTF8) AS comment, r_date FROM $table_bookings ORDER BY r_date DESC LIMIT $limit";
+            $sql = "SELECT r_id AS id, r_plane, r_pilot, r_instructor, r_start, r_stop, r_type, CONVERT(r_comment USING UTF8) AS comment, r_date 
+                FROM $table_bookings ORDER BY r_date DESC LIMIT $limit";
             return qFetchAll($sql);
 
         case 'users':
-            $sql = "SELECT id, username, name, email FROM $table_users ORDER BY name LIMIT $limit";
+            if ($id > 0) {
+                $sql = "SELECT jom_id as id, name AS username, CONVERT(first_name USING UTF8) AS first_name, CONVERT(last_name USING UTF8) AS last_name, 
+                    email, cell_phone, 
+                    CONVERT(address USING UTF8) AS address, CONVERT(city USING UTF8) AS city, zipcode, country
+                    FROM $table_person
+                    WHERE jom_id = $id";
+                return qFetchAll($sql);
+            }
+            $sql = "SELECT jom_id as id, name AS username, CONVERT(first_name USING UTF8) AS first_name, CONVERT(last_name USING UTF8) AS last_name, 
+                email, cell_phone, 
+                CONVERT(address USING UTF8) AS address, CONVERT(city USING UTF8) AS city, zipcode, country
+                FROM $table_person ORDER BY last_name, first_name LIMIT $limit";
             return qFetchAll($sql);
 
         case 'invoices':
@@ -86,7 +122,14 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
             return qFetchAll($sql);
 
         case 'students':
-            $sql = "SELECT s_id AS id, s_name AS name, s_email AS email, s_status AS status FROM $table_dto_student LIMIT $limit";
+            if ($id > 0) {
+                $sql = "SELECT ds_jom_id AS id, ds_year AS year,  
+                    FROM $table_dto_student 
+                    WHERE ds_jom_id = $id";
+                return qFetchAll($sql);
+            }
+            $sql = "SELECT ds_jom_id AS id, ds_year AS year,  
+                FROM $table_dto_student LIMIT $limit";
             $res = qFetchAll($sql);
             if (isset($res['error'])) {
                 return qFetchAll("SELECT * FROM $table_dto_student LIMIT $limit");
@@ -139,7 +182,10 @@ function getMcpTools() {
             'description' => 'Return users from the booking system',
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => ['limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 500]],
+                'properties' => [
+                    'id' => ['type' => 'integer', 'description' => 'Optional user id'],
+                    'limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 500]
+                ],
                 'additionalProperties' => false
             ]
         ],
@@ -166,7 +212,10 @@ function getMcpTools() {
             'description' => 'Return students',
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => ['limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 500]],
+                'properties' => [
+                    'id' => ['type' => 'integer', 'description' => 'Optional student id'],
+                    'limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 500]
+                ],
                 'additionalProperties' => false
             ]
         ],
@@ -175,7 +224,10 @@ function getMcpTools() {
             'description' => 'Return rows from the configured flight logs table',
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => ['limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 200]],
+                'properties' => [
+                    'id' => ['type' => 'integer', 'description' => 'Optional logbook id'],
+                    'limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 200]
+                ],
                 'additionalProperties' => false
             ]
         ],
@@ -207,6 +259,8 @@ function getMcpTools() {
 }
 
 function handleMcpRequest($payload) {
+    global $userId;
+
     if (!is_array($payload) || ($payload['jsonrpc'] ?? null) !== '2.0') {
         return ['jsonrpc' => '2.0', 'error' => ['code' => -32600, 'message' => 'Invalid Request'], 'id' => null];
     }
@@ -214,6 +268,8 @@ function handleMcpRequest($payload) {
     $method = $payload['method'] ?? '';
     $id = $payload['id'] ?? null;
     $params = $payload['params'] ?? [];
+
+    journalise($userId, 'I', "handleMcpRequest(): method=$method, id=$id");
 
     if ($method === 'initialize') {
         return ['jsonrpc' => '2.0', 'id' => $id, 'result' => [
@@ -244,7 +300,7 @@ function handleMcpRequest($payload) {
                 $toolResult = fetchResourceData('bookings', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 200));
                 break;
             case 'get_users':
-                $toolResult = fetchResourceData('users', 0, intval($arguments['limit'] ?? 500));
+                $toolResult = fetchResourceData('users', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 500));
                 break;
             case 'get_invoices':
                 $toolResult = fetchResourceData('invoices', 0, intval($arguments['limit'] ?? 500));
@@ -253,10 +309,10 @@ function handleMcpRequest($payload) {
                 $toolResult = fetchResourceData('folios', 0, intval($arguments['limit'] ?? 500));
                 break;
             case 'get_students':
-                $toolResult = fetchResourceData('students', 0, intval($arguments['limit'] ?? 500));
+                $toolResult = fetchResourceData('students', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 500));
                 break;
             case 'get_logbooks':
-                $toolResult = fetchResourceData('logbooks', 0, intval($arguments['limit'] ?? 200));
+                $toolResult = fetchResourceData('logbooks', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 200));
                 break;
             case 'get_planes':
                 $toolResult = fetchResourceData('planes', 0, intval($arguments['limit'] ?? 200));
@@ -307,8 +363,6 @@ if (!$authenticated) {
 
 $resource = isset($_REQUEST['resource']) ? $_REQUEST['resource'] : '';
 $id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
-
-journalise($userId, 'I', "api.php: resource=$resource id=$id");
 
 $httpMethod = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 if ($httpMethod === 'POST') {
