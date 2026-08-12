@@ -71,7 +71,7 @@ function respondJson($payload, $statusCode = 200) {
 
 function qFetchAll($sql) {
     global $mysqli_link, $userId;
-    journalise($userId, 'D', "qFetchAll: executing SQL: $sql");
+//    journalise($userId, 'D', "qFetchAll: executing SQL: $sql");
     $res = mysqli_query($mysqli_link, $sql);
     if ($res === false) {
         journalise($userId, 'E', "qFetchAll: SQL error: " . mysqli_error($mysqli_link) . " for query: $sql");
@@ -123,12 +123,12 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
 
         case 'students':
             if ($id > 0) {
-                $sql = "SELECT ds_jom_id AS id, ds_year AS year,  
+                $sql = "SELECT ds_jom_id AS id, ds_year AS year  
                     FROM $table_dto_student 
                     WHERE ds_jom_id = $id";
                 return qFetchAll($sql);
             }
-            $sql = "SELECT ds_jom_id AS id, ds_year AS year,  
+            $sql = "SELECT ds_jom_id AS id, ds_year AS year
                 FROM $table_dto_student LIMIT $limit";
             $res = qFetchAll($sql);
             if (isset($res['error'])) {
@@ -160,16 +160,20 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
             if ($id > 0) {
                 $sql = "SELECT i.*, 
                     (SELECT CONVERT(ih_text USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id AND h.ih_status = 'opened' ORDER BY h.ih_id ASC LIMIT 1) AS description,
+                    (SELECT ih.ih_when FROM $table_incident_history ih WHERE ih.ih_incident = i.i_id AND ih.ih_status = 'opened' ORDER BY ih.ih_id ASC LIMIT 1) AS created_date,
                     (SELECT CONVERT(ih_text USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS latest_description,
-                    (SELECT CONVERT(ih_status USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS status
+                    (SELECT ih.ih_when FROM $table_incident_history ih WHERE ih.ih_incident = i.i_id ORDER BY ih.ih_id DESC LIMIT 1) AS latest_date,
+                    (SELECT CONVERT(ih_status USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS latest_status
                     FROM $table_incident AS i
                     WHERE i.i_id = $id LIMIT 1";
                 return qFetchAll($sql);
             }
             $sql = "SELECT i.*, 
                 (SELECT CONVERT(ih_text USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id AND h.ih_status = 'opened' ORDER BY h.ih_id ASC LIMIT 1) AS description,
+                (SELECT ih.ih_when FROM $table_incident_history ih WHERE ih.ih_incident = i.i_id AND ih.ih_status = 'opened' ORDER BY ih.ih_id ASC LIMIT 1) AS created_date,
                 (SELECT CONVERT(ih_text USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS latest_description,
-                (SELECT CONVERT(ih_status USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS status
+                (SELECT ih.ih_when FROM $table_incident_history ih WHERE ih.ih_incident = i.i_id ORDER BY ih.ih_id DESC LIMIT 1) AS latest_date,
+                (SELECT CONVERT(ih_status USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS latest_status
                 FROM $table_incident AS i
                 ORDER BY i.i_id DESC LIMIT $limit";
             return qFetchAll($sql);
