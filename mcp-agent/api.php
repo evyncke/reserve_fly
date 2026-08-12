@@ -84,7 +84,7 @@ function qFetchAll($sql) {
 }
 
 function fetchResourceData($resource, $id = 0, $limit = 200) {
-    global $table_bookings, $table_person, $table_bk_invoices, $table_flights, $table_dto_student, $table_logbook, $table_planes, $table_incident;
+    global $table_bookings, $table_person, $table_bk_invoices, $table_flights, $table_dto_student, $table_logbook, $table_planes, $table_incident, $table_incident_history;
 
     switch ($resource) {
         case 'bookings':
@@ -153,10 +153,26 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
             return qFetchAll("SELECT * FROM $table_planes ORDER BY id LIMIT $limit");
 
         case 'incidents':
+            // Return incident rows enriched with history-based fields:
+            // - description: the ih_text for the record where ih_status='opened' (first opened text)
+            // - latest_description: ih_text of the most recent history entry
+            // - status: ih_status of the most recent history entry
             if ($id > 0) {
-                return qFetchAll("SELECT * FROM $table_incident WHERE i_id = $id LIMIT 1");
+                $sql = "SELECT i.*, 
+                    (SELECT CONVERT(ih_text USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id AND h.ih_status = 'opened' ORDER BY h.ih_id ASC LIMIT 1) AS description,
+                    (SELECT CONVERT(ih_text USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS latest_description,
+                    (SELECT CONVERT(ih_status USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS status
+                    FROM $table_incident AS i
+                    WHERE i.i_id = $id LIMIT 1";
+                return qFetchAll($sql);
             }
-            return qFetchAll("SELECT * FROM $table_incident ORDER BY i_id DESC LIMIT $limit");
+            $sql = "SELECT i.*, 
+                (SELECT CONVERT(ih_text USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id AND h.ih_status = 'opened' ORDER BY h.ih_id ASC LIMIT 1) AS description,
+                (SELECT CONVERT(ih_text USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS latest_description,
+                (SELECT CONVERT(ih_status USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS status
+                FROM $table_incident AS i
+                ORDER BY i.i_id DESC LIMIT $limit";
+            return qFetchAll($sql);
 
         default:
             return ['error' => 'unknown_resource', 'message' => 'resource not found', 'available' => ['bookings', 'users', 'invoices', 'folios', 'students', 'logs', 'planes', 'incidents']];
