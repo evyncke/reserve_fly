@@ -469,7 +469,17 @@ function journalise($userId, $severity, $message) {
 	$remote_address = getClientAddress() ;
 	$message = web2db($message) ;
 	$message = mysqli_real_escape_string($mysqli_link, $message) ;
-	$uri = $_SERVER['REQUEST_URI'] ;
+	// Clean the request URI by removing sensitive query parameters (username, password)
+	$raw_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '' ;
+	$uri_parts = parse_url($raw_uri);
+	$path = isset($uri_parts['path']) ? $uri_parts['path'] : '';
+	$query = isset($uri_parts['query']) ? $uri_parts['query'] : '';
+	parse_str($query, $query_params);
+	// Remove sensitive keys if present
+	if (isset($query_params['username'])) unset($query_params['username']);
+	if (isset($query_params['password'])) unset($query_params['password']);
+	$new_query = http_build_query($query_params);
+	$uri = $path . ($new_query !== '' ? '?' . $new_query : '');
 	$trusted_booker = (isset($_COOKIE['trusted_booker']) and $_COOKIE['trusted_booker'] == 1) ? 1 : 0 ;
 	$params = '' ;
 	foreach($_POST as $var => $value) {
