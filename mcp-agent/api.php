@@ -85,6 +85,7 @@ function qFetchAll($sql) {
 
 function fetchResourceData($resource, $id = 0, $limit = 200) {
     global $table_bookings, $table_person, $table_bk_invoices, $table_flights, $table_dto_student, $table_logbook, $table_planes, $table_incident, $table_incident_history;
+    global $userId, $userIsInstructor, $userIsBoardMember, $odoo_host, $odoo_db, $odoo_username, $odoo_password, $mysqli_link ;
 
     switch ($resource) {
         case 'bookings':
@@ -100,22 +101,41 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
 
         case 'users':
             if ($id > 0) {
-                $sql = "SELECT jom_id as id, name AS username, CONVERT(first_name USING UTF8) AS first_name, CONVERT(last_name USING UTF8) AS last_name, 
+                $sql = "SELECT jom_id as id, odoo_id, name AS username, CONVERT(first_name USING UTF8) AS first_name, CONVERT(last_name USING UTF8) AS last_name, 
                     email, cell_phone, 
                     CONVERT(address USING UTF8) AS address, CONVERT(city USING UTF8) AS city, zipcode, country
                     FROM $table_person
                     WHERE jom_id = $id";
                 return qFetchAll($sql);
             }
-            $sql = "SELECT jom_id as id, name AS username, CONVERT(first_name USING UTF8) AS first_name, CONVERT(last_name USING UTF8) AS last_name, 
+            $sql = "SELECT jom_id as id, odoo_id, name AS username, CONVERT(first_name USING UTF8) AS first_name, CONVERT(last_name USING UTF8) AS last_name, 
                 email, cell_phone, 
                 CONVERT(address USING UTF8) AS address, CONVERT(city USING UTF8) AS city, zipcode, country
                 FROM $table_person ORDER BY last_name, first_name LIMIT $limit";
             return qFetchAll($sql);
 
         case 'invoices':
-            $sql = "SELECT id, b_number, b_date, b_amount, b_partner_id FROM $table_bk_invoices ORDER BY b_date DESC LIMIT $limit";
-            return qFetchAll($sql);
+            // If an Odoo partner id is provided (passed as $id), fetch invoices from Odoo
+            if ($id > 0) {
+                $res = mysqli_query($mysqli_link, "SELECT odoo_id FROM $table_person WHERE jom_id = $userId LIMIT 1");
+                if ($res === NULL) return ['error' => 'no_jom_id', 'message' => 'Unknown logged-in user'];
+                $row = mysqli_fetch_assoc($res);
+                if ($row === NULL) return ['error' => 'no_odoo_id', 'message' => 'Cannot fetch Odoo partner id for logged-in user'];
+                $odooId = $row['odoo_id'];
+                if ($odooId != $id and ! ($userIsInstructor || $userIsBoardMember)) {
+                    journalise($userId, 'E', "Requested Odoo partner id ($id) does not match logged-in user's Odoo partner id ($odooId)");
+                    return ['error' => 'odoo_no_access', 'message' => "Requested Odoo partner id ($id) does not match logged-in user's Odoo partner id ($odooId)"];
+                }
+                require_once __DIR__ . '/../odoo.class.php';
+                $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password, false);
+                $domain = array(array(array('partner_id', '=', $id)));
+                $display = array('fields' => array('id', 'name', 'move_type', 'invoice_date', 'amount_total', 'state', 'payment_state'), 'limit' => $limit, 'order' => 'invoice_date desc');
+                $res = $odooClient->SearchRead('account.move', $domain, $display);
+                if ($res === NULL) return ['error' => 'odoo_error', 'message' => $odooClient->errorMessage ?? 'unknown'];
+                return $res;
+            }
+            journalise($userId, 'E', "fetchResourceData(): invoices resource requires an Odoo partner id (odoo_id) to be provided");
+            return ['error' => 'missing_odoo_id', 'message' => 'invoices resource requires an Odoo partner id (odoo_id) to be provided'] ;
 
         case 'folios':
             $sql = "SELECT f_id AS id, f_reference AS reference, f_date AS date, f_booking AS booking FROM $table_flights ORDER BY f_date DESC LIMIT $limit";
@@ -138,12 +158,14 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
 
         case 'logbooks':
             if ($id > 0) {
-                $sql = "SELECT l_id AS id, l_plane, l_model, l_pilot, l_instructor, l_start, l_stop, CONVERT(l_flight_type USING UTF8) AS flight_type, l_from, l_to, l_pilot, l_instructor
+                $sql = "SELECT l_id AS id, l_plane, l_model, l_pilot, l_instructor, l_start, l_end, CONVERT(l_flight_type USING UTF8) AS flight_type, l_from, l_to, l_pilot, l_instructor
                 FROM $table_logbook WHERE l_id = $id";
+                journalise($userId, 'D', "fetchResourceData(): logbooks resource fetch for id=$id SQL: $sql");
                 return qFetchAll($sql);
             }
-            $sql = "SELECT l_id AS id, l_plane, l_model, l_pilot, l_instructor, l_start, l_stop, CONVERT(l_flight_type USING UTF8) AS flight_type, l_from, l_to, l_pilot, l_instructor
-                FROM $table_logbook ORDER BY l_date DESC LIMIT $limit";
+            $sql = "SELECT l_id AS id, l_plane, l_model, l_pilot, l_instructor, l_start, l_end, CONVERT(l_flight_type USING UTF8) AS flight_type, l_from, l_to, l_pilot, l_instructor
+                FROM $table_logbook ORDER BY l_start DESC LIMIT $limit";
+            journalise($userId, 'D', "fetchResourceData(): logbooks resource fetch for id=$id SQL: $sql");
             return qFetchAll($sql);
 
         case 'planes':
@@ -178,6 +200,23 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
                 ORDER BY i.i_id DESC LIMIT $limit";
             return qFetchAll($sql);
 
+        case 'weather':
+            // Fetch METAR text for EBSP and return it as 'METAR'
+            $url = 'https://nav.vyncke.org/EBSP.TXT';
+            $opts = [
+                'http' => [
+                    'method' => 'GET',
+                    'timeout' => 5,
+                    'header' => "User-Agent: RAPCS-MCP-Agent/1.0\r\n"
+                ]
+            ];
+            $context = stream_context_create($opts);
+            $content = @file_get_contents($url, false, $context);
+            if ($content === false) {
+                return ['error' => 'fetch_failed', 'message' => "Cannot fetch $url"];
+            }
+            return ['METAR' => $content, 'source' => $url];
+
         default:
             return ['error' => 'unknown_resource', 'message' => 'resource not found', 'available' => ['bookings', 'users', 'invoices', 'folios', 'students', 'logs', 'planes', 'incidents']];
     }
@@ -199,7 +238,7 @@ function getMcpTools() {
         ],
         [
             'name' => 'get_users',
-            'description' => 'Return users from the booking system',
+            'description' => 'Return users/members from the booking system or a user by id',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -211,16 +250,19 @@ function getMcpTools() {
         ],
         [
             'name' => 'get_invoices',
-            'description' => 'Return invoices from the booking system',
+            'description' => 'Return invoices for a specific Odoo partner id',
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => ['limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 500]],
+                'properties' => [
+                    'odoo_id' => ['type' => 'integer', 'description' => 'Odoo partner id'],
+                    'limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 500]
+                ],
                 'additionalProperties' => false
             ]
         ],
         [
             'name' => 'get_folios',
-            'description' => 'Return folios or flights',
+            'description' => 'Return folios of invoices from the booking system',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => ['limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 500]],
@@ -229,7 +271,7 @@ function getMcpTools() {
         ],
         [
             'name' => 'get_students',
-            'description' => 'Return students',
+            'description' => 'Return students from the RAPCS DTO system',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -241,7 +283,7 @@ function getMcpTools() {
         ],
         [
             'name' => 'get_logbooks',
-            'description' => 'Return rows from the configured flight logs table',
+            'description' => 'Return rows from the flight logs table',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -265,13 +307,22 @@ function getMcpTools() {
         ],
         [
             'name' => 'get_incidents',
-            'description' => 'Return incident records',
+            'description' => 'Return planes incident records',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
                     'id' => ['type' => 'integer', 'description' => 'Optional incident id'],
                     'limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 200]
                 ],
+                'additionalProperties' => false
+            ]
+        ],
+        [
+            'name' => 'get_weather',
+            'description' => 'Return current METAR text for EBSP airport (from nav.vyncke.org)',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => new stdClass(),
                 'additionalProperties' => false
             ]
         ]
@@ -295,7 +346,9 @@ function handleMcpRequest($payload) {
         return ['jsonrpc' => '2.0', 'id' => $id, 'result' => [
             'protocolVersion' => '2024-11-05',
             'capabilities' => ['tools' => ['listChanged' => false]],
-            'serverInfo' => ['name' => 'RAPCS MCP Agent', 'version' => '1.0.0']
+            'resources' => ['subscribe' => false, 'listChanged' => false],
+            'serverInfo' => ['name' => 'RAPCS Flight club and school MCP Agent', 'version' => '1.1.2'],
+            '_meta' => ['cacheScope' => 'public', 'ttlMs' => 3600000]
         ]];
     }
 
@@ -307,7 +360,13 @@ function handleMcpRequest($payload) {
     }
 
     if ($method === 'tools/list') {
-        return ['jsonrpc' => '2.0', 'id' => $id, 'result' => ['tools' => getMcpTools()]];
+        return ['jsonrpc' => '2.0', 'id' => $id, 
+            'result' => [
+                'tools' => getMcpTools(),
+                '_meta' => [
+                    'cacheScope' => 'public',
+                    'ttlMs' => 3600000 // 1 hour in milliseconds
+            ]]];
     }
 
     if ($method === 'tools/call') {
@@ -323,7 +382,7 @@ function handleMcpRequest($payload) {
                 $toolResult = fetchResourceData('users', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 500));
                 break;
             case 'get_invoices':
-                $toolResult = fetchResourceData('invoices', 0, intval($arguments['limit'] ?? 500));
+                $toolResult = fetchResourceData('invoices', intval($arguments['odoo_id'] ?? 0), intval($arguments['limit'] ?? 500));
                 break;
             case 'get_folios':
                 $toolResult = fetchResourceData('folios', 0, intval($arguments['limit'] ?? 500));
@@ -340,6 +399,9 @@ function handleMcpRequest($payload) {
             case 'get_incidents':
                 $toolResult = fetchResourceData('incidents', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 200));
                 break;
+            case 'get_weather':
+                $toolResult = fetchResourceData('weather', 0, 0);
+                break;
             default:
                 return ['jsonrpc' => '2.0', 'id' => $id, 'error' => ['code' => -32601, 'message' => 'Method not found']];
         }
@@ -350,6 +412,8 @@ function handleMcpRequest($payload) {
                 'text' => json_encode($toolResult, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
             ]],
             'structuredContent' => $toolResult
+            // Should probably add a 'cache' field here to indicate how long the result can be cached, 
+            // but for now we leave it to the client to decide
         ]];
     }
 
@@ -408,5 +472,5 @@ if ($resource !== '') {
     respondJson(fetchResourceData($resource, 0, $limit));
 }
 
-respondJson(['message' => 'RAPCS MCP Agent', 'protocol' => 'json-rpc-2.0', 'resources' => ['bookings', 'users', 'invoices', 'folios', 'students', 'logbooks', 'planes', 'incidents']]);
+respondJson(['message' => 'RAPCS MCP Agent', 'protocol' => 'json-rpc-2.0', 'resources' => ['bookings', 'users', 'invoices', 'folios', 'students', 'logbooks', 'planes', 'incidents', 'weather']]);
 ?>
