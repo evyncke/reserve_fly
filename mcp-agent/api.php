@@ -64,14 +64,18 @@ function tryJoomlaLogin($username, $password) {
 }
 
 function respondJson($payload, $statusCode = 200) {
+    global $userId;
+
     http_response_code($statusCode);
-    echo json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    $body = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    echo $body;
+//    journalise($userId, 'D', "respondJson(): status=$statusCode, body=$body");
     exit;
 }
 
 function qFetchAll($sql) {
     global $mysqli_link, $userId;
-//    journalise($userId, 'D', "qFetchAll: executing SQL: $sql");
+    //    journalise($userId, 'D', "qFetchAll: executing SQL: $sql");
     $res = mysqli_query($mysqli_link, $sql);
     if ($res === false) {
         journalise($userId, 'E', "qFetchAll: SQL error: " . mysqli_error($mysqli_link) . " for query: $sql");
@@ -84,7 +88,7 @@ function qFetchAll($sql) {
 }
 
 function fetchResourceData($resource, $id = 0, $limit = 200) {
-    global $table_bookings, $table_person, $table_bk_invoices, $table_flights, $table_dto_student, $table_logbook, $table_planes, $table_incident, $table_incident_history;
+    global $table_bookings, $table_person, $table_bk_invoices, $table_flights, $table_dto_student, $table_logbook, $table_planes, $table_incident, $table_incident_history, $table_user_usergroup_map;
     global $userId, $userIsInstructor, $userIsBoardMember, $odoo_host, $odoo_db, $odoo_username, $odoo_password, $mysqli_link ;
 
     switch ($resource) {
@@ -103,15 +107,20 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
             if ($id > 0) {
                 $sql = "SELECT jom_id as id, odoo_id, name AS username, CONVERT(first_name USING UTF8) AS first_name, CONVERT(last_name USING UTF8) AS last_name, 
                     email, cell_phone, 
-                    CONVERT(address USING UTF8) AS address, CONVERT(city USING UTF8) AS city, zipcode, country
-                    FROM $table_person
-                    WHERE jom_id = $id";
+                    CONVERT(address USING UTF8) AS address, CONVERT(city USING UTF8) AS city, zipcode, country,
+                    GROUP_CONCAT($table_user_usergroup_map.group_id) AS group_ids
+                    FROM $table_person JOIN $table_user_usergroup_map ON $table_person.jom_id = $table_user_usergroup_map.user_id
+                    WHERE jom_id = $id" ;
                 return qFetchAll($sql);
             }
             $sql = "SELECT jom_id as id, odoo_id, name AS username, CONVERT(first_name USING UTF8) AS first_name, CONVERT(last_name USING UTF8) AS last_name, 
                 email, cell_phone, 
-                CONVERT(address USING UTF8) AS address, CONVERT(city USING UTF8) AS city, zipcode, country
-                FROM $table_person ORDER BY last_name, first_name LIMIT $limit";
+                CONVERT(address USING UTF8) AS address, CONVERT(city USING UTF8) AS city, zipcode, country,
+                GROUP_CONCAT($table_user_usergroup_map.group_id) AS group_ids
+                FROM $table_person JOIN $table_user_usergroup_map ON $table_person.jom_id = $table_user_usergroup_map.user_id
+                GROUP BY jom_id
+                ORDER BY last_name, first_name 
+                LIMIT $limit";
             return qFetchAll($sql);
 
         case 'invoices':
@@ -217,8 +226,18 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
             }
             return ['METAR' => $content, 'source' => $url];
 
+        case 'groups':
+            $groups = [];
+            foreach ($GLOBALS as $name => $value) {
+                if (preg_match('/^joomla_.*_group$/', $name) && is_numeric($value)) {
+                    $groups[$name] = (int)$value;
+                }
+            }
+            ksort($groups);
+            return $groups;
+
         default:
-            return ['error' => 'unknown_resource', 'message' => 'resource not found', 'available' => ['bookings', 'users', 'invoices', 'folios', 'students', 'logs', 'planes', 'incidents']];
+            return ['error' => 'unknown_resource', 'message' => 'resource not found', 'available' => ['bookings', 'users', 'invoices', 'folios', 'students', 'logs', 'planes', 'incidents', 'groups', 'weather']];
     }
 }
 
@@ -226,7 +245,7 @@ function getMcpTools() {
     return [
         [
             'name' => 'get_bookings',
-            'description' => 'Return recent bookings or a booking by id',
+            'description' => 'Return recent plane bookings or a booking by id',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -238,7 +257,7 @@ function getMcpTools() {
         ],
         [
             'name' => 'get_users',
-            'description' => 'Return users/members from the booking system or a user by id',
+            'description' => 'Return users/members from the plane booking system or a user by id',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -318,6 +337,15 @@ function getMcpTools() {
             ]
         ],
         [
+            'name' => 'get_groups',
+            'description' => 'Return all user-group IDs defined in the booking system',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => new stdClass(),
+                'additionalProperties' => false
+            ]
+        ],
+        [
             'name' => 'get_weather',
             'description' => 'Return current METAR text for EBSP airport (from nav.vyncke.org)',
             'inputSchema' => [
@@ -347,7 +375,9 @@ function handleMcpRequest($payload) {
             'protocolVersion' => '2024-11-05',
             'capabilities' => ['tools' => ['listChanged' => false]],
             'resources' => ['subscribe' => false, 'listChanged' => false],
-            'serverInfo' => ['name' => 'RAPCS Flight club and school MCP Agent', 'version' => '1.1.2'],
+            'serverInfo' => ['name' => '✈️ RAPCS Flight club and school MCP Agent', 
+                'version' => '1.2.3', 
+                'description' => '✈️ Provides access to bookings, users, invoices, folios, students, logbooks, planes, incidents and weather data'],
             '_meta' => ['cacheScope' => 'public', 'ttlMs' => 3600000]
         ]];
     }
@@ -359,14 +389,48 @@ function handleMcpRequest($payload) {
         return null;
     }
 
-    if ($method === 'tools/list') {
-        return ['jsonrpc' => '2.0', 'id' => $id, 
+    if ($method === 'tools/list' || $method === 'tools_search') {
+        $tools = getMcpTools();
+        $query = strtolower((string)($params['query'] ?? $params['search'] ?? ''));
+
+        if ($query !== '') {
+            $tools = array_values(array_filter($tools, function ($tool) use ($query) {
+                $name = strtolower((string)($tool['name'] ?? ''));
+                $description = strtolower((string)($tool['description'] ?? ''));
+                return str_contains($name, $query) || str_contains($description, $query);
+            }));
+        }
+
+        return ['jsonrpc' => '2.0', 'id' => $id,
             'result' => [
-                'tools' => getMcpTools(),
+                'tools' => $tools,
                 '_meta' => [
                     'cacheScope' => 'public',
                     'ttlMs' => 3600000 // 1 hour in milliseconds
             ]]];
+    }
+
+    if ($method === 'tools/search') {
+        $tools = getMcpTools();
+        $query = strtolower((string)($params['query'] ?? $params['search'] ?? ''));
+
+        if ($query !== '') {
+            $tools = array_values(array_filter($tools, function ($tool) use ($query) {
+                $name = strtolower((string)($tool['name'] ?? ''));
+                $description = strtolower((string)($tool['description'] ?? ''));
+                return str_contains($name, $query) || str_contains($description, $query);
+            }));
+        }
+
+        return ['jsonrpc' => '2.0', 'id' => $id,
+            'result' => [
+                'tools' => $tools,
+                '_meta' => [
+                    'cacheScope' => 'public',
+                    'ttlMs' => 3600000
+                ]
+            ]
+        ];
     }
 
     if ($method === 'tools/call') {
@@ -399,10 +463,14 @@ function handleMcpRequest($payload) {
             case 'get_incidents':
                 $toolResult = fetchResourceData('incidents', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 200));
                 break;
+            case 'get_groups':
+                $toolResult = fetchResourceData('groups', 0, 0);
+                break;
             case 'get_weather':
                 $toolResult = fetchResourceData('weather', 0, 0);
                 break;
             default:
+                journalise($userId, 'E', "handleMcpRequest(): unknown tool method '$name'");
                 return ['jsonrpc' => '2.0', 'id' => $id, 'error' => ['code' => -32601, 'message' => 'Method not found']];
         }
 
@@ -411,7 +479,7 @@ function handleMcpRequest($payload) {
                 'type' => 'text',
                 'text' => json_encode($toolResult, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
             ]],
-            'structuredContent' => $toolResult
+            'structuredContent' => ['data' => $toolResult]
             // Should probably add a 'cache' field here to indicate how long the result can be cached, 
             // but for now we leave it to the client to decide
         ]];
@@ -472,5 +540,5 @@ if ($resource !== '') {
     respondJson(fetchResourceData($resource, 0, $limit));
 }
 
-respondJson(['message' => 'RAPCS MCP Agent', 'protocol' => 'json-rpc-2.0', 'resources' => ['bookings', 'users', 'invoices', 'folios', 'students', 'logbooks', 'planes', 'incidents', 'weather']]);
+respondJson(['message' => 'RAPCS MCP Agent', 'protocol' => 'json-rpc-2.0', 'resources' => ['bookings', 'users', 'invoices', 'folios', 'students', 'logbooks', 'planes', 'incidents', 'groups', 'weather']]);
 ?>
