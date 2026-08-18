@@ -485,6 +485,7 @@ function handleMcpRequest($payload) {
         ]];
     }
 
+    journalise($userId, 'W', "handleMcpRequest(): unknown method '$method'");
     return ['jsonrpc' => '2.0', 'id' => $id, 'error' => ['code' => -32601, 'message' => 'Method not found']];
 }
 
