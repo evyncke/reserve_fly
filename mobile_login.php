@@ -18,21 +18,21 @@
 
 require_once "dbi.php" ;
 
-$callback = $_REQUEST['cb'] ;
+$callback = htmlspecialchars(urldecode($_REQUEST['cb']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ;
 if ($callback == '') $callback = 'resa/mobile.php' ; // By default
 
 if ($userId > 0) {
-    header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
+    header("Location: https://www.spa-aviation.be/$callback", TRUE, 303) ;
     exit ;
 }
 
 $connect_msg = '' ;
 
-if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
+if (isset($_POST['username']) and isset($_POST['password'])) {
     $result_login = JFactory::getApplication()->login(
         [
-            'username' => $_REQUEST['username'],
-            'password' => $_REQUEST['password']
+            'username' => htmlspecialchars($_POST['username'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+            'password' => htmlspecialchars($_POST['password'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
         ],
         [
             'remember' => true,
@@ -100,7 +100,7 @@ $linkedin = new LinkedIn([
 ]);
 
 // TODO should come from the "state" parameter and be stored in session to prevent forgery and to differentiate between multiple OAuth providers if needed
-$browser = ($_REQUEST['browser'] != '') ? mysqli_real_escape_string($mysqli_link, $_REQUEST['browser']) : 'unknown' ;
+$browser = ($_REQUEST['browser'] != '') ? mysqli_real_escape_string($mysqli_link, htmlspecialchars($_REQUEST['browser'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')) : 'unknown' ;
 
 // Check whether  OAuth callback
 if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
@@ -301,14 +301,14 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
     <p class="bg-danger"><?=$connect_msg?></p>
     <p class="bg-info">Pour accéder au site vous devez vous connecter soit via votre identifiant et mot de passe, ou les méthodes via un fournisseur d'identité ou une clé secrète (FaceID, TouchID, ...).</p>
 
-    <form method="post" action="<?=$_SERVER['PHP_SELF']?>">
+    <form method="post" action="<?=htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')?>">
         <input type="hidden" name="cb" value="<?=$callback?>">
 
         <div class="d-flex align-items-center">
             <label for="username" class="form-label col-auto me-2">
                 Identifiant:
             </label>
-            <input type="text" class="form-control" id="username" name="username" placeholder="Votre nom d'utilisateur" autocomplete="username" value="<?=$_REQUEST['username']?>"><br/>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Votre nom d'utilisateur" autocomplete="username" value="<?=htmlspecialchars($_REQUEST['username'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')?>"><br/>
         </div> <!-- d-flex -->
 
         <div class="d-flex align-items-center">
