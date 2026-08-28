@@ -48,7 +48,7 @@ function PDF_createBonDeCommande($BonDeCommandelines, $expenseReport_date, $part
 	$pdf->SetDate($expenseReport_date);
 	$pdf->SetExpenseReportNumber($nextExpenseReport);
 	$pdf->SetExpenseReportCommunication($communication);
-	$pdf->SetUploadFolder("https://www.spa-aviation.be/resa/".$BonDeCommandeFolder);
+	$pdf->SetUploadFolder(SITE_URL . $BonDeCommandeFolder);
 	$pdf->AddPage();
 	$pdf->AliasNbPages();
 	$pdf->AddAddress($partner['name'], $entrepriseName, $partner['address'], $partner['city'], $partner['country'], $bce) ;
@@ -147,7 +147,6 @@ function PDF_BCD_sendMail($theBonDeCommandeReference, $theBonDeCommandePDF, $the
     $mailto=$facturesMail;
     $from_mail=$theMemberMail;
     $subject="Bon de commande RAPCS: $theBonDeCommandeReference";
-	$fullAttachedName="https://www.spa-aviation.be/resa/uploads/BonDeCommande/".$theAttachedFileName;
     $message="Bonjour\nVeuillez trouvez ci-joint le bon de commande $theBonDeCommandeReference.\n";
 	$message.="Bien à vous.\n$theMemberName\n\n"; 
 	//print("PDF_sendMail: message=$message");

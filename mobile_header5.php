@@ -58,11 +58,11 @@ $christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_mont
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <meta charset="utf-8">
 <!-- Facebook Open graph data -->
-<meta property="og:url"           content="https://www.spa-aviation.be/resa/mobile.php" />
+<meta property="og:url"           content="<?= SITE_URL ?>mobile.php" />
 <meta property="og:type"          content="website" />
 <meta property="og:title"         content="Royal Aero Para Club de Spa ASBL" />
 <meta property="og:description"   content="Page réservée aux membres RAPCS" />
-<meta property="og:image"         content="https://www.spa-aviation.be/logo_rapcs_256x256.png" />
+<meta property="og:image"         content="https://<?= SITE_HOST ?>/logo_rapcs_256x256.png" />
 <meta property="og:image:width"	  content="256" />
 <meta property="og:image:height"  content="256" />
 <meta property="og:image:type"    content="image/png" />
@@ -195,7 +195,7 @@ if (isset($_REQUEST['user']) and ($_REQUEST['user'] != '')) // Let's try to keep
 <div class="d-none d-print-block"><!-- Show a header on printed documents TODO use js to have the current print date and not the first display date-->
 <div class="row"> 
 <div class="col-sm-3">
-    <img class="img-fluid" src="https://www.spa-aviation.be/logo_rapcs_256x256.png">
+    <img class="img-fluid" src="https://<?= SITE_HOST ?>/logo_rapcs_256x256.png">
   </div><!-- col -->
   <div class="col-sm-9">
     <h2>Royal Aéro Para Club de Spa ASBL</h2>
@@ -456,7 +456,7 @@ if ($userId > 0) {
 ?>
             <li><hr class="dropdown-divider"/></li>
             <li><h6 class="dropdown-header">Cartes Jeppessen</h6></li>
-            <li><a class="dropdown-item" href="https://www.spa-aviation.be/airports/tripkits/JeppesenBelgium_31-08-2025.pdf">Jeppessen Charts</a></li>
+            <li><a class="dropdown-item" href="https://<?= SITE_HOST ?>/airports/tripkits/JeppesenBelgium_31-08-2025.pdf">Jeppessen Charts</a></li>
             <li><a class="dropdown-item" href="mobile_airports.php">Résumé airports</a></li>
 <?php
 }

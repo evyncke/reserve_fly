@@ -20,12 +20,12 @@ function rapcs_display_metar($station, $displayType) {
         <div style="width: calc(100% - 100px); max-width: 215px; margin: 0 auto">
                 <div style="position:relative;padding-bottom: 100%">
                 <div style="position:absolute;width:100%;overflow:hidden">
-        <img src="https://www.spa-aviation.be/resa/images/metar_rose.png" style="width:100%" alt="Compass">                                
-        <img  id="id_rapcs_runway"src="https://www.spa-aviation.be/resa/images/metar_runway.png" style="position:absolute;left:0;top:0;width:100%;transform: rotate(0deg);" alt="Runway">
+        <img src="<?= SITE_URL ?>images/metar_rose.png" style="width:100%" alt="Compass">                                
+        <img  id="id_rapcs_runway"src="<?= SITE_URL ?>images/metar_runway.png" style="position:absolute;left:0;top:0;width:100%;transform: rotate(0deg);" alt="Runway">
 
-        <img  id="id_rapcs_wind_direction" src="https://www.spa-aviation.be/resa/images/metar_wind_direction.svg" style="left:0;top:0;position:absolute;width: 100%;transform: rotate(0deg)" alt="Wind direction 220°">      
+        <img  id="id_rapcs_wind_direction" src="<?= SITE_URL ?>images/metar_wind_direction.svg" style="left:0;top:0;position:absolute;width: 100%;transform: rotate(0deg)" alt="Wind direction 220°">      
 
-        <img  id="id_rapcs_cross_direction" src="https://www.spa-aviation.be/resa/images/metar_crosswind_direction.png" style="left:0;top:0;position:absolute;width: 100%;transform: rotate(0deg)" alt="Wind direction 220°">      
+        <img  id="id_rapcs_cross_direction" src="<?= SITE_URL ?>images/metar_crosswind_direction.png" style="left:0;top:0;position:absolute;width: 100%;transform: rotate(0deg)" alt="Wind direction 220°">      
         </div>
             </div>
         <div style="text-align:center; position: relative; margin-top: 0">

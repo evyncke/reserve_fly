@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ mysqli_query($mysqli_link, "UPDATE $table_news SET n_stop = DATE_SUB(sysdate(), 
 		or journalise($userId, "E", "Cannot delete news $id: " . mysqli_error($mysqli_link)) ;
 	// So far so good, redirect to the reservation page
 journalise($userId, 'W', "News $id deleted") ;
-header('Location: ' . 'https://www.spa-aviation.be/resa/') ;
+header('Location: ' . SITE_URL . 'mobile.php') ;
 die() ; 
 
 ?>

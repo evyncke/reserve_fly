@@ -3,6 +3,9 @@
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
 include 'Mail.php';
 
+DEFINE('SITE_URL', 'https://www.example.org/resa/') ;
+DEFINE('SITE_HOST', 'www.example.org') ;
+
 /*
    Copyright 2014-2020 Eric Vyncke
 
@@ -112,7 +115,7 @@ function MustBeLoggedIn() {
 	global $userId ;
 
 	if ($userId == 0) {
-		header("Location: https://www.spa-aviation.be/resa/connect.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+		header("Location: " . SITE_URL . "connect.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 		exit ;
 	}
 }
@@ -157,8 +160,8 @@ function airport_closing_local_time($year, $month, $day) {
 $validity_warning = 30 ; // Number of days before validity expiration to flag as warning
 
 // List of webcam to display... should be at least two (can repeat one of course)
-$webcam_uris = array("https://www.example.org/webcam.php", "https://example.org/mjpg/video.mjpg") ;
-$favicon = "https://www.example.org/favicon32x32.ico" ; // The usual web browser favicon + also used in Calendar
+$webcam_uris = array("https://" . SITE_HOST . "/webcam.php", "https://" . SITE_HOST . "/mjpg/video.mjpg") ;
+$favicon = "https://" . SITE_HOST . "/favicon32x32.ico" ; // The usual web browser favicon + also used in Calendar
 $ical_name = "My club calendar" ; // Name of the iCAL calendar
 $ical_organizer = "My flighht club" ; // Name of the organizer for iCAL calendar
 
@@ -254,7 +257,7 @@ if ($userId > 0 and $userId != 294) { // Only for logged-in users and not for SP
 			$_SERVER['PHP_SELF'] != '/resa/get_bookings.php' && $_SERVER['PHP_SELF'] != '/resa/get_fi_agenda.php')
 			if (!isset($_COOKIE['membership'])) {
 					journalise($userId, "I", "Unpaid membership, redirecting to membership page") ;
-					header("Location: https://www.spa-aviation.be/resa/mobile_membership.php?cb=" . urlencode($cb) , TRUE, 307) ;
+					header("Location: " . SITE_URL . "mobile_membership.php?cb=" . urlencode($cb) , TRUE, 307) ;
 			}
 	}
 } else $row_fee = NULL ;// $userId > 0

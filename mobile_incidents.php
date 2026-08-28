@@ -1,7 +1,4 @@
 <?php
-// Failing on https://www.spa-aviation.be/resa/mobile_incidents.php?plane=OO-ALE&remark=Passengers+headset+bolt+on+the+jack+is+loose.+Gave+the+bolt+and+ring+to+Ren%C3%A9+V.&severity=mineure&action=create
-// apparently because of +AND+ triggering a Web Application Firewall rule...
-// Passengers headset bolt on the jack is loose. Gave the bolt and ring to René V
 /*
    Copyright 2023-2026 Eric Vyncke
 
@@ -22,7 +19,7 @@
 require_once "dbi.php" ;
 
 if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+	header("Location: " . SITE_URL . "mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 	exit ;
 }
 

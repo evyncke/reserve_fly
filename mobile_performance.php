@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2025-2025 Patrick Reginster
+   Copyright 2025-2026 Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,10 +23,6 @@ Runway: 5 -> 05
 */
 
 require_once "dbi.php" ;
-if ($userId == 0) {
-	//header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	//exit ;
-}
 $plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, strtoupper($_REQUEST['plane'])) : 'OO-ALD' ;
 $body_attributes = 'style="height: 100%; min-height: 100%; width:100%;" onload="init();mobile_performance_page_loaded();"' ;
 $header_postamble = "
@@ -36,7 +32,7 @@ $header_postamble = "
 " ;
 
 require_once 'mobile_header5.php' ;
-$performanceJSONcontent = file_get_contents('https://www.spa-aviation.be/resa/mobile_performance.json') ;
+$performanceJSONcontent = file_get_contents(SITE_URL . 'mobile_performance.json') ;
 $performanceJSONcontent = str_replace("\n","",$performanceJSONcontent);
 print("<script>\nvar performanceJSONcontent='$performanceJSONcontent';");
 print("var default_member=$userId;\n");
@@ -457,6 +453,6 @@ function openPerformance(evt, cityName) {
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
 </script>
-<script src="https://www.spa-aviation.be/resa/js/mobile_performance.js"></script>
+<script src="<?= SITE_URL ?>js/mobile_performance.js"></script>
 </body>
 </html>

@@ -57,7 +57,7 @@ function PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $expenseRepo
 	$pdf->SetExpenseReportNumber($nextExpenseReport);
 	$pdf->SetExpenseReportCommunication($communication);
 	$pdf->SetAttachedFile($aNewAttachedFileName);
-	$pdf->SetUploadFolder("https://www.spa-aviation.be/resa/".$notedefraisFolder);
+	$pdf->SetUploadFolder(SITE_URL . $notedefraisFolder);
 	$pdf->SetRemboursable($remboursable);
 	$pdf->AddPage();
 	$pdf->AliasNbPages();
@@ -129,7 +129,7 @@ function PDF_AddAttchedPicture($pdf, $notedefraisFolder, $aNewAttachedFileName)
 		$pdf->SetXY(20,60);
 	    $pdf->SetFont('Arial','',10);
 		if($file!="") {
-			$pdf->CellUtf8(100, 5, "Fichier attaché: "."http://www.spa-aviation.be/resa/".$file);
+			$pdf->CellUtf8(100, 5, "Fichier attaché: ".SITE_URL.$file);
 		}
 		else {
 			$pdf->CellUtf8(35, 5, "Pas de fichier attaché.", 0, 'L', false);
@@ -219,7 +219,6 @@ function PDF_sendMail($theNoteDeFraisReference, $theNoteDeFraisPDF, $theAttached
     $mailto=$facturesMail;
     $from_mail=$theMemberMail;
     $subject="Note de frais RAPCS: $theNoteDeFraisReference";
-	$fullAttachedName="https://www.spa-aviation.be/resa/uploads/notedefrais/".$theAttachedFileName;
     $message="Bonjour\nVeuillez trouvez ci-joint la note de frais $theNoteDeFraisReference.\n";
 	if($theAttachedFileName!="") {
 		//$message.="Justificatif associé à la note de frais: ".$fullAttachedName."\n"; 

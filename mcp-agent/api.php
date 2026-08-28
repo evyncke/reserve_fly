@@ -25,6 +25,34 @@ require_once '../dbi.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
+function getBearerToken(): ?string {
+    $headers = function_exists('getallheaders') ? getallheaders() : [];
+    $auth = $headers['Authorization']
+        ?? $headers['authorization']
+        ?? $_SERVER['HTTP_AUTHORIZATION']
+        ?? '';
+
+    if (preg_match('/^Bearer\s+(.+)$/i', $auth, $m)) {
+        return $m[1];
+    }
+    return null;
+}
+
+function authenticate(string $token): ?string {
+    global $mcp_secret;
+
+    [$userId, $epoch, $mac] = array_pad(explode(':', $token, 3), 3, null);
+    if ($userId === null || $epoch === null || $mac === null) return null;
+
+    $expected = hash_hmac('sha256', $userId . $epoch, $mcp_secret);
+    journalise($userId, 'D', "authenticate(): userId=$userId, epoch=$epoch, mac=$mac, expected=$expected");
+    if (!hash_equals($expected, $mac)) return null;
+
+    // TODO check whether the epoch is still valid (not expired)
+
+    return $userId; // authenticated identity
+}
+
 function getBasicAuthCredentials() {
     if (isset($_SERVER['PHP_AUTH_USER'])) return [$_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] ?? ''];
     if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
@@ -68,6 +96,13 @@ function respondJson($payload, $statusCode = 200) {
 
     http_response_code($statusCode);
     $body = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    if ($body === false) {
+       $body = json_encode([
+            'error' => 'json_encode_failed',
+            'message' => json_last_error_msg()
+        ]);
+        journalise($userId, 'E', "respondJson(): json_encode failed: " . json_last_error_msg());
+    }
     echo $body;
 //    journalise($userId, 'D', "respondJson(): status=$statusCode, body=$body");
     exit;
@@ -509,9 +544,16 @@ if (isset($userId) && $userId > 0) {
 }
 
 if (!$authenticated) {
-    header('HTTP/1.1 401 Unauthorized');
-    header('WWW-Authenticate: Basic realm="RAPCS MCP Agent"');
-    respondJson(['error' => 'unauthorized', 'message' => 'Joomla authentication required (use HTTP Basic or username/password)'], 401);
+    $token = getBearerToken();
+    $userId = $token ? authenticate($token) : null;
+
+    if ($userId === null) {
+        http_response_code(401);
+        header('WWW-Authenticate: Bearer');
+        echo json_encode(['error' => 'unauthorized']);
+        exit;
+    }
+    $authenticated = true;
 }
 
 $resource = isset($_REQUEST['resource']) ? $_REQUEST['resource'] : '';

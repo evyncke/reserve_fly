@@ -23,7 +23,7 @@ require_once 'dbi.php' ;
 $callback = htmlspecialchars(urldecode($_REQUEST['cb']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ;
 
 if ($userId > 0) {
-    header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
+    header("Location: https://" . SITE_HOST . "/" . $callback, TRUE, 307) ;
     exit ;
 }
 
@@ -42,7 +42,7 @@ if (isset($_POST['username']) and isset($_POST['password'])) {
         ]
     );
     if ($result_login) {
-        header("Location: https://www.spa-aviation.be/$callback", TRUE, 303) ;
+        header("Location: https://" . SITE_HOST . "/" . $callback, TRUE, 303) ;
         $joomla_user = JFactory::getUser() ;
         journalise($joomla_user->id, "I", "Connection of $_REQUEST[username] from $callback") ;
         exit ;

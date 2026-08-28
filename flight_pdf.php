@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ function Header() {
 	global $flight_reference, $userFullName ;
     // Logo
     $this->Image('../logo_rapcs_256x256.png',10,6,30);
-//    $this->Image('http://www.spa-aviation.be/logo_rapcs_256x256.png',10,6,30);
     // Police Arial gras 15
     $this->SetFont('Arial','B',12);
     // Décalage à droite
@@ -550,12 +549,9 @@ $pdf->Ln(30) ;
 // Also before of web application firewall in cloudflare or mod_security on the server as the request is not built with user-agent or accept...
 //ini_set("user_agent","RAPCS - flight engine");
 // Annoying as the output is no more a PNG...
-// No longer a PNG but a javascript...
-// $pdf->Image("https://www.spa-aviation.be/TippingPoint/scatter.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg", null, null, 0, 0, 'PNG') ;
 
 $pdf->MultiCellUtf8(0, 4, "Enveloppe masse et centrage: ") ;
-$url = "https://www.spa-aviation.be/TippingPoint/scatter.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg" ;
-// $url = "https://www.spa-aviation.be/TippingPoint/index.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg" ;
+$url = "https://" . SITE_HOST . "/TippingPoint/scatter.php?tailnumber=1&totarm_to=$totarm_to&totwt_to=$totwt_to&totarm_ldg=$totarm_ldg&totwt_ldg=$totwt_ldg" ;
 $pdf->Write(4, $url, $url) ;
 } // $row_flight[r_plane]) No W&B when plane is unknown 
 

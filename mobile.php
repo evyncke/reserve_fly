@@ -28,7 +28,7 @@ if (isset($_REQUEST['wpa']) and $_REQUEST['wpa']) {
 	journalise($userId, "D", "Mobile Web Application start") ;
 }
 if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF']) , TRUE, 307) ;
+	header("Location: " . SITE_URL . "mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF']) , TRUE, 307) ;
 	exit ;
 }
 

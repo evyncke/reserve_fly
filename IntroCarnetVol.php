@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2025 Patrick Reginster (and Eric Vyncke)
+   Copyright 2022-2026 Patrick Reginster (and Eric Vyncke)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year
   <title>Introduction carnet de routes</title>
   <link rel="stylesheet" type="text/css" href="css/IntroCarnetVol.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://www.spa-aviation.be/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+  <link href="https://<?= SITE_HOST ?>/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
 <script>
 	
 <?php
@@ -859,7 +859,7 @@ if($bookingid) {
 				<button type=\"button\" value=\"Edit\" onclick=\"window.location.href='$_SERVER[PHP_SELF]?edit=1&id=$bookingid&logid=$logid';\">&#9998;&nbsp; Editer</button>&nbsp;");
 			//<button type=\"button\" value=\"QRCode\" onclick=\"displayQRCode();\">&#xf029; QRCode</button>"
 				if($dtoFlightId>0) {
-					print("&nbsp;<button type=\"button\" value=\"DTO\" onclick=\"window.location.href='https://www.spa-aviation.be//resa/dto.flight.php?flight=$dtoFlightId';\">DTO</button>");
+					print("&nbsp;<button type=\"button\" value=\"DTO\" onclick=\"window.location.href='" . SITE_URL . "dto.flight.php?flight=$dtoFlightId';\">DTO</button>");
 				}
 				print("
 				</td>
@@ -1373,10 +1373,10 @@ Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 
 </span>
 
 <p></p>
-<p><center><input class="button" type="button" style="background-color: green; color: white;" value="Mon Folio" onclick="javascript:document.location.href='../../resa/mobile_folio.php';"></input></center>
-<center><input class="button" type="button" style="background-color: green; color: white;" value="Accès au TechLog" onclick="javascript:document.location.href='../../resa/mobile_incidents.php';"></input></center>
-<center><input class="button" type="button" style="background-color: green; color: white;" value="Mon carnet de vol" onclick="javascript:document.location.href='../../resa/mobile_mylog.php';"></input></center>
-<center><input class="button" type="button" style="background-color: green; color: white;" value="Retour à la page de réservation" onclick="javascript:document.location.href='https://www.spa-aviation.be/index.php/fr/resa-full/reserver';"></input></center></p>
+<p><center><input class="button" type="button" style="background-color: green; color: white;" value="Mon Folio" onclick="javascript:document.location.href='<?= SITE_URL ?>mobile_folio.php';"></input></center>
+<center><input class="button" type="button" style="background-color: green; color: white;" value="Accès au TechLog" onclick="javascript:document.location.href='<?= SITE_URL ?>mobile_incidents.php';"></input></center>
+<center><input class="button" type="button" style="background-color: green; color: white;" value="Mon carnet de vol" onclick="javascript:document.location.href='<?= SITE_URL ?>mobile_mylog.php';"></input></center>
+<center><input class="button" type="button" style="background-color: green; color: white;" value="Retour à la page de réservation" onclick="javascript:document.location.href='https://<?= SITE_HOST ?>/index.php/fr/resa-full/reserver';"></input></center></p>
 <p></p>
 <p></p>
 <p><b>Syntaxe:</b></p>
@@ -1389,9 +1389,7 @@ Communication : "<span id="id_payment_communication"></span>"</br>Compte : BE64 
 <script src="data/members.js"></script>
 <script src="data/shareCodes.js"></script>
 <script src="data/pilots.js"></script>
-<!---<script src="https://www.spa-aviation.be/resa/CP_frais_type.js"\></script>-->
-<script src="https://www.spa-aviation.be/resa/data/prix.js"></script>
-<!---<script src="https://www.spa-aviation.be/resa/js/script_carnetdevol_InProgress.js"></script>-->
-<script src="https://www.spa-aviation.be/resa/js/script_carnetdevol.js"></script>
+<script src="<?= SITE_URL ?>data/prix.js"></script>
+<script src="<?= SITE_URL ?>js/script_carnetdevol.js"></script>
 </body>
 </html>

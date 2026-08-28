@@ -22,7 +22,7 @@ $callback = htmlspecialchars(urldecode($_REQUEST['cb']), ENT_QUOTES | ENT_SUBSTI
 if ($callback == '') $callback = 'resa/mobile.php' ; // By default
 
 if ($userId > 0) {
-    header("Location: https://www.spa-aviation.be/$callback", TRUE, 303) ;
+    header("Location: https://" . SITE_HOST . "/$callback", TRUE, 303) ;
     exit ;
 }
 
@@ -40,7 +40,7 @@ if (isset($_POST['username']) and isset($_POST['password'])) {
         ]
     );
     if ($result_login) {
-        header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
+        header("Location: https://" . SITE_HOST . "/$callback", TRUE, 307) ;
         $joomla_user = JFactory::getUser() ;
         $app = JFactory::getApplication('site');
         $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
@@ -81,7 +81,7 @@ use League\OAuth2\Client\Provider\LinkedIn;
 $google = new Google([
     'clientId'     => $google_client_id,
     'clientSecret' => $google_client_secret,
-    'redirectUri'  => 'https://www.spa-aviation.be/resa/mobile_login.php', // Doit être identique à la console Google
+    'redirectUri'  => SITE_URL . 'mobile_login.php', // Doit être identique à la console Google
 ]);
 
 // Initialize Facebook Client
@@ -96,7 +96,7 @@ $facebook = new Facebook([
 $linkedin = new LinkedIn([
     'clientId' => $linkedin_client_id,
     'clientSecret' => $linkedin_client_secret,
-    'redirectUri' => 'https://www.spa-aviation.be/resa/mobile_login.php',
+    'redirectUri' => SITE_URL . 'mobile_login.php',
 ]);
 
 // TODO should come from the "state" parameter and be stored in session to prevent forgery and to differentiate between multiple OAuth providers if needed
@@ -148,7 +148,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                         ON DUPLICATE KEY UPDATE oa_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "', oa_last_use=NOW(), oa_last_device='$browser'")
                         or journalise($userId, "E", "Error inserting google_id/token for user id $userId in $table_oauth: " . mysqli_error($mysqli_link)) ;
                     unset($_SESSION['google_oauth2state']); // Clear Google state
-                    header("Location: https://www.spa-aviation.be/$callback", TRUE, 307);
+                    header("Location: https://" . SITE_HOST . "/$callback", TRUE, 307);
                     exit;
                 } else {
                     journalise(0, "W", "No user found for google id $googleUser->getId() or email $googleUser->getEmail()") ;
@@ -211,7 +211,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                         ON DUPLICATE KEY UPDATE oa_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "', oa_last_use=NOW(), oa_last_device='$browser'")
                         or journalise($userId, "E", "Error inserting linkedin_id/token for user id $userId in $table_oauth: " . mysqli_error($mysqli_link)) ;
                     unset($_SESSION['linkedin_oauth2state']); // Clear LinkedIn state
-                    header("Location: https://www.spa-aviation.be/$callback", TRUE, 307);
+                    header("Location: https://" . SITE_HOST . "/$callback", TRUE, 307);
                     exit;
                 } else {
                     journalise(0, "W", "No user found for LinkedIn id $linkedInUser[sub] or email $linkedInUser[email]") ;
@@ -266,7 +266,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                         ON DUPLICATE KEY UPDATE oa_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "', oa_last_use=NOW(), oa_last_device='$browser'")
                         or journalise($userId, "E", "Error inserting facebook_id/token for user id $userId in $table_oauth: " . mysqli_error($mysqli_link)) ;
 
-                    header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
+                    header("Location: https://" . SITE_HOST . "/$callback", TRUE, 307) ;
                     exit ;  
                 } else {
                     journalise(0, "W", "No user found for Facebook id $facebookUser[id] or email $facebookUser[email]") ;
@@ -287,7 +287,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
 // Generate OAuth URLs
 $googleAuthUrl = $google->getAuthorizationUrl();
 $facebookHelper = $facebook->getRedirectLoginHelper();
-$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_login.php', ['email','public_profile','user_link']);
+$facebookAuthUrl = $facebookHelper->getLoginUrl(SITE_URL . 'mobile_login.php', ['email','public_profile','user_link']);
 $linkedInAuthUrl = $linkedin->getAuthorizationUrl(['scope' => ['openid', 'profile', 'email']]);
 // Save the state generated for each provider to validate in the callback and prevent CSRF attacks
 // TODO as the state can be extended by JS to include browser info, only CSRF token should be stored in session and checked here, the browser info should be passed via a different parameter to avoid confusion and potential security issues.
@@ -423,7 +423,7 @@ loginButton.addEventListener('click', async () => {
 			feedback.innerHTML += '<div class="alert alert-success">Passkey Logged In! ' + status.message + '</div>';
             // if (confirm("Connexion réussie via Passkey. Appuyez sur OK pour continuer vers vos réservations (<?=$callback?>).")) {
             //    // User pressed OK 
-                window.location.href = "https://www.spa-aviation.be/<?=$callback?>";
+                window.location.href = "https://<?= SITE_HOST ?>/<?=$callback?>";
             // } else {
             //     // User pressed Cancel
             //     console.log("User stayed on the page.");

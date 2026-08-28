@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke, Patrick Reginster
+   Copyright 2014-2026 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ require_once "odooFlight.class.php" ;
 
 //MustBeLoggedIn() ;
 // In the mobile_header.php, $header_postamble will be inserted in the actual <head>...</head> section
-
-
 
 $since = "";
 if (isset($_REQUEST['since'])) $since =$_REQUEST['since'];
@@ -161,7 +159,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
 	while ($row = mysqli_fetch_array($resultLedger)) {
 
         $referenceText=$row['f_reference'];
-		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
+		$reference = db2web($row['f_reference'])."<a href=\"" . SITE_URL . "flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
 		$date=$row['fl_date'];
 		$datePaiement=$date." 12:00:00";
 		$datePaiement=gmdate('d/m/Y', strtotime($datePaiement)) ;
@@ -266,7 +264,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
         $invoiceRef=$row['f_invoice_ref'];
         $referenceFlight=$row['f_reference'];
         
-		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
+		$reference = db2web($row['f_reference'])."<a href=\"" . SITE_URL . "flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
 		$date=$row['f_date_flown'];
 		$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
 		$plane=$row['l_plane'];
@@ -348,7 +346,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
         $referenceFlight=$row['f_reference'];
 		$pos = strpos(strtoupper($referenceFlight), "DHF-");
 		if($pos===false) {
-    		$reference = db2web($row['f_reference'])."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
+    		$reference = db2web($row['f_reference'])."<a href=\"" . SITE_URL . "flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
     		$date=$row['f_date_flown'];
     		$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
     		$plane=$row['l_plane'];
@@ -449,7 +447,7 @@ print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbs
             //print("logbookid=$logbookid logbookids=$logbookids<br>");
             $invoiceRef=$row['f_invoice_ref'];
             if($invoiceRef>0) $invoiceRefCount+=1;
- 			$reference = db2web($reference)."<a href=\"https://www.spa-aviation.be/resa/flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
+ 			$reference = db2web($reference)."<a href=\"" . SITE_URL . "flight_create.php?flight_id=$row[f_id]\" title=\"Go to reservation $row[f_reference]\" target=\"_blank\">&boxbox;</a>";
 			$date=$row['f_date_flown'];
 			$date=gmdate('d/m/Y', strtotime("$row[f_date_flown]")) ;
 			$plane=$row['l_plane'];
