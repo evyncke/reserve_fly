@@ -33,6 +33,8 @@ function PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $expenseRepo
 	$date=date_create();
 	$year=date_format($date,"Y");
 	$remboursable="REMBOURSABLE SUR COMPTE PILOTE";
+	$facturesMailCC="aeroclub.spa@gmail.com";
+	//$facturesMailCC="patrick.reginster@gmail.com";
 	$facturesMail="note_de_frais_nr@spa-aviation.odoo.com";
 	if($theRemboursable==1) {
 		// Note de frais remboursable
@@ -57,7 +59,7 @@ function PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $expenseRepo
 	$pdf->SetExpenseReportNumber($nextExpenseReport);
 	$pdf->SetExpenseReportCommunication($communication);
 	$pdf->SetAttachedFile($aNewAttachedFileName);
-	$pdf->SetUploadFolder("https://www.spa-aviation.be/resa/".$notedefraisFolder);
+	$pdf->SetUploadFolder(SITE_URL.$notedefraisFolder);
 	$pdf->SetRemboursable($remboursable);
 	$pdf->AddPage();
 	$pdf->AliasNbPages();
@@ -101,7 +103,8 @@ function PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $expenseRepo
 	// Send Mail to factures@spa-aviation.be
 	$theMemberMail="patrick.reginster@gmail.com";
 	PDF_sendMail($nextExpenseReport, $notedefraisFolder."/".$notedefraisFile, $aNewAttachedFileName, $facturesMail, $theMemberMail, $partner['name']);
-
+	//COPIE SENT TO BERNARD
+	PDF_sendMail($nextExpenseReport, $notedefraisFolder."/".$notedefraisFile, $aNewAttachedFileName, $facturesMailCC, $theMemberMail, $partner['name']);
 	//print("<br>PDF_createNoteDeFrais: PDF Version: End<br>");
  	return $notedefraisFile;
 }
@@ -129,7 +132,7 @@ function PDF_AddAttchedPicture($pdf, $notedefraisFolder, $aNewAttachedFileName)
 		$pdf->SetXY(20,60);
 	    $pdf->SetFont('Arial','',10);
 		if($file!="") {
-			$pdf->CellUtf8(100, 5, "Fichier attaché: "."http://www.spa-aviation.be/resa/".$file);
+			$pdf->CellUtf8(100, 5, "Fichier attaché: ".SITE_URL.$file);
 		}
 		else {
 			$pdf->CellUtf8(35, 5, "Pas de fichier attaché.", 0, 'L', false);
@@ -207,7 +210,7 @@ function PDF_getNoteDeFraisNumber()
 function PDF_sendMail($theNoteDeFraisReference, $theNoteDeFraisPDF, $theAttachedFileName,  $theFacturesMail, $theMemberMail, $theMemberName)
 {
 
-	//print("PDF_sendMail: $theNoteDeFraisReference $theNoteDeFraisPDF, $theAttachedFileName, $theMemberMail<br>");
+	print("PDF_sendMail: $theNoteDeFraisReference $theNoteDeFraisPDF, $theAttachedFileName, $theFacturesMail<br>");
 		//Si non remboursable -> dans le dossier odoo "note de frais non remboursable"
 		//$facturesMail="note_de_frais_nr@spa-aviation.odoo.com";
 		//Si remboursable -> le dossier odoo "note de frais remboursable"
@@ -219,7 +222,6 @@ function PDF_sendMail($theNoteDeFraisReference, $theNoteDeFraisPDF, $theAttached
     $mailto=$facturesMail;
     $from_mail=$theMemberMail;
     $subject="Note de frais RAPCS: $theNoteDeFraisReference";
-	$fullAttachedName="https://www.spa-aviation.be/resa/uploads/notedefrais/".$theAttachedFileName;
     $message="Bonjour\nVeuillez trouvez ci-joint la note de frais $theNoteDeFraisReference.\n";
 	if($theAttachedFileName!="") {
 		//$message.="Justificatif associé à la note de frais: ".$fullAttachedName."\n"; 
@@ -269,7 +271,12 @@ function sendMail(
     $message .= $attachment;
     $message .= $boundWithPre."--";
     //print("sendMail: toAddress=$toAddress, <br>subject=$subject, <br>message=$message,<br>headers=$headers<br>");
-    return mail($toAddress, $subject, $message, $headers);
+	if(0) {
+   		print("smtp_mail: toAddress=$toAddress<br>");
+		smtp_mail($toAddress, $subject, $message, $headers) ;
+		return "";
+	}
+	return mail($toAddress, $subject, $message, $headers);
 }
 
 function sendMailBackup(
