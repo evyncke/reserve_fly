@@ -748,7 +748,7 @@ function OF_createFactureDHF($theFlightReferences, $theDate, $thelogbookids) {
     return true;
 }
 //============================================
-// Function: OF_createNoteDeFrais
+// Function: OF_createBonDeCommande
 // Purpose: Creation d'un bon de commande
 //============================================
 function OF_createBonDeCommande($theMemberID, $theBonDeCommandeJSON, &$theUploadFolder, &$theFactureMailTo)
@@ -758,7 +758,7 @@ function OF_createBonDeCommande($theMemberID, $theBonDeCommandeJSON, &$theUpload
     global $mysqli_link, $table_person,$userId;
 
     if($theMemberID=="") {
-        print("<h2 style=\"color: red;\">ERROR:OF_createNoteDeFrais: Pas de membre sélectionné</h2>");
+        print("<h2 style=\"color: red;\">ERROR:OF_createBonDeCommande: Pas de membre sélectionné</h2>");
         return "";
     }
 
@@ -1444,7 +1444,7 @@ function OF_GetAnalyticAccountID($theAnalyticAccount)
     if (array_key_exists($theAnalyticAccount, $accounts)) {
         return $accounts["$theAnalyticAccount"];
     }
-    print("<h2 style=\"color: red;\">ERROR:OF_GetJournalID: Unknown Journal $theAnalyticAccount</h2>");
+    print("<h2 style=\"color: red;\">ERROR:OF_GetAnalyticAccountID: Unknown Journal $theAnalyticAccount</h2>");
     return 0;
 }  
     
