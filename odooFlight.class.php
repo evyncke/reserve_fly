@@ -1444,7 +1444,7 @@ function OF_GetAnalyticAccountID($theAnalyticAccount)
     if (array_key_exists($theAnalyticAccount, $accounts)) {
         return $accounts["$theAnalyticAccount"];
     }
-    print("<h2 style=\"color: red;\">ERROR:OF_GetJournalID: Unknown Journal $theAnalyticAccount</h2>");
+    print("<h2 style=\"color: red;\">ERROR:OF_GetAnalyticAccountID: Unknown Journal $theAnalyticAccount</h2>");
     return 0;
 }  
     
