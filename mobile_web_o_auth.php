@@ -17,10 +17,8 @@
 */
 
 require_once "dbi.php" ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-} ;
+MustBeLoggedIn() ;
+	
 require_once 'mobile_header5.php' ;
 if ($userId != 62) journalise($userId, "I", "Accessing OAuth/WebAuthn registration page") ;
 
@@ -42,19 +40,19 @@ $facebook = new Facebook([
 $google = new Google([
     'clientId'     => $google_client_id,
     'clientSecret' => $google_client_secret,
-    'redirectUri'  => 'https://www.spa-aviation.be/resa/mobile_login.php', // Doit être identique à la console Google
+    'redirectUri'  => SITE_URL . 'mobile_login.php', // Doit être identique à la console Google
 ]);
 
 // Initialize LinkedIn Client
 $linkedin = new LinkedIn([
     'clientId' => $linkedin_client_id,
     'clientSecret' => $linkedin_client_secret,
-    'redirectUri' => 'https://www.spa-aviation.be/resa/mobile_login.php',
+    'redirectUri' => SITE_URL . 'mobile_login.php',
 ]);
 
 // Generate OAuth URLs
 $facebookHelper = $facebook->getRedirectLoginHelper();
-$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_web_o_auth.php', ['email','public_profile','user_link']);
+$facebookAuthUrl = $facebookHelper->getLoginUrl(SITE_URL . 'mobile_web_o_auth.php', ['email','public_profile','user_link']);
 // TODO find the equivalent $_SESSION['facebook_oauth2state'] = $facebook->getState(); // Unsure if used later...
 $googleAuthUrl = $google->getAuthorizationUrl();
 $_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later...

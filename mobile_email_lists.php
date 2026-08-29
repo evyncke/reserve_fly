@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2024 Eric Vyncke
+   Copyright 2024-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,10 +17,7 @@
 */
 
 require_once "dbi.php" ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 if (! ($userIsAdmin or $userIsBoardMember or $userIsInstructor))
     journalise($userId, "F", "Vous devez être administrateur ou instructeur pour voir cette page.") ;
 require_once 'mobile_header5.php' ;

@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2025 Patrick Reginster
+   Copyright 2023-2026 Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,10 +23,7 @@
 require_once "dbi.php" ;
 require_once __DIR__.'/odooFlight.class.php';
 
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) journalise($userId, "F", "This admin page is reserved to administrators") ;
 
 $header_postamble = "
@@ -154,7 +151,7 @@ if (isset($_REQUEST['createmember']) and $_REQUEST['createmember'] == 'create') 
 ?>
 
 <h3>Today this page can be used only to create a new member in RAPCS tables and in Odoo</h3>
-<h4>To edit a member: Use the page <a href="https://www.spa-aviation.be/resa/gestionMembres.php">GestionMembres</a></h4>
+<h4>To edit a member: Use the page <a href="<?= SITE_URL ?>gestionMembres.php">GestionMembres</a></h4>
 
 <div class="row">
 <form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal" enctype="multipart/form-data">

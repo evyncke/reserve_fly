@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2025 Eric Vyncke
+   Copyright 2013-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,10 +19,7 @@
 require_once "dbi.php" ;
 $header_postamble = '<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>' ;
 require_once 'mobile_header5.php' ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 if (isset($_REQUEST['webcam']))
   $webcam = '-' . $_REQUEST['webcam'] ;
 else // Use the default

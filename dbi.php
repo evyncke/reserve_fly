@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
 /*
-   Copyright 2014-2021 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -62,6 +62,9 @@ if (filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
 
 // End of paranoid address blocking
 
+DEFINE('SITE_URL', 'https://www.spa-aviation.be/resa/') ;
+DEFINE('SITE_HOST', 'www.spa-aviation.be') ;
+
 require_once('auth.php') ;
 
 // MySQL Credentials & configuration are in auth.php
@@ -69,7 +72,7 @@ require_once('auth.php') ;
 $convertToUtf8 = false ;
 $convertToUtf8 = true ;
 $joomla_session = true ;
-$joomla_connection_page = "https://www.spa-aviation.be/index.php/fr/" ;
+$joomla_connection_page = "https://" . SITE_HOST . "/index.php/fr/" ;
 
 $test_mode = false ;
 $managerEmail = "info@spa-aviation.be" ;
@@ -168,11 +171,11 @@ if ($joomla_user->guest and isset($_SESSION['jom_id'])) { // User is not logged 
 	$joomla_user = JFactory::getUser($userId) ;
 } else
 	$userId = 0 ;
+$joomla_session = JFactory::getSession() ;
+$joomla_session->start() ; // Keep alive?
 CheckJoomlaUser($joomla_user) ;
 if ($userId == 62 or $userId == 66)
 	ini_set('display_errors', 1) ; // extensive error reporting for debugging
-$joomla_session = JFactory::getSession() ;
-$joomla_session->start() ; // Keep alive?
 
 function CheckJoomlaUser($joomla_user) {
 	global $userIsPilot, $userIsAdmin, $userIsBoardMember, $userIsInstructor, $userIsMechanic,$userIsStudent, $userIsTheoryStudent, $userIsFlyingStudent,
@@ -218,7 +221,7 @@ function MustBeLoggedIn() {
 	global $userId ;
 
 	if ($userId == 0) {
-		header("Location: https://www.spa-aviation.be/resa/connect.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
+		header("Location: " . SITE_URL . "mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
 		exit ;
 	}
 }
@@ -280,14 +283,14 @@ $webcam_uris = array("https://nav.vyncke.org/rapcs/snapshot-apron.jpg?uid=$userI
 	"https://nav.vyncke.org/rapcs/snapshot-hangars.jpg?uid=$userId",
 //	"https://www.spa-aviation.be/webcam.php",
 	) ;
-$favicon = "https://www.spa-aviation.be/favicon32x32.ico" ;// The usual web browser favicon + also used in Calendar
+$favicon = "https://" . SITE_HOST . "/favicon32x32.ico" ;// The usual web browser favicon + also used in Calendar
 $ical_name = "Calendrier réservations et événements RAPCS" ; // Name of the iCAL calendar
 $ical_organizer = "RAPCS asbl" ; // Name of the organizer of the iCAL calendar
 
 // More Joomla dependencies
-$avatar_root_resized_uri = "https://www.spa-aviation.be/resa/images/members/resized/size144" ;
+$avatar_root_resized_uri = SITE_URL . "images/members/resized/size144" ;
 $avatar_root_resized_directory = "resa/images/members/resized/size144" ;
-$avatar_root_uri = "https://www.spa-aviation.be/resa/images/members" ;
+$avatar_root_uri = SITE_URL . "images/members" ;
 $avatar_root_directory = "resa/images/members" ;
 
 // Aircraft Technical Log variables
@@ -416,7 +419,7 @@ if ($userId > 0 and $userId != 294) { // Only for logged-in users and not for SP
 			$_SERVER['PHP_SELF'] != '/resa/get_bookings.php' && $_SERVER['PHP_SELF'] != '/resa/get_fi_agenda.php')
 			if (!isset($_COOKIE['membership'])) {
 					journalise($userId, "I", "Unpaid membership, redirecting to membership page (from $_SERVER[HTTP_REFERER])") ;
-					header("Location: https://www.spa-aviation.be/resa/mobile_membership.php?cb=" . urlencode($cb) , TRUE, 307) ;
+					header("Location: " . SITE_URL . "mobile_membership.php?cb=" . urlencode($cb) , TRUE, 307) ;
 			}
 	}
 } else // not logged in
@@ -469,7 +472,17 @@ function journalise($userId, $severity, $message) {
 	$remote_address = getClientAddress() ;
 	$message = web2db($message) ;
 	$message = mysqli_real_escape_string($mysqli_link, $message) ;
-	$uri = $_SERVER['REQUEST_URI'] ;
+	// Clean the request URI by removing sensitive query parameters (username, password)
+	$raw_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '' ;
+	$uri_parts = parse_url($raw_uri);
+	$path = isset($uri_parts['path']) ? $uri_parts['path'] : '';
+	$query = isset($uri_parts['query']) ? $uri_parts['query'] : '';
+	parse_str($query, $query_params);
+	// Remove sensitive keys if present
+	if (isset($query_params['username'])) unset($query_params['username']);
+	if (isset($query_params['password'])) unset($query_params['password']);
+	$new_query = http_build_query($query_params);
+	$uri = $path . ($new_query !== '' ? '?' . $new_query : '');
 	$trusted_booker = (isset($_COOKIE['trusted_booker']) and $_COOKIE['trusted_booker'] == 1) ? 1 : 0 ;
 	$params = '' ;
 	foreach($_POST as $var => $value) {

@@ -24,6 +24,7 @@ require_once 'dbi.php' ; // Mainly to have access to $default_metar_station...
 $allowed_origins = [
     "https://www.spa-aviation.be",
     "https://spa-aviation.be",
+	SITE_HOST,
     "https://www.spa-aviation.ovh",
     "https://spa-aviation.ovh"
 ];

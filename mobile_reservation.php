@@ -19,10 +19,7 @@
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 require_once "dbi.php" ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 
 require_once "odoo.class.php" ;
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password, FALSE) ;

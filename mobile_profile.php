@@ -17,10 +17,8 @@
 */
 
 require_once "dbi.php" ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
+
 if (isset($_REQUEST['displayed_id']) and $_REQUEST['displayed_id'] != '') {
 	$displayed_id = $_REQUEST['displayed_id'] ;
 	if (! is_numeric($displayed_id)) journalise($userId, "F", "Numero d'utilisateur invalide: $displayed_id") ;
@@ -87,7 +85,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
 		$google = new Google([
 			'clientId'     => $google_client_id,
 			'clientSecret' => $google_client_secret,
-			'redirectUri'  => 'https://www.spa-aviation.be/resa/mobile_profile.php', // Doit être identique à la console Google
+			'redirectUri'  => SITE_URL . 'mobile_profile.php', // Doit être identique à la console Google
 		]);
 		journalise(0, "I", "Google OAuth callback received") ;
         try {
@@ -847,11 +845,11 @@ if (! $read_only) {
 	$google = new Google([
 		'clientId'     => $google_client_id,
 		'clientSecret' => $google_client_secret,
-		'redirectUri'  => 'https://www.spa-aviation.be/resa/mobile_profile.php', // Doit être identique à la console Google
+		'redirectUri'  => SITE_URL . 'mobile_profile.php', // Doit être identique à la console Google
 	]);
 	// Generate OAuth URLs
 	$facebookHelper = $facebookClient->getRedirectLoginHelper();
-	$facebookAuthUrl = $facebookHelper->getLoginUrl('https://www.spa-aviation.be/resa/mobile_profile.php', ['email','public_profile','user_link']);
+	$facebookAuthUrl = $facebookHelper->getLoginUrl(SITE_URL . 'mobile_profile.php', ['email','public_profile','user_link']);
 	$googleAuthUrl = $google->getAuthorizationUrl();
 	$_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 	print('<div class="form-group">Faciliter la connexion/login en 

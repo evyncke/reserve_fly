@@ -18,10 +18,7 @@
 
 require_once "dbi.php" ;
 
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 
 $id = (isset($_REQUEST['id'])) ? $_REQUEST['id'] : '' ; // Direct access to a booking by id
 $auth = (isset($_REQUEST['auth'])) ? $_REQUEST['auth'] : '';

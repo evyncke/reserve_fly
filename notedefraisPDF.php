@@ -33,8 +33,6 @@ function PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $expenseRepo
 	$date=date_create();
 	$year=date_format($date,"Y");
 	$remboursable="REMBOURSABLE SUR COMPTE PILOTE";
-	$facturesMailCC="aeroclub.spa@gmail.com";
-	//$facturesMailCC="patrick.reginster@gmail.com";
 	$facturesMail="note_de_frais_nr@spa-aviation.odoo.com";
 	if($theRemboursable==1) {
 		// Note de frais remboursable
@@ -59,7 +57,7 @@ function PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $expenseRepo
 	$pdf->SetExpenseReportNumber($nextExpenseReport);
 	$pdf->SetExpenseReportCommunication($communication);
 	$pdf->SetAttachedFile($aNewAttachedFileName);
-	$pdf->SetUploadFolder(SITE_URL.$notedefraisFolder);
+	$pdf->SetUploadFolder(SITE_URL . $notedefraisFolder);
 	$pdf->SetRemboursable($remboursable);
 	$pdf->AddPage();
 	$pdf->AliasNbPages();
@@ -103,8 +101,7 @@ function PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $expenseRepo
 	// Send Mail to factures@spa-aviation.be
 	$theMemberMail="patrick.reginster@gmail.com";
 	PDF_sendMail($nextExpenseReport, $notedefraisFolder."/".$notedefraisFile, $aNewAttachedFileName, $facturesMail, $theMemberMail, $partner['name']);
-	//COPIE SENT TO BERNARD
-	PDF_sendMail($nextExpenseReport, $notedefraisFolder."/".$notedefraisFile, $aNewAttachedFileName, $facturesMailCC, $theMemberMail, $partner['name']);
+
 	//print("<br>PDF_createNoteDeFrais: PDF Version: End<br>");
  	return $notedefraisFile;
 }
@@ -210,7 +207,7 @@ function PDF_getNoteDeFraisNumber()
 function PDF_sendMail($theNoteDeFraisReference, $theNoteDeFraisPDF, $theAttachedFileName,  $theFacturesMail, $theMemberMail, $theMemberName)
 {
 
-	print("PDF_sendMail: $theNoteDeFraisReference $theNoteDeFraisPDF, $theAttachedFileName, $theFacturesMail<br>");
+	//print("PDF_sendMail: $theNoteDeFraisReference $theNoteDeFraisPDF, $theAttachedFileName, $theMemberMail<br>");
 		//Si non remboursable -> dans le dossier odoo "note de frais non remboursable"
 		//$facturesMail="note_de_frais_nr@spa-aviation.odoo.com";
 		//Si remboursable -> le dossier odoo "note de frais remboursable"
@@ -271,12 +268,7 @@ function sendMail(
     $message .= $attachment;
     $message .= $boundWithPre."--";
     //print("sendMail: toAddress=$toAddress, <br>subject=$subject, <br>message=$message,<br>headers=$headers<br>");
-	if(0) {
-   		print("smtp_mail: toAddress=$toAddress<br>");
-		smtp_mail($toAddress, $subject, $message, $headers) ;
-		return "";
-	}
-	return mail($toAddress, $subject, $message, $headers);
+    return mail($toAddress, $subject, $message, $headers);
 }
 
 function sendMailBackup(

@@ -33,7 +33,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'news_add') {
 		or die("Cannot add news about '$_REQUEST[subject]': " . mysqli_error($mysqli_link)) ;
 	// So far so good, redirect to the reservation page
 	journalise($userId, 'I', "News about $_REQUEST[subject] added") ;
-	header('Location: ' . 'https://www.spa-aviation.be/resa/mobile_reservations.php') ;
+	header('Location: ' . SITE_URL . 'mobile_reservations.php') ;
 	exit ; 
 }
 

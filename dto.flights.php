@@ -17,10 +17,7 @@
 */
 
 require_once "dbi.php" ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 

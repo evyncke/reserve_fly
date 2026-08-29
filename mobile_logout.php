@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2023 Eric Vyncke
+   Copyright 2013-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ unset($_SESSION['jom_id']);
 session_unset();
 session_destroy();
 
-header("Location: https://www.spa-aviation.be/resa/mobile.php?logout") ;
+header("Location: " . SITE_URL . "mobile.php?logout") ;
 journalise($userId, 'I', "$userName is disconnected from the mobile web") ;
 
 exit() ;

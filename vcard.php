@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2025 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ VERSION:3.0
 PRODID:aeroclub management by Eric Vyncke
 N;charset=utf-8:$me[last_name];$me[first_name];;;
 FN;charset=utf-8:$me[name]
-LOGO;MEDIATYPE=image/x-icon:https://www.spa-aviation.be/favicon32x32.ico
+LOGO;MEDIATYPE=image/x-icon:https://" . SITE_HOST . "/favicon32x32.ico
 ORG;charset=utf-8:RAPCS\n" ;
 if (!isset($_REQUEST['qr']) and $me['avatar'] != '' and file_exists("$avatar_root_directory/$me[avatar]")) {
 	$file_name = "$avatar_root_directory/$me[avatar]" ;

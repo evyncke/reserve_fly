@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,5 +15,5 @@
    limitations under the License.
 
 */
-header('Location: https://www.spa-aviation.be/resa/mobile_planelog.php?plane=' . $_REQUEST['plane']);
+header('Location: ' . SITE_URL . 'mobile_planelog.php?plane=' . $_REQUEST['plane']);
 ?>

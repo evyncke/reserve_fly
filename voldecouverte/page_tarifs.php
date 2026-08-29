@@ -6,11 +6,10 @@ require_once 'action_tools.php' ;
 <!DOCTYPE html>
 <html>
 <body>
-	<script src="https://www.spa-aviation.be/resa/voldecouverte/offrir_bons.js"></script>
-	<script src="https://www.spa-aviation.be/resa/voldecouverte/offrir_circuits.js"></script>
-	<script src="https://www.spa-aviation.be/resa/voldecouverte/tarifs.js"></script>
-	<!---<script src="https://www.spa-aviation.be/resa/voldecouverte/table_tools.js"></script>-->
-	<script src="https://www.spa-aviation.be/resa/voldecouverte/tarif_tools.js"></script>
+	<script src="offrir_bons.js"></script>
+	<script src="offrir_circuits.js"></script>
+	<script src="tarifs.js"></script>
+	<script src="tarif_tools.js"></script>
 	<script>
 	<?php
 	 	function printJavaScriptVariableFromFile($theVarName,$theURL) {
@@ -18,34 +17,11 @@ require_once 'action_tools.php' ;
 			print("var $theVarName=$text;\n");
 		}
 	  // Add in the file: var myTarifs = {content of the file};
-	  printJavaScriptVariableFromFile("myTarifs","https://www.spa-aviation.be/resa/voldecouverte/tarifs.json");
+	  printJavaScriptVariableFromFile("myTarifs","tarifs.json");
 	?>
 
 // Include fs module
 //const fs = require('FS');
-
-// Calling the readFileSync() method
-// to read 'input.txt' file
-//const data = fs.readFileSync('https://www.spa-aviation.be/resa/voldecouverte/tarifs.json',
-//    { encoding: 'utf8', flag: 'r' });
-//	var aJSON=  JSON.parse(data);
-
-// Display the file data
-//console.log(data);
-/*
-	var myTarifs={};
-	var myTarifsReady=false;
-	getFileAsJSON("https://www.spa-aviation.be/resa/voldecouverte/tarifs.json").then(
-		function(tarifs) {
-			myTarifs=tarifs;
-			myTarifsReady=true;
-	        //document.write("JSON Read<br>");
-		},
-		function(error) {
-			var anError=error;
-		}
-	);
-	*/
 	</script>
 	
     <h1 style='text-align: center;'>Summary of all tarifs (2024)</h1>
@@ -142,14 +118,14 @@ require_once 'action_tools.php' ;
 	
 	<!-- Table tarifs des circuits )-->
 	<h2>Circuits</h2>
- 	<script src="https://www.spa-aviation.be/resa/voldecouverte/table_vol_decouverte.js"></script>
+ 	<script src="table_vol_decouverte.js"></script>
 	
 	<!-- Table tarifs Vol libre )-->
 	<h2>Vols libres</h2>
- 	<script src="https://www.spa-aviation.be/resa/voldecouverte/table_vol_libre.js"></script>
+ 	<script src="table_vol_libre.js"></script>
 
 	<!-- Table tarifs Vol libre par minute)-->
 	<h2>Vols libres Tarifs par minutes</h2>
- 	<script src="https://www.spa-aviation.be/resa/voldecouverte/table_vol_libre_par_minute.js"></script>
+ 	<script src="table_vol_libre_par_minute.js"></script>
 </body>
 </html>

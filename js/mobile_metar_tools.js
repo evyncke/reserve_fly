@@ -1,5 +1,32 @@
 // JavaScript used by display_metar.php to manage the page
 //
+function showAutoCloseAlert(message, timeoutMs = 3000) {
+    const existing = document.querySelector('.rapcs-autoclose-alert');
+    if (existing) existing.remove();
+
+    const alertEl = document.createElement('div');
+    alertEl.className = 'rapcs-autoclose-alert alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3 shadow';
+    alertEl.style.zIndex = '2000';
+    alertEl.style.maxWidth = '90vw';
+    alertEl.role = 'alert';
+    alertEl.innerHTML = `
+        <div class="d-flex align-items-center">
+            <div class="me-2"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <div>${message}</div>
+            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+
+    document.body.appendChild(alertEl);
+
+    setTimeout(() => {
+        if (alertEl && alertEl.parentNode) {
+            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertEl);
+            bsAlert.close();
+        }
+    }, timeoutMs);
+}
+
 function display_metar_page_loaded(station, displayType) {
     //station="EBLG";
     const metar = {};
@@ -198,7 +225,7 @@ function wprapcs_setMETAR(metar)
         return;
     }
     if(station.length!=4) {
-        alert("Error:setMetar: le nom de la station doit comporter 4 lettres \""+station+"\"");
+        showAutoCloseAlert("Error:setMetar: le nom de la station doit comporter 4 lettres \"" + station + "\"");
         return;
     }
 	var XHR=new XMLHttpRequest();
@@ -210,11 +237,11 @@ function wprapcs_setMETAR(metar)
 				try {
 					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
-                    alert("ERROR:setMETAR: Impossible to retrieve the METAR: "+err);
+                    showAutoCloseAlert("ERROR:setMETAR: Impossible to retrieve the METAR: " + err);
 					return ;
 				}
 				if (response.error != '') {
-                    alert("ERROR:setMETAR: Impossible to retrieve the METAR of "+station+":\n "+response.error);
+                    showAutoCloseAlert("ERROR:setMETAR: Impossible to retrieve the METAR of " + station + ":\n " + response.error);
                     setRunway(station);
                     return;
                 }
@@ -366,7 +393,7 @@ function wprapcs_setRunway(station, metar)
         return;
     }
     if(station.length!=4) {
-        alert("Error:setRunway: le nom de la station doit comporter 4 lettres \""+station+"\"");
+        showAutoCloseAlert("Error:setRunway: le nom de la station doit comporter 4 lettres \"" + station + "\"");
         return;
     }
 	var XHR=new XMLHttpRequest();
@@ -376,11 +403,11 @@ function wprapcs_setRunway(station, metar)
 				try {
 					var response = eval('(' + this.responseText.trim() + ')') ;
 				} catch(err) {
-                    alert("ERROR:setMETAR: Impossible to retrieve the AirportInfo: "+err);
+                    showAutoCloseAlert("ERROR:setMETAR: Impossible to retrieve the AirportInfo: " + err);
 					return ;
 				}
 				if (response.hasOwnProperty("statusCode")) {
-                    alert("ERROR:setRunway: Impossible to retrieve the Airport Info of "+station+":\n "+response.message);
+                    showAutoCloseAlert("ERROR:setRunway: Impossible to retrieve the Airport Info of " + station + ":\n " + response.message);
                     return;
                 }
                 else {

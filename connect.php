@@ -20,21 +20,21 @@ require_once 'dbi.php' ;
 
 // https://gist.github.com/alexandreelise/2fa2c5ce2a823bc2f08abbb91cd44274
 
-$callback = urldecode($_REQUEST['cb']) ;
+$callback = htmlspecialchars(urldecode($_REQUEST['cb']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ;
 
 if ($userId > 0) {
-    header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
+    header("Location: https://" . SITE_HOST . "/" . $callback, TRUE, 307) ;
     exit ;
 }
 
 $connect_msg = '' ;
 
 // TODO should probably follow https://stackoverflow.com/questions/74343651/joomla-4-user-login-programmatically
-if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
+if (isset($_POST['username']) and isset($_POST['password'])) {
     $result_login = JFactory::getApplication()->login(
         [
-            'username' => $_REQUEST['username'],
-            'password' => $_REQUEST['password']
+            'username' => htmlspecialchars($_POST['username'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+            'password' => htmlspecialchars($_POST['password'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
         ],
         [
             'remember' => true,
@@ -42,7 +42,7 @@ if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
         ]
     );
     if ($result_login) {
-        header("Location: https://www.spa-aviation.be/$callback", TRUE, 307) ;
+        header("Location: https://" . SITE_HOST . "/" . $callback, TRUE, 303) ;
         $joomla_user = JFactory::getUser() ;
         journalise($joomla_user->id, "I", "Connection of $_REQUEST[username] from $callback") ;
         exit ;
@@ -73,9 +73,9 @@ if (isset($_REQUEST['username']) and isset($_REQUEST['password'])) {
     <p class="bg-danger"><?=$connect_msg?></p>
     <p class="bg-info">Pour accéder au site vous devez vous connecter.</p>
 
-<form method="post" action="<?=$_SERVER['PHP_SELF']?>">
+<form method="post" action="<?=htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')?>">
 <input type="hidden" name="cb" value="<?=$callback?>">
-Identifiant: <input type="text" name="username"  autocomplete="username" value="<?=$_REQUEST['username']?>"><br/>
+Identifiant: <input type="text" name="username"  autocomplete="username" value="<?=htmlspecialchars($_REQUEST['username'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')?>"><br/>
 Mot de passe: <input type="password" name="password" autocomplete="current-password"><br/>
 <input type="submit" value="Connexion">
 </form>

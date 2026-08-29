@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2024 Eric Vyncke
+   Copyright 2024-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,13 +20,10 @@ ob_start("ob_gzhandler");
 require_once 'flight_header.php' ;
 require_once "dbi.php" ;
 require_once "odooFlight.class.php" ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 
 $header_postamble = '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-<link href="https://www.spa-aviation.be/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+<link href="https://' . SITE_HOST . '/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>';
 
@@ -272,14 +269,12 @@ foreach($result as $f=>$desc) {
         if (array_key_exists($referenceInFlight, $referenceIDMap)) {
             $pos = strpos($referenceInFlight, "V-");
             if ($pos !== false) {
-                print("<td $styleRed><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight</a>$dateFlown</td>");
+                print("<td $styleRed><a href=\"flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight</a>$dateFlown</td>");
             } 
             else {
-                print("<td style='color: red;'><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight</a><br>La référence ne commence pas par V-$dateFlown</td>");               
+                print("<td style='color: red;'><a href=\"flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight</a><br>La référence ne commence pas par V-$dateFlown</td>");               
             }
-         
-     	  	//print("<td $styleRed><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$referenceInFlight]\">$referenceInFlight<a></td>");
-        }
+                 }
         else {
             if($referenceInFlight!="") {
                 print("<td $styleRed>$referenceInFlight</td>");      
@@ -291,7 +286,7 @@ foreach($result as $f=>$desc) {
                     $var1=$referenceIDMap[$flightReference];
                     $var3=$ledgerIdMap[$flightReference];
                     print("<td $styleRed><a href=\"javascript:void(0);\" onclick=\"linkPaymentFunction('$_SERVER[PHP_SELF]', '$var1', '$id', '$var3')\">Lier Odoo&Flight</a><br>avec<br>
-                    <a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDMap[$flightReference]\">$flightReference</a></td>");
+                    <a href=\"flight_create.php?flight_id=$referenceIDMap[$flightReference]\">$flightReference</a></td>");
                 }
                 else if (array_key_exists($flightReference, $referenceIDFlightMap)) {
                     $var1=$referenceIDFlightMap[$flightReference];
@@ -299,7 +294,7 @@ foreach($result as $f=>$desc) {
                     $varRef=str_replace("'"," ",$varRef);
                     $varDate=$date;
                     print("<td $styleRed><a href=\"javascript:void(0);\" onclick=\"createPaymentFunction('$_SERVER[PHP_SELF]', '$var1', '$id', '$credit', '$varDate', '$varRef')\">Créer paiement</a><br>dans<br>
-                    <a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDFlightMap[$flightReference]\">$flightReference</a></td>");
+                    <a href=\"flight_create.php?flight_id=$referenceIDFlightMap[$flightReference]\">$flightReference</a></td>");
                 }
                 else {
                     // On ne trouve pas en automatique un lien entre le paiement odoo et un vol dans Flight
@@ -309,8 +304,6 @@ foreach($result as $f=>$desc) {
         }
         // Column Ref un Odoo
         if (array_key_exists($flightReference, $referenceIDFlightMap)) {
-            // Le lien entre Flight et Odoo est OK
-            //print("<td $styleRed><a href=\"https://www.spa-aviation.be//resa/flight_create.php?flight_id=$referenceIDFlightMap[$flightReference]\">$flightReference<a></td>");
             print("<td $styleRed>OK</td>");
         }
         else {

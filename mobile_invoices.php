@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2025 Eric Vyncke
+   Copyright 2023-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,10 +17,7 @@
 */
 
 require_once "dbi.php" ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 require_once 'mobile_header5.php' ;
 
 $originalUserId = $userId ;
@@ -90,7 +87,7 @@ if ($odooId != '') {
 	require_once 'odoo.class.php' ;
 	$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
 	$invoices = $odooClient->SearchRead('account.move', array(array(
-		// TODO also list out_refund for credit notes ? like this without any move_type filter https://www.spa-aviation.be/resa/mobile_ledger.php?user=182
+		// TODO also list out_refund for credit notes ? like this without any move_type filter mobile_ledger.php?user=182
 				'|',
 				array('move_type','=','out_invoice'),
 				array('move_type','=','out_refund'),

@@ -17,10 +17,7 @@
 */
 
 require_once "dbi.php" ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 require_once 'dto.class.php' ;
 
 if (isset($_REQUEST['file']) and $_REQUEST['file'] != '') {
@@ -40,5 +37,5 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'delete') {
         journalise($userId, "F", "Vous n'avez pas l'autorisation pour effacer ce fichier") ;
     $file->delete() ;
 }
-header("Location: https://www.spa-aviation.be/resa/dto.student.php?student=$file->studentId") ;
+header("Location: " . SITE_URL . "dto.student.php?student=$file->studentId") ;
 ?>

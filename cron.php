@@ -204,7 +204,7 @@ while ($row = mysqli_fetch_array($result)) {
 		"Cette d&eacute;marche est indispensable pour une gestion efficace de la flotte (planification de la maintenance des avions, " .
 		"aide &agrave; la facturation des heures de vol, ...).</p>" .
 		"<p>Merci d’entrer ces données en utilisant ce lien : " . 
-		"<a href=\"https://www.spa-aviation.be/resa/IntroCarnetVol.php?id=$booking_id&auth=$auth\">encoder les index</a>.</p>" .
+		"<a href=\"" . SITE_URL . "IntroCarnetVol.php?id=$booking_id&auth=$auth\">encoder les index</a>.</p>" .
 		"<p>Dans le cas contraire, le système vous bloquera et il ne vous sera plus possible d'effectuer votre prochaine r&eacute;servation.</p>" .
 		"<p>Merci pour votre compréhension et votre collaboration.</p>" .
 		"<p>Le conseil d'administration</p>" .
@@ -353,13 +353,13 @@ while ($row = mysqli_fetch_array($result)) {
 	} else {
 		$email_subject = "Bienvenue sur le site des réservations du RAPCS" ;
         $email_message = "<p>Bonjour,</p><p>Vous avez d&eacute;j&agrave; re&ccedil;u un email avec votre identifiant et votre mot de passe pour le site du RAPCS:\n" ;
-		$email_message .= "<a href=https://www.spa-aviation.be>www.spa-aviation.be</a>. Mais, ce m&ecirc;me identifiant vous permet aussi de visualiser toutes les r&eacute;servations des avions\n" ;
+		$email_message .= "<a href=https://" . SITE_HOST . ">" . SITE_HOST . "</a>. Mais, ce m&ecirc;me identifiant vous permet aussi de visualiser toutes les r&eacute;servations des avions\n" ;
 		$email_message .= "(en tant qu'&eacute;l&egrave;ve ou membre non navigant vous ne pouvez pas en r&eacute;server un)" ;
 		$email_message .= ". La partie r&eacute;servation est accessible via le menu <b>Avions</b> ou\n" ;
 		$email_message .= "directement via <a href=https://resa.spa-aviation.be/>resa.spa-aviation.be/</a> (voire <a href=https://m.spa-aviation.be>m.spa-aviation.be</a> pour mobile).\n" ;
 		$email_message .= " Afin de conna&icirc;tre les autres membres de notre club\n" ;
 		$email_message .= "il vous est conseill&eacute; de compl&egrave;ter votre profil: " ;
-		$email_message .= "<a href=https://www.spa-aviation.be/resa/mobile_profile.php>profil r&eacute;servation</a>; profitez-en pour mettre une photo de vous afin de vous faire reconna&icirc;tre ;-).</p>\n" ;
+		$email_message .= "<a href=" . SITE_URL . "mobile_profile.php>profil r&eacute;servation</a>; profitez-en pour mettre une photo de vous afin de vous faire reconna&icirc;tre ;-).</p>\n" ;
 		$email_message .= "<p>Pour rappel, votre identifiant est <b>$row[username]</b> (vous pouvez le changer en contactant <a href=mailto:webmaster@spa-aviation.be>webmaster@spa-aviation.be</a>).</p>\r\n" ;
 		$email_message .= "<hr>Ceci est un message automatique. En cas de soucis, veuillez contacter <a href=mailto:webmaster@spa-aviation.be>webmaster@spa-aviation.be</a>." ;
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;

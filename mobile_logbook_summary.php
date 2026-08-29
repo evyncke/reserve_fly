@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2025 Eric Vyncke - Patrick Reginster
+   Copyright 2014-2026 Eric Vyncke - Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,13 +17,8 @@
 */
 
 require_once "dbi.php" ;
+MustBeLoggedIn() ;
 require_once "mobile_tools.php" ;
-
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
-
 
 $need_swiped_events = true ; // Allow swipe events on this page
 //$body_attributes=' onload="initPlaneLog();init();" ' ;

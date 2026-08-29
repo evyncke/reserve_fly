@@ -89,11 +89,11 @@ print("\n<!--- PROFILE " .  date('H:i:s') . "-->\n") ;
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
 
 <!-- Facebook Open graph data -->
-<meta property="og:url"           content="https://www.spa-aviation.be/resa/reservation.php" />
+<meta property="og:url"           content="<?= SITE_URL ?>reservation.php" />
 <meta property="og:type"          content="website" />
 <meta property="og:title"         content="Royal Aero Para Club de Spa ASBL" />
 <meta property="og:description"   content="Page réservée aux members pour la réservation de nos avions" />
-<meta property="og:image"         content="https://www.spa-aviation.be/logo_rapcs_256x256.png" />
+<meta property="og:image"         content="<?= SITE_HOST ?>/logo_rapcs_256x256.png" />
 <meta property="og:image:width"	  content="256" />
 <meta property="og:image:height"  content="256" />
 <meta property="og:image:type"    content="image/png" />

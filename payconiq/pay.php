@@ -9,7 +9,7 @@ $reference = $_REQUEST['reference'] ;
 $description = $_REQUEST['description'] ;
 $cb = $_REQUEST['cb'] ;
 
-$pcnq->receivePayment($amount, $description, $reference, 'https://www.spa-aviation.be/resa/payconiq/callback.php') ;
+$pcnq->receivePayment($amount, $description, $reference, SITE_URL . 'payconiq/callback.php') ;
 ?><!DOCTYPE html>
 <html>
 <header>

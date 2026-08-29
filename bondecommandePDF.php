@@ -48,7 +48,7 @@ function PDF_createBonDeCommande($BonDeCommandelines, $expenseReport_date, $part
 	$pdf->SetDate($expenseReport_date);
 	$pdf->SetExpenseReportNumber($nextExpenseReport);
 	$pdf->SetExpenseReportCommunication($communication);
-	$pdf->SetUploadFolder(SITE_URL.$BonDeCommandeFolder);
+	$pdf->SetUploadFolder(SITE_URL . $BonDeCommandeFolder);
 	$pdf->AddPage();
 	$pdf->AliasNbPages();
 	$pdf->AddAddress($partner['name'], $entrepriseName, $partner['address'], $partner['city'], $partner['country'], $bce) ;
@@ -89,7 +89,7 @@ function PDF_createBonDeCommande($BonDeCommandelines, $expenseReport_date, $part
 //Check if it a "bon de commande" for manuel => Not the same facture mail address
 function PDF_isBonDeCommandeForManuel($BonDeCommandelines)
 {
-	//printf("PDF_isBonDeCommandeForManuel:start<br>");
+	printf("PDF_isBonDeCommandeForManuel:start<br>");
 	$BonDeCommandeSize=sizeof($BonDeCommandelines);
     for($i=0;$i<$BonDeCommandeSize;$i++) {
         $nodedefraisLine=$BonDeCommandelines[$i];
@@ -97,12 +97,12 @@ function PDF_isBonDeCommandeForManuel($BonDeCommandelines)
 		$pos = strpos($reference, "M.");
 		if ($pos !== false) {
 			if ($pos == 0) {
-				//printf("PDF_isBonDeCommandeForManuel:It is a manual<br>");
+				printf("PDF_isBonDeCommandeForManuel:It is a manual<br>");
 				return true;
 			}
 		}
     }	
-	//printf("PDF_isBonDeCommandeForManuel:It is NOT a manual<br>");
+	printf("PDF_isBonDeCommandeForManuel:It is NOT a manual<br>");
 	return false;
 }
 

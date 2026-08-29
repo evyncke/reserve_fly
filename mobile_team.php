@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2013-2019 Eric Vyncke
+   Copyright 2013-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,10 +17,7 @@
 */
 
 require_once "dbi.php" ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 
 require_once 'mobile_header5.php' ;
 
@@ -32,7 +29,7 @@ require_once 'mobile_header5.php' ;
 </div> <!-- row -->
 
 <div class="row">
-	<img class="img-fluid" src="https://www.spa-aviation.be/attachments/article/314/SPW_team.png" width="1070" height="533"/>
+	<img class="img-fluid" src="https://<?= SITE_HOST ?>/attachments/article/314/SPW_team.png" width="1070" height="533"/>
 </div> <!-- row -->
 
 

@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2025 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 */
 
 require_once "dbi.php" ;
-if ($userId == 0) {
-	header("Location: https://www.spa-aviation.be/resa/mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
+
 
 $header_postamble = '<script src="data/shareCodes.js"></script>' ;
 $body_attributes=' onload="initPlaneLog();init();" ' ;
@@ -319,7 +317,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$instructor = ($instructor_name != '') ? " /<br/>$instructor_name" : '' ;
 	$huileQuantity=$row['pt_quantity'];
 	$huileQuantityTotal+=$huileQuantity;
-	$bookingLink = ($userIsAdmin) ? " <a href=\"https://www.spa-aviation.be/resa/IntroCarnetVol.php?id=$row[l_booking]\" title=\"Go to booking $row[l_booking]\" target=\"_blank\"> <i class=\"bi bi-box-arrow-up-right\"></a>" : '' ;
+	$bookingLink = ($userIsAdmin) ? " <a href=\"" . SITE_URL . "IntroCarnetVol.php?id=$row[l_booking]\" title=\"Go to booking $row[l_booking]\" target=\"_blank\"> <i class=\"bi bi-box-arrow-up-right\"></a>" : '' ;
 	if ($row['l_start_minute'] < 10)
 			$row['l_start_minute'] = "0$row[l_start_minute]" ;
 	if ($row['l_end_minute'] < 10)
