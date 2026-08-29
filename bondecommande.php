@@ -19,10 +19,7 @@
 require_once "dbi.php" ;
 require_once "odooFlight.class.php" ;
 require_once "mobile_tools.php" ;
-if ($userId == 0) {
-	header("Location: " . SITE_URL . "mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 $bondecommandeJSONcontent = file_get_contents('data/bondecommande.json') ;
 $bondecommandeJSONcontent = str_replace("\n","",$bondecommandeJSONcontent);
 

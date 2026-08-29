@@ -171,11 +171,11 @@ if ($joomla_user->guest and isset($_SESSION['jom_id'])) { // User is not logged 
 	$joomla_user = JFactory::getUser($userId) ;
 } else
 	$userId = 0 ;
+$joomla_session = JFactory::getSession() ;
+$joomla_session->start() ; // Keep alive?
 CheckJoomlaUser($joomla_user) ;
 if ($userId == 62 or $userId == 66)
 	ini_set('display_errors', 1) ; // extensive error reporting for debugging
-$joomla_session = JFactory::getSession() ;
-$joomla_session->start() ; // Keep alive?
 
 function CheckJoomlaUser($joomla_user) {
 	global $userIsPilot, $userIsAdmin, $userIsBoardMember, $userIsInstructor, $userIsMechanic,$userIsStudent, $userIsTheoryStudent, $userIsFlyingStudent,

@@ -26,10 +26,7 @@ document attache: 9240 Note_de_frais_16-04-25.pdf
 require_once "dbi.php" ;
 require_once "odooFlight.class.php" ;
 require_once "mobile_tools.php" ;
-if ($userId == 0) {
-	header("Location: " . SITE_URL . "mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 $notedefraisJSONcontent = file_get_contents('data/notedefrais.json') ;
 $notedefraisJSONcontent = str_replace("\n","",$notedefraisJSONcontent);
 

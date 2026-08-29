@@ -19,10 +19,7 @@
 require_once "dbi.php" ;
 $header_postamble = '<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>' ;
 require_once 'mobile_header5.php' ;
-if ($userId == 0) {
-	header("Location: " . SITE_URL . "mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 if (isset($_REQUEST['webcam']))
   $webcam = '-' . $_REQUEST['webcam'] ;
 else // Use the default

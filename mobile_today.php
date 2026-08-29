@@ -17,10 +17,7 @@
 */
 
 require_once "dbi.php" ;
-if ($userId == 0) {
-	header("Location: " . SITE_URL . "mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 # HTTP/2 push of some JS scripts via header()
 $additional_preload = '</resa/js/mobile_modal_reservation.js>;rel=preload;as=script,</resa/data/instructors.js>;rel=preload;as=script' ;
 $need_swiped_events = true ; // Allow swipe events on this page

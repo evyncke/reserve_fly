@@ -22,10 +22,7 @@ if (isset($_GET['odoo']) and $_GET['odoo'] != '') {
 }
 
 require_once "dbi.php" ;
-if ($userId == 0) {
-	header("Location: " . SITE_URL . "mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 
 $cookie = isset($_COOKIE['odoo']) ? $_COOKIE['odoo'] : 'no cookie defined';
 

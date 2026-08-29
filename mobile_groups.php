@@ -18,10 +18,7 @@
 
 require_once "dbi.php" ;
 
-if ($userId == 0) {
-	header("Location: " . SITE_URL . "mobile_login.php?cb=" . urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) , TRUE, 307) ;
-	exit ;
-}
+MustBeLoggedIn() ;
 require_once 'mobile_header5.php' ;
 
 $original_userId = $userId ;
