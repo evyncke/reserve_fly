@@ -19,6 +19,7 @@
 //ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
+require_once "mobile_tools.php" ;
 require_once 'fpdf186/fpdf.php';
 
 function PDF_createBonDeCommande($BonDeCommandelines, $expenseReport_date, $partner, &$theUploadFolder, &$theFactureMailTo)
@@ -39,6 +40,10 @@ function PDF_createBonDeCommande($BonDeCommandelines, $expenseReport_date, $part
 		$facturesMail="bon.commande.manuel@spa-aviation.be";
 		//$facturesMail="albrechtd75@gmail.com";
 		$nextExpenseReport="BCM-".$year."-".$nextExpenseReportNumber;
+		if(0) {
+			PDF_BDC_SMTP_SendMail();
+			return "";
+		}
 	}
 	$theFactureMailTo=$facturesMail;
 	$BonDeCommandeFile=$nextExpenseReport.".pdf";
@@ -145,49 +150,19 @@ function PDF_BCD_sendMail($theBonDeCommandeReference, $theBonDeCommandePDF, $the
 	$replyto=$theMemberMail;
     //$mailto="factures@spa-aviation.com";
     $mailto=$facturesMail;
+	//$mailto="patrick.reginster@gmail.com";
     $from_mail=$theMemberMail;
     $subject="Bon de commande RAPCS: $theBonDeCommandeReference";
     $message="Bonjour\nVeuillez trouvez ci-joint le bon de commande $theBonDeCommandeReference.\n";
 	$message.="Bien à vous.\n$theMemberName\n\n"; 
 	//print("PDF_sendMail: message=$message");
 	if(1) {
-		return PDF_BDC_sendMail( $theBonDeCommandePDF, $message, $subject, $facturesMail,$from_mail); 
+		//return PDF_BDC_sendMail( $theBonDeCommandePDF, $message, $subject, $facturesMail,$from_mail); 
+		//return PDF_BDC_SMTP_sendMail( $theBonDeCommandePDF, $message, $subject, $facturesMail,$from_mail); 
+		return  MT_smtp_mail_withPDF ( $mailto, $subject, $message, $theBonDeCommandePDF );
 	}
 	return true;
 }
-
-function PDF_BDC_sendMail(
-    string $fileAttachment,
-    string $mailMessage ,
-    string $subject     ,
-    string $toAddress   ,
-    string $fromMail 
-): bool {
-  	$fileAttachment = trim($fileAttachment);
-    $from           = $fromMail;
-    $pathInfo       = pathinfo($fileAttachment);
-    $attachment    = chunk_split(base64_encode(file_get_contents($fileAttachment)));
-    $boundary      = "PHP-mixed-".md5(time());
-    $boundWithPre  = "\n--".$boundary;
-    
-    $headers   = "From: $from";
-    $headers  .= "\nReply-To: $from";
-    $headers  .= "\nContent-Type: multipart/mixed; boundary=\"".$boundary."\"";
-    
-    $message   = $boundWithPre;
-    $message  .= "\n Content-Type: text/plain; charset=UTF-8\n";
-    $message  .= "\n $mailMessage";
-    
-    $message .= $boundWithPre;
-    $message .= "\nContent-Type: application/pdf; name=\"".$pathInfo['basename']."\"";
-    $message .= "\nContent-Transfer-Encoding: base64\n";
-    $message .= "\nContent-Disposition: attachment\n";
-    $message .= $attachment;
-    $message .= $boundWithPre."--";
-    //print("sendMail: toAddress=$toAddress, <br>subject=$subject, <br>message=$message,<br>headers=$headers<br>");
-    return mail($toAddress, $subject, $message, $headers);
-}
-
 
 class BonDeCommandePDF extends FPDF {
 // Column widths

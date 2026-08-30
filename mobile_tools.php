@@ -672,4 +672,80 @@ function MT_DeleteFilesOlderThan($theUploadFolder, $olderTime)
 		}
 	}
 }
+
+function MT_smtp_mail_withPDF ( 
+   string $to, 
+   string $subject,
+   string $message, 
+   string $fichierPdf ): bool 
+{ 
+	require_once 'PEAR.php';
+	require_once 'Mail.php';
+	require_once 'Mail/mime.php';
+
+	global $smtp_from,$smtp_localhost, $smtp_user , $smtp_password, $smtp_host ,$smtp_port; 
+	global $smtp_info;
+	global $mail;
+	//print("envoyerMailSmtp:started<br>");
+ 	
+	if (! isset($mail) or $mail == NULL or $smtp_info['persist'] == False) 
+		$mail = Mail::factory('smtp', $smtp_info); // Create the mail object using the Mail::factory method
+
+   // Paramètres SMTP
+    $params = [
+        'host'     => $smtp_host,
+        'port'     => $smtp_port,
+        'auth'     => true,
+        'username' => $smtp_user,
+        'password' => '$smtp_password'
+    ];
+
+    // Création du transport SMTP avec Mail::factory()
+    //$mail = Mail::factory('smtp', $smtp_info);
+
+    // Vérification du fichier PDF
+    if (!is_file($fichierPdf)) {
+        print("Fichier PDF introuvable : " . $fichierPdf.'<br>');
+        return false;
+    }
+
+    // Construction du message MIME
+    $mime = new Mail_mime([
+        'eol' => "\r\n"
+    ]);
+
+    $mime->setTXTBody($message);
+
+    // Ajout du PDF
+    $mime->addAttachment(
+        file_get_contents($fichierPdf),
+        'application/pdf',
+        basename($fichierPdf),
+        false
+    );
+
+    // Création des headers MIME
+    $headers = [
+        'From' => $smtp_from,
+        'To'   => $to,
+        'Subject' => $subject
+    ];
+
+    $headers = $mime->headers($headers);
+
+    // Envoi
+    $result = $mail->send(
+        $to,
+        $headers,
+        $mime->get()
+    );
+
+    if (PEAR::isError($result)) {
+        print('Erreur SMTP : ' . $result->getMessage().'<br>');
+        return false;
+    }
+
+    return true;
+}
+
 ?>

@@ -19,6 +19,7 @@
 //ob_start("ob_gzhandler");
 
 require_once "dbi.php" ;
+require_once "mobile_tools.php" ;
 require_once 'fpdf186/fpdf.php';
 
 function PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $expenseReport_date, $partner, $attachedFileName, &$theUploadFolder, &$theFactureMailTo)
@@ -233,7 +234,8 @@ function PDF_sendMail($theNoteDeFraisReference, $theNoteDeFraisPDF, $theAttached
 	$message.="Bien à vous.\n$theMemberName\n\n"; 
 	//print("PDF_sendMail: message=$message");
 	if(1) {
-		return sendMail( $theNoteDeFraisPDF, $message, $subject, $facturesMail,$from_mail); 
+		//return sendMail( $theNoteDeFraisPDF, $message, $subject, $facturesMail,$from_mail); 
+		return  MT_smtp_mail_withPDF ( $mailto, $subject, $message, $theNoteDeFraisPDF );
 	}
 	return true;
 }
