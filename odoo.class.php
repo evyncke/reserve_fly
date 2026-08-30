@@ -54,7 +54,8 @@ class OdooClient {
         $context  = stream_context_create($options);
         $result = file_get_contents($this->url, false, $context);
         if ($result === FALSE) {
-            journalise($userId, "F", "Cannot connect to $this->url") ;
+            journalise($userId, "E", "Cannot connect to $this->url") ;
+            return NULL ;
         }
         if ($this->debug) {
             print("<h3>After $service/$method") ;
@@ -77,10 +78,14 @@ class OdooClient {
         $this->exitOnError = $exitOnError ;
 
         $auth = $this->rpc('common', 'authenticate', [$db, $user, $password, []]);
+        if ($auth === NULL and $this->exitOnError) {
+            journalise($originUserId, "F", "Cannot connect to Odoo $host and exitOnError is true") ;
+            return ;
+        }
 
         $this->uid = $auth['result'];
         if (! $this->uid) {
-            journalise($originUserId, "F", "Odoo authentication failure for $user on $db @ $host");
+            journalise($originUserId, "E", "Odoo authentication failure for $user on $db @ $host");
         }
     }
 
