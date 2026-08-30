@@ -59,11 +59,7 @@ function PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $expenseRepo
 	$pdf->SetExpenseReportNumber($nextExpenseReport);
 	$pdf->SetExpenseReportCommunication($communication);
 	$pdf->SetAttachedFile($aNewAttachedFileName);
-<<<<<<< HEAD
 	$pdf->SetUploadFolder(SITE_URL.$notedefraisFolder);
-=======
-	$pdf->SetUploadFolder(SITE_URL . $notedefraisFolder);
->>>>>>> 7cd8614914e5be2c2d83c279bdfc938b21869df9
 	$pdf->SetRemboursable($remboursable);
 	$pdf->AddPage();
 	$pdf->AliasNbPages();

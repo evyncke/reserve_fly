@@ -48,11 +48,7 @@ function PDF_createBonDeCommande($BonDeCommandelines, $expenseReport_date, $part
 	$pdf->SetDate($expenseReport_date);
 	$pdf->SetExpenseReportNumber($nextExpenseReport);
 	$pdf->SetExpenseReportCommunication($communication);
-<<<<<<< HEAD
 	$pdf->SetUploadFolder(SITE_URL.$BonDeCommandeFolder);
-=======
-	$pdf->SetUploadFolder(SITE_URL . $BonDeCommandeFolder);
->>>>>>> 7cd8614914e5be2c2d83c279bdfc938b21869df9
 	$pdf->AddPage();
 	$pdf->AliasNbPages();
 	$pdf->AddAddress($partner['name'], $entrepriseName, $partner['address'], $partner['city'], $partner['country'], $bce) ;
