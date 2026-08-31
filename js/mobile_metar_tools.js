@@ -105,18 +105,18 @@ function wprapcs_displayMETAR(metar)
         windCrossColor=colorOrange;
     }
     
-    var WingDirectionSVG="https://www.spa-aviation.be/resa/images/metar_wind_direction.svg";
+    var WingDirectionSVG=siteURL+"images/metar_wind_direction.svg";
     if(metar.wind_gust> 0.){
         windSpeedDuration=6.0*10.0/metar.wind_velocity; // 6s at 10kt
-        WingDirectionSVG="https://www.spa-aviation.be/resa/images/metar_wind_direction_gust.svg";
+        WingDirectionSVG=siteURL+"images/metar_wind_direction_gust.svg";
     }
    else if(metar.wind_velocity> 13.){
         windSpeedDuration=6.0*10.0/metar.wind_velocity; // 6s at 10kt
-        WingDirectionSVG="https://www.spa-aviation.be/resa/images/metar_wind_direction_fast.svg";
+        WingDirectionSVG=siteURL+"images/metar_wind_direction_fast.svg";
     }
     if(metar.wind_velocity< 9.){
         windSpeedDuration=6.0*10.0/metar.wind_velocity; // 6s at 10kt
-        WingDirectionSVG="https://www.spa-aviation.be/resa/images/metar_wind_direction_slow.svg";
+        WingDirectionSVG=siteURL+"images/metar_wind_direction_slow.svg";
     }
     document.getElementById("id_rapcs_wind_direction").src=WingDirectionSVG;
 
@@ -366,7 +366,7 @@ function wprapcs_setMETAR(metar)
 			}
 		}
 	}
-	var requestUrl = 'https://www.spa-aviation.be/resa/metar.php?station=' + station ;
+	var requestUrl = siteURL + 'metar.php?station=' + station ;
 	XHR.open("GET", requestUrl, true) ;
 	XHR.send(null) ;
 }

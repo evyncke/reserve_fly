@@ -111,6 +111,9 @@ if (isset($need_swiped_events) and is_numeric($need_swiped_events)) {
 <script>
 var
 		runwaysQFU = [ <?php print(implode(', ', $runways_qfu)) ; ?> ],
+    siteURL = '<?= SITE_URL ?>',
+    siteHost = '<?= SITE_HOST ?>',
+    sitePath = '<?= SITE_PATH ?>',
 		nowTimestamp = <?=time()?>,
 		utcOffset = Number(<?=date('Z')/3600?>),
 		userId = <?=$userId?>,

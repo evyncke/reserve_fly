@@ -1597,7 +1597,7 @@ function fillQRCode(communication, amount, theAfterString) {
 	var epcPurpose = '' ; // No clue what to put in this 4-char field
 	//var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount.toFixed(2) + "\n" + epcPurpose + "\n" + "\n" + "TEXT"+ "\n"+ communication + "\n";
 	var epcURI = "BCD\n001\n1\nSCT\n" + epcBic + "\n" + epcName + "\n" + epcIban + "\nEUR" + amount.toFixed(2) + "\n" + epcPurpose + "\n" + "\n" + communication + "\n";
-	document.getElementById('id_payment_qr_code'+theAfterString).src = "https://spa-aviation.be/resa/qr-code.php?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
+	document.getElementById('id_payment_qr_code'+theAfterString).src = siteURL + "qr-code.php?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 	//document.getElementById('id_payment_qr_code'+theAfterString).src = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&&chl=" + encodeURI(epcURI) ;
 
 
@@ -1750,7 +1750,7 @@ function PHPRequest(theRequest) {
 // Acces a l'ancien carnet de vol
 function AncienlogbookClick(id, auth) {
 	console.log('logbookClick() id=' + id) ;
-	window.location.href = '../../resa/mobile_logbook.php?id=' + id + '&auth=' + auth ;
+	window.location.href = siteURL + 'mobile_logbook.php?id=' + id + '&auth=' + auth ;
 }
 
 //===============================================
