@@ -52,7 +52,7 @@ if ($scan_root !== false) {
                         }
 
                         $modification_time = $file_info->getMTime() ;
-                        if ($file_info->getBasename() !== '.htaccess' and $modification_time < $modified_after) {
+                        if ($file_info->getBasename() !== '.htaccess' and ! preg_match('/^[0-9a-f]{12}\.php$/i', $file_info->getBasename()) and $modification_time < $modified_after) { # also f(preg_match('/^[0-9a-f]{12}\.php$/i',basename($file)))
                                 continue ;
                         }
 
