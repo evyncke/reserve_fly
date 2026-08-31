@@ -157,8 +157,9 @@ if (!isset($_REQUEST['kiosk'])) { // No matomo analytics in kiosk mode
 ?>
   /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
   _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
-  _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
-  _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
+/*  _paq.push(["setCookieDomain", "*.spa-aviation.be"]); */
+  _paq.push(["setCookieDomain", document.domain]);
+  _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be","*.spa-aviation.ovh"]]);
   _paq.push(['enableHeartBeatTimer']);
   _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
   _paq.push(['trackPageView']);
