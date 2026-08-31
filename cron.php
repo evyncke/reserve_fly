@@ -751,27 +751,28 @@ mysqli_query($mysqli_link, "DELETE FROM $table_tracks WHERE t_time < DATE_SUB(NO
 mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_tracks") and mysqli_query($mysqli_link, "ALTER TABLE $table_tracks ENGINE=INNODB")
 	or journalise($userId, "E", "Cannot optimize $table_tracks: " . mysqli_error($mysqli_link)) ;
 
-// Clean-up Joomla session table (growing for ever...)
 print(date('Y-m-d H:i:s').": purging database.\n") ;
-mysqli_query($mysqli_link, "DELETE FROM $table_session WHERE userid = 0")
-	or journalise($userId, "E", "Cannot purge anonymous entries in $table_session: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "OPTIMIZE TABLE $table_session") and mysqli_query($mysqli_link, "ALTER TABLE $table_session ENGINE=INNODB")
-	or journalise($userId, "E", "Cannot optimize $table_session: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "DELETE FROM jom_action_logs WHERE log_date < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
-	or journalise($userId, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "DELETE FROM jom_action_logs 
-		WHERE message_language_key = 'PLG_ACTIONLOG_JOOMLA_USER_LOGIN_FAILED' AND log_date < DATE_SUB(NOW(), INTERVAL 1 WEEK)") // Be more aggressive in case of dictionnary attacks
-	or journalise($userId, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_action_logs") and mysqli_query($mysqli_link, "ALTER TABLE jom_action_logs ENGINE=INNODB")
-	or journalise($userId, "E", "Cannot optimize jom_action_logs: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "DELETE FROM jom_redirect_links WHERE published = 0")
-	or journalise($userId, "E", "Cannot purge unpublished entries in jom_redirect_links: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_redirect_links")
-	or journalise($userId, "E", "Cannot optimize jom_redirect_links: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "DELETE FROM jom_ucm_history WHERE save_date < DATE_SUB(NOW(), INTERVAL 24 MONTH)")
-	or journalise($userId, "E", "Cannot purge old revisions in jom_ucm_history: " . mysqli_error($mysqli_link)) ;
-mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_ucm_history") and mysqli_query($mysqli_link, "ALTER TABLE jom_ucm_history ENGINE=INNODB")
-	or journalise($userId, "E", "Cannot optimize jom_ucm_history: " . mysqli_error($mysqli_link)) ;
+if ($use_joomla_authentication) {
+	mysqli_query($mysqli_link, "DELETE FROM jom_session WHERE time < DATE_SUB(NOW(), INTERVAL 1 WEEK)")
+		or journalise($userId, "E", "Cannot purge old entries in jom_session: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_session") and mysqli_query($mysqli_link, "ALTER TABLE jom_session ENGINE=INNODB")
+		or journalise($userId, "E", "Cannot optimize jom_session: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "DELETE FROM jom_action_logs WHERE log_date < DATE_SUB(NOW(), INTERVAL 12 MONTH)")
+		or journalise($userId, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "DELETE FROM jom_action_logs 
+			WHERE message_language_key = 'PLG_ACTIONLOG_JOOMLA_USER_LOGIN_FAILED' AND log_date < DATE_SUB(NOW(), INTERVAL 1 WEEK)") // Be more aggressive in case of dictionnary attacks
+		or journalise($userId, "E", "Cannot purge old entries in jom_action_logs: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_action_logs") and mysqli_query($mysqli_link, "ALTER TABLE jom_action_logs ENGINE=INNODB")
+		or journalise($userId, "E", "Cannot optimize jom_action_logs: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "DELETE FROM jom_redirect_links WHERE published = 0")
+		or journalise($userId, "E", "Cannot purge unpublished entries in jom_redirect_links: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_redirect_links")
+		or journalise($userId, "E", "Cannot optimize jom_redirect_links: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "DELETE FROM jom_ucm_history WHERE save_date < DATE_SUB(NOW(), INTERVAL 24 MONTH)")
+		or journalise($userId, "E", "Cannot purge old revisions in jom_ucm_history: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "OPTIMIZE TABLE jom_ucm_history") and mysqli_query($mysqli_link, "ALTER TABLE jom_ucm_history ENGINE=INNODB")
+		or journalise($userId, "E", "Cannot optimize jom_ucm_history: " . mysqli_error($mysqli_link)) ;
+}
 
 // Get some system parameters
 

@@ -71,26 +71,26 @@ function odooSynchronize() {
                     journalise($userId, "W", "Member $name_from_db (#$row[jom_id]) has no address or city set in Ciel, but is active in Joomla/Odoo") ;
                 }
             } else {  
-                if ($odoo_customer['street'] != db2web($row['address']) and $row['address'] != '') {
-                    $updates['street'] = db2web($row['address']) ;
+                if ($row['address'] != '' and $odoo_customer['street'] != db2web($row['address'])) {
+                    $updates['street'] = db2web($row['address'] ?? '') ;
                 }
-                if ($odoo_customer['zip'] != db2web($row['zipcode']) and $row['zipcode'] != '') {
-                    $updates['zip'] = db2web($row['zipcode']) ;
+                if ($row['zipcode'] != '' and$odoo_customer['zip'] != db2web($row['zipcode'])) {
+                    $updates['zip'] = db2web($row['zipcode'] ?? '') ;
                 }
-                if ($odoo_customer['city'] != db2web($row['city']) and $row['city'] != '') {
-                    $updates['city'] = db2web($row['city']) ;
+                if ($row['city'] != '' and $odoo_customer['city'] != db2web($row['city'])) {
+                    $updates['city'] = db2web($row['city'] ?? '') ;
                 } 
             }
             if ($odoo_customer['email'] != $row['email'] and $row['email'] != '')
                 $updates['email'] = $row['email'] ;     
             // Odoo (since v19) only supports mobile phones.  
-            if ($odoo_customer['phone'] != canonicalizePhone(db2web($row['cell_phone'])) and $row['cell_phone'] != '')
+            if ($row['cell_phone'] != '' and $odoo_customer['phone'] != canonicalizePhone(db2web($row['cell_phone'])))
                 $updates['phone'] = canonicalizePhone(db2web($row['cell_phone'])) ;
-            elseif ($odoo_customer['phone'] != canonicalizePhone(db2web($row['cell_phone'])) and $odoo_customer['phone'] != canonicalizePhone(db2web($row['home_phone'])) and $row['home_phone'] != '')
+            elseif ($row['home_phone'] != '' and $odoo_customer['phone'] != canonicalizePhone(db2web($row['cell_phone'])) and $odoo_customer['phone'] != canonicalizePhone(db2web($row['home_phone'])))
                 $updates['phone'] = canonicalizePhone(db2web($row['home_phone'])) ;
-            if ($odoo_customer['name'] != $name_from_db and $name_from_db != '')
+            if ($name_from_db != '' and $odoo_customer['name'] != $name_from_db)
                 $updates['name'] = $name_from_db ;
-            if ($odoo_customer['complete_name'] != $name_from_db and $name_from_db != '')
+            if ($name_from_db != '' and $odoo_customer['complete_name'] != $name_from_db)
                 $updates['complete_name'] = $name_from_db ;
             // Code below is to ensure that all members are using the same 400100 account
             if ($property_account_receivable_id  != '400100') {

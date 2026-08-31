@@ -69,12 +69,12 @@ $additional_preload = '</' . SITE_PATH . '/js/mobile_reservation.js>;rel=preload
 	'</' . SITE_PATH . '/images/spinner.gif>;rel=preload;as=image,</' . SITE_PATH . '/images/fa.ico>;rel=preload;as=image,' .
 	'</' . SITE_PATH . '/data/instructors.js>;rel=preload;as=script,</' . SITE_PATH . '/data/ressources.js>;rel=preload;as=script,</' . SITE_PATH . '/data/pilots.js>;rel=preload;as=script' ;
 
-$header_postamble = '<link rel="stylesheet" type="text/css" href="css/mobile_reservation.css">
+$header_postamble = '<link rel="stylesheet" type="text/css" href="' . SITE_URL . 'css/mobile_reservation.css">
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="data/ressources.js"></script>
-<script src="data/pilots.js"></script>
-<script src="data/instructors.js"></script>
-<script src="js/mobile_reservation.js"></script>
+<script src="' . SITE_URL . 'data/ressources.js"></script>
+<script src="' . SITE_URL . 'data/pilots.js"></script>
+<script src="' . SITE_URL . 'data/instructors.js"></script>
+<script src="' . SITE_URL . 'js/mobile_reservation.js"></script>
 ' ;
 $body_attributes = 'onload="init(); initBooking();"' ;
 $need_swiped_events = 1024 ; // Allow swipe events on this page only when view port width >= 1024px as responsive table scroll can be confusing
