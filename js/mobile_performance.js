@@ -147,7 +147,7 @@ function planeChanged()
     updateAll();
     setToolTip();
     // update the POH
-    var urlPOH="https://www.spa-aviation.be/resa/mobile_plane.php?plane="+plane;
+    var urlPOH="mobile_plane.php?plane="+plane;
     if(performanceJSON.performance[plane].hasOwnProperty("POH")) {
         urlPOH=performanceJSON.performance[plane].POH;
     }

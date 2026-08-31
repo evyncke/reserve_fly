@@ -414,6 +414,8 @@ function listenBootstrapModal() {
 
 function init() {
 	// Fill in the Planes dropdown menu with the content of data/planes.js
+
+	lastPart = window.location.pathname.split('/').filter(Boolean).pop() || '/';
 	var planesDropdown = document.getElementById('planesDropdown') ;
 	if (planesDropdown) {
 		for (var plane = 0; plane < planes.length; plane++) {
@@ -466,7 +468,7 @@ function init() {
 				pilotSelect.add(option) ;
 		}
 		pilotSelect.value = selectedUserId ;
-		pilotSelect.disabled = ! (userIsAdmin || userIsInstructor || window.location.pathname == '/resa/mobile_profile.php') ;
+		pilotSelect.disabled = ! (userIsAdmin || userIsInstructor || lastPart == 'mobile_profile.php') ;
 	}
 
 	var memberSelect = document.getElementById('memberSelect') ;
@@ -488,7 +490,7 @@ function init() {
 				memberSelect.add(option) ;
 		}
 		memberSelect.value = selectedUserId ;
-		memberSelect.disabled = ! (userIsAdmin || userIsInstructor || window.location.pathname == '/resa/mobile_profile.php') ;
+		memberSelect.disabled = ! (userIsAdmin || userIsInstructor || lastPart == 'mobile_profile.php') ;
 	}
 
 	var instructorSelect = document.getElementById('instructorSelect') ;
