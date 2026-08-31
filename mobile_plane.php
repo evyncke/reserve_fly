@@ -45,7 +45,7 @@ $result2 = mysqli_query($mysqli_link, "select $index_column as compteur_pilote, 
 	or die("Cannot get pilote engine time:" . mysqli_error($mysqli_link)) ;
 $row2 = mysqli_fetch_array($result2) ;
 
-$additional_preload = '</resa/images/fa.ico>;rel=preload;as=image' ;
+$additional_preload = '</' . SITE_PATH . '/images/fa.ico>;rel=preload;as=image' ;
 
 require_once 'mobile_header5.php' ;
 ?> 

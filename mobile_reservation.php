@@ -64,10 +64,10 @@ while ($row = mysqli_fetch_array($result)) {
 }
 
 # HTTP/2 push of some JS scripts via header()
-$additional_preload = '</resa/js/mobile_reservation.js>;rel=preload;as=script,' . 
-	'</resa/css/mobile_reservation.css>;rel=preload;as=style,' .
-	'</resa/images/spinner.gif>;rel=preload;as=image,</resa/images/fa.ico>;rel=preload;as=image,' .
-	'</resa/data/instructors.js>;rel=preload;as=script,</resa/data/ressources.js>;rel=preload;as=script,</resa/data/pilots.js>;rel=preload;as=script' ;
+$additional_preload = '</' . SITE_PATH . '/js/mobile_reservation.js>;rel=preload;as=script,' . 
+	'</' . SITE_PATH . '/css/mobile_reservation.css>;rel=preload;as=style,' .
+	'</' . SITE_PATH . '/images/spinner.gif>;rel=preload;as=image,</' . SITE_PATH . '/images/fa.ico>;rel=preload;as=image,' .
+	'</' . SITE_PATH . '/data/instructors.js>;rel=preload;as=script,</' . SITE_PATH . '/data/ressources.js>;rel=preload;as=script,</' . SITE_PATH . '/data/pilots.js>;rel=preload;as=script' ;
 
 $header_postamble = '<link rel="stylesheet" type="text/css" href="css/mobile_reservation.css">
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

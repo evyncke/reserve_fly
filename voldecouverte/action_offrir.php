@@ -305,7 +305,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$message.="Valeur &agrave; verser sur le compte BE64 7320 3842 1852 BIC CREGBEBB au nom de RAPCS asbl: ".htmlentities($valeur_versement) ." &euro;<br/>";
 		$message.="<p>Communication &agrave; associer au virement: Bon cadeau $flight_reference de ".htmlentities($firstname1) ." " . htmlentities($lastname1)." - Date: ".$today."</p>";
         $epcURI = "BCD\n001\n1\nSCT\nCREGBEBB\nRAPCS asbl\nBE64732038421852\nEUR$valeur_versement\nBon $flight_reference $lastname1 $today\nBon $flight_reference $lastname1 $today" ;
-        $message .= "<p>Ou utilisez le QR-code ci-dessous et votre application bancaire (<b>pas</b> payconiq):<br/><img width=300 height=300 src=\"https://spa-aviation.be/resa/qr-code.php?cht=qr&chs=200x200&&chl=" . urlencode($epcURI) . "\"></p>\n" ;
+        $message .= "<p>Ou utilisez le QR-code ci-dessous et votre application bancaire (<b>pas</b> payconiq):<br/><img width=300 height=300 src=\"". SITE_URL ."qr-code.php?cht=qr&chs=200x200&&chl=" . urlencode($epcURI) . "\"></p>\n" ;
 		if(count($remarques)==0 || $remarques[0]=="") {
 			$message.="Pas de Remarques<br/>";
 		} else {
@@ -383,7 +383,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$message.="Value to transfer by bank. Name RAPCS asbl, IBAN BE64 7320 3842 1852, BIC CREGBEBB: ".htmlentities($valeur_versement) ." &euro;<br/>";
 		$message.="Communication on bank transfer: <b>Gift voucher $flight_reference for  ".htmlentities($firstname1) ." " . htmlentities($lastname1)." - Date: ".$today."</b><br/><br/>";
 		$epcURI = "BCD\n001\n1\nSCT\nCREGBEBB\nRAPCS asbl\nBE64732038421852\nEUR$valeur_versement\nBon $flight_reference $lastname1 $today\nBon $flight_reference $lastname1 $today" ;
-        $message .= "<p>Or use the above QR-code and your Bank App (<b>not</b> payconiq):<br/><img width=300 height=300 src=\"https://spa-aviation.be/resa/qr-code.php?cht=qr&chs=200x200&&chl=" . urlencode($epcURI) . "\"></p>\n" ;
+        $message .= "<p>Or use the above QR-code and your Bank App (<b>not</b> payconiq):<br/><img width=300 height=300 src=\"". SITE_URL ."qr-code.php?cht=qr&chs=200x200&&chl=" . urlencode($epcURI) . "\"></p>\n" ;
 		if(count($remarques)==0 || $remarques[0]=="") {
 			$message.="No remark<br/>";
 		} else {

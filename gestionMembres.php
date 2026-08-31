@@ -24,12 +24,12 @@ if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor)
 	journalise($userId, "F", "Vous n'avez pas le droit de consulter cette page") ; // journalise with Fatal error class also stop execution
 
 // In the mobile_header.php, $additional_preload is use to force a HTTP/2 preload of specific resources (faster load time)
-$additional_preload = '</resa/js/gestionMembres.js>;rel=preload;as=script,</resa/css/gestionMembres.css>;rel=preload;as=style' ;
+$additional_preload = '</' . SITE_PATH . '/js/gestionMembres.js>;rel=preload;as=script,</' . SITE_PATH . '/css/gestionMembres.css>;rel=preload;as=style' ;
 // In the mobile_header.php, $header_postamble will be inserted in the actual <head>...</head> section
 $header_postamble ='
-<script type="text/javascript" src="js/gestionMembres.js"></script>
+<script type="text/javascript" src="' . SITE_PATH . '/js/gestionMembres.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-<link rel="stylesheet" type="text/css" href="css/gestionMembres.css">
+<link rel="stylesheet" type="text/css" href="' . SITE_PATH . '/css/gestionMembres.css">
 ' ;
 require_once 'mobile_header5.php' ;
 

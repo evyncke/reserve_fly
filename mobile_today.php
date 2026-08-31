@@ -19,11 +19,11 @@
 require_once "dbi.php" ;
 MustBeLoggedIn() ;
 # HTTP/2 push of some JS scripts via header()
-$additional_preload = '</resa/js/mobile_modal_reservation.js>;rel=preload;as=script,</resa/data/instructors.js>;rel=preload;as=script' ;
+$additional_preload = '</' . SITE_PATH . '/js/mobile_modal_reservation.js>;rel=preload;as=script,</' . SITE_PATH . '/data/instructors.js>;rel=preload;as=script' ;
 $need_swiped_events = true ; // Allow swipe events on this page
 $header_postamble = '
-<script src="data/instructors.js"></script>
-<script src="js/mobile_modal_reservation.js"></script>
+<script src="' . SITE_URL . 'data/instructors.js"></script>
+<script src="' . SITE_URL . 'js/mobile_modal_reservation.js"></script>
 ' ;
 require_once 'mobile_header5.php' ;
 

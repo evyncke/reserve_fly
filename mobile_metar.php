@@ -18,8 +18,8 @@
 
 require_once "dbi.php" ;
 # HTTP/2 push of some JS scripts via header()
-$additional_preload = '</resa/js/mobile_metar_tools.js>;rel=preload;as=script,' .
-	'</resa/images/metar_rose.png>;rel=preload;as=image' ;
+$additional_preload = '</' . SITE_PATH . '/js/mobile_metar_tools.js>;rel=preload;as=script,' .
+	'</' . SITE_PATH . '/images/metar_rose.png>;rel=preload;as=image' ;
 require_once 'mobile_header5.php' ;
 require_once "mobile_metar_tools.php";
 

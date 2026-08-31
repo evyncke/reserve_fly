@@ -284,9 +284,9 @@ while ($row = mysqli_fetch_array($result)) {
 		"avec $row[full_name] en tant que pilote.</p>\n" ;
 	$directory_prefix = dirname($_SERVER['REQUEST_URI']) ;
 	$email_message .= "<p>Vous pouvez entrer les donn&eacute;es dans le carnet de route de cette r&eacute;servation via ce lien \n"  .
-		"<a href=\"https://$_SERVER[SERVER_NAME]$directory_prefix/booking.php?id=$booking_id&auth=$auth\">direct</a> \n" .
+		"<a href=\"" . SITE_URL . "booking.php?id=$booking_id&auth=$auth\">direct</a> \n" .
 		"(&agrave; conserver si souhait&eacute; ou  ce lien pr&eacute;vu \n" .
-		"<a href=\"https://resa.spa-aviation.be/mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle \n" .
+		"<a href=\"" . SITE_URL . "mobile_logbook.php?id=$booking_id&auth=$auth\">pour smartphones et tablettes</a>). Vous pouvez aussi cliquer sur n'importe quelle \n" .
 		"r&eacute;servation du pass&eacute; afin de mettre &agrave; jour le carnet de route et vos heures voire d'annuler a posteriori une r&eacute;servation.</p>\n" .
 		"<hr><p>Il est &agrave; noter que l'entr&eacute;e par informatique ne remplace pas l'entr&eacute;e manuelle dans le carnet de route!</p>\n" ;
 	if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;

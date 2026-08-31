@@ -1,7 +1,6 @@
 <?php
 // This PHP script is fully integrated as a component of Joomla
 // Developped by Patrick Reginster in 2019
-//include "../../resa/dbi.php" ;
 require_once "../dbi.php" ;
 
 function remove_accents($text) {

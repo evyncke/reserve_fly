@@ -38,7 +38,7 @@ use League\OAuth2\Client\Provider\Google;
 $body_attributes = "onload=\"selectedUserId=$displayed_id;init();\"" ;
 $header_postamble = '<script data-cfasync="true" src="js/mobile_profile.js"></script>' ;
 # HTTP/2 push of some JS scripts via header()
-$additional_preload = '</resa/js/mobile_profile.js>;rel=preload;as=script' ;
+$additional_preload = '</' . SITE_PATH . '/js/mobile_profile.js>;rel=preload;as=script' ;
 require_once 'mobile_header5.php' ;
 
 $change_profile_message = '' ;

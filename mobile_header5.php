@@ -24,12 +24,12 @@ elseif (! str_starts_with($additional_preload, ',')) // Ensure it starts with a 
   $additional_preload = ',' . $additional_preload ; 
 
 if (isset($need_swiped_events) and $need_swiped_events) {
-    $additional_preload .= ',</resa/js/swiped-events.js>;rel=preload;as=script' ;
+    $additional_preload .= ',</' . SITE_PATH . '/js/swiped-events.js>;rel=preload;as=script' ;
 }
 
 # HTTP/2 push of some JS scripts via header()
-header('Link: </resa/js/mobile.js>;rel=preload;as=script,</resa/data/members.js>;rel=preload;as=script,</resa/data/planes.js>;rel=preload;as=script,' .
-  '</logo_rapcs_256x256_white.png>;rel=preload;as=image,</logo_rapcs_256x256.png>;rel=preload;as=image' . 
+header('Link: </' . SITE_PATH . '/js/mobile.js>;rel=preload;as=script,</' . SITE_PATH . '/data/members.js>;rel=preload;as=script,</' . SITE_PATH . '/data/planes.js>;rel=preload;as=script,' .
+  '</' . SITE_PATH . '/logo_rapcs_256x256_white.png>;rel=preload;as=image,</' . SITE_PATH . '/logo_rapcs_256x256.png>;rel=preload;as=image' . 
   $additional_preload) ;
 
 # Handle the toggle between dark/light themes
@@ -71,7 +71,7 @@ $christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_mont
 <!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <link rel="apple-touch-icon" sizes="32x32" href="<?=$favicon?>">
-<link rel="manifest" href="/resa/manifest.webmanifest">
+<link rel="manifest" href="/<?= SITE_URL ?>manifest.webmanifest">
 <title>Mobile RAPCS ASBL</title>
 
 <!-- Using latest bootstrap 5 -->
