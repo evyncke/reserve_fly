@@ -62,8 +62,9 @@ if (filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
 
 // End of paranoid address blocking
 
-DEFINE('SITE_URL', 'https://www.spa-aviation.be/resa/') ;
 DEFINE('SITE_HOST', 'www.spa-aviation.be') ;
+DEFINE('SITE_PATH', 'resa') ;
+DEFINE('SITE_URL', 'https://' . SITE_HOST . '/'. SITE_PATH . '/') ;
 
 require_once('auth.php') ;
 
@@ -289,9 +290,9 @@ $ical_organizer = "RAPCS asbl" ; // Name of the organizer of the iCAL calendar
 
 // More Joomla dependencies
 $avatar_root_resized_uri = SITE_URL . "images/members/resized/size144" ;
-$avatar_root_resized_directory = "resa/images/members/resized/size144" ;
+$avatar_root_resized_directory = SITE_PATH . "/images/members/resized/size144" ;
 $avatar_root_uri = SITE_URL . "images/members" ;
-$avatar_root_directory = "resa/images/members" ;
+$avatar_root_directory = SITE_PATH . "images/members" ;
 
 // Aircraft Technical Log variables
 $atl_uploadfiles_path = "ATL/upload";
@@ -415,8 +416,8 @@ if ($userId > 0 and $userId != 294) { // Only for logged-in users and not for SP
 	$row_fee = mysqli_fetch_array($result_fee) ;
 	if (!$row_fee) {
 		$cb = urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) ;
-		if ($_SERVER['PHP_SELF'] != '/resa/mobile_journal.php' && $_SERVER['PHP_SELF'] != '/resa/mobile_membership.php' && 
-			$_SERVER['PHP_SELF'] != '/resa/get_bookings.php' && $_SERVER['PHP_SELF'] != '/resa/get_fi_agenda.php')
+		if ($_SERVER['PHP_SELF'] != SITE_PATH . '/mobile_journal.php' && $_SERVER['PHP_SELF'] != SITE_PATH . '/mobile_membership.php' && 
+			$_SERVER['PHP_SELF'] != SITE_PATH . '/get_bookings.php' && $_SERVER['PHP_SELF'] != SITE_PATH . '/get_fi_agenda.php')
 			if (!isset($_COOKIE['membership'])) {
 					journalise($userId, "I", "Unpaid membership, redirecting to membership page (from $_SERVER[HTTP_REFERER])") ;
 					header("Location: " . SITE_URL . "mobile_membership.php?cb=" . urlencode($cb) , TRUE, 307) ;
