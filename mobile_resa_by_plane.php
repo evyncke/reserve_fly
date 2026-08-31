@@ -118,8 +118,8 @@ function displayPlane($id) {
 		$row['r_start'] = substr($row['r_start'], 0, 16) ;
 		$row['r_stop'] = substr($row['r_stop'], 0, 16) ;
 		// Canonicalize phone numbers
-		$row['pcell_phone'] = canonicalizePhone($row['pcell_phone']) ;
-		$row['icell_phone'] = canonicalizePhone($row['icell_phone']) ;
+		$row['pcell_phone'] = canonicalizePhone($row['pcell_phone'] ?? '') ;
+		$row['icell_phone'] = canonicalizePhone($row['icell_phone'] ?? '') ;
 		// Keep all rows in an array for further processing
 	    $rows[$row['r_id']] = [
 			'r_id' => intval($row['r_id']),

@@ -310,7 +310,7 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['l_instructor'] == -1)
 		$instructor_name = "Autre FI" ;
 	else
-		$instructor_name = db2web($row['instructor_name']) ;
+		$instructor_name = db2web($row['instructor_name'] ?? '') ;
 	// Time in $table_logbook is already in UTC
 	$l_start = substr($row['l_start'], 11, 5) ;
 	$l_end = substr($row['l_end'], 11, 5) ;

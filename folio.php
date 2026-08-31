@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2025 Eric Vyncke
+   Copyright 2023-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -175,21 +175,21 @@ class FolioLine{
             case -8: $this->share_member_name = '(Mécano)'; $this->share_member_fname = 'Club'; break ;
             default:
                 if (($row['l_share_type'] == 'CP2' or $row['l_share_type'] == 'CP1') and $row['l_share_member'] == $userId) {
-                    $this->share_member_name = db2web($row['pilot_name']) ;
-                    $this->share_member_fname = db2web($row['pilot_fname']) ;
+                    $this->share_member_name = db2web($row['pilot_name'] ?? '') ;
+                    $this->share_member_fname = db2web($row['pilot_fname'] ?? '') ;
                 } else {
-                    $this->share_member_name = db2web($row['share_member_name']) ; 
-                    $this->share_member_fname = db2web($row['share_member_fname']) ;
+                    $this->share_member_name = db2web($row['share_member_name'] ?? '') ; 
+                    $this->share_member_fname = db2web($row['share_member_fname'] ?? '') ;
                 }
         }
         $this->share_member_code_odoo = $row['share_member_code_odoo'] ;
-        $this->pilot_name = db2web($row['pilot_name']) ;
-        $this->pilot_fname = db2web($row['pilot_fname']) ;
+        $this->pilot_name = db2web($row['pilot_name'] ?? '') ;
+        $this->pilot_fname = db2web($row['pilot_fname'] ?? '') ;
         $this->pilot_code_odoo = $row['pilot_code_odoo'] ;
         $this->pilot_code = $row['l_pilot'] ;
         $this->is_pic = $row['l_is_pic'] ;
-        $this->instructor_name = db2web($row['instructor_name']) ; 
-        $this->instructor_fname = db2web($row['instructor_fname']) ;
+        $this->instructor_name = db2web($row['instructor_name'] ?? '') ; 
+        $this->instructor_fname = db2web($row['instructor_fname'] ?? '') ;
         $this->instructor_code = $row['l_instructor'] ;
     }
     function distance($apt) {

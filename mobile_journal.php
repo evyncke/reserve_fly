@@ -87,7 +87,7 @@ while ($row = mysqli_fetch_array($result)) {
 	if (isset($row['last_name']) and $row['last_name'] != '')
 		$name = db2web("<b>$row[last_name]</b><span class=\"d-none d-md-inline\"> $row[first_name]</span>") ;
 	else
-		$name = db2web($row['name']) ;
+		$name = db2web($row['name'] ?? 'no name') ;
 	print("<tr>
 		<td class=\"text-nowrap$specialClass\">$date</td>
 		<td$nameStyle class=\"text-nowrap$specialClass\">$name</td>

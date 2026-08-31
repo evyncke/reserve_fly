@@ -69,7 +69,7 @@ while ($row = mysqli_fetch_array($result)) {
         $address = $company['street'] ;
         $city = $company['city'] ;
         $zipcode = $company['zip'] ;
-        $country = $company['country_id'][1] ;
+        $country = isset($company['country_id'][1]) ? $company['country_id'][1] : '' ;
     } else {
         $name = "Aucune compagnie dans Odoo pour #$row[c_odoo_id]" ;
         $address = '?' ;

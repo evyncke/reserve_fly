@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2022-2025 Eric Vyncke, Patrick Reginster
+   Copyright 2022-2026 Eric Vyncke, Patrick Reginster
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -73,9 +73,9 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	or journalise($originalUserId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
 $pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
-$userLastName = db2web($pilot['last_name']) ;
+$userLastName = db2web($pilot['last_name'] ?? '') ;
 $odooId = $pilot['odoo_id'] ;
-$blocked_reason = db2web($pilot['b_reason']) ;
+$blocked_reason = db2web($pilot['b_reason'] ?? '') ;
 $blocked_when = $pilot['b_when'] ;
 mysqli_free_result($result) ;
 

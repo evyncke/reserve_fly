@@ -57,8 +57,8 @@ $result = mysqli_query($mysqli_link, "SELECT *
 	or journalise($originalUserId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
 $pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
 $userName = db2web("$pilot[first_name] $pilot[last_name]") ;
-$userLastName = substr(db2web($pilot['last_name']), 0, 5) ;
-$blocked_reason = db2web($pilot['b_reason']) ;
+$userLastName = substr(db2web($pilot['last_name'] ?? ''), 0, 5) ;
+$blocked_reason = db2web($pilot['b_reason'] ?? '') ;
 $blocked_when = $pilot['b_when'] ;
 
 ?> 

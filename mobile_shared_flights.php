@@ -144,8 +144,8 @@ while ($row = mysqli_fetch_array($result)) {
 	// Don't trust the row but the diff of engine index
 	$duration = 60 * ($row['l_end_hour'] - $row['l_start_hour']) + $row['l_end_minute'] - $row['l_start_minute'] ;
 	// Handling character sets...
-	$pilot_name = db2web($row['pilot_name']) ;
-	$instructor_name = db2web($row['instructor_name']) ;
+	$pilot_name = db2web($row['pilot_name'] ?? '') ;
+	$instructor_name = db2web($row['instructor_name'] ?? '') ;
 	// Time in $table_logbook is already in UTC
 	$l_start = substr($row['l_start'], 11, 5) ;
 	$l_end = substr($row['l_end'], 11, 5) ;
@@ -180,8 +180,8 @@ while ($row = mysqli_fetch_array($result)) {
 </tbody>
 </table>
 <br>
-<p class="small">Seuls les vols en code partage club et en dehors des vols découvertes et d'initiation sont affichés. Sur base des donn&eacute;es entr&eacute;es apr&egrave;s les vols dans le
-carnet de route des avions. Heure affich&eacute;e en heure universelle.</p>
+<p class="small">Seuls les vols en code partage club et en dehors des vols découvertes et d'initiation sont affichés. Sur base des données entrées après les vols dans le
+carnet de route des avions. Heure affichée en heure universelle.</p>
 </div><!-- container -->
 </body>
 </html>

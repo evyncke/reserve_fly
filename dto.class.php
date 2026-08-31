@@ -64,17 +64,17 @@ class DTOMember {
         global $avatar_root_uri , $avatar_root_directory, $avatar_root_resized_uri, $avatar_root_resized_directory,
             $joomla_theory_student_group, $joomla_flying_student_group ;
         if ($row) {
-            $this->firstName = db2web($row['first_name']) ;
-            $this->lastName = db2web($row['last_name']) ;
+            $this->firstName = db2web($row['first_name'] ?? '') ;
+            $this->lastName = db2web($row['last_name'] ?? '') ;
             $this->jom_id = $row['jom_id'] ;
             $this->email = $row['email'] ;
-            $this->mobilePhone = canonicalizePhone($row['cell_phone']) ;
-            $this->address = db2web($row['address']) ;
+            $this->mobilePhone = canonicalizePhone($row['cell_phone'] ?? '') ;
+            $this->address = db2web($row['address'] ?? '') ;
             $this->zipCode = $row['zipcode'] ;
-            $this->city = db2web($row['city']) ;
-            $this->country = db2web($row['country']) ;
+            $this->city = db2web($row['city'] ?? '') ;
+            $this->country = db2web($row['country'] ?? '') ;
             $this->blocked = ($row['b_reason'] != '') ;
-            $this->blockedMessage = db2web($row['b_reason']) ;
+            $this->blockedMessage = db2web($row['b_reason'] ?? '') ;
             $this->membershipPaid = ($row['bkf_payment_date'] != '') ;
             $this->groupMembership = $row['group_ids'] ;
             $this->theoryStudent = in_array($joomla_theory_student_group, explode(',', $this->groupMembership));
