@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2023-2025 Eric Vyncke
+   Copyright 2023-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -64,44 +64,52 @@ $header_postamble = '<style>
 require_once 'mobile_header5.php' ;
 
 $sql_date = date('Y-m-d') ;
-$special_date = '2025-05-17' ;
-$rows = [
-    [ '0910', 'OOJRB', 'NIHOUL', 'GASPAR'],
-    [ '0920', 'OOAPV', 'REGINSTER', 'VINTENS'],
-    [ '1030', 'OOALE', 'HENDRICKX', 'POLAT'],
-    [ '1040', 'OOFUN', 'MOREAU', 'LALLEMANT'],
-    [ '1150', 'DELZB', 'ROSANT', 'LIEVENS'],
-    [ '1200', 'OOG85', 'MALAISE', 'VAN HEES'],
-    [ '1210', 'OOFUN', 'DELFOSSE', 'BARBIER'],
-    [ '1220', 'OOJRB', 'LENOM', 'FERNANDEZ'],
-    [ '1230', 'OOALD', 'DOPPAGNE', 'MENDES'],
-    [ '1310', 'OOADO', 'HARTMANN', 'FRAIKIN'],
-    [ '1320', 'OOALE', 'PENDERS', 'ALBRECHT'],
-    [ '1330', 'OOFMX', 'MICHOTTE', 'EVERAETS'],
-    [ '1340', 'OOPEG', 'MATHIEU', 'RAOUT'],
-    [ '1350', 'OOVMS', 'SAUVAGE', 'LEFIN'],
-    [ '1400', 'FJXRL', 'GUILLOU', ''],
-    [ '1410', 'OOALD', 'HANNAY', 'MENDES'],
-    [ '1420', 'OOJRB', 'PACHOLIK', '& SON'],
-    [ '1510', 'OOALE', 'VYNCKE', 'DEHOUSSE'],
-    [ '1530', 'DELZB', 'VANHEYSTE', 'ROBA'],
-    [ '1540', 'OOFMX', 'WARNOTTE', 'SMAL'],
-    [ '1550', 'OOFUN', 'CANADAS', 'ERNST'],
-    [ '1200', 'OOSPQ', 'GASPAR', ''],
-    [ '0900', 'OOALD', 'SONKES', 'MENDES'],
-    [ '1545', 'OOJRB', 'MAGHFOUL', 'MENDES'],
-    [ '1700', 'OOALE', 'GADZJIEV', 'MENDES'],
-    [ '', '', '', ''],
-    [ '', '', '', ''],
-    [ '', '', '', ''],
-] ;
+$special_date = '2026-09-01' ;
+$rows = [] ;
 
+if ($special_date == $sql_date and file_exists('data/crews.json')) {
+    $jsonData = file_get_contents('data/crews.json');
+    if (!mb_check_encoding($jsonData, 'UTF-8')) {
+       $jsonData = mb_convert_encoding($jsonData, 'UTF-8', 'ISO-8859-1');
+    }
+    try {
+        $crews = json_decode($jsonData, true, 512, JSON_THROW_ON_ERROR);
+        foreach ($crews as $record) {
+            if (! isset($record['Immatriculation']) or $record['Immatriculation'] == '') # Skip non-plane lines
+                continue ;
+            $row = [];
+            $row[] = isset($record['Departure Time']) 
+                ? str_replace(':', '', $record['Departure Time']) 
+                : '';
+            $row[] = isset($record['Immatriculation']) 
+                ? str_replace('-', '', $record['Immatriculation']) 
+                : '';
+            if (!empty($record['Pilote'])) {
+                $piloteParts = explode(' ', trim($record['Pilote']));
+                $row[] = $piloteParts[0];
+            } else {
+                $row[] = '';
+            }
+            if (!empty($record['Navigateur'])) {
+                $navParts = explode(' ', trim($record['Navigateur']));
+                $row[] = $navParts[0];
+            } else {
+                $row[] = '';
+            }
+            $rows[] = $row;
+        }
+    } catch (\JsonException $e) {
+        echo "Error decoding JSON: " . $e->getMessage();
+        journalise($userId, "E", "Error decoding JSON: " . $e->getMessage()) ;
+    }
+}
+        
 if (isset($_REQUEST['kiosk']) and (date('i') == '23' or date('i') == '24')) journalise($userId, 'D', "In kiosk mode: $_REQUEST[kiosk]") ; // Log liveness on everyhour and 23 minutes
 
 // Dynamic flip departure board https://codepen.io/tomgiddings/pen/yLyExxo
 // Using https://codepen.io/chonz0/pen/NGRbWj for now
 
-function boardPrint($s, $width, $margin, $color = "#fff") {
+function boardPrint(string $s, int $width, int $margin, string $color = "#fff") {
     $chars = mb_str_split($s) ; // Need to support UTF-8 strings that do not support $s[$i]
     for ($i = 0; ($i < $width) and ($i < sizeof($chars)); $i++)
         print('<div class="pane" style="color: ' . $color . ';">' . mb_strtoupper($chars[$i]) . '</div>') ;
@@ -135,7 +143,7 @@ function boardPrint($s, $width, $margin, $color = "#fff") {
 <?php
 
 // Ancilliary function to sort based on departure time
-function cmp($a, $b) {
+function cmp(array $a, array $b) {
     return strcmp($a[0], $b[0]) ;
 }
 
