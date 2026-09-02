@@ -33,22 +33,22 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 
 // Ensure sessions are kept across browsers reloads.
 
-DEFINE('SESSION_COOKIE_LIFETIME', 60 * 60 * 24 * 1) ; // 30 days
+DEFINE('SESSION_COOKIE_LIFETIME', 60 * 60 * 24 * 30) ; // 30 days
 // How long the data is considered 'valid' on the server
-// ini_set('session.gc_maxlifetime', SESSION_COOKIE_LIFETIME); 
+ini_set('session.gc_maxlifetime', SESSION_COOKIE_LIFETIME);
 // How long the cookie lives in the browser
-// ini_set('session.cookie_lifetime', SESSION_COOKIE_LIFETIME);
+ini_set('session.cookie_lifetime', SESSION_COOKIE_LIFETIME);
 
 function startSessionIfRequired(): bool {
 	if (session_status() !== PHP_SESSION_ACTIVE) {
-		// session_set_cookie_params([
-		// 	'lifetime' => SESSION_COOKIE_LIFETIME,
-		// 	'path' => '/',
-		// 	'domain' => $_SERVER['HTTP_HOST'],
-		// 	'secure' => true,     // Recommended: only send over HTTPS
-		// 	'httponly' => true,   // Recommended: prevents JS access to the cookie
-		// 	'samesite' => 'Lax'   // Recommended: protects against CSRF
-		// ]);
+		 session_set_cookie_params([
+		 	'lifetime' => SESSION_COOKIE_LIFETIME,
+		 	'path' => '/',
+		 	'domain' => $_SERVER['HTTP_HOST'],
+		 	'secure' => true,     // Recommended: only send over HTTPS
+		 	'httponly' => true,   // Recommended: prevents JS access to the cookie
+		 	'samesite' => 'Lax'   // Recommended: protects against CSRF
+        ]);
 		if (session_start()) {
 			return true;
 		}
