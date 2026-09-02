@@ -31,12 +31,42 @@ DEFINE('PSEUDO_JOOMLA_KEY', 'no_joomla_user') ;
 
 ini_set('display_errors', 1) ; // extensive error reporting for debugging
 
+// Ensure sessions are kept across browsers reloads.
+
+DEFINE('SESSION_COOKIE_LIFETIME', 60 * 60 * 24 * 1) ; // 30 days
+// How long the data is considered 'valid' on the server
+// ini_set('session.gc_maxlifetime', SESSION_COOKIE_LIFETIME); 
+// How long the cookie lives in the browser
+// ini_set('session.cookie_lifetime', SESSION_COOKIE_LIFETIME);
+
+function startSessionIfRequired(): bool {
+	if (session_status() !== PHP_SESSION_ACTIVE) {
+		// session_set_cookie_params([
+		// 	'lifetime' => SESSION_COOKIE_LIFETIME,
+		// 	'path' => '/',
+		// 	'domain' => $_SERVER['HTTP_HOST'],
+		// 	'secure' => true,     // Recommended: only send over HTTPS
+		// 	'httponly' => true,   // Recommended: prevents JS access to the cookie
+		// 	'samesite' => 'Lax'   // Recommended: protects against CSRF
+		// ]);
+		if (session_start()) {
+			return true;
+		}
+		journalise(0, "E", "Failed to start session: " . session_status()) ;
+		return false ;
+	}
+	return true ;
+}
+
 function authenticateJoomlaUser(string $username, string $password): object|false {
     global $table_user_usergroup_map, $table_users, $mysqli_link ;
 
-	if (session_status() !== PHP_SESSION_ACTIVE && !session_start()) {
+//	if (session_status() === PHP_SESSION_ACTIVE)
+//		journalise(0, "W", "authenticateJoomlaUser(): Session is already active when trying to authenticate Joomla user") ;
+
+	if (!startSessionIfRequired()) {
 		return false;
-	}
+	} ;
 
 	$sql = "SELECT id, username, name, email, password
 			FROM $table_users
@@ -92,7 +122,8 @@ function authenticateJoomlaUser(string $username, string $password): object|fals
 	}
 	mysqli_stmt_close($statement);
 
-	session_regenerate_id(true);
+// TODO: analyse why the line below is called everytime in mobile_login
+//	session_regenerate_id(true);
 	$_SESSION['jom_id'] = (int) $userId;
 	$pseudo_joomla_user = (object) [
 		'id' => (int) $userId,
@@ -112,8 +143,9 @@ function authenticateJoomlaUser(string $username, string $password): object|fals
  *
  */
 function getJoomlaSessionUser(): object|false{
-	if (session_status() !== PHP_SESSION_ACTIVE && !session_start()) {
-        journalise(0, "E", "Session not active and cannot be started") ;
+//	if (session_status() === PHP_SESSION_ACTIVE)
+//		journalise(0, "W", "getJoomlaSessionUser(): Session is already active when trying to get Joomla session user") ;
+	if (!startSessionIfRequired()) {
 		return false;
 	}
 
