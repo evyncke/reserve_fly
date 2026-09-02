@@ -116,7 +116,7 @@ $send_no_recent_flight_email = false ; // Whether to send an email to the manage
 $send_missing_validity_email = false ; // Whether to send an email to the manager when a booking is created or modified and the pilot has no valid medical or license
 
 $tracked_planes = array('OOALD', 'OOALE', 'OOAPV', 'OOFUN', 'OOJRB', 'OOFMX', 'OOSPQ') ;
-// array_push($tracked_planes, 'OOADO', 'OOG85', 'OOPEG', 'OOVMS', 'DELZA', 'DELZB', 'FJXRL') ; // For Air Spa Rallye
+array_push($tracked_planes, 'FGOUF', 'FJXRL', 'OOD35', 'OOG85', 'OOVMS') ; // For Air Spa Rallye
 // array_push($tracked_planes, 'OOCEK', 'FAZMX', 'FAYAC', 'GIIIG') ; // For 75 ans avions externes
 
 $bccTo = "eric.vyncke@edpnet.be" ;

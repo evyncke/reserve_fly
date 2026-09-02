@@ -100,7 +100,7 @@ $linkedin = new LinkedIn([
 ]);
 
 // TODO should come from the "state" parameter and be stored in session to prevent forgery and to differentiate between multiple OAuth providers if needed
-$browser = ($_REQUEST['browser'] != '') ? mysqli_real_escape_string($mysqli_link, htmlspecialchars($_REQUEST['browser'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')) : 'unknown' ;
+$browser = (isset($_REQUEST['browser']) && $_REQUEST['browser'] != '') ? mysqli_real_escape_string($mysqli_link, htmlspecialchars($_REQUEST['browser'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')) : 'unknown' ;
 
 // Check whether  OAuth callback
 if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
@@ -308,7 +308,7 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
             <label for="username" class="form-label col-auto me-2">
                 Identifiant:
             </label>
-            <input type="text" class="form-control" id="username" name="username" placeholder="Votre nom d'utilisateur" autocomplete="username" value="<?=htmlspecialchars($_REQUEST['username'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')?>"><br/>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Votre nom d'utilisateur" autocomplete="username" value="<?=htmlspecialchars($_REQUEST['username'] ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')?>"><br/>
         </div> <!-- d-flex -->
 
         <div class="d-flex align-items-center">

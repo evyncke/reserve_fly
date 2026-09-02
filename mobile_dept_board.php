@@ -64,7 +64,7 @@ $header_postamble = '<style>
 require_once 'mobile_header5.php' ;
 
 $sql_date = date('Y-m-d') ;
-$special_date = '2026-09-01' ;
+$special_date = '2026-09-05' ;
 $rows = [] ;
 
 if ($special_date == $sql_date and file_exists('data/crews.json')) {
