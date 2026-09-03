@@ -26,13 +26,13 @@ $blocked_prefix = '2a03:cfc0:8000::';
 $subnet_length = 33;
 
 // Convert an IPv6 address to a binary string
-function ipv6ToBinary($ip) {
+function ipv6ToBinary(string $ip): false|string {
     $packed = inet_pton($ip);
     return $packed ? unpack('A16', $packed)[1] : false;
 }
 
 // Check if an IPv6 address is in a given subnet
-function isInIPv6Subnet($ip, $subnet, $subnet_length) {
+function isInIPv6Subnet(string $ip, string $subnet, int $subnet_length): bool {
     $ip_bin = ipv6ToBinary($ip);
     $subnet_bin = ipv6ToBinary($subnet);
     if ($ip_bin === false || $subnet_bin === false) return false;
@@ -62,18 +62,18 @@ if (filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
 
 // End of paranoid address blocking
 
-DEFINE('SITE_HOST', 'www.spa-aviation.be') ;
-DEFINE('SITE_PATH', 'resa') ;
-DEFINE('SITE_URL', 'https://' . SITE_HOST . '/'. SITE_PATH . '/') ;
-
 require_once('auth.php') ;
 
 // MySQL Credentials & configuration are in auth.php
+// Some common initializations
 
+$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ; 
+if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
+if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
+// Trying to restore the right character set after PHP upgrade from 8.1 to 8.4
+// Eric Vyncke 2025-01-08
+$mysqli_link->set_charset('utf8mb4') ;
 $convertToUtf8 = false ;
-$convertToUtf8 = true ;
-$joomla_session = true ;
-$joomla_connection_page = "https://" . SITE_HOST . "/index.php/fr/" ;
 
 $test_mode = false ;
 $managerEmail = "info@spa-aviation.be" ;
@@ -116,7 +116,7 @@ $send_no_recent_flight_email = false ; // Whether to send an email to the manage
 $send_missing_validity_email = false ; // Whether to send an email to the manager when a booking is created or modified and the pilot has no valid medical or license
 
 $tracked_planes = array('OOALD', 'OOALE', 'OOAPV', 'OOFUN', 'OOJRB', 'OOFMX', 'OOSPQ') ;
-array_push($tracked_planes, 'FGOUF', 'FJXRL', 'OOD35', 'OOG85', 'OOVMS') ; // For Air Spa Rallye
+array_push($tracked_planes, 'FGOUF', 'FJXRL','OOD35', 'OOG85', 'OOVMS') ; // For Air Spa Rallye
 // array_push($tracked_planes, 'OOCEK', 'FAZMX', 'FAYAC', 'GIIIG') ; // For 75 ans avions externes
 
 $bccTo = "eric.vyncke@edpnet.be" ;
@@ -158,30 +158,61 @@ $joomla_flight_manager_group = 20 ;
 $joomla_no_flight = 23 ;
 $joomla_effectif_group = 25 ;
 
-// Get information from Joomla
-define( '_JEXEC', 1 );
-define( 'JPATH_BASE', realpath(dirname(__FILE__) . '/..' ));
-require_once ( JPATH_BASE . '/includes/defines.php' );
-require_once ( JPATH_BASE . '/includes/framework.php' );
-$mainframe = JFactory::getApplication('site');
-$mainframe->initialise();
-$joomla_user = JFactory::getUser() ;
-if ($joomla_user->guest and isset($_SESSION['jom_id'])) { // User is not logged in via Joomla but via the mobile app TODO ensure that session is started !
-	$userId = intval($_SESSION['jom_id']) ;
-	$originUserId = $userId ;
-	$joomla_user = JFactory::getUser($userId) ;
-} else
-	$userId = 0 ;
-$joomla_session = JFactory::getSession() ;
-$joomla_session->start() ; // Keep alive?
+// Check whether Joomla authentication is to be used...
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if ($path == '/resa/add_to_tracks.php' or $path == '/resa/track.php') {
+	$use_joomla_authentication = true ;
+} else 
+if ($_SERVER['SERVER_NAME'] == 'www.spa-aviation.ovh' or $_SERVER['SERVER_NAME'] == 'new.spa-aviation.ovh' or $client_ip == '213.211.158.241' or str_starts_with($client_ip, '2a02:578:85b7:1700')) {
+	$use_joomla_authentication = false ;
+} else {
+	$use_joomla_authentication = true ;
+}
+
+if ($use_joomla_authentication) {
+	// Get information from Joomla
+	define( '_JEXEC', 1 );
+	define( 'JPATH_BASE', realpath(dirname(__FILE__) . '/..' ));
+	require_once ( JPATH_BASE . '/includes/defines.php' );
+	require_once ( JPATH_BASE . '/includes/framework.php' );
+	$mainframe = JFactory::getApplication('site');
+	$mainframe->initialise();
+	$joomla_user = JFactory::getUser() ;
+	if ($joomla_user->guest and isset($_SESSION['jom_id'])) { // User is not logged in via Joomla but via the mobile app TODO ensure that session is started !
+		$userId = intval($_SESSION['jom_id']) ;
+		$originUserId = $userId ;
+		$joomla_user = JFactory::getUser($userId) ;
+	} else
+		$userId = 0 ;
+	$joomla_session = JFactory::getSession() ;
+	$joomla_session->start() ; // Keep alive?
+} else {
+	require_once 'no_joomla.php' ;
+	$joomla_user = getJoomlaSessionUser() ;
+	if ($joomla_user === false) {
+		$userId = 0 ;
+		$joomla_user = (object) [
+			'id' => 0,
+			'username' => 'guest',
+			'name' => 'invité',
+			'groups' => [],
+			'guest' => true,
+		] ;
+	} else {
+		$userId = $joomla_user->id ?? 0;
+		$joomla_user->groups = (array) $joomla_user->groups ;
+	}
+	$originUserId = $userId;
+}
+
 CheckJoomlaUser($joomla_user) ;
 if ($userId == 62 or $userId == 66)
 	ini_set('display_errors', 1) ; // extensive error reporting for debugging
 
-function CheckJoomlaUser($joomla_user) {
+function CheckJoomlaUser(object $joomla_user) {
 	global $userIsPilot, $userIsAdmin, $userIsBoardMember, $userIsInstructor, $userIsMechanic,$userIsStudent, $userIsTheoryStudent, $userIsFlyingStudent,
 		$userIsFlightPilot, $userIsFlightManager, $userNoFlight, $userIsManualManager ;
-	global $userName, $userFullName, $userId, $originUserId ;
+	global $userName, $userFullName, $userId, $originUserId, $use_joomla_authentication ;
 	global $joomla_admin_group, $joomla_sysadmin_group, $joomla_superuser_group, $joomla_board_group ;
 	global $joomla_pilot_group, $joomla_flying_student_group, $joomla_theory_student_group, $joomla_instructor_group, $joomla_instructor_group2, $joomla_mechanic_group ;
 	global $joomla_flight_group, $joomla_flight_pilot_group, $joomla_flight_manager_group, $joomla_no_flight ;
@@ -197,7 +228,9 @@ function CheckJoomlaUser($joomla_user) {
 		$originUserId = $userId ;
 		$userFullName = $joomla_user->name ;
 		$userName = $joomla_user->username ;
-		$joomla_user->setLastVisit() ;
+		if ($use_joomla_authentication) {
+			$joomla_user->setLastVisit() ; // TODO update one field in $table_users ?
+		}
 //		if ($userId == 62) { $userId = 296 ; print("Forcing userId = $userId") ; }
 	}
 	$joomla_groups = $joomla_user->groups ;
@@ -212,7 +245,8 @@ function CheckJoomlaUser($joomla_user) {
 	$userIsFlyingStudent = array_key_exists($joomla_flying_student_group, $joomla_groups) ;
 	$userIsTheoryStudent = array_key_exists($joomla_theory_student_group, $joomla_groups) ;
 	$userIsStudent = $userIsFlyingStudent || $userIsTheoryStudent ;
-	$userIsFlightPilot = array_key_exists($joomla_flight_pilot_group, $joomla_groups) || array_key_exists($joomla_flight_group, $joomla_groups);
+	$userIsFlightPilot = array_key_exists($joomla_flight_pilot_group, $joomla_groups) 
+		|| array_key_exists($joomla_flight_group, $joomla_groups);
 	$userIsFlightManager = array_key_exists($joomla_flight_manager_group, $joomla_groups) ;
 	$userNoFlight = array_key_exists($joomla_no_flight, $joomla_groups) ;
 	$userIsManualManager = ($userId==429) ; // Daniel Albrech manage manuals
@@ -252,7 +286,7 @@ function fullDebug() {
 // Tricky stuff for daylight saving and AIP:
 // The times specified in the AIP and AICs are expressed in UTC and relate to the wintertime period.
 // In summertime period, one HR is to be substracted from the published UTC times. The new obtained UTC time + two HR gives the local time.
-function airport_opening_local_time($year, $month, $day) {
+function airport_opening_local_time(int $year, int $month, int $day): string {
 	$today = new Datetime("$year-$month-$day 08:00:00 GMT") ;
 	$today_local = new Datetime("$year-$month-$day 08:00:00") ;
 	if ($today_local->format('O') == '+0200')
@@ -261,7 +295,7 @@ function airport_opening_local_time($year, $month, $day) {
 		return $today->format('U') ;
 }
 
-function airport_closing_local_time($year, $month, $day) {
+function airport_closing_local_time(int $year, int $month, int $day): string {
 	if ($month >= 2 and $month <= 10)
 		$today = new Datetime("$year-$month-$day 19:00:00 GMT") ;
 	else
@@ -292,7 +326,7 @@ $ical_organizer = "RAPCS asbl" ; // Name of the organizer of the iCAL calendar
 $avatar_root_resized_uri = SITE_URL . "images/members/resized/size144" ;
 $avatar_root_resized_directory = SITE_PATH . "/images/members/resized/size144" ;
 $avatar_root_uri = SITE_URL . "images/members" ;
-$avatar_root_directory = SITE_PATH . "images/members" ;
+$avatar_root_directory = SITE_PATH . "/images/members" ;
 
 // Aircraft Technical Log variables
 $atl_uploadfiles_path = "ATL/upload";
@@ -395,15 +429,6 @@ $longitude = 4.358991 ;
 // Astronical twilight at 108 degrees - the point when Sun stops being a source of any illumination.
 $zenith = 90.5 ;
 
-// Some common initializations
-
-$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ; 
-if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
-if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;
-// Trying to restore the right character set after PHP upgrade from 8.1 to 8.4
-// Eric Vyncke 2025-01-08
-$mysqli_link->set_charset('utf8mb4') ;
-$convertToUtf8 = false ;
 
 // Do we need to redirect to the membership renewal page ?
 $membership_year = date('Y') ;
@@ -416,8 +441,8 @@ if ($userId > 0 and $userId != 294) { // Only for logged-in users and not for SP
 	$row_fee = mysqli_fetch_array($result_fee) ;
 	if (!$row_fee) {
 		$cb = urlencode($_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) ;
-		if ($_SERVER['PHP_SELF'] != SITE_PATH . '/mobile_journal.php' && $_SERVER['PHP_SELF'] != SITE_PATH . '/mobile_membership.php' && 
-			$_SERVER['PHP_SELF'] != SITE_PATH . '/get_bookings.php' && $_SERVER['PHP_SELF'] != SITE_PATH . '/get_fi_agenda.php')
+		if ($_SERVER['PHP_SELF'] != '/resa/mobile_journal.php' && $_SERVER['PHP_SELF'] != '/resa/mobile_membership.php' && 
+			$_SERVER['PHP_SELF'] != '/resa/get_bookings.php' && $_SERVER['PHP_SELF'] != '/resa/get_fi_agenda.php')
 			if (!isset($_COOKIE['membership'])) {
 					journalise($userId, "I", "Unpaid membership, redirecting to membership page (from $_SERVER[HTTP_REFERER])") ;
 					header("Location: " . SITE_URL . "mobile_membership.php?cb=" . urlencode($cb) , TRUE, 307) ;
@@ -437,7 +462,7 @@ if ($http_referer != '') {
 // Canonicalize a phone number by removing spaces, dashes, dots, parentheses
 // and add a +32 if starts with 0
 
-function canonicalizePhone($phone) {
+function canonicalizePhone(?string $phone): string {
 	if ($phone == null or $phone == '') return '' ;
 	$phone = preg_replace('/\s+/', '', $phone) ; // Remove spaces
 	$phone = str_replace('-', '', $phone) ; // Remove dashes
@@ -452,14 +477,14 @@ function canonicalizePhone($phone) {
 }
 
 // IP addresses are fetched from the X-Forwarded-For HTTP header
-function getClientAddress() {
+function getClientAddress(): string {
 	$remote_address = (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] ;
 	$remote_address = (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) ? $_SERVER['HTTP_CF_CONNECTING_IP'] : $remote_address ;
 	return $remote_address ;
 }
 
 // $message must be UTF-8
-function journalise($userId, $severity, $message) {
+function journalise(int $userId, string $severity, string $message) {
 	global $table_journal, $mysqli_link, $db_host, $db_user, $db_password, $db_name ;
 	
 	if ($table_journal == '') $table_journal = 'rapcs_journal' ;
@@ -502,7 +527,7 @@ function journalise($userId, $severity, $message) {
 }
 
 // same function exists in js/reservation.js
-function planeClassIsMember($member, $group) {
+function planeClassIsMember(string $member, string $group): bool {
         if ($member == $group) return true ;
         switch ($group) {
         case 'C182':
@@ -518,7 +543,7 @@ function planeClassIsMember($member, $group) {
         return false ;
 }
 
-function web2db($msg) {
+function web2db(?string $msg): string|null {
 	global $convertToUtf8 ;
 	if (false & $convertToUtf8 )
 		return mb_convert_encoding($msg, "ISO-8859-15", mb_detect_encoding($msg, "UTF-8, ISO-8859-15, ISO-8859-1", false)) ;
@@ -526,7 +551,7 @@ function web2db($msg) {
 		return $msg ;
 }
 
-function db2web($msg) {
+function db2web(?string $msg): string|null {
 	global $convertToUtf8 ;
 	if ($convertToUtf8 ) {
 		return mb_convert_encoding($msg, "UTF-8", mb_detect_encoding($msg, "ISO-8859-15, UTF-8, ISO-8859-1", false)) ;
@@ -554,13 +579,15 @@ $mime_preferences = array(
     "line-break-chars" => "\n"
 );
 
-function smtp_mail($smtp_to, $smtp_subject, $smtp_body, $str_headers  = NULL) {
+function smtp_mail(string $smtp_to, string $smtp_subject, string $smtp_body, ?string $str_headers = null) {
 	require_once 'PEAR.php';
 	require_once 'Mail.php';
 
 	global $smtp_from, $smtp_return_path, $smtp_info, $mime_preferences ;
 	global $mail, $userId, $originUserId ;
 	
+	$str_headers = $str_headers ?? '';
+
 	if (! isset($mail) or $mail == NULL or $smtp_info['persist'] == False) 
 		$mail = Mail::factory('smtp', $smtp_info); // Create the mail object using the Mail::factory method
 	PEAR::setErrorHandling(PEAR_ERROR_EXCEPTION) ; // Force an exception to be trapped
@@ -658,7 +685,7 @@ foreach($_POST as $key=>$value)
 
 // Refresh session table & co, as long as this file is included (by Ajax requests or plain pages)
 if ($userId > 0) {
-	mysqli_query($mysqli_link, "update jom_session set time = unix_timestamp() where userid = $userId") or die("Cannot update jom_session: " . mysqli_error($mysqli_link)) ;
-	mysqli_query($mysqli_link, "update jom_users set lastvisitDate = utc_timestamp() where id = $userId") or die("Cannot update jom_user: " . mysqli_error($mysqli_link)) ;
+	mysqli_query($mysqli_link, "UPDATE $table_users SET lastvisitDate = utc_timestamp() WHERE id = $userId") 
+		or journalise($userId, 'E', "Cannot update $table_users: " . mysqli_error($mysqli_link)) ;
 }
 ?>
