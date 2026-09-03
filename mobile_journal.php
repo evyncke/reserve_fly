@@ -29,6 +29,7 @@
 require_once "dbi.php" ;
 MustBeLoggedIn() ;
 $need_swiped_events = true ; // Allow swipe events on this page
+$header_postamble = '<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">' ;
 require_once 'mobile_header5.php' ;
 
 if (!($userIsAdmin or $userIsBoardMember))
@@ -38,7 +39,7 @@ if (!($userIsAdmin or $userIsBoardMember))
 <h2>Journal système</h2>
 
 <div class="table-responsive">
-<table class="table table-striped table-hover">
+<table class="table table-striped table-hover" id="journal-table">
 <thead>
 <tr>
 <th scope='col'>Date</th>
@@ -87,7 +88,7 @@ while ($row = mysqli_fetch_array($result)) {
 	if (isset($row['last_name']) and $row['last_name'] != '')
 		$name = db2web("<b>$row[last_name]</b><span class=\"d-none d-md-inline\"> $row[first_name]</span>") ;
 	else
-		$name = db2web($row['name'] ?? 'no name') ;
+		$name = db2web($row['name'] ?? '') ;
 	print("<tr>
 		<td class=\"text-nowrap$specialClass\">$date</td>
 		<td$nameStyle class=\"text-nowrap$specialClass\">$name</td>
@@ -109,10 +110,21 @@ $last_id -= 1 ;
 </div> <!-- table responsive -->
 Les heures sont en heures locales.<br/>
 </div><!-- container -->
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
 <script>
 	// Swipe to change to next webcam
 	document.addEventListener('swiped-right', function(e) {location.href='<?="$_SERVER[PHP_SELF]?start=$last_id"?>' }) ;
 	document.addEventListener('swiped-left', function(e) {location.href='<?="$_SERVER[PHP_SELF]?start=$first_id"?>' }) ;
+    new window.simpleDatatables.DataTable("#journal-table", {
+        searchable: true,
+        fixedHeight: false,
+        paging: false,
+        labels: {
+            placeholder: "Rechercher...",
+            noRows: "Aucune entrée trouvée",
+            info: "Affichage de {start} à {end} sur {rows} entrées",
+        }  
+    });
 </script>
 </body>
 </html>
