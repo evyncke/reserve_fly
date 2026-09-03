@@ -40,7 +40,7 @@ if ($userIsAdmin or $userIsInstructor) { // Let' trust this browser for one year
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://<?= SITE_HOST ?>/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
 <script>
-var siteURL = "<?= SITE_URL ?>";
+const siteURL = "<?= SITE_URL ?>";
 
 <?php
 //---------------------------------------------------------------------------
