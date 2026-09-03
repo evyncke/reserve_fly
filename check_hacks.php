@@ -52,7 +52,7 @@ if ($scan_root !== false) {
                         }
 
                         $modification_time = $file_info->getMTime() ;
-                        if ($file_info->getBasename() !== '.htaccess' and ! preg_match('/^[0-9a-f]{12}\.php$/i', $file_info->getBasename()) and $modification_time < $modified_after) { # also f(preg_match('/^[0-9a-f]{12}\.php$/i',basename($file)))
+                        if ($file_info->getBasename() !== '.htaccess' and ! preg_match('/^[0-9a-f]{10,12}\.php$/i', $file_info->getBasename()) and $modification_time < $modified_after) { # also f(preg_match('/^[0-9a-f]{12}\.php$/i',basename($file)))
                                 continue ;
                         }
 
@@ -91,7 +91,7 @@ function format_file_size(int $size): string {
         ont été modifiés récemment ou si des tentatives de piratage ont été détectées. 
         Il est normal de voir des fichiers modifiés récemment, mais il est important de surveiller les modifications suspectes.
         En clair, c'est pour Éric et Patrick ;-)</lead>
-    <h3 class="h3 mb-3">Recent and .htaccess files</h3>
+    <h3 class="h3 mb-3">Recent, weird hex filenames,  and .htaccess files</h3>
     <?php if (isset($scan_error)) { ?>
         <div class="alert alert-warning" role="alert">
             The directory scan could not be completed: <?=htmlspecialchars($scan_error, ENT_QUOTES, 'UTF-8')?>
@@ -147,6 +147,7 @@ if (is_readable($audit_log_path)) {
                         <thead class="table-dark">
                                 <tr>
                                         <th scope="col">Datetime</th>
+                                        <th scope="col">Trojan</th>
                                         <th scope="col">Client IP</th>
                                         <th scope="col">Evaluated command</th>
                                         <th scope="col">File name</th>
@@ -161,6 +162,7 @@ if (is_readable($audit_log_path)) {
                 foreach (array_reverse($audit_entries) as $audit_entry) { ?>
                                 <tr>
                                         <td class="text-nowrap"><?=htmlspecialchars((string) ($audit_entry['datetime'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
+                                        <td class="text-nowrap"><?=htmlspecialchars((string) ($audit_entry['trojan'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
                                         <td class="text-nowrap"><?=htmlspecialchars((string) ($audit_entry['client_ip'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
                                         <td class="font-monospace text-break"><?=htmlspecialchars((string) ($audit_entry['eval_cmd'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
                                         <td class="font-monospace text-break"><?=htmlspecialchars((string) ($audit_entry['file_name'] ?? ''), ENT_QUOTES, 'UTF-8')?><br/>
