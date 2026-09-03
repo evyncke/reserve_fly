@@ -167,3 +167,4 @@ function getJoomlaSessionUser(): object|false{
         return false ;
     }
 }
+?>
