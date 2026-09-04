@@ -28,7 +28,7 @@ $plane = (isset($_REQUEST['plane'])) ? mysqli_real_escape_string($mysqli_link, u
 $since = (isset($_REQUEST['since'])) ? mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['since']))) : false ;
 $latest = (isset($_REQUEST['latest'])) ? mysqli_real_escape_string($mysqli_link, urldecode(trim($_REQUEST['latest']))) : false ;
 
-function pilot($plane, $start, $end) {
+function pilot(string $plane, string $start, string $end): string|null {
 	global $mysqli_link, $table_logbook, $table_users, $userId ;
 
 	
