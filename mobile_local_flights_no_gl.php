@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2021-2025 Eric Vyncke
+   Copyright 2021-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ $zoom_level = 11 ;
 $local_longitude_bound /= 1.5 ;
 $local_latitude_bound /= 1.5 ;
 
-$header_postamble = "<!-- Load the MAP BOX scripts & CSS -->
+$header_postamble = "
 <link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css' />
 <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>
 <script src='https://cdn.jsdelivr.net/npm/leaflet-rotatedmarker@0.2.0/leaflet.rotatedMarker.min.js'></script>

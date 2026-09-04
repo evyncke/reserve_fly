@@ -522,9 +522,9 @@ function init() {
 			{ path: 'mobile_metar.php', duration: 10},			
 //			{ path: 'mobile_webcam.php?cam=1', duration: 10}, // Seems to often cause time-out
 // Removing map as WebGL does not work on the old Ubuntu in the clubhouse (the NVIDIA card is too old and the 'nouveau' driver is buggy
-//			{ path: 'mobile_fleet_map.php', duration: 15}, 
-			{ path: 'mobile_ephemerides.php', duration: 10},
-			{ path: 'mobile_dept_board.php', duration: 10},
+			{ path: 'mobile_fleet_map_no_gl.php', duration: 10}, 
+			{ path: 'mobile_ephemerides.php', duration: 15},
+			{ path: 'mobile_dept_board.php', duration: 7},
 			{ path: 'mobile_local_flights_no_gl.php', duration: 15}, // Local flights map without WebGL, hence, should work on the old Ubuntu in the clubhouse
 			{ path: 'mobile_wx_map.php', duration: 15},
 //			{ path: 'mobile_mymap.php?user=all&period=1m&auth=3293a7509955277ae6b674be7898bab9', duration: 15},
@@ -535,7 +535,7 @@ function init() {
 			if (urlParts[0] == thisPath) { // Ignoring the query string
 				var duration = kioskURIs[i].duration * 1000;
 				i = (i + 1)	 % kioskURIs.length ; // Loop around
-				// Redirect to the next page after the specified duration'
+				// Redirect to the page after the specified duration'
 				setTimeout(function () { 
 					if (kioskURIs[i].path.includes('?'))
 						window.location.href = kioskURIs[i].path + '&kiosk' ;
