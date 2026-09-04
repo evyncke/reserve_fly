@@ -7,8 +7,9 @@ $error_message = '' ;
 $airports = array() ;
 
 // Parameter sanitization
-$code = trim($_REQUEST['code']) ;
-if ($code == '') $error_message = "Missing parameter" ;
+$code = trim($_REQUEST['code'] ?? '') ;
+if ($code == '') 
+	$error_message = "Missing parameter" ;
 $code = mysqli_real_escape_string($mysqli_link, $code) ;
 $airports['Code'] = $code ;
 
