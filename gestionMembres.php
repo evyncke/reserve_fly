@@ -27,9 +27,9 @@ if (! $userIsAdmin and ! $userIsBoardMember and !$userIsInstructor)
 $additional_preload = '</' . SITE_PATH . '/js/gestionMembres.js>;rel=preload;as=script,</' . SITE_PATH . '/css/gestionMembres.css>;rel=preload;as=style' ;
 // In the mobile_header.php, $header_postamble will be inserted in the actual <head>...</head> section
 $header_postamble ='
-<script type="text/javascript" src="' . SITE_PATH . '/js/gestionMembres.js"></script>
+<script type="text/javascript" src="' . SITE_URL . 'js/gestionMembres.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-<link rel="stylesheet" type="text/css" href="' . SITE_PATH . '/css/gestionMembres.css">
+<link rel="stylesheet" type="text/css" href="' . SITE_URL . 'css/gestionMembres.css">
 ' ;
 require_once 'mobile_header5.php' ;
 
