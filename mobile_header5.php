@@ -395,7 +395,13 @@ if ($userId > 0) {
           <ul class="dropdown-menu" id="planesDropdown">
             <li><a class="dropdown-item" href="mobile_wnb.php">Masse et centrage</a></li>
             <li><i><a class="dropdown-item" href="mobile_performance.php">Performances</a></i></li>
-
+<?php
+  if ($userId == 66) { // Glider menus
+?>
+           <li><i><a class="dropdown-item" href="mobile_planeur.php">Glider</a></i></li>
+<?php
+}
+?>
 <?php
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
