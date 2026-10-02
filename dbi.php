@@ -169,6 +169,8 @@ if ($_SERVER['SERVER_NAME'] == 'www.spa-aviation.ovh' or $_SERVER['SERVER_NAME']
 	$use_joomla_authentication = true ;
 }
 
+$use_joomla_authentication = false ; // Test by eric 2026/10/02 0740 LT
+
 if ($use_joomla_authentication) {
 	// Get information from Joomla
 	define( '_JEXEC', 1 );
