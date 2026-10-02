@@ -41,6 +41,8 @@ ini_set('session.cookie_lifetime', SESSION_COOKIE_LIFETIME);
 
 function startSessionIfRequired(): bool {
 	if (session_status() !== PHP_SESSION_ACTIVE) {
+		# journalise(0, "D", "Before starting session: " . json_encode(session_get_cookie_params())) ;
+		# journalise(0, "D", "Session in php.ini: " . json_encode(ini_get_all('session'))) ;
 		 session_set_cookie_params([
 		 	'lifetime' => SESSION_COOKIE_LIFETIME,
 		 	'path' => '/',
@@ -50,11 +52,13 @@ function startSessionIfRequired(): bool {
 		 	'samesite' => 'Lax'   // Recommended: protects against CSRF
         ]);
 		if (session_start()) {
+			#journalise(0, "D", "Session is NOW active: " . json_encode(session_get_cookie_params())) ;
 			return true;
 		}
 		journalise(0, "E", "Failed to start session: " . session_status()) ;
 		return false ;
 	}
+	journalise(0, "D", "Session is already active: " . json_encode(session_get_cookie_params())) ;
 	return true ;
 }
 
