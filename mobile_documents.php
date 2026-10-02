@@ -33,8 +33,7 @@ if ($userId != 62) journalise($userId, "D", "Using documents page") ;
 <h2>Documents pour les membres</h2>
 <p>En mode test, "quick and dirty", les documents PDF disponibles sont listés ci-dessous. Cliquez sur un lien pour télécharger le document.</p>
 <?php
-$directory = $_SERVER['DOCUMENT_ROOT'] . '/www/images/pdf';
-$directory = '../images/pdf'; # Need to exit the resa folder to reach the images folder
+$directory = DOCUMENTS_DIRECTORY ;
 
 // Recursive function to scan directories and list PDF files
 function listPdfFiles($dir) {
