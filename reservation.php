@@ -20,11 +20,12 @@
 ob_start("ob_gzhandler");
 
 # HTTP/2 push of CSS via header()
-header('Link: </resa/css/reservation.css>;rel=preload;as=style, </resa/css/datepickr.css>;rel=preload;as=style,</resa/js/reservation.js>;rel=preload;as=script,</resa/js/datepickr.js>;rel=preload;as=script,' .
-		'</resa/images/spinner.gif>;rel=preload;as=image,</resa/images/fa.ico>;rel=preload;as=image,</resa/images/calendar.png>;rel=preload;as=image,' . 
-		'</resa/images/exclamation-icon.png>;rel=preload;as=image,</resa/images/forbidden-icon.png>;rel=preload;as=image,</resa/images/usl_search_icon.png>;rel=preload;as=image,' .
-		'</resa/images/gtk_media_forward_rtl.png>;rel=preload;as=image,</resa/images/gtk_media_forward_ltr.png>;rel=preload;as=image,</resa/images/gtk_media_play_rtl.png>;rel=preload;as=image,</resa/images/gtk_media_play_ltr.png>;rel=preload;as=image,' .
-		'</resa/data/members.js>;rel=preload;as=script,</resa/data/pilots.js>;rel=preload;as=script,</resa/data/planes.js>;rel=preload;as=script') ;
+// Commented out as this page is becoming outdated
+// header('Link: </resa/css/reservation.css>;rel=preload;as=style, </resa/css/datepickr.css>;rel=preload;as=style,</resa/js/reservation.js>;rel=preload;as=script,</resa/js/datepickr.js>;rel=preload;as=script,' .
+// 		'</resa/images/spinner.gif>;rel=preload;as=image,</resa/images/fa.ico>;rel=preload;as=image,</resa/images/calendar.png>;rel=preload;as=image,' . 
+// 		'</resa/images/exclamation-icon.png>;rel=preload;as=image,</resa/images/forbidden-icon.png>;rel=preload;as=image,</resa/images/usl_search_icon.png>;rel=preload;as=image,' .
+// 		'</resa/images/gtk_media_forward_rtl.png>;rel=preload;as=image,</resa/images/gtk_media_forward_ltr.png>;rel=preload;as=image,</resa/images/gtk_media_play_rtl.png>;rel=preload;as=image,</resa/images/gtk_media_play_ltr.png>;rel=preload;as=image,' .
+// 		'</resa/data/members.js>;rel=preload;as=script,</resa/data/pilots.js>;rel=preload;as=script,</resa/data/planes.js>;rel=preload;as=script') ;
 
 $microtime_start = microtime(TRUE) ; // Get start time in floating seconds
 require_once "dbi.php" ;

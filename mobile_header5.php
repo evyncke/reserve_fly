@@ -29,7 +29,7 @@ if (isset($need_swiped_events) and $need_swiped_events) {
 
 # HTTP/2 push of some JS scripts via header()
 header('Link: </' . SITE_PATH . '/js/mobile.js>;rel=preload;as=script,</' . SITE_PATH . '/data/members.js>;rel=preload;as=script,</' . SITE_PATH . '/data/planes.js>;rel=preload;as=script,' .
-  '</' . SITE_PATH . '/logo_rapcs_256x256_white.png>;rel=preload;as=image,</' . SITE_PATH . '/logo_rapcs_256x256.png>;rel=preload;as=image' . 
+  '</logo_rapcs_256x256_white.png>;rel=preload;as=image' . 
   $additional_preload) ;
 
 # Handle the toggle between dark/light themes
