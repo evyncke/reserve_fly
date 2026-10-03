@@ -159,15 +159,15 @@ $joomla_no_flight = 23 ;
 $joomla_effectif_group = 25 ;
 
 // Check whether Joomla authentication is to be used...
-$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-if ($path == '/resa/add_to_tracks.php' or $path == '/resa/track.php') {
-	$use_joomla_authentication = true ;
-} else 
-if ($_SERVER['SERVER_NAME'] == 'www.spa-aviation.ovh' or $_SERVER['SERVER_NAME'] == 'new.spa-aviation.ovh' or $client_ip == '213.211.158.241' or str_starts_with($client_ip, '2a02:578:85b7:1700')) {
-	$use_joomla_authentication = false ;
-} else {
-	$use_joomla_authentication = true ;
-}
+// $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// if ($path == '/resa/add_to_tracks.php' or $path == '/resa/track.php') {
+// 	$use_joomla_authentication = true ;
+// } else 
+// if ($_SERVER['SERVER_NAME'] == 'www.spa-aviation.ovh' or $_SERVER['SERVER_NAME'] == 'new.spa-aviation.ovh' or $client_ip == '213.211.158.241' or str_starts_with($client_ip, '2a02:578:85b7:1700')) {
+// 	$use_joomla_authentication = false ;
+// } else {
+// 	$use_joomla_authentication = true ;
+// }
 
 $use_joomla_authentication = false ; // Test by eric 2026/10/02 0740 LT
 
