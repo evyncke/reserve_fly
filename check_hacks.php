@@ -30,10 +30,11 @@ if (! $userIsBoardMember) {
     exit ;
 }
 
+$header_postamble = '<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">' ;
 require_once 'mobile_header5.php' ;
 
 $scan_root = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..') ;
-$modified_after = time() - (48 * 60 * 60) ;
+$modified_after = time() - (2 * 24 * 60 * 60) ;
 $files = [] ;
 
 if ($scan_root !== false) {
@@ -52,7 +53,7 @@ if ($scan_root !== false) {
                         }
 
                         $modification_time = $file_info->getMTime() ;
-                        if ($file_info->getBasename() !== '.htaccess' and ! preg_match('/^[0-9a-f]{10,12}\.php$/i', $file_info->getBasename()) and $modification_time < $modified_after) { # also f(preg_match('/^[0-9a-f]{12}\.php$/i',basename($file)))
+                        if ($file_info->getBasename() !== '.htaccess' and $file_info->getBasename() !== 'nxproof.php.json' and ! preg_match('/^[0-9a-f]{10,12}\.php$/i', $file_info->getBasename()) and $modification_time < $modified_after) { # also f(preg_match('/^[0-9a-f]{12}\.php$/i',basename($file)))
                                 continue ;
                         }
 
@@ -98,7 +99,7 @@ function format_file_size(int $size): string {
         </div>
     <?php } ?>
     <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle">
+        <table class="table table-striped table-hover align-middle" id="files-table">
             <thead class="table-dark">
                 <tr>
                     <th scope="col">Full path</th>
@@ -143,7 +144,7 @@ if (is_readable($audit_log_path)) {
 ?>
         <h3 class="h3 mb-3">Hack request audit log</h3>
         <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle">
+                <table class="table table-striped table-hover align-left" id="hacks-table">
                         <thead class="table-dark">
                                 <tr>
                                         <th scope="col">Datetime</th>
@@ -163,7 +164,10 @@ if (is_readable($audit_log_path)) {
                                 <tr>
                                         <td class="text-nowrap"><?=htmlspecialchars((string) ($audit_entry['datetime'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
                                         <td class="text-nowrap"><?=htmlspecialchars((string) ($audit_entry['trojan'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
-                                        <td class="text-nowrap"><?=htmlspecialchars((string) ($audit_entry['client_ip'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
+                                        <td class="text-nowrap"><?=htmlspecialchars((string) ($audit_entry['client_ip'] ?? ''), ENT_QUOTES, 'UTF-8')?><br/>
+                                                <?=htmlspecialchars((string) ($audit_entry['client_isp'] ?? ''), ENT_QUOTES, 'UTF-8')?><br/>
+                                                <?=htmlspecialchars((string) ($audit_entry['client_country'] ?? ''), ENT_QUOTES, 'UTF-8')?><br/>
+                                        </td>
                                         <td class="font-monospace text-break"><?=htmlspecialchars((string) ($audit_entry['eval_cmd'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
                                         <td class="font-monospace text-break"><?=htmlspecialchars((string) ($audit_entry['file_name'] ?? ''), ENT_QUOTES, 'UTF-8')?><br/>
                                             <?=htmlspecialchars((string) ($audit_entry['file_tmp_name'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
@@ -176,4 +180,27 @@ if (is_readable($audit_log_path)) {
 
 
 </main>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+<script>
+    new window.simpleDatatables.DataTable("#files-table", {
+        searchable: true,
+        fixedHeight: false,
+        paging: false,
+        labels: {
+            placeholder: "Rechercher...",
+            noRows: "Aucune entrée trouvée",
+            info: "Affichage de {start} à {end} sur {rows} entrées",
+        }
+    });
+    new window.simpleDatatables.DataTable("#hacks-table", {
+        searchable: true,
+        fixedHeight: false,
+        paging: false,
+        labels: {
+            placeholder: "Rechercher...",
+            noRows: "Aucune entrée trouvée",
+            info: "Affichage de {start} à {end} sur {rows} entrées",
+        }
+    });
+</script>
 </html>
