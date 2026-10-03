@@ -29,7 +29,8 @@
 
 DEFINE('PSEUDO_JOOMLA_KEY', 'no_joomla_user') ;
 
-ini_set('display_errors', 1) ; // extensive error reporting for debugging
+// May be the issue ? 2026-10-02
+// ini_set('display_errors', 1) ; // extensive error reporting for debugging
 
 // Ensure sessions are kept across browsers reloads.
 
@@ -58,7 +59,7 @@ function startSessionIfRequired(): bool {
 		journalise(0, "E", "Failed to start session: " . session_status()) ;
 		return false ;
 	}
-	journalise(0, "D", "Session is already active: " . json_encode(session_get_cookie_params())) ;
+	// journalise(0, "D", "Session is already active: " . json_encode(session_get_cookie_params())) ;
 	return true ;
 }
 
