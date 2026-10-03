@@ -15,46 +15,64 @@
    limitations under the License.
 
 */
+ini_set('display_errors', 1) ; // extensive error reporting for debugging
 
 require_once "dbi.php" ;
 
-$callback = htmlspecialchars(urldecode($_REQUEST['cb']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ;
-if ($callback == '') $callback = 'resa/mobile.php' ; // By default
+if (isset($_REQUEST['cb']) and $_REQUEST['cb'] != '')
+    $callback = htmlspecialchars(urldecode($_REQUEST['cb']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ;
+else    
+    $callback = 'resa/mobile.php' ; // By default
 
-if ($userId > 0) {
-    header("Location: https://" . SITE_HOST . "/$callback", TRUE, 303) ;
-    exit ;
-}
+// if ($userId > 0) {
+//     header("Location: https://" . SITE_HOST . "/$callback", TRUE, 303) ;
+//     exit ;
+// }
 
 $connect_msg = '' ;
 
 if (isset($_POST['username']) and isset($_POST['password'])) {
-    $result_login = JFactory::getApplication()->login(
-        [
-            'username' => htmlspecialchars($_POST['username'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
-            'password' => htmlspecialchars($_POST['password'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
-        ],
-        [
-            'remember' => true,
-            'silent'   => true
-        ]
-    );
-    if ($result_login) {
-        header("Location: https://" . SITE_HOST . "/$callback", TRUE, 307) ;
-        $joomla_user = JFactory::getUser() ;
-        $app = JFactory::getApplication('site');
-        $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
-        $joomla_user->save();
-        $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
-        $app->triggerEvent('onUserLogin', array(
-            (array) $joomla_user,
-            $options));
-        journalise($joomla_user->id, "I", "Connection of $_REQUEST[username] from $callback") ;
-        exit ;
+    if (!$use_joomla_authentication) {
+        // journalise(0, "I", "Non-Joomla login attempt for $_POST[username] from $callback") ;
+        $joomla_user = authenticateJoomlaUser($_POST['username'], $_POST['password']);
+        if ($joomla_user === false) {
+            $connect_msg = "Utilisateur inconnu ou mauvais mot de passe." ;
+            journalise(0, "W", "Invalid password for $_POST[username] from $callback") ;
+        } else {
+            $userId = $joomla_user->id ?? 0;
+            journalise($userId, "I", "Non-Joomla login for user id $userId ($_POST[username]) from $callback") ;
+            header("Location: https://" . SITE_HOST . "/$callback", TRUE, 307) ;
+            exit ;
+        }
     } else {
-        $connect_msg = "Utilisateur inconnu ou mauvais mot de passe." ;
-        journalise(0, "W", "Invalid password for $_REQUEST[username] from $callback") ;
-    }
+        journalise(0, "I", "Joomla login attempt for $_POST[username] from $callback") ;
+        $result_login = JFactory::getApplication()->login(
+            [
+                'username' => htmlspecialchars($_POST['username'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+                'password' => htmlspecialchars($_POST['password'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+            ],
+            [
+                'remember' => true,
+                'silent'   => true
+            ]
+        );
+        if ($result_login) {
+            header("Location: https://" . SITE_HOST . "/$callback", TRUE, 307) ;
+            $joomla_user = JFactory::getUser() ;
+            $app = JFactory::getApplication('site');
+            $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
+            $joomla_user->save();
+            $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
+            $app->triggerEvent('onUserLogin', array(
+                (array) $joomla_user,
+                $options));
+            journalise($joomla_user->id, "I", "Connection of $_REQUEST[username] from $callback") ;
+            exit ;
+        } else {
+            $connect_msg = "Utilisateur inconnu ou mauvais mot de passe." ;
+            journalise(0, "W", "Invalid password for $_REQUEST[username] from $callback") ;
+        }
+    }       
 }
 
 require_once 'mobile_header5.php' ;
@@ -100,7 +118,9 @@ $linkedin = new LinkedIn([
 ]);
 
 // TODO should come from the "state" parameter and be stored in session to prevent forgery and to differentiate between multiple OAuth providers if needed
-$browser = (isset($_REQUEST['browser']) && $_REQUEST['browser'] != '') ? mysqli_real_escape_string($mysqli_link, htmlspecialchars($_REQUEST['browser'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')) : 'unknown' ;
+$browser = (isset($_REQUEST['browser']) and $_REQUEST['browser'] != '') ? 
+    mysqli_real_escape_string($mysqli_link, htmlspecialchars($_REQUEST['browser'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')) 
+    : 'unknown' ;
 
 // Check whether  OAuth callback
 if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
@@ -127,6 +147,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                 if ($row) {   
                     // User found, log them in
                     $userId = $row['jom_id'];
+                    journalise($userId, "I", "Google JOOMLA login for user id $row[jom_id] from $callback, browser=$browser.") ;
                     $joomla_user = JFactory::getUser($userId);
                     $app = JFactory::getApplication('site');
                     $session = JFactory::getSession();
@@ -189,6 +210,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                 if ($row) {   
                     // User found, log them in
                     $userId = $row['jom_id'];
+                    journalise($userId, "I", "LinkedIn JOOMLA login for user id $row[jom_id] from $callback, browser=$browser.") ;
                     $joomla_user = JFactory::getUser($userId);
                     $app = JFactory::getApplication('site');
                     $session = JFactory::getSession();
@@ -244,6 +266,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                 if ($row) {
                     // User found, log them in
                     $userId = $row['jom_id'];
+                    journalise($userId, "I", "Facebook login for user id $row[jom_id] from $callback, browser=$browser.") ;
                     $joomla_user = JFactory::getUser($userId);
                     $app = JFactory::getApplication('site');
                     $session = JFactory::getSession();
@@ -293,7 +316,6 @@ $linkedInAuthUrl = $linkedin->getAuthorizationUrl(['scope' => ['openid', 'profil
 // TODO as the state can be extended by JS to include browser info, only CSRF token should be stored in session and checked here, the browser info should be passed via a different parameter to avoid confusion and potential security issues.
 $_SESSION['google_oauth2state'] = $google->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
 $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used later... could be useful to differentiate multiple OAuth providers
-
 ?>
 
 <div class="container">

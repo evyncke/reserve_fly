@@ -17,11 +17,15 @@
 */
 
 require_once "dbi.php" ;
+require_once "no_joomla.php" ;
 
-session_name('RAPCSSID') ;
-session_start() ;
+#session_name('RAPCSSID') ;
+if (session_status() !== PHP_SESSION_ACTIVE) {
+	session_start() ;
+}
 unset($_SESSION['fb_access_token']); // Even if no more used
 unset($_SESSION['jom_id']);
+unset($_SESSION[PSEUDO_JOOMLA_KEY]); 
 session_unset();
 session_destroy();
 
