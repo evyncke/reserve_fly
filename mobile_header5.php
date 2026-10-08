@@ -291,7 +291,6 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
     <ul class="dropdown-menu">
       <li><h6 class="dropdown-header class-primary">Réservé aux administrateurs/comptables</h6></li>
       <li><a class="dropdown-item" href="mobile_journal.php">Journal système</a></li>
-      <li><a class="dropdown-item" href="check_hacks.php">Info piratage éventuel</a></li>
       <li><a class="dropdown-item" href="gestionMembres.php">Gestion membres</a></li>
       <li><a class="dropdown-item" href="odoo_inscription.php">Introduction d'un nouveau membre</a></li>
       <li><a class="dropdown-item" href="mobile_members_map.php">Localisation de nos membres</a></li>
@@ -300,7 +299,20 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><a class="dropdown-item" href="mobile_tilea.php">Taxe TILEA</a></li>
       <li><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></li>
       <li><a class="dropdown-item" href="http://www.spa-aviation.ovh" target="_blank>Essai nouveau site <i class="bi bi-box-arrow-up-right"></i></a></li>
+<?php
+  if ($userId == 62 or $userId == 66 or $userId == 46) { // IT Speciaslits
+?>
+      <li><hr class="dropdown-divider"/></li>
+      <li><h6 class="dropdown-header">Réservé aux gars IT</h6></li>
+      <li><a class="dropdown-item" href="check_hacks.php">Info piratage éventuel</a></li>
+      <li><a class="dropdown-item" href="mobile_admin_export.php">Export de la base de données</a></li>
+      <li><a class="dropdown-item" href="mobile_admin_import.php">Import de la base de données</a></li>
+      <!-- <li><a class="dropdown-item" href="mobile_admin_sql.php">Exécution SQL</a></li>
+      <li><a class="dropdown-item" href="mobile_admin_phpinfo.php">PHP info</a></li> -->
     </ul>
+<?php
+  } // IT Specialists
+?>    
   </li> <!-- dropdown administration-->
 
 <?php
@@ -433,7 +445,7 @@ if ($userId > 0) {
 <?php
 if ($userId > 0) {
 ?> 
-             <li><a class="dropdown-item" href="mobile_dept_board.php">Départs</a></li> 
+            <li><a class="dropdown-item" href="mobile_dept_board.php">Départs</a></li> 
 <?php
 }
 ?>
