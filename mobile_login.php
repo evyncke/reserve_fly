@@ -22,7 +22,7 @@ require_once "dbi.php" ;
 if (isset($_REQUEST['cb']) and $_REQUEST['cb'] != '')
     $callback = htmlspecialchars(urldecode($_REQUEST['cb']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ;
 else    
-    $callback = 'resa/mobile.php' ; // By default
+    $callback = SITE_PATH . '/mobile.php' ; // By default
 
 // if ($userId > 0) {
 //     header("Location: https://" . SITE_HOST . "/$callback", TRUE, 303) ;
