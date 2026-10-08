@@ -433,8 +433,7 @@ if ($userId > 0) {
 <?php
 if ($userId > 0) {
 ?> 
-            <li><a class="dropdown-item" href="mobile_team.php">Équipe SPW</a></li>
-            <li><a class="dropdown-item" href="mobile_dept_board.php">Départs</a></li> 
+             <li><a class="dropdown-item" href="mobile_dept_board.php">Départs</a></li> 
 <?php
 }
 ?>
@@ -467,7 +466,7 @@ if ($userId > 0) {
 ?>
             <li><hr class="dropdown-divider"/></li>
             <li><h6 class="dropdown-header">Cartes Jeppessen</h6></li>
-            <li><a class="dropdown-item" href="https://<?= SITE_HOST ?>/airports/tripkits/JeppesenBelgium_31-08-2025.pdf">Jeppessen Charts</a></li>
+            <li><a class="dropdown-item" href="<?= DOCUMENTS_DIRECTORY ?>/Navigation/JeppesenBelgium_31-08-2025.pdf">Jeppessen Charts</a></li>
             <li><a class="dropdown-item" href="mobile_airports.php">Résumé airports</a></li>
 <?php
 }
