@@ -307,13 +307,14 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><a class="dropdown-item" href="check_hacks.php">Info piratage éventuel</a></li>
       <li><a class="dropdown-item" href="mobile_admin_export.php">Export de la base de données</a></li>
       <li><a class="dropdown-item" href="mobile_admin_import.php">Import de la base de données</a></li>
-      <!-- <li><a class="dropdown-item" href="mobile_admin_sql.php">Exécution SQL</a></li>
-      <li><a class="dropdown-item" href="mobile_admin_phpinfo.php">PHP info</a></li> -->
-    </ul>
+      <li><a class="dropdown-item" href="mobile_admin_phpinfo.php">PHP info</a></li>
+      <!-- <li><a class="dropdown-item" href="mobile_admin_sql.php">Exécution SQL</a></li> -->
+
 <?php
   } // IT Specialists
 ?>    
-  </li> <!-- dropdown administration-->
+    </ul>
+    </li> <!-- dropdown administration-->
 
 <?php
   if ($userId == 62 or $userId == 66 or $userId == 92 or $userId == 348 or $userId == 306) { // Odoo users
