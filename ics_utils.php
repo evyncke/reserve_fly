@@ -101,7 +101,7 @@ function emit_booking($booking) {
 		emit("\tCommentaire: " . db2web($booking['r_comment']) . '.\n' . $eol) ;
 
 	emit("SEQUENCE:$booking[r_sequence]" . $eol .
-		"URL:" . ((isset($_SERVER['HTTPS'])) ? 'https' : 'http') . "://$_SERVER[HTTP_HOST]/resa/booking.php?" . $eol . "\tid=$booking[r_id]&auth=$auth" . $eol .
+		"URL:" . SITE_URL . "booking.php?" . $eol . "\tid=$booking[r_id]&auth=$auth" . $eol .
 		"SUMMARY:Vol sur $booking[r_plane]" . $eol ) ; // SUMMARY is the main visible thing in the calendar
 	emit('TRANSP:OPAQUE' . $eol .
 //		'CLASS:PRIVATE' . $eol .
