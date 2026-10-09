@@ -43,5 +43,6 @@ echo $Parsedown->text($text) ;
 ?>
 </div><!-- row -->
 </div><!-- container -->
+<h5>(<?= SITE_HOST ?>)</h5>
 </body>
 </html>

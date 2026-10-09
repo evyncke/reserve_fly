@@ -281,7 +281,7 @@ if ($christmas_theme and strpos($_SERVER['SCRIPT_NAME'], 'mobile_webcam') === fa
       </a>
       <ul class="nav navbar-nav multi-collapse collapse navbar-collapse"><!-- nav-bar left with most of the dropdown -->
         <li class="navbar-item me-auto me-md-0">
-          <a class="nav-link text-white" href="mobile.php?news">Home</a>
+          <a class="nav-link text-white" href="mobile_welcome.php">Home</a>
         </li>
 <?php
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
