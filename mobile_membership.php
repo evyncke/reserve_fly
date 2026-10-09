@@ -24,7 +24,7 @@ if (isset($_REQUEST['invoice']) and $_REQUEST['invoice'] == 'delay') {
     setcookie('membership', 'ignore', time() + ($hours * 60 * 60), "/"); 
     // Is there a call back URL ? 
     // Also clean it a bit... to avoid a // in the redirection URL
-    $cb = (isset($_REQUEST['cb'])) ? urldecode($_REQUEST['cb']) : 'mobile.php' ;
+    $cb = (isset($_REQUEST['cb'])) ? urldecode($_REQUEST['cb']) : 'mobile_welcome.php' ;
     if (str_starts_with($cb, '/'))
         $cb = substr($cb, 1) ;
     // TODO avoid using hardcoded domain name

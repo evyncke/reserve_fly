@@ -1,6 +1,6 @@
 <?php      
 /*
-   Copyright 2014-2025 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,12 +16,22 @@
 
 */
 
-if (($_SERVER['SERVER_NAME'] == 'm.ebsp.be') or ($_SERVER['SERVER_NAME'] == 'm.spa-aviation.be')) 
-	header('Location: https://www.spa-aviation.be/resa/mobile.php?news');      
-else if ($_SERVER['SERVER_NAME'] == 'my.spa-aviation.be') 
-    header('Location: https://www.spa-aviation.be/index.php/fr/homepage');      
-else if (($_SERVER['SERVER_NAME'] == 'resa.spa-aviation.be') or ($_SERVER['SERVER_NAME'] == 'resa.ebsp.be'))
-	header('Location: https://www.spa-aviation.be/resa/reservation.php');      
-else
-	header('Location: https://www.spa-aviation.be/resa/reservation.php');      
+require_once "auth.php" ;
+
+switch ($_SERVER['SERVER_NAME']) {
+	case 'm.ebsp.be':
+	case 'm.spa-aviation.be':
+		header('Location: ' . SITE_URL . 'mobile_welcome.php?news');
+		break;
+	case 'my.spa-aviation.be':
+		header('Location: https://www.spa-aviation.be/index.php/fr/homepage');
+		break;
+	case 'resa.spa-aviation.be':
+	case 'resa.ebsp.be':
+		header('Location: ' . SITE_URL . 'mobile_welcome.php');
+		break;
+	default:
+		header('Location: ' . SITE_URL . 'reservation.php');
+}
+exit ;
 ?>

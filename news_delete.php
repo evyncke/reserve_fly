@@ -32,7 +32,6 @@ mysqli_query($mysqli_link, "UPDATE $table_news SET n_stop = DATE_SUB(sysdate(), 
 		or journalise($userId, "E", "Cannot delete news $id: " . mysqli_error($mysqli_link)) ;
 	// So far so good, redirect to the reservation page
 journalise($userId, 'W', "News $id deleted") ;
-header('Location: ' . SITE_URL . 'mobile.php') ;
-die() ; 
-
+header('Location: ' . SITE_URL . 'mobile_welcome.php') ;
+exit ; 
 ?>

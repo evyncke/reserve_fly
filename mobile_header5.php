@@ -276,7 +276,7 @@ if ($christmas_theme and strpos($_SERVER['SCRIPT_NAME'], 'mobile_webcam') === fa
         <i class="navbar-toggler-icon"></i>
       </button>
       <!-- below in the <a the navbar-collapse widen the space by adding right margin !!! -->
-      <a class="navbar-brand multi-collapse hidden-md collapse navbar-collapse" href="mobile.php?news" style="max-width: 40px;">
+      <a class="navbar-brand multi-collapse hidden-md collapse navbar-collapse" href="mobile_welcome.php?news" style="max-width: 40px;">
         <img src="/logo_rapcs_256x256_white.png" width="24px" height="24px">
       </a>
       <ul class="nav navbar-nav multi-collapse collapse navbar-collapse"><!-- nav-bar left with most of the dropdown -->
