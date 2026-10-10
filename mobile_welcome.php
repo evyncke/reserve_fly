@@ -24,7 +24,8 @@ require_once 'mobile_header5.php' ;
 require_once "mobile_metar_tools.php";
 require_once 'dto.class.php' ;
 
-$station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(strtoupper($_REQUEST['station'])) : $default_metar_station ;
+$station = strtoupper(trim($_REQUEST['station'] ?? ''));
+if (!preg_match('/^[A-Z0-9]{4}$/', $station)) $station = $default_metar_station; // Check for XSS attack
 
 $color1="#FFF4F4";
 $color2="#EAF7E7";
@@ -157,13 +158,13 @@ function displayProfile()
 		$pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
 		$userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 		$blocked_reason = db2web($pilot['b_reason'] ?? '') ;
-		$blocked_when = substr($pilot['b_when'],0,10) ;
+		$blocked_when = substr($pilot['b_when'] ?? '',0,10) ;
 		print('<p class="lead"><b>Nom : </b>'.$userName.'</p>');
 		if($blocked_reason=="") {
 			print('<p class="lead"><b>Statut : <span class="bg-light text-success">OK</span></b></p>');
 		}
 		else {
-			print('<p class="lead"><b>Status :</b><i class="bi bi-sign-stop-fill text-danger"></i><b><span style="color:red;"> Bloqué ('.$blocked_reason.' depuis '.$blocked_when.')</span></b>.</p>');
+			print('<p class="lead"><b>Status :</b><i class="bi bi-sign-stop-fill text-danger"></i><b><span style="color:red;"> Bloqué ('.htmlspecialchars($blocked_reason).' depuis '.$blocked_when.')</span></b>.</p>');
 		}
 
 	// Find all Odoo IDs
@@ -298,10 +299,10 @@ function displayReservation()
 						if($instructor!="") {$instructor= "DC";}
 						$comment=$row['r_comment'];
 						$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
-						$class = ' class="text-warning"' ;
+						$class = ' class="text-warning"' ;  // ERIC cela écrase la valeur ci-dessus ?
 						$dateDe=substr($row['r_start'], 0,16) ;
 						$dateA=substr($row['r_stop'], 0,16) ;
-						print("<tr><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>\n") ;
+						print("<tr><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($comment))) . "</td></tr>\n") ;
 				}
 				if($count==0) {
 						print('<tr><td colspan="5" class="text-warning" >Aucune réservation prévue</td></tr>') ;
@@ -387,7 +388,14 @@ function displayWebcam($webcam)
     if($webcam=="EBSP") {
 ?>
         <div style="text-align: center;">
-            <iframe style="aspect-ratio: 6 / 4; object-fit: cover;width: 100%;" src="https://g0.ipcamlive.com/player/player.php?alias=camebspairside&autoplay=1&mute=1&disableautofullscreen=1&disablezoombutton=p;disableframecapture=1&disabletimelapseplayer=1&disablestorageplayer=1&disabledownloadbutton=1&disableplaybackspeedbutton=1&disablenavigation=1&disableuserpause=1" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
+            <iframe 
+				style="aspect-ratio: 6 / 4; object-fit: cover;width: 100%;" 
+				src="https://g0.ipcamlive.com/player/player.php?alias=camebspairside&autoplay=1&mute=1&disableautofullscreen=1&disablezoombutton=p;disableframecapture=1&disabletimelapseplayer=1&disablestorageplayer=1&disabledownloadbutton=1&disableplaybackspeedbutton=1&disablenavigation=1&disableuserpause=1" 
+				frameborder="0" 
+				loading="lazy"
+				title="Webcam aire à signaux"
+				allowfullscreen="allowfullscreen">
+			</iframe>
         </div>
 <?php
     }
@@ -402,7 +410,7 @@ function displayWebcam($webcam)
 		// Apron
 ?>
         <div style="text-align: center;">
-            <img style="aspect-ratio: 6/ 4; object-fit: cover;width: 100%;" src="https://nav.vyncke.org/rapcs/snapshot-apron.jpg?random=1748878308770"/>
+            <img style="aspect-ratio: 6/ 4; object-fit: cover;width: 100%;" src="https://nav.vyncke.org/rapcs/snapshot-apron.jpg"/>
         </div>
 <?php
     }
@@ -417,11 +425,10 @@ function displayDepart()
 	global $userId;
 	global $mysqli_link,$table_person,$table_blocked,$table_bookings,$table_users;
 	print('<h4 class="text-center">Réservation du jour</h4>');
-	if($userId!=0) {
 
 	if($userId!=0) {
 		$id=$userId;
-		$sql="SELECT * FROM $table_bookings WHERE r_start>sysdate() and r_start<'2026-10-12' and r_cancel_date is null";
+		$sql="SELECT * FROM $table_bookings WHERE r_start>sysdate() and r_cancel_date is null";
 		//print("SQL=$sql<br>");
 		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 	?>
@@ -436,7 +443,6 @@ function displayDepart()
 				$count=0;
 				while ($row = mysqli_fetch_array($result)) {
 						$count++;
-						$date=$row['r_start'];
 						$plane=$row['r_plane'];
 						$instructor=$row['r_instructor'];
 						if($instructor!="") {$instructor= "DC";}
@@ -446,7 +452,7 @@ function displayDepart()
 						$class = ' class="text-warning"' ;
 						$dateDe=substr($row['r_start'], 0,16) ;
 						$dateA=substr($row['r_stop'], 0,16) ;
-						print("<tr><td>$nom</td><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>\n") ;
+						print("<tr><td>$nom</td><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($comment))) . "</td></tr>\n") ;
 				}
 				if($count==0) {
 						print('<tr><td colspan="6" class="text-warning">Aucune réservation prévue</td></tr>') ;
@@ -456,8 +462,6 @@ function displayDepart()
 		</table>
 		</div><!-- row -->
 	<?php
-
-	}
 
 	}
 }
@@ -474,6 +478,7 @@ function displayMeteo()
 		src="https://embed.windy.com/embed2.html?lat=$apt_latitude&lon=$apt_longitude&zoom=9&level=surface&overlay=radar&menu=false&theme=dark" 
 		width="100%" 
 		frameborder="0"
+		loading="lazy" title="Windy" alt="Windy"
 		style="aspect-ratio: 6/ 4; object-fit: cover;width: 100%;">
 	</iframe><?php
 	}
