@@ -443,10 +443,10 @@ function displayMesReservations()
 						//$class = ' class="text-warning"' ;
 						$dateDe=displayFlyDate($row['r_start']) ;
 						$dateA=displayFlyDate($row['r_stop']) ;
-						print("<tr><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>\n") ;
+						print("<tr><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>") ;
 				}
 				if($count==0) {
-						print('<tr><td colspan="5" class="text-warning" >Aucune réservation prévue</td></tr>\n') ;
+						print('<tr><td colspan="5" class="text-warning" >Aucune réservation prévue</td></tr>') ;
 				}
 	?>
 			</tbody>
