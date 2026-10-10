@@ -30,7 +30,7 @@ if (!preg_match('/^[A-Z0-9]{4}$/', $station)) $station = $default_metar_station;
 $color1="#FFF4F4";
 $color2="#EAF7E7";
 $style1='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-dark" style="background-color:PowderBlue;"';
-$style2='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-darkt" style="background-color:PowderBlue;"';
+$style2='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-dark" style="background-color:PowderBlue;"';
 $style3='class="border border-3 border-secondary rounded-3 bg-muted shadow p-2 m-1 text-light"';
 
 ?> 
@@ -121,14 +121,15 @@ else {
 			<div <?= $style2 ?>>
 				<div>
 					<?php displayWebcam("apron"); ?>
-					<?php displayButtonLink("Display", "mobile_webcam.php?cam=0");?>				</div>
+					<?php displayButtonLink("Display", "mobile_webcam.php?cam=0");?>
+				</div>
 			</div>
 		</div>
 		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
 			<div <?= $style1 ?>>
 				<div>
 					<?php displayWebcam("hangar"); ?>
-					<?php displayButtonLink("Display", "mobile_webcam.php?cam=2");?>				</div>
+					<?php displayButtonLink("Display", "mobile_webcam.php?cam=2");?>
 				</div>
 			</div>
 		</div>
@@ -152,9 +153,9 @@ else {
 	<div class="row">
 		<div class="col-12">
 			<div <?= $style3?>>
-				<div id="metarMessage" ... fetching data over the Internet ...</div> 
+				<div id="metarMessage"> ... fetching data over the Internet ...</div> 
 			</div>
-		</div
+		</div>
 	</div> <!-- row -->
 
 
@@ -533,10 +534,11 @@ function displayTodayReservation()
 //==============================================
 function displayMeteo()
 {
+	global 
 	print('<h4 class="text-center">Météo Windy</h4>');
 ?>
 	<iframe 
-		src="https://embed.windy.com/embed2.html?lat=$apt_latitude&lon=$apt_longitude&zoom=9&level=surface&overlay=radar&menu=false&theme=dark" 
+		src="https://embed.windy.com/embed2.html?lat=<?=$apt_latitude?>&lon=<?=$apt_longitude?>&zoom=9&level=surface&overlay=radar&menu=false&theme=dark" 
 		width="100%" 
 		frameborder="0"
 		loading="lazy" title="Windy" alt="Windy"
@@ -554,11 +556,6 @@ function displayEphemeride()
 	$fontSize = '1em' ;
 	$default_airport="EBSP";
 ?> 
-	<main class="container-fluid">
-		<header class="row">
-			<h4 class="text-center">Ephémérides du <time id="displayDate"></time></h4>
-		</header>
-
 		<section class="row" style="font-size: <?=$fontSize?>">
 			<dl class="row m-0 w-100">
 				<dt class="col-md-4 col-8">Jour aéronautique:</dt>
