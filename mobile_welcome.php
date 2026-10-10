@@ -113,6 +113,7 @@ else {
 			<div <?= $style1 ?>>
 				<div>
 					<?php displayWebcam("EBSP"); ?>
+					<?php displayButtonLink("Display", "mobile_webcam.php?cam=1");?>
 				</div>
 			</div>
 		</div>
@@ -120,13 +121,14 @@ else {
 			<div <?= $style2 ?>>
 				<div>
 					<?php displayWebcam("apron"); ?>
-				</div>
+					<?php displayButtonLink("Display", "mobile_webcam.php?cam=0");?>				</div>
 			</div>
 		</div>
 		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style1 ?>">
 			<div <?= $style1 ?>>
 				<div>
 					<?php displayWebcam("hangar"); ?>
+					<?php displayButtonLink("Display", "mobile_webcam.php?cam=2");?>				</div>
 				</div>
 			</div>
 		</div>
