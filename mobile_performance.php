@@ -32,7 +32,8 @@ $header_postamble = "
 " ;
 
 require_once 'mobile_header5.php' ;
-$performanceJSONcontent = file_get_contents(SITE_URL . 'mobile_performance.json') ;
+$jsonFile=SITE_URL . 'data/mobile_performance.json';
+$performanceJSONcontent = file_get_contents($jsonFile) ;
 $performanceJSONcontent = str_replace("\n","",$performanceJSONcontent);
 print("<script>\nvar performanceJSONcontent='$performanceJSONcontent';");
 print("var default_member=$userId;\n");
