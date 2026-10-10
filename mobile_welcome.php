@@ -33,7 +33,7 @@ $style2='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-l
 $style3='class="border border-3 border-secondary rounded-3 bg-muted shadow p-2 m-1 text-light"';
 ?> 
 <div class="container-fluid">
-<p><h2 class="border border-3 border-secondary rounded-3 shadow mx-auto text-center text-light" style="background-color:LightSlateGrey;">Bienvenue dans l'espace Membre du RAPCS</h2></p>
+<h2 class="border border-3 border-secondary rounded-3 shadow mx-auto text-center text-light" style="background-color:LightSlateGrey;">Bienvenue dans l'espace Membre du RAPCS</h2>
 <?php
 if($userId==0) {
 	print("<h1 style=\"color: red;\">Vous devez d'abord vous connecter pour accéder à l'espace Membre du RAPCS</h1>");
@@ -57,14 +57,14 @@ if($userId==0) {
 	</div>
 </div>
 <div class="row">
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style2 ?>">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" <?= $style2 ?>>
 		<div <?= $style2 ?>>
 			<div>
 				<?php displayMETAR($station); ?>
 			</div>
 		</div>
 	</div>
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style1 ?>">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" <?= $style1 ?>>
 		<div <?= $style1 ?>>
 			<div>
 				<?php displayMeteo(); ?>
@@ -74,7 +74,7 @@ if($userId==0) {
 </div>
 <!---
 <div class="row">
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="<?= $style1 ?>">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" <?= $style1 ?>>
 		<div <?= $style1 ?>>
 			<div>
 				<?php displayWebcam("EBSP"); ?>
@@ -84,21 +84,21 @@ if($userId==0) {
 </div>
 -->
 <div class="row">
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style1 ?>">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" <?= $style1 ?>>
 		<div <?= $style1 ?>>
 			<div>
 				<?php displayWebcam("EBSP"); ?>
 			</div>
 		</div>
 	</div>
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style2 ?>">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" <?= $style2 ?>>
 		<div <?= $style2 ?>>
 			<div>
 				<?php displayWebcam("apron"); ?>
 			</div>
 		</div>
 	</div>
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style1 ?>">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" <?= $style1 ?>>
 		<div <?= $style1 ?>>
 			<div>
 				<?php displayWebcam("hangar"); ?>
@@ -107,14 +107,14 @@ if($userId==0) {
 	</div>
 </div>
 <div class="row">
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style1 ?>">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" <?= $style1 ?>>
 		<div <?= $style1 ?>>
 			<div>
 				<?php displayDepart(); ?>
 			</div>
 		</div>
 	</div>
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style2 ?>">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" <?= $style2 ?>>
 		<div <?= $style2 ?>>
 			<div>
 				<?php displayEphemeride(); ?>
@@ -125,16 +125,16 @@ if($userId==0) {
 <div class="row">
 	<div class="col-12">
 		<div <?= $style3?>>
-			<div id="metarMessage" ... fetching data over the Internet ...</div> 
+			<div id="metarMessage"> ... fetching data over the Internet ...</div> 
 		</div>
-	</div
+</div>
 </div> <!-- row -->
 
 
 <script>
 	displayMobileMETAR('<?=$station?>', 'picture') ;
 </script>
-<h5>(<?= SITE_HOST ?>)</h5>
+<h5>(<?= SITE_HOST ?><?=  SITE_ICON ?>)</h5>
 </div> <!-- container-->
 </body>
 </html>
@@ -163,7 +163,7 @@ function displayProfile()
 			print('<p class="lead"><b>Statut : <span class="bg-light text-success">OK</span></b></p>');
 		}
 		else {
-			print('<p class="lead"><b>Status :</b><i class="bi bi-sign-stop-fill text-danger"></i><b><span style="color:red;"> Bloqué ('.$blocked_reason.' depuis '.$blocked_when.')<span></b>.</p>');
+			print('<p class="lead"><b>Status :</b><i class="bi bi-sign-stop-fill text-danger"></i><b><span style="color:red;"> Bloqué ('.$blocked_reason.' depuis '.$blocked_when.')</span></b>.</p>');
 		}
 
 	// Find all Odoo IDs
@@ -304,7 +304,7 @@ function displayReservation()
 						print("<tr><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>\n") ;
 				}
 				if($count==0) {
-						print('<tr><td colspan="5" class="text-warning" >Aucune réservation prévue</td></tr>\n') ;
+						print('<tr><td colspan="5" class="text-warning" >Aucune réservation prévue</td></tr>') ;
 				}
 	?>
 			</tbody>
@@ -449,7 +449,7 @@ function displayDepart()
 						print("<tr><td>$nom</td><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>\n") ;
 				}
 				if($count==0) {
-						print('<tr><td colspan="6" class="text-warning" >Aucune réservation prévue</td></tr>\n') ;
+						print('<tr><td colspan="6" class="text-warning">Aucune réservation prévue</td></tr>') ;
 				}
 	?>
 			</tbody>
@@ -471,7 +471,7 @@ function displayMeteo()
 	print('<h4 class="text-center">Météo Windy</h4>');
 ?>
 	<iframe 
-		src="https://embed.windy.com/embed2.html?lat= 50.4833&lon=5.91&zoom=9&level=surface&overlay=radar&menu=false&theme=dark" 
+		src="https://embed.windy.com/embed2.html?lat=$apt_latitude&lon=$apt_longitude&zoom=9&level=surface&overlay=radar&menu=false&theme=dark" 
 		width="100%" 
 		frameborder="0"
 		style="aspect-ratio: 6/ 4; object-fit: cover;width: 100%;">
@@ -489,11 +489,6 @@ function displayEphemeride()
 	$fontSize = '1em' ;
 	$default_airport="EBSP";
 ?> 
-	<main class="container-fluid">
-		<header class="row">
-			<h2 class="h2">Ephémérides du <time id="displayDate"></time></h2>
-		</header>
-
 		<section class="row" style="font-size: <?=$fontSize?>">
 			<dl class="row m-0 w-100">
 				<dt class="col-md-4 col-8">Jour aéronautique:</dt>
