@@ -39,126 +39,131 @@ $style3='class="border border-3 border-secondary rounded-3 bg-muted shadow p-2 m
 <?php
 if($userId==0) {
 	print("<h1 style=\"color: red;\">Vous devez d'abord vous connecter pour accéder à l'espace Membre du RAPCS</h1>");
+	displayButtonLink("Se Connecter", "mobile_login.php?cb=%2Fresa%2Fmobile_welcome.php");
+}
+else {
+?>
+	<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div <?= $style1 ?>>
+				<div>
+					<?php displayProfile(); ?>
+					<?php displayButtonLink("Profile", "mobile_profile.php");?>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div <?= $style2 ?>>
+				<div>
+					<?php displayFolio(); ?>
+					<?php displayButtonLink("Folio", "mobile_folio.php");?>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div <?= $style1 ?>>
+				<div>
+					<?php displayMesReservations(); ?>
+					<?php displayButtonLink("Reservation", "mobile_reservation.php");?>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div <?= $style2 ?>>
+				<div>
+					<?php displayTodayReservation(); ?>
+					<?php displayButtonLink("Reservation", "mobile_resa_by_plane.php");?>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style2 ?>">
+			<div <?= $style2 ?>>
+				<div>
+					<?php displayMETAR($station); ?>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style1 ?>">
+			<div <?= $style1 ?>>
+				<div>
+					<?php displayMeteo(); ?>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!---
+	<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="<?= $style1 ?>">
+			<div <?= $style1 ?>>
+				<div>
+					<?php displayWebcam("EBSP"); ?>
+				</div>
+			</div>
+		</div>
+	</div>
+	-->
+	<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style1 ?>">
+			<div <?= $style1 ?>>
+				<div>
+					<?php displayWebcam("EBSP"); ?>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style2 ?>">
+			<div <?= $style2 ?>>
+				<div>
+					<?php displayWebcam("apron"); ?>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style1 ?>">
+			<div <?= $style1 ?>>
+				<div>
+					<?php displayWebcam("hangar"); ?>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style1 ?>">
+			<div <?= $style1 ?>>
+				<div>
+					<?php displayRAPCSNotam(); ?>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style2 ?>">
+			<div <?= $style2 ?>>
+				<div>
+					<?php displayEphemeride(); ?>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<div <?= $style3?>>
+				<div id="metarMessage" ... fetching data over the Internet ...</div> 
+			</div>
+		</div
+	</div> <!-- row -->
+
+
+	<script>
+		displayMobileMETAR('<?=$station?>', 'picture') ;
+	</script>
+	<h5>(<?= SITE_HOST ?><?=  SITE_ICON ?>)</h5>
+	</div> <!-- container-->
+<?php
 }
 ?>
-<div class="row">
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
-		<div <?= $style1 ?>>
-			<div>
-				<?php displayProfile(); ?>
-				<?php displayButtonLink("Profile", "mobile_profile.php");?>
-			</div>
-		</div>
-	</div>
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
-		<div <?= $style2 ?>>
-			<div>
-				<?php displayFolio(); ?>
-				<?php displayButtonLink("Folio", "mobile_folio.php");?>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class="row">
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
-		<div <?= $style1 ?>>
-			<div>
-				<?php displayReservation(); ?>
-				<?php displayButtonLink("Reservation", "mobile_reservation.php");?>
-			</div>
-		</div>
-	</div>
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
-		<div <?= $style2 ?>>
-			<div>
-				<?php displayDepart(); ?>
-				<?php displayButtonLink("Reservation", "mobile_resa_by_plane.php");?>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class="row">
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style2 ?>">
-		<div <?= $style2 ?>>
-			<div>
-				<?php displayMETAR($station); ?>
-			</div>
-		</div>
-	</div>
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style1 ?>">
-		<div <?= $style1 ?>>
-			<div>
-				<?php displayMeteo(); ?>
-			</div>
-		</div>
-	</div>
-</div>
-<!---
-<div class="row">
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="<?= $style1 ?>">
-		<div <?= $style1 ?>>
-			<div>
-				<?php displayWebcam("EBSP"); ?>
-			</div>
-		</div>
-	</div>
-</div>
--->
-<div class="row">
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style1 ?>">
-		<div <?= $style1 ?>>
-			<div>
-				<?php displayWebcam("EBSP"); ?>
-			</div>
-		</div>
-	</div>
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style2 ?>">
-		<div <?= $style2 ?>>
-			<div>
-				<?php displayWebcam("apron"); ?>
-			</div>
-		</div>
-	</div>
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style1 ?>">
-		<div <?= $style1 ?>>
-			<div>
-				<?php displayWebcam("hangar"); ?>
-			</div>
-		</div>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style1 ?>">
-		<div <?= $style1 ?>>
-			<div>
-				<?php displayRAPCSNotam(); ?>
-			</div>
-		</div>
-	</div>
-	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style2 ?>">
-		<div <?= $style2 ?>>
-			<div>
-				<?php displayEphemeride(); ?>
-			</div>
-		</div>
-	</div>
-</div>
-<div class="row">
-	<div class="col-12">
-		<div <?= $style3?>>
-			<div id="metarMessage" ... fetching data over the Internet ...</div> 
-		</div>
-	</div
-</div> <!-- row -->
-
-
-<script>
-	displayMobileMETAR('<?=$station?>', 'picture') ;
-</script>
-<h5>(<?= SITE_HOST ?><?=  SITE_ICON ?>)</h5>
-</div> <!-- container-->
 </body>
 </html>
 
@@ -299,55 +304,6 @@ function displayFolio()
 		}
 	}
 }
-//==============================================
-// Function: displayReservation
-// Purpose: 
-//==============================================
-function displayReservation()
-{
-	global $mysqli_link,$table_person,$table_blocked,$table_bookings,$table_users;
-	global $userId;
-	print('<h4 class="text-center">Mes Réservations</h4>');
-	if($userId!=0) {
-		$id=$userId;
-		$sql="SELECT * FROM $table_bookings WHERE r_pilot=$userId and r_start>=sysdate() and r_cancel_date is null";
-		//print("SQL=$sql<br>");
-		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
-	?>
-
-		<div class="row">
-		<table class="col-sm-12 table table-responsive table-striped p-2 m-2" width="90%">
-			<thead>
-				<tr><th>De</th><th>À</th><th>Avion</th><th>DC</th><th>Commentaire</th></tr>
-			</thead>
-			<tbody class="table-group-divider">
-	<?php
-				$count=0;
-				while ($row = mysqli_fetch_array($result)) {
-						$count++;
-						$date=$row['r_start'];
-						$plane=$row['r_plane'];
-						$instructor=$row['r_instructor'];
-						if($instructor!="") {$instructor= "DC";}
-						$comment=$row['r_comment'];
-						$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
-						//$class = ' class="text-warning"' ;
-						$dateDe=substr($row['r_start'], 0,16) ;
-						$dateA=substr($row['r_stop'], 0,16) ;
-						print("<tr><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>\n") ;
-				}
-				if($count==0) {
-						print('<tr><td colspan="5" class="text-warning" >Aucune réservation prévue</td></tr>\n') ;
-				}
-	?>
-			</tbody>
-		</table>
-		</div><!-- row -->
-	<?php
-
-	}
-
-}
 
 //==============================================
 // Function: displayMETAR
@@ -446,21 +402,18 @@ function displayWebcam($webcam)
 <?php
     }
 }
-
 //==============================================
-// Function: displayDepart
+// Function: displayMesReservations
 // Purpose: 
 //==============================================
-function displayDepart()
+function displayMesReservations()
 {
-	global $userId;
 	global $mysqli_link,$table_person,$table_blocked,$table_bookings,$table_users;
-	print('<h4 class="text-center">Réservation du jour</h4>');
-	if($userId!=0) {
-
+	global $userId;
+	print('<h4 class="text-center">Mes Réservations</h4>');
 	if($userId!=0) {
 		$id=$userId;
-		$sql="SELECT * FROM $table_bookings WHERE r_start>sysdate() and r_start<'2026-10-12' and r_cancel_date is null";
+		$sql="SELECT * FROM $table_bookings WHERE r_pilot=$userId and r_start>=sysdate() and r_cancel_date is null";
 		//print("SQL=$sql<br>");
 		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 	?>
@@ -468,7 +421,68 @@ function displayDepart()
 		<div class="row">
 		<table class="col-sm-12 table table-responsive table-striped p-2 m-2" width="90%">
 			<thead>
-				<tr><th>Nom</th><th>De</th><th>À</th><th>Avion</th><th>DC</th><th>Commentaire</th></tr>
+				<tr><th>De</th><th>À</th><th>Avion</th><th>DC</th><th>Commentaire</th></tr>
+			</thead>
+			<tbody class="table-group-divider">
+	<?php
+				$count=0;
+				while ($row = mysqli_fetch_array($result)) {
+						$count++;
+						$date=$row['r_start'];
+						$plane=$row['r_plane'];
+						$instructor=$row['r_instructor'];
+						if($instructor!="") {$instructor= "DC";}
+						$comment=$row['r_comment'];
+						$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
+						//$class = ' class="text-warning"' ;
+						$dateDe=displayFlyDate($row['r_start']) ;
+						$dateA=displayFlyDate($row['r_stop']) ;
+						print("<tr><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>\n") ;
+				}
+				if($count==0) {
+						print('<tr><td colspan="5" class="text-warning" >Aucune réservation prévue</td></tr>\n') ;
+				}
+	?>
+			</tbody>
+		</table>
+		</div><!-- row -->
+	<?php
+	}
+
+}
+//==============================================
+// Function: displayFlyDate
+// Purpose: 
+//==============================================
+function displayFlyDate($date)
+{
+	$flyDate=substr($date,8,2)."-".substr($date,5,2)."-".substr($date,2,2)." ".substr($date,11,5);
+	return $flyDate;
+}
+
+//==============================================
+// Function: displayTodayReservation
+// Purpose: 
+//==============================================
+function displayTodayReservation()
+{
+	global $userId;
+	global $mysqli_link,$table_person,$table_blocked,$table_bookings,$table_users;
+	print('<h4 class="text-center">Réservations du jour</h4>');
+
+	if($userId!=0) {
+		$id=$userId;
+		$sql_date = date('Y-m-d') ;
+
+		$sql="SELECT * FROM $table_bookings WHERE r_start >sysdate() - INTERVAL 1 DAY and r_start < sysdate() + INTERVAL 1 DAY and r_cancel_date is null";
+		//print("SQL=$sql<br>");
+		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
+	?>
+
+		<div class="row">
+		<table class="col-sm-12 table table-responsive table-striped p-2 m-2" width="90%">
+			<thead>
+				<tr><th>Nom</th><th>De</th><th>À</th><th>Avion</th><th>DC</th><th width="40%">Commentaire</th></tr>
 			</thead>
 			<tbody class="table-group-divider">
 	<?php
@@ -482,8 +496,8 @@ function displayDepart()
 						$comment=$row['r_comment'];
 						$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
 						$class = ' class="text-warning"' ;
-						$dateDe=substr($row['r_start'], 0,16) ;
-						$dateA=substr($row['r_stop'], 0,16) ;
+						$dateDe=substr($row['r_start'], 11,5) ;
+						$dateA=substr($row['r_stop'], 11,5) ;
 						print("<tr><td>$nom</td><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($comment))) . "</td></tr>\n") ;
 				}
 				if($count==0) {
@@ -494,8 +508,6 @@ function displayDepart()
 		</table>
 		</div><!-- row -->
 	<?php
-
-	}
 
 	}
 }
