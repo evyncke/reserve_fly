@@ -38,8 +38,8 @@ $style3='class="border border-3 border-secondary rounded-3 bg-muted shadow p-2 m
 <p><h2 class="border border-3 border-secondary rounded-3 shadow mx-auto text-center text-light" style="background-color:LightSlateGrey;">Bienvenue dans l'espace Membre du RAPCS</h2></p>
 <?php
 if($userId==0) {
-	print("<h1 style=\"color: red;\">Vous devez d'abord vous connecter pour accéder à l'espace Membre du RAPCS</h1>");
-	displayButtonLink("Se Connecter", "mobile_login.php?cb=%2Fresa%2Fmobile_welcome.php");
+	print("<h1 class=\"text-center\" style=\"color: red;\">Vous devez d'abord vous connecter pour accéder à l'espace Membre du RAPCS</h1>");
+	displayButtonLink("Se Connecter", "mobile_login.php?cb=%2F".SITE_PATH."%2Fmobile_welcome.php");
 }
 else {
 ?>
