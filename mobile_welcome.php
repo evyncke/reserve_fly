@@ -29,8 +29,8 @@ if (!preg_match('/^[A-Z0-9]{4}$/', $station)) $station = $default_metar_station;
 
 $color1="#FFF4F4";
 $color2="#EAF7E7";
-$style1='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-light" style="background-color:LightSlateGrey;"';
-$style2='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-light" style="background-color:LightSlateGrey;"';
+$style1='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-dark" style="background-color:PowderBlue;"';
+$style2='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-darkt" style="background-color:PowderBlue;"';
 $style3='class="border border-3 border-secondary rounded-3 bg-muted shadow p-2 m-1 text-light"';
 
 ?> 
@@ -82,14 +82,14 @@ else {
 	</div>
 
 	<div class="row">
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style2 ?>">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" >
 			<div <?= $style2 ?>>
 				<div>
 					<?php displayMETAR($station); ?>
 				</div>
 			</div>
 		</div>
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style1 ?>">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" >
 			<div <?= $style1 ?>>
 				<div>
 					<?php displayMeteo(); ?>
@@ -99,7 +99,7 @@ else {
 	</div>
 	<!---
 	<div class="row">
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="<?= $style1 ?>">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 			<div <?= $style1 ?>>
 				<div>
 					<?php displayWebcam("EBSP"); ?>
@@ -109,7 +109,7 @@ else {
 	</div>
 	-->
 	<div class="row">
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style1 ?>">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
 			<div <?= $style1 ?>>
 				<div>
 					<?php displayWebcam("EBSP"); ?>
@@ -117,14 +117,14 @@ else {
 				</div>
 			</div>
 		</div>
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style2 ?>">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
 			<div <?= $style2 ?>>
 				<div>
 					<?php displayWebcam("apron"); ?>
 					<?php displayButtonLink("Display", "mobile_webcam.php?cam=0");?>				</div>
 			</div>
 		</div>
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style1 ?>">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
 			<div <?= $style1 ?>>
 				<div>
 					<?php displayWebcam("hangar"); ?>
@@ -134,14 +134,14 @@ else {
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style1 ?>">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
 			<div <?= $style1 ?>>
 				<div>
 					<?php displayRAPCSNotam(); ?>
 				</div>
 			</div>
 		</div>
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style2 ?>">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
 			<div <?= $style2 ?>>
 				<div>
 					<?php displayEphemeride(); ?>
@@ -415,7 +415,11 @@ function displayMesReservations()
 	print('<h4 class="text-center">Mes Réservations</h4>');
 	if($userId!=0) {
 		$id=$userId;
-		$sql="SELECT * FROM $table_bookings WHERE r_pilot=$userId and r_start>=sysdate() and r_cancel_date is null";
+		//$sql="SELECT * FROM $table_bookings WHERE r_pilot=$userId and r_start>=sysdate() and r_cancel_date is null";
+	    $sql="SELECT * FROM $table_bookings b
+        JOIN $table_person pi ON pi.jom_id = r_pilot
+        LEFT JOIN $table_person i ON i.jom_id = r_instructor
+		WHERE r_pilot=$userId and r_start>=sysdate() and r_cancel_date is null";	
 		//print("SQL=$sql<br>");
 		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 	?>
@@ -476,7 +480,11 @@ function displayTodayReservation()
 		$id=$userId;
 		$sql_date = date('Y-m-d') ;
 
-		$sql="SELECT * FROM $table_bookings WHERE r_start >sysdate() - INTERVAL 1 DAY and r_start < sysdate() + INTERVAL 1 DAY and r_cancel_date is null";
+		//$sql="SELECT * FROM $table_bookings WHERE r_start >sysdate() - INTERVAL 1 DAY and r_start < sysdate() + INTERVAL 1 DAY and r_cancel_date is null";
+		$sql="SELECT * FROM $table_bookings b
+        JOIN $table_person pi ON pi.jom_id = r_pilot
+		WHERE r_start >sysdate() - INTERVAL 1 DAY and r_start < sysdate() + INTERVAL 1 DAY and r_cancel_date is null";
+
 		//print("SQL=$sql<br>");
 		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 	?>
@@ -491,10 +499,15 @@ function displayTodayReservation()
 				$count=0;
 				while ($row = mysqli_fetch_array($result)) {
 						$count++;
+						if($count==8) {
+							//var_dump($row );
+							//print("<br>");
+						}
 						$plane=$row['r_plane'];
+						$nom=$row['first_name']." ".$row['last_name'];
 						$instructor=$row['r_instructor'];
 						if($instructor!="") {$instructor= "DC";}
-						$nom="To Do";
+	
 						$comment=$row['r_comment'];
 						$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
 						$class = ' class="text-warning"' ;
