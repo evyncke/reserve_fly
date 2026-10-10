@@ -22,59 +22,112 @@ $additional_preload = '</' . SITE_PATH . '/js/mobile_metar_tools.js>;rel=preload
 	'</' . SITE_PATH . '/images/metar_rose.png>;rel=preload;as=image' ;
 require_once 'mobile_header5.php' ;
 require_once "mobile_metar_tools.php";
+require_once 'dto.class.php' ;
 
 $station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(strtoupper($_REQUEST['station'])) : $default_metar_station ;
 
 $color1="#FFF4F4";
 $color2="#EAF7E7";
-$style1="background-color:$color1;";
-$style2="background-color:$color2;";
+$style1='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-light" style="background-color:LightSlateGrey;"';
+$style2='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-light" style="background-color:LightSlateGrey;"';
+$style3='class="border border-3 border-secondary rounded-3 bg-muted shadow p-2 m-1 text-light"';
 ?> 
 <div class="container-fluid">
-<h2>Bienvenue dans l'espace Membre du RAPCS</h2>
-<h2><?=$station?> METAR</h2>
+<p><h2 class="border border-3 border-secondary rounded-3 shadow mx-auto text-center text-light" style="background-color:LightSlateGrey;">Bienvenue dans l'espace Membre du RAPCS</h2></p>
+<?php
+if($userId==0) {
+	print("<h1 style=\"color: red;\">Vous devez d'abord vous connecter pour accéder à l'espace Membre du RAPCS</h1>");
+}
+?>
 <div class="row">
-	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" style="<?= $style1 ?>";>
-		<?php displayProfile(); ?>
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+		<div <?= $style1 ?>>
+			<div>
+			<?php displayProfile(); ?>
+			<?php displayFolio(); ?>
+			</div>
+		</div>
 	</div>
-	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" style="<?= $style2 ?>">
-		<?php displayFolio(); ?>
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+		<div <?= $style2 ?>>
+			<div>
+				<?php displayReservation(); ?>
+			</div>
+		</div>
 	</div>
 </div>
 <div class="row">
-	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" style="<?= $style2 ?>">
-		<?php displayMETAR($station); ?>
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style2 ?>">
+		<div <?= $style2 ?>>
+			<div>
+				<?php displayMETAR($station); ?>
+			</div>
+		</div>
 	</div>
-	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" style="<?= $style1 ?>">
-		<?php displayRAPCSNotam(); ?>
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style1 ?>">
+		<div <?= $style1 ?>>
+			<div>
+				<?php displayMeteo(); ?>
+			</div>
+		</div>
+	</div>
+</div>
+<!---
+<div class="row">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="<?= $style1 ?>">
+		<div <?= $style1 ?>>
+			<div>
+				<?php displayWebcam("EBSP"); ?>
+			</div>
+		</div>
+	</div>
+</div>
+-->
+<div class="row">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style1 ?>">
+		<div <?= $style1 ?>>
+			<div>
+				<?php displayWebcam("EBSP"); ?>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style2 ?>">
+		<div <?= $style2 ?>>
+			<div>
+				<?php displayWebcam("apron"); ?>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4" style="<?= $style1 ?>">
+		<div <?= $style1 ?>>
+			<div>
+				<?php displayWebcam("hangar"); ?>
+			</div>
+		</div>
 	</div>
 </div>
 <div class="row">
-	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" style="<?= $style1 ?>">
-		<?php displayWebcam("EBSP"); ?>
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style1 ?>">
+		<div <?= $style1 ?>>
+			<div>
+				<?php displayDepart(); ?>
+			</div>
+		</div>
 	</div>
-	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" style="<?= $style2 ?>">
-		<?php displayWebcam("apron"); ?>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" style="<?= $style2 ?>">
-		<?php displayMeteo(); ?>
-	</div>
-	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" style="<?= $style1 ?>">
-		<?php displayWebcam("hangar"); ?>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" style="<?= $style1 ?>">
-		<?php displayDepart(); ?>
-	</div>
-	<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" style="<?= $style2 ?>">
-		<?php displayEphemeride(); ?>
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style2 ?>">
+		<div <?= $style2 ?>>
+			<div>
+				<?php displayEphemeride(); ?>
+			</div>
+		</div>
 	</div>
 </div>
 <div class="row">
-	<div id="metarMessage" class="col-12 bg-muted">... fetching data over the Internet ...</div> 
+	<div class="col-12">
+		<div <?= $style3?>>
+			<div id="metarMessage" ... fetching data over the Internet ...</div> 
+		</div>
+	</div
 </div> <!-- row -->
 
 
@@ -93,71 +146,183 @@ $style2="background-color:$color2;";
 //==============================================
 function displayProfile()
 {
-	print("<h4>Mon profile</h4>");
-	global $mysqli_link,$table_person,$table_blocked,$userId;
-	$result = mysqli_query($mysqli_link, "SELECT * 
-	FROM $table_person LEFT JOIN $table_blocked on jom_id=b_jom_id
-	WHERE jom_id = $userId")
-	or journalise($userId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
-	$pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
-	$userName = db2web("$pilot[first_name] $pilot[last_name]") ;
-	$blocked_reason = db2web($pilot['b_reason'] ?? '') ;
-	$blocked_when = $pilot['b_when'] ;
+	global $userId;
+	print('<h4 class="text-center">Mon Profil</h4>');
+	global $mysqli_link,$table_person,$table_blocked,$table_user_usergroup_map,$userId;
+	if($userId!=0) {
+		$result = mysqli_query($mysqli_link, "SELECT * 
+		FROM $table_person LEFT JOIN $table_blocked on jom_id=b_jom_id
+		WHERE jom_id = $userId")
+		or journalise($userId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
+		$pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
+		$userName = db2web("$pilot[first_name] $pilot[last_name]") ;
+		$blocked_reason = db2web($pilot['b_reason'] ?? '') ;
+		$blocked_when = substr($pilot['b_when'],0,10) ;
+		print('<p class="lead"><b>Nom : </b>'.$userName.'</p>');
+		if($blocked_reason=="") {
+			print('<p class="lead"><b>Statut : <span class="bg-light text-success">OK</span></b></p>');
+		}
+		else {
+			print('<p class="lead"><b>Status :</b><i class="bi bi-sign-stop-fill text-danger"></i><b><span style="color:red;"> Bloqué ('.$blocked_reason.' depuis '.$blocked_when.')<span></b>.</p>');
+		}
 
-	print('<p class="lead">Nom :'.$userName.'/'.$blocked_reason.'/'.$blocked_when.'</b>.</p>');
+	// Find all Odoo IDs
+		$sql = "SELECT * FROM  $table_user_usergroup_map WHERE user_id= $userId ";
+		//print("SQL=$sql<br>");
+		$result = mysqli_query($mysqli_link, $sql);
+		print('<p class="lead"><b>Rôle:</b> ');
+		$count=0;
+		while ($row = mysqli_fetch_array($result)) {
+			$groupId=$row['group_id'];
+			if($groupId!="") {
+				$count++;
+				if($count>1){print("/");}
+				print(getGroupName($groupId));
+			}
+		}
+		print("</p>");
+/*
+	// Afficher les limit medical, sep, ...
+		$member=new DTOMember();
+		$member->getById($userId);
+		var_dump($member);
+		print("<br>");
+*/
+	}
+}
+//==============================================
+// Function: getGroupName
+// Purpose: 
+//==============================================
+function getGroupName($groupId)
+{
+	$groups = array(
+		6=>"Gestionnaire Site",
+		7=>"Administrateur Web",
+		8=>"Super Utilisateur",
+		13=>"Pilote",
+		14=>"Instructeur Vol",
+		15=>"Instructeur Théorique",
+		16=>"Elève",
+		17=>"Mecano",
+		18=>"Membre",
+		19=>"Pilote Vol Découverte",
+		20=>"Gestion Vol Découverte",
+		22=>"Membre de l'OA",
+		24=>"Développeur Site",
+		25=>"Membre Effectif",
+		26=>"Elève Cours Théorique"
+	);
+	
+	if (array_key_exists($groupId,$groups))
+  	{
+  		return $groups[$groupId];
+ 	}
+	return "";
 }
 
 //==============================================
-// Function: displayProfile
+// Function: displayFolio
 // Purpose: 
 //==============================================
 function displayFolio()
 {
 	global $odoo_host, $odoo_db, $odoo_username, $odoo_password;
 	global $mysqli_link,$table_person,$table_blocked,$userId;
-	print("<h4>Mon folio</h4>");
-	$result = mysqli_query($mysqli_link, "SELECT * 
-	FROM $table_person LEFT JOIN $table_blocked on jom_id=b_jom_id
-	WHERE jom_id = $userId")
-	or journalise($userId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
-	$pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
-	//$userName = db2web("$pilot[first_name] $pilot[last_name]") ;
-	//$userLastName = db2web($pilot['last_name'] ?? '') ;
-	$odooId = $pilot['odoo_id'] ;
+	print('<h4 class="text-center">Mon Folio</h4>');
+	if($userId!=0) {
+		$result = mysqli_query($mysqli_link, "SELECT * 
+		FROM $table_person LEFT JOIN $table_blocked on jom_id=b_jom_id
+		WHERE jom_id = $userId")
+		or journalise($userId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
+		$pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
+		//$userName = db2web("$pilot[first_name] $pilot[last_name]") ;
+		//$userLastName = db2web($pilot['last_name'] ?? '') ;
+		$odooId = $pilot['odoo_id'] ;
 
-	if ($odooId != '') {
-			$balance_text="?????";
-		require_once 'odoo.class.php' ;
-		$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-		$accounts = $odooClient->SearchRead('res.partner', array(array(
-					array('id', '=', intval($odooId))
-				)), 
-				array('fields' => array('id', 'total_due'))) ;
-		$balance = -1.0 * $accounts[0]['total_due'] ;
-		if ($balance < 0) {
-			$balance_text = number_format($balance,2,",",".");
+		if ($odooId != '') {
+				$balance_text="?????";
+			require_once 'odoo.class.php' ;
+			$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
+			$accounts = $odooClient->SearchRead('res.partner', array(array(
+						array('id', '=', intval($odooId))
+					)), 
+					array('fields' => array('id', 'total_due'))) ;
+			$balance = -1.0 * $accounts[0]['total_due'] ;
+			if ($balance < 0) {
+				$balance_text = number_format($balance,2,",",".");
+			} 
+			else {
+				$balance_text = "+".number_format($balance,2,",",".");
+			}
+			print('<p class="lead">Solde Compte Pilote: <b class="text-danger bg-light">'.$balance_text.'&euro;</b></p>');
 		} 
-		else {
-			$balance_text = "+".number_format($balance,2,",",".");
+		else { // Odoo account does not exist
+			$balance = 0 ;
+			$invoice_total = 0 ;
+			$invoice_reason = '' ;
+			journalise($userId, "E", "No Odoo id associated to $userName") ;
+			print("<p class=\"text-danger\">Vous n'avez pas encore de compte dans la comptabilité.</p>\n") ;
 		}
-		print('<p class="lead">Le solde de votre compte membre est de <b style="color: red;">'.$balance_text.'&euro;</b>.</p>');
-	} 
-	else { // Odoo account does not exist
-		$balance = 0 ;
-		$invoice_total = 0 ;
-		$invoice_reason = '' ;
-		journalise($userId, "E", "No Odoo id associated to $userName") ;
-		print("<p class=\"text-danger\">Vous n'avez pas encore de compte dans la comptabilité.</p>\n") ;
 	}
+}
+//==============================================
+// Function: displayReservation
+// Purpose: 
+//==============================================
+function displayReservation()
+{
+	global $mysqli_link,$table_person,$table_blocked,$table_bookings,$table_users;
+	global $userId;
+	print('<h4 class="text-center">Mes Réservations</h4>');
+	if($userId!=0) {
+		$id=$userId;
+		$sql="SELECT * FROM $table_bookings WHERE r_pilot=$userId and r_start>=sysdate() and r_cancel_date is null";
+		//print("SQL=$sql<br>");
+		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
+	?>
+
+		<div class="row">
+		<table class="col-sm-12 table table-responsive table-striped p-2 m-2" width="90%">
+			<thead>
+				<tr><th>De</th><th>À</th><th>Avion</th><th>DC</th><th>Commentaire</th></tr>
+			</thead>
+			<tbody class="table-group-divider">
+	<?php
+				$count=0;
+				while ($row = mysqli_fetch_array($result)) {
+						$count++;
+						$date=$row['r_start'];
+						$plane=$row['r_plane'];
+						$instructor=$row['r_instructor'];
+						if($instructor!="") {$instructor= "DC";}
+						$comment=$row['r_comment'];
+						$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
+						$class = ' class="text-warning"' ;
+						$dateDe=substr($row['r_start'], 0,16) ;
+						$dateA=substr($row['r_stop'], 0,16) ;
+						print("<tr><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>\n") ;
+				}
+				if($count==0) {
+						print('<tr><td colspan="5" class="text-warning" >Aucune réservation prévue</td></tr>\n') ;
+				}
+	?>
+			</tbody>
+		</table>
+		</div><!-- row -->
+	<?php
+
+	}
+
 }
 
 //==============================================
-// Function: displayProfile
+// Function: displayMETAR
 // Purpose: 
 //==============================================
 function displayMETAR($station)
 {
-	print("<h4> Metar</h4>");
+	print('<h4 class="text-center">Metar</h4>');
 	?>
 	<div class="row">
 		<?php rapcs_display_metar($station, 'picture'); ?>
@@ -185,37 +350,40 @@ function displayMETAR($station)
 }
 
 //==============================================
-// Function: displayProfile
+// Function: displayRAPCSNotam
 // Purpose: 
 //==============================================
 function displayRAPCSNotam() 
 {
+	global $userId;
 	global $mysqli_link,$table_news;
-	print("<h4>RAPCS notam</h4>");
-	$result_news = mysqli_query($mysqli_link, "SELECT * FROM $table_news
-	WHERE n_stop >= CURRENT_DATE() and n_start <= CURRENT_DATE()
-	ORDER BY n_id DESC
-	LIMIT 0,3") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
-	
-	if (mysqli_num_rows($result_news)) {
-		print('<ul>') ;
-		while ($row_news = mysqli_fetch_array($result_news)) {
-			$subject = db2web($row_news['n_subject']) ;
-			$text = db2web(nl2br($row_news['n_text'])) ;
-			print("<li><b>$subject</b>: $text</li>\n") ;
+	print('<h4 class="text-center">Notam RAPCS</h4>');
+	if($userId!=0) {
+		$result_news = mysqli_query($mysqli_link, "SELECT * FROM $table_news
+		WHERE n_stop >= CURRENT_DATE() and n_start <= CURRENT_DATE()
+		ORDER BY n_id DESC
+		LIMIT 0,3") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
+		
+		if (mysqli_num_rows($result_news)) {
+			print('<ul>') ;
+			while ($row_news = mysqli_fetch_array($result_news)) {
+				$subject = db2web($row_news['n_subject']) ;
+				$text = db2web(nl2br($row_news['n_text'])) ;
+				print("<li><b>$subject</b>: $text</li>\n") ;
+			}
+			print('</ul>') ;
 		}
-		print('</ul>') ;
-	}
 	mysqli_free_result($result_news) ;
+	}
 }
 
 //==============================================
-// Function: displayProfile
+// Function: displayWebcam
 // Purpose: 
 //==============================================
 function displayWebcam($webcam)
 {
-	print("<h4>Webcam $webcam</h4>");
+	print('<h4 class="text-center">Webcam '.$webcam.'</h4>');
     if($webcam=="EBSP") {
 ?>
         <div style="text-align: center;">
@@ -241,21 +409,66 @@ function displayWebcam($webcam)
 }
 
 //==============================================
-// Function: displayProfile
+// Function: displayDepart
 // Purpose: 
 //==============================================
 function displayDepart()
 {
-	print("<h4>Mon Depart</h4>");
+	global $userId;
+	global $mysqli_link,$table_person,$table_blocked,$table_bookings,$table_users;
+	print('<h4 class="text-center">Réservation du jour</h4>');
+	if($userId!=0) {
+
+	if($userId!=0) {
+		$id=$userId;
+		$sql="SELECT * FROM $table_bookings WHERE r_start>sysdate() and r_start<'2026-10-12' and r_cancel_date is null";
+		//print("SQL=$sql<br>");
+		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
+	?>
+
+		<div class="row">
+		<table class="col-sm-12 table table-responsive table-striped p-2 m-2" width="90%">
+			<thead>
+				<tr><th>Nom</th><th>De</th><th>À</th><th>Avion</th><th>DC</th><th>Commentaire</th></tr>
+			</thead>
+			<tbody class="table-group-divider">
+	<?php
+				$count=0;
+				while ($row = mysqli_fetch_array($result)) {
+						$count++;
+						$date=$row['r_start'];
+						$plane=$row['r_plane'];
+						$instructor=$row['r_instructor'];
+						if($instructor!="") {$instructor= "DC";}
+						$nom="To Do";
+						$comment=$row['r_comment'];
+						$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
+						$class = ' class="text-warning"' ;
+						$dateDe=substr($row['r_start'], 0,16) ;
+						$dateA=substr($row['r_stop'], 0,16) ;
+						print("<tr><td>$nom</td><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>\n") ;
+				}
+				if($count==0) {
+						print('<tr><td colspan="6" class="text-warning" >Aucune réservation prévue</td></tr>\n') ;
+				}
+	?>
+			</tbody>
+		</table>
+		</div><!-- row -->
+	<?php
+
+	}
+
+	}
 }
 
 //==============================================
-// Function: displayProfile
+// Function: displayMeteo
 // Purpose: 
 //==============================================
 function displayMeteo()
 {
-	print("<h4>Meteo</h4>");
+	print('<h4 class="text-center">Météo Windy</h4>');
 ?>
 	<iframe 
 		src="https://embed.windy.com/embed2.html?lat= 50.4833&lon=5.91&zoom=9&level=surface&overlay=radar&menu=false&theme=dark" 
@@ -266,12 +479,13 @@ function displayMeteo()
 	}
 
 //==============================================
-// Function: displayProfile
+// Function: function displayEphemeride()
+
 // Purpose: 
 //==============================================
 function displayEphemeride()
 {
-	print("<h4>Mon Ephemeride</h4>");
+	print('<h4 class="text-center">Ephéméride</h4>');
 	$fontSize = '1em' ;
 	$default_airport="EBSP";
 ?> 
