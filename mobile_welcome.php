@@ -24,13 +24,15 @@ require_once 'mobile_header5.php' ;
 require_once "mobile_metar_tools.php";
 require_once 'dto.class.php' ;
 
-$station = (isset($_REQUEST['station']) and $_REQUEST['station'] != '') ? trim(strtoupper($_REQUEST['station'])) : $default_metar_station ;
+$station = strtoupper(trim($_REQUEST['station'] ?? ''));
+if (!preg_match('/^[A-Z0-9]{4}$/', $station)) $station = $default_metar_station; // Check for XSS attack
 
 $color1="#FFF4F4";
 $color2="#EAF7E7";
 $style1='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-light" style="background-color:LightSlateGrey;"';
 $style2='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-light" style="background-color:LightSlateGrey;"';
 $style3='class="border border-3 border-secondary rounded-3 bg-muted shadow p-2 m-1 text-light"';
+
 ?> 
 <div class="container-fluid">
 <p><h2 class="border border-3 border-secondary rounded-3 shadow mx-auto text-center text-light" style="background-color:LightSlateGrey;">Bienvenue dans l'espace Membre du RAPCS</h2></p>
@@ -43,19 +45,40 @@ if($userId==0) {
 	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
 		<div <?= $style1 ?>>
 			<div>
-			<?php displayProfile(); ?>
-			<?php displayFolio(); ?>
+				<?php displayProfile(); ?>
+				<?php displayButtonLink("Profile", "mobile_profile.php");?>
 			</div>
 		</div>
 	</div>
 	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
 		<div <?= $style2 ?>>
 			<div>
-				<?php displayReservation(); ?>
+				<?php displayFolio(); ?>
+				<?php displayButtonLink("Folio", "mobile_folio.php");?>
 			</div>
 		</div>
 	</div>
 </div>
+
+<div class="row">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+		<div <?= $style1 ?>>
+			<div>
+				<?php displayReservation(); ?>
+				<?php displayButtonLink("Reservation", "mobile_reservation.php");?>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+		<div <?= $style2 ?>>
+			<div>
+				<?php displayDepart(); ?>
+				<?php displayButtonLink("Reservation", "mobile_resa_by_plane.php");?>
+			</div>
+		</div>
+	</div>
+</div>
+
 <div class="row">
 	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style2 ?>">
 		<div <?= $style2 ?>>
@@ -110,7 +133,7 @@ if($userId==0) {
 	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" style="<?= $style1 ?>">
 		<div <?= $style1 ?>>
 			<div>
-				<?php displayDepart(); ?>
+				<?php displayRAPCSNotam(); ?>
 			</div>
 		</div>
 	</div>
@@ -134,12 +157,22 @@ if($userId==0) {
 <script>
 	displayMobileMETAR('<?=$station?>', 'picture') ;
 </script>
-<h5>(<?= SITE_HOST ?>)</h5>
+<h5>(<?= SITE_HOST ?><?=  SITE_ICON ?>)</h5>
 </div> <!-- container-->
 </body>
 </html>
 
 <?php
+//==============================================
+// Function: displayProfile
+// Purpose: 
+//==============================================
+function displayButtonLink($buttonName, $URL)
+{
+	$styleButton='class="btn btn-info text-light"';
+	print('<div class="d-flex justify-content-center"><a href="'.$URL.'" '.$styleButton.' role="button">'.$buttonName.'</a></div>');
+}
+
 //==============================================
 // Function: displayProfile
 // Purpose: 
@@ -157,13 +190,13 @@ function displayProfile()
 		$pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
 		$userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 		$blocked_reason = db2web($pilot['b_reason'] ?? '') ;
-		$blocked_when = substr($pilot['b_when'],0,10) ;
+		$blocked_when = substr($pilot['b_when'] ?? '',0,10) ;
 		print('<p class="lead"><b>Nom : </b>'.$userName.'</p>');
 		if($blocked_reason=="") {
 			print('<p class="lead"><b>Statut : <span class="bg-light text-success">OK</span></b></p>');
 		}
 		else {
-			print('<p class="lead"><b>Status :</b><i class="bi bi-sign-stop-fill text-danger"></i><b><span style="color:red;"> Bloqué ('.$blocked_reason.' depuis '.$blocked_when.')<span></b>.</p>');
+			print('<p class="lead"><b>Status :</b><i class="bi bi-sign-stop-fill text-danger"></i><b><span style="color:red;"> Bloqué ('.htmlspecialchars($blocked_reason).' depuis '.$blocked_when.')</span></b>.</p>');
 		}
 
 	// Find all Odoo IDs
@@ -298,7 +331,7 @@ function displayReservation()
 						if($instructor!="") {$instructor= "DC";}
 						$comment=$row['r_comment'];
 						$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
-						$class = ' class="text-warning"' ;
+						//$class = ' class="text-warning"' ;
 						$dateDe=substr($row['r_start'], 0,16) ;
 						$dateA=substr($row['r_stop'], 0,16) ;
 						print("<tr><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>\n") ;
@@ -387,8 +420,14 @@ function displayWebcam($webcam)
     if($webcam=="EBSP") {
 ?>
         <div style="text-align: center;">
-            <iframe style="aspect-ratio: 6 / 4; object-fit: cover;width: 100%;" src="https://g0.ipcamlive.com/player/player.php?alias=camebspairside&autoplay=1&mute=1&disableautofullscreen=1&disablezoombutton=p;disableframecapture=1&disabletimelapseplayer=1&disablestorageplayer=1&disabledownloadbutton=1&disableplaybackspeedbutton=1&disablenavigation=1&disableuserpause=1" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
-        </div>
+ 			<iframe 
+				style="aspect-ratio: 6 / 4; object-fit: cover;width: 100%;" 
+				src="https://g0.ipcamlive.com/player/player.php?alias=camebspairside&autoplay=1&mute=1&disableautofullscreen=1&disablezoombutton=p;disableframecapture=1&disabletimelapseplayer=1&disablestorageplayer=1&disabledownloadbutton=1&disableplaybackspeedbutton=1&disablenavigation=1&disableuserpause=1"  				frameborder="0" 
+				loading="lazy"
+				title="Webcam aire à signaux"
+ 				allowfullscreen="allowfullscreen">
+ 			</iframe> 
+		</div>
 <?php
     }
     else if($webcam=="hangar") {
@@ -402,7 +441,7 @@ function displayWebcam($webcam)
 		// Apron
 ?>
         <div style="text-align: center;">
-            <img style="aspect-ratio: 6/ 4; object-fit: cover;width: 100%;" src="https://nav.vyncke.org/rapcs/snapshot-apron.jpg?random=1748878308770"/>
+            <img style="aspect-ratio: 6/ 4; object-fit: cover;width: 100%;" src="https://nav.vyncke.org/rapcs/snapshot-apron.jpg"/>
         </div>
 <?php
     }
@@ -436,7 +475,6 @@ function displayDepart()
 				$count=0;
 				while ($row = mysqli_fetch_array($result)) {
 						$count++;
-						$date=$row['r_start'];
 						$plane=$row['r_plane'];
 						$instructor=$row['r_instructor'];
 						if($instructor!="") {$instructor= "DC";}
@@ -446,7 +484,7 @@ function displayDepart()
 						$class = ' class="text-warning"' ;
 						$dateDe=substr($row['r_start'], 0,16) ;
 						$dateA=substr($row['r_stop'], 0,16) ;
-						print("<tr><td>$nom</td><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>\n") ;
+						print("<tr><td>$nom</td><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($comment))) . "</td></tr>\n") ;
 				}
 				if($count==0) {
 						print('<tr><td colspan="6" class="text-warning" >Aucune réservation prévue</td></tr>\n') ;
@@ -471,9 +509,10 @@ function displayMeteo()
 	print('<h4 class="text-center">Météo Windy</h4>');
 ?>
 	<iframe 
-		src="https://embed.windy.com/embed2.html?lat= 50.4833&lon=5.91&zoom=9&level=surface&overlay=radar&menu=false&theme=dark" 
+		src="https://embed.windy.com/embed2.html?lat=$apt_latitude&lon=$apt_longitude&zoom=9&level=surface&overlay=radar&menu=false&theme=dark" 
 		width="100%" 
 		frameborder="0"
+		loading="lazy" title="Windy" alt="Windy"
 		style="aspect-ratio: 6/ 4; object-fit: cover;width: 100%;">
 	</iframe><?php
 	}
@@ -485,13 +524,12 @@ function displayMeteo()
 //==============================================
 function displayEphemeride()
 {
-	print('<h4 class="text-center">Ephéméride</h4>');
 	$fontSize = '1em' ;
 	$default_airport="EBSP";
 ?> 
 	<main class="container-fluid">
 		<header class="row">
-			<h2 class="h2">Ephémérides du <time id="displayDate"></time></h2>
+			<h4 class="text-center">Ephémérides du <time id="displayDate"></time></h4>
 		</header>
 
 		<section class="row" style="font-size: <?=$fontSize?>">
