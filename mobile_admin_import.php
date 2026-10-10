@@ -115,6 +115,7 @@ function validateSqlBackup(string $filename, string &$error_message): bool {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' and ($_POST['action'] ?? '') == 'import') {
+	journalise($userId, "I", "Début de la restauration de la DB") ;
 	$token = $_POST['csrf_token'] ?? '' ;
 	if (!is_string($token) or !hash_equals($_SESSION['admin_import_token'], $token)) {
 		$message = 'La vérification de sécurité a échoué. Rechargez la page et réessayez.' ;
@@ -166,12 +167,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' and ($_POST['action'] ?? '') == 'import
 			}
 			if ($import_error != '') {
 				$message = 'Import interrompu après une erreur SQL : ' . $import_error ;
+				journalise($userId, "E", $message) ;
 			} else {
 				$message_type = 'success' ;
 				$message = 'Import terminé. Tables traitées : ' . implode(', ', array_keys($imported_tables)) ;
+				journalise($userId, "I", $message) ;	
 			}
 		}
 	}
+
 }
 
 require_once 'mobile_header5.php' ;

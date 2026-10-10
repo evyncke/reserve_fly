@@ -23,6 +23,7 @@ if (!($userIsAdmin or $userIsBoardMember))
 	journalise($userId, "F", "This admin page is reserved to administrators") ;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' and ($_POST['action'] ?? '') == 'export') {
+	journalise($userId, "I", "Début de sauvegarde de la DB") ;
 	$tables_result = mysqli_query($mysqli_link, 'SHOW FULL TABLES') ;
 	if (!$tables_result) {
 		journalise($userId, "F", "Cannot list database tables: " . htmlspecialchars(mysqli_error($mysqli_link))) ;
@@ -57,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' and ($_POST['action'] ?? '') == 'export
 	if (!$sql_file) {
 		@unlink($sql_path) ;
 		@unlink($zip_path) ;
-		journalise($userId, "F", 'Cannot create temporary SQL backup file.') ;
+		journalise($userId, "F", 'Cannot create temporary SQL backup file: ' . $sql_path) ;
 	}
 	fwrite($sql_file, "-- RAPCS SQL backup v1\n") ;
 	fwrite($sql_file, "SET FOREIGN_KEY_CHECKS=0;\n") ;
@@ -108,6 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' and ($_POST['action'] ?? '') == 'export
 	readfile($zip_path) ;
 	@unlink($sql_path) ;
 	@unlink($zip_path) ;
+	journalise($userId, "I", "Sauvegarde effectuée dans rapcs-database-$timestamp.zip") ;
 	exit ;
 }
 
