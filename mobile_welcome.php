@@ -315,11 +315,11 @@ function displayMETAR($station)
 {
 	print('<h4 class="text-center">Metar</h4>');
 	?>
-	<div class="row">
+	<div class="row bg-light text-dark m-2 p-2">
 		<?php rapcs_display_metar($station, 'picture'); ?>
 	</div> <!-- row -->
 
-	<div class="row d-sm-none d-md-block">
+	<div class="row text-dark d-sm-none d-md-block">
 		<footer class="blockquote-footer">Source <cite title="Source du METAR" id="sourceId"></cite></footer>
 	</div> <!-- row -->
 	<div class="row">
