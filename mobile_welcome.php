@@ -35,7 +35,7 @@ $style3='class="border border-3 border-secondary rounded-3 bg-muted shadow p-2 m
 
 ?> 
 <div class="container-fluid">
-<p><h2 class="border border-3 border-secondary rounded-3 shadow mx-auto text-center text-light" style="background-color:LightSlateGrey;">Bienvenue dans l'espace Membre du RAPCS</h2></p>
+<p><h2 class="border border-3 border-secondary rounded-3 shadow mx-auto text-center text-light" style="background-color:Teal;">Bienvenue dans l'espace Membre du RAPCS</h2></p>
 <?php
 if($userId==0) {
 	print("<h1 class=\"text-center\" style=\"color: red;\">Vous devez d'abord vous connecter pour accéder à l'espace Membre du RAPCS</h1>");
@@ -176,7 +176,7 @@ else {
 //==============================================
 function displayButtonLink($buttonName, $URL)
 {
-	$styleButton='class="btn btn-info text-light"';
+	$styleButton='class="btn btn-info text-light border border-1 border-secondary"';
 	print('<div class="d-flex justify-content-center"><a href="'.$URL.'" '.$styleButton.' role="button">'.$buttonName.'</a></div>');
 }
 
