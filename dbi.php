@@ -87,11 +87,6 @@ $bic = "CREGBEBB" ;
 
 $bank_account_name = "Royal Aero Para Club Spa" ;
 
-// Payconiq information
-$pcnq_api_key = '37a89b34-3931-400a-8858-c8c8e2da4e21' ;
-$pcnq_merchant_id = '64e3577b9ba65103267cdee6' ;
-// $pcnq_endpoint = see auth.php ;
-
 // Some costs
 $cost_fi_minute = 0.83 ;
 $revenue_fi_minute = 0.75 ;
@@ -158,58 +153,32 @@ $joomla_flight_manager_group = 20 ;
 $joomla_no_flight = 23 ;
 $joomla_effectif_group = 25 ;
 
-// Check whether Joomla authentication is to be used...
-// $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-// if ($path == '/resa/add_to_tracks.php' or $path == '/resa/track.php') {
-// 	$use_joomla_authentication = true ;
-// } else 
-// if ($_SERVER['SERVER_NAME'] == 'www.spa-aviation.ovh' or $_SERVER['SERVER_NAME'] == 'new.spa-aviation.ovh' or $client_ip == '213.211.158.241' or str_starts_with($client_ip, '2a02:578:85b7:1700')) {
-// 	$use_joomla_authentication = false ;
-// } else {
-// 	$use_joomla_authentication = true ;
-// }
-
 $use_joomla_authentication = false ; // Test by eric 2026/10/02 0740 LT
 
-if ($use_joomla_authentication) {
-	// Get information from Joomla
-	define( '_JEXEC', 1 );
-	define( 'JPATH_BASE', realpath(dirname(__FILE__) . '/..' ));
-	require_once ( JPATH_BASE . '/includes/defines.php' );
-	require_once ( JPATH_BASE . '/includes/framework.php' );
-	$mainframe = JFactory::getApplication('site');
-	$mainframe->initialise();
-	$joomla_user = JFactory::getUser() ;
-	if ($joomla_user->guest and isset($_SESSION['jom_id'])) { // User is not logged in via Joomla but via the mobile app TODO ensure that session is started !
-		$userId = intval($_SESSION['jom_id']) ;
-		$originUserId = $userId ;
-		$joomla_user = JFactory::getUser($userId) ;
-	} else
-		$userId = 0 ;
-	$joomla_session = JFactory::getSession() ;
-	$joomla_session->start() ; // Keep alive?
+require_once 'no_joomla.php' ;
+$joomla_user = getJoomlaSessionUser() ;
+if ($joomla_user === false) {
+	$userId = 0 ;
+	$joomla_user = (object) [
+		'id' => 0,
+		'username' => 'guest',
+		'name' => 'invité',
+		'groups' => [],
+		'guest' => true,
+	] ;
 } else {
-	require_once 'no_joomla.php' ;
-	$joomla_user = getJoomlaSessionUser() ;
-	if ($joomla_user === false) {
-		$userId = 0 ;
-		$joomla_user = (object) [
-			'id' => 0,
-			'username' => 'guest',
-			'name' => 'invité',
-			'groups' => [],
-			'guest' => true,
-		] ;
-	} else {
-		$userId = $joomla_user->id ?? 0;
-		$joomla_user->groups = (array) $joomla_user->groups ;
-	}
-	$originUserId = $userId;
+	$userId = $joomla_user->id ?? 0;
+	$joomla_user->groups = (array) $joomla_user->groups ;
 }
+$originUserId = $userId;
 
 CheckJoomlaUser($joomla_user) ;
-if ($userId == 62 or $userId == 66)
+if ($userId == 62 or $userId == 66) // IT Guys
 	ini_set('display_errors', 1) ; // extensive error reporting for debugging
+else if (SITE_MAINTENANCE) {
+	header("Location: " . SITE_URL . "maintenance.html", TRUE, 307) ;
+	exit ;
+}
 
 function CheckJoomlaUser(object $joomla_user) {
 	global $userIsPilot, $userIsAdmin, $userIsBoardMember, $userIsInstructor, $userIsMechanic,$userIsStudent, $userIsTheoryStudent, $userIsFlyingStudent,
