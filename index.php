@@ -21,17 +21,17 @@ require_once "auth.php" ;
 switch ($_SERVER['SERVER_NAME']) {
 	case 'm.ebsp.be':
 	case 'm.spa-aviation.be':
-		header('Location: ' . SITE_URL . 'mobile_welcome.php?news');
+		header('Location: ' . SITE_URL . 'mobile_reservation.php');
 		break;
 	case 'my.spa-aviation.be':
-		header('Location: https://www.spa-aviation.be/index.php/fr/homepage');
+		header('Location: https://www.spa-aviation.be/');
 		break;
 	case 'resa.spa-aviation.be':
 	case 'resa.ebsp.be':
-		header('Location: ' . SITE_URL . 'mobile_welcome.php');
+		header('Location: ' . SITE_URL . 'mobile_reservation.php');
 		break;
 	default:
-		header('Location: ' . SITE_URL . 'reservation.php');
+		header('Location: ' . SITE_URL . 'mobile_reservation.php');
 }
 exit ;
 ?>

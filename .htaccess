@@ -38,6 +38,8 @@ Options -MultiViews
 RewriteEngine on
 RewriteRule ^metar/(.*)$ /resa/metar.php?station=$1 [L]
 RewriteRule ^get_ephemerides/(.*)/(.*)/(.*)$ /resa/get_ephemerides.php?year=$1&month=$2&day=$3 [L]
+RewriteRule ^reservation.php$ /resa/mobile_reservation.php [L]
+RewriteRule ^$ /resa/mobile_reservation.php [L]
 
 # Uncomment following line if your webserver's URL
 # is not directly related to physical file paths.
@@ -58,4 +60,4 @@ RewriteCond %{REQUEST_FILENAME} !-f
 # and the requested path and file doesn't directly match a physical folder
 RewriteCond %{REQUEST_FILENAME} !-d
 # internally rewrite the request to the index.php script
-RewriteRule .* reservation.php [L]
+RewriteRule .* mobile_reservation.php [L]
