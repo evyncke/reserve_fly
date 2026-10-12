@@ -19,9 +19,12 @@ ini_set('display_errors', 1) ; // extensive error reporting for debugging
 
 require_once "dbi.php" ;
 
-if (isset($_REQUEST['cb']) and $_REQUEST['cb'] != '')
-    $callback = htmlspecialchars(urldecode($_REQUEST['cb']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ;
-else    
+if (isset($_REQUEST['cb']) and $_REQUEST['cb'] != '') {
+    $callback = ltrim(urldecode($_REQUEST['cb']), '/') ; // The callback is later used as "https://host/$callback"
+    if (SITE_PATH != '' and !str_starts_with($callback, SITE_PATH))
+        $callback = SITE_PATH . '/' . $callback ;
+    $callback = htmlspecialchars($callback, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ;
+} else
     $callback = SITE_PATH . '/mobile_welcome.php' ; // By default
 
 // if ($userId > 0) {

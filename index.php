@@ -24,7 +24,7 @@ switch ($_SERVER['SERVER_NAME']) {
 		header('Location: ' . SITE_URL . 'mobile_reservation.php');
 		break;
 	case 'my.spa-aviation.be':
-		header('Location: https://www.spa-aviation.be/');
+		header('Location: https://' . SITE_HOST);
 		break;
 	case 'resa.spa-aviation.be':
 	case 'resa.ebsp.be':
