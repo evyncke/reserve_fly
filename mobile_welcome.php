@@ -421,13 +421,14 @@ function displayMesReservations()
 	    $sql="SELECT * FROM $table_bookings b
         JOIN $table_person pi ON pi.jom_id = r_pilot
         LEFT JOIN $table_person i ON i.jom_id = r_instructor
-		WHERE r_pilot=$userId and r_start>=sysdate() and r_cancel_date is null";	
+		WHERE r_pilot=$userId and r_start>=sysdate() and r_cancel_date is null
+		ORDER BY r_start";	
 		//print("SQL=$sql<br>");
 		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 	?>
 
-		<div class="row">
-		<table class="col-sm-12 table table-responsive table-striped p-2 m-2" width="90%">
+		<div class="row d-flex justify-content-center">
+		<table class="col-sm-12 table table-responsive table-striped p-2 m-2" style="width:95%;">
 			<thead>
 				<tr><th>De</th><th>À</th><th>Avion</th><th>DC</th><th>Commentaire</th></tr>
 			</thead>
@@ -485,14 +486,15 @@ function displayTodayReservation()
 		//$sql="SELECT * FROM $table_bookings WHERE r_start >sysdate() - INTERVAL 1 DAY and r_start < sysdate() + INTERVAL 1 DAY and r_cancel_date is null";
 		$sql="SELECT * FROM $table_bookings b
         JOIN $table_person pi ON pi.jom_id = r_pilot
-		WHERE r_start >sysdate() - INTERVAL 1 DAY and r_start < sysdate() + INTERVAL 1 DAY and r_cancel_date is null";
+		WHERE r_start >sysdate() - INTERVAL 1 DAY and r_start < sysdate() + INTERVAL 1 DAY and r_cancel_date is null
+		ORDER BY r_start";
 
 		//print("SQL=$sql<br>");
 		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 	?>
 
-		<div class="row">
-		<table class="col-sm-12 table table-responsive table-striped p-2 m-2" width="90%">
+		<div class="row d-flex justify-content-center">
+		<table class="col-sm-12 table table-responsive table-striped p-2 m-2" style="width:95%;">
 			<thead>
 				<tr><th>Nom</th><th>De</th><th>À</th><th>Avion</th><th>DC</th><th width="40%">Commentaire</th></tr>
 			</thead>
