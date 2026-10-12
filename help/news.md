@@ -3,6 +3,14 @@
 Vous trouverez ici les diverses nouveautés à propos du site réservation du RAPCS. Les suggestions sont les bienvenues auprès de
 [Éric Vyncke](mobile_profile.php?displayed_id=62) et [Patrick Reginster](mobile_profile.php?displayed_id=66).
 
+## Octobre 2026
+
+- migration du site public vers Wordpress au lieu de Joomla et changement de serveur
+
+## Septembre 2026
+
+- ajout d'un agent AI *MCP* que vous pouvez ajouter dans vos outils AI comme connecteur ou agent. L'authentification se fait pour l'instant en clair au lieu de OAuth, donc, l'URL à entrer dans vos outils AI est https://www.spa-aviation.be/resa/mcp-agent/api.php suivi de *?username=_votreidentifiant_&password=_votremotdepasse_* ou si votre outil AI le supporte entrer simplement votre identifiant et mot de passe. L'agent AI connaît les réservations, les membres, la météo, ...
+
 ## Avril 2026
 
 - en absence d'information sur la station automatique METAR quant aux nuages, le fameux `// VV///`, le plafond 'théorique' est calculé via l'humidité relative (via l'écart entre la température et le point de rosée), si ce plafond théorique est > 2000 ft, alors les conditions météo sont supposée être 'TVMC' (theorical VMC) et l'affichage du METAR devient vert foncé.
