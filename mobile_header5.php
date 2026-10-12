@@ -309,6 +309,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><a class="dropdown-item" href="mobile_admin_export.php">Export de la base de données</a></li>
       <li><a class="dropdown-item" href="mobile_admin_import.php">Import de la base de données</a></li>
       <li><a class="dropdown-item" href="mobile_admin_phpinfo.php">PHP info</a></li>
+      <li><a class="dropdown-item" href="http://kiosk.spa-aviation.be:8001/screenshot.png">Kiosque screenshot</a></li>
       <!-- <li><a class="dropdown-item" href="mobile_admin_sql.php">Exécution SQL</a></li> -->
 
 <?php
@@ -551,7 +552,7 @@ if ($userId <= 0) {
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-person"></i> <span id="userNameSpan"><?="$userFullName ($userName)"?></span><span class="caret"></span></a>
           <ul class="dropdown-menu">
               <li id="logoutElem">
-              <a class="dropdown-item" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
+              <a class="dropdown-item text-danger" href="mobile_logout.php"><i class="bi bi-box-arrow-right"></i> Se déconnecter</a>
               <a class="dropdown-item" href="mobile_web_o_auth.php"><i class="bi bi-shield"></i> Mes connexions</a>
               <a class="dropdown-item" href="?theme=dark"><i class="bi bi-moon-stars-fill"></i> Mode nuit</a>
               <a class="dropdown-item" href="?theme=light"><i class="bi bi-sun-fill"></i> Mode jour</a>
