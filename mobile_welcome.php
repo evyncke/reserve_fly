@@ -63,25 +63,6 @@ else {
 	</div>
 
 	<div class="row">
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
-			<div <?= $style1 ?>>
-				<div>
-					<?php displayMesReservations(); ?>
-					<?php displayButtonLink("Reservation", "mobile_reservation.php");?>
-				</div>
-			</div>
-		</div>
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
-			<div <?= $style2 ?>>
-				<div>
-					<?php displayTodayReservation(); ?>
-					<?php displayButtonLink("Reservation", "mobile_resa_by_plane.php");?>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<div class="row">
 		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6" >
 			<div <?= $style2 ?>>
 				<div>
@@ -150,6 +131,26 @@ else {
 			</div>
 		</div>
 	</div>
+
+<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div <?= $style1 ?>>
+				<div>
+					<?php displayMesReservations(); ?>
+					<?php displayButtonLink("Reservation", "mobile_reservation.php");?>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div <?= $style2 ?>>
+				<div>
+					<?php displayTodayReservation(); ?>
+					<?php displayButtonLink("Reservation", "mobile_resa_by_plane.php");?>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="row">
 		<div class="col-12">
 			<div <?= $style3?>>
