@@ -276,14 +276,14 @@ if ($christmas_theme and strpos($_SERVER['SCRIPT_NAME'], 'mobile_webcam') === fa
         <i class="navbar-toggler-icon"></i>
       </button>
       <!-- below in the <a the navbar-collapse widen the space by adding right margin !!! -->
-      <a class="navbar-brand multi-collapse hidden-md collapse navbar-collapse" href="mobile_welcome.php?news" style="max-width: 40px;">
+      <a class="navbar-brand multi-collapse hidden-md collapse navbar-collapse" href="https://www.spa-aviation.be" style="max-width: 40px;">
         <img src="/logo_rapcs_256x256_white.png" width="24px" height="24px">
         <?=  SITE_ICON ?>
       </a>
       <ul class="nav navbar-nav multi-collapse collapse navbar-collapse"><!-- nav-bar left with most of the dropdown -->
         <li class="navbar-item me-auto me-md-0">
           <a class="nav-link text-white" href="mobile_welcome.php">Home</a>
-        </li>
+        </li> <!-- dropdown Home-->
 <?php
 if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 ?>
@@ -299,7 +299,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
       <li><a class="dropdown-item" href="mobile_members_list.php">Listes spécifiques des membres</a></li>
       <li><a class="dropdown-item" href="mobile_tilea.php">Taxe TILEA</a></li>
       <li><a class="dropdown-item" href="flight_home.php">Vols découvertes <i class="bi bi-box-arrow-up-right"></i></a></li>
-      <li><a class="dropdown-item" href="http://www.spa-aviation.ovh" target="_blank>Essai nouveau site <i class="bi bi-box-arrow-up-right"></i></a></li>
+      <li><a class="dropdown-item" href="http://old.spa-aviation.be" target="_blank>Ancien site <i class="bi bi-box-arrow-up-right"></i></a></li>
 <?php
   if ($userId == 62 or $userId == 66 or $userId == 46) { // IT Speciaslits
 ?>
@@ -367,6 +367,21 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
   </li> <!-- dropdown Ecole-->
 <?php
 }
+
+if ($userIsFlightManager) {
+?>
+  <li class="nav-item dropdown me-auto me-md-0"> <!-- dropdown vol IF/INI -->
+    <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Vols IF/INIT<span class="caret"></span></a>
+    <ul class="dropdown-menu">
+    <li><h6 class="dropdown-header">Réservé aux pilotes vols IF/INIT</h6></li>
+    <li><a class="dropdown-item" href="flight_home.php">Management</a></li>
+    <!--Fichier onedrive dans Vols_INI_IF_SHARED Panning_Vols_INIT.xlsx-->
+    <li><a class="dropdown-item" href="https://1drv.ms/x/c/73f33d534cbe15a0/IQCgFb5MUz3zIIBzmVgAAAAAAc9yRjPJoW-oJJTozJGxBTI?e=bqbtMk">Planning vols INIT</a></li> 
+   </ul>
+  </li> <!-- dropdown vols IF/INIT-->
+<?php  
+}
+
 if ($userIsFlightManager && $userId == 62) {
 ?>
   <li class="nav-item dropdown me-auto me-md-0">
@@ -387,7 +402,8 @@ if ($userIsFlightManager && $userId == 62) {
   </li> <!-- dropdown vols IF/INIT-->
 <?php  
 }
-?>         <li class="nav-item dropdown me-auto me-md-0">
+?> 
+        <li class="nav-item dropdown me-auto me-md-0">
           <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">Réservations<span class="caret"></span></a>
           <ul class="dropdown-menu">
 <?php
