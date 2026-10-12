@@ -78,27 +78,24 @@ function tryLogin(string $username, string $password) : bool {
     if (!$username || !$password) return false;
     try {
         $joomla_user = authenticateJoomlaUser($username, $password) ;
+        if (!$joomla_user) {
+            journalise(0, "E", "In MCP agent, tryLogin($username), cannot authenticate") ;
+            return false ;
+        }
         $userId = $joomla_user->id ?? 0;
+        if ($userId == 62 or $userId == 66) // IT Guys
+        	ini_set('display_errors', 1) ; // extensive error reporting for debugging
         $joomla_user->groups = (array) $joomla_user->groups ;
         CheckJoomlaUser($joomla_user) ;
+        journalise($userId, "D", "in MCP agent, tryLogin($username), got userId=$userId") ;
         return true ;
-        // $app = JFactory::getApplication();
-        // $credentials = ['username' => $username, 'password' => $password];
-        // $options = ['silent' => true, 'remember' => false];
-        // $result = $app->login($credentials, $options);
-        // if ($result) {
-        //     global $joomla_user, $userId;
-        //     $joomla_user = JFactory::getUser();
-        //     CheckJoomlaUser($joomla_user);
-        //     return true;
-        // }
     } catch (Exception $e) {
         // ignore and return false
     }
     return false;
 }
 
-function respondJson(string $payload, $statusCode = 200) : string {
+function respondJson(array $payload, $statusCode = 200) : string {
     global $userId;
 
     http_response_code($statusCode);
@@ -115,7 +112,7 @@ function respondJson(string $payload, $statusCode = 200) : string {
     exit;
 }
 
-function qFetchAll(string $sql) {
+function qFetchAll(string $sql) : array{
     global $mysqli_link, $userId;
     //    journalise($userId, 'D', "qFetchAll: executing SQL: $sql");
     $res = mysqli_query($mysqli_link, $sql);
@@ -129,45 +126,110 @@ function qFetchAll(string $sql) {
     return $rows;
 }
 
-function fetchResourceData($resource, $id = 0, $limit = 200) {
+// Normalise the optional filters accepted by fetchResourceData().
+// $source is a request or the arguments of an MCP tool call; $idKey is the name of the key holding the id
+// Returned keys (only when provided and valid):
+//   id     => int, primary key of the resource (for 'invoices': the Odoo partner id)
+//   date   => 'YYYY-MM-DD'
+//   member => string, part of the first and/or last name of a member
+//   plane  => string, plane identifier such as 'OO-FMX'
+//   error  => string, only when a filter value is invalid
+function extractFilters(array $source, string $idKey = 'id') : array {
+    $filters = [];
+
+    $id = intval($source[$idKey] ?? 0);
+    if ($id > 0) $filters['id'] = $id;
+
+    $date = trim((string)($source['date'] ?? ''));
+    if ($date !== '') {
+        $d = DateTime::createFromFormat('Y-m-d', $date);
+        if ($d !== false and $d->format('Y-m-d') === $date)
+            $filters['date'] = $date;
+        else
+            $filters['error'] = "invalid date '$date', expecting YYYY-MM-DD";
+    }
+
+    $member = trim((string)($source['member'] ?? ''));
+    if ($member !== '') $filters['member'] = $member;
+
+    $plane = strtoupper(trim((string)($source['plane'] ?? '')));
+    if ($plane !== '') {
+        if (preg_match('/^[A-Z0-9-]{1,10}$/', $plane))
+            $filters['plane'] = $plane;
+        else
+            $filters['error'] = "invalid plane identifier '$plane'";
+    }
+
+    return $filters;
+}
+
+// SQL condition matching a member name (first and/or last name, in any order) of the person table aliased $alias
+function memberCondition(string $alias, string $member) : string {
+    global $mysqli_link;
+
+    $like = "'%" . mysqli_real_escape_string($mysqli_link, addcslashes(web2db($member), '%_\\')) . "%'";
+    return "(CONCAT($alias.first_name, ' ', $alias.last_name) LIKE $like OR CONCAT($alias.last_name, ' ', $alias.first_name) LIKE $like)";
+}
+
+function whereClause(array $conditions) : string {
+    return $conditions ? ' WHERE ' . implode(' AND ', $conditions) : '';
+}
+
+// $filters: see extractFilters() for the optional keys id, date, member and plane. Each resource uses those that make sense for it:
+//   bookings: id, date (bookings overlapping that day), member (pilot or instructor), plane
+//   users: id, member
+//   invoices: id (mandatory, Odoo partner id)
+//   students: id, member
+//   logbooks: id, date (day of the start of the flight), member (pilot or instructor), plane
+//   planes: plane (or id)
+//   incidents: id
+function fetchResourceData(string $resource, array $filters = [], int $limit = 200) : array {
     global $table_bookings, $table_person, $table_bk_invoices, $table_flights, $table_dto_student, $table_logbook, $table_planes, $table_incident, $table_incident_history, $table_user_usergroup_map;
     global $userId, $userIsInstructor, $userIsBoardMember, $odoo_host, $odoo_db, $odoo_username, $odoo_password, $mysqli_link ;
 
+    if (isset($filters['error']))
+        return ['error' => 'invalid_filter', 'message' => $filters['error']];
+
+    // Values are validated by extractFilters() but are escaped again as this function can be called from elsewhere
+    $id = intval($filters['id'] ?? 0);
+    $date = isset($filters['date']) ? mysqli_real_escape_string($mysqli_link, $filters['date']) : '';
+    $member = $filters['member'] ?? '';
+    $plane = isset($filters['plane']) ? mysqli_real_escape_string($mysqli_link, $filters['plane']) : '';
+    $limit = max(1, $limit); // Resources without any limit ('groups', 'weather') do not use it
+
     switch ($resource) {
         case 'bookings':
-            if ($id > 0) {
-                $sql = "SELECT r_id AS id, r_plane, r_pilot, r_instructor, r_start, r_stop, r_type, CONVERT(r_comment USING UTF8) AS comment, r_date 
-                    FROM $table_bookings 
-                    WHERE r_id = $id";
-                return qFetchAll($sql);
+            $joins = '';
+            $conditions = [];
+            if ($id > 0) $conditions[] = "r_id = $id";
+            if ($date != '') $conditions[] = "DATE(r_start) <= '$date' AND DATE(r_stop) >= '$date'";
+            if ($plane != '') $conditions[] = "r_plane = '$plane'";
+            if ($member != '') {
+                $joins = "LEFT JOIN $table_person AS pilot ON pilot.jom_id = r_pilot LEFT JOIN $table_person AS instructor ON instructor.jom_id = r_instructor";
+                $conditions[] = '(' . memberCondition('pilot', $member) . ' OR ' . memberCondition('instructor', $member) . ')';
             }
             $sql = "SELECT r_id AS id, r_plane, r_pilot, r_instructor, r_start, r_stop, r_type, CONVERT(r_comment USING UTF8) AS comment, r_date 
-                FROM $table_bookings ORDER BY r_date DESC LIMIT $limit";
+                FROM $table_bookings $joins" . whereClause($conditions) . " ORDER BY r_date DESC LIMIT $limit";
             return qFetchAll($sql);
 
         case 'users':
-            if ($id > 0) {
-                $sql = "SELECT jom_id as id, odoo_id, name AS username, CONVERT(first_name USING UTF8) AS first_name, CONVERT(last_name USING UTF8) AS last_name, 
-                    email, cell_phone, 
-                    CONVERT(address USING UTF8) AS address, CONVERT(city USING UTF8) AS city, zipcode, country,
-                    GROUP_CONCAT($table_user_usergroup_map.group_id) AS group_ids
-                    FROM $table_person JOIN $table_user_usergroup_map ON $table_person.jom_id = $table_user_usergroup_map.user_id
-                    WHERE jom_id = $id" ;
-                return qFetchAll($sql);
-            }
+            $conditions = [];
+            if ($id > 0) $conditions[] = "jom_id = $id";
+            if ($member != '') $conditions[] = memberCondition($table_person, $member);
             $sql = "SELECT jom_id as id, odoo_id, name AS username, CONVERT(first_name USING UTF8) AS first_name, CONVERT(last_name USING UTF8) AS last_name, 
                 email, cell_phone, 
                 CONVERT(address USING UTF8) AS address, CONVERT(city USING UTF8) AS city, zipcode, country,
                 GROUP_CONCAT($table_user_usergroup_map.group_id) AS group_ids
-                FROM $table_person JOIN $table_user_usergroup_map ON $table_person.jom_id = $table_user_usergroup_map.user_id
+                FROM $table_person JOIN $table_user_usergroup_map ON $table_person.jom_id = $table_user_usergroup_map.user_id" . whereClause($conditions) . "
                 GROUP BY jom_id
                 ORDER BY last_name, first_name 
                 LIMIT $limit";
             return qFetchAll($sql);
 
         case 'invoices':
-            // If an Odoo partner id is provided (passed as $id), fetch invoices from Odoo
+            // The Odoo partner id is passed as $filters['id']: fetch invoices from Odoo
             if ($id > 0) {
+                // Access control: unless instructor or board member, the requested partner must be the one of the logged-in user (checked below)
                 $res = mysqli_query($mysqli_link, "SELECT odoo_id FROM $table_person WHERE jom_id = $userId LIMIT 1");
                 if ($res === NULL) return ['error' => 'no_jom_id', 'message' => 'Unknown logged-in user'];
                 $row = mysqli_fetch_assoc($res);
@@ -188,40 +250,45 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
             journalise($userId, 'E', "fetchResourceData(): invoices resource requires an Odoo partner id (odoo_id) to be provided");
             return ['error' => 'missing_odoo_id', 'message' => 'invoices resource requires an Odoo partner id (odoo_id) to be provided'] ;
 
-        case 'folios':
-            $sql = "SELECT f_id AS id, f_reference AS reference, f_date AS date, f_booking AS booking FROM $table_flights ORDER BY f_date DESC LIMIT $limit";
-            return qFetchAll($sql);
+        // case 'folios':
+        //     $sql = "SELECT f_id AS id, f_reference AS reference, f_date AS date, f_booking AS booking FROM $table_flights ORDER BY f_date DESC LIMIT $limit";
+        //     return qFetchAll($sql);
 
         case 'students':
-            if ($id > 0) {
-                $sql = "SELECT ds_jom_id AS id, ds_year AS year  
-                    FROM $table_dto_student 
-                    WHERE ds_jom_id = $id";
-                return qFetchAll($sql);
+            $joins = '';
+            $conditions = [];
+            if ($id > 0) $conditions[] = "ds_jom_id = $id";
+            if ($member != '') {
+                $joins = "JOIN $table_person AS student ON student.jom_id = ds_jom_id";
+                $conditions[] = memberCondition('student', $member);
             }
-            $sql = "SELECT ds_jom_id AS id, ds_year AS year
-                FROM $table_dto_student LIMIT $limit";
-            $res = qFetchAll($sql);
-            if (isset($res['error'])) {
-                return qFetchAll("SELECT * FROM $table_dto_student LIMIT $limit");
+            $where = whereClause($conditions);
+            $res = qFetchAll("SELECT ds_jom_id AS id, ds_year AS year FROM $table_dto_student $joins $where LIMIT $limit");
+            if (isset($res['error']) and $joins == '') { // Column names may differ: fall back to all columns
+                return qFetchAll("SELECT * FROM $table_dto_student $where LIMIT $limit");
             }
             return $res;
 
         case 'logbooks':
-            if ($id > 0) {
-                $sql = "SELECT l_id AS id, l_plane, l_model, l_pilot, l_instructor, l_start, l_end, CONVERT(l_flight_type USING UTF8) AS flight_type, l_from, l_to, l_pilot, l_instructor
-                FROM $table_logbook WHERE l_id = $id";
-                journalise($userId, 'D', "fetchResourceData(): logbooks resource fetch for id=$id SQL: $sql");
-                return qFetchAll($sql);
+            $joins = '';
+            $conditions = [];
+            if ($id > 0) $conditions[] = "l_id = $id";
+            if ($date != '') $conditions[] = "DATE(l_start) = '$date'";
+            if ($plane != '') $conditions[] = "l_plane = '$plane'";
+            if ($member != '') {
+                $joins = "LEFT JOIN $table_person AS pilot ON pilot.jom_id = l_pilot LEFT JOIN $table_person AS instructor ON instructor.jom_id = l_instructor";
+                $conditions[] = '(' . memberCondition('pilot', $member) . ' OR ' . memberCondition('instructor', $member) . ')';
             }
-            $sql = "SELECT l_id AS id, l_plane, l_model, l_pilot, l_instructor, l_start, l_end, CONVERT(l_flight_type USING UTF8) AS flight_type, l_from, l_to, l_pilot, l_instructor
-                FROM $table_logbook ORDER BY l_start DESC LIMIT $limit";
-            journalise($userId, 'D', "fetchResourceData(): logbooks resource fetch for id=$id SQL: $sql");
+            $sql = "SELECT l_id AS id, l_plane, l_model, l_pilot, l_instructor, l_start, l_end, CONVERT(l_flight_type USING UTF8) AS flight_type, l_from, l_to
+                FROM $table_logbook $joins" . whereClause($conditions) . " ORDER BY l_start DESC LIMIT $limit";
+            journalise($userId, 'D', "fetchResourceData(): logbooks resource fetch for filters=" . json_encode($filters) . " SQL: $sql");
             return qFetchAll($sql);
 
         case 'planes':
-            if ($id > 0) {
-                return qFetchAll("SELECT * FROM $table_planes WHERE id = '$id' LIMIT 1");
+            // The plane identifier is $filters['plane'] (the id filter is accepted as a fallback)
+            if ($plane == '' and $id > 0) $plane = $id;
+            if ($plane != '') {
+                return qFetchAll("SELECT * FROM $table_planes WHERE id = '$plane' LIMIT 1");
             }
             return qFetchAll("SELECT * FROM $table_planes ORDER BY id LIMIT $limit");
 
@@ -230,17 +297,7 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
             // - description: the ih_text for the record where ih_status='opened' (first opened text)
             // - latest_description: ih_text of the most recent history entry
             // - status: ih_status of the most recent history entry
-            if ($id > 0) {
-                $sql = "SELECT i.*, 
-                    (SELECT CONVERT(ih_text USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id AND h.ih_status = 'opened' ORDER BY h.ih_id ASC LIMIT 1) AS description,
-                    (SELECT ih.ih_when FROM $table_incident_history ih WHERE ih.ih_incident = i.i_id AND ih.ih_status = 'opened' ORDER BY ih.ih_id ASC LIMIT 1) AS created_date,
-                    (SELECT CONVERT(ih_text USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS latest_description,
-                    (SELECT ih.ih_when FROM $table_incident_history ih WHERE ih.ih_incident = i.i_id ORDER BY ih.ih_id DESC LIMIT 1) AS latest_date,
-                    (SELECT CONVERT(ih_status USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS latest_status
-                    FROM $table_incident AS i
-                    WHERE i.i_id = $id LIMIT 1";
-                return qFetchAll($sql);
-            }
+            $where = ($id > 0) ? " WHERE i.i_id = $id" : '';
             $sql = "SELECT i.*, 
                 (SELECT CONVERT(ih_text USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id AND h.ih_status = 'opened' ORDER BY h.ih_id ASC LIMIT 1) AS description,
                 (SELECT ih.ih_when FROM $table_incident_history ih WHERE ih.ih_incident = i.i_id AND ih.ih_status = 'opened' ORDER BY ih.ih_id ASC LIMIT 1) AS created_date,
@@ -248,6 +305,7 @@ function fetchResourceData($resource, $id = 0, $limit = 200) {
                 (SELECT ih.ih_when FROM $table_incident_history ih WHERE ih.ih_incident = i.i_id ORDER BY ih.ih_id DESC LIMIT 1) AS latest_date,
                 (SELECT CONVERT(ih_status USING UTF8) FROM $table_incident_history h WHERE h.ih_incident = i.i_id ORDER BY h.ih_id DESC LIMIT 1) AS latest_status
                 FROM $table_incident AS i
+                $where
                 ORDER BY i.i_id DESC LIMIT $limit";
             return qFetchAll($sql);
 
@@ -292,6 +350,9 @@ function getMcpTools() {
                 'type' => 'object',
                 'properties' => [
                     'id' => ['type' => 'integer', 'description' => 'Optional booking id'],
+                    'date' => ['type' => 'string', 'description' => 'Optional date (YYYY-MM-DD): bookings covering that day'],
+                    'member' => ['type' => 'string', 'description' => 'Optional member name (or part of it), as pilot or instructor'],
+                    'plane' => ['type' => 'string', 'description' => 'Optional plane identifier, e.g., OO-FMX'],
                     'limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 200]
                 ],
                 'additionalProperties' => false
@@ -304,6 +365,7 @@ function getMcpTools() {
                 'type' => 'object',
                 'properties' => [
                     'id' => ['type' => 'integer', 'description' => 'Optional user id'],
+                    'member' => ['type' => 'string', 'description' => 'Optional member name (or part of it)'],
                     'limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 500]
                 ],
                 'additionalProperties' => false
@@ -321,15 +383,15 @@ function getMcpTools() {
                 'additionalProperties' => false
             ]
         ],
-        [
-            'name' => 'get_folios',
-            'description' => 'Return folios of invoices from the booking system',
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => ['limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 500]],
-                'additionalProperties' => false
-            ]
-        ],
+        // [
+        //     'name' => 'get_folios',
+        //     'description' => 'Return folios of invoices from the booking system',
+        //     'inputSchema' => [
+        //         'type' => 'object',
+        //         'properties' => ['limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 500]],
+        //         'additionalProperties' => false
+        //     ]
+        // ],
         [
             'name' => 'get_students',
             'description' => 'Return students from the RAPCS DTO system',
@@ -337,6 +399,7 @@ function getMcpTools() {
                 'type' => 'object',
                 'properties' => [
                     'id' => ['type' => 'integer', 'description' => 'Optional student id'],
+                    'member' => ['type' => 'string', 'description' => 'Optional student name (or part of it)'],
                     'limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 500]
                 ],
                 'additionalProperties' => false
@@ -349,6 +412,9 @@ function getMcpTools() {
                 'type' => 'object',
                 'properties' => [
                     'id' => ['type' => 'integer', 'description' => 'Optional logbook id'],
+                    'date' => ['type' => 'string', 'description' => 'Optional date (YYYY-MM-DD) of the flight'],
+                    'member' => ['type' => 'string', 'description' => 'Optional member name (or part of it), as pilot or instructor'],
+                    'plane' => ['type' => 'string', 'description' => 'Optional plane identifier, e.g., OO-FMX'],
                     'limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 200]
                 ],
                 'additionalProperties' => false
@@ -360,7 +426,7 @@ function getMcpTools() {
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
-                    'id' => ['type' => 'string', 'description' => 'Optional plane identifier'],
+                    'plane' => ['type' => 'string', 'description' => 'Optional plane identifier, e.g., OO-FMX'],
                     'limit' => ['type' => 'integer', 'description' => 'Maximum number of rows to return', 'default' => 200]
                 ],
                 'additionalProperties' => false
@@ -419,7 +485,7 @@ function handleMcpRequest($payload) {
             'resources' => ['subscribe' => false, 'listChanged' => false],
             'serverInfo' => ['name' => '✈️ RAPCS Flight club and school MCP Agent', 
                 'version' => '1.2.3', 
-                'description' => '✈️ Provides access to bookings, users, invoices, folios, students, logbooks, planes, incidents and weather data'],
+                'description' => '✈️ Provides access to bookings, users, invoices, students, logbooks, planes, incidents and weather data'],
             '_meta' => ['cacheScope' => 'public', 'ttlMs' => 3600000]
         ]];
     }
@@ -482,34 +548,34 @@ function handleMcpRequest($payload) {
 
         switch ($name) {
             case 'get_bookings':
-                $toolResult = fetchResourceData('bookings', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 200));
+                $toolResult = fetchResourceData('bookings', extractFilters($arguments), intval($arguments['limit'] ?? 200));
                 break;
             case 'get_users':
-                $toolResult = fetchResourceData('users', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 500));
+                $toolResult = fetchResourceData('users', extractFilters($arguments), intval($arguments['limit'] ?? 500));
                 break;
             case 'get_invoices':
-                $toolResult = fetchResourceData('invoices', intval($arguments['odoo_id'] ?? 0), intval($arguments['limit'] ?? 500));
+                $toolResult = fetchResourceData('invoices', extractFilters($arguments, 'odoo_id'), intval($arguments['limit'] ?? 500));
                 break;
-            case 'get_folios':
-                $toolResult = fetchResourceData('folios', 0, intval($arguments['limit'] ?? 500));
-                break;
+            // case 'get_folios':
+            //     $toolResult = fetchResourceData('folios', 0, intval($arguments['limit'] ?? 500));
+            //     break;
             case 'get_students':
-                $toolResult = fetchResourceData('students', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 500));
+                $toolResult = fetchResourceData('students', extractFilters($arguments), intval($arguments['limit'] ?? 500));
                 break;
             case 'get_logbooks':
-                $toolResult = fetchResourceData('logbooks', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 200));
+                $toolResult = fetchResourceData('logbooks', extractFilters($arguments), intval($arguments['limit'] ?? 200));
                 break;
             case 'get_planes':
-                $toolResult = fetchResourceData('planes', 0, intval($arguments['limit'] ?? 200));
+                $toolResult = fetchResourceData('planes', extractFilters(['plane' => $arguments['plane'] ?? $arguments['id'] ?? ''] + $arguments), intval($arguments['limit'] ?? 200));
                 break;
             case 'get_incidents':
-                $toolResult = fetchResourceData('incidents', intval($arguments['id'] ?? 0), intval($arguments['limit'] ?? 200));
+                $toolResult = fetchResourceData('incidents', extractFilters($arguments), intval($arguments['limit'] ?? 200));
                 break;
             case 'get_groups':
-                $toolResult = fetchResourceData('groups', 0, 0);
+                $toolResult = fetchResourceData('groups');
                 break;
             case 'get_weather':
-                $toolResult = fetchResourceData('weather', 0, 0);
+                $toolResult = fetchResourceData('weather');
                 break;
             default:
                 journalise($userId, 'E', "handleMcpRequest(): unknown tool method '$name'");
@@ -564,8 +630,6 @@ if (!$authenticated) {
 }
 
 $resource = isset($_REQUEST['resource']) ? $_REQUEST['resource'] : '';
-$id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
-
 $httpMethod = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 if ($httpMethod === 'POST') {
     $rawBody = file_get_contents('php://input');
@@ -584,11 +648,10 @@ if ($httpMethod === 'POST') {
 
 if ($resource !== '') {
     $limit = isset($_REQUEST['limit']) ? intval($_REQUEST['limit']) : 200;
-    if ($resource === 'bookings' && $id > 0) {
-        respondJson(fetchResourceData($resource, $id, $limit));
-    }
-    respondJson(fetchResourceData($resource, 0, $limit));
+    // Optional filters: id, date (YYYY-MM-DD), member (name) and plane
+    $filters = extractFilters($_REQUEST, $resource === 'invoices' ? 'odoo_id' : 'id');
+    respondJson(fetchResourceData($resource, $filters, $limit));
 }
 
-respondJson(['message' => 'RAPCS MCP Agent', 'protocol' => 'json-rpc-2.0', 'resources' => ['bookings', 'users', 'invoices', 'folios', 'students', 'logbooks', 'planes', 'incidents', 'groups', 'weather']]);
+respondJson(['message' => 'RAPCS MCP Agent', 'protocol' => 'json-rpc-2.0', 'resources' => ['bookings', 'users', 'invoices', 'students', 'logbooks', 'planes', 'incidents', 'groups', 'weather']]);
 ?>
