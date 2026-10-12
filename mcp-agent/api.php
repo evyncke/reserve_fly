@@ -20,7 +20,7 @@
 // MCP Agent API - provides access to bookings, users, invoices, folios and students
 // Authentication: require $userIsMember != 0
 
-// Include existing app bootstrap (dbi.php sets Joomla user context)
+// Include existing app bootstrap
 require_once '../dbi.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -72,26 +72,33 @@ function getBasicAuthCredentials() {
     return [null, null];
 }
 
-function tryJoomlaLogin($username, $password) {
+function tryLogin(string $username, string $password) : bool {
+    global $joomla_user, $userId ;
+
     if (!$username || !$password) return false;
     try {
-        $app = JFactory::getApplication();
-        $credentials = ['username' => $username, 'password' => $password];
-        $options = ['silent' => true, 'remember' => false];
-        $result = $app->login($credentials, $options);
-        if ($result) {
-            global $joomla_user, $userId;
-            $joomla_user = JFactory::getUser();
-            CheckJoomlaUser($joomla_user);
-            return true;
-        }
+        $joomla_user = authenticateJoomlaUser($username, $password) ;
+        $userId = $joomla_user->id ?? 0;
+        $joomla_user->groups = (array) $joomla_user->groups ;
+        CheckJoomlaUser($joomla_user) ;
+        return true ;
+        // $app = JFactory::getApplication();
+        // $credentials = ['username' => $username, 'password' => $password];
+        // $options = ['silent' => true, 'remember' => false];
+        // $result = $app->login($credentials, $options);
+        // if ($result) {
+        //     global $joomla_user, $userId;
+        //     $joomla_user = JFactory::getUser();
+        //     CheckJoomlaUser($joomla_user);
+        //     return true;
+        // }
     } catch (Exception $e) {
         // ignore and return false
     }
     return false;
 }
 
-function respondJson($payload, $statusCode = 200) {
+function respondJson(string $payload, $statusCode = 200) : string {
     global $userId;
 
     http_response_code($statusCode);
@@ -108,7 +115,7 @@ function respondJson($payload, $statusCode = 200) {
     exit;
 }
 
-function qFetchAll($sql) {
+function qFetchAll(string $sql) {
     global $mysqli_link, $userId;
     //    journalise($userId, 'D', "qFetchAll: executing SQL: $sql");
     $res = mysqli_query($mysqli_link, $sql);
@@ -533,13 +540,13 @@ if (isset($userId) && $userId > 0) {
 } else {
     list($buser, $bpass) = getBasicAuthCredentials();
     if ($buser) {
-        if (tryJoomlaLogin($buser, $bpass)) $authenticated = true;
+        if (tryLogin($buser, $bpass)) $authenticated = true;
     }
 
     if (!$authenticated && isset($_REQUEST['username']) && isset($_REQUEST['password'])) {
         $u = trim($_REQUEST['username']);
         $p = trim($_REQUEST['password']);
-        if (tryJoomlaLogin($u, $p)) $authenticated = true;
+        if (tryLogin($u, $p)) $authenticated = true;
     }
 }
 
