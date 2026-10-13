@@ -301,7 +301,7 @@ if ($row_flight['f_reference'] != '')
 	$flight_reference = db2web($row_flight['f_reference']) . ' (' . sprintf("#%06d", $flight_id) . ')';
 
 // Get the circuit names
-$circuits = json_decode(file_get_contents("../voldecouverte/script/circuits.js"), true);
+$circuits = json_decode(file_get_contents("voldecouverte/circuits.js"), true);
 $circuit_name = (isset($circuits[$row_flight['f_circuit']])) ? $circuits[$row_flight['f_circuit']] : "Circuit #$row_flight[f_circuit] inconnu" ;
 
 

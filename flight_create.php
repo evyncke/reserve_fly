@@ -452,6 +452,8 @@ if (isset($flight_id) and $flight_id != 0) {
 			WHERE f_id = $flight_id and pr_role='C'")
 		or journalise($userId, "F", "Cannot retrieve flight $flight_id: " . mysqli_error($mysqli_link)) ;
 	$row_flight = mysqli_fetch_array($result) ;
+	//var_dump($row_flight);
+	//print("<br>");
 	if (!$row_flight) journalise($userId, "F", "Vol #$flight_id inconnu!") ;
 	if ($row_flight['f_reference'] != '')
 		$flight_number = strtoupper($row_flight['f_reference']) ;
@@ -521,7 +523,7 @@ if (isset($flight_id) and $flight_id != 0) {
 			<select class="form-control" id="circuitSelect" name="selectedCircuit">
 <?php
 	// Get the circuit names
-	$circuits = json_decode(file_get_contents("../voldecouverte/script/circuits.js"), true);
+	$circuits = json_decode(file_get_contents("voldecouverte/circuits.js"), true);
 	$circuit_name = (isset($circuits[$row_flight['f_circuit']])) ? $circuits[$row_flight['f_circuit']] : "Circuit #$row_flight[f_circuit] inconnu" ;
 	foreach ($circuits as $circuit_id => $circuit_name) {
 		if ($circuit_name == '') continue; // Some circuits have an empty name
@@ -542,7 +544,7 @@ if (isset($flight_id) and $flight_id != 0) {
 			<select class="form-control" id="scheduleSelect" name="selectedSchedule">
 <?php
 	// Get the possible schedules
-	$schedules = json_decode(file_get_contents("../voldecouverte/script/plageshoraire.js"), true);
+	$schedules = json_decode(file_get_contents("voldecouverte/plageshoraire.js"), true);
 	foreach ($schedules as $schedule) {
 		$selected = ($row_flight['f_schedule'] == $schedule) ? ' selected' : '' ;
 		print("<option value=\"$schedule\"$selected>$schedule</option>\n") ;

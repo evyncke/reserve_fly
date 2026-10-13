@@ -481,12 +481,11 @@ function displayTodayReservation()
 
 	if($userId!=0) {
 		$id=$userId;
-		$sql_date = date('Y-m-d') ;
+		$today = date('Y-m-d') ;
 
-		//$sql="SELECT * FROM $table_bookings WHERE r_start >sysdate() - INTERVAL 1 DAY and r_start < sysdate() + INTERVAL 1 DAY and r_cancel_date is null";
 		$sql="SELECT * FROM $table_bookings b
         JOIN $table_person pi ON pi.jom_id = r_pilot
-		WHERE r_start >sysdate() - INTERVAL 1 DAY and r_start < sysdate() + INTERVAL 1 DAY and r_cancel_date is null
+		WHERE r_start > '$today'  and r_start < '$today' + INTERVAL 1 DAY and r_cancel_date is null
 		ORDER BY r_start";
 
 		//print("SQL=$sql<br>");

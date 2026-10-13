@@ -40,7 +40,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'delete' and isset($_R
 </thead>
 <tbody>
 <?php
-$circuits = json_decode(file_get_contents("../voldecouverte/script/circuits.js"), true);
+$circuits = json_decode(file_get_contents("voldecouverte/circuits.js"), true);
 $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flight JOIN $table_pax_role ON f_id = pr_flight JOIN $table_pax ON pr_pax = p_id 
 	WHERE pr_role = 'C' AND f_date_cancelled IS NULL AND f_pilot IS NULL AND (f_date_1 >= CURRENT_DATE() or f_date_2 >= CURRENT_DATE())
 	ORDER BY f_id ASC") 
