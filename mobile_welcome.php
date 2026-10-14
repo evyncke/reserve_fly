@@ -22,24 +22,22 @@ $additional_preload = '</' . SITE_PATH . '/js/mobile_metar_tools.js>;rel=preload
 	'</' . SITE_PATH . '/images/metar_rose.png>;rel=preload;as=image' ;
 require_once 'mobile_header5.php' ;
 require_once "mobile_metar_tools.php";
-require_once 'dto.class.php' ;
+// require_once 'dto.class.php' ;
 
 $station = strtoupper(trim($_REQUEST['station'] ?? ''));
 if (!preg_match('/^[A-Z0-9]{4}$/', $station)) $station = $default_metar_station; // Check for XSS attack
 
-$color1="#FFF4F4";
-$color2="#EAF7E7";
 $style1='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-dark" style="background-color:PowderBlue;"';
 $style2='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-dark" style="background-color:PowderBlue;"';
 $style3='class="border border-3 border-secondary rounded-3 bg-muted shadow p-2 m-1 text-light"';
 
 ?> 
 <div class="container-fluid">
-<p><h2 class="border border-3 border-secondary rounded-3 shadow mx-auto text-center text-light" style="background-color:Teal;">Bienvenue dans l'espace membre du RAPCS</h2></p>
+<h2 class="border border-3 border-secondary rounded-3 shadow mx-auto text-center text-light" style="background-color:Teal;">Bienvenue dans l'espace membre du RAPCS</h2>
 <?php
 if($userId==0) {
 	print("<h1 class=\"text-center\" style=\"color: red;\">Vous devez d'abord vous connecter pour accéder à l'espace membre du RAPCS</h1>");
-	displayButtonLink("Se Connecter", "mobile_login.php?cb=%2F".SITE_PATH."%2Fmobile_welcome.php");
+	displayButtonLink("Se Connecter", "mobile_login.php?cb=" . urlencode('/' . SITE_PATH . '/mobile_welcome.php'));
 }
 else {
 ?>
@@ -78,7 +76,7 @@ else {
 			</div>
 		</div>
 	</div>
-	<!---
+	<!--
 	<div class="row">
 		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 			<div <?= $style1 ?>>
@@ -196,7 +194,7 @@ function displayProfile()
 		FROM $table_person LEFT JOIN $table_blocked on jom_id=b_jom_id
 		WHERE jom_id = $userId")
 		or journalise($userId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
-		$pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
+		$pilot = mysqli_fetch_array($result) or journalise($userId, 'F', "Pilote $userId inconnu") ;
 		$userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 		$blocked_reason = db2web($pilot['b_reason'] ?? '') ;
 		$blocked_when = substr($pilot['b_when'] ?? '',0,10) ;
@@ -279,7 +277,7 @@ function displayFolio()
 		FROM $table_person LEFT JOIN $table_blocked on jom_id=b_jom_id
 		WHERE jom_id = $userId")
 		or journalise($userId, 'F', "Impossible de lire le pilote $userId: " . mysqli_error($mysqli_link)) ;
-		$pilot = mysqli_fetch_array($result) or journalise($originalUserId, 'F', "Pilote $userId inconnu") ;
+		$pilot = mysqli_fetch_array($result) or journalise($userId, 'F', "Pilote $userId inconnu") ;
 		//$userName = db2web("$pilot[first_name] $pilot[last_name]") ;
 		//$userLastName = db2web($pilot['last_name'] ?? '') ;
 		$odooId = $pilot['odoo_id'] ;
@@ -303,9 +301,7 @@ function displayFolio()
 		} 
 		else { // Odoo account does not exist
 			$balance = 0 ;
-			$invoice_total = 0 ;
-			$invoice_reason = '' ;
-			journalise($userId, "E", "No Odoo id associated to $userName") ;
+			journalise($userId, "E", "No Odoo id associated to $userId") ;
 			print("<p class=\"text-danger\">Vous n'avez pas encore de compte dans la comptabilité.</p>\n") ;
 		}
 	}
@@ -357,13 +353,13 @@ function displayRAPCSNotam()
 		$result_news = mysqli_query($mysqli_link, "SELECT * FROM $table_news
 		WHERE n_stop >= CURRENT_DATE() and n_start <= CURRENT_DATE()
 		ORDER BY n_id DESC
-		LIMIT 0,3") or die("Cannot fetch news: " . mysqli_error($mysqli_link)) ;
+		LIMIT 0,3") or journalise($userId, "F", "Cannot fetch news: " . mysqli_error($mysqli_link)) ;
 		
 		if (mysqli_num_rows($result_news)) {
 			print('<ul>') ;
 			while ($row_news = mysqli_fetch_array($result_news)) {
-				$subject = db2web($row_news['n_subject']) ;
-				$text = db2web(nl2br($row_news['n_text'])) ;
+				$subject = htmlspecialchars(db2web($row_news['n_subject'])) ;
+				$text = nl2br(htmlspecialchars(db2web($row_news['n_text']))) ;
 				print("<li><b>$subject</b>: $text</li>\n") ;
 			}
 			print('</ul>') ;
@@ -384,7 +380,7 @@ function displayWebcam($webcam)
         <div style="text-align: center;">
  			<iframe 
 				style="aspect-ratio: 6 / 4; object-fit: cover;width: 100%;" 
-				src="https://g0.ipcamlive.com/player/player.php?alias=camebspairside&autoplay=1&mute=1&disableautofullscreen=1&disablezoombutton=p;disableframecapture=1&disabletimelapseplayer=1&disablestorageplayer=1&disabledownloadbutton=1&disableplaybackspeedbutton=1&disablenavigation=1&disableuserpause=1"  				frameborder="0" 
+				src="https://g0.ipcamlive.com/player/player.php?alias=camebspairside&autoplay=1&mute=1&disableautofullscreen=1&disablezoombutton=1&disableframecapture=1&disabletimelapseplayer=1&disablestorageplayer=1&disabledownloadbutton=1&disableplaybackspeedbutton=1&disablenavigation=1&disableuserpause=1"  				frameborder="0" 
 				loading="lazy"
 				title="Webcam aire à signaux"
  				allowfullscreen="allowfullscreen">
@@ -426,7 +422,7 @@ function displayMesReservations()
 		WHERE r_pilot=$userId and r_start>=sysdate() and r_cancel_date is null
 		ORDER BY r_start";	
 		//print("SQL=$sql<br>");
-		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
+		$result = mysqli_query($mysqli_link, $sql ) or journalise($userId, "F", "Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 	?>
 
 		<div class="row d-flex justify-content-center">
@@ -448,7 +444,7 @@ function displayMesReservations()
 						//$class = ' class="text-warning"' ;
 						$dateDe=displayFlyDate($row['r_start']) ;
 						$dateA=displayFlyDate($row['r_stop']) ;
-						print("<tr><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(db2web($comment)) . "</td></tr>") ;
+						print("<tr><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($comment))) . "</td></tr>") ;
 				}
 				if($count==0) {
 						print('<tr><td colspan="5" class="text-warning" >Aucune réservation prévue</td></tr>') ;
@@ -491,7 +487,7 @@ function displayTodayReservation()
 		ORDER BY r_start";
 
 		//print("SQL=$sql<br>");
-		$result = mysqli_query($mysqli_link, $sql ) or die("Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
+		$result = mysqli_query($mysqli_link, $sql ) or journalise($userId, "F", "Cannot access the booking #$id: " . mysqli_error($mysqli_link)) ;
 	?>
 
 		<div class="row d-flex justify-content-center">
@@ -509,19 +505,19 @@ function displayTodayReservation()
 							//print("<br>");
 						}
 						$plane=$row['r_plane'];
-						$nom=$row['first_name']." ".$row['last_name'];
+						$nom=htmlspecialchars(db2web($row['first_name']." ".$row['last_name']));
 						$instructor=$row['r_instructor'];
 						if($instructor!="") {$instructor= "DC";}
 	
-						$comment=$row['r_comment'];
+						$comment=nl2br(htmlspecialchars(db2web($row['r_comment'])));
 						$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="text-danger"' : '' ;
 						$class = ' class="text-warning"' ;
 						$dateDe=substr($row['r_start'], 11,5) ;
 						$dateA=substr($row['r_stop'], 11,5) ;
-						print("<tr><td>$nom</td><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". nl2br(htmlspecialchars(db2web($comment))) . "</td></tr>\n") ;
+						print("<tr><td>$nom</td><td>$dateDe</td><td>$dateA</td><td>$plane</td><td>$instructor</td><td$class>". $comment . "</td></tr>\n") ;
 				}
 				if($count==0) {
-						print('<tr><td colspan="6" class="text-warning" >Aucune réservation prévue</td></tr>\n') ;
+						print('<tr><td colspan="6" class="text-warning" >Aucune réservation prévue</td></tr>') ;
 				}
 	?>
 			</tbody>
@@ -545,7 +541,7 @@ function displayMeteo()
 		src="https://embed.windy.com/embed2.html?lat=<?=$apt_latitude?>&lon=<?=$apt_longitude?>&zoom=9&level=surface&overlay=radar&menu=false&theme=dark" 
 		width="100%" 
 		frameborder="0"
-		loading="lazy" title="Windy" alt="Windy"
+		loading="lazy" title="Windy"
 		style="aspect-ratio: 6/ 4; object-fit: cover;width: 100%;">
 	</iframe><?php
 	}
@@ -598,11 +594,10 @@ function displayEphemeride()
 		</section>
 
 	<script>
-		refreshEphemerides(<?=date('Y')?>, <?=date('m')?>, <?=date('d')?>) ;
+		refreshEphemerides(<?=date('Y')?>, <?=date('n')?>, <?=date('j')?>) ;
 		displayClock() ;
 	</script>
 
-	</div> <!-- container-->
 <?php
 }
 ?>
