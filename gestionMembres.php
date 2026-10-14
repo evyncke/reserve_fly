@@ -147,10 +147,10 @@ if (isset($_REQUEST['createcourstheorique'])) {
 		$personid=$_REQUEST['personid'];
 		if(OF_CreateFactureCoursTheorique($personid, $membership_year, $facture)) {
 			if($facture=="1") {
-				print("<div class=\"alert alert-info\" role=\"alert\"><b>La facture pour cours theorique pour $personid pour $membership_year a été créée dans ODOO et les tables RAPCS!</b></div>");	
+				print("<div class=\"alert alert-info\" role=\"alert\"><b>La facture pour cours theorique pour $personid pour $membership_year a été créée dans ODOO et les tables " . SITE_SHORT_NAME . ".</b></div>");	
 			}
 			else {
-				print("<div class=\"alert alert-info\" role=\"alert\"><b>L'élève a été intruit dans la liste des élèves $membership_year (Table RAPCS)</b></div>");	
+				print("<div class=\"alert alert-info\" role=\"alert\"><b>L'élève a été intruit dans la liste des élèves $membership_year (Table " . SITE_SHORT_NAME . ")</b></div>");	
 			}
 		}
 		else {

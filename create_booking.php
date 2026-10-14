@@ -206,7 +206,7 @@ $message .= "<ul>\n" ;
 // More checks on user when booking a plane and booked by an non-instructor/mechanic
 
 if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BOOKING_MAINTENANCE) or $userIsInstructor or $instructor_id != "NULL")) {
-	$intro = "<p>Chaque réservation est vérifiée quant au Règlement d'Ordre Intérieur (ROI) à propos du re-check RAPCS
+	$intro = "<p>Chaque réservation est vérifiée quant au Règlement d'Ordre Intérieur (ROI) à propos du re-check " . SITE_SHORT_NAME . "
 		et des validités.<p>
 		<p><i>Ce message est envoyé au pilote, aux instructeurs et aux gestionnaires de la flotte.</i></p>" ;
 	if ($comment != '')
@@ -278,14 +278,14 @@ if ($plane_row['ressource'] == 0 and ! (($userIsMechanic and $booking_type == BO
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 		$email_recipients = "fis@spa-aviation.be,$pilot[email]" ;
 		if (!$userRatingValid) {
-			$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>, $managerName <$managerEmail>\r\n" ;
+			$email_header .= "Cc: " . SITE_SHORT_NAME . " FIs <fis@spa-aviation.be>, $managerName <$managerEmail>\r\n" ;
 			$email_recipients .= ",$managerEmail" ;
 			$subject =  "Validité expirée pour $pilot[name]/$userFullName... pour la réservation de $plane" ;
 		} elseif ($blocked_user) {
-			$email_header .= "Cc: RAPCS CA <ca@spa-aviation.be>\r\n" ;
+			$email_header .= "Cc: " . SITE_SHORT_NAME . " CA <ca@spa-aviation.be>\r\n" ;
 			$subject = "$pilot[name]/$userFullName est bloqué(e): " . db2web($row_blocked['b_reason']) ;
 		} else {
-			$email_header .= "Cc: RAPCS FIs <fis@spa-aviation.be>\r\n" ;
+			$email_header .= "Cc: " . SITE_SHORT_NAME . " FIs <fis@spa-aviation.be>\r\n" ;
 			$subject = "La réservation de $plane devrait être refusée pour $pilot[name]/$userFullName" ;
 		} 
 
@@ -399,7 +399,7 @@ if ($response['error'] == '') {
 			}
 		}
 		$email_header .= "Message-ID: <booking-$booking_id@$smtp_localhost>\r\n" ;
-		$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
+		$email_header .= "Thread-Topic: Réservation " . SITE_SHORT_NAME . "#$booking_id\r\n" ; 
 		//
 //		$smtp_info['debug'] = True;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
@@ -450,7 +450,7 @@ if ($response['error'] == '') {
 				$email_header = "From: $managerName <$smtp_from>\r\n" ;
 				$email_header .= "To: $fleetEmail, $managerName <$managerEmail>\r\n" ;
 				$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
-				$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
+				$email_header .= "Thread-Topic: Réservation " . SITE_SHORT_NAME . "#$booking_id\r\n" ; 
 				@smtp_mail("$managerEmail, $fleetEmail", "!!! Longue reservation ($start / $end): " . $email_subject, $email_message, "To: $managerName <$managerEmail>, $fleetName <$fleetEmail>\r\n" . $email_header) ;
 			}
 		}

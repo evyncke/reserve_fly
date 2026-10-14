@@ -487,7 +487,7 @@ $version_php = date ("Y-m-d H:i:s.", filemtime('if_init_folio.php')) ;
 $version_css = date ("Y-m-d H:i:s.", filemtime('css/log.css')) ;
 ?>
 <hr>
-<div class="copyright">Réalisation: Patrick Reginster et Eric Vyncke, janvier 2015 - november 2023, pour RAPCS, Royal Aéro Para Club de Spa<br>
+<div class="copyright">Réalisation: Patrick Reginster et Eric Vyncke, janvier 2015 - november 2023, pour <?= SITE_LONG_NAME ?><br>
 Versions: PHP=<?=$version_php?>, CSS=<?=$version_css?></div>
 </body>
 </html>

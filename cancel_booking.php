@@ -132,7 +132,7 @@ if ($response['error'] == '') {
 		$email_header .= "X-Comment: reservation is $id\r\n" ;
 		$email_header .= "References: <booking-$id@$smtp_localhost>\r\n" ;
 		$email_header .= "In-Reply-To: <booking-$id@$smtp_localhost>\r\n" ;
-		$email_header .= "Thread-Topic: Réservation RAPCS #$id\r\n" ; 
+		$email_header .= "Thread-Topic: Réservation " . SITE_SHORT_NAME . "#$id\r\n" ; 
 		$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
 		if ($test_mode)
 			smtp_mail("eric.vyncke@ulg.ac.be", substr($email_subject, 9), $email_message, $email_header) ;
@@ -179,7 +179,7 @@ function email_adjacent($result, $booking, $booker) {
 	$email_header .= "X-Comment: reservation is $id\r\n" ;
 	$email_header .= "References: <booking-$id@$smtp_localhost>\r\n" ;
 	$email_header .= "In-Reply-To: <booking-$id@$smtp_localhost>\r\n" ;
-	$email_header .= "Thread-Topic: Réservation RAPCS #$id\r\n" ; 
+	$email_header .= "Thread-Topic: Réservation " . SITE_SHORT_NAME . "#$id\r\n" ; 
 	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
 	$email_message = "<p>Bonjour,</p><p>Pour votre information, suite &agrave; une annulation d'une autre r&eacute;servation par $booker[name], le $row[r_plane] 
 		est maintenant disponible du $booking[r_start] au $booking[r_stop]. N'h&eacute;sitez donc pas &agrave; &eacute;tendre votre
