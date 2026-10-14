@@ -60,8 +60,8 @@ $christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_mont
 <!-- Facebook Open graph data -->
 <meta property="og:url"           content="<?= SITE_URL ?>mobile.php" />
 <meta property="og:type"          content="website" />
-<meta property="og:title"         content="Royal Aero Para Club de Spa ASBL" />
-<meta property="og:description"   content="Page réservée aux membres RAPCS" />
+<meta property="og:title"         content="<?=  SITE_LONG_NAME ?>" />
+<meta property="og:description"   content="Page réservée aux membres <?= SITE_SHORT_NAME ?>" />
 <meta property="og:image"         content="https://<?= SITE_HOST ?>/logo_rapcs_256x256.png" />
 <meta property="og:image:width"	  content="256" />
 <meta property="og:image:height"  content="256" />
@@ -72,7 +72,7 @@ $christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_mont
 <link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <link rel="apple-touch-icon" sizes="32x32" href="<?=$favicon?>">
 <link rel="manifest" href="<?= SITE_URL ?>manifest.webmanifest">
-<title>Mobile RAPCS ASBL</title>
+<title>Mobile <?= SITE_SHORT_NAME ?> ASBL</title>
 
 <!-- Using latest bootstrap 5 -->
 <!-- Latest compiled and minified CSS add media="screen" would reserve it only for screen and not printers -->
@@ -374,7 +374,8 @@ if ($userIsFlightManager) {
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Vols IF/INIT<span class="caret"></span></a>
     <ul class="dropdown-menu">
     <li><h6 class="dropdown-header">Réservé aux pilotes vols IF/INIT</h6></li>
-    <li><a class="dropdown-item" href="flight_home.php">Management</a></li>
+    <li><a class="dropdown-item" href="flight_home.php">Menus Vol IF</a></li>
+    <li><a class="dropdown-item" href="https://1drv.ms/x/c/73f33d534cbe15a0/IQBlgaCC_BVWRpkyNHbASYcvAQ3-d5xOuQ8R5TxUvYeqL0c?e=Q28nGb">Planning Vols IF</a></li>
     <!--Fichier onedrive dans Vols_INI_IF_SHARED Panning_Vols_INIT.xlsx-->
     <li><a class="dropdown-item" href="https://1drv.ms/x/c/73f33d534cbe15a0/IQCgFb5MUz3zIIBzmVgAAAAAAc9yRjPJoW-oJJTozJGxBTI?e=bqbtMk">Planning vols INIT</a></li> 
    </ul>
@@ -471,26 +472,26 @@ if ($userId > 0) {
             <li><a class="dropdown-item" href="mobile_local_flights.php">Vols proches</a></li>
             <li><a class="dropdown-item" href="mobile_metar.php">METAR</a></li>
             <li><a class="dropdown-item" href="mobile_wx_map.php">Météo des environs</a></li>
-            <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam RAPCS (Apron)</a></li>
+            <li><a class="dropdown-item" href="mobile_webcam.php?cam=0">Webcam <?= SITE_SHORT_NAME ?> (Apron)</a></li>
             <li><a class="dropdown-item" href="mobile_webcam.php?cam=1">Webcam SOWAER (station météo)</a></li>
 <?php
 if ($userId > 0) {
 ?>
             <li><hr class="dropdown-divider"/></li>
             <li><h6 class="dropdown-header">Réservé aux membres</h6></li>
-            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=apron">Webcam RAPCS (Apron) streaming</a></li>
+            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=apron">Webcam <?= SITE_SHORT_NAME ?> (Apron) streaming</a></li>
             <li><a class="dropdown-item" href="mobile_streaming.php?webcam=sowaer">Webcam SOWAER (station météo) streaming</a></li>
-            <li><a class="dropdown-item" href="mobile_webcam.php?cam=2">Webcam RAPCS (Hangars)</a></li>
-            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=hangars">Webcam RAPCS (Hangars) streaming</a></li>
+            <li><a class="dropdown-item" href="mobile_webcam.php?cam=2">Webcam <?= SITE_SHORT_NAME ?> (Hangars)</a></li>
+            <li><a class="dropdown-item" href="mobile_streaming.php?webcam=hangars">Webcam <?= SITE_SHORT_NAME ?> (Hangars) streaming</a></li>
 <?php
 }
 if ($userIsAdmin or $userIsInstructor) {
 ?>
             <li><hr class="dropdown-divider"/></li>
             <li><h6 class="dropdown-header">Pour les admins & FI</h6></li>
-            <li><a class="dropdown-item text-warning" href="mobile_streaming.php?webcam=both">Webcams RAPCS (Apron and hangars) streaming</a></li>
-            <li><a class="dropdown-item text-warning" href="http://kiosk.spa-aviation.be:8001/hls/index-lowres.html" target="_blank">Webcams RAPCS 48 heures basse résolution <i class="bi bi-box-arrow-up-right"></i></a></li>
-            <li><a class="dropdown-item text-warning" href="http://192.168.129.3:8001/hls/index-highres.html" target="_blank">Webcams RAPCS 48 heures depuis le club <i class="bi bi-box-arrow-up-right"></i></a></li>
+            <li><a class="dropdown-item text-warning" href="mobile_streaming.php?webcam=both">Webcams <?= SITE_SHORT_NAME ?> (Apron and hangars) streaming</a></li>
+            <li><a class="dropdown-item text-warning" href="http://kiosk.spa-aviation.be:8001/hls/index-lowres.html" target="_blank">Webcams <?= SITE_SHORT_NAME ?> 48 heures basse résolution <i class="bi bi-box-arrow-up-right"></i></a></li>
+            <li><a class="dropdown-item text-warning" href="http://192.168.129.3:8001/hls/index-highres.html" target="_blank">Webcams <?= SITE_SHORT_NAME ?> 48 heures depuis le club <i class="bi bi-box-arrow-up-right"></i></a></li>
 <?php
 }
 if ($userId > 0) {
