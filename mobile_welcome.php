@@ -238,29 +238,31 @@ function displayProfile()
 //==============================================
 function getGroupName($groupId)
 {
+	// Group ids are defined in dbi.php (must follow jom_usergroups)
+	global $joomla_sysadmin_group, $joomla_admin_group, $joomla_superuser_group, $joomla_pilot_group,
+		$joomla_instructor_group, $joomla_instructor_group2, $joomla_student_group, $joomla_mechanic_group,
+		$joomla_member_group, $joomla_flight_pilot_group, $joomla_flight_manager_group, $joomla_board_group,
+		$joomla_effectif_group, $joomla_theory_student_group ;
+
 	$groups = array(
-		6=>"Gestionnaire Site",
-		7=>"Administrateur Web",
-		8=>"Super Utilisateur",
-		13=>"Pilote",
-		14=>"Instructeur Vol",
-		15=>"Instructeur Théorique",
-		16=>"Elève",
-		17=>"Mecano",
-		18=>"Membre",
-		19=>"Pilote Vol Découverte",
-		20=>"Gestion Vol Découverte",
-		22=>"Membre de l'OA",
-		24=>"Développeur Site",
-		25=>"Membre Effectif",
-		26=>"Elève Cours Théorique"
+		$joomla_sysadmin_group => "Gestionnaire Site",
+		$joomla_admin_group => "Administrateur Web",
+		$joomla_superuser_group => "Super Utilisateur",
+		$joomla_pilot_group => "Pilote",
+		$joomla_instructor_group => "Instructeur Vol",
+		$joomla_instructor_group2 => "Instructeur Théorique",
+		$joomla_student_group => "Elève",
+		$joomla_mechanic_group => "Mecano",
+		$joomla_member_group => "Membre",
+		$joomla_flight_pilot_group => "Pilote Vol Découverte",
+		$joomla_flight_manager_group => "Gestion Vol Découverte",
+		$joomla_board_group => "Membre de l'OA",
+		24 => "Développeur Site", // No $joomla_*_group variable in dbi.php for this group
+		$joomla_effectif_group => "Membre Effectif",
+		$joomla_theory_student_group => "Elève Cours Théorique"
 	);
-	
-	if (array_key_exists($groupId,$groups))
-  	{
-  		return $groups[$groupId];
- 	}
-	return "";
+
+	return $groups[$groupId] ?? "";
 }
 
 //==============================================
