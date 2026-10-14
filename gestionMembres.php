@@ -214,12 +214,17 @@ document.addEventListener("DOMContentLoaded", function () {
 				"\nRappel: le membre doit être élève ou pilote sinon il est non-navigant." +
 				"\nNe pas oublier de prévenir les personnes responsables et de mettre à jour le fichier membres.xls sur OneDrive (Toujours utilisé - Seul endroit ou on gere l'historique des membres).")) {
 				var aSearchText=document.getElementById("id_SearchInput").value;
-				var aCommand='?checkboxId=' + this.id + '&checked=' + this.checked;
-				if(aCommand != "") {
-					aCommand+="&search="+aSearchText;
-				}
-					// Redirect to the same URL with the checkbox ID in the query string
-            	window.location.href = window.location.pathname + aCommand;
+				// Reload the same page, keeping the current query string (e.g., unactivated=true)
+				// and adding/replacing the checkbox ID, its state and the search text (URLSearchParams encodes them)
+				var aParams = new URLSearchParams(window.location.search);
+				aParams.set('checkboxId', this.id);
+				aParams.set('checked', this.checked);
+				if (aSearchText != "")
+					aParams.set('search', aSearchText);
+				else
+					aParams.delete('search');
+				// Only change the query string: the host and path stay as they are (a path starting with '//' would be taken as a host name)
+				window.location.search = aParams.toString();
 			}
 			else { // Revert to previous checked state
 				// TODO can probably simply do this.checked = !this.checked; ;-)
