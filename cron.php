@@ -149,7 +149,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
 	$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
-	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
+	$email_header .= "Thread-Topic: Réservation " . SITE_SHORT_NAME . "#$booking_id\r\n" ; 
 	$delimiteur = "Part=".md5(uniqid(rand())) ;
 	$email_header .= "Content-Type: multipart/mixed; boundary=\"$delimiteur\"\r\n" ;
 	$email_message = "Ce texte est envoye en format MIME et HTML donc peut-etre pas lisible sur cette plateforme.\r\n" .
@@ -230,7 +230,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
 	$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
-	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
+	$email_header .= "Thread-Topic: Réservation " . SITE_SHORT_NAME . "#$booking_id\r\n" ; 
 	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
 	$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 	if ($test_mode)
@@ -275,9 +275,9 @@ while ($row = mysqli_fetch_array($result)) {
 	$booker['name'] = db2web($booker['name']) ; // SQL DB is latin1 and the rest is in UTF-8
 	$email_subject = "Rappel: entrer les heures ⏱ moteur de votre vol sur $row[r_plane] du $row[r_start] [#$booking_id]" ;
 	$email_message = "<p>$row[first_name],</p>\n" ;
-	$email_message .= "<p>Il est important que tous les pilotes et &eacute;l&egrave;ves respectent le r&egrave;glement d'ordre int&eacute;rieur du RAPCS.</p>\n" .
+	$email_message .= "<p>Il est important que tous les pilotes et &eacute;l&egrave;ves respectent le r&egrave;glement d'ordre int&eacute;rieur du " . SITE_LONG_NAME . ".</p>\n" .
 		"<p>Afin de garder une trace des compteurs moteur des avions et de planifier les maintenances, et de v&eacute;rifier si les pilotes respectent \n" .
-		"les conditions <i>check club</i> avant de prendre un avion, le RAPCS demande\n" .
+		"les conditions <i>check club</i> avant de prendre un avion, le " . SITE_SHORT_NAME . " demande\n" .
 		"&agrave; tous les pilotes et &eacute;l&egrave;ves d'entrer les heures moteur (et en option les heures de vol ainsi que les a&eacute;roports de d&eacute;part et de destination).\n" .
 		" <b>Nous comptons tous sur vous</b>.</p>\n" .
 		"<p>Cet email concerne la r&eacute;servation du $row[r_start] au $row[r_stop] sur le $row[r_plane] \n" .
@@ -307,7 +307,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$email_header .= "X-Comment: reservation is $booking_id\r\n" ;
 	$email_header .= "References: <booking-$booking_id@$smtp_localhost>\r\n" ;
 	$email_header .= "In-Reply-To: <booking-$booking_id@$smtp_localhost>\r\n" ;
-	$email_header .= "Thread-Topic: Réservation RAPCS #$booking_id\r\n" ; 
+	$email_header .= "Thread-Topic: Réservation " . SITE_SHORT_NAME . "#$booking_id\r\n" ; 
 	$email_header .= "Content-Type: text/html; charset=UTF-8\r\n" ;
 	$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 	if ($test_mode)
@@ -329,7 +329,7 @@ if (! is_resource($mysqli_link)) { // Naive ? attempt to reconnect in case of lo
 		$mysqli_link = mysqli_connect($db_host, $db_user, $db_password) ;
 		if (! $mysqli_link) die("Impossible de se connecter a MySQL:" . mysqli_connect_error()) ;
 		if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base de donnees:" . mysqli_error($mysqli_link)) ;}
-// Vérifier si tous les pilotes/élèves/membres ont bel et bien une entrée dans la table $rapcs_person (ex OpenFlyers)
+// Vérifier si tous les pilotes/élèves/membres ont bel et bien une entrée dans la table $table_person (ex OpenFlyers)
 // Ajouter/enlever si nécessaire
 print(date('Y-m-d H:i:s').": checking entries in $table_person.\n") ;
 $result = mysqli_query($mysqli_link, "select id,name,email,username
@@ -351,8 +351,8 @@ while ($row = mysqli_fetch_array($result)) {
 			print(date('Y-m-d H:i:s').": cannot insert into $table_person($row[id], $row[name], $row[email]): " . mysqli_error($mysqli_link) . "\n") ;
 			journalise($row['id'], 'E', " cannot insert into $table_person($row[id], $row[name], $row[email]): " . mysqli_error($mysqli_link)) ;
 	} else {
-		$email_subject = "Bienvenue sur le site des réservations du RAPCS" ;
-        $email_message = "<p>Bonjour,</p><p>Vous avez d&eacute;j&agrave; re&ccedil;u un email avec votre identifiant et votre mot de passe pour le site du RAPCS:\n" ;
+		$email_subject = "Bienvenue sur le site des réservations du " . SITE_SHORT_NAME ;
+        $email_message = "<p>Bonjour,</p><p>Vous avez d&eacute;j&agrave; re&ccedil;u un email avec votre identifiant et votre mot de passe pour le site du " . SITE_SHORT_NAME . ":\n" ;
 		$email_message .= "<a href=https://" . SITE_HOST . ">" . SITE_HOST . "</a>. Mais, ce m&ecirc;me identifiant vous permet aussi de visualiser toutes les r&eacute;servations des avions\n" ;
 		$email_message .= "(en tant qu'&eacute;l&egrave;ve ou membre non navigant vous ne pouvez pas en r&eacute;server un)" ;
 		$email_message .= ". La partie r&eacute;servation est accessible via le menu <b>Avions</b> ou\n" ;
@@ -363,7 +363,7 @@ while ($row = mysqli_fetch_array($result)) {
 		$email_message .= "<p>Pour rappel, votre identifiant est <b>$row[username]</b> (vous pouvez le changer en contactant <a href=mailto:webmaster@spa-aviation.be>webmaster@spa-aviation.be</a>).</p>\r\n" ;
 		$email_message .= "<hr>Ceci est un message automatique. En cas de soucis, veuillez contacter <a href=mailto:webmaster@spa-aviation.be>webmaster@spa-aviation.be</a>." ;
 		if ($test_mode) $email_message .= "<hr><font color=red><B>Ceci est une version de test</b></font>" ;
-		$email_header = "From: Webmaster RAPCS <webmaster@spa-aviation.be>\r\n" ;
+		$email_header = "From: Webmaster " . SITE_SHORT_NAME . " <webmaster@spa-aviation.be>\r\n" ;
 		$email_header .= "To: $row[name] <$row[email]>\r\n" ;
 		$email_header .= "Return-Path: <bounce@spa-aviation.be>\r\n" ;  // Will set the MAIL FROM enveloppe by the Pear Mail send()
 		if ($bccTo != '') $email_header .= "Bcc: $bccTo\r\n" ;
@@ -390,7 +390,7 @@ while ($row = mysqli_fetch_array($result)) {
 		or journalise(0, "E", "Cannot nullify joomla ID($row[jom_id]/$row[id]: " . mysqli_error($mysqli_link)) ;
 }
 
-// Vérifier si tous les pilotes/élèves ont des informations équivalentes en $table_users and $rapcs_person (ex OpenFlyers)
+// Vérifier si tous les pilotes/élèves ont des informations équivalentes en $table_users and $table_person (ex OpenFlyers)
 // Ajouter/enlever si nécessaire
 print(date('Y-m-d H:i:s').": checking email/name entries in $table_users and $table_person.\n") ;
 // $result = mysqli_query($mysqli_link, "select *, u.id as j_id, u.email as j_email, p.email as p_email, u.name as j_name, p.user_name as p_name
@@ -401,11 +401,11 @@ $result = mysqli_query($mysqli_link, "select *, u.id as j_id,
 	or die(date('Y-m-d H:i:s').": cannot read $table_users and $table_person, " . mysqli_error($mysqli_link)) ;
 while ($row = mysqli_fetch_array($result)) {
 	if ($row['p_email'] != $row['j_email']) {
-		print(date('Y-m-d H:i:s').": $row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)\n") ;
-		journalise($row['j_id'], 'W', "$row[name]/$row[j_id] '$row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
+		print(date('Y-m-d H:i:s').": $row[name]/$row[j_id] '$row[p_email]' (club) != '$row[j_email]' (Joomla)\n") ;
+		journalise($row['j_id'], 'W', "$row[name]/$row[j_id] '$row[p_email]' (club) != '$row[j_email]' (Joomla)") ;
 		$status = mysqli_query($mysqli_link, "UPDATE $table_person SET email = '$row[j_email]' WHERE jom_id = $row[j_id]");
 		if (!$status) {
-			journalise($row['j_id'], 'E', mysqli_error($mysqli_link) . " for row[p_email]' (RAPCS) != '$row[j_email]' (Joomla)") ;
+			journalise($row['j_id'], 'E', mysqli_error($mysqli_link) . " for row[p_email]' (club) != '$row[j_email]' (Joomla)") ;
 		}
 	}
 }
@@ -451,7 +451,7 @@ while ($row = mysqli_fetch_array($result)) {
 }
 
 // Synchronize the Odoo partners with profile information
-print(date('Y-m-d H:i:s').": synchronizing Odoo partners with RAPCS profile information.\n") ;
+print(date('Y-m-d H:i:s').": synchronizing Odoo partners with " . SITE_SHORT_NAME . " profile information.\n") ;
 require_once("odoo_synch.php") ;
 odooSynchronize() ;
 

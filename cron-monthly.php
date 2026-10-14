@@ -55,7 +55,7 @@ journalise(0, 'I', "Cron-monthly: starting for actions = {$actions}") ;
 
 print(date('Y-m-d H:i:s').": preparing lists of plane bookings & logbook entries.\n") ;
 
-$email_body = "<p>Voici la liste mensuelle des diverses r&eacute;servations des avions du RAPCS.</p>" ;
+$email_body = "<p>Voici la liste mensuelle des diverses r&eacute;servations des avions du " . SITE_SHORT_NAME . ".</p>" ;
 
 function print_plane_table($title, $sql, $columns) {
 	global $email_body, $mysqli_link ;
@@ -206,7 +206,7 @@ foreach ($all_rows as $row) {
 	else
 		$email_message .= "<p>Bonjour,</p>" ;
 	$email_message .= "<p>&Agrave; titre informatif, votre profil sur le site de notre club est incomplet: seulement $profile_count informations sur $max_profile_count...<br/>
-		Ces informations ne sont visibles que pour les autres membres RAPCS (+ le SPW et notre atelier).
+		Ces informations ne sont visibles que pour les autres membres " . SITE_SHORT_NAME . " (+ le SPW et notre atelier).
 		<b>Seules certaines donn&eacute;es sont obligatoires pour effectuer une r&eacute;servation: nom, pr&eacute;nom, email et num&eacute;ro
 		de t&eacute;l&eacute;phone mobile</b> (ceci afin de vous contacter si n&eacute;cessaire); les autres informations sont simplement
 		pour permettre de nous conna&icirc;tre au sein de notre club.</p>
@@ -249,7 +249,7 @@ if (! mysqli_select_db($mysqli_link, $db_name)) die("Impossible d'ouvrir la base
 
 print(date('Y-m-d H:i:s').": preparing lists of pilots/students/members.\n") ; ob_flush() ;
 
-$email_body = "<p>Voici la liste mensuelle des divers utilisateurs du site RAPCS.</p>" ;
+$email_body = "<p>Voici la liste mensuelle des divers utilisateurs du site " . SITE_SHORT_NAME . ".</p>" ;
 
 function print_table($title, $sql) {
 	global $email_body, $mysqli_link ;

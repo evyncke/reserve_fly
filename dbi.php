@@ -77,7 +77,7 @@ $convertToUtf8 = false ;
 
 $test_mode = false ;
 $managerEmail = "info@spa-aviation.be" ;
-$managerName = "Réservation RAPCS" ;
+$managerName = "Réservation " . SITE_SHORT_NAME  ;
 $fleetEmail = "fleet@spa-aviation.be" ;
 $fleetName = "Fleet Management" ;
 
@@ -290,8 +290,8 @@ $webcam_uris = array("https://nav.vyncke.org/rapcs/snapshot-apron.jpg?uid=$userI
 //	"https://www.spa-aviation.be/webcam.php",
 	) ;
 $favicon = "https://" . SITE_HOST . "/favicon32x32.ico" ;// The usual web browser favicon + also used in Calendar
-$ical_name = "Calendrier réservations et événements RAPCS" ; // Name of the iCAL calendar
-$ical_organizer = "RAPCS asbl" ; // Name of the organizer of the iCAL calendar
+$ical_name = "Calendrier réservations et événements " . SITE_LONG_NAME  ; // Name of the iCAL calendar
+$ical_organizer = SITE_LONG_NAME ; // Name of the organizer of the iCAL calendar
 
 // More Joomla dependencies
 $avatar_root_resized_uri = SITE_URL . "images/members/resized/size144" ;
