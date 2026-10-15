@@ -385,8 +385,11 @@ datediff(current_date(), b_when) as days_blocked
 			$row['last_name']="xxxxx";
 		}
 		$photo="images/avatar.jpg";
-		if(isset($row['avatar'])) {
-			$photo=$avatar_root_uri."/".$row['avatar'];
+		if (isset($row['avatar'])) {
+			if (file_exists("../$avatar_root_directory/$row[avatar]"))
+				$photo=$avatar_root_uri."/".$row['avatar'];
+			else
+				journalise($personid, "W", "Photo for $nom ($row[avatar]) does not exist") ;
 		}
 		$photo='<a href="'.$photo.'"><img style="object-fit: cover;"src="'.$photo.'" alt="photo" width="50" height="66"></a>';
 		$groups = explode(',', $row['allGroups']) ;
