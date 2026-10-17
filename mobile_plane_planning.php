@@ -27,7 +27,7 @@ require_once "dbi.php" ;
 MustBeLoggedIn() ;
 
 require_once 'mobile_header5.php' ;
-if (!($userIsAdmin or $userIsInstructor)) journalise($userId, "F", "Vous devez être admin ou FI pour voir cette page") ;
+if (!($userIsAdmin or $userIsInstructor or $userIsMechanic)) journalise($userId, "F", "Vous devez être admin, FI ou mécanicien pour voir cette page") ;
 
 ?>
 <div class="container-fluid">
@@ -97,7 +97,10 @@ while ($row = mysqli_fetch_array($result)) {
 		$cnDateString="?".$cnDateString."?";
 	}
 
-	print("<tr class=\"text-center\"><td><a href=\"plane_chart.php?id=$row[id]\">" . strtoupper($row['id']) . "</a></td><td>$current_value_pilot</td>") ;
+	$edit_link = '' ;
+	if ($userIsMechanic) // Mechanics can edit all the fields of the plane
+		$edit_link = " <a href=\"mobile_plane_update.php?id=" . urlencode($row['id']) . "\" class=\"ms-1\" title=\"Modifier l'avion\" aria-label=\"Modifier l'avion " . htmlspecialchars(strtoupper($row['id'])) . "\"><i class=\"bi bi-pencil-square\"></i></a>" ;
+	print("<tr class=\"text-center\"><td><a href=\"plane_chart.php?id=$row[id]\">" . strtoupper($row['id']) . "</a>$edit_link</td><td>$current_value_pilot</td>") ;
 	// Type_entretien... human encoding :-( 50h, 50h->200h, 100h
 	if (stripos($row['type_entretien'], '50h') === 0)
 		print("". GenCell($row['entretien']) . "<td></td><td></td>") ;
