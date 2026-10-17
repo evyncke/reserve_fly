@@ -20,12 +20,12 @@ require_once "dbi.php" ;
 MustBeLoggedIn() ;
 
 // Param plane
-$plane = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['plane'])) ;
+$plane = strtoupper(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['plane']))) ;
 
 $plane_result = mysqli_query($mysqli_link, "SELECT * FROM $table_planes WHERE id='$plane' AND ressource = 0")
-	or die("Cannot retrieve plane ($id): " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "F", "Cannot retrieve plane ($id): " . mysqli_error($mysqli_link)) ;
 $plane_row = mysqli_fetch_array($plane_result) ;
-if (! $plane_row) die("No such plane: $plane") ;
+if (! $plane_row) journalise($userId, "F", "No such plane: $plane") ;
 if ($plane_row['compteur_vol']) $plane_row['compteur'] = $plane_row['compteur_vol_valeur'] ;
 
 // Get all pictures of that plane
@@ -51,7 +51,7 @@ require_once 'mobile_header5.php' ;
 ?> 
 <div class="container-fluid">
 
-<h2><?=$plane?></h2>
+<h2><?=$plane?> (<?= $plane_row['model'] ?>)</h2>
 
 <div class="row">
 
@@ -97,6 +97,7 @@ foreach ($plane_pics as $pic) {
 
 <div class="col-md-8 col-sm-8">
 <table class="table table-responsive table-striped">
+	<tr><td>Modèle (année de fabrication)</td><td><?=$plane_row['model']?> (<?=$plane_row['fabrication']?>)</td></tr>
 	<tr><td>Consommation</td><td><?=$plane_row['consommation']?> litres/heure</td></tr>
 	<tr><td>Batterie</td><td><?=($plane_row['batterie'] == 0) ? 'Inconnu' : $plane_row['batterie'] . ' V'?></td></tr>
 	<tr><td>Prix de location</td><td><?=number_format($plane_row['cout'], 2, ',')?> &euro;/min (soit <?=number_format(60*$plane_row['cout'], 2, ',')?> &euro;/heure)</td></tr>
