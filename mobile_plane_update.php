@@ -34,7 +34,7 @@ if ($plane_id === '')
 $fields = array(
 	'type_entretien' => array('label' => 'Inspections: type', 'kind' => 'text', 'maxlength' => 30, 'list' => array('50h', '100h', '200h'),
 		'help' => 'Commence par 50h, 100h ou 200h: détermine la colonne 50h / 100h / 200h du tableau'),
-	'entretien' => array('label' => 'Inspections: 50h / 100h / 200h', 'kind' => 'number', 'help' => 'Prochaine échéance (heures moteur)'),
+	'entretien' => array('label' => 'Prochaine échéance', 'kind' => 'number', 'help' => ''),
 	'limite_moteur_heure' => array('label' => 'Time limit: Eng (heures)', 'kind' => 'number', 'help' => 'Heures moteur limites, -1 si N/A'),
 	'limite_moteur_12ans' => array('label' => 'Time limit: Eng (12 ans, date)', 'kind' => 'date'),
 	'limite_helice' => array('label' => 'Time limit: Prop (heures)', 'kind' => 'number', 'help' => 'Heures hélice limites, -1 si N/A'),
@@ -44,6 +44,8 @@ $fields = array(
 	'pesage' => array('label' => 'Pesage: 10 y (date)', 'kind' => 'date'),
 	'plb_date_limite' => array('label' => 'PLB: Date', 'kind' => 'date'),
 	'instrument_date_limite' => array('label' => 'Instruments: Date', 'kind' => 'date'),
+	'poids' => array('label' => 'Pesage: Poids à vide (lb)', 'kind' => 'number', 'help' => ''),
+	'bras' => array('label' => 'Pesage: Bras de levier (inch)', 'kind' => 'number', 'help' => '')
 ) ;
 
 function fetchPlane(string $plane_id) : array {

@@ -34,8 +34,8 @@ if (!($userIsAdmin or $userIsInstructor or $userIsMechanic)) journalise($userId,
 <h2>Echéances des avions</h2>
 <table class="col-sm-12 col-lg-8 table table-hover table-bordered table-striped">
 <thead>
-<tr class="text-center"><th>Plane</th> <th>Last index</th> <th colspan="3">Inspections</th>        <th colspan="2">Time limit</th> <th>Batterie</th>    <th>&lt; 30 days</th>            <th>Mag.</th> <th>Pesage</th><th>PLB</th><th>Instruments</th></tr>
-<tr class="text-center"><th>     </th> <th>                       </th> <th>50h</th><th>100h</th><th>200h</th>  <th>Eng</th><th>Prop</th>       <th>Date installation</th>    <th>CN</th>                      <th>500h</th> <th>10 y </th><th>Date</th><th>Date</th></tr>
+<tr class="text-center"><th>Plane</th> <th colspan="2">Last index</th> <th colspan="3">Inspections</th>        <th colspan="2">Time limit</th> <th>Batterie</th>    <th>&lt; 30 days</th>            <th>Mag.</th> <th>Pesage</th><th>PLB</th><th>Instruments</th></tr>
+<tr class="text-center"><th>     </th> <th>Index</th> <th>&Delta;</th> <th>50h</th><th>100h</th><th>200h</th>  <th>Eng</th><th>Prop</th>       <th>Date installation</th>    <th>CN</th>                      <th>500h</th> <th>10 y </th><th>Date</th><th>Date</th></tr>
 </thead>
 <tbody>
 <?php
@@ -69,7 +69,8 @@ $result = mysqli_query($mysqli_link, "SELECT * from $table_planes WHERE ressourc
 while ($row = mysqli_fetch_array($result)) {
 	$current_value = ($row['compteur_vol'] == 0) ? $row['compteur'] : $row['compteur_vol_valeur'] ;
 	$index_column = ($row['compteur_vol'] == 0) ? 'l_end_hour' : 'l_flight_end_hour' ;
-	$result2 = mysqli_query($mysqli_link, "select $index_column as compteur_pilote, l_end as compteur_pilote_date, concat(first_name, ' ', last_name) as compteur_pilote_nom 
+	$index_minute_column = ($row['compteur_vol'] == 0) ? 'l_end_minute' : 'l_flight_end_minute' ;
+	$result2 = mysqli_query($mysqli_link, "select $index_column as compteur_pilote, $index_minute_column as compteur_minute_pilote, l_end as compteur_pilote_date, concat(first_name, ' ', last_name) as compteur_pilote_nom 
 		from $table_logbook  l join $table_bookings r on l_booking = r_id join $table_person p on jom_id = if(l_audit_who <= 0, if(l_instructor is null, l_pilot, l_instructor), l_audit_who)
 		where l_plane = '$row[id]' and l_booking is not null and l_end_hour > 0
 		order by compteur_pilote_date desc limit 0,1")
@@ -77,8 +78,15 @@ while ($row = mysqli_fetch_array($result)) {
 
 	$row2 = mysqli_fetch_array($result2) ;
 	$current_value_pilot=0;
+	$current_value_minute_pilot=0;
+	$delta_entretien=0;
 	if (isset($row2['compteur_pilote'])) {
 		$current_value_pilot = $row2['compteur_pilote'] ;
+		$current_value_minute_pilot = $row2['compteur_minute_pilote'] ;
+		$delta_entretien=$row['entretien']-$current_value_pilot;
+		if($current_value_minute_pilot!=0)$delta_entretien--;
+		$delta_entretien=strval($delta_entretien).":".strval(60-$current_value_minute_pilot);
+		if($current_value_minute_pilot<10) $current_value_minute_pilot="0".$current_value_minute_pilot;
 	}
 
 	$cnDateString=$row['cn'];
@@ -100,7 +108,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$edit_link = '' ;
 	if ($userIsMechanic) // Mechanics can edit all the fields of the plane
 		$edit_link = " <a href=\"mobile_plane_update.php?id=" . urlencode($row['id']) . "\" class=\"ms-1\" title=\"Modifier l'avion\" aria-label=\"Modifier l'avion " . htmlspecialchars(strtoupper($row['id'])) . "\"><i class=\"bi bi-pencil-square\"></i></a>" ;
-	print("<tr class=\"text-center\"><td><a href=\"plane_chart.php?id=$row[id]\">" . strtoupper($row['id']) . "</a>$edit_link</td><td>$current_value_pilot</td>") ;
+	print("<tr class=\"text-center\"><td><a href=\"plane_chart.php?id=$row[id]\">" . strtoupper($row['id']) . "</a>$edit_link</td><td>$current_value_pilot:$current_value_minute_pilot</td><td>$delta_entretien</td>") ;
 	// Type_entretien... human encoding :-( 50h, 50h->200h, 100h
 	if (stripos($row['type_entretien'], '50h') === 0)
 		print("". GenCell($row['entretien']) . "<td></td><td></td>") ;
