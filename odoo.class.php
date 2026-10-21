@@ -84,7 +84,7 @@ class OdooClient {
         }
 
         $this->uid = $auth['result'];
-        if (! $this->uid) {
+        if (! $this->uid and $this->exitOnError) {
             journalise($originUserId, "E", "Odoo authentication failure for $user on $db @ $host");
         }
     }
@@ -123,6 +123,11 @@ class OdooClient {
     # Could also contain: array('offset'=>10, 'limit'=>5, 'order=>col1,col2')
     function SearchRead($model, $domain_filter, $display) {
         global $originUserId ;
+
+        if ($this->uid == NULL) {
+            journalise($originUserId, "E", "SearchRead: Odoo authentication has failed, returning NULL") ;
+            return NULL ;
+        }
 
         $result = $this->rpc("object", "execute_kw", [
             $this->db, $this->uid, $this->password,
@@ -189,7 +194,7 @@ class OdooClient {
             $this->db, $this->uid, $this->password,
             $model, "create", [$mapping]]);
         if (isset($result['error'])) {
-            $this->errorMessage = "Cannot search_read in Odoo model $model @ $this->host: " . 
+            $this->errorMessage = "Cannot create in Odoo model $model @ $this->host: " . 
                 htmlentities($result['error']['message']) . "Reason: '" . htmlentities($result['error']['data']['debug']) ;
             if ($this->debug)
                 die("<hr><b>$this->errorMessage</b><hr>") ;
