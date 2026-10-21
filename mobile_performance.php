@@ -59,6 +59,7 @@ if ($plane == '') {
   <button class="tablinks" onclick="openPerformance(event, 'W&B')" >W&B</button>
   <button class="tablinks" onclick="openPerformance(event, 'Take-off')" id="defaultOpen">Take-off</button>
   <button class="tablinks" onclick="openPerformance(event, 'Landing')">Landing</button>
+  <button class="tablinks" onclick="openPerformance(event, 'Conversion')">Conversion</button>
 </div>
 
 <div id="W&B" class="tabcontent">
@@ -407,6 +408,148 @@ if ($plane == '') {
 </div> <!---tabcontent Landing-->
 
 
+<div id="Conversion" class="tabcontent">
+   <div class="container-fluid">
+<?php  
+    $styleConverter='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-dark" style="background-color:PowderBlue;"';
+?>
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 justify-content-center"> <!--- col -->
+                <h2 class="text-center">Conversion d'unités</h2>
+                    <?php
+                        displayConvertUnit("Longueur");
+                        displayConvertUnit("Vitesse");
+                        displayConvertUnit("Masse");
+                        displayConvertUnit("Volume");
+                        displayConvertUnit("Température");
+                        displayConvertUnit("Ecart Température");
+                    ?>
+        <p class="d-none d-md-block text-bg-warning mx-auto fs-6" style="height: 20px; position: fixed; margin:0; bottom: 0px;">
+        <small>Ceci est un simple outil informatique, le pilote doit toujours vérifier si les valeurs semblent correctent
+        </small></p>
+
+    </div><!-- container-fluid -->
+</div> <!---tabcontent Convertion-->
+<?php
+//==============================================
+// Function: displayMesReservations
+// Purpose: 
+//==============================================
+function displayConvertUnit($unitType)
+{
+    $styleConverter='class="border border-3 border-secondary rounded-3 shadow p-2 m-1 text-dark" style="background-color:PowderBlue;"';
+?>
+    <div class="row">
+        <div <?= $styleConverter ?>>
+            <h4 class="text-center"><?= $unitType ?></h4>
+            <table class="table table-striped table-hover table-bordered table-condensed" style="margin-bottom: 0rem;width:95%;">
+            <!---
+            <thead>
+            <tr><th class="text-end py-0 py-md-1">Unité</th>
+                <th class="py-0 py-md-1 py-md-1">Valeur</th>
+            </tr>
+            </thead>
+            -->
+            <tbody class="table-divider">
+
+            <?php
+            if($unitType=="Longueur") {
+                //1. Length
+                print("<tr><td class=\"text-end py-0 py-md-1\">Mètre</td>") ;
+                // Length - m
+                print("<td class=\"py-0\"><input type=\"number\" id=\"id_conversion_length_m\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;m</td>") ;
+                print("</tr>") ;
+                // Length - ft
+                print("<tr><td class=\"text-end py-0 py-md-1\">Feet</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_length_ft\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;ft</td>") ;
+                print("</tr>") ;
+                // Length - km
+                print("<tr><td class=\"text-end py-0 py-md-1\">Kilomètre</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_length_km\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;km</td>") ;
+                print("</tr>") ;
+                // Length - nm
+                print("<tr><td class=\"text-end py-0 py-md-1\">Nautical Mile</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_length_nm\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;nm</td>") ;
+                print("</tr>") ;
+                // Length - sm
+                print("<tr><td class=\"text-end py-0 py-md-1\">Statute Mile</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_length_sm\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;mile</td>") ;
+                print("</tr>") ;
+                // Length - inch
+                print("<tr><td class=\"text-end py-0 py-md-1\">Inch</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_length_inch\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;inch</td>") ;
+                print("</tr>") ;
+            }
+            else if($unitType=="Vitesse") {
+                //2. Speed
+                print("<tr><td class=\"text-end py-0 py-md-1\">Kilomètre/heure</td>") ;
+                // Speed - km/h
+                print("<td class=\"py-0\"><input type=\"number\" id=\"id_conversion_speed_kmh\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;km/h</td>") ;
+                print("</tr>") ;
+                // Speed - ft
+                print("<tr><td class=\"text-end py-0 py-md-1\">Knot (nm/h)</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_speed_kt\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;kt</td>") ;
+                print("</tr>") ;
+                // Speed - MPH
+                print("<tr><td class=\"text-end py-0 py-md-1\">Mile/heure</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_speed_MPH\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;MPH</td>") ;
+                print("</tr>") ;
+                // Speed - m/min
+                print("<tr><td class=\"text-end py-0 py-md-1\">Mètre/minute</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_speed_m/min\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;m/min</td>") ;
+                print("</tr>") ;
+                // Speed - ft/min
+                print("<tr><td class=\"text-end py-0 py-md-1\">Feet/minute</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_speed_ft/min\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;ft/min</td>") ;
+                print("</tr>") ;
+                // Speed - m/s
+                print("<tr><td class=\"text-end py-0 py-md-1\">Mètre/seconde</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_speed_m/sec\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;m/sec</td>") ;
+                print("</tr>") ;
+            }
+            else if($unitType=="Masse") {
+                //3. Masse
+                print("<tr><td class=\"text-end py-0 py-md-1\">Kilogramme</td>") ;
+                // Poids - kg
+                print("<td class=\"py-0\"><input type=\"number\" id=\"id_conversion_mass_kg\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;kg</td>") ;
+                print("</tr>") ;
+                // Poids - lb
+                print("<tr><td class=\"text-end py-0 py-md-1\">Pound</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_mass_lb\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;lb</td>") ;
+                print("</tr>") ;
+                // Poids - litre AVGAS
+                print("<tr><td class=\"text-end py-0 py-md-1\">Litre AVGAS</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_mass_avgas\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;litre AVGAS</td>") ;
+                print("</tr>") ;
+            }
+            else if($unitType=="Volume") {
+                //4. Volume
+                print("<tr> <td class=\"text-end py-0 py-md-1\">Litre</td>") ;
+                // Volume - litre
+                print("<td class=\"py-0\"><input type=\"number\" id=\"id_conversion_volume_l\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;litre</td>") ;
+                print("</tr>") ;
+                // Volume - Gallon
+                print("<tr><td class=\"text-end py-0 py-md-1\">US Gallon</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_volume_ga\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;US Gallon</td>") ;
+                print("</tr>") ;
+                }
+            else if($unitType=="Température") {
+                //5. Temperature
+                print("<tr><td class=\"text-end py-0 py-md-1\">Degré Celsius</td>") ;
+                // Temperature - Celcius
+                print("<td class=\"py-0\"><input type=\"number\" id=\"id_conversion_temperature_C\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;&deg;C</td>") ;
+                print("</tr>") ;
+                // Temperature - Farenheid
+                print("<tr><td class=\"text-end py-0 py-md-1\">Degré Farenheid</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_temperature_F\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;&deg;F</td>") ;
+                print("</tr>") ;
+
+                }
+            else if($unitType=="Ecart Température") {
+                //6. Ecart temperature
+                print("<tr><td class=\"text-end py-0 py-md-1\">Ecart degré Celcius</td>") ;
+                // Ecart Temperature - Celcius
+                print("<td class=\"py-0\"><input type=\"number\" id=\"id_conversion_deltatemperature_C\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;&Delta;&deg;C</td>") ;
+                print("</tr>") ;
+                // Ecart Temperature - Farenheid
+                print("<tr><td class=\"text-end py-0 py-md-1\">Ecart degré Farenheid</td><td class=\"py-0\"><input type=\"number\" id=\"id_conversion_deltatemperature_F\" class=\"text-end py-0 py-md-1\" value=\"1\" style=\"width: 60%;\">&nbsp;&Delta;&deg;F</td>") ;
+                print("</tr>") ;
+            }
+?>
+            </tbody>
+            </table>
+            </div>
+    </div><!--col-->
+<?php
+}
+?>
+
 
 <script type="text/javascript">
     var rowCount = 7, density = [], 
@@ -450,7 +593,6 @@ function openPerformance(evt, cityName) {
   document.getElementById(cityName).style.display = "block";
   evt.currentTarget.className += " active";
 }
-
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
 </script>

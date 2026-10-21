@@ -95,10 +95,77 @@ function mobile_performance_page_loaded() {
         planeChanged();
     };
     
+
+    // Consersions
+    document.getElementById("id_conversion_length_m").onchange = function() {
+        lengthConversionChanged("m");
+    };
+    document.getElementById("id_conversion_length_ft").onchange = function() {
+        lengthConversionChanged("ft");
+    };
+    document.getElementById("id_conversion_length_km").onchange = function() {
+        lengthConversionChanged("km");
+    };
+    document.getElementById("id_conversion_length_nm").onchange = function() {
+        lengthConversionChanged("nm");
+    };
+    document.getElementById("id_conversion_length_sm").onchange = function() {
+        lengthConversionChanged("sm");
+    };
+    document.getElementById("id_conversion_length_inch").onchange = function() {
+        lengthConversionChanged("inch");
+    };
+    document.getElementById("id_conversion_speed_kmh").onchange = function() {
+        speedConversionChanged("kmh");
+    };
+    document.getElementById("id_conversion_speed_kt").onchange = function() {
+        speedConversionChanged("kt");
+    };
+    document.getElementById("id_conversion_speed_MPH").onchange = function() {
+        speedConversionChanged("MPH");
+    };
+    document.getElementById("id_conversion_speed_m/min").onchange = function() {
+        speedConversionChanged("m/min");
+    };
+    document.getElementById("id_conversion_speed_ft/min").onchange = function() {
+        speedConversionChanged("ft/min");
+    };
+    document.getElementById("id_conversion_speed_m/sec").onchange = function() {
+        speedConversionChanged("m/sec");
+    };
+    document.getElementById("id_conversion_mass_kg").onchange = function() {
+        massConversionChanged("kg");
+    };
+     document.getElementById("id_conversion_mass_lb").onchange = function() {
+        massConversionChanged("lb");
+    };
+     document.getElementById("id_conversion_mass_avgas").onchange = function() {
+        massConversionChanged("avgas");
+    };
+    document.getElementById("id_conversion_volume_l").onchange = function() {
+        volumeConversionChanged("l");
+    };
+     document.getElementById("id_conversion_volume_ga").onchange = function() {
+        volumeConversionChanged("ga");
+    };
+    document.getElementById("id_conversion_temperature_C").onchange = function() {
+        temperatureConversionChanged("C");
+    };
+    document.getElementById("id_conversion_temperature_F").onchange = function() {
+        temperatureConversionChanged("F");
+    };
+    document.getElementById("id_conversion_deltatemperature_C").onchange = function() {
+        deltaTemperatureConversionChanged("C");
+    };
+    document.getElementById("id_conversion_deltatemperature_F").onchange = function() {
+        deltaTemperatureConversionChanged("F");
+    };
+
     //document.getElementById("id_notedefrais_rowinput").style.display="none";
     //document.getElementById("id_submit_notedefrais").disabled=true;
     planeChanged();
     stationChanged("takeoff")
+    conversionInit();
 }
 
 //==============================================
@@ -956,6 +1023,108 @@ function setDisplayedValue(theValue, theMap, theKey)
         theMap[theKey+"/unit"]);
     theMap[theKey]=value;
 }
+//==============================================
+// Function: conversionInit
+// Purpose: 
+//==============================================
+function conversionInit()
+{
+    document.getElementById("id_conversion_length_m").value=1.0;
+    lengthConversionChanged("m");
+    document.getElementById("id_conversion_speed_kmh").value=1.0;
+    speedConversionChanged("kmh");
+    document.getElementById("id_conversion_mass_kg").value=1.0;
+    massConversionChanged("kg");
+    document.getElementById("id_conversion_volume_l").value=1.0;
+    volumeConversionChanged("l");
+    document.getElementById("id_conversion_temperature_C").value=1.0;
+    temperatureConversionChanged("C");
+    document.getElementById("id_conversion_deltatemperature_C").value=1.0;
+    deltaTemperatureConversionChanged("C");
+}
+//==============================================
+// Function: lengthConversionChanged
+// Purpose: 
+//==============================================
+function lengthConversionChanged(dimension)
+{
+    var value=Number(document.getElementById("id_conversion_length_"+dimension).value);
+    document.getElementById("id_conversion_length_m").value= convertToString(convertUnit(value, "length", dimension, "m"));
+    document.getElementById("id_conversion_length_ft").value= convertToString(convertUnit(value, "length", dimension, "ft"));
+    document.getElementById("id_conversion_length_km").value= convertToString(convertUnit(value, "length", dimension, "km"));
+    document.getElementById("id_conversion_length_nm").value= convertToString(convertUnit(value, "length", dimension, "nm"));
+    document.getElementById("id_conversion_length_sm").value= convertToString(convertUnit(value, "length", dimension, "sm"));
+    document.getElementById("id_conversion_length_inch").value= convertToString(convertUnit(value, "length", dimension, "inch"));
+}
+//==============================================
+// Function: speedConversionChanged
+// Purpose: 
+//==============================================
+function speedConversionChanged(dimension)
+{
+    var value=Number(document.getElementById("id_conversion_speed_"+dimension).value);
+    document.getElementById("id_conversion_speed_kmh").value= convertToString(convertUnit(value, "speed", dimension, "kmh"));
+    document.getElementById("id_conversion_speed_kt").value= convertToString(convertUnit(value, "speed", dimension, "kt"));
+    document.getElementById("id_conversion_speed_MPH").value= convertToString(convertUnit(value, "speed", dimension, "MPH"));
+    document.getElementById("id_conversion_speed_m/min").value= convertToString(convertUnit(value, "speed", dimension, "m/min"));
+    document.getElementById("id_conversion_speed_ft/min").value= convertToString(convertUnit(value, "speed", dimension, "ft/min"));
+    document.getElementById("id_conversion_speed_m/sec").value= convertToString(convertUnit(value, "speed", dimension, "m/sec"));
+}
+//==============================================
+// Function: massConversionChanged
+// Purpose: 
+//==============================================
+function massConversionChanged(dimension)
+{
+    var value=Number(document.getElementById("id_conversion_mass_"+dimension).value);
+    document.getElementById("id_conversion_mass_kg").value= convertToString(convertUnit(value, "mass", dimension, "kg"));
+    document.getElementById("id_conversion_mass_lb").value= convertToString(convertUnit(value, "mass", dimension, "lb"));
+    document.getElementById("id_conversion_mass_avgas").value= convertToString(convertUnit(value, "mass", dimension, "avgas"));
+}
+//==============================================
+// Function: volumeConversionChanged
+// Purpose: 
+//==============================================
+function volumeConversionChanged(dimension)
+{
+    var value=Number(document.getElementById("id_conversion_volume_"+dimension).value);
+    document.getElementById("id_conversion_volume_l").value= convertToString(convertUnit(value, "volume", dimension, "l"));
+    document.getElementById("id_conversion_volume_ga").value= convertToString(convertUnit(value, "volume", dimension, "ga"));
+}
+//==============================================
+// Function: temperatureConversionChanged
+// Purpose: 
+//==============================================
+function temperatureConversionChanged(dimension)
+{
+    var value=Number(document.getElementById("id_conversion_temperature_"+dimension).value);
+    document.getElementById("id_conversion_temperature_C").value= convertToString(convertUnit(value, "temperature", dimension, "C"));
+    document.getElementById("id_conversion_temperature_F").value= convertToString(convertUnit(value, "temperature", dimension, "F"));
+}
+//==============================================
+// Function: deltaTemperatureConversionChanged
+// Purpose: 
+//==============================================
+function deltaTemperatureConversionChanged(dimension)
+{
+    var value=Number(document.getElementById("id_conversion_deltatemperature_"+dimension).value);
+    document.getElementById("id_conversion_deltatemperature_C").value= convertToString(convertUnit(value, "temperature_delta", dimension, "C"));
+    document.getElementById("id_conversion_deltatemperature_F").value= convertToString(convertUnit(value, "temperature_delta", dimension, "F"));
+}
+//==============================================
+// Function: convertToString
+// Purpose: Convert the value into a string
+//==============================================
+
+function convertToString(value) 
+{
+    var absValue=Math.abs(value);
+    if(absValue<1.0) return value.toFixed(4);
+    if(absValue<10.0) return value.toFixed(3);
+    if(absValue<100.0) return value.toFixed(2);
+    if(absValue<1000.0) return value.toFixed();   
+    return  value.toFixed(0);
+}
 
 //==============================================
 // Function: convertUnit
@@ -968,22 +1137,89 @@ function convertUnit(value, unitType, unitInput, unitOutput)
         return value;
     }
     if(unitType=="length") {
-        if(unitInput=="ft" && unitOutput=="m") {
-            return value*0.3048;
+        if(unitOutput!="m") {
+            var value_m=convertUnit(value, unitType, unitInput, "m") ;
+            if(unitOutput=="ft") {
+                return value_m*3.28084;
+            }
+            if(unitOutput=="km") {
+                return value_m/1000.;
+            }
+            if(unitOutput=="nm") {
+                return value_m/1852.0;
+            }
+            if(unitOutput=="sm") {
+                return value_m/1604.24;
+            }
+           if(unitOutput=="inch") {
+                return value_m*39.3701;
+            }
         }
-        if(unitInput=="m" && unitOutput=="ft") {
-            return value*3.28084;
-        }
+        else {
+            if(unitInput=="ft") {
+                return value*0.3048;
+            }
+            if(unitInput=="km" ) {
+                return value*1000.;
+            }
+            if(unitInput=="nm") {
+                return value*1852;
+            }
+            if(unitInput=="sm") {
+                return value*1604.34;
+            }
+            if(unitInput=="inch") {
+                return value/39.3701;
+            }
+        }   
     }
     else if(unitType=="speed") {
-        if(unitInput=="MPH" && unitOutput=="ft/min") {
-            return value*5279.98687656/60.0;
+       if(unitOutput!="kmh") {
+            var value_m=convertUnit(value, unitType, unitInput, "kmh") ;
+            if(unitOutput=="kt") {
+                return value_m*0.539957;
+            }
+            if(unitOutput=="MPH") {
+                return value_m*0.621371;
+            }
+            if(unitOutput=="m/min") {
+                return value_m*0.277778*60.;
+            }
+            if(unitOutput=="ft/min") {
+                return value_m*0.911344*60.;
+            }
+            if(unitOutput=="m/sec") {
+                return value_m*0.277778;
+            }
         }
-       if(unitInput=="MPH" && unitOutput=="kt") {
-            return value*0.868976;
-        }
+        else {
+            if(unitInput=="kt") {
+                return value/0.539957;
+            }
+            if(unitInput=="MPH") {
+                return value/0.621371;
+            }
+            if(unitInput=="m/min") {
+                return value/0.277778/60.;
+            }
+            if(unitInput=="ft/min") {
+                return value/0.911344/60.;
+            }
+            if(unitInput=="m/sec") {
+                return value/0.277778;
+            }
+        }   
     }
-   else if(unitType=="temperature") {
+    else if(unitType=="volume") {
+         if(unitInput=="l" && unitOutput=="ga") {
+            return value*0.264172;
+        }
+        if(unitInput=="ga" && unitOutput=="l") {
+            return value/0.264172;
+        }
+
+    }
+     else if(unitType=="temperature") {
         if(unitInput=="C" && unitOutput=="F") {
             return value*9.0/5.0+32.0;
         }
@@ -1000,12 +1236,23 @@ function convertUnit(value, unitType, unitInput, unitOutput)
         }
     }
     else if(unitType=="mass") {
-        if(unitInput=="lb" && unitOutput=="kg") {
-            return value*0.453592;
+       if(unitOutput!="kg") {
+            var value_m=convertUnit(value, unitType, unitInput, "kg") ;
+            if(unitOutput=="lb") {
+                return value_m*2.20462;
+            }
+            if(unitOutput=="avgas") {
+                return value_m/0.72;
+            }
         }
-        if(unitInput=="kg" && unitOutput=="lb") {
-            return value*2.20462;
-        }
+        else {
+            if(unitInput=="lb") {
+                return value/2.20462;
+            }
+            if(unitInput=="avgas") {
+                return value*0.72;
+            }
+        }   
     }
     else {
         alert("ERROR:convertUnit: Unknown unitType="+unitType);
