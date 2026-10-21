@@ -136,6 +136,7 @@ function ShowEntryCell($line, $action, $dom_id, $col_name, $default_value, $inpu
 			print("<option value=\"$row[jom_id]\"" . (($default_value == $row['jom_id']) ? 'selected' : '') . ">$instructor_name</option>\n") ;
 		}
 		print("<option value=\"-1\"" . (($default_value == '-1') ? ' selected' : '') . ">Autre FI</option>\n") ;
+		print("<option value=\"-2\"" . (($default_value == '-2') ? ' selected' : '') . ">SELF=FI</option>\n") ;
 		print("</select>\n</td>\n") ;
 	}
 }
@@ -399,6 +400,11 @@ while ($row = mysqli_fetch_array($result)) {
 	if ($row['l_instructor'] == '' or $row['l_is_pic']) { // Solo, no instructor
 		$pic_grand_total_hour += $duration[0] ;
 		$pic_grand_total_minute += $duration[1] ;
+	} elseif ($row['l_instructor'] == -2) { // Special case, the owner is FI but not a club flight
+		$pic_grand_total_hour += $duration[0] ;
+		$pic_grand_total_minute += $duration[1] ;
+		$fi_grand_total_hour += $duration[0] ;
+		$fi_grand_total_minute += $duration[1] ;
 	} else 
 		if ($row['l_pilot'] == $owner) { // Dual command as student
 			$dual_grand_total_hour += $duration[0] ;
@@ -416,10 +422,13 @@ while ($row = mysqli_fetch_array($result)) {
 		// DB contains UTC time
 		$l_start = gmdate('H:i', strtotime("$row[l_start] UTC")) ;
 		$l_end = gmdate('H:i', strtotime("$row[l_end] UTC")) ;
-		if ($row['l_instructor'] < 0) $row['instructor_name'] = 'Autre FI' ;
+		if ($row['l_instructor'] == -1) 
+			$row['instructor_name'] = 'Autre FI' ;
+		elseif ($row['l_instructor'] == -2) 
+			$row['instructor_name'] = 'SELF=FI' ;
 		print("<tr>
 			<td class=\"logCell\">
-				<a href=\"$_SERVER[PHP_SELF]?action=edit&id=$row[l_id]&owner=$owner\" title=\"Modifier cette ligne\"><i class=\"bi bi-pencil-fill\"></i></a>
+				<a href=\"$_SERVER[PHP_SELF]?action=edit&id=$row[l_id]&owner=$owner\" title=\"Modifier cette ligne\"><i class=\"bi bi-pencil-square\"></i></a>
 				<a href=\"$_SERVER[PHP_SELF]?action=delete&id=$row[l_id]&owner=$owner\" title=\"Effacer cette ligne\"><i class=\"bi bi-trash-fill\"></i></a>
 			</td>
 			<td class=\"logCell\">$row[date]</td>
@@ -441,6 +450,20 @@ while ($row = mysqli_fetch_array($result)) {
 				\n") ;
 			$pic_total_hour += $duration[0] ;
 			$pic_total_minute += $duration[1] ;
+		} elseif ($row['l_instructor'] == -2) { // Special case, the owner is FI but not a club flight
+			print("<td class=\"logCell\">SELF</td>
+				<td class=\"logCell\">$row[l_day_landing]</td>
+				<td class=\"logCell\">$row[l_night_landing]</td>
+				<td class=\"logCell\">$duration[0]</td>
+				<td class=\"logCell\">$duration[1]</td>
+				<td class=\"logCell\"></td><td class=\"logCell\"></td>
+				<td class=\"logCell\">$duration[0]</td>
+				<td class=\"logCell\">$duration[1]</td>
+			\n") ;
+			$pic_total_hour += $duration[0] ;
+			$pic_total_minute += $duration[1] ;
+			$fi_total_hour += $duration[0] ;
+			$fi_total_minute += $duration[1] ;
 		} else { // Dual command
 			if ($row['l_pilot'] == $owner) { // Dual command as student
 				print("<td class=\"logCell\">$row[instructor_name]</td>

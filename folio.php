@@ -100,7 +100,10 @@ class FolioLine{
         // Vol PIC- Recheck : 
         // Pour le Pilote -> SELF
         // Pour l'Instructeur -> Pilote_name    
-        if ($row['l_instructor'] < 0) $row['instructor_name'] = 'Autre FI' ;
+        if ($row['l_instructor'] == -1) 
+            $row['instructor_name'] = 'Autre FI' ;
+        elseif ($row['l_instructor'] == -2) 
+            $row['instructor_name'] = 'SELF=FI' ;
         if ($row['l_instructor'] != $userId  and  $row['l_is_pic']) { // PIC 
             $this->pic_name = "SELF" ; //Pilot Point of View. A PIC-Recheck is SELF
         } else  // Dual command
