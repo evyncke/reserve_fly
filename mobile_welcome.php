@@ -286,7 +286,7 @@ function displayFolio()
 			$balance_text="?????";
 			require_once 'odoo.class.php' ;
 			$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password, FALSE) ;
-			if($odooClient) {
+			if($odooClient==NULL) {
 				print('<p class="lead">Solde Compte Pilote: <b class="text-danger bg-light">'.$balance_text.'&euro;</b></p>');
 			}
 			else {
