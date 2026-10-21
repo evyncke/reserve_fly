@@ -283,21 +283,26 @@ function displayFolio()
 		$odooId = $pilot['odoo_id'] ;
 
 		if ($odooId != '') {
-				$balance_text="?????";
+			$balance_text="?????";
 			require_once 'odoo.class.php' ;
-			$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-			$accounts = $odooClient->SearchRead('res.partner', array(array(
-						array('id', '=', intval($odooId))
-					)), 
-					array('fields' => array('id', 'total_due'))) ;
-			$balance = -1.0 * $accounts[0]['total_due'] ;
-			if ($balance < 0) {
-				$balance_text = number_format($balance,2,",",".");
-			} 
-			else {
-				$balance_text = "+".number_format($balance,2,",",".");
+			$odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password, FALSE) ;
+			if($odooClient) {
+				print('<p class="lead">Solde Compte Pilote: <b class="text-danger bg-light">'.$balance_text.'&euro;</b></p>');
 			}
-			print('<p class="lead">Solde Compte Pilote: <b class="text-danger bg-light">'.$balance_text.'&euro;</b></p>');
+			else {
+				$accounts = $odooClient->SearchRead('res.partner', array(array(
+							array('id', '=', intval($odooId))
+						)), 
+						array('fields' => array('id', 'total_due'))) ;
+				$balance = -1.0 * $accounts[0]['total_due'] ;
+				if ($balance < 0) {
+					$balance_text = number_format($balance,2,",",".");
+				} 
+				else {
+					$balance_text = "+".number_format($balance,2,",",".");
+				}
+				print('<p class="lead">Solde Compte Pilote: <b class="text-danger bg-light">'.$balance_text.'&euro;</b></p>');
+			}
 		} 
 		else { // Odoo account does not exist
 			$balance = 0 ;
