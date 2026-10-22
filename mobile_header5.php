@@ -368,7 +368,7 @@ if ($userIsAdmin or $userIsInstructor or $userIsBoardMember) {
 <?php
 }
 
-if ($userIsFlightManager) {
+if ($userIsFlightManager || $userIsFlightPilot || $userIsInstructor) {
 ?>
   <li class="nav-item dropdown me-auto me-md-0"> <!-- dropdown vol IF/INI -->
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Vols IF/INIT<span class="caret"></span></a>
