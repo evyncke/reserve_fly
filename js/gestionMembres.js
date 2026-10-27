@@ -440,6 +440,17 @@ function submitUnactivated(PHP_Self, action) {
 		}		
 	}
 }
+function deactivateMemberFunction(PHP_Self,action,theName,thePersonid) {
+	var aSearchText=document.getElementById("id_SearchInput").value;
+
+	if (confirm("Confirmez que vous voulez supprimer " + theName + " des membres du RAPCS (id="+thePersonid+")?") == true) {
+      		var aCommand=PHP_Self+"?deletemember=true&personid="+thePersonid;
+ 			if(aSearchText!="")	 {
+ 				aCommand+="&search="+aSearchText;
+ 			}
+      		 window.location.href = aCommand;
+	}
+}
 
 function createCotisationFunction(PHP_Self,action,theName,thePersonid,isMember) {
 	var aSearchText=document.getElementById("id_SearchInput").value;

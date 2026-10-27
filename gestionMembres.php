@@ -17,6 +17,7 @@
 */
 require_once 'dbi.php';
 require_once 'odooFlight.class.php';
+require_once 'mobile_tools.php';
 
 // Cotisation computed for year 
 $cotisationYear=$membership_year; // Set in dbi.php
@@ -38,6 +39,28 @@ $displayWebDeactivated=true;
 $searchText=""; 	
 if (isset($_REQUEST['search']) and $_REQUEST['search'] != '') {
 	$searchText=$_REQUEST['search'];
+}
+
+if (isset($_REQUEST['deletemember']) && $_REQUEST['deletemember']=="true") {
+	$personid="";
+	if (isset($_REQUEST['personid']) and $_REQUEST['personid'] != '') {
+		$personid=$_REQUEST['personid'];
+	}
+	if(!$userIsBoardMember) {
+		print("<p class=\"text-danger\"><b>Vous n'êtes pas autorisés à supprimer un membre.<br/>Seuls les membres de l'OA peuvent supprimer un membre !</b></p>");
+		journalise($userId, "I", "One FI try to delete a member $personid. Not allowed") ;
+	}
+	else {
+		mysqli_query($mysqli_link, "UPDATE $table_users SET block=1 WHERE id=$personid")
+    	or 
+		journalise($userId, "F", "Impossible de supprimer le membre $personid: " . mysqli_error($mysqli_link)) ;
+		$personName= MT_getName($personid);
+		print("<p class=\"text-danger\"><b>Le membre $personName ($personid) a été supprimé</b></p>");
+		$mailTo="vintens.ch@gmail.com,benoitmendes@hotmail.com,pendersbernard@gmail.com,patrick.reginster@me.com";
+		$subject="Suppression d'un membre du RAPCS";
+		$object="Bonjour,\n\nLe membre $personName a ete supprime de la liste des membres du RAPCS\n\n".MT_getName($userId);
+		MT_smtp_mail($mailTo,$subject,$object);
+	}
 }
 if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 	if(!$userIsBoardMember) {
@@ -105,7 +128,7 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 					journalise($userId, "W", "Member $personid is now blocked, $reasonWeb") ;
 				}
 				else {
-				    print("<b>Le membre $personid est déjà bloqué !</b></br>");	
+				    print("<p class=\"text-danger\"><b>Le membre $personid est déjà bloqué !</b></p>");	
 				}
 			}
 		}
@@ -555,7 +578,12 @@ datediff(current_date(), b_when) as days_blocked
 		if($blocked == 2) $blockedCount++;
 		print("<tr style='text-align: right'; $rowStyle>
 			<td><input type=\"checkbox\"> $count</td>
-		    <td style='text-align: right;'>$personid</td>");
+		    <td style='text-align: right;'>$personid&nbsp;
+				<a class=\"tooltip\" href=\"javascript:void(0);\" 
+					onclick=\"deactivateMemberFunction('$_SERVER[PHP_SELF]','deactivate','" .
+					str_replace("'", "\\'","$nom $prenom") . "','$personid')\">
+					<i class=\"bi bi-trash text-danger\"></i><span class='tooltiptext'>Click pour supprimer le membre</span>
+					</a></td>");
 		print("<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_ledger.php?user=$personid\">$odooReference<span class='tooltiptext'>Click pour afficher les opérations comptables</span></a></td>
 			<td style='text-align: left;'><a class=\"tooltip\" href=\"mobile_profile.php?displayed_id=$personid\">$row[last_name]<span class='tooltiptext'>Click pour editer le profile</span></a></td>
 			<td style='text-align: left;'>$row[first_name]</td>
