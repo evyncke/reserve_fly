@@ -318,6 +318,9 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 		print("<input type=\"submit\" value=\"Display Activated\" id=\"id_SubmitUnactivated\" onclick=\"submitUnactivated('$_SERVER[PHP_SELF]', 'Activated')\">&nbsp;&nbsp;");
 	}
 	print("<input type=\"submit\" value=\"Export\" id=\"id_SubmitExport\" onclick=\"submitExport('$_SERVER[PHP_SELF]')\">&nbsp;&nbsp;");
+	print("<p></p>");
+	$styleButton='class="btn btn-info text-light border border-1 border-secondary"';
+	print('<div class="d-flex"><a href="gestionMembres_removed.php" '.$styleButton.' role="button">Display Removed Members</a></div>');
 
 	
 ?>
