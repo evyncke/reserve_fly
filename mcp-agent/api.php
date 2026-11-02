@@ -422,7 +422,7 @@ function getMcpTools() {
         ],
         [
             'name' => 'get_planes',
-            'description' => 'Return aircraft/planes from the booking system',
+            'description' => 'Return aircraft/planes data (registration, model, tail number, engine maintenance deadline, engine index, ...)',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -483,8 +483,8 @@ function handleMcpRequest($payload) {
             'protocolVersion' => '2024-11-05',
             'capabilities' => ['tools' => ['listChanged' => false]],
             'resources' => ['subscribe' => false, 'listChanged' => false],
-            'serverInfo' => ['name' => '✈️ Royal Aero Para Clug de Spa (RAPCS) Flight club and school based in EBSP (Spa La Sauvenière airfield) MCP Agent', 
-                'version' => '1.2.4', 
+            'serverInfo' => ['name' => '✈️ Royal Aero Para Club de Spa (RAPCS) Flight club and school based in EBSP (Spa La Sauvenière) airfield MCP Agent', 
+                'version' => '1.2.5', 
                 'description' => '✈️ Provides access to bookings, members, invoices, students, logbooks, planes, incidents and weather data'],
             '_meta' => ['cacheScope' => 'public', 'ttlMs' => 3600000]
         ]];
