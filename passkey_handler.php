@@ -138,18 +138,10 @@ if ($action == 'webauthn_register') {
         exit;
     }
     $userId = $row['pk_userid'];
-    // Let's do the Joomla login now
-    $joomla_user = JFactory::getUser($userId);
-    $app = JFactory::getApplication('site');
-    $session = JFactory::getSession();
-    $session->set('user', $joomla_user);
-    $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
-    $joomla_user->save();
-    $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
-    $app->triggerEvent('onUserLogin', array(
-        (array) $joomla_user,
-        $options));
-        
+
+    // Let's do the Pseudo-Joomla login now
+    require_once "no_joomla.php" ;
+    $joomla_user = JoomlaUserIsAuthenticated($userId) ;
     mysqli_query($mysqli_link, "UPDATE $table_passkey 
         SET pk_last_use = NOW(), pk_last_device = '" . mysqli_real_escape_string($mysqli_link, $response['browser']) . "' 
         WHERE pk_credential_id = '" . mysqli_real_escape_string($mysqli_link, $credentialId) . "'")
