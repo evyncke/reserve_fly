@@ -75,7 +75,7 @@ function authenticateJoomlaUser(string $username, string $password): object|fals
 
 	$sql = "SELECT id, username, name, email, password
 			FROM $table_users
-			WHERE username = ? AND block = 0 AND (activation IS NULL OR activation = '')
+			WHERE username = ? AND block = 0
 			LIMIT 1";
 	$statement = mysqli_prepare($mysqli_link, $sql);
 	if ($statement === false || !mysqli_stmt_bind_param($statement, 's', $username)
