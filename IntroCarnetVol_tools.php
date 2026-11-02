@@ -4,7 +4,7 @@ require_once "dbi.php" ;
 
 function GetCompteurHour($Compteur) {
 	$aPos=strpos($Compteur,".");
-	if(!$aPos) {
+	if($aPos === false) {
 		return NULL;
 	}
 	return substr($Compteur,0,$aPos);
@@ -12,7 +12,7 @@ function GetCompteurHour($Compteur) {
 
 function GetCompteurMinute($Compteur) {
 	$aPos=strpos($Compteur,".");
-	if(!$aPos) {
+	if($aPos === false) {
 		return NULL;
 	}
 	return substr($Compteur,$aPos+1,strlen($Compteur)-$aPos-1);
@@ -26,7 +26,7 @@ function CheckVar($var) {
 	if(!isset($var)) {
 		$var='NULL';
 	}
-	else if(empty($var)) {
+	else if(empty($var) and $var != 0) {
 		$var='NULL';
 	}
 	return $var;
@@ -82,9 +82,6 @@ function GetFullRemarks( $theFraisCP,  $thePAX, $theRemarque, $theFraisDC) {
 
 // Add an incident in the Aircraft Technical Log 
 function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
-    global $mysqli_link, $table_incident_history, $userId ;
-    //if(1) return 76;
-    //print("AddATLIncident:Started: theLogId=$theLogId, thePlane=$thePlane, theSeverity=$theSeverity, theRemark=$theRemark<br>");
     if($theLogId==0) return false;
     if(!CheckIncidentCoherency($theLogId)){
         // The incident table is corrected!
@@ -142,7 +139,7 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
                 $incident->plane = $thePlane ;
                 $incident->severity = $theSeverity ;
                 $incident->save();
-                return $incident->id;;
+                return $incident->id;
             }
             else {
                 //print("AddATLIncident: the remark has changed!<br>");
@@ -156,20 +153,19 @@ function AddATLIncident($theLogId, $thePlane, $theSeverity, $theRemark) {
                 $event = new IncidentEvent() ;
                 $event->incident = $incident ;
                 $event->status = "opened";
-                $event->text = trim(web2db($theRemark));
+                $event->text = $theRemark;
                 $event->save() ;
-                return $incident->id;;
+                return $incident->id;
             }
     }
-    return 0;
 }
 
 // Remove all oil quantity associated to a BookId
 function RemoveAllHuileQuantityBooking($bookingid) {
-	global $mysqli_link, $table_logbook ;
+	global $mysqli_link, $table_logbook, $userId ;
 	$result = mysqli_query($mysqli_link, "select l_id
 			from $table_logbook where l_booking = $bookingid")
-		or die("Impossible de lire les entrees pour reservation $bookingid: " . mysqli_error($mysqli_link)) ;
+		or journalise($userId, "F", "Impossible de lire les entrées pour réservation $bookingid: " . mysqli_error($mysqli_link)) ;
 
 	while ($row = mysqli_fetch_array($result)) {
 			$logid=$row['l_id'];
@@ -180,7 +176,7 @@ function RemoveAllHuileQuantityBooking($bookingid) {
 //Remove Entry in the Topup table
 function RemoveHuileQuantity($logid)
 {   
-    global $mysqli_link, $table_planes_topup ;
+    global $mysqli_link, $table_planes_topup, $userId ;
     $sql = "DELETE FROM $table_planes_topup WHERE pt_log_id = $logid AND pt_item='oil'";
     mysqli_query($mysqli_link, $sql) 
          or journalise($userId, "F", "Cannot delete topup $logid: " . mysqli_error($mysqli_link)) ;
@@ -190,7 +186,7 @@ function RemoveHuileQuantity($logid)
 function GethuileQuantity($logid) 
 {
     //print("GethuileQuantity($logid) <br>");
-    global $mysqli_link, $table_planes_topup ;
+    global $mysqli_link, $table_planes_topup, $userId ;
     $sql = "SELECT pt_quantity FROM $table_planes_topup WHERE pt_log_id = $logid AND pt_item='oil'";
     //print("sql=$sql<br>");
     //if(1) return 3.0;
@@ -205,7 +201,7 @@ function GethuileQuantity($logid)
     return $quantity;
 }
 
-// Manage the oil quantity stored in the table $table_planes_topup = 'rapcs_planes_topup' ;
+// Manage the oil quantity stored in the table $table_planes_topup = '$table_planes_topup' ;
 function ManageHuileQuantity($logid, $planeId, $huileQuantity, $pilotId, $startDayTime, $engineStartHour,$engineStartMin)
 {
     global $userId, $mysqli_link, $table_planes_topup ;
@@ -453,8 +449,10 @@ function HasDTOFlight($theLogId) {
 
 // Returns true is the thePilotID is a student
 function IsStudent($thePilotID) {
-    global $mysqli_link, $table_user_usergroup_map,$joomla_student_group;
-	$studentResult=mysqli_query($mysqli_link,"SELECT user_id FROM $table_user_usergroup_map WHERE user_id = '$thePilotID' and group_id='$joomla_student_group';") or die("Impossible de retrouver le user_id dans table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
+    global $mysqli_link, $table_user_usergroup_map,$joomla_student_group, $userId;
+	$studentResult=mysqli_query($mysqli_link,"SELECT user_id FROM $table_user_usergroup_map 
+    WHERE user_id = '$thePilotID' AND group_id=$joomla_student_group") 
+    or journalise($userId, "F", "Impossible de retrouver le user_id=$thePilotID dans table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
 	if ($studentResult->num_rows != 0) {
         return true;
     }
