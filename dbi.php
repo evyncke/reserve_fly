@@ -266,11 +266,13 @@ function airport_opening_local_time(int $year, int $month, int $day): string {
 		return $today->format('U') ;
 }
 
+// Pfttt... A partir de ce dimanche 25 octobre 2026 et jusqu’au dimanche 31 janvier 2027, l’aérodrome de Spa – la Sauvenière vous accueillera de 09h00 à 17h00LT.
+
 function airport_closing_local_time(int $year, int $month, int $day): string {
 	if ($month >= 2 and $month <= 10)
-		$today = new Datetime("$year-$month-$day 19:00:00 GMT") ;
+		$today = new Datetime("$year-$month-$day 19:00:00 GMT") ; // Summer
 	else
-		$today = new Datetime("$year-$month-$day 16:00:00 GMT") ;
+		$today = new Datetime("$year-$month-$day 16:00:00 GMT") ; // Winter
 	$today_local = new Datetime("$year-$month-$day 08:00:00") ;
 	if ($today_local->format('O') == '+0200')
 		return $today->format('U') -3600 ;
