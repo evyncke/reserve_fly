@@ -374,7 +374,7 @@ if ($userIsFlightManager || $userIsFlightPilot || $userIsInstructor) {
     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">Vols IF/INIT<span class="caret"></span></a>
     <ul class="dropdown-menu">
     <li><h6 class="dropdown-header">Réservé aux pilotes vols IF/INIT</h6></li>
-    <li><a class="dropdown-item" href="flight_home.php">Menus Vol IF</a></li>
+    <li><a class="dropdown-item" href="flight_list.php?completed=false">Menus Vol IF</a></li>
     <li><a class="dropdown-item" href="https://1drv.ms/x/c/73f33d534cbe15a0/IQBlgaCC_BVWRpkyNHbASYcvAQ3-d5xOuQ8R5TxUvYeqL0c?e=Q28nGb">Planning Vols IF</a></li>
     <li><a class="dropdown-item" href="https://1drv.ms/x/c/73f33d534cbe15a0/IQCgFb5MUz3zIIBz3mkAAAAAAfdhUQTfOQarOpmG73a6NIM?e=BlrYk5">Membres invités DHF</a></li> 
     <!--Fichier onedrive dans Vols_INI_IF_SHARED Panning_Vols_INIT.xlsx-->
