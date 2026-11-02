@@ -360,7 +360,7 @@ function getMcpTools() {
         ],
         [
             'name' => 'get_users',
-            'description' => 'Return users/members from the plane booking system or a user by id',
+            'description' => 'Return users/members from the plane booking system or a user/member by id',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -434,7 +434,7 @@ function getMcpTools() {
         ],
         [
             'name' => 'get_incidents',
-            'description' => 'Return planes incident records',
+            'description' => 'Return aircfrats/planes incident records',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -455,7 +455,7 @@ function getMcpTools() {
         ],
         [
             'name' => 'get_weather',
-            'description' => 'Return current METAR text for EBSP airport (from nav.vyncke.org)',
+            'description' => 'Return current METAR weather text for EBSP airport (from nav.vyncke.org)',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => new stdClass(),
@@ -483,9 +483,9 @@ function handleMcpRequest($payload) {
             'protocolVersion' => '2024-11-05',
             'capabilities' => ['tools' => ['listChanged' => false]],
             'resources' => ['subscribe' => false, 'listChanged' => false],
-            'serverInfo' => ['name' => '✈️ RAPCS Flight club and school MCP Agent', 
-                'version' => '1.2.3', 
-                'description' => '✈️ Provides access to bookings, users, invoices, students, logbooks, planes, incidents and weather data'],
+            'serverInfo' => ['name' => '✈️ Royal Aero Para Clug de Spa (RAPCS) Flight club and school based in EBSP (Spa La Sauvenière airfield) MCP Agent', 
+                'version' => '1.2.4', 
+                'description' => '✈️ Provides access to bookings, members, invoices, students, logbooks, planes, incidents and weather data'],
             '_meta' => ['cacheScope' => 'public', 'ttlMs' => 3600000]
         ]];
     }
