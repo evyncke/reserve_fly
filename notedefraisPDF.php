@@ -51,7 +51,7 @@ function PDF_createNoteDeFrais($notedefraislines, $theRemboursable, $expenseRepo
 	$aNewAttachedFileName="";
 	if($attachedFileName!="") {
 		$aNewAttachedFileName=$nextExpenseReport."_".$attachedFileName;
-		str_replace($aNewAttachedFileName," ","");
+		$aNewAttachedFileName=str_replace(' ','_',$aNewAttachedFileName);
 		rename($notedefraisFolder."/".$attachedFileName,$notedefraisFolder."/".$aNewAttachedFileName);
 	}
 	//PDF
@@ -162,6 +162,7 @@ function PDF_MergeAttachedPDFFile($notedefraisFolder, $theNotedefraisPDFFile, $t
 			$pdf1 = new \setasign\Fpdi\Fpdi();
 			$files = array($file1, $file2);
 			foreach ($files as $file) {
+				//print("PDF_MergeAttachedPDFFile(file=$file)<br>");
 
 				$pageCount = $pdf1->setSourceFile($file);
 
@@ -176,7 +177,8 @@ function PDF_MergeAttachedPDFFile($notedefraisFolder, $theNotedefraisPDFFile, $t
 		}
 	}
 
-	return true;}
+	return true;
+}
 
 
 // Get the next note de frais number
