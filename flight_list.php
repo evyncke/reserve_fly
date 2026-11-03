@@ -140,10 +140,9 @@ while ($row = mysqli_fetch_array($result)) {
 	
 	$passenger="";
 
-	//print("SELECT *, SYSDATE() AS today FROM rapcs_pax_role join rapcs_pax ON p_id= pr_pax WHERE pr_flight=$row[f_id] and (pr_role='P' or pr_role='S')</br>");
-
-	$resultPassenger= mysqli_query($mysqli_link, "SELECT *, SYSDATE() AS today FROM rapcs_pax_role join rapcs_pax ON p_id= pr_pax 
-	WHERE pr_flight=$row[f_id] and (pr_role='P'or pr_role='S')")
+	$resultPassenger= mysqli_query($mysqli_link, "SELECT *, SYSDATE() AS today 
+		FROM $table_pax_role  JOIN $table_pax ON p_id= pr_pax 
+		WHERE pr_flight=$row[f_id] and (pr_role='P'or pr_role='S')")
 	or journalise($userId, "F", "Impossible de loader les passagers: " . mysqli_error($mysqli_link));
 	while ($rowPassenger = mysqli_fetch_array($resultPassenger)) {
 		$passenger=db2web($rowPassenger['p_fname']) . " <b>" . db2web($rowPassenger['p_lname']). "</b>";

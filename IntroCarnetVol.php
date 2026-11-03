@@ -198,8 +198,8 @@ $cars["color"] = "Red";
 print("<script>\n");
 print("var planes_properties=[\n");	
 	$result=mysqli_query($mysqli_link,"SELECT upper(id) as name,  cout, l_end_hour, l_end_minute, l_flight_end_hour, l_flight_end_minute, compteur_vol, compteur_type, model
-	FROM rapcs_planes p JOIN rapcs_logbook l ON p.id = l_plane 
-	WHERE l_id = (SELECT MAX(ll.l_id) FROM rapcs_logbook ll WHERE ll.l_plane = l.l_plane)
+	FROM $table_planes p JOIN $table_logbook l ON p.id = l_plane 
+	WHERE l_id = (SELECT MAX(ll.l_id) FROM $table_logbook ll WHERE ll.l_plane = l.l_plane)
 	and ressource = 0 and actif=1");
 	
 	while($row=mysqli_fetch_array($result)) {
@@ -685,7 +685,8 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
 	//print("</br>Check if the pilot is a student pilotId=$pilotId </br>");
 	//print("SELECT user_id FROM $table_user_usergroup_map WHERE user_id = '$pilotId' and group_id='$joomla_student_group';</br>");
 	// Look in the $table_user_usergroup_map if the pilot is a student
-	$studentResult=mysqli_query($mysqli_link,"SELECT user_id FROM $table_user_usergroup_map WHERE user_id = '$pilotId' and group_id='$joomla_student_group';") 
+	$studentResult=mysqli_query($mysqli_link,"SELECT user_id FROM $table_user_usergroup_map 
+		WHERE user_id = '$pilotId' AND group_id=$joomla_student_group") 
 		or journalise($userId, "F", "Impossible de retrouver le user_id=$pilotId dans table_user_usergroup_map: " . mysqli_error($mysqli_link)) ;
 	if ($studentResult->num_rows != 0) {
         if($logid!="") {
@@ -693,7 +694,7 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] != '') {
         }
         if(!HasDTOFlight($l_id)) {
     		//print("C'est aussi un eleve logid=$logid</br>");
-    		// Create a flight in the DTO table rapcs_dto_flight
+    		// Create a flight in the DTO table $table_dto_flight
     		$flight = new Flight() ;
     		$flight->flightLog = $l_id;
     		$flight->student= $pilotId;

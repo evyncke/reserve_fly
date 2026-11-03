@@ -17,7 +17,7 @@
 
    Introduction of a new member in DB
 
-   Tables company: (tables rapcs_company et rapcs_company_member).
+   Tables company: (tables $table_company et $table_company_member).
 */
 
 require_once "dbi.php" ;

@@ -444,16 +444,18 @@ loginButton.addEventListener('click', async () => {
 		});
 		console.log('After sending to verify-login:', verify);
 		if (verify.ok) { // TODO check content?
+            console.log("All is good, redirecting to the callback: <?= $callback ?>") ;
             const status = await verify.json();
 			feedback.innerHTML += '<div class="alert alert-success">Passkey Logged In! ' + status.message + '</div>';
             // if (confirm("Connexion réussie via Passkey. Appuyez sur OK pour continuer vers vos réservations (<?=$callback?>).")) {
             //    // User pressed OK 
-                window.location.href = "https://<?= SITE_HOST ?>/<?=$callback?>";
+            window.location.href = "https://<?= SITE_HOST ?>/<?=$callback?>";
             // } else {
             //     // User pressed Cancel
             //     console.log("User stayed on the page.");
             // }       
 		} else {
+            console.log("Alas, verify.ok==false, HTTP status: ", verify.status) ;
 			feedback.innerHTML += "<div class=\"alert alert-danger\">Passkey Login Failed! </div>";
 		}
 	} catch (e) {

@@ -63,8 +63,47 @@ function startSessionIfRequired(): bool {
 	return true ;
 }
 
+/**
+ * Load the groups of an authenticated Joomla user and create the application session.
+ * Shared by authenticateJoomlaUser() and JoomlaUserIsAuthenticated().
+ */
+function createJoomlaSession(int $userId, string $username, string $name, string $email): object|false {
+	global $table_user_usergroup_map, $mysqli_link ;
+
+	$statement = mysqli_prepare($mysqli_link,
+		"SELECT group_id FROM $table_user_usergroup_map WHERE user_id = ? ORDER BY group_id");
+	if ($statement === false || !mysqli_stmt_bind_param($statement, 'i', $userId)
+		|| !mysqli_stmt_execute($statement)) {
+		if ($statement !== false) {
+			mysqli_stmt_close($statement);
+		}
+		return false;
+	}
+	mysqli_stmt_bind_result($statement, $groupId);
+	$groups = [];
+	while (mysqli_stmt_fetch($statement)) {
+		$groups[(int) $groupId] = $groupId;
+	}
+	mysqli_stmt_close($statement);
+
+// TODO: analyse why the line below is called everytime in mobile_login
+//	session_regenerate_id(true);
+	$_SESSION['jom_id'] = $userId;
+	$pseudo_joomla_user = (object) [
+		'id' => $userId,
+		'username' => $username,
+		'name' => $name,
+		'email' => $email,
+		'guest' => false,
+	];
+	$pseudo_joomla_user->groups = $groups;
+	$_SESSION[PSEUDO_JOOMLA_KEY] = json_encode($pseudo_joomla_user, JSON_FORCE_OBJECT) ;
+
+	return $pseudo_joomla_user ;
+}
+
 function authenticateJoomlaUser(string $username, string $password): object|false {
-    global $table_user_usergroup_map, $table_users, $mysqli_link ;
+    global $table_users, $mysqli_link ;
 
 //	if (session_status() === PHP_SESSION_ACTIVE)
 //		journalise(0, "W", "authenticateJoomlaUser(): Session is already active when trying to authenticate Joomla user") ;
@@ -75,7 +114,7 @@ function authenticateJoomlaUser(string $username, string $password): object|fals
 
 	$sql = "SELECT id, username, name, email, password
 			FROM $table_users
-			WHERE username = ? AND block = 0 AND (activation IS NULL OR activation = '')
+			WHERE username = ? AND block = 0
 			LIMIT 1";
 	$statement = mysqli_prepare($mysqli_link, $sql);
 	if ($statement === false || !mysqli_stmt_bind_param($statement, 's', $username)
@@ -105,11 +144,24 @@ function authenticateJoomlaUser(string $username, string $password): object|fals
 	if (!$passwordMatches) {
 		return false;
 	}
+	return createJoomlaSession((int) $userId, (string) $storedUsername, (string) $name, (string) $email) ;
+}
 
-	$statement = mysqli_prepare(
-		$mysqli_link,
-		"SELECT group_id FROM $table_user_usergroup_map WHERE user_id = ? ORDER BY group_id"
-	);
+/**
+ * Create the application session for a user who has already been authenticated
+ * by other means (e.g., a token or an SSO callback): no username/password check.
+ * Returns the same kind of object as authenticateJoomlaUser(), or false when
+ * the user does not exist or is blocked.
+ */
+function JoomlaUserIsAuthenticated(int $userId): object|false {
+	global $table_users, $mysqli_link ;
+
+	if (!startSessionIfRequired()) {
+		return false;
+	}
+
+	$statement = mysqli_prepare($mysqli_link,
+		"SELECT id, username, name, email FROM $table_users WHERE id = ? AND block = 0 LIMIT 1");
 	if ($statement === false || !mysqli_stmt_bind_param($statement, 'i', $userId)
 		|| !mysqli_stmt_execute($statement)) {
 		if ($statement !== false) {
@@ -117,30 +169,14 @@ function authenticateJoomlaUser(string $username, string $password): object|fals
 		}
 		return false;
 	}
-
-	mysqli_stmt_bind_result($statement, $groupId);
-	$groups = [];
-	while (mysqli_stmt_fetch($statement)) {
-		# or ? $groups[$groupId] = $groupId;
-	    # $groups[(int) $groupId] = (int) $groupId;
-	    $groups[(int) $groupId] = $groupId;
-	}
+	mysqli_stmt_bind_result($statement, $foundId, $storedUsername, $name, $email);
+	$found = mysqli_stmt_fetch($statement);
 	mysqli_stmt_close($statement);
+	if (!$found) {
+		return false;
+	}
 
-// TODO: analyse why the line below is called everytime in mobile_login
-//	session_regenerate_id(true);
-	$_SESSION['jom_id'] = (int) $userId;
-	$pseudo_joomla_user = (object) [
-		'id' => (int) $userId,
-		'username' => $storedUsername,
-		'name' => $name,
-		'email' => $email,
-        'guest' => false,
-	];
-	$pseudo_joomla_user->groups = $groups;
-    $_SESSION[PSEUDO_JOOMLA_KEY] = json_encode($pseudo_joomla_user, JSON_FORCE_OBJECT) ;
-
-	return $pseudo_joomla_user ;
+	return createJoomlaSession((int) $foundId, (string) $storedUsername, (string) $name, (string) $email) ;
 }
 
 /**

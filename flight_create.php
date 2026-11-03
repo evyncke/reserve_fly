@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2024 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 /*
   Changement d'année: Le numéro du  vols INIT et IF commence par l'année (Ex:252692 en 2025)
-  ==================  Pour cela, il suffit de créer un vol IF et INIT le 1 janvier et editer ce nouveau vol dans la table RAPCS_FLIGHT et changer la valeur dans la colonne f_id
+  ==================  Pour cela, il suffit de créer un vol IF et INIT le 1 janvier et editer ce nouveau vol dans la table $TABLE_FLIGHT et changer la valeur dans la colonne f_id
                       de 242692 -> 252692. Tous les autres flights auront un f_id=f_id+1
 */
 

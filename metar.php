@@ -53,7 +53,7 @@ if (isset($_REQUEST['altitude']))
 else if ($metar_station == $default_metar_station)
 	$metar_altitude = $default_metar_altitude ;
 else {
-	$sql_result = mysqli_query($mysqli_link, "select * from $rapcs_metar where m_station = '$metar_station'") or die("Cannot retrieve altitude (user=$db_user, host=$db_host): " . mysqli_error($mysqli_link));
+	$sql_result = mysqli_query($mysqli_link, "select * from $table_metar where m_station = '$metar_station'") or die("Cannot retrieve altitude (user=$db_user, host=$db_host): " . mysqli_error($mysqli_link));
 	if ($sql_result) {
 		$row = mysqli_fetch_array($sql_result) ;
 		if ($row) {
