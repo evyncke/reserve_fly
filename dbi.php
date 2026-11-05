@@ -143,6 +143,7 @@ $joomla_superuser_group = 8 ;
 $joomla_pilot_group = 13 ;
 $joomla_student_group = 16 ;
 $joomla_flying_student_group = 16 ; // Flying students
+$joomla_flying_casual_group = 27 ; // Naviguant occasionnel
 $joomla_theory_student_group = 26 ; // Theory only students
 $joomla_instructor_group = 14 ;
 $joomla_instructor_group2 = 15 ;
@@ -182,11 +183,11 @@ else if (SITE_MAINTENANCE) {
 
 function CheckJoomlaUser(object $joomla_user) {
 	global $userIsPilot, $userIsAdmin, $userIsBoardMember, $userIsInstructor, $userIsMechanic,$userIsStudent, $userIsTheoryStudent, $userIsFlyingStudent,
-		$userIsFlightPilot, $userIsFlightManager, $userNoFlight, $userIsManualManager ;
+		$userIsFlightPilot, $userIsFlightManager, $userNoFlight, $userIsManualManager,$userIsFlyingCasual ;
 	global $userName, $userFullName, $userId, $originUserId, $use_joomla_authentication ;
 	global $joomla_admin_group, $joomla_sysadmin_group, $joomla_superuser_group, $joomla_board_group ;
 	global $joomla_pilot_group, $joomla_flying_student_group, $joomla_theory_student_group, $joomla_instructor_group, $joomla_instructor_group2, $joomla_mechanic_group ;
-	global $joomla_flight_group, $joomla_flight_pilot_group, $joomla_flight_manager_group, $joomla_no_flight ;
+	global $joomla_flight_group, $joomla_flight_pilot_group, $joomla_flight_manager_group, $joomla_no_flight,$joomla_flying_casual_group; ;
 
 	// And now use this information
 	if ($joomla_user->guest) {
@@ -221,6 +222,7 @@ function CheckJoomlaUser(object $joomla_user) {
 	$userIsFlightManager = array_key_exists($joomla_flight_manager_group, $joomla_groups) ;
 	$userNoFlight = array_key_exists($joomla_no_flight, $joomla_groups) ;
 	$userIsManualManager = ($userId==429) ; // Daniel Albrech manage manuals
+	$userIsFlyingCasual = array_key_exists($joomla_flying_casual_group, $joomla_groups) ;
 }
 
 function MustBeLoggedIn() {
