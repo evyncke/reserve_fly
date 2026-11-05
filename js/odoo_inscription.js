@@ -254,6 +254,11 @@ function updateFields(theField) {
  		document.getElementById("id_courstheorique_row").style.display="";
 	}
 
+    if(typemembre=="occasionnel"){
+        document.getElementById("id_cotisation").value="90.0";
+        document.getElementById("id_caution").value="non";
+    }
+
   	value=document.getElementById("id_societe").value;
     if(value=="") return false;
 	var societe=value;

@@ -344,11 +344,12 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 <th onclick="sortTable(11, false)">Membre non-navigant</th>
 <th onclick="sortTable(12, false)">Élève</th>
 <th onclick="sortTable(13, false)">Pilote</th>
-<th onclick="sortTable(14, false)">Membre Effectif</th>
-<th onclick="sortTable(15, true)">Cotisation</th>
-<th onclick="sortTable(16, true)">Solde</th>
-<th onclick="sortTable(17, false)">Status</th>
-<th onclick="sortTable(18, false)">Raison</th>
+<th onclick="sortTable(14, false)">Occasionnel</th>
+<th onclick="sortTable(15, false)">Membre Effectif</th>
+<th onclick="sortTable(16, true)">Cotisation</th>
+<th onclick="sortTable(17, true)">Solde</th>
+<th onclick="sortTable(18, false)">Status</th>
+<th onclick="sortTable(19, false)">Raison</th>
 </tr>
 </thead>
 <tbody id="myTable">
@@ -368,7 +369,7 @@ datediff(current_date(), b_when) as days_blocked
 	left join $table_membership_fees on bkf_user = p.jom_id and bkf_year = $cotisationYear
 	left join $table_blocked on u.id = b_jom_id
     left join $table_company_member on u.id=cm_member
-	where group_id in ($joomla_member_group, $joomla_theory_student_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group)
+	where group_id in ($joomla_member_group, $joomla_theory_student_group, $joomla_student_group, $joomla_pilot_group, $joomla_effectif_group, $joomla_flying_casual_group)
 	group by user_id
 	order by last_name, first_name" ;
 //print("$sql<br>");
@@ -381,6 +382,7 @@ datediff(current_date(), b_when) as days_blocked
 	$studentCount=0;
 	$effectifCount=0;
 	$pilotCount=0;
+	$occasionnelCount=0;
 	$blockedCount=0;
 	$soldeTotalPositif=0.0;
 	$soldeTotalNegatif=0.0;
@@ -428,6 +430,9 @@ datediff(current_date(), b_when) as days_blocked
 		$student = (in_array($joomla_student_group, $groups)) ? 
 			'<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Student" checked>' 
 			: '<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Student">'  ;
+		$occasionnel = (in_array($joomla_flying_casual_group, $groups)) ? 
+			'<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Occasionnel" checked><br>('.OF_getRegisterDate($personid).')'
+			: '<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Occasionnel">'  ;
 		$status=db2web($row['b_reason']);
 		$blocked=$row['block'];
 		$promotionEleve="";
@@ -462,6 +467,7 @@ datediff(current_date(), b_when) as days_blocked
 			$status="Web désactivé";
 			$pilote="";
 			$student="";
+			$occasionnel="";
 			$effectif="";
 		}
 		else if($status!="") {
@@ -480,7 +486,7 @@ datediff(current_date(), b_when) as days_blocked
 			*/
 		}
 		if($status=="") $status="OK";
-		if($blocked==1 || strpos($pilot, "checked") !== false || strpos($student, "checked") !== false) {
+		if($blocked==1 || strpos($pilot, "checked") !== false || strpos($student, "checked") !== false || strpos($occasionnel, "checked") !== false) {
 			$member='';
 		}
 		else {
@@ -576,6 +582,7 @@ datediff(current_date(), b_when) as days_blocked
 			if(strpos($member, "checked") !== false) $memberCount++;
 			if(strpos($student, "checked") !== false) $studentCount++;
 			if(strpos($pilot, "checked") !== false) $pilotCount++;
+			if(strpos($occasionnel, "checked") !== false) $occasionnelCount++;
 			if(strpos($effectif, "checked") !== false) $effectifCount++;
 		}
 		if($blocked == 2) $blockedCount++;
@@ -599,6 +606,7 @@ datediff(current_date(), b_when) as days_blocked
 			<td style='text-align: center;'>$member</td>
 			<td style='text-align: center;'>$student$promotionEleve</td>
 			<td style='text-align: center;'>$pilot</td>
+			<td style='text-align: center;'>$occasionnel</td>
 			<td style='text-align: center;'>$effectif</td>");
 
 		// Cotisation column. Nothing if web déactivé
@@ -675,6 +683,7 @@ datediff(current_date(), b_when) as days_blocked
 		<td>$memberCount</td>
 		<td>$studentCount</td>
 		<td>$pilotCount</td>
+		<td>$occasionnelCount</td>
 		<td>$effectifCount</td>
 		<td><div class='text-danger'>[$cotisationNonRenouveleeCount]</div><div>/$cotisationRenouveleeCount</div></td>");
 		$soldeTotalPositifText=number_format($soldeTotalPositif,2,",",".");
@@ -693,7 +702,7 @@ datediff(current_date(), b_when) as days_blocked
 // Change a user of group
 function GM_SetMemberGroup($personId, $memberType, $checked) 
 {
-	global  $joomla_member_group,$joomla_student_group,$joomla_pilot_group,$joomla_theory_student_group,$joomla_effectif_group;
+	global  $joomla_member_group,$joomla_student_group,$joomla_pilot_group,$joomla_theory_student_group,$joomla_effectif_group,$joomla_flying_casual_group;
 	global $userId;
 	global $mysqli_link,$table_user_usergroup_map;
 	//print("SetMemberGroup($personId, $memberType, $checked): Started");

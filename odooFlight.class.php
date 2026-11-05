@@ -151,7 +151,7 @@ function OF_FillFlightMaps(&$theReferenceIDMap) {
 //============================================
 function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMembership_year) {
     global $mysqli_link, $table_membership_fees, $userId, $userFullName;
-    global $non_nav_membership_product,$non_nav_membership_price,$membership_analytic_account;
+    global $non_nav_membership_product,$non_nav_membership_price,$membership_analytic_account,$nav_casual_membership_price;
     global $nav_membership_product,$nav_membership_price,$membership_analytic_account;
     //print("OF_createFactureCotisation($thePersonID, $theCotisationType):started<br>");
 
@@ -171,6 +171,11 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMember
         $non_nav_membership_price_corrected=$non_nav_membership_price_corrected*(12-$month)/12.0;
         $nav_membership_price_corrected=$nav_membership_price_corrected*(12-$month)/12.0;
     }
+    if($theCotisationType=="occasionnel") {
+        // One price 70 + 20 in 2026 at any time
+        $non_nav_membership_price_corrected=$non_nav_membership_price;
+        $nav_membership_price_corrected=$nav_casual_membership_price;
+    }
     $odooClient = OF_GetOdooClient();
     $invoice_lines = array() ;
     $invoice_lines[] = array(0, 0,
@@ -182,10 +187,10 @@ function OF_CreateFactureCotisation($thePersonID, $theCotisationType, $theMember
             'analytic_distribution' => array($membership_analytic_account => 100)
     )) ;
     $membership_price=$non_nav_membership_price_corrected;
-    if($theCotisationType=="naviguant") {
+    if($theCotisationType=="naviguant" || $theCotisationType=="occasionnel") {
         $invoice_lines[] = array(0, 0,
             array(
-                'name' => "Cotisation membre naviguant pour l'année $theMembership_year",
+                'name' => "Cotisation membre ".$theCotisationType." pour l'année $theMembership_year",
                 'product_id' => $nav_membership_product, 
                 'quantity' => 1,
                 'price_unit' => $nav_membership_price_corrected,
@@ -2096,7 +2101,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
 */
     global $table_users,$table_person,$table_user_usergroup_map,$table_company, $table_company_member;
     global $userId,$mysqli_link,$joomla_flying_student_group,$joomla_pilot_group,$joomla_member_group;
-    global $membership_year;
+    global $joomla_flying_casual_group,$membership_year;
 
     $insertFlag=true;
     $checkUsername=true;
@@ -2237,6 +2242,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
         // Insert like a pilot or a student
         $groupId=$joomla_flying_student_group;
         if($typemembre=="pilote") $groupId=$joomla_pilot_group;
+        if($typemembre=="occasionnel") $groupId=$joomla_flying_casual_group;
 
         //print("OF_CreateNewMember:typemembre=$typemembre joomla_flying_student_group=$joomla_flying_student_group groupId=$groupId joomla_pilot_group=$joomla_pilot_group<br>");
         $sql= "INSERT INTO $table_user_usergroup_map (user_id, group_id)
@@ -2304,6 +2310,7 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     //11. Create the invoice for caution + cotisation
     $cotisationType="naviguant";
     if($typemembre=="nonnaviguant") $cotisationType="nonnaviguant";
+    if($typemembre=="occasionnel") $cotisationType="occasionnel";
     if($insertOdooFlag) {
         if(!OF_CreateFactureCotisation($jom_id, $cotisationType,$membership_year)) {
             return "Impossible to create the invoice in Odoo!";
@@ -2379,6 +2386,7 @@ function OF_AddPartnerInOdoo(
     or journalise($userId, "E", "Cannot set Odoo customer for user #$row[jom_id]") ;
     //print("OF_AddPartnerInOdoo: $jom_id inserted in odoo partner=$odooid<br>");
 }
+
 function GetOdooAccount($code, $fullName) {
     static $cache = array() ;
    // print("GetOdooAccount:started<br>");
@@ -2426,5 +2434,20 @@ function GetOdooCategory($role) {
         $cache[$role] = $id ;
         return $id ;
     }
+}
+
+//============================================
+// Function: OF_getRegisterDate
+// Purpose: returns the register date of a user
+//============================================
+function OF_getRegisterDate($personId) {
+    global $mysqli_link, $table_users,$userId;
+
+    $result = mysqli_query($mysqli_link, "SELECT registerDate FROM $table_users WHERE id=$personId")
+    		or journalise($userId, "E", "Cannot read jom_users: " . mysqli_error($mysqli_link)) ;
+    while ($row = mysqli_fetch_array($result)) {
+        return substr($row['registerDate'],0,10);
+    }   
+    return "xxxx-xx-xx";
 }
 ?>

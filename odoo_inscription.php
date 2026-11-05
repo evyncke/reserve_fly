@@ -225,6 +225,7 @@ if (isset($_REQUEST['createmember']) and $_REQUEST['createmember'] == 'create') 
             <option value="nonnaviguant" <?=($typemembre=="nonnaviguant") ? "selected" :""?>>Membre non-naviguant</option>
             <option value="eleve" <?=($typemembre=="eleve") ? "selected" :""?>>Elève</option>
             <option value="pilote"<?=($typemembre=="pilote") ? "selected" :""?>>Pilote</option>
+            <option value="occasionnel"<?=($typemembre=="occasionnel") ? "selected" :""?>>Naviguant occasionnel</option>
         </select>
 	</div> <!-- col -->
 </div> <!-- row -->

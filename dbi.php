@@ -100,6 +100,7 @@ $non_nav_membership_product = 7 ;//product.product == cotisation club
 $nav_membership_product = 8 ;
 $non_nav_membership_price = 70.0 ; //2025
 $nav_membership_price = 200.0 ; //2025
+$nav_casual_membership_price = 20.0 ; //2026 (Then 70+20=90)
 $membership_analytic_account = 25  ;//account.analytic.account == cotication club
 
 $theoretical_tuition_price = 700;
