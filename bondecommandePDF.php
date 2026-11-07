@@ -116,7 +116,7 @@ function PDF_getBonDeCommandeNumber()
 {
 	global $userId ;
 
-	$myfile = fopen("uploads/bondecommande/bondecommande_number.txt", "r") or journalise($userId, "F", "Unable to open file uploads/bondedodmmande/dondedommande_number.txt!");
+	$myfile = fopen("uploads/bondecommande/bondecommande_number.txt", "r") or journalise($userId, "F", "Unable to open file uploads/bondedecommande/bondecommande_number.txt!");
 	$number=fgets($myfile);
 	fclose($myfile);
 	//print("PDF_getBonDeCommandeNumber():number=$number<br>");
