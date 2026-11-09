@@ -2153,7 +2153,6 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     }
     $hashPassword='$2y$10$cBt1zEWomm7NOKxtrQGES.skeauwcURaiEukb/IutAXS0hgbeB2AW';
     $registerDate=$dateinscription." 12:00:00";
-    $params='{"admin_style":"","admin_language":"","language":"fr-FR","editor":"","timezone":""}';
  
     //1. Check if the e-mail already exists (Only one time) in $table_users = 'jom_users'
     $sql= "SELECT email FROM $table_users WHERE email='$email'";
@@ -2207,8 +2206,8 @@ $table_membership_fees = 'rapcs_bk_fees' ;
     }
 
      //3. Insert the new member in the table $table_users = 'jom_users' (Name, username,...)
-    $sql= "INSERT INTO $table_users (name, username, email, password, registerDate, params)
-		    VALUES ('$fullName', '$username', '$email', '$hashPassword', '$registerDate', '$params')";
+    $sql= "INSERT INTO $table_users (name, username, email, password, registerDate)
+		    VALUES ('$fullName', '$username', '$email', '$hashPassword', '$registerDate')";
     //print("OF_CreateNewMember:$sql<br>");
     if($insertFlag) {
        $result = mysqli_query($mysqli_link, $sql)
