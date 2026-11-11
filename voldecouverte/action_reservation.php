@@ -85,9 +85,15 @@ if($flightdate2=="") {
 	// No date for Vol_Initiatiation
 	//$flightdate2=date('j-n-Y',time()+(1 * 24 * 60 * 60));
 }
-
-$heure=plages_horaire(intval($_POST["heure"]));
-$voldansles12mois=$_POST["voldansles12mois"];
+//print("action_reservation.php<br>");
+$heure="";
+if(isset($_POST["heure"])) {
+	$heure=plages_horaire(intval($_POST["heure"]));
+}
+$voldansles12mois="";
+if(isset($_POST["voldansles12mois"])) {
+	$voldansles12mois=$_POST["voldansles12mois"];
+}
 $remarque=$_POST["remarque"];
 $rapcsmember="non";
 if($voldansles12mois=="2") {

@@ -48,7 +48,7 @@ function offrir_page_loaded() {
 function check_field(theFieldId) {
     var aText=document.getElementById(theFieldId).value;
     if(aText=="") {
-        document.getElementById(theFieldId).style.backgroundColor = 'orange';
+        document.getElementById(theFieldId).style.backgroundColor = 'LightPink';
         return false;
     }
     document.getElementById(theFieldId).style.backgroundColor = 'white';
@@ -73,10 +73,12 @@ function check_fields() {
 function check_submit() {
     if(!check_fields()) {
         document.getElementById("id_submit").disabled=true;
+        document.getElementById("id_submit").style.backgroundColor = 'LightPink';
         document.getElementById("id_pleaseWait").innerHTML  = "";
         return false;
     }
     document.getElementById("id_submit").disabled=false;
+    document.getElementById("id_submit").style.backgroundColor = 'MediumSeaGreen';
 	document.getElementById("id_pleaseWait").innerHTML  = "";
     return true;
 }
