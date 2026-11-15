@@ -34,8 +34,6 @@ function offrir_page_loaded() {
     check_field("id_lastname2");
     document.getElementById("id_contactmail").onchange = function() {check_field("id_contactmail");check_submit();};
     check_field("id_contactmail");
-    document.getElementById("id_boitelettre").onchange = function() {check_field("id_boitelettre");check_submit();};
-    check_field("id_boitelettre");
     document.getElementById("id_ville").onchange = function() {check_field("id_ville");check_submit();};
     check_field("id_ville");
     document.getElementById("id_codepostal").onchange = function() {check_field("id_codepostal");check_submit();};
@@ -56,17 +54,48 @@ function check_field(theFieldId) {
 }
 //========================================================
 function check_fields() {
-    if(!check_field("id_typeofgift")) return false;
-    if(!check_field("id_rue")) return false;
-    if(!check_field("id_firstname1")) return false;
-    if(!check_field("id_lastname1")) return false;
-    if(!check_field("id_contactphone")) return false;
-    if(!check_field("id_firstname2")) return false;
-    if(!check_field("id_lastname2")) return false;
-    if(!check_field("id_contactmail")) return false;
-    if(!check_field("id_boitelettre")) return false;
-    if(!check_field("id_codepostal")) return false;
-    if(!check_field("id_ville")) return false;
+    if(!check_field("id_typeofgift")) {
+        sendErrorMessage("Le type de cadeau n'est pas sélectionné!")
+        return false;
+    }
+     if(!check_field("id_firstname1")) {
+        sendErrorMessage("Votre prénom n'est pas introduit!")
+        return false;
+    }
+    if(!check_field("id_lastname1")) {
+        sendErrorMessage("Votre nom  n'est pas introduit!")
+        return false;
+    }
+
+    if(!check_field("id_contactmail")) {
+        sendErrorMessage("Votre email n'est pas introduit!")
+        return false;
+    }
+    if(!check_field("id_contactphone")) {
+        sendErrorMessage("Le numéro de téléphone n'est pas introduit!")
+        return false;
+    }
+    if(!check_field("id_firstname2")) {
+        sendErrorMessage("Le prénom du destinataire n'est pas introduit!")
+        return false;
+    }
+    if(!check_field("id_lastname2")) {
+        sendErrorMessage("Le nom du destinatairen'est pas introduit!")
+        return false;
+    }
+    if(!check_field("id_rue")) {
+        sendErrorMessage("La rue n'est pas introduite!")
+        return false;
+    }
+    if(!check_field("id_codepostal")) {
+        sendErrorMessage("Le code postal n'est pas introduit!")
+        return false;
+    }
+    if(!check_field("id_ville")) {
+        sendErrorMessage("La ville n'est pas introduite!")
+        return false;
+    };
+    sendErrorMessage("")
     return true;
 }
 //========================================================
@@ -81,6 +110,10 @@ function check_submit() {
     document.getElementById("id_submit").style.backgroundColor = 'MediumSeaGreen';
 	document.getElementById("id_pleaseWait").innerHTML  = "";
     return true;
+}
+//========================================================
+function sendErrorMessage(theMessage) {
+    document.getElementById("id_errormessage").innerHTML  = theMessage;
 }
 //========================================================
 function submitFunction() {

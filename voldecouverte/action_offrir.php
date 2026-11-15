@@ -70,7 +70,6 @@ if(isset($_POST["nom_destinataire"])) {
 	$destinataire_option_name=$_POST["nom_destinataire"];
 }
 $rue=$_POST["rue"];
-$boitelettre=$_POST["boitelettre"];
 $codepostal=$_POST["codepostal"];
 $ville=$_POST["ville"];
 $pays=$_POST["pays"];
@@ -165,7 +164,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$fname = web2db($firstname1);
 		$email = $_REQUEST['contactmail'];
 		$tel = $contactphone;
-		$street = web2db("$rue $boitelettre");
+		$street = web2db("$rue");
 		$zip = $codepostal;
 		$city = web2db("$ville");
 		$country = web2db("$pays");
@@ -280,7 +279,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$message.="<br/>";
 		$message.="<b>Adresse de livraison du bon cadeau</b><br/>";
 		$message.="Destinataire du courrier: ".$destinataire_option_name."<br/>";
-		$message.="Adresse: ". $rue.", ".$boitelettre." - ". $codepostal." ". $ville." - ".$pays."<br/>";
+		$message.="Adresse: ". $rue." - ". $codepostal." ". $ville." - ".$pays."<br/>";
 		$message.="<br/>";
 		$message.="<b>Information sur le vol $flight_reference</b><br/>";
 		if ($typeofgift == "vol_decouverte") {
@@ -362,7 +361,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		} else {
 			$message.="Mail recipient: gift applicant<br/>";		
 		}
-		$message.="Address: ". $rue.", ".$boitelettre." - ". $codepostal." ". $ville." - ".$pays."<br/>";
+		$message.="Address: ". $rue." - ". $codepostal." ". $ville." - ".$pays."<br/>";
 		$message.="<br/>";
 
 		$message.="<b>Flight Information $flight_reference</b><br/>";				
@@ -449,7 +448,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
         <p>
 		<br/><br/><?php if($language=="french") {
 			echo("<i>Un mail contenant ce r&eacute;sum&eacute;, vous a &eacute;t&eacute; envoy&eacute;.<br/>");
-            echo("Si vous ne le recevez pas ou pour tout renseignement compl&eacute;mentaire, contactez nous aux adresses ci-dessous.<br/>");
+            echo("Si vous ne le recevez pas, v&eacute;rifiez dans vos spams. Pour tout renseignement compl&eacute;mentaire, contactez nous aux adresses ci-dessous.<br/>");
             echo("Adresse mail <a href='mailto:reservation@spa-aviation.be'>reservation@spa-aviation.be</a> ou num&eacute;ro de t&eacute;l&eacute;phone <a href='tel:+32470646828'>+32 (0)470 64 68 28</a></i>.");
 		}
 		else {

@@ -167,7 +167,7 @@ switch ($circuit) {
 </tr>
 <tr>
 <td style="width: 25.770293824701195%;">Rue et numéro:</td>
-<td style="width: 71.2297061752988%;"><input id="id_rue" style="width: 70%;" name="rue" required="" size="30" type="text" placeholder="rue" /> <input id="id_boitelettre" style="width: 20%;" name="boitelettre" required="" size="10" type="text" placeholder="boite lettre" /></td>
+<td style="width: 71.2297061752988%;"><input id="id_rue" style="width: 100%;" name="rue" required="" size="30" type="text" placeholder="rue et numéro" /></td>
 </tr>
 <tr>
 <td style="width: 25.770293824701195%;">Code Postal:</td>
@@ -197,7 +197,7 @@ switch ($circuit) {
 </tbody>
 </table>
 <p id="id_pleaseWait" style="font-size: 16pt; color: #ff0000;">Please wait</p>
-<p align="center">      <input id="id_submit" type="submit" value="Envoyer la demande" />     Nous vous contacterons dans les plus brefs délais.</p>
+<p align="center"><input id="id_submit" type="submit" value="Envoyer la demande" /> <span id="id_errormessage" style="color:red;"></span><br> Un mail vous sera envoyé. Vérifiez vos spams.<br>Nous vous contacterons dans les plus brefs délais.</p>
 </form>
 <p><span style="font-family: courier new, courier, monospace;">
 <script src="https://www.spa-aviation.be/resa/voldecouverte/offrir_bons.js"></script></span></p>
