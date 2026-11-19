@@ -60,7 +60,7 @@ function check_fields() {
     if(!check_fields_passager("1")) return false;
     var nbrPassagers=document.getElementById("id_numberofpassagers").value;
     if(nbrPassagers>=2 && !check_fields_passager("2")) return false;
-    if(nbrPassagers>=2 && !check_fields_passager("3")) return false;
+    if(nbrPassagers>=3 && !check_fields_passager("3")) return false;
 
     if(!check_field("id_contactmail")) {
         sendErrorMessage("Votre mail n'est pas introduit!")
