@@ -93,39 +93,39 @@ switch ($circuit) {
 <td style="width: 80%; vertical-align: top;">
     <input id="id_firstname1" name="firstname1" required="" size="20" type="text" placeholder="Prénom" /> 
     <input id="id_lastname1"  name="lastname1" required="" size="20" type="text" placeholder="Nom du contact" /><br>
-&nbsp;<select name="age1">
+&nbsp;<select id="id_age1" name="age1">
 <option disabled="disabled" selected="selected" value="">Age</option>
 <option value="&lt; 12 ans">&lt; 12 ans</option>
 <option value="&lt; 18 ans">&lt; 18 ans</option>
 <option value="&gt;= 18 ans">&gt;= 18 ans</option>
 </select>
-<br><input max="120" min="20" name="weight1" size="3" type="number" value=""  placeholder="Poids" /></td>
+<br><input max="120" min="20" id="id_weight1" name="weight1" size="3" type="number" value=""  placeholder="Poids" /></td>
 </tr>
 <tr id="id_passager2_row">
 <td style="width: 20%; vertical-align: top;">Passager 2</td>
 <td style="width: 80%; vertical-align: top;">
-    <input name="firstname2" size="20" type="text" placeholder="Prénom" /> 
-    <input name="lastname2" size="20" type="text" placeholder="Nom" /><br>
-&nbsp;<select name="age2">
+    <input id="id_firstname2" name="firstname2" size="20" type="text" placeholder="Prénom" /> 
+    <input id="id_lastname2" name="lastname2" size="20" type="text" placeholder="Nom" /><br>
+&nbsp;<select id="id_age2" name="age2">
 <option disabled="disabled" selected="selected" value="">Age</option>
 <option value="&lt; 12 ans">&lt; 12 ans</option>
 <option value="&lt; 18 ans">&lt; 18 ans</option>
 <option value="&gt;= 18 ans">&gt;= 18 ans</option>
 </select><br>
-<input max="120" min="20" name="weight2" size="3" type="number" value=""  placeholder="Poids"/></td>
+<input max="120" min="20" id="id_weight2" name="weight2" size="3" type="number" value=""  placeholder="Poids"/></td>
 </tr>
 <tr id="id_passager3_row">
 <td style="width: 20%; vertical-align: top;">Passager 3</td>
 <td style="width: 80%; vertical-align: top;">
-    <input name="firstname3" size="20" type="text" placeholder="Prénom" /> 
-    <input name="lastname3" size="20" type="text" placeholder="Nom" /><br>
-&nbsp;<select  name="age3">
+    <input id="id_firstname3" name="firstname3" size="20" type="text" placeholder="Prénom" /> 
+    <input id="id_lastname3" name="lastname3" size="20" type="text" placeholder="Nom" /><br>
+&nbsp;<select  id="id_age3" name="age3">
 <option disabled="disabled" selected="selected" value="">Age</option>
 <option value="&lt; 12 ans">&lt; 12 ans</option>
 <option value="&lt; 18 ans">&lt; 18 ans</option>
 <option value="&gt;= 18 ans">&gt;= 18 ans</option>
 </select>
-<input max="120" min="20" name="weight3" size="3" type="number" value="" placeholder="Poids"/></td>
+<input max="120" min="20" id="id_weight3" name="weight3" size="3" type="number" value="" placeholder="Poids"/></td>
 </tr>
 </tbody>
 </table>
@@ -187,7 +187,8 @@ switch ($circuit) {
 </tr>
 </tbody>
 </table>
-<p align="center"><input id="id_submit" type="submit" value="Envoyer la demande" /> </p>
+<p align="center"><input id="id_submit" type="submit" value="Envoyer la demande" />  <span id="id_errormessage" style="color:red;"></span>
+<br> Un mail vous sera envoyé. Vérifiez vos spams.<br>Nous vous contacterons dans les plus brefs délais.</p>
 <p id="id_pleaseWait" style="font-size: 16pt; color: #ff0000;">Please wait</p>
 </form>
 <script src="https://www.spa-aviation.be/resa/voldecouverte/script_reservation.js">
