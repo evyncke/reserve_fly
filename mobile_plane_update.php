@@ -39,13 +39,17 @@ $fields = array(
 	'limite_moteur_12ans' => array('label' => 'Time limit: Eng (12 ans, date)', 'kind' => 'date'),
 	'limite_helice' => array('label' => 'Time limit: Prop (heures)', 'kind' => 'number', 'help' => 'Heures hélice limites, -1 si N/A'),
 	'batterie_date' => array('label' => 'Batterie: Date installation', 'kind' => 'date'),
+	'batterie' => array('label' => 'Batterie: Volt(V)', 'kind' => 'number'),
 	'cn' => array('label' => 'Certificat Navigabilité', 'kind' => 'cn', 'help' => 'Jour et mois du certificat de navigabilité, format JJ-MM'),
 	'limite_magnetos' => array('label' => 'Mag.: 500h (heures)', 'kind' => 'number', 'help' => 'Heures limites des magnétos, -1 si N/A'),
 	'pesage' => array('label' => 'Pesage: 10 y (date)', 'kind' => 'date'),
 	'plb_date_limite' => array('label' => 'PLB: Date', 'kind' => 'date'),
 	'instrument_date_limite' => array('label' => 'Instruments: Date', 'kind' => 'date'),
 	'poids' => array('label' => 'Pesage: Poids à vide (lb)', 'kind' => 'number', 'help' => ''),
-	'bras' => array('label' => 'Pesage: Bras de levier (inch)', 'kind' => 'number', 'help' => '')
+	'bras' => array('label' => 'Pesage: Bras de levier (inch)', 'kind' => 'number', 'help' => ''),
+	'model' => array('label' => 'Modèle', 'kind' => 'text', 'help' => 'Type d avion'),
+	'fabrication' => array('label' => 'Année de fabrication', 'kind' => 'number', 'help' => ''),
+	'engine' => array('label' => 'Type de moteur', 'kind' => 'text', 'help' => '')
 ) ;
 
 function fetchPlane(string $plane_id) : array {
