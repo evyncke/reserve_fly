@@ -53,7 +53,8 @@ function listPdfFiles($dir, $collapsed = false) {
         } elseif (pathinfo($file, PATHINFO_EXTENSION) === 'pdf') {
             // If it's a PDF file, list it
             $filenameWithoutExtension = pathinfo($file, PATHINFO_FILENAME);
-            echo '<li><a href="/www/' . htmlspecialchars($filePath) . '"><i class="bi bi-file-earmark-pdf"></i> ' . htmlspecialchars($filenameWithoutExtension) . '</a></li>';
+            echo '<li><a href="/www/' . htmlspecialchars($filePath) . '"><i class="bi bi-file-earmark-pdf"></i> ' . htmlspecialchars($filenameWithoutExtension) . '</a>' .
+                ' <small class="text-muted">(' . number_format(filesize($filePath) / 1024, 0, ',', ' ') . ' kB, ' . date('Y-m-d', filemtime($filePath)) . ')</small></li>';
         }
     }
     echo '</ul>';
