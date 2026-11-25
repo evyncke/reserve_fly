@@ -56,7 +56,7 @@ if (isset($_REQUEST['deletemember']) && $_REQUEST['deletemember']=="true") {
 		journalise($userId, "F", "Impossible de supprimer le membre $personid: " . mysqli_error($mysqli_link)) ;
 		$personName= MT_getName($personid);
 		print("<p class=\"text-danger\"><b>Le membre $personName ($personid) a été supprimé</b></p>");
-		$mailTo="vintens.ch@gmail.com,benoitmendes@hotmail.com,pendersbernard@gmail.com,patrick.reginster@me.com";
+		$mailTo="vintens.ch@gmail.com,benoitmendes@hotmail.com,pendersbernard@gmail.com,patrick.reginster@me.com"; // Eric: this should be in dbi.php as $boardMailTo or similar
 		$subject="Suppression d'un membre du RAPCS";
 		$object="Bonjour,\n\nLe membre $personName a ete supprime de la liste des membres du RAPCS\n\n".MT_getName($userId);
 		MT_smtp_mail($mailTo,$subject,$object);
@@ -65,15 +65,17 @@ if (isset($_REQUEST['deletemember']) && $_REQUEST['deletemember']=="true") {
 if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 	if(!$userIsBoardMember) {
 		print("<p class=\"text-danger\"><b>Vous n'êtes pas autorisés à débloquer un membre.<br/>Seuls les membres de l'OA peuvent débloquer un membre !</b></p>");
-		journalise($userId, "I", "One FI try to unblock a member $personid. Not allowed") ;
+		journalise($userId, "I", "One FI try to unblock a member. Not allowed") ;
 	}
 	else {
-		$personid="";
 		if (isset($_REQUEST['personid']) and $_REQUEST['personid'] != '') {
 			$listpersonid=$_REQUEST['personid'];
 		}
 		else if (isset($_REQUEST['listpersonid']) and $_REQUEST['listpersonid'] != '') {
 			$listpersonid=$_REQUEST['listpersonid'];
+		}
+		else {
+			journalise($userId, "F", "No member selected wile trying to block/unblock a member") ;
 		}
 		$personids=explode(",",$listpersonid);
 		
@@ -90,10 +92,8 @@ if (isset($_REQUEST['block']) or isset($_REQUEST['unblock'])) {
 					mysqli_query($mysqli_link, "delete from $table_blocked where b_jom_id=$personid") 
 						or journalise($userId, 'F', "Cannot delete $personid from $table_blocked: " . mysqli_error($mysqli_link)) ;
 					if (mysqli_affected_rows($mysqli_link) > 0) {
-						$insert_message = "Table blocked  mise à jour" ;
 						journalise($userId, 'I', "$table_blocked entry deleted for person $personid.") ;
 					} else {
-						$insert_message = "Impossible d'effacer la ligne dans la $table_blocked" ;
 						journalise($userId, 'E', "Error (" . mysqli_error($mysqli_link). ") while deleting person entry for person $personid.") ;
 					}			
 					print("<b>Le membre $personid a été débloqué</b></br>");
@@ -187,7 +187,7 @@ if (isset($_REQUEST['createcourstheorique'])) {
 }
 
 // Handle checkboxes toggling, i.e., add or remove from group
-if (isset($_REQUEST['checkboxId']) and $_REQUEST['checkboxId'] != '' and isset($_REQUEST['checked']) and $_REQUEST['checked'] != '') {
+if (isset($_REQUEST['checkboxId']) and $_REQUEST['checkboxId'] != '' and strpos($_REQUEST['checkboxId'], '-') !== false and isset($_REQUEST['checked']) and $_REQUEST['checked'] != '') {
 	$checked=$_REQUEST['checked'];
 	$parts = explode('-', $_REQUEST['checkboxId']);
 	$personId = $parts[1];
@@ -292,17 +292,17 @@ print("<b>Cotisation pour l'année $cotisationYear</b><br>");
   print("<input class=\"form-control\" id=\"id_SearchInput\" type=\"text\" placeholder=\"Search..\" value=\"$searchText\">");
 ?>
   <br>&nbsp;&nbsp;Display only:
-  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterSelected" name="name_FilterSelected" value="Selected" onclick="filterSelected();" ><label for="name_FilterSelected">&nbsp;Selected</label>
-  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows1" name="name_FilterRows1" value="Blocked" onclick="filterRows(1,'Blocked','');" ><label for="name_Blocked">&nbsp;Blocked</label>
-  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows2" name="name_FilterRows2" value="negativeValue" onclick="filterRows(2,'','<');" ><label for="name_negativeValue">&nbsp;Negative Value</label>
-  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows3" name="name_FilterRows3" value="negativeValue" onclick="filterRows(3,'NotBlocked','<');" ><label for="name_negativeValue">&nbsp;Negative Value & Not Blocked</label>
-  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows4" name="name_FilterRows4" value="negativeValue" onclick="filterRows(4,'Blocked','>');" ><label for="name_negativeValue">&nbsp;Positive Value & Blocked</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterSelected" name="name_FilterSelected" value="Selected" onclick="filterSelected();" ><label for="id_FilterSelected">&nbsp;Selected</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows1" name="name_FilterRows1" value="Blocked" onclick="filterRows(1,'Blocked','');" ><label for="id_FilterRows1">&nbsp;Blocked</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows2" name="name_FilterRows2" value="negativeValue" onclick="filterRows(2,'','<');" ><label for="id_FilterRows2">&nbsp;Negative Value</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows3" name="name_FilterRows3" value="negativeValue" onclick="filterRows(3,'NotBlocked','<');" ><label for="id_FilterRows3">&nbsp;Negative Value & Not Blocked</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows4" name="name_FilterRows4" value="negativeValue" onclick="filterRows(4,'Blocked','>');" ><label for="id_FilterRows4">&nbsp;Positive Value & Blocked</label>
   <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows5" name="name_FilterRows5" value="sanscotisation" onclick="filterRows(5,'membre','sanscotisation');" ><label for="name_sanscotisation">&nbsp;Sans Cotisation</label>
-  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows6" name="name_FilterRows6" value="membre" onclick="filterRows(6,'membre','nonnaviguant');" ><label for="name_nonnaviguant">&nbsp;Membres non naviguant</label>
-  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows7" name="name_FilterRows7" value="membre" onclick="filterRows(7,'membre','eleve');" ><label for="name_eleve">&nbsp;Elèves</label>
-  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows8" name="name_FilterRows8" value="membre" onclick="filterRows(8,'membre','pilote');" ><label for="name_pilote">&nbsp;Pilotes</label>
-  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows9" name="name_FilterRows9" value="membre" onclick="filterRows(9,'membre','effectif');" ><label for="name_effectif">&nbsp;Membres effectifs</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows5" name="name_FilterRows5" value="sanscotisation" onclick="filterRows(5,'membre','sanscotisation');" ><label for="id_FilterRows5">&nbsp;Sans Cotisation</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows6" name="name_FilterRows6" value="membre" onclick="filterRows(6,'membre','nonnaviguant');" ><label for="id_FilterRows6">&nbsp;Membres non naviguant</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows7" name="name_FilterRows7" value="membre" onclick="filterRows(7,'membre','eleve');" ><label for="id_FilterRows7">&nbsp;Elèves</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows8" name="name_FilterRows8" value="membre" onclick="filterRows(8,'membre','pilote');" ><label for="id_FilterRows8">&nbsp;Pilotes</label>
+  &nbsp;&nbsp;<input type="checkbox" class="form-check-input" id="id_FilterRows9" name="name_FilterRows9" value="membre" onclick="filterRows(9,'membre','effectif');" ><label for="id_FilterRows9">&nbsp;Membres effectifs</label>
   <br>
 <?php
 print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
@@ -326,9 +326,9 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 ?>
 </br>
 	<p></p>
-<div class="table">
-<table width="100%" style="margin-left: auto; margin-right: auto;" class="table table-striped table-hover table-bordered"> 
-	<thead style="position: sticky;">
+<div class="table-responsive">
+<table Xstyle="margin-left: auto; margin-right: auto;" class="table table-striped table-hover table-bordered"> 
+	<thead style="position: sticky-top;">
 <tr style="text-align: Center;">
 <th class="select-checkbox" onclick="sortTable(0, true)" style="text-align: right;">#</th>
 <th onclick="sortTable(1, true)">Jom Id</th>
@@ -359,7 +359,7 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 // TODO as now Odoo is well in full force, probably need to only process Odoo balance
 $sql = "select distinct u.id as id, u.name as name, first_name, last_name, address, zipcode, city, country, avatar,
 odoo_id, block, b_reason, u.email as email, 
-bkf_user, bkf_amount, bkf_payment_date, bkf_invoice_date, bkf_invoice_id, ds_year, cm_company,
+bkf_amount, bkf_payment_date, bkf_invoice_date, ds_year, cm_company,
 group_concat(group_id) as allGroups,
 datediff(current_date(), b_when) as days_blocked
 	from $table_users as u 
@@ -391,16 +391,14 @@ datediff(current_date(), b_when) as days_blocked
 	$cotisationPayeCount=0;
 	$cotisationNonRenouveleeCount=0;
 	$cotisationRenouveleeCount=0;
-	$CheckMark="&#9989;";
 	
 	while ($row = mysqli_fetch_array($result)) {
 		$personid=$row['id'];
 		$row['name'] = db2web($row['name']) ;
 		if ($row['name'] === FALSE) 
-			journalise($userId, 'E', "There was an error while converting $row[name]") ; 
+			journalise($userId, 'E', "There was an error while converting \$row[name]") ; 
 		$row['first_name'] = db2web($row['first_name']) ;
 		$row['last_name'] = db2web($row['last_name']) ;
-		//$address=db2web($row['address']." ".$row['zipcode']." ".$row['city']." ".$row['country'];
 		$address=db2web($row['address']);
 		$code=db2web($row['zipcode']);
 		$ville=db2web($row['city']);
@@ -443,6 +441,7 @@ datediff(current_date(), b_when) as days_blocked
 				$promotionEleve="<br>P".$row['ds_year'];
 			}
 			else {
+				// TODO: replace 2026 with $membership_year (or $cotisationYear) ???
 				$promotionEleve="<a class=\"tooltip\" href=\"javascript:void(0);\" 
 					onclick=\"createCoursTheoriqueFunction('$_SERVER[PHP_SELF]','CoursTheorique','" .
 					str_replace("'", "\\'","$nom $prenom") . "','$personid',
@@ -465,7 +464,7 @@ datediff(current_date(), b_when) as days_blocked
 		$odoo = (isset($odoo_customers[strtolower($row['email'])])) ? $odoo_customers[strtolower($row['email'])] : null ;
 		if($blocked==1) {
 			$status="Web désactivé";
-			$pilote="";
+			$pilot="";
 			$student="";
 			$occasionnel="";
 			$effectif="";
@@ -522,7 +521,7 @@ datediff(current_date(), b_when) as days_blocked
 		$dueDaysText="";
 	
 		if($solde<0.0) {
-			$dueDays=OF_InvoiceDueDays($odooReference);	
+			$dueDays=OF_InvoiceDueDays($odooReference);	// TODO; this can be optimized by retrieving all due days in one query instead of one per member as well as te last invoice due date
 			if($dueDays>0) {
 				$dueDaysText="<span class=\"badge bg-danger\">$dueDays</span>";
 				$invoiceDueDate="&#10071;Echéance facture dépassée: ".OF_LastInvoiceDueDate($odooReference)."$dueDaysText<br>";
@@ -566,10 +565,8 @@ datediff(current_date(), b_when) as days_blocked
 		else {
 			$soldeTotalPositif+=$solde;
 		}
-		$soldeStyle='';
 		$rowStyle="";
 		if($solde<0.0) {
-//			$soldeStyle="style='color: red;'";
 			$rowStyle="class='text-warning'";
 		}
 		if($blocked==2) {
@@ -586,7 +583,7 @@ datediff(current_date(), b_when) as days_blocked
 			if(strpos($effectif, "checked") !== false) $effectifCount++;
 		}
 		if($blocked == 2) $blockedCount++;
-		print("<tr style='text-align: right'; $rowStyle>
+		print("<tr style='text-align: right' $rowStyle>
 			<td><input type=\"checkbox\"> $count</td>
 		    <td style='text-align: right;'>$personid&nbsp;
 				<a class=\"tooltip\" href=\"javascript:void(0);\" 
@@ -702,13 +699,19 @@ datediff(current_date(), b_when) as days_blocked
 // Change a user of group
 function GM_SetMemberGroup($personId, $memberType, $checked) 
 {
-	global  $joomla_member_group,$joomla_student_group,$joomla_pilot_group,$joomla_theory_student_group,$joomla_effectif_group,$joomla_flying_casual_group;
+	global $joomla_member_group,$joomla_student_group,$joomla_pilot_group,$joomla_effectif_group,$joomla_flying_casual_group;
 	global $userId;
 	global $mysqli_link,$table_user_usergroup_map;
 	//print("SetMemberGroup($personId, $memberType, $checked): Started");
 	switch($memberType) {
+		case 'Effectif':
+			$groupId = $joomla_effectif_group;
+			break;
 		case 'Member':
 			$groupId = $joomla_member_group;
+			break;
+		case 'Occasionnel':
+			$groupId = $joomla_flying_casual_group;
 			break;
 		case 'Student':
 			$groupId = $joomla_student_group;
@@ -716,11 +719,8 @@ function GM_SetMemberGroup($personId, $memberType, $checked)
 		case 'Pilot':
 			$groupId = $joomla_pilot_group;
 			break;
-		case 'Effectif':
-			$groupId = $joomla_effectif_group;
-			break;
 		default:
-			journalise($userId, "E", "Unknown group for checkbox toggling: " . $_REQUEST['checkboxId']) ;
+			journalise($userId, "F", "Unknown group, $memberType, for checkbox toggling: " . $_REQUEST['checkboxId']) ;
 			break;
 	}
 	if ($checked == 'true') {
