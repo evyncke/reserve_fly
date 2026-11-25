@@ -35,47 +35,16 @@ if (isset($_REQUEST['cb']) and $_REQUEST['cb'] != '') {
 $connect_msg = '' ;
 
 if (isset($_POST['username']) and isset($_POST['password'])) {
-    if (!$use_joomla_authentication) {
-        // journalise(0, "I", "Non-Joomla login attempt for $_POST[username] from $callback") ;
-        $joomla_user = authenticateJoomlaUser($_POST['username'], $_POST['password']);
-        if ($joomla_user === false) {
-            $connect_msg = "Utilisateur inconnu ou mauvais mot de passe." ;
-            journalise(0, "W", "Invalid password for $_POST[username] from $callback") ;
-        } else {
-            $userId = $joomla_user->id ?? 0;
-            journalise($userId, "I", "Non-Joomla login for user id $userId ($_POST[username]) from $callback") ;
-            header("Location: https://" . SITE_HOST . "/$callback", TRUE, 307) ;
-            exit ;
-        }
+    $joomla_user = authenticateJoomlaUser($_POST['username'], $_POST['password']);
+    if ($joomla_user === false) {
+        $connect_msg = "Utilisateur inconnu ou mauvais mot de passe." ;
+        journalise(0, "W", "Invalid password for $_POST[username] from $callback") ;
     } else {
-        journalise(0, "I", "Joomla login attempt for $_POST[username] from $callback") ;
-        $result_login = JFactory::getApplication()->login(
-            [
-                'username' => htmlspecialchars($_POST['username'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
-                'password' => htmlspecialchars($_POST['password'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
-            ],
-            [
-                'remember' => true,
-                'silent'   => true
-            ]
-        );
-        if ($result_login) {
-            header("Location: https://" . SITE_HOST . "/$callback", TRUE, 307) ;
-            $joomla_user = JFactory::getUser() ;
-            $app = JFactory::getApplication('site');
-            $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
-            $joomla_user->save();
-            $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
-            $app->triggerEvent('onUserLogin', array(
-                (array) $joomla_user,
-                $options));
-            journalise($joomla_user->id, "I", "Connection of $_REQUEST[username] from $callback") ;
-            exit ;
-        } else {
-            $connect_msg = "Utilisateur inconnu ou mauvais mot de passe." ;
-            journalise(0, "W", "Invalid password for $_REQUEST[username] from $callback") ;
-        }
-    }       
+        $userId = $joomla_user->id ?? 0;
+        journalise($userId, "I", "Login successful for user id $userId ($_POST[username]) from $callback") ;
+        header("Location: https://" . SITE_HOST . "/$callback", TRUE, 307) ;
+        exit ;
+    }
 }
 
 require_once 'mobile_header5.php' ;
@@ -150,17 +119,10 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                 if ($row) {   
                     // User found, log them in
                     $userId = $row['jom_id'];
-                    journalise($userId, "I", "Google JOOMLA login for user id $row[jom_id] from $callback, browser=$browser.") ;
-                    $joomla_user = JFactory::getUser($userId);
-                    $app = JFactory::getApplication('site');
-                    $session = JFactory::getSession();
-                    $session->set('user', $joomla_user);
-                    $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
-                    $joomla_user->save();
-                    $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
-                    $app->triggerEvent('onUserLogin', array(
-                        (array) $joomla_user,
-                        $options));
+                    journalise($userId, "I", "Google successful login for user id $row[jom_id] from $callback, browser=$browser.") ;
+                    // Let's do the Pseudo-Joomla login now
+                    require_once "no_joomla.php" ;
+                    $joomla_user = JoomlaUserIsAuthenticated($userId) ;
                     journalise($userId, "I", "Google login for user id $userId (" . $googleUser->getEmail() . ") from $callback, browser=$browser.") ;
                     mysqli_query($mysqli_link, "UPDATE $table_person SET google_id='" . mysqli_real_escape_string($mysqli_link, $googleUser->getId()) . "', " .
                         " google_token='" . mysqli_real_escape_string($mysqli_link, $accessToken) . "'
@@ -213,17 +175,10 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                 if ($row) {   
                     // User found, log them in
                     $userId = $row['jom_id'];
-                    journalise($userId, "I", "LinkedIn JOOMLA login for user id $row[jom_id] from $callback, browser=$browser.") ;
-                    $joomla_user = JFactory::getUser($userId);
-                    $app = JFactory::getApplication('site');
-                    $session = JFactory::getSession();
-                    $session->set('user', $joomla_user);
-                    $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
-                    $joomla_user->save();
-                    $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
-                    $app->triggerEvent('onUserLogin', array(
-                        (array) $joomla_user,
-                        $options));
+                    journalise($userId, "I", "LinkedIn login for user id $row[jom_id] from $callback, browser=$browser.") ;
+                    // Let's do the Pseudo-Joomla login now
+                    require_once "no_joomla.php" ;
+                    $joomla_user = JoomlaUserIsAuthenticated($userId) ;
                     journalise($userId, "I", "LinkedIn login for user id $userId (" . $linkedInUser['email'] . ") from $callback.") ;
                     // TODO next UPDATE is to be deleted once the 2nd is checked working fine.
                     mysqli_query($mysqli_link, "UPDATE $table_person SET linkedin_id='" . mysqli_real_escape_string($mysqli_link, $linkedInUser['sub']) . "', " .
@@ -249,6 +204,7 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
         }
         unset($_SESSION['linkedin_oauth2state']); // Clear LinkedIn state
     } else { // Assume Facebook
+    // Pending https://developers.facebook.com/apps/1070912613042275/alerts/inbox/?business_id=363522343467274
         if (isset($_SESSION['google_oauth2state'])) unset($_SESSION['google_oauth2state']); // Clear Google state if any
         if (isset($_SESSION['linkedin_oauth2state'])) unset($_SESSION['linkedin_oauth2state']); // Clear LinkedIn state if any
         $helper = $facebook->getRedirectLoginHelper();
@@ -270,16 +226,9 @@ if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and 
                     // User found, log them in
                     $userId = $row['jom_id'];
                     journalise($userId, "I", "Facebook login for user id $row[jom_id] from $callback, browser=$browser.") ;
-                    $joomla_user = JFactory::getUser($userId);
-                    $app = JFactory::getApplication('site');
-                    $session = JFactory::getSession();
-                    $session->set('user', $joomla_user);
-                    $joomla_user->lastvisitDate = JFactory::getDate()->toSql();
-                    $joomla_user->save();
-                    $options = array('remember' => true); // Vous pouvez mettre true si vous gérez les cookies
-                    $app->triggerEvent('onUserLogin', array(
-                        (array) $joomla_user,
-                        $options));
+                    // Let's do the Pseudo-Joomla login now
+                    require_once "no_joomla.php" ;
+                    $joomla_user = JoomlaUserIsAuthenticated($userId) ;
                     journalise($userId, "I", "Facebook login for user id $userId ($facebookUser[email]) from $callback.") ;
                     // TODO next UPDATE is to be deleted once the 2nd is checked working fine.
                     mysqli_query($mysqli_link, "UPDATE $table_person SET facebook_id='" . mysqli_real_escape_string($mysqli_link, $facebookUser['id']) . "', " .
@@ -350,7 +299,7 @@ $_SESSION['linkedin_oauth2state'] = $linkedin->getState(); // Unsure if used lat
 
     <div class="text-center">
         <p><b>OU</b> via:</p>
-        <a href="<?=$facebookAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-primary"><i class="bi bi-facebook"></i> Facebook</a>
+        <!--a href="<?=$facebookAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-primary"><i class="bi bi-facebook"></i> Facebook</a-->
         <a id="google-auth-link" href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Google</a>
         <a id="gmail-auth-link" href="<?=$googleAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><img src="images/google.svg" width="20px" height="20px"> Gmail</a>
         <a href="<?=$linkedInAuthUrl?>&cb=<?=urlencode($callback)?>" class="btn btn-outline-secondary"><i class="bi bi-linkedin"></i> LinkedIn</a>
