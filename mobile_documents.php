@@ -18,7 +18,8 @@
 
 require_once "dbi.php" ;
 MustBeLoggedIn() ; ;
-$header_postamble = '<style>
+$header_postamble = '<script data-cfasync="true" src="js/mobile_documents.js"></script>
+<style>
     ul {
         list-style-type: none; /* Remove default bullet points */
     }
@@ -36,9 +37,9 @@ if ($userId != 62) journalise($userId, "D", "Using documents page") ;
 $directory = DOCUMENTS_DIRECTORY ;
 
 // Recursive function to scan directories and list PDF files
-function listPdfFiles($dir) {
+function listPdfFiles($dir, $collapsed = false) {
     $files = scandir($dir);
-    echo '<ul>';
+    echo '<ul' . ($collapsed ? ' class="d-none"' : '') . '>';
     foreach ($files as $file) {
         if ($file === '.' || $file === '..') {
             continue; // Skip current and parent directory links
@@ -46,8 +47,9 @@ function listPdfFiles($dir) {
         $filePath = $dir . '/' . $file;
         if (is_dir($filePath)) {
             // If it's a directory, create a nested list
-            echo '<li><i class="bi bi-folder"></i>&nbsp;' . htmlspecialchars($file) . '</li>';
-            listPdfFiles($filePath); // Recursive call
+            echo '<li><a href="#" class="doc-folder text-decoration-none" role="button" aria-expanded="false"><i class="bi bi-folder"></i>&nbsp;' . htmlspecialchars($file) . '</a>';
+            listPdfFiles($filePath, true); // Recursive call, collapsed by default
+            echo '</li>';
         } elseif (pathinfo($file, PATHINFO_EXTENSION) === 'pdf') {
             // If it's a PDF file, list it
             $filenameWithoutExtension = pathinfo($file, PATHINFO_FILENAME);
