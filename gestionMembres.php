@@ -306,23 +306,20 @@ print("<b>Cotisation pour l'année $cotisationYear</b><br>");
   <br>
 <?php
 print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
-	<input type=\"submit\" value=\"Select all visible\" id=\"id_SubmitSelect\" onclick=\"submitSelect('SelectVisible')\")> &nbsp;&nbsp;
-	<input type=\"submit\" value=\"Unselect all\" id=\"id_SubmitSelect\" onclick=\"submitSelect('Unselect')\")> &nbsp;&nbsp;
-	<input type=\"submit\" value=\"Block\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[PHP_SELF]','Block')\")> &nbsp;&nbsp;
-    <input type=\"submit\" value=\"Unblock\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[PHP_SELF]', 'NotBlock')\">&nbsp;&nbsp;
-	<input type=\"submit\" value=\"Copy Mails\" id=\"id_SubmitDownloadMail\" onclick=\"submitDownloadMail('$_SERVER[PHP_SELF]', 'CopyMail')\">&nbsp;&nbsp;");
+	<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitSelect\" onclick=\"submitSelect('SelectVisible')\")>Select all visible</button> &nbsp;&nbsp;
+	<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitSelect\" onclick=\"submitSelect('Unselect')\")>Unselect all</button> &nbsp;&nbsp;
+	<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[SCRIPT_NAME]','Block')\">Block</button> &nbsp;&nbsp;
+    <button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[SCRIPT_NAME]', 'NotBlock')\">Unblock</button>&nbsp;&nbsp;
+	<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitDownloadMail\" onclick=\"submitDownloadMail('$_SERVER[SCRIPT_NAME]', 'CopyMail')\">Copy mails</button>&nbsp;&nbsp;");
 	if(!$displayWebDeactivated) {
-		print("<input type=\"submit\" value=\"Display Unactivated\" id=\"id_SubmitUnactivated\" onclick=\"submitUnactivated('$_SERVER[PHP_SELF]', 'Unactivated')\">&nbsp;&nbsp;");
+		print("<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitUnactivated\" onclick=\"submitUnactivated('$_SERVER[SCRIPT_NAME]', 'Unactivated')\">Display Unactivated</button>&nbsp;&nbsp;");
 	}
 	else {
-		print("<input type=\"submit\" value=\"Display Activated\" id=\"id_SubmitUnactivated\" onclick=\"submitUnactivated('$_SERVER[PHP_SELF]', 'Activated')\">&nbsp;&nbsp;");
+		print("<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitUnactivated\" onclick=\"submitUnactivated('$_SERVER[SCRIPT_NAME]', 'Activated')\">Display Activated</button>&nbsp;&nbsp;");
 	}
-	print("<input type=\"submit\" value=\"Export\" id=\"id_SubmitExport\" onclick=\"submitExport('$_SERVER[PHP_SELF]')\">&nbsp;&nbsp;");
+	print("<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitExport\" onclick=\"submitExport('$_SERVER[SCRIPT_NAME]')\">Export</button>&nbsp;&nbsp;");
 	print("<p></p>");
-	$styleButton='class="btn btn-info text-light border border-1 border-secondary"';
-	print('<div class="d-flex"><a href="gestionMembres_removed.php" '.$styleButton.' role="button">Display Removed Members</a></div>');
-
-	
+	print('<button type="button" class="btn btn-info btn-sm" onclick="window.location.href=\'gestionMembres_removed.php\'">Display Removed Members</button>');
 ?>
 </br>
 	<p></p>
@@ -443,7 +440,7 @@ datediff(current_date(), b_when) as days_blocked
 			else {
 				// TODO: replace 2026 with $membership_year (or $cotisationYear) ???
 				$promotionEleve="<a class=\"tooltip\" href=\"javascript:void(0);\" 
-					onclick=\"createCoursTheoriqueFunction('$_SERVER[PHP_SELF]','CoursTheorique','" .
+					onclick=\"createCoursTheoriqueFunction('$_SERVER[SCRIPT_NAME]','CoursTheorique','" .
 					str_replace("'", "\\'","$nom $prenom") . "','$personid',
 					'2026')\">
 					[2026?]<span class='tooltiptext'>Click pour facturer un cours theorique 2026</span>
@@ -587,7 +584,7 @@ datediff(current_date(), b_when) as days_blocked
 			<td><input type=\"checkbox\"> $count</td>
 		    <td style='text-align: right;'>$personid&nbsp;
 				<a class=\"tooltip\" href=\"javascript:void(0);\" 
-					onclick=\"deactivateMemberFunction('$_SERVER[PHP_SELF]','deactivate','" .
+					onclick=\"deactivateMemberFunction('$_SERVER[SCRIPT_NAME]','deactivate','" .
 					str_replace("'", "\\'","$nom $prenom") . "','$personid')\">
 					<i class=\"bi bi-trash text-danger\"></i><span class='tooltiptext'>Click pour supprimer le membre</span>
 					</a></td>");
@@ -618,7 +615,7 @@ datediff(current_date(), b_when) as days_blocked
 				$isMember = (strpos($member, "checked") !== false) ? 'true' : 'false';
 				print("<td style=\"text-align: center;\" class=\"text-danger\">
 				<a class=\"tooltip\" href=\"javascript:void(0);\" 
-					onclick=\"createCotisationFunction('$_SERVER[PHP_SELF]','Cotisation','" .
+					onclick=\"createCotisationFunction('$_SERVER[SCRIPT_NAME]','Cotisation','" .
 					str_replace("'", "\\'","$nom $prenom") . "','$personid',
 					$isMember)\">
 					$cotisation<span class='tooltiptext'>Click pour facturer une cotisation</span>
@@ -642,7 +639,7 @@ datediff(current_date(), b_when) as days_blocked
 		print("<td $soldeStyle>$soldeText</td>");				
 		if($blocked==2) {
 			print("<td style='text-align: center;font-size: 17px;' class='text-danger'>
-			<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Unblock','" .
+			<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[SCRIPT_NAME]','Unblock','" .
 				str_replace("'", "\\'","$nom $prenom") . "','$personid','$solde')\">&#x26D4;<span class='tooltiptext'>Click pour DEBLOQUER</span>
 				<span class=\"badge text-bg-info\"><i class=\"bi bi-calendar3\"></i>&nbsp;$row[days_blocked]</span></a></td>");
 		}
@@ -652,7 +649,7 @@ datediff(current_date(), b_when) as days_blocked
 		}
 		else {
 			print("<td style='text-align: center;font-size: 17px;' class='text-success'>
-				<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[PHP_SELF]','Block','" .
+				<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"blockFunction('$_SERVER[SCRIPT_NAME]','Block','" .
 				str_replace("'", "\\'","$nom $prenom") . "','$personid','$solde')\">&#x2714;<span class='tooltiptext'>Click pour BLOQUER</span></a></td>");
 		}
 		print("<td style='text-align: left;'>$invoiceDueDate$status$company</td>");
