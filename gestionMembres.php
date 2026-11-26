@@ -151,7 +151,7 @@ if (isset($_REQUEST['createcotisation'])) {
 			}
 		}
 		else {
-			print("<div class=\"alert alert-warning\" role=\"alert\"><b style='color: red;'>Impossible de créer une cotisation: Pas de cotisation type sélectionné!</b></div");	
+			print("<div class=\"alert alert-warning\" role=\"alert\"><b style='color: red;'>Impossible de créer une cotisation: Pas de cotisation type sélectionné!</b></div>");	
 		}
 	}
 	else  {
@@ -306,8 +306,8 @@ print("<b>Cotisation pour l'année $cotisationYear</b><br>");
   <br>
 <?php
 print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
-	<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitSelect\" onclick=\"submitSelect('SelectVisible')\")>Select all visible</button> &nbsp;&nbsp;
-	<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitSelect\" onclick=\"submitSelect('Unselect')\")>Unselect all</button> &nbsp;&nbsp;
+	<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitSelect\" onclick=\"submitSelect('SelectVisible')\">Select all visible</button> &nbsp;&nbsp;
+	<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitSelect\" onclick=\"submitSelect('Unselect')\">Unselect all</button> &nbsp;&nbsp;
 	<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[SCRIPT_NAME]','Block')\">Block</button> &nbsp;&nbsp;
     <button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitBlocked\" onclick=\"submitBlocked('$_SERVER[SCRIPT_NAME]', 'NotBlock')\">Unblock</button>&nbsp;&nbsp;
 	<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"id_SubmitDownloadMail\" onclick=\"submitDownloadMail('$_SERVER[SCRIPT_NAME]', 'CopyMail')\">Copy mails</button>&nbsp;&nbsp;");
@@ -324,12 +324,12 @@ print("&nbsp;&nbsp;Actions:&nbsp;&nbsp;
 </br>
 	<p></p>
 <div class="table-responsive">
-<table Xstyle="margin-left: auto; margin-right: auto;" class="table table-striped table-hover table-bordered"> 
-	<thead style="position: sticky-top;">
-<tr style="text-align: Center;">
-<th class="select-checkbox" onclick="sortTable(0, true)" style="text-align: right;">#</th>
+<table class="table table-striped table-hover table-bordered"> 
+	<thead class="sticky-top">
+<tr class="text-center">
+<th class="select-checkbox text-end" onclick="sortTable(0, true)">#</th>
 <th onclick="sortTable(1, true)">Jom Id</th>
-<th onclick="sortTable(2, true)">Ré	f. Odoo</th>
+<th onclick="sortTable(2, true)">Réf. Odoo</th>
 <th onclick="sortTable(3, false)">Nom</th>
 <th onclick="sortTable(4, false)">Prénom</th>
 <th onclick="sortTable(5, false)">Photo</th>
@@ -384,26 +384,26 @@ datediff(current_date(), b_when) as days_blocked
 	$soldeTotalPositif=0.0;
 	$soldeTotalNegatif=0.0;
 	$odooCount=0;
-	$cotisationNonPayeCount=0;
-	$cotisationPayeCount=0;
+	$cotisationNonPayeCount=0; // TODO: this value is never used
+	$cotisationPayeCount=0; // TODO: this value is never used
 	$cotisationNonRenouveleeCount=0;
 	$cotisationRenouveleeCount=0;
 	
 	while ($row = mysqli_fetch_array($result)) {
 		$personid=$row['id'];
-		$row['name'] = db2web($row['name']) ;
+		$row['name'] = cleanHTML(db2web($row['name'])) ;
 		if ($row['name'] === FALSE) 
 			journalise($userId, 'E', "There was an error while converting \$row[name]") ; 
-		$row['first_name'] = db2web($row['first_name']) ;
-		$row['last_name'] = db2web($row['last_name']) ;
-		$address=db2web($row['address']);
-		$code=db2web($row['zipcode']);
-		$ville=db2web($row['city']);
-		$pays=db2web($row['country']);
-		$email=db2web($row['email']);		
-		$nom=$row['last_name'];
-		if($nom == "") $nom=$row['name'];
-		$prenom=$row['first_name'];	
+		$row['first_name'] = cleanHTML(db2web($row['first_name'])) ;
+		$row['last_name'] = cleanHTML(db2web($row['last_name'])) ;
+		$address=cleanHTML(db2web($row['address']));
+		$code=cleanHTML(db2web($row['zipcode']));
+		$ville=cleanHTML(db2web($row['city']));
+		$pays=cleanHTML(db2web($row['country']));
+		$email=cleanHTML(db2web($row['email']));		
+		$nom=cleanHTML($row['last_name']);
+		if($nom == "") $nom=cleanHTML($row['name']);
+		$prenom=cleanHTML($row['first_name']);	
 		if($row['last_name']=="") {
 			$row['last_name']="xxxxx";
 		}
@@ -414,7 +414,7 @@ datediff(current_date(), b_when) as days_blocked
 			else
 				journalise($personid, "W", "Photo for $nom ($row[avatar]) does not exist") ;
 		}
-		$photo='<a href="'.$photo.'"><img style="object-fit: cover;"src="'.$photo.'" alt="photo" width="50" height="66"></a>';
+		$photo='<a href="'.$photo.'"><img style="object-fit: cover;" src="'.$photo.'" alt="photo" width="50" height="66"></a>';
 		$groups = explode(',', $row['allGroups']) ;
 		$effectif = (in_array($joomla_effectif_group, $groups)) ? 
 			'<input class="form-check-input" type="checkbox" id="check-' . $personid . '-Effectif" checked>' 
@@ -454,7 +454,7 @@ datediff(current_date(), b_when) as days_blocked
 			$resultCompany = mysqli_query($mysqli_link, $sqlCompany)
     			or journalise($userId, "E", "Cannot read $table_company: " . mysqli_error($mysqli_link)) ;
     		while ($rowCompany= mysqli_fetch_array($resultCompany)) {
-				$company="<br>Company=".$rowCompany['c_name'];
+				$company="<br>Company=".cleanHTML(db2web($rowCompany['c_name']));
 				break;
 			}
 		}
@@ -682,8 +682,8 @@ datediff(current_date(), b_when) as days_blocked
 		<td><div class='text-danger'>[$cotisationNonRenouveleeCount]</div><div>/$cotisationRenouveleeCount</div></td>");
 		$soldeTotalPositifText=number_format($soldeTotalPositif,2,",",".");
 		$soldeTotalNegatifText=number_format($soldeTotalNegatif,2,",",".");
-		print("<td style='text-align: right;'><div>+$soldeTotalPositifText €/</div><div class='text-danger'>$soldeTotalNegatifText €<div></td>");
-	print("<td>$blockedCount</td>
+		print("<td style='text-align: right;'><div>+$soldeTotalPositifText €/</div><div class='text-danger'>$soldeTotalNegatifText €</div></td>");
+		print("<td>$blockedCount</td>
 		<td></td>
 		</tr>\n");
 ?>

@@ -534,6 +534,16 @@ function db2web(?string $msg): string|null {
 		return $msg ;
 }
 
+// This function is used to clean HTML content before displaying it in the browser. 
+// It converts special characters to HTML entities, preventing XSS attacks and ensuring that the content is displayed correctly.
+// Should be used after db2web() to ensure that the string is in UTF-8 encoding before cleaning it for HTML output.
+function cleanHTML(string|null $s): string {
+	if ($s === null) 
+		return '';
+	else
+		return htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
 // SMTP server name, port, user/passwd
 $smtp_info['host'] = $smtp_host ;
 $smtp_info['localhost'] = $smtp_localhost ;
