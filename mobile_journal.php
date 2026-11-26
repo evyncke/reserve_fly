@@ -51,70 +51,103 @@ if (!($userIsAdmin or $userIsBoardMember))
 </thead>
 <tbody>
 <?php
-$start = (isset($_REQUEST['start']) and $_REQUEST['start'] > 0) ? $_REQUEST['start'] : DB_MAX_UINT ;
+$start = (isset($_REQUEST['start']) and $_REQUEST['start'] > 0 and ctype_digit($_GET['start']) and $_GET['start'] > 0) ? $_REQUEST['start'] : DB_MAX_UINT ;
 $sql_filter = '' ;
-if (isset($_REQUEST['id']) and is_numeric($_REQUEST['id']))
+$filter_params = array() ; // The active filter, to be kept in the pagination and swipe links
+if (isset($_REQUEST['id']) and ctype_digit($_REQUEST['id'])) {
 	$sql_filter = " AND j_jom_id = $_REQUEST[id]" ;
-else if (isset($_REQUEST['usr']))
+	$filter_params['id'] = $_REQUEST['id'] ;
+} else if (isset($_REQUEST['usr'])) {
 	$sql_filter = " AND name like '%" . web2db(mysqli_real_escape_string($mysqli_link, $_REQUEST['usr'])) . "%'" ;
-else if (isset($_REQUEST['msg']))
+	$filter_params['usr'] = $_REQUEST['usr'] ;
+} else if (isset($_REQUEST['msg'])) {
 	$sql_filter = " AND j_message like '%" . web2db(mysqli_real_escape_string($mysqli_link, $_REQUEST['msg'])) . "%'" ;
-else if (isset($_REQUEST['ip']))
+	$filter_params['msg'] = $_REQUEST['msg'] ;
+} else if (isset($_REQUEST['ip'])) {
 	$sql_filter = " AND j_address like '%" . web2db(mysqli_real_escape_string($mysqli_link, $_REQUEST['ip'])) . "%'" ;
+	$filter_params['ip'] = $_REQUEST['ip'] ;
+}
 $sql = "SELECT * FROM $table_journal
 			LEFT JOIN $table_person p ON j_jom_id = p.jom_id
 		WHERE j_id <= $start $sql_filter
 		ORDER BY j_id desc
 		LIMIT 0, 25" ;
 $result = mysqli_query($mysqli_link, $sql) 
-	or die("Erreur systeme a propos de l'access au journal: " . mysqli_error($mysqli_link)) ;
+	or journalise($userId, "F", "Erreur systeme a propos de l'access au journal: " . mysqli_error($mysqli_link)) ;
 $first_id = -1 ;
 $last_id = -1 ;
+$row_count = 0 ;
 while ($row = mysqli_fetch_array($result)) {
+	$row_count++ ;
 	if ($first_id < 0) $first_id = $row['j_id'] ;
 	$last_id = $row['j_id'] ;
 	$nameStyle = ($row['j_trusted_booker'] == 1) ? ' style="font-weight: bold;"' : '' ;
 	switch (strtoupper($row['j_severity'])) {
-		case 'F': $specialClass = ' bg-danger text-bg-danger' ; break ;
-		case 'E': $specialClass = ' bg-warning text-bg-warning' ; break ;
-		case 'W': $specialClass = ' text-info' ; break ;
+		case 'F': $specialClass = ' table-danger' ; break ;
+		case 'E': $specialClass = ' table-warning' ; break ;
+		case 'W': $specialClass = ' table-info' ; break ;
 		default: $specialClass = '' ;
 	}
 	$date = $row['j_datetime']	;
 	if (strpos($date, date('Y-m-d')) === 0)
 		$date = substr($date, 11) ; // Don't display today date
 	else 
-		$date = substr($date,0, 10) . '<br/>' . substr($date, 11) ; // Nice break
+		$date = substr($date,0, 10) . '<br>' . substr($date, 11) ; // Nice break
 	if (isset($row['last_name']) and $row['last_name'] != '')
-		$name = db2web("<b>$row[last_name]</b><span class=\"d-none d-md-inline\"> $row[first_name]</span>") ;
+		$name = db2web('<strong>' . cleanHTML($row['last_name']) . '</strong><span class="d-none d-md-inline"> ' . cleanHTML($row['first_name']) . '</span>') ;
 	else
-		$name = db2web($row['name'] ?? '') ;
+		$name = cleanHTML(db2web($row['name'] ?? '')) ;
 	print("<tr>
 		<td class=\"text-nowrap$specialClass\">$date</td>
 		<td$nameStyle class=\"text-nowrap$specialClass\">$name</td>
-		<td class=\"d-none d-lg-table-cell$specialClass\">$row[j_address]</td>
-		<td class=\"text-align$specialClass\">" . db2web($row['j_message']) . "</td>
-		<td class=\"text-align d-none d-lg-table-cell$specialClass\"><a href=\"" . db2web($row['j_uri']) . "\">" . db2web($row['j_uri']) . "</a></td>
+		<td class=\"d-none d-lg-table-cell$specialClass\">" . cleanHTML($row['j_address']) . "</td>
+		<td class=\"text-start$specialClass\">" . cleanHTML(db2web($row['j_message'])) . "</td>
+		<td class=\"text-start d-none d-lg-table-cell$specialClass\"><a href=\"" . db2web($row['j_uri']) . "\">" . db2web($row['j_uri']) . "</a></td>
 		</tr>\n") ;
 }
-$first_id += 25 ;
-$last_id -= 1 ;
+// Pagination start ids (null when there is no such page). The journal ids have gaps when a filter is active,
+// so do not compute them arithmetically but ask the database
+// Older entries: a full page means that there may be more, and "j_id <= start" copes with gaps
+$older_start = ($row_count == 25 and $last_id > 1) ? $last_id - 1 : null ;
+// Newer entries: the 25 entries immediately after the first displayed one (with the same filter), start is the newest of them
+$newer_start = null ;
+if ($row_count > 0) {
+	$result_newer = mysqli_query($mysqli_link, "SELECT MAX(j_id) AS newer_start FROM
+			(SELECT j_id FROM $table_journal
+				LEFT JOIN $table_person p ON j_jom_id = p.jom_id
+			WHERE j_id > $first_id $sql_filter
+			ORDER BY j_id ASC
+			LIMIT 25) AS newer")
+		or journalise($userId, "F", "Erreur systeme a propos de l'access au journal (entrees plus recentes): " . mysqli_error($mysqli_link)) ;
+	$row_newer = mysqli_fetch_array($result_newer) ;
+	$newer_start = $row_newer['newer_start'] ; // NULL when we are already on the newest page
+	mysqli_free_result($result_newer) ;
+}
+
+// URL of this page for a given start id, keeping the active filter
+function journalUrl($theFilterParams, $theStart = null) {
+	$params = ($theStart === null) ? $theFilterParams : array('start' => $theStart) + $theFilterParams ;
+	return $_SERVER['SCRIPT_NAME'] . ((count($params) > 0) ? '?' . http_build_query($params) : '') ;
+}
 ?>
 </tbody>
 </table>
 <ul class="pagination justify-content-center">
-  <li  class="page-item"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?start=$last_id"?>"><i class="bi bi-caret-left-fill"></i> Entrées précédentes</a></li>
-  <li  class="page-item"><a class="page-link" href="<?="$_SERVER[PHP_SELF]?start=$first_id"?>"><i class="bi bi-caret-right-fill"></i> Entrées suivantes</a></li>
-  <li  class="page-item"><a class="page-link" href="<?="$_SERVER[PHP_SELF]"?>"><i class="bi bi-caret-right-fill"></i><i class="bi bi-caret-right-fill"></i> Dernières entrées</a></li>
+  <li class="page-item<?=($older_start === null) ? ' disabled' : ''?>"><a class="page-link" href="<?=($older_start === null) ? '#' : htmlspecialchars(journalUrl($filter_params, $older_start))?>"<?=($older_start === null) ? ' aria-disabled="true" tabindex="-1"' : ''?>><i class="bi bi-caret-left-fill"></i> Entrées précédentes</a></li>
+  <li class="page-item<?=($newer_start === null) ? ' disabled' : ''?>"><a class="page-link" href="<?=($newer_start === null) ? '#' : htmlspecialchars(journalUrl($filter_params, $newer_start))?>"<?=($newer_start === null) ? ' aria-disabled="true" tabindex="-1"' : ''?>><i class="bi bi-caret-right-fill"></i> Entrées suivantes</a></li>
+  <li  class="page-item"><a class="page-link" href="<?=htmlspecialchars(journalUrl($filter_params))?>"><i class="bi bi-chevron-double-right"></i></i> Dernières entrées</a></li>
 </ul><!-- pagination -->
 </div> <!-- table responsive -->
-Les heures sont en heures locales.<br/>
+<p class="text-muted small">Les heures sont en heures locales.</p>
 </div><!-- container -->
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
 <script>
 	// Swipe to change to next webcam
-	document.addEventListener('swiped-right', function(e) {location.href='<?="$_SERVER[PHP_SELF]?start=$last_id"?>' }) ;
-	document.addEventListener('swiped-left', function(e) {location.href='<?="$_SERVER[PHP_SELF]?start=$first_id"?>' }) ;
+<?php if ($older_start !== null) { ?>
+	document.addEventListener('swiped-right', function(e) {location.href=<?=json_encode(journalUrl($filter_params, $older_start))?> }) ;
+<?php } if ($newer_start !== null) { ?>
+	document.addEventListener('swiped-left', function(e) {location.href=<?=json_encode(journalUrl($filter_params, $newer_start))?> }) ;
+<?php } ?>
     new window.simpleDatatables.DataTable("#journal-table", {
         searchable: true,
         fixedHeight: false,
