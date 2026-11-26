@@ -33,7 +33,7 @@ $notedefraisJSONcontent = str_replace("\n","",$notedefraisJSONcontent);
 
 $header_postamble = "
 <script>
-  var notedefraisJSONString='$notedefraisJSONcontent';
+  var notedefraisJSONString= " . json_encode($notedefraisJSONcontent) . ";
   var default_member=$userId;
 </script>
 <script src=\"js/notedefrais.js\"></script>" ;
@@ -85,11 +85,11 @@ if (isset($_REQUEST['notedefrais_input_remboursable'])) {
         journalise($userId, "F", "Erreur: le type de note de frais est invalide: $remboursable");
     }
 }
-$memberID=$userId;
-if (isset($_REQUEST['member_name'])) {
-    $memberID = $_REQUEST['member_name'] ;
-    //print("memberID=$memberID<br>");
-}
+if (isset($_REQUEST['member_name']) and ctype_digit($_REQUEST['member_name'] and ($userIsAdmin or $userIsInstructor))) {
+    $memberID = intval($_REQUEST['member_name']) ;
+    journalise($userId, "I", "Expense report user set to $memberID") ;
+} else
+    $memberID=$userId;
 
 if (isset($_REQUEST['notedefrais_json'])) {
     $ndfJSON = $_REQUEST['notedefrais_json'] ;
@@ -118,7 +118,7 @@ else
 ?>
 <h2>Introduction d'une note de frais</h2>
 <br>
-<form action="<?=$_SERVER['PHP_SELF']?>" method="post" enctype="multipart/form-data">
+<form action="<?=$_SERVER['SCRIPT_NAME']?>" method="post" enctype="multipart/form-data">
 <div class="row">
 <div class="col-lg-7">
 <div class="row mb-3 align-items-center">
@@ -223,7 +223,7 @@ if ($userIsAdmin or $userIsBoardMember) {
 <?php
     for($i=$noteDeFraisCount-1;$i>=0;$i--) {
         print("<tr>");
-        print("<td><a href=\"javascript:void(0);\" onclick=\"deleteNoteDeFraisFiles('$_SERVER[PHP_SELF]','$theNotesDeFrais[$i]')\" title=\"Effacer les fichiers associés à la note de frais sur le serveur\"><i class=\"bi bi-trash-fill\"></i></a></td>");
+        print("<td><a href=\"javascript:void(0);\" onclick=\"deleteNoteDeFraisFiles('$_SERVER[SCRIPT_NAME]','$theNotesDeFrais[$i]')\" title=\"Effacer les fichiers associés à la note de frais sur le serveur\"><i class=\"bi bi-trash-fill\"></i></a></td>");
         print("<td><a href=\"$theUploadFolder/$theNotesDeFrais[$i]\" target=\"_blank\"><i class=\"bi bi-file-earmark-pdf\" style=\"font-size:36px;\"></i>$theNotesDeFrais[$i]</a></td>");
         if($theAttachedFiles[$i]==""){
             print("<td></td>");           
@@ -245,7 +245,7 @@ if ($userIsAdmin or $userIsBoardMember) {
         print("</tr>");
     }
 
-    MT_DeleteFilesOlderThan($theUploadFolder, "P2M");
+    MT_DeleteFilesOlderThan($theUploadFolder, "P2M"); // TODO to be moved to cron.php
 ?>
 </tbody>
 </table>
