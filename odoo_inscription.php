@@ -155,77 +155,77 @@ if (isset($_REQUEST['createmember']) and $_REQUEST['createmember'] == 'create') 
     }
 }
 ?>
-
-<h3>Today this page can be used only to create a new member in RAPCS tables and in Odoo</h3>
+<h2>Adding a new member</h2>
+<h3>Today this page can be used only to create a new member in <?=  SITE_SHORT_NAME ?> tables and in Odoo</h3>
 <h4>To edit a member: Use the page <a href="<?= SITE_URL ?>gestionMembres.php">GestionMembres</a></h4>
 
-<div class="row">
-<form action="<?=$_SERVER['PHP_SELF']?>" method="get" role="form" class="form-horizontal" enctype="multipart/form-data">
+<div class="container-fluid">
+<form action="<?=$_SERVER['PHP_SELF']?>" method="put" enctype="multipart/form-data">
 <div class="row mb-3">
-	<label for="id_prenom" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Prénom nom:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
- 		<input type="text" class="form-control" name="prenom" id="id_prenom" placeholder="Prénom" value="<?=$prenom?>">
-		<input type="text" class="form-control" name="nom" id="id_nom" placeholder="Nom" value="<?=$nom?>">
+	<label for="id_prenom" class="col-12 col-md-3 col-form-label">&nbsp;Prénom nom:</label>
+	<div class="col-12 col-md-6">
+ 		<input type="text" class="form-control mb-2" name="prenom" id="id_prenom" required autocomplete="off" placeholder="Prénom" value="<?=$prenom?>">
+		<input type="text" class="form-control" name="nom" id="id_nom" required autocomplete="off" placeholder="Nom" value="<?=$nom?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_username" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Username &amp; Password:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
- 		<input type="text" class="form-control" name="username" id="id_username" placeholder="pnom" value="<?=$username?>">
-		<input type="text" class="form-control" name="password" id="id_password" placeholder="Pnom123!" value="<?=$password?>">
+	<label for="id_username" class="col-12 col-md-3 col-form-label">&nbsp;Username &amp; Password:</label>
+	<div class="col-12 col-md-6">
+ 		<input type="text" class="form-control mb-2" name="username" id="id_username" required autocomplete="off" placeholder="pnom" value="<?=$username?>">
+		<input type="password" class="form-control" name="password" id="id_password" required autocomplete="new-password" placeholder="Pnom123!" value="<?=$password?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_datenaissance" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Date naissance:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_datenaissance" class="col-12 col-md-3 col-form-label">&nbsp;Date naissance:</label>
+	<div class="col-12 col-md-6">
  		<input type="date" class="form-control" name="datenaissance" id="id_datenaissance" placeholder="jj/mm/aaaa" value="<?=$datenaissance?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_email" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Email:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
- 		<input type="text" class="form-control" name="email" id="id_email" placeholder="e-mail address" value="<?=$email?>">
+	<label for="id_email" class="col-12 col-md-3 col-form-label">&nbsp;Email:</label>
+	<div class="col-12 col-md-6">
+ 		<input type="email" class="form-control" name="email" id="id_email" required autocomplete="off" placeholder="e-mail address" value="<?=$email?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_adresse" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Adresse:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_adresse" class="col-12 col-md-3 col-form-label">&nbsp;Adresse:</label>
+	<div class="col-12 col-md-6">
  		<input type="text" class="form-control" name="adresse" id="id_adresse" placeholder="rue xxxxx, 11/51" value="<?=$adresse?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_codepostal" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Code Postal:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
- 		<input type="text" class="form-control" name="codepostal" id="id_codepostal" placeholder="4000" value="<?=$codepostal?>">
+	<label for="id_codepostal" class="col-12 col-md-3 col-form-label">&nbsp;Code Postal:</label>
+	<div class="col-12 col-md-6">
+ 		<input type="text" inputmode="numeric" class="form-control" name="codepostal" id="id_codepostal" placeholder="4000" value="<?=$codepostal?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_ville" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Ville:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_ville" class="col-12 col-md-3 col-form-label">&nbsp;Ville:</label>
+	<div class="col-12 col-md-6">
  		<input type="text" class="form-control" name="ville" id="id_ville" placeholder="Spa" value="<?=$ville?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_pays" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Pays:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_pays" class="col-12 col-md-3 col-form-label">&nbsp;Pays:</label>
+	<div class="col-12 col-md-6">
  		<input type="text" class="form-control" name="pays" id="id_pays" placeholder="Belgique" value="<?=$pays?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_telephone" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Téléphone:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
- 		<input type="text" class="form-control" name="telephone" id="id_telephone" placeholder="+324********" value="<?=$telephone?>">
+	<label for="id_telephone" class="col-12 col-md-3 col-form-label">&nbsp;Téléphone:</label>
+	<div class="col-12 col-md-6">
+ 		<input type="tel" class="form-control" name="telephone" id="id_telephone" autocomplete="off" placeholder="+324********" value="<?=$telephone?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_motivation" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Motivations:</label>
-	<div class="col-sm-12 col-md-4 col-lg-4">
-          <textarea name="motivation" class="form-control" id="id_motivation" rows="5" cols="30" placeholder="Décrire ses motivations"></textarea>
+	<label for="id_motivation" class="col-12 col-md-3 col-form-label">&nbsp;Motivations:</label>
+	<div class="col-12 col-md-6">
+          <textarea name="motivation" class="form-control" id="id_motivation" rows="5" placeholder="Décrire ses motivations"><?=htmlspecialchars($motivation)?></textarea>
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_typemembre" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Type de membre:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_typemembre" class="col-12 col-md-3 col-form-label">&nbsp;Type de membre:</label>
+	<div class="col-12 col-md-6">
         <select name="typemembre" id="id_typemembre" class="form-select">
             <option value="none">Choisir un type de membre</option>
             <option value="nonnaviguant" <?=($typemembre=="nonnaviguant") ? "selected" :""?>>Membre non-naviguant</option>
@@ -236,8 +236,8 @@ if (isset($_REQUEST['createmember']) and $_REQUEST['createmember'] == 'create') 
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_qualification_row">
-	<label for="id_qualification" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Qualification:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_qualification" class="col-12 col-md-3 col-form-label">&nbsp;Qualification:</label>
+	<div class="col-12 col-md-6">
         <select name="qualification" id="id_qualification" class="form-select">
             <option value="none">Choisir une qualification</option>
             <option value="PPL" <?=($qualification=="PPL") ? "selected" :""?>>PPL</option>
@@ -248,26 +248,26 @@ if (isset($_REQUEST['createmember']) and $_REQUEST['createmember'] == 'create') 
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_licence_row">
-	<label for="id_licence" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Licence Nº:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_licence" class="col-12 col-md-3 col-form-label">&nbsp;Licence Nº:</label>
+	<div class="col-12 col-md-6">
  		<input type="text" class="form-control" name="licence" id="id_licence" placeholder="BExxxxxxx" value="<?=$licence?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_validitemedicale_row">
-	<label for="id_validitemedicale" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Validité médicale:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_validitemedicale" class="col-12 col-md-3 col-form-label">&nbsp;Validité médicale:</label>
+	<div class="col-12 col-md-6">
  		<input type="date" class="form-control" name="validitemedicale" id="id_validitemedicale" placeholder="jj/mm/aaaa" value="<?=$validitemedicale?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_validiteelp_row">
-	<label for="id_validiteelp" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Validite ELP:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_validiteelp" class="col-12 col-md-3 col-form-label">&nbsp;Validite ELP:</label>
+	<div class="col-12 col-md-6">
  		<input type="date" class="form-control" name="validiteelp" id="id_validiteelp" placeholder="jj/mm/aaaa" value="<?=$validiteelp?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_courstheorique_row">
-	<label for="id_courstheorique" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Participation cours théorique (Session <?=$membership_year?>):</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_courstheorique" class="col-12 col-md-3 col-form-label">&nbsp;Participation cours théorique (Session <?=$membership_year?>):</label>
+	<div class="col-12 col-md-6">
         <select name="courstheorique" id="id_courstheorique" class="form-select">
             <option value="none">Choisir</option>
             <option value="oui" <?=($courstheorique=="oui") ? "selected" :""?>>Oui</option>
@@ -276,20 +276,20 @@ if (isset($_REQUEST['createmember']) and $_REQUEST['createmember'] == 'create') 
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_dateinscription" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Date d'inscription:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_dateinscription" class="col-12 col-md-3 col-form-label">&nbsp;Date d'inscription:</label>
+	<div class="col-12 col-md-6">
  		<input type="date" class="form-control" name="dateinscription" id="id_dateinscription" placeholder="jj/mm/aaaa" value="<?=$dateinscription?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_cotisation" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Cotisation(€):</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
- 		<input type="text" class="form-control" name="cotisation" id="id_cotisation" placeholder="270" value="<?=$cotisation?>">
+	<label for="id_cotisation" class="col-12 col-md-3 col-form-label">&nbsp;Cotisation(€):</label>
+	<div class="col-12 col-md-6">
+ 		<input type="text" inputmode="decimal" class="form-control" name="cotisation" id="id_cotisation" placeholder="270" value="<?=$cotisation?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_caution_row">
-	<label for="id_caution" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Caution:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_caution" class="col-12 col-md-3 col-form-label">&nbsp;Caution:</label>
+	<div class="col-12 col-md-6">
         <select name="caution" id="id_caution" class="form-select">
             <option value="none">Choisir</option>
             <option value="oui" <?=($caution=="oui") ? "selected" :""?>>Oui - 200€</option>
@@ -301,8 +301,8 @@ if (isset($_REQUEST['createmember']) and $_REQUEST['createmember'] == 'create') 
 
 <!-- Société -->
 <div class="row mb-3" id="id_societe_row">
-	<label for="id_societe" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Société associée au membre:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_societe" class="col-12 col-md-3 col-form-label">&nbsp;Société associée au membre:</label>
+	<div class="col-12 col-md-6">
         <select name="societe" id="id_societe" class="form-select">
             <option value="oui" <?=($societe=="oui") ? "selected" :""?>>Oui</option>
             <option value="non" <?=($societe=="non") ? "selected" :""?>>Non</option>
@@ -310,69 +310,70 @@ if (isset($_REQUEST['createmember']) and $_REQUEST['createmember'] == 'create') 
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_nomsociete_row">
-	<label for="id_nomsociete" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Nom société:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_nomsociete" class="col-12 col-md-3 col-form-label">&nbsp;Nom société:</label>
+	<div class="col-12 col-md-6">
  		<input type="text" class="form-control" name="nomsociete" id="id_nomsociete" placeholder="nom société" value="<?=$nomsociete?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_bcesociete_row">
-	<label for="id_bcesociete" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;TVA société:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_bcesociete" class="col-12 col-md-3 col-form-label">&nbsp;TVA société:</label>
+	<div class="col-12 col-md-6">
  		<input type="text" class="form-control" name="bcesociete" id="id_bcesociete" placeholder="BE0XXXXXXXXXXXX" value="<?=$bcesociete?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_adressesociete_row">
-	<label for="id_adressesociete" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Adresse société:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_adressesociete" class="col-12 col-md-3 col-form-label">&nbsp;Adresse société:</label>
+	<div class="col-12 col-md-6">
  		<input type="text" class="form-control" name="adressesociete" id="id_adressesociete" placeholder="rue xxxxx, 11/51" value="<?=$adressesociete?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_codepostalsociete_row">
-	<label for="id_codepostalsociete" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Code Postal société:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
- 		<input type="text" class="form-control" name="codepostalsociete" id="id_codepostalsociete" placeholder="4000" value="<?=$codepostalsociete?>">
+	<label for="id_codepostalsociete" class="col-12 col-md-3 col-form-label">&nbsp;Code Postal société:</label>
+	<div class="col-12 col-md-6">
+ 		<input type="text" inputmode="numeric" class="form-control" name="codepostalsociete" id="id_codepostalsociete" placeholder="4000" value="<?=$codepostalsociete?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_villesociete_row">
-	<label for="id_villesociete" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Ville société:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_villesociete" class="col-12 col-md-3 col-form-label">&nbsp;Ville société:</label>
+	<div class="col-12 col-md-6">
  		<input type="text" class="form-control" name="villesociete" id="id_villesociete" placeholder="Spa" value="<?=$villesociete?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3" id="id_payssociete_row">
-	<label for="id_payssociete" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Pays société:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_payssociete" class="col-12 col-md-3 col-form-label">&nbsp;Pays société:</label>
+	<div class="col-12 col-md-6">
  		<input type="text" class="form-control" name="payssociete" id="id_payssociete" placeholder="Belgique" value="<?=$payssociete?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 
 <div class="row mb-3">
-	<label for="id_contactnom" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Personne de contact:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_contactnom" class="col-12 col-md-3 col-form-label">&nbsp;Personne de contact:</label>
+	<div class="col-12 col-md-6">
  		<input type="text" class="form-control" name="contactnom" id="id_contactnom" placeholder="Prénom Nom" value="<?=$contactnom?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_contactlien" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Lien avec la personne de contact:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
+	<label for="id_contactlien" class="col-12 col-md-3 col-form-label">&nbsp;Lien avec la personne de contact:</label>
+	<div class="col-12 col-md-6">
  		<input type="text" class="form-control" name="contactlien" id="id_contactlien" placeholder="Conjoint(e))" value="<?=$contactlien?>">
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-	<label for="id_contactphone" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Téléphone de la personne de contact:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
- 		<input type="text" class="form-control" name="contactphone" id="id_contactphone" placeholder="+324xxxxxxxxxx" value="<?=$contactphone?>">
+	<label for="id_contactphone" class="col-12 col-md-3 col-form-label">&nbsp;Téléphone de la personne de contact:</label>
+	<div class="col-12 col-md-6">
+ 		<input type="tel" class="form-control" name="contactphone" id="id_contactphone" autocomplete="off" placeholder="+324xxxxxxxxxx" value="<?=$contactphone?>">
 	</div> <!-- col -->
 </div> <!-- row --><div class="row mb-3">
-	<label for="id_contactmail" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Email de la personne de contact:</label>
-	<div class="col-sm-4 col-md-4 col-lg-4">
-  		<input type="text" class="form-control" name="contactmail" id="id_contactmail" placeholder="xxxxx@gmail.com" value="<?=$contactmail?>">	</div> <!-- col -->
+	<label for="id_contactmail" class="col-12 col-md-3 col-form-label">&nbsp;Email de la personne de contact:</label>
+	<div class="col-12 col-md-6">
+  		<input type="email" class="form-control" name="contactmail" id="id_contactmail" autocomplete="off" placeholder="xxxxx@gmail.com" value="<?=$contactmail?>">	
+    </div> <!-- col -->
 </div> <!-- row -->
 
 <!--- Bouton envoie -->
 <div class="row mb-3">
-	<label for="id_factureodoo" class="col-form-label col-sm-4 col-md-4 col-lg-4">&nbsp;Génération facture odoo: <span id="id_valeurfacture">xxxx€</span></label>
-	<div class="col-sm-4 col-md-4">
+	<label for="id_factureodoo" class="col-12 col-md-3 col-form-label">&nbsp;Génération facture odoo: <span id="id_valeurfacture">xxxx€</span></label>
+	<div class="col-12 col-md-6">
         <select name="factureodoo" id="id_factureodoo" class="form-select">
             <option value="none">Choisir</option>
             <option value="oui" <?=($factureodoo=="oui") ? "selected" :""?>>Oui</option>
@@ -381,10 +382,11 @@ if (isset($_REQUEST['createmember']) and $_REQUEST['createmember'] == 'create') 
 	</div> <!-- col -->
 </div> <!-- row -->
 <div class="row mb-3">
-        <button type="submit" id="id_createmember" name="createmember" value="create" class="col-sm-offset-2 col-md-offset-1 col-sm-3 col-md-4 btn btn-primary" >
-            Create new Member
-        </button></div>
-</form>
+    <div class="col-auto offset-sm-4">
+        <button type="submit" id="id_createmember" name="createmember" value="create" class="btn btn-primary">Create new Member</button>
+    </div><!-- col -->
 </div><!-- row -->
+</form>
+</div><!-- container -->
 </body>
 </html>

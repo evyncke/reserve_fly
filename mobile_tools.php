@@ -265,15 +265,9 @@ function GetUploadedFileInfo($theUploadFolder, $theFilePrefix, $theFileName)
 	return $fileInfo;
 }
 
-function IsPictureFile($theFileNameExtension) 
+function IsPictureFile(string $theFileNameExtension): bool
 {
-	$pictureExtensions=array("jpg", "jpeg", "gif", "png", "tiff");
-	foreach($pictureExtensions as $extension) {
-		if($extension==strtolower($theFileNameExtension)) {
-			return true;
-		}
-	}
-	return false;
+	return in_array(strtolower((string) $theFileNameExtension), array("jpg", "jpeg", "gif", "png", "tiff"), true);
 }
 
 //  Function: GetATLPrefixName : Returns the prefix from a incident id
