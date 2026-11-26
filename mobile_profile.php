@@ -72,10 +72,9 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) {
 	$me['contact_email'] = db2web($me['contact_email']) ;
 }
 
-// Be paranoid
+// Be paranoid and escape all HTML special characters to avoid XSS attacks (even if we have already cleaned the data before saving it in the database)
 foreach($me as $key => $value)
-	$me[$key] = htmlspecialchars($value, ENT_QUOTES) ;
-
+	$me[$key] = cleanHTML($value) ;
 
 // Handle OAuth callbacks
 if (isset($_GET['state']) and $_GET['state'] != '' and isset($_GET['code']) and $_GET['code'] != '') {
@@ -233,9 +232,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'log' and !$read_only)
 
 // Apply any change on the social tab before fetching all displayed_id information
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'social' and !$read_only) {
-	$facebook = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['facebook'])) ;
-	$linkedin = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['linkedin'])) ;
-	$twitter = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['twitter'])) ;
+	$facebook = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['facebook'])) ;
+	$linkedin = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['linkedin'])) ;
+	$twitter = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['twitter'])) ;
 	$affected_rows = 0 ;
 	foreach (array('facebook', 'linkedin', 'twitter') as $social_network) {
 		$profile = ${$social_network} ;
@@ -260,9 +259,9 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'validity' and !$read_
 	$log = '' ;
 	while ($row =  mysqli_fetch_array($result)) {
 		$type = $row['id'] ;
-		$ident_value = (isset($_REQUEST['ident_value'][$type])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['ident_value'][$type])) : '' ;
-		$grant_date = (isset($_REQUEST['grant_date'][$type])) ?mysqli_real_escape_string($mysqli_link, trim($_REQUEST['grant_date'][$type])) : '' ;
-		$expire_date = (isset($_REQUEST['expire_date'][$type])) ?mysqli_real_escape_string($mysqli_link, trim($_REQUEST['expire_date'][$type])) : '' ;
+		$ident_value = (isset($_REQUEST['ident_value'][$type])) ? mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['ident_value'][$type])) : '' ;
+		$grant_date = (isset($_REQUEST['grant_date'][$type])) ?mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['grant_date'][$type])) : '' ;
+		$expire_date = (isset($_REQUEST['expire_date'][$type])) ?mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['expire_date'][$type])) : '' ;
 		if ($ident_value == '' and $grant_date == '' and $expire_date == '') continue ;
 		if ($ident_value == '' and $grant_date == '' and $expire_date == '') continue ;
 		$sql_statement = "REPLACE INTO $table_validity(jom_id, validity_type_id, ident_value, grant_date, expire_date)
@@ -278,12 +277,12 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'validity' and !$read_
 	if (isset($_REQUEST['newValidityId'])) {
 		$newValidityId = intval(trim($_REQUEST['newValidityId'])) ;
 		if (! is_numeric($newValidityId) or $newValidityId <= 0) journalise($userId, "F", "Invalid newValidityId ($newValidityId)") ;
-		$new_ident_value = mysqli_real_escape_string($mysqli_link, web2db(trim($_REQUEST['new_ident_value']))) ;
-		$new_grant_date = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['new_grant_date'])) ;
+		$new_ident_value = mysqli_real_escape_string($mysqli_link, web2db(cleanInput($_REQUEST['new_ident_value']))) ;
+		$new_grant_date = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['new_grant_date'])) ;
 		if ($new_grant_date == '')
 			$log .= "empty grant date for new validity $newValidityId;\n" ;
 		else {
-			$new_expire_date = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['new_expire_date'])) ;
+			$new_expire_date = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['new_expire_date'])) ;
 			mysqli_query($mysqli_link, "INSERT INTO $table_validity(jom_id, validity_type_id, ident_value, grant_date, expire_date)
 				VALUES($displayed_id, $newValidityId, '$new_ident_value', '$new_grant_date', '$new_expire_date')")
 				or journalise($userId, "F","Impossible d'ajouter la validité/annotation: " . mysqli_error($mysqli_link)) ;
@@ -305,24 +304,24 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'delete_rating' and !$
 }
 // Apply any change before fetching all displayed_id information
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_only) {
-	$home_phone = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['home_phone'])) ;
-	$cell_phone = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['cell_phone'])) ;
-	$work_phone = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['work_phone'])) ;
-	$email = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['email'])) ;
+	$home_phone = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['home_phone'])) ;
+	$cell_phone = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['cell_phone'])) ;
+	$work_phone = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['work_phone'])) ;
+	$email = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['email'])) ;
 	if ((strlen($email) == 0) or ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
 		journalise($userId, 'F', "Adresse email invalide pour $me[username]/$displayed_id: $email") ;
 	}
-	$address = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['address']))) ;
-	$zipcode = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['zipcode']))) ;
-	$city = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['city']))) ;
-	$country = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['country'])) ;
-	$birthdate = (isset($_REQUEST['birthdate'])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['birthdate'])) : '';
+	$address = web2db(mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['address']))) ;
+	$zipcode = web2db(mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['zipcode']))) ;
+	$city = web2db(mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['city']))) ;
+	$country = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['country'])) ;
+	$birthdate = (isset($_REQUEST['birthdate'])) ? mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['birthdate'])) : '';
 	$sex = (isset($_REQUEST['sex'])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['sex'])) : 0 ;
 	if (!is_numeric($sex)) $sex = 0 ;
 	$hide_flight = (isset($_REQUEST['hide_flight'])) ? mysqli_real_escape_string($mysqli_link, trim($_REQUEST['hide_flight'])) : 0 ;
 	if (!is_numeric($hide_flight)) $hide_flight = 0 ;
-	$first_name = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['first_name']))) ;
-	$last_name = web2db(mysqli_real_escape_string($mysqli_link, trim($_REQUEST['last_name']))) ;
+	$first_name = web2db(mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['first_name']))) ;
+	$last_name = web2db(mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['last_name']))) ;
 //	if ($first_name == '' or $last_name == '') {
 //		journalise($userId, 'E', "Nom ou pr&eacute;nom invalides pour $me[username]/$displayed_id: prenom=" . db2web($first_name) . ", nom: " . db2web($last_name)) ;
 //		journalise($userId, "F", "Le nom et/ou le pr&eacute;nom sont invalides. Changements refus&eacute;s.") ;
@@ -350,10 +349,10 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'profile' and !$read_o
 
 // Apply any change before fetching all displayed_id information
 if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'alt_contact' and !$read_only) {
-	$contactName = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_name'])) ;
-	$contactRelationship = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_relationship'])) ;
-	$contactPhone = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_phone'])) ;
-	$contactEmail = mysqli_real_escape_string($mysqli_link, trim($_REQUEST['c_email'])) ;
+	$contactName = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['c_name'])) ;
+	$contactRelationship = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['c_relationship'])) ;
+	$contactPhone = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['c_phone'])) ;
+	$contactEmail = mysqli_real_escape_string($mysqli_link, cleanInput($_REQUEST['c_email'])) ;
 	mysqli_query($mysqli_link, "update $table_person set contact_name='$contactName', contact_relationship='$contactRelationship',
 		contact_phone='$contactPhone', contact_email='$contactEmail' where jom_id = $displayed_id")
 		or journalise($userId, "F", "Erreur systeme lors de la mise a jour de $table_person: " . mysqli_error($mysqli_link)) ;
@@ -408,9 +407,9 @@ if ($userIsBoardMember or $userIsInstructor or $userId == $displayed_id) { // Pr
 	$me['contact_email'] = db2web($me['contact_email']) ;
 }
 
-// Be paranoid
+// Be paranoid and escape all HTML special characters to avoid XSS attacks (even if we have already cleaned the data before saving it in the database)
 foreach($me as $key => $value)
-	$me[$key] = htmlspecialchars($value, ENT_QUOTES) ;
+	$me[$key] = cleanHTML($value) ;
 
 ?>
 <div class="container-fluid">

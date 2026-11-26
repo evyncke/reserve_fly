@@ -537,6 +537,17 @@ function db2web(?string $msg): string|null {
 // This function is used to clean HTML content before displaying it in the browser. 
 // It converts special characters to HTML entities, preventing XSS attacks and ensuring that the content is displayed correctly.
 // Should be used after db2web() to ensure that the string is in UTF-8 encoding before cleaning it for HTML output.
+// Sanitise free-text user input BEFORE storing it in the DB (stored XSS defence): returns plain text without
+// control characters nor HTML tags. Output must still be escaped (cleanHTML) when displayed.
+function cleanInput(string|null $s): string {
+	if ($s === null)
+		return '' ;
+	$s = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $s) ?? '' ;
+	$s = strip_tags($s) ;
+	$s = str_replace(array('<', '>'), '', $s) ; // Leftovers such as an unterminated '<script'
+	return trim($s) ;
+}
+
 function cleanHTML(string|null $s): string {
 	if ($s === null) 
 		return '';
