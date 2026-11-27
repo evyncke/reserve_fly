@@ -99,9 +99,15 @@ while ($row = mysqli_fetch_array($result)) {
 	else
 		$name = cleanHTML(db2web($row['name'] ?? '')) ;
 	// The URI is the logged request URI, i.e., controlled by the visitor: escape it and link only local paths
-	$uri = db2web($row['j_uri'] ?? '') ;
-	$uri_html = cleanHTML($uri) ;
-	$uri_cell = (preg_match('#^/(?![/\\\\])#', $uri)) ? "<a href=\"$uri_html\">$uri_html</a>" : $uri_html ;
+	// journalise() stores "<path>?<query> <POST parameters>": only the first part is a URL, the rest is plain text
+	$uri_parts = explode(' ', db2web($row['j_uri'] ?? ''), 2) ;
+	$uri_url = $uri_parts[0] ;
+	$uri_params = trim($uri_parts[1] ?? '') ;
+	$uri_cell = cleanHTML($uri_url) ;
+	if (preg_match('#^/(?![/\\\\])#', $uri_url))
+		$uri_cell = '<a href="' . $uri_cell . '">' . $uri_cell . '</a>' ;
+	if ($uri_params !== '')
+		$uri_cell .= '<br><small class="text-muted">' . cleanHTML($uri_params) . '</small>' ;
 	print("<tr>
 		<td class=\"text-nowrap$specialClass\">$date</td>
 		<td$nameStyle class=\"text-nowrap$specialClass\">$name</td>
