@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17776877434"></script>
 <script>
 	window.dataLayer = window.dataLayer || [];
 	function gtag(){dataLayer.push(arguments);}
 	gtag('js', new Date());
-
 	gtag('config', 'AW-17776877434');
 </script>
 <script>
@@ -15,7 +17,7 @@
 		window.history.back();
 	}
 </script>
-<title>Résumé de votre demande (InProgress)</title>
+<title>Résumé de votre demande</title>
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq = window._paq || [];
@@ -37,23 +39,31 @@
 <!-- End Matomo Code -->
 </head>
 <body>
+<div class="container my-4">
 <?php
 // This PHP script is fully integrated as a component of Joomla
 // Developped by Patrick Reginster in 2019
 // Updated Eric Vyncke 2022
 require_once __DIR__ .'/action_tools.php' ; // it also includes the load of dbi.php
 
-$language=$_POST["form_language"];
-$typeofgift=$_POST["typeofgift"];
-$numberofpassagers=$_POST["numberofpassagers"];
+$language=cleanInput($_POST["form_language"] ?? '');
+$typeofgift=cleanInput($_POST["typeofgift"] ?? '');
+// Whitelists: those values end up in mail headers (subject) and in the HTML
+if (!in_array($language, array('french', 'english'), true))
+	$language = 'french' ;
+if (!in_array($typeofgift, array('vol_decouverte', 'vol_initiation', 'bon_valeur'), true))
+	journalise(0, 'F', "Invalid typeofgift='" . substr($typeofgift, 0, 50) . "'") ;
+$numberofpassagers=(int) ($_POST["numberofpassagers"] ?? 0) ;
+if ($numberofpassagers < 0 or $numberofpassagers > 4)
+	journalise(0, 'F', "Invalid numberofpassagers=$numberofpassagers") ;
 
-$firstname1=$_POST["firstname1"];
-$lastname1=$_POST["lastname1"];
+$firstname1=cleanInput($_POST["firstname1"] ?? '');
+$lastname1=cleanInput($_POST["lastname1"] ?? '');
 if($firstname1=="James" && $lastname1=="Smith") {
 	exit;
 }
-$firstname2=$_POST["firstname2"];
-$lastname2=$_POST["lastname2"];
+$firstname2=cleanInput($_POST["firstname2"] ?? '');
+$lastname2=cleanInput($_POST["lastname2"] ?? '');
 $circuitnumber=0;
 if(isset($_POST["circuit"])) {
 	$circuitnumber=$_POST["circuit"]+1;
@@ -63,24 +73,26 @@ $valeur_bon=0.0;
 if(isset($_POST["valeur_bon"])) {
 	$valeur_bon=$_POST["valeur_bon"];
 }
-$valeur_bon_libre=$_POST["valeur_bon_libre"];
-$valeur_versement=$_POST["valeur_virement"];
+$valeur_bon_libre=cleanInput($_POST["valeur_bon_libre"] ?? '');
+// The amount is used in the bank transfer QR code: only keep a positive finite number, otherwise it is considered as missing
+$valeur_versement=cleanInput($_POST["valeur_virement"] ?? '');
+$valeur_versement=(is_numeric($valeur_versement) and is_finite((float) $valeur_versement) and (float) $valeur_versement > 0 and (float) $valeur_versement <= 1000) ? (string) (float) $valeur_versement : '' ;
 $destinataire_option_name="";
 if(isset($_POST["nom_destinataire"])) {
 	$destinataire_option_name=$_POST["nom_destinataire"];
 }
-$rue=$_POST["rue"];
-$codepostal=$_POST["codepostal"];
-$ville=$_POST["ville"];
-$pays=$_POST["pays"];
+$rue=cleanInput($_POST["rue"] ?? '');
+$codepostal=cleanInput($_POST["codepostal"] ?? '');
+$ville=cleanInput($_POST["ville"] ?? '');
+$pays=cleanInput($_POST["pays"] ?? '');
 
-$contactmail=$_POST["contactmail"];
-$contactphone=$_POST["contactphone"];
-$destinatairemail=$_POST["destinatairemail"];
-$destinatairephone=$_POST["destinatairephone"];
-$voldansles12mois=$_POST["voldansles12mois"];
-$remarque=$_POST["remarque"];
-$messageforgift=$_POST["message"];
+$contactmail=cleanInput($_POST["contactmail"] ?? '');
+$contactphone=cleanInput($_POST["contactphone"] ?? '');
+$destinatairemail=cleanInput($_POST["destinatairemail"] ?? '');
+$destinatairephone=cleanInput($_POST["destinatairephone"] ?? '');
+$voldansles12mois=cleanInput($_POST["voldansles12mois"] ?? '');
+$remarque=cleanInput($_POST["remarque"] ?? '');
+$messageforgift=cleanInput($_POST["message"] ?? '');
 $rapcsmember="non";
 if($voldansles12mois=="oui") {
 	$rapcsmember="oui";
@@ -93,7 +105,7 @@ $to = 'reservation@spa-aviation.be';
 $replyto='reservation@spa-aviation.be';
 $sender='reservation@spa-aviation.be';
 $testingto='patrick.reginster@me.com';
-$testingreplyto='patrick.reginster@me.com>';
+$testingreplyto='patrick.reginster@me.com';
 
 //Sometimes doesn't work. Why?
 //$from='"Reservation RAPCS asbl" <reservation@spa-aviation.be>';
@@ -148,7 +160,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 	$MessageAnswer=$errormessage;
 } else {	
 	// Now let's try to insert the data in the data base
-	journalise(0, 'D', "Discovery flight ($typeofgift) about to be created for $_REQUEST[contactmail] $lastname1 $firstname1 ($remarque)") ;
+	journalise(0, 'D', "Discovery flight ($typeofgift) about to be created for $contactmail $lastname1 $firstname1 ($remarque)") ;
 	if ($typeofgift == "vol_decouverte") 
 		$flight_type = 'D' ;
 	else if ($typeofgift == "vol_initiation") 
@@ -162,7 +174,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 	if ($stmt) {
 		$lname = web2db($lastname1);
 		$fname = web2db($firstname1);
-		$email = $_REQUEST['contactmail'];
+		$email = $contactmail;
 		$tel = $contactphone;
 		$street = web2db("$rue");
 		$zip = $codepostal;
@@ -216,11 +228,11 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$roleS = 'S';
 		mysqli_stmt_bind_param($stmt, 'iis', $flight_id, $contact_id, $roleC);
 		if (!mysqli_stmt_execute($stmt)) {
-			journalise(0, "E", "Cannot add contact role C, system error: " . mysqli_error($mysqli_link));
+			journalise(0, "E", "Cannot add contact role C $roleC, system error: " . mysqli_error($mysqli_link));
 		}
 		mysqli_stmt_bind_param($stmt, 'iis', $flight_id, $pax_id, $roleS);
 		if (!mysqli_stmt_execute($stmt)) {
-			journalise(0, "E", "Cannot add student role $role, system error: " . mysqli_error($mysqli_link));
+			journalise(0, "E", "Cannot add student role $roleS, system error: " . mysqli_error($mysqli_link));
 		}
 		mysqli_stmt_close($stmt);
 	} else {
@@ -268,18 +280,18 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 
 		$message.="<b>Information sur le demandeur du cadeau</b><br/>";		
 		$message.="Nom: ".htmlentities($firstname1) ." " . htmlentities($lastname1) . "<br/>";
-		$message.="Mail: ".$contactmail ."<br/>";
-		$message.="T&eacute;l&eacute;phone: ".$contactphone ."<br/>";
+		$message.="Mail: ".cleanHTML($contactmail) ."<br/>";
+		$message.="T&eacute;l&eacute;phone: ".cleanHTML($contactphone) ."<br/>";
 		$message.="<br/>";
 
 		$message.="<b>Information sur le destinataire du cadeau</b><br/>";		
 		$message.="Nom: ".htmlentities($firstname2) ." " . htmlentities($lastname2) . "<br/>";
-		$message.="Mail: ".$destinatairemail ."<br/>";
-		$message.="T&eacute;l&eacute;phone: ".$destinatairephone ."<br/>";
+		$message.="Mail: ".cleanHTML($destinatairemail) ."<br/>";
+		$message.="T&eacute;l&eacute;phone: ".cleanHTML($destinatairephone) ."<br/>";
 		$message.="<br/>";
 		$message.="<b>Adresse de livraison du bon cadeau</b><br/>";
-		$message.="Destinataire du courrier: ".$destinataire_option_name."<br/>";
-		$message.="Adresse: ". $rue." - ". $codepostal." ". $ville." - ".$pays."<br/>";
+		$message.="Destinataire du courrier: ".cleanHTML($destinataire_option_name)."<br/>";
+		$message.="Adresse: ". cleanHTML($rue)." - ". cleanHTML($codepostal)." ". cleanHTML($ville)." - ".cleanHTML($pays)."<br/>";
 		$message.="<br/>";
 		$message.="<b>Information sur le vol $flight_reference</b><br/>";
 		if ($typeofgift == "vol_decouverte") {
@@ -304,7 +316,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$message.="Valeur &agrave; verser sur le compte BE64 7320 3842 1852 BIC CREGBEBB au nom de RAPCS asbl: ".htmlentities($valeur_versement) ." &euro;<br/>";
 		$message.="<p>Communication &agrave; associer au virement: Bon cadeau $flight_reference de ".htmlentities($firstname1) ." " . htmlentities($lastname1)." - Date: ".$today."</p>";
         $epcURI = "BCD\n001\n1\nSCT\nCREGBEBB\nRAPCS asbl\nBE64732038421852\nEUR$valeur_versement\nBon $flight_reference $lastname1 $today\nBon $flight_reference $lastname1 $today" ;
-        $message .= "<p>Ou utilisez le QR-code ci-dessous et votre application bancaire (<b>pas</b> payconiq):<br/><img width=300 height=300 src=\"". SITE_URL ."qr-code.php?cht=qr&chs=200x200&&chl=" . urlencode($epcURI) . "\"></p>\n" ;
+        $message .= "<p>Ou utilisez le QR-code ci-dessous et votre application bancaire (<b>pas</b> payconiq):<br/><img width=\"300\" height=\"300\" src=\"". SITE_URL ."qr-code.php?cht=qr&chs=300x300&&chl=" . urlencode($epcURI) . "\"></p>\n" ;
 		if(count($remarques)==0 || $remarques[0]=="") {
 			$message.="Pas de Remarques<br/>";
 		} else {
@@ -351,8 +363,8 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$message.="<br/>";
 		$message.="<b>Information about the gift recipient</b><br/>";				
 		$message.="name: ".htmlentities($firstname2) ." " . htmlentities($lastname2) . "<br/>";
-		$message.="Mail: ".$destinatairemail ."<br/>";
-		$message.="Phone: ".$destinatairephone ."<br/>";
+		$message.="Mail: ".cleanHTML($destinatairemail) ."<br/>";
+		$message.="Phone: ".cleanHTML($destinatairephone) ."<br/>";
 		$message.="<br/>";
 
 		$message.="<b>Delivery address of the voucher</b><br/>";	
@@ -361,7 +373,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		} else {
 			$message.="Mail recipient: gift applicant<br/>";		
 		}
-		$message.="Address: ". $rue." - ". $codepostal." ". $ville." - ".$pays."<br/>";
+		$message.="Address: ". cleanHTML($rue)." - ". cleanHTML($codepostal)." ". cleanHTML($ville)." - ".cleanHTML($pays)."<br/>";
 		$message.="<br/>";
 
 		$message.="<b>Flight Information $flight_reference</b><br/>";				
@@ -382,7 +394,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 		$message.="Value to transfer by bank. Name RAPCS asbl, IBAN BE64 7320 3842 1852, BIC CREGBEBB: ".htmlentities($valeur_versement) ." &euro;<br/>";
 		$message.="Communication on bank transfer: <b>Gift voucher $flight_reference for  ".htmlentities($firstname1) ." " . htmlentities($lastname1)." - Date: ".$today."</b><br/><br/>";
 		$epcURI = "BCD\n001\n1\nSCT\nCREGBEBB\nRAPCS asbl\nBE64732038421852\nEUR$valeur_versement\nBon $flight_reference $lastname1 $today\nBon $flight_reference $lastname1 $today" ;
-        $message .= "<p>Or use the above QR-code and your Bank App (<b>not</b> payconiq):<br/><img width=300 height=300 src=\"". SITE_URL ."qr-code.php?cht=qr&chs=200x200&&chl=" . urlencode($epcURI) . "\"></p>\n" ;
+        $message .= "<p>Or use the above QR-code and your Bank App (<b>not</b> payconiq):<br/><img width=\"300\" height=\"300\" src=\"". SITE_URL ."qr-code.php?cht=qr&chs=300x300&chl=" . urlencode($epcURI) . "\"></p>\n" ;
 		if(count($remarques)==0 || $remarques[0]=="") {
 			$message.="No remark<br/>";
 		} else {
@@ -423,28 +435,26 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 	
 	$MessageAnswerBody='<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>'.$MessageAnswer."</body></html>";
     mail_attachment($contactmail, $sender, "", $replyto, "Confirmation ($flight_reference): ".$subject, $MessageAnswerBody,"", "", "");
-	journalise(0, "I", "Vol découverte $flight_reference: New reservation by $contactmail, referer $_SERVER[HTTP_REFERER]") ;
+	journalise(0, "I", "Vol découverte $flight_reference: New reservation by $contactmail, referer " . cleanInput($_SERVER['HTTP_REFERER'] ?? '')) ;
 }
 ?>
-        <p>
+
 		<h2><?php 
 		if($language=="french") {
 			echo("R&eacute;sum&eacute; de votre demande $flight_reference");
 		}
 		else {
 			echo("Request summary $flight_reference");			
-		} ?></h2>
-	    </p>
-		<p>
-			<?php 
-			if(empty($errormessage)) {
-			echo $MessageAnswer; 
+		} ?>
+		</h2>
+		<?php 
+		if(empty($errormessage)) {
+			echo "<div class=\"mb-3\">" . $MessageAnswer . "</div>\n"; 
 		}
-		else{
-			echo "<b><font color=\"red\">".$errormessage."</font></b><br/>";
-	     }
-			?>
-		</p>
+		else {
+			echo "<div class=\"alert alert-danger\" role=\"alert\">" . $errormessage . "</div>\n";
+		}
+		?>
         <p>
 		<br/><br/><?php if($language=="french") {
 			echo("<i>Un mail contenant ce r&eacute;sum&eacute;, vous a &eacute;t&eacute; envoy&eacute;.<br/>");
@@ -456,9 +466,7 @@ if(!empty($errormessage) || empty($valeur_versement)) {
 			echo("by mail at <a href='mailto:reservation@spa-aviation.be'>reservation@spa-aviation.be</a> or by phone at <a href='tel:+32470646828'>+32 (0)470 64 68 28</a></i>.");			
 		} ?>
 	    </p>
-		<br/>
-		<h2>
-		<button onclick="goBack()">Retour &agrave; la page de r&eacute;servation</button>
-	    </h2>
+		<button type="button" class="btn btn-primary mt-3" onclick="goBack()"><?= ($language == 'french') ? 'Retour &agrave; la page de r&eacute;servation' : 'Back to the reservation page' ?></button>
+</div><!-- container -->
     	</body>
 </html>

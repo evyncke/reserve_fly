@@ -22,20 +22,19 @@ require_once 'action_tools.php' ;
 // Developped by Patrick Reginster in 2019-2023
 // Eric Vyncke 2022-2023
 
-$language=$_POST["form_language"];
-$typeofflight=$_POST["typeofflight"];
-//print("typeofflight=$typeofflight</br>");
-$numberofpassagers=$_POST["numberofpassagers"];
+$language=$_POST["form_language"] ?? '';
+$typeofflight=$_POST["typeofflight"] ?? '';
+$numberofpassagers=$_POST["numberofpassagers"] ?? '';
 if (!is_numeric($numberofpassagers) or $numberofpassagers < 0 or $numberofpassagers > 4)
 	journalise(0, 'F', "SQL injection detected numberofpassagers='$numberofpassagers'") ;
 
-$firstname1=$_POST["firstname1"];
-$lastname1=$_POST["lastname1"];
+$firstname1=$_POST["firstname1"] ?? '';
+$lastname1=$_POST["lastname1"] ?? '';
 $age1="";
 if(isset($_POST["age1"])) {
 	$age1=$_POST["age1"];
 }
-$weight1=$_POST["weight1"];
+$weight1=$_POST["weight1"] ?? '';
 if ($weight1 != '' and !is_numeric($weight1))
 	journalise(0, 'F', "SQL injection detected weight1='$weight1'") ;
 
@@ -43,28 +42,28 @@ if($firstname1=="James" && $lastname1=="Smith") {
 	exit;
 }
 
-$firstname2=$_POST["firstname2"];
-$lastname2=$_POST["lastname2"];
+$firstname2=$_POST["firstname2"] ?? '';
+$lastname2=$_POST["lastname2"] ?? '';
 $age2="";
 if(isset($_POST["age2"])) {
 	$age2=$_POST["age2"];
 }
-$weight2=$_POST["weight2"];
+$weight2=$_POST["weight2"] ?? '';
 if ($weight2 != '' and !is_numeric($weight2))
 	journalise(0, 'F', "SQL injection detected weight2='$weight2'") ;
 
-$firstname3=$_POST["firstname3"];
-$lastname3=$_POST["lastname3"];
+$firstname3=$_POST["firstname3"] ?? '';
+$lastname3=$_POST["lastname3"] ?? '';
 $age3="";
 if(isset($_POST["age3"])) {
 	$age3=$_POST["age3"];
 }
-$weight3=$_POST["weight3"];
+$weight3=$_POST["weight3"] ?? '';
 if ($weight3 != '' and !is_numeric($weight3))
 	journalise(0, 'F', "SQL injection detected weight3='$weight3'") ;
 
-$contactmail=$_POST["contactmail"];
-$contactphone=$_POST["contactphone"];
+$contactmail=$_POST["contactmail"] ?? '';
+$contactphone=$_POST["contactphone"] ?? '';
 $circuitnumber="";
 if(isset($_POST["circuit"])) {
 	$circuitnumber=$_POST["circuit"];
@@ -74,8 +73,8 @@ if (!is_numeric($circuitnumber) or $circuitnumber < 0 or $circuitnumber > 100)
 	journalise(0, 'F', "SQL injection detected circuitnumber='$circuitnumber'") ;
 
 $circuit=circuit_name($circuitnumber);
-$flightdate=compute_date($_POST["flightdate"]);
-$flightdate2=compute_date($_POST["flightdate2"]);
+$flightdate=compute_date($_POST["flightdate"] ?? '');
+$flightdate2=compute_date($_POST["flightdate2"] ?? '');
 
 if($flightdate=="") {
 	// No date for Vol_Initiatiation
@@ -94,7 +93,7 @@ $voldansles12mois="";
 if(isset($_POST["voldansles12mois"])) {
 	$voldansles12mois=$_POST["voldansles12mois"];
 }
-$remarque=$_POST["remarque"];
+$remarque=$_POST["remarque"] ?? '';
 $rapcsmember="non";
 if($voldansles12mois=="2") {
 	$rapcsmember="oui";
@@ -136,10 +135,10 @@ if($testingflag) {
   $falsemail=" (Warning: This is not a true reservation)";
 }
 if($language == "french") {
-	$subject = 'Demande de '.$typeofflight .$falsemail;
+	$subject = 'Demande de '.cleanHTML($typeofflight) .$falsemail;
 }
 else {
-	$subject = 'Request for a '.$typeofflight .$falsemail;
+	$subject = 'Request for a '.cleanHTML($typeofflight) .$falsemail;
 }
 
 $today = date("j-n-Y"); 
@@ -151,7 +150,7 @@ if(!empty($errormessage)) {
 else {	
 	if($language == "french") {
 		$message = "Date demande: ".$today."<br/>";
-		$message = "Demande de r&eacute;servation d'";
+		$message .= "Demande de r&eacute;servation d'";
 		if ($typeofflight == "vol_decouverte") {
 			$message.="une promenade a&eacute;rienne";
 			$flight_type = 'D' ;
@@ -169,8 +168,8 @@ else {
 		if($numberofpassagers > 2) {
 		   $message.="Passager 3: ".htmlentities($firstname3) ." " . htmlentities($lastname3) . " (Age: ". $age3." , Poids: ". $weight3. "kg)". "<br/>";
 	    }
-		$message.="Mail: ".$contactmail ."<br/>";
-		$message.="T&eacute;l&eacute;phone: ".$contactphone ."<br/>";
+		$message.="Mail: ".cleanHTML($contactmail) ."<br/>";
+		$message.="T&eacute;l&eacute;phone: ".cleanHTML($contactphone) ."<br/>";
 		if ($typeofflight == "vol_decouverte") {
 			$message.="Circuit demand&eacute;: ".htmlentities($circuit) ."<br/>";
 		}
@@ -194,7 +193,7 @@ else {
 	}
 	else {
 		$message = "Request date: ".$today."<br/>";
-		$message = "Request for ";
+		$message .= "Request for ";
 		if ($typeofflight == "vol_decouverte") {
 			$message.="an introductory flight (Air trip)";
 			$flight_type = 'D' ;
@@ -212,8 +211,8 @@ else {
 		if($numberofpassagers > 2) {
 		   $message.="Passenger 3: ".htmlentities($firstname3) ." " . htmlentities($lastname3) . " (Age: ". $age3." , Weight: ". $weight3. "kg)". "<br/>";
 	    }
-		$message.="Mail: ".$contactmail ."<br/>";
-		$message.="Phone: ".$contactphone ."<br/>";
+		$message.="Mail: ".cleanHTML($contactmail) ."<br/>";
+		$message.="Phone: ".cleanHTML($contactphone) ."<br/>";
 		if ($typeofflight == "vol_decouverte") {
 			$message.="Requested Circuit: ".htmlentities($circuit) ."<br/>";
 		}
@@ -276,13 +275,16 @@ else {
 ?>
 <html>
 <head>
+	<meta charset="utf-8">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Résumé demande réservation</title>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17776877434"></script>
 <script>
 	window.dataLayer = window.dataLayer || [];
 	function gtag(){dataLayer.push(arguments);}
 	gtag('js', new Date());
-
 	gtag('config', 'AW-17776877434');
 </script>
 <!-- Matomo -->
@@ -306,46 +308,40 @@ else {
 <!-- End Matomo Code -->
 		</head>
 		<body>
-        <p>
 		<h2><?php if($language=="french") {
 			echo("R&eacute;sum&eacute; de votre demande");
 		}
 		else {
 			echo("Request summary");			
 		} ?></h2>
-	    </p>
 		<p>
-			<?php 
-			if(empty($errormessage)) {
+		<?php 
+		if(empty($errormessage)) {
 			echo $MessageAnswer; 
-		}
-		else{
-			echo "<b><font color=\"red\">".$errormessage."</font></b><br/>";
+		} else {
+			echo '<div class="alert alert-danger" role="alert">'.$errormessage."</div><br/>";
 			journalise(0, "E", $errormessage) ;
-	     }
-			?>
+	    }
+		?>
 		</p>
         <p>
-		<br/><br/><?php  	if(empty($errormessage)) {
+		<br/><br/>
+		<?php
+		if(empty($errormessage)) {
 			if($language=="french") {
-			echo("<i>Un mail contenant ce r&eacute;sum&eacute;, vous a &eacute;t&eacute; envoy&eacute;.<br/>");
-            echo("Si vous ne le recevez pas ou pour tout renseignement compl&eacute;mentaire, contactez nous aux adresses ci-dessous.<br/>");
-            echo("Adresse  mail <a href='mailto:reservation@spa-aviation.be'>reservation@spa-aviation.be</a> ou num&eacute;ro de t&eacute;l&eacute;phone <a href='tel:+32470646828'>+32 (0)470 64 68 28</a></i>");
+				echo("<i>Un mail contenant ce r&eacute;sum&eacute;, vous a &eacute;t&eacute; envoy&eacute;.<br/>");
+				echo("Si vous ne le recevez pas ou pour tout renseignement compl&eacute;mentaire, contactez nous aux adresses ci-dessous.<br/>");
+				echo("Adresse  mail <a href='mailto:reservation@spa-aviation.be'>reservation@spa-aviation.be</a> ou num&eacute;ro de t&eacute;l&eacute;phone <a href='tel:+32470646828'>+32 (0)470 64 68 28</a></i>");
+			}
+			else {
+				echo("<i>A mail was sent to your e-mail address.<br/> If you don't receive this mail  or if you have any question, don't hesitate to contact us");
+				echo("by mail at <a href='mailto:reservation@spa-aviation.be'>reservation@spa-aviation.be</a> or by phone at <a href='tel:+32470646828'>+32 (0)470 64 68 28</a></i>");			
+			} 
 		}
-		else {
-			echo("<i>A mail was sent to your e-mail address.<br/> If you don't receive this mail  or if you have any question, don't hesitate to contact us");
-			echo("by mail at <a href='mailto:reservation@spa-aviation.be'>reservation@spa-aviation.be</a> or by phone at <a href='tel:+32470646828'>+32 (0)470 64 68 28</a></i>");			
-		} } ?>
+		?>
 	    </p>
 				<br/>
-		<h2>
-		<button onclick="goBack()">Retour &agrave; la page de r&eacute;servaton</button>
-	    </h2>
-		   <script>
-		    function goBack() {
-		      window.history.back();
-		    }
-		   </script>
+		<button type="button" class="btn btn-primary" onclick="history.back()">Retour &agrave; la page de r&eacute;servation</button>
    	</body>
 		</html>
 
@@ -362,7 +358,7 @@ else {
 		if ($stmt) {
 			$lname = web2db($lastname1);
 			$fname = web2db($firstname1);
-			$email = $_REQUEST['contactmail'];
+			$email = $contactmail;
 			$tel = $contactphone;
 			$w = (int)$weight1;
 			mysqli_stmt_bind_param($stmt, 'ssssd', $lname, $fname, $email, $tel, $w);
@@ -376,7 +372,7 @@ else {
 		}
 		$tokens = explode('-', $flightdate) ;
 		$flightdate = "";
-		if(sizeof($tokens)==2) {
+		if(sizeof($tokens) == 3) {
 			$flightdate = "$tokens[2]-$tokens[1]-$tokens[0]" ;
 		}
 		$tokens = explode('-', $flightdate2) ;
@@ -492,12 +488,12 @@ else {
 			}
 		}
 		journalise(0, 'I', "Discovery flight ($flight_id) created for $lastname1 $firstname1 ($remarque)") ;
-	} else
+	} else {
 		journalise(0, "E", "Vol decouverte: $errormessage") ;
-		
-		mail_attachment($to, $sender, "", $contactmail, $subject." ".$flight_reference, $messageBody, "", "", "");
-		mail_attachment($to, $sender, "", $contactmail, "Reservation.csv:".$subject." ".$flight_reference, $message,$filename, $filepath, $filecontent);
-		mail_attachment($contactmail, $sender, "", $replyto, "Confirmation: ".$subject." ".$flight_reference, $MessageAnswerBody,"", "", "");
- 		journalise(0, "I", "Vol decouverte: New reservation from $contactmail") ;
+	}	
+	mail_attachment($to, $sender, "", $contactmail, $subject." ".$flight_reference, $messageBody, "", "", "");
+	mail_attachment($to, $sender, "", $contactmail, "Reservation.csv:".$subject." ".$flight_reference, $message,$filename, $filepath, $filecontent);
+	mail_attachment($contactmail, $sender, "", $replyto, "Confirmation: ".$subject." ".$flight_reference, $MessageAnswerBody,"", "", "");
+	journalise(0, "I", "Vol decouverte: New reservation from $contactmail") ;
 		
 ?>
