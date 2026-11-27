@@ -484,6 +484,7 @@ function journalise(int $userId, string $severity, string $message) {
 	if (isset($query_params['password'])) unset($query_params['password']);
 	$new_query = http_build_query($query_params);
 	$uri = $path . ($new_query !== '' ? '?' . $new_query : '');
+	$uri = mysqli_real_escape_string($mysqli_link, $uri) ;
 	$trusted_booker = (isset($_COOKIE['trusted_booker']) and $_COOKIE['trusted_booker'] == 1) ? 1 : 0 ;
 	$params = '' ;
 	foreach($_POST as $var => $value) {
@@ -662,16 +663,16 @@ function smtp_mail(string $smtp_to, string $smtp_subject, string $smtp_body, ?st
 //Try to sanitize input
 foreach($_REQUEST as $key=>$value)
         if (!is_array($_REQUEST[$key]))
-		$_REQUEST[$key] = strip_tags($value) ;
+		$_REQUEST[$key] = cleanInput($value) ;
 	else
 		foreach($_REQUEST[$key] as $sub_key => $sub_value)
-			$_REQUEST[$key][$sub_key] = strip_tags($sub_value) ;
+			$_REQUEST[$key][$sub_key] = cleanInput($sub_value) ;
 foreach($_GET as $key=>$value)
         if (!is_array($_GET[$key]))
-		$_GET[$key] = strip_tags($value) ;
+		$_GET[$key] = cleanInput($value) ;
 	else
 		foreach($_GET[$key] as $sub_key => $sub_value)
-			$_GET[$key][$sub_key] = strip_tags($sub_value) ;
+			$_GET[$key][$sub_key] = cleanInput($sub_value) ;
 foreach($_POST as $key=>$value)
         if (!is_array($_POST[$key]))
 		$_POST[$key] = strip_tags($value) ;
