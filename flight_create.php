@@ -71,21 +71,21 @@ if (!is_numeric($flight_id) and $flight_id != '') die("Invalid ID: $flight_id") 
 // and of course add 'modify' 'cancel' button
 
 // Prepare the active tab
-$contact_active = 'active in' ;
+$contact_active = 'active' ;
 $payment_active = '' ;
 $pax_active = '' ;
 $pilot_active = '' ;
 if ($pay_open) {
 	$contact_active = '' ;
-	$payment_active = 'active in' ;
+	$payment_active = 'active' ;
 }
 if ($pax_open) {
 	$contact_active = '' ;
-	$pax_active = 'active in' ;
+	$pax_active = 'active' ;
 }
 if ($pilot_open) {
 	$contact_active = '' ;
-	$pilot_active = 'active in' ;
+	$pilot_active = 'active' ;
 }
 
 function id2name($id) {
@@ -476,38 +476,39 @@ if (isset($flight_id) and $flight_id != 0) {
 	$title = "Création d'une réservation de vol" ;
 ?>
 
-<div class="page-header">
+<div class="pb-2 mb-3 border-bottom">
 <h3><?=$title?></h3>
 </div><!-- page header -->
 
-<ul class="nav nav-tabs">
-  <li class="<?=$contact_active?>"><a data-toggle="tab" href="#menuContact">Résumé</a></li>
-  <li class="<?=$pax_active?>"><a data-toggle="tab" href="#menuPassenger">Passagers</a></li>
-  <li class="<?=$payment_active?>"><a data-toggle="tab" href="#menuPayment">Paiements</a></li>
-  <li class="<?=$pilot_active?>"><a data-toggle="tab" href="#menuPilot">Pilote</a></li>
-  <li><a data-toggle="tab" href="#menuPlane">Réservation</a></li>
-  <li><a data-toggle="tab" href="#menuAudit">Historique</a></li>
+<ul class="nav nav-tabs mb-3" role="tablist">
+  <li class="nav-item"><a class="nav-link <?=$contact_active?>" data-bs-toggle="tab" href="#menuContact" role="tab">Résumé</a></li>
+  <li class="nav-item"><a class="nav-link <?=$pax_active?>" data-bs-toggle="tab" href="#menuPassenger" role="tab">Passagers</a></li>
+  <li class="nav-item"><a class="nav-link <?=$payment_active?>" data-bs-toggle="tab" href="#menuPayment" role="tab">Paiements</a></li>
+  <li class="nav-item"><a class="nav-link <?=$pilot_active?>" data-bs-toggle="tab" href="#menuPilot" role="tab">Pilote</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#menuPlane" role="tab">Réservation</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#menuAudit" role="tab">Historique</a></li>
 </ul>
 
 <div class="tab-content">
 
-<div id="menuContact" class="tab-pane fade <?=$contact_active?>">
+<div id="menuContact" class="tab-pane fade <?=($contact_active) ? 'show active' : ''?>">
 
 <form action="<?=$_SERVER['PHP_SELF']?>" method="post" autocomplete="off">
 
 <div class="row">
-	<div class="form-group col-xs-3 col-sm-2">
-		<label class="radio control-label">Type de vol:</label>
-		<div class="radio">
-            <select class="form-control" id="idFlightTypeSelect" name="selectedFlightType" onchange="flightTypeChanged(<?=$flight_id?> , <?=$row_flight['f_gift']?>);">
+	<div class="mb-3 col-3 col-sm-2">
+		<label class="form-label" for="idFlightTypeSelect">Type de vol:</label>
+		<div>
+            <select class="form-select" id="idFlightTypeSelect" name="selectedFlightType" onchange="flightTypeChanged(<?=$flight_id?> , <?=$row_flight['f_gift']?>);">
                 <option value="decouverte">Découverte</option>
                 <option value="initiation">Initiation</option>
                 <option value="bon">Bon Valeur</option>
                 <option value="dhf">DHF</option>
            </select>
         </div>
-		<div class="radio">
-			<label><input type="checkbox" name="gift" id="idgift" onchange="giftChanged(<?=$flight_id?>);">&nbsp;Bon Valeur</label>
+		<div class="form-check mt-2">
+			<input class="form-check-input" type="checkbox" name="gift" id="idgift" onchange="giftChanged(<?=$flight_id?>);">
+			<label class="form-check-label" for="idgift">Bon Valeur</label>
 		</div>
 <!--
 		<div class="radio">
@@ -518,9 +519,9 @@ if (isset($flight_id) and $flight_id != 0) {
 		</div>
         -->
 	</div> <!-- form-group flight type -->
-	<div class="form-group col-xs-6 col-sm-2">
-		<label class="control-label" for="circuitSelect">Circuit:</label>
-			<select class="form-control" id="circuitSelect" name="selectedCircuit">
+	<div class="mb-3 col-6 col-sm-2">
+		<label class="form-label" for="circuitSelect">Circuit:</label>
+			<select class="form-select" id="circuitSelect" name="selectedCircuit">
 <?php
 	// Get the circuit names
 	$circuits = json_decode(file_get_contents("voldecouverte/circuits.js"), true);
@@ -533,15 +534,15 @@ if (isset($flight_id) and $flight_id != 0) {
 ?>
 			</select>
 	</div> <!-- form-group circuit -->
-	<div class="form-group col-xs-4 col-sm-2"">
-		<label class="control-label" for="date1">Dates:</label>
+	<div class="mb-3 col-4 col-sm-2">
+		<label class="form-label" for="date1">Dates:</label>
 		<input type="date" class="form-control" name="date1" value="<?=$row_flight['f_date_1']?>">
 		<br/>
 		<input type="date" class="form-control" name="date2" value="<?=$row_flight['f_date_2']?>">
 	</div> <!-- form-group schedule -->
-	<div class="form-group col-xs-3 col-sm-2"">
-		<label class="control-label" for="scheduleSelect">Plage horaire:</label>
-			<select class="form-control" id="scheduleSelect" name="selectedSchedule">
+	<div class="mb-3 col-3 col-sm-2">
+		<label class="form-label" for="scheduleSelect">Plage horaire:</label>
+			<select class="form-select" id="scheduleSelect" name="selectedSchedule">
 <?php
 	// Get the possible schedules
 	$schedules = json_decode(file_get_contents("voldecouverte/plageshoraire.js"), true);
@@ -552,7 +553,7 @@ if (isset($flight_id) and $flight_id != 0) {
 ?>
 			</select>
 	</div> <!-- form-group schedule -->
-	<div class="form-group col-xs-6 col-sm-3">
+	<div class="mb-3 col-6 col-sm-3">
 		<label for="lname">Nombre de passagers (au total en dehors du pilote/FI):</label>
 		<input type="number" min="1" max="3" class="form-control" name="pax_cnt" value="1">
 	</div> <!-- form-group pax count -->
@@ -560,7 +561,7 @@ if (isset($flight_id) and $flight_id != 0) {
 </div><!-- row -->
 
 <div class="row">
-	<div class="form-group col-xs-12 col-sm-6">
+	<div class="mb-3 col-12 col-sm-6">
 		<label for="reference">Référence (V-INIT-239999, IF-239999, ...) :</label>
 		<input type="text" class="form-control" name="reference" id="idreference">
     </div><!-- form-group -->
@@ -571,47 +572,47 @@ if (isset($flight_id) and $flight_id != 0) {
 </div><!-- row -->
 
 <div class="row">
-	<!-- div class="form-group col-xs-12 col-sm-1">
+	<!-- div class="mb-3 col-12 col-sm-1">
 		<label for="gender">Salutations:</label>
-		<select class="form-control" name="gender">
+		<select class="form-select" name="gender">
 			<option value="F">Mme</option>
 			<option value="L">Melle</option>
 			<option value="M">M.</option>
 		</select>
 	</div--><!-- form-group -->
-	<div class="form-group col-xs-12 col-sm-6">
+	<div class="mb-3 col-12 col-sm-6">
 		<label for="lname">Nom:</label>
 		<input type="text" class="form-control" name="lname">
 	</div><!-- form-group -->
-	<div class="form-group col-xs-12 col-sm-4">
+	<div class="mb-3 col-12 col-sm-4">
 		<label for="fname">Prénom:</label>
 		<input type="text" class="form-control" name="fname">
 	</div><!-- form-group -->
 </div> <!-- row -->
 <div class="row">
-	<div class="form-group col-xs-12 col-sm-4">
+	<div class="mb-3 col-12 col-sm-4">
 		<label for="email">Adresse email:</label>
 		<input type="email" class="form-control" name="email">
 	</div><!-- form-group -->
-	<div class="form-group col-xs-12 col-sm-4">
+	<div class="mb-3 col-12 col-sm-4">
 		<label for="phone">Téléphone:</label>
 		<input type="tel" class="form-control" name="phone">
 	</div><!-- form-group -->
 </div> <!-- row -->
 <div class="row">
-	<div class="form-group col-xs-12 col-sm-4">
+	<div class="mb-3 col-12 col-sm-4">
 		<label for="phone">Rue:</label>
 		<input type="tel" class="form-control" name="street">
 	</div><!-- form-group -->
-	<div class="form-group col-xs-4 col-sm-2">
+	<div class="mb-3 col-4 col-sm-2">
 		<label for="phone">CP:</label>
 		<input type="tel" class="form-control" name="zip">
 	</div><!-- form-group -->
-	<div class="form-group col-xs-12 col-sm-4">
+	<div class="mb-3 col-12 col-sm-4">
 		<label for="phone">Ville:</label>
 		<input type="tel" class="form-control" name="city">
 	</div><!-- form-group -->
-	<div class="form-group col-xs-12 col-sm-4">
+	<div class="mb-3 col-12 col-sm-4">
 		<label for="phone">Pays:</label>
 		<input type="tel" class="form-control" name="country">
 	</div><!-- form-group -->
@@ -621,26 +622,28 @@ if (isset($flight_id) and $flight_id != 0) {
 if ($flight_id == '') {
 ?>
 <div class="row">
-	<div class="form-group col-xs-6 col-sm-2">
+	<div class="mb-3 col-6 col-sm-2">
 		<label for="weight">Poids:</label>
 		<input type="number" min="0" max="150" class="form-control" name="weight" value="80">
 	</div> <!-- form-group -->
-	<div class="form-group col-xs-6 col-sm-3">
+	<div class="mb-3 col-6 col-sm-3">
 		<label for="age">Âge:</label>
-			<select name="age" id="ageSelect">
+			<select class="form-select" name="age" id="ageSelect">
 				<option value="C" >< 12 ans</option>
 				<option value="T">< 18 ans</option>
 				<option value="A">>= 18 ans</option>
 		</select>
 	</div> <!-- form-group -->
-	<div class="form-group col-xs-6 col-sm-3">
+	<div class="mb-3 col-6 col-sm-3">
 		<label for="role">Ce contact est:</label>
-		<div class="checkbox">
-			<label><input type="checkbox" name="pax" value="yes">passager (vol découverte)</label>
-		</div><!-- checkbox-->
-		<div class="checkbox">
-			<label><input type="checkbox" name="student" value="yes">élève (vol initiation)</label>
-		</div><!-- checkbox-->
+		<div class="form-check">
+			<input class="form-check-input" type="checkbox" name="pax" id="idpax" value="yes">
+			<label class="form-check-label" for="idpax">passager (vol découverte)</label>
+		</div><!-- form-check-->
+		<div class="form-check">
+			<input class="form-check-input" type="checkbox" name="student" id="idstudent" value="yes">
+			<label class="form-check-label" for="idstudent">élève (vol initiation)</label>
+		</div><!-- form-check-->
 	</div> <!-- form-group -->
 </div><!-- row -->
 <?php
@@ -648,21 +651,21 @@ if ($flight_id == '') {
 ?>
 
 <div class="row">
-	<div class="form-group col-xs-12">
+	<div class="mb-3 col-12">
 		<label for="comment">Remarque client:</label>
 		<textarea class="form-control" rows="5" name="comment"></textarea>
 	</div><!-- form-group -->
 </div><!-- row -->
 
 <div class="row">
-	<div class="form-group col-xs-12">
+	<div class="mb-3 col-12">
 		<label for="notes">Notes club:</label>
 		<textarea class="form-control" rows="5" name="notes"></textarea>
 	</div><!-- form-group -->
 </div><!-- row -->
 
 <div class="row">
-	<div class="btn-toolbar">
+	<div class="d-flex gap-2 mb-3">
 <?php
 	if ($flight_id== 0)
 		print('<button type="submit" class="btn btn-primary" name="create" value="create">Créer la demande</button>') ;
@@ -692,14 +695,14 @@ if ($flight_id == '') {
 </div><!-- menu contact -->
 
 
-<div id="menuPassenger" class="tab-pane fade <?=$pax_active?>">
-<div class="page-header">
+<div id="menuPassenger" class="tab-pane fade <?=($pax_active) ? 'show active' : ''?>">
+<div class="pb-2 mb-3 border-bottom">
 <h4>Liste des passagers</h4>
-</div><!-- page-header -->
+</div><!-- pb-2 mb-3 border-bottom -->
 
 <!--div class="row">
 <div class="col-sm-12"-->
-<table class="table-responsive table-bordered table-striped col-xs-12 col-md-6">
+<div class="table-responsive col-12 col-md-6"><table class="table table-bordered table-striped">
 <thead>
 <tr><th>Passager n°</th><th>Rôle</th><th>Nom de famille</th><th>Prénom</th><th>Âge</th><th>Poids</th><th>Action(s)</th></tr>
 </thead>
@@ -712,7 +715,7 @@ $result_pax = mysqli_query($mysqli_link, "SELECT * FROM $table_pax_role JOIN $ta
 			or journalise($userId, "F", "Cannot retrieve passengers list: " . mysqli_error($mysqli_link)) ;
 $known_pax_count = 0 ;
 while ($row_pax = mysqli_fetch_array($result_pax)) {
-	$delete = " <a href=\"flight_create.php?pax_id=$row_pax[p_id]&delete_pax=true&pax_role=$row_pax[pr_role]&flight_id=$flight_id\"><span class=\"glyphicon glyphicon-trash text-danger\"></span></a>" ;
+	$delete = " <a href=\"flight_create.php?pax_id=$row_pax[p_id]&delete_pax=true&pax_role=$row_pax[pr_role]&flight_id=$flight_id\"><span class=\"bi bi-trash text-danger\"></span></a>" ;
 	$known_pax_count ++ ;
 	switch ($row_pax['pr_role']) {
 		case 'C': $role = 'Contact' ; $delete = '' ; break ; // Cannot delete the contact
@@ -735,7 +738,7 @@ while ($row_pax = mysqli_fetch_array($result_pax)) {
 		</td>
 		<td><input type=\"text\" name=\"weight\" size=\"3\" value=\"" . db2web($row_pax['p_weight']) . "\"> kg</td>
 		<td>
-		<span class=\"glyphicon glyphicon-floppy-disk text-primary\" onclick=\"submitForm('form_$row_pax[p_id]');\"></span>$delete</td></tr></form>\n") ;
+		<span class=\"bi bi-floppy text-primary\" onclick=\"submitForm('form_$row_pax[p_id]');\"></span>$delete</td></tr></form>\n") ;
 }
 
 for ($i = $known_pax_count+1; $i <= $row_flight['f_pax_cnt']; $i++) {
@@ -752,22 +755,22 @@ for ($i = $known_pax_count+1; $i <= $row_flight['f_pax_cnt']; $i++) {
 				<option value=\"A\" selected>>= 18 ans</option>
 			</select>
 			<td><input type=\"text\" name=\"weight\" size=\"3\"> kg</td>
-			<td><span class=\"glyphicon glyphicon-floppy-disk text-primary\" onclick=\"submitForm('form_add_$i');\"></span></td></tr></form>\n") ;
+			<td><span class=\"bi bi-floppy text-primary\" onclick=\"submitForm('form_add_$i');\"></span></td></tr></form>\n") ;
 	} // for
 } // (isset($flight_id) and $flight_id != 0)
 ?>
 </tbody>
-</table>
+</table></div>
 <!--/div><!-- col -->
 <!--/div><!-- row -->
 
 </div> <!-- menu passenger -->
 
-<div id="menuPayment" class="tab-pane fade <?=$payment_active?>">
+<div id="menuPayment" class="tab-pane fade <?=($payment_active) ? 'show active' : ''?>">
 
 <div class="row">
 <h3>Historique des paiements</h3>
-<table class="table table-striped table-responsive table-hover" id="ledgerTable">
+<div class="table-responsive"><table class="table table-striped table-hover" id="ledgerTable">
 	<thead>
 		<tr><th></th><th>Date</th><th>Montant</th><th>Référence</th><th>Odoo Réf.</th><th>Par</th></tr>
 	</thead>
@@ -779,7 +782,7 @@ $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flights_ledger JOIN $
 $total_paid = 0 ;
 while ($row = mysqli_fetch_array($result)) {
 	print("<tr>
-		<td><button onclick=\"location.href='" . $_SERVER['PHP_SELF'] . "?deletePayment=$row[fl_id]&flight_id=$flight_id&pay_open=Y'\" class=\"btn btn-danger\" title=\"Enlever ce paiement\"><span class=\"glyphicon glyphicon-remove\"></span></button></td>
+		<td><button onclick=\"location.href='" . $_SERVER['PHP_SELF'] . "?deletePayment=$row[fl_id]&flight_id=$flight_id&pay_open=Y'\" class=\"btn btn-danger\" title=\"Enlever ce paiement\"><span class=\"bi bi-x-lg\"></span></button></td>
 		<td>$row[fl_date]</td><td>$row[fl_amount]</td><td>" . db2web($row['fl_reference']) . "</td>
         <td>" . db2web($row['fl_odoo_payment_id']) . "</td>
 		<td>" . db2web("$row[first_name] $row[last_name]") . "</td></tr>\n") ;
@@ -790,7 +793,7 @@ print("<form action=\"" . $_SERVER['PHP_SELF'] . "?\">
 	<input type=\"hidden\" name=\"flight_id\" value=\"$flight_id\">
 	<input type=\"hidden\" name=\"pay_open\" value=\"Y\">
 	<tr>
-    <td><button type=\"submit\" class=\"btn btn-success\" title=\"Ajouter un paiement\" name=\"addPayment\" value=\"Y\"><span class=\"glyphicon glyphicon-plus\"></span></button></td>
+    <td><button type=\"submit\" class=\"btn btn-success\" title=\"Ajouter un paiement\" name=\"addPayment\" value=\"Y\"><span class=\"bi bi-plus-lg\"></span></button></td>
 	<td><input type=\"date\" name=\"paymentDate\" value=\"" . date('Y-m-d') . "\"></td>
 	<td><input type=\"text\" name=\"paymentAmount\"></td>
 	<td><input type=\"text\" name=\"paymentReference\"></td>
@@ -799,15 +802,15 @@ print("<form action=\"" . $_SERVER['PHP_SELF'] . "?\">
 	</tr>
 	</form>\n") ;
 // Show the total
-print("<tr class=\"bg-info\"><td></td><td></td><td><b>$total_paid</b></td><td><b>TOTAL</b></td><td></td><td></td></tr>\n") ;
+print("<tr class=\"table-info\"><td></td><td></td><td><b>$total_paid</b></td><td><b>TOTAL</b></td><td></td><td></td></tr>\n") ;
 ?>
 	</tbody>
-</table>
+</table></div>
 </div><!-- row -->
 
 </div> <!-- menu Payment -->
 
-<div id="menuPilot" class="tab-pane fade <?=$pilot_active?>">
+<div id="menuPilot" class="tab-pane fade <?=($pilot_active) ? 'show active' : ''?>">
 
 <div class="row text-info">
 <?php
@@ -818,13 +821,14 @@ else
 ?>
 </div><!-- row -->
 
-<form action="<?=$_SERVER['PHP_SELF']?>" method="GET" class="form-horizontal" >
+<form action="<?=$_SERVER['PHP_SELF']?>" method="GET" class="row g-2 align-items-center mb-3">
 <input type="hidden" name="flight_id" value="<?=$flight_id?>">
 <input type="hidden" name="pilot_open" value="true">
-	<div class="form-group">
-		<label class="control-label col-xs-2 col-md-1" for="pilotSelect">Pilote:</label>
-		<div class="col-xs-6 col-md-3 col-lg-2">
-			<select class="form-control" id="pilotSelect" name="assignedPilot">
+		<div class="col-auto">
+			<label class="col-form-label" for="pilotSelect">Pilote:</label>
+		</div>
+		<div class="col-6 col-md-3 col-lg-2">
+			<select class="form-select" id="pilotSelect" name="assignedPilot">
 <?php
 	if ($row_flight['f_type'] == 'D') 
 		$condition = 'p_discovery <> 0' ;
@@ -846,12 +850,9 @@ else
 ?>
 			</select>
 		</div><!-- col -->
-	</div><!-- form-group-->
-	<div class="form-group">
-		<div class="col-xs-3 col-md-2">
+		<div class="col-auto">
 			<input type="submit" class="btn btn-primary" name="assign_pilot" value="Sélectionner ce pilote"/>
    		</div><!-- col -->
-	</div><!-- formgroup-->
 </form>
 
 </div><!-- menuPilot -->
@@ -868,7 +869,7 @@ function show_reservation($date, $header) {
 		<h4 class=\"text-center\">$header: $date</h4>
 		</div><!-- row -->\n" ) ;
 	print("<div class=\"row\">
-		<table class=\"col-sm-12 table table-responsive table-striped\">
+		<div class=\"table-responsive\"><table class=\"table table-striped\">
 		<tr><th>De</th><th>A</th><th>Avion</th><th>Pilote</th><th>Commentaire</th><th>Action</th></tr>\n") ;
 	$sql_date = date('Y-m-d') ;
 	$result = mysqli_query($mysqli_link, "SELECT *, i.last_name as ilast_name, i.first_name as ifirst_name, i.cell_phone as icell_phone, i.jom_id as iid,
@@ -882,31 +883,31 @@ function show_reservation($date, $header) {
 		ORDER BY r_start ASC")
 		or journalise($userId, "F", "Cannot retrieve bookings(: " . mysqli_error($mysqli_link)) ;
 	while ($row = mysqli_fetch_array($result)) {
-		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
-		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : '' ;
-		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-toggle="tooltip" data-placement="right" title="' .
+		$ptelephone = ($row['pcell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[pcell_phone]\"><span class=\"bi bi-telephone\"></span></a>" : '' ;
+		$itelephone = ($row['icell_phone'] and ($userId > 0)) ? " <a href=\"tel:$row[icell_phone]\"><span class=\"bi bi-telephone\"></span></a>" : '' ;
+		$instructor = ($row['ilast_name'] and $row['pid'] != $row['iid']) ? ' <i><span data-bs-toggle="tooltip" data-bs-placement="right" title="' .
 			db2web($row['ifirst_name']) . ' ' . db2web($row['ilast_name']) . '">' .
 			substr($row['ifirst_name'], 0, 1) . "." . substr($row['ilast_name'], 0, 1) . '. </span></i>' . $itelephone : '' ; 
-		$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="danger"' : '' ;
+		$class = ($row['r_type'] == BOOKING_MAINTENANCE) ? ' class="table-danger"' : '' ;
 		if ($row['r_id'] == $row_flight['f_booking'])
-			$class = ' class="success"' ;
+			$class = ' class="table-success"' ;
 		// Only display time for the current date
 		if (strpos($row['r_start'], $date) === 0) 
 			$row['r_start'] = substr($row['r_start'], 11) ;
 		if (strpos($row['r_stop'], $date) === 0) 
 			$row['r_stop'] = substr($row['r_stop'], 11) ;
-		print("<tr$class><td>$row[r_start]</td><td>$row[r_stop]</td><td>$row[r_plane]</td><td><span class=\"hidden-xs\">" . db2web($row['pfirst_name']) . " </span><b>" . 
+		print("<tr$class><td>$row[r_start]</td><td>$row[r_stop]</td><td>$row[r_plane]</td><td><span class=\"d-none d-sm-inline\">" . db2web($row['pfirst_name']) . " </span><b>" . 
 			db2web($row['plast_name']) . "</b>$ptelephone$instructor</td><td>". nl2br(db2web($row['r_comment'])) . "</td>\n") ;
 		if ($row['r_type'] == BOOKING_MAINTENANCE) // Cannot link to a maintenance booking ;-)
 			print("<td></td></tr>\n") ;
 		else if ($row_flight['f_booking'] == $row['r_id']) // Is the flight already linked to this existing booking ?
-			print("<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&unlink_from=$row[r_id]\"><span class=\"glyphicon glyphicon-scissors\" style=\"color: red;\" title=\"Découpler cette réservation de ce vol\"></span></a></td></tr>\n") ;
+			print("<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&unlink_from=$row[r_id]\"><span class=\"bi bi-scissors\" style=\"color: red;\" title=\"Découpler cette réservation de ce vol\"></span></a></td></tr>\n") ;
 		else if ($row['f_reference'] != '')
-			print("<td><span class=\"glyphicon glyphicon-link\" style=\"color: pink;\" title=\"Cette réservation est déjà associée à un vol\"></span></td></tr>\n") ;
+			print("<td><span class=\"bi bi-link-45deg\" style=\"color: pink;\" title=\"Cette réservation est déjà associée à un vol\"></span></td></tr>\n") ;
 		else // Flight is not linked yet to a booking
-			print("<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&link_to=$row[r_id]\"><span class=\"glyphicon glyphicon-link\" title=\"Lier cette réservation à ce vol\"></span></a></td></tr>\n") ;
+			print("<td><a href=\"$_SERVER[PHP_SELF]?flight_id=$_REQUEST[flight_id]&link_to=$row[r_id]\"><span class=\"bi bi-link-45deg\" title=\"Lier cette réservation à ce vol\"></span></a></td></tr>\n") ;
 	}
-	print("</table>
+	print("</table></div>
 	</div><!-- row -->\n" ) ;
 }
 
@@ -940,7 +941,7 @@ $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flights_ledger JOIN $
 	WHERE fl_flight = $flight_id ORDER BY fl_date ASC")
 	or journalise($userId, "E", "Cannot read ledger: " . mysqli_error($mysqli_link)) ;
 if (mysqli_num_rows($result) == 0)
-	print("<p class=\"bg-danger\">Aucun paiement effectué.</p>") ;	
+	print("<p class=\"text-danger\">Aucun paiement effectué.</p>") ;	
 while ($row = mysqli_fetch_array($result))
 	print("Paiement de $row[fl_amount] &euro; (" . db2web($row['fl_reference']) . ") effectué le $row[fl_date] par " . id2name($row['fl_who']) . ".<br/>") 
 	?>

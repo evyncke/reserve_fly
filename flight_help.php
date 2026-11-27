@@ -19,7 +19,7 @@ require_once 'flight_header.php' ;
 require_once 'Parsedown.php' ;
 ?>
 
-<div class="page-header hidden-xs">
+<div class="pb-2 mb-3 border-bottom d-none d-sm-block">
 <h3>Aide</h3>
 </div><!-- page header -->
 

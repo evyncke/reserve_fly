@@ -22,11 +22,11 @@ if (!is_numeric($flight_id)) die("Invalid ID: $flight_id") ;
 require_once 'flight_header.php' ;
 ?>
 
-<div class="page-header hidden-xs">
+<div class="pb-2 mb-3 border-bottom d-none d-sm-block">
 <h3>Détails du vol</h3>
 </div><!-- page header -->
 
-<table class="table table-striped table-responsive">
+<div class="table-responsive"><table class="table table-striped">
 <thead>
 <tr><th>Créé le</th><th>Etat</th><th>Depuis</th><th>Type</th><th>Contact</th><th>Description</th></tr>
 </thead>
@@ -37,10 +37,10 @@ $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today
 	WHERE pr_role = 'C' AND f_id = $flight_id ORDER BY f_id DESC") 
 	or die("Impossible de lister les vols: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
-	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"glyphicon glyphicon-envelope\"></span>" : "" ; 
-	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"glyphicon glyphicon-earphone\"></span>" : "" ; 
-	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-pencil\"></span> " ;
-	$edit =  " <a href=\"flight_print.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-print\"></span> " ;
+	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"bi bi-envelope\"></span>" : "" ; 
+	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"bi bi-telephone\"></span>" : "" ; 
+	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"bi bi-pencil\"></span> " ;
+	$edit =  " <a href=\"flight_print.php?flight_id=$row[f_id]\"><span class=\"bi bi-printer\"></span> " ;
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 	$description = db2web($row['f_description']) ;
 	if ($row['f_date_cancelled'])
@@ -57,7 +57,7 @@ while ($row = mysqli_fetch_array($result)) {
 }
 ?>
 </tbody>
-</table>
+</table></div>
 
 Impression PDF <a href="flight_pdf.php?flight_id=<?=$flight_id?>">à réaliser</a>.
 <?php

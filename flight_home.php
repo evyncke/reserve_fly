@@ -26,15 +26,15 @@ if (isset($_REQUEST['action']) and $_REQUEST['action'] == 'delete' and isset($_R
 }
 ?>
 
-<div class="page-header hidden-xs">
+<div class="pb-2 mb-3 border-bottom d-none d-sm-block">
 <h3>Vols découvertes et d'initiation</h3>
 </div><!-- page header -->
 
-<div class="page-header hidden-xs">
+<div class="pb-2 mb-3 border-bottom d-none d-sm-block">
 <h4>Vols futurs à assigner</h4>
 </div><!-- page header -->
 
-<table class="table table-striped table-responsive">
+<div class="table-responsive"><table class="table table-striped">
 <thead>
 <tr><th>Créé le</th><th>Type</th><th>Circuit</th><th>Dates</th><th>Heures</th><th>Contact</th><th>Description</th><th>Notes club</th></tr>
 </thead>
@@ -46,11 +46,11 @@ $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flight JOIN $table_pa
 	ORDER BY f_id ASC") 
 	or die("Impossible de lister les vols: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
-	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"glyphicon glyphicon-envelope\"></span></a>" : "" ; 
-	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : "" ; 
-	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-pencil\"></span></a> " ;
-	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-print\"></span></a> " ;
-	$cancel =  " <a href=\"flight_home.php?action=delete&flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-trash\"></span></a> " ;
+	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"bi bi-envelope\"></span></a>" : "" ; 
+	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"bi bi-telephone\"></span></a>" : "" ; 
+	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"bi bi-pencil\"></span></a> " ;
+	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\"><span class=\"bi bi-printer\"></span></a> " ;
+	$cancel =  " <a href=\"flight_home.php?action=delete&flight_id=$row[f_id]\"><span class=\"bi bi-trash\"></span></a> " ;
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 	$row['p_fname'] = db2web($row['p_fname']) ;
 	$row['p_lname'] = db2web($row['p_lname']) ;
@@ -64,13 +64,13 @@ while ($row = mysqli_fetch_array($result)) {
 }
 ?>
 </tbody>
-</table>
+</table></div>
 
-<div class="page-header hidden-xs">
+<div class="pb-2 mb-3 border-bottom d-none d-sm-block">
 <h4>Vols prévus ce jour</h4>
 </div><!-- page header -->
 
-<table class="table table-striped table-responsive">
+<div class="table-responsive"><table class="table table-striped">
 <thead>
 <tr><th>Vol (LT)</th><th>Pilote</th><th>Type</th><th>Contact</th><th>Description</th></tr>
 </thead>
@@ -83,10 +83,10 @@ $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() as today
 	ORDER BY f_id DESC") 
 	or die("Impossible de lister les vols: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
-	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"glyphicon glyphicon-envelope\"></span></a>" : "" ; 
-	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : "" ; 
-	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-pencil\"></span></a> " ;
-	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-print\"></span></a> " ;
+	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"bi bi-envelope\"></span></a>" : "" ; 
+	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"bi bi-telephone\"></span></a>" : "" ; 
+	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"bi bi-pencil\"></span></a> " ;
+	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\"><span class=\"bi bi-printer\"></span></a> " ;
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 	$description = nl2br(db2web($row['f_description'])) ;
 	if ($row['f_date_flown'])
@@ -96,13 +96,13 @@ while ($row = mysqli_fetch_array($result)) {
 	else
 		$date_vol = "à déterminer" ;
 	$pilote = db2web("$row[first_name] <b>$row[last_name]</b>") ;
-	$pilote .= " <a href=\"mailto:$row[email]\"><span class=\"glyphicon glyphicon-envelope\"></span></a> " ;
-	$pilote .= " <a href=\"tel:$row[cell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a> " ;
+	$pilote .= " <a href=\"mailto:$row[email]\"><span class=\"bi bi-envelope\"></span></a> " ;
+	$pilote .= " <a href=\"tel:$row[cell_phone]\"><span class=\"bi bi-telephone\"></span></a> " ;
 	print("<tr><td>$edit$print$date_vol</td><td>$pilote</td><td>$type</td><td>". db2web("$row[p_fname] <b>$row[p_lname]") . "$email$telephone</b></td><td>$description</td></tr>\n") ;
 }
 ?>
 </tbody>
-</table>
+</table></div>
 
 
 <?php

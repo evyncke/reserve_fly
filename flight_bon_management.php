@@ -179,40 +179,36 @@ function submitDisableBon(PHP_Self, action) {
 }
 </script>
 
-<div class="page-header hidden-xs">
+<div class="pb-2 mb-3 border-bottom d-none d-sm-block">
 <h3>Gestion des bons cadeaux <?=$title?></h3>
 </div><!-- page header -->
 
-<div class="row">
-<form class="" action="<?=$_SERVER['PHP_SELF']?>">
+<form class="row g-2 align-items-center mb-3" action="<?=$_SERVER['PHP_SELF']?>">
 	<input type="hidden" name="completed" value="<?=$completed?>"/>
-<!--div class="form-group"-->
-    <div class="form-group">
-        <!-- checkbox-->
-	    <div class="checkbox col-xs-4 col-md-2">
-			<label><input type="checkbox" name="init_only"<?=$init_only?> onchange="this.form.submit();">Initiations seulement</label>
-	    </div><!-- checkbox-->
-	    <div class="checkbox col-xs-4 col-md-2">
-				<label><input type="checkbox" name="if_only"<?=$if_only?> onchange="this.form.submit();">Découvertes seulement</label>
-	    </div><!-- checkbox-->
-    </div> <!-- formgroup-->
-	<div class="form-group">
-			<div class="col-xs-6 col-md-offset-1 col-md-4">
-				<input type="text" class="form-control" name="pattern" value="<?=db2web($pattern)?>"/>
-			</div>
-	</div> <!-- formgroup-->
-	<div class="form-group">
-				<div class="col-xs-3 col-md-1">
-					<input type="submit" class="btn btn-primary" name="add" value="Chercher"/>
-				</div><!-- col -->
-	</div><!-- formgroup-->
-	</form>
-</div><!-- row -->
+	<div class="col-auto">
+		<div class="form-check">
+			<input class="form-check-input" type="checkbox" id="idInitOnly" name="init_only"<?=$init_only?> onchange="this.form.submit();">
+			<label class="form-check-label" for="idInitOnly">Initiations seulement</label>
+		</div>
+	</div><!-- col -->
+	<div class="col-auto">
+		<div class="form-check">
+			<input class="form-check-input" type="checkbox" id="idIfOnly" name="if_only"<?=$if_only?> onchange="this.form.submit();">
+			<label class="form-check-label" for="idIfOnly">Découvertes seulement</label>
+		</div>
+	</div><!-- col -->
+	<div class="col-6 col-md-4">
+		<input type="text" class="form-control" name="pattern" value="<?=db2web($pattern)?>"/>
+	</div><!-- col -->
+	<div class="col-auto">
+		<input type="submit" class="btn btn-primary" name="add" value="Chercher"/>
+	</div><!-- col -->
+</form>
 <?php
 print("<input type=\"submit\" value=\"Désactiver bons\" id=\"id_SubmitDisableBon\" onclick=\"submitDisableBon('$_SERVER[PHP_SELF]','disable')\")>
     <br>");
 ?>
-<table class="table table-striped table-responsive table-hover" id="allFlights">
+<div class="table-responsive"><table class="table table-striped table-hover" id="allFlights">
 <thead>
 <tr><th>#</th><th>Réf</th><th>Actions</th><th>Date Paiement</th><th>Ancienneté</th><th>Compte attente</th><th>Etat</th><th>Type</th><th>Client</th><th>Passager</th><th>Notes club</th></tr>
 </thead>
@@ -232,16 +228,16 @@ while ($row = mysqli_fetch_array($result)) {
     //if($count>10) break;
     $referenceID=$row['f_id']; // Ex 241234
 	$reference = db2web($row['f_reference']) ; // Ex: V-INIT-241234
-	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"glyphicon glyphicon-envelope\" title=\"Envoyer un email\"></span></a>" : "" ; 
-	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"glyphicon glyphicon-earphone\" title=\"Téléphoner\"></span></a>" : "" ; 
-	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-pencil\" title=\"Modifier/Annuler\"></span></a> " ;
-	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\" target=\"_blank\"><span class=\"glyphicon glyphicon-print\" title=\"Imprimer sous format PDF\"></span></a> " ;
-	$pay =  ($row['payment'] > 0) ? "<span class=\"glyphicon glyphicon-euro\" style=\"color: green;\" title=\"Vol déjà payé\"></span>" :
-		" <a href=\"flight_create.php?flight_id=$row[f_id]&pay_open=true\"><span class=\"glyphicon glyphicon-euro\" style=\"color: red;\" title=\"Indiquer le paiement\"></span></a> " ;
+	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"bi bi-envelope\" title=\"Envoyer un email\"></span></a>" : "" ; 
+	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"bi bi-telephone\" title=\"Téléphoner\"></span></a>" : "" ; 
+	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"bi bi-pencil\" title=\"Modifier/Annuler\"></span></a> " ;
+	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\" target=\"_blank\"><span class=\"bi bi-printer\" title=\"Imprimer sous format PDF\"></span></a> " ;
+	$pay =  ($row['payment'] > 0) ? "<span class=\"bi bi-currency-euro\" style=\"color: green;\" title=\"Vol déjà payé\"></span>" :
+		" <a href=\"flight_create.php?flight_id=$row[f_id]&pay_open=true\"><span class=\"bi bi-currency-euro\" style=\"color: red;\" title=\"Indiquer le paiement\"></span></a> " ;
     $expired=$row['f_expired'];
     $deactiveAction="<a class=\"tooltip\" href=\"javascript:void(0);\" onclick=\"deactiveBonFunction('$_SERVER[PHP_SELF]','deactive','$referenceID','$reference')\">&#x2714;Déactiver Bon<span class='tooltiptext'>Click pour déactiver le bon</span></a>";
 
-	$is_gift = ($row['f_gift'] != 0) ? '&nbsp;<span class="glyphicon glyphicon-gift" style="color: red;" title="Bon cadeau"></span>' : '' ;
+	$is_gift = ($row['f_gift'] != 0) ? '&nbsp;<span class="bi bi-gift" style="color: red;" title="Bon cadeau"></span>' : '' ;
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 	$description = nl2br(db2web($row['f_description'])) ;
 	$notes = nl2br(db2web($row['f_notes'])) ;
@@ -338,7 +334,7 @@ while ($row = mysqli_fetch_array($result)) {
 }
 ?>
 </tbody>
-</table>
+</table></div>
 
 <script>
 	// Let sort the row by clicking on the header https://stackoverflow.com/questions/3160277/jquery-table-sort/19947532#19947532

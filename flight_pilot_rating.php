@@ -47,13 +47,13 @@ if (isset($_REQUEST['edit_pilot']) and isset($_REQUEST['pilot'])){
 }
 ?>
 <script src="data/pilots.js"></script>
-<div class="page-header hidden-xs">
+<div class="pb-2 mb-3 border-bottom d-none d-sm-block">
 <h3>Qualifications des pilotes</h3>
 </div><!-- page header -->
 
 <div class="row">
-<div class="col-xs-offset-11 col-xs-1">
-<a href="flight_pilot_pdf.php"><span class="glyphicon glyphicon-print"></span></a>
+<div class="offset-11 col-1">
+<a href="flight_pilot_pdf.php"><span class="bi bi-printer"></span></a>
 </div><!-- class=col -->
 </div><!-- class=row -->
 
@@ -66,7 +66,7 @@ Voici la liste des pilotes qualifiés pour les divers types de vol:
 En plus, le pilote doit avoir son certificat médical ainsi qu'avoir effectué 3 décolages/atterrissage lors des derniers 90 jours.
 </div><!-- row -->
 
-<table class="table table-striped table-responsive col-md-6 col-xs-12">
+<div class="table-responsive col-md-6 col-12"><table class="table table-striped">
 <thead>
 <tr><th>Pilote</th><th>Poids (kg)</th><th>Découverte</th><th>Initiation</th><th>Action</th></tr>
 </thead>
@@ -76,13 +76,13 @@ $result = mysqli_query($mysqli_link, "SELECT * FROM $table_flights_pilots JOIN $
 	 ORDER BY last_name ASC, first_name ASC") 
 	or die("Impossible de lister les pilotes: " . mysqli_error($mysqli_link));
 while ($row = mysqli_fetch_array($result)) {
-	$email = ($row['email']) ? " <a href=\"mailto:$row[email]\"><span class=\"glyphicon glyphicon-envelope\"></span></a>" : "" ; 
-	$telephone = ($row['cell_phone']) ? " <a href=\"tel:$row[cell_phone]\"><span class=\"glyphicon glyphicon-earphone\"></span></a>" : "" ; 
-	$edit =  " <span class=\"glyphicon glyphicon-floppy-disk text-success\" onclick=\"submitForm('form_$row[p_id]');\"></span> " ;
-	$delete = " <a href=\"$_SERVER[PHP_SELF]?pilot=$row[p_id]&delete=true\"><span class=\"glyphicon glyphicon-trash text-danger\"></span></a>" ;
+	$email = ($row['email']) ? " <a href=\"mailto:$row[email]\"><span class=\"bi bi-envelope\"></span></a>" : "" ; 
+	$telephone = ($row['cell_phone']) ? " <a href=\"tel:$row[cell_phone]\"><span class=\"bi bi-telephone\"></span></a>" : "" ; 
+	$edit =  " <span class=\"bi bi-floppy text-success\" onclick=\"submitForm('form_$row[p_id]');\"></span> " ;
+	$delete = " <a href=\"$_SERVER[PHP_SELF]?pilot=$row[p_id]&delete=true\"><span class=\"bi bi-trash text-danger\"></span></a>" ;
 	$poids = "<input type=\"number\" name=\"weight\" value=\"$row[p_weight]\" min=\"40\" max=\"120\">" ;
-	$discovery = '<div class="checkbox"><label><input name="discovery" type="checkbox"' . (($row['p_discovery']) ? ' checked' : '') . '/>Découverte</label></div>' ;
-	$initiation = '<div class="checkbox"><label><input name="initiation" type="checkbox"' . (($row['p_initiation']) ? ' checked' : '') . '/>Initiation</label></div>' ;
+	$discovery = '<div class="form-check"><input class="form-check-input" name="discovery" id="discovery_' . (int) $row['p_id'] . '" type="checkbox"' . (($row['p_discovery']) ? ' checked' : '') . '><label class="form-check-label" for="discovery_' . (int) $row['p_id'] . '">Découverte</label></div>' ;
+	$initiation = '<div class="form-check"><input class="form-check-input" name="initiation" id="initiation_' . (int) $row['p_id'] . '" type="checkbox"' . (($row['p_initiation']) ? ' checked' : '') . '><label class="form-check-label" for="initiation_' . (int) $row['p_id'] . '">Initiation</label></div>' ;
 	print("<form id=\"form_$row[p_id]\" action=\"$_SERVER[PHP_SELF]\">
 		<input type=\"hidden\" name=\"pilot\" value=\"$row[p_id]\">
 		<input type=\"hidden\" name=\"edit_pilot\" value=\"edit_pilot\">
@@ -90,24 +90,19 @@ while ($row = mysqli_fetch_array($result)) {
 }
 ?>
 </tbody>
-</table>
+</table></div>
 
-<div class="row">
-<form action="<?=$_SERVER['PHP_SELF']?>" method="GET">
-
-	<div class="form-group">
-		<label class="control-label col-xs-6 col-md-1" for="pilotSelect">Pilote:</label>
-		<div class="col-xs-6 col-md-2">
-			<select class="form-control" id="pilotSelect" name="newPilot"></select>
-		</div>
+<form class="row g-2 align-items-center mb-3" action="<?=$_SERVER['PHP_SELF']?>" method="GET">
+	<div class="col-auto">
+		<label class="col-form-label" for="pilotSelect">Pilote:</label>
 	</div>
-	<div class="form-group">
-		<div class="col-xs-3 col-md-2">
-			<input type="submit" class="btn btn-primary" name="add" value="Ajouter aux pilotes"/>
-   		</div><!-- col -->
-	</div><!-- formgroup-->
+	<div class="col-6 col-md-2">
+		<select class="form-select" id="pilotSelect" name="newPilot"></select>
+	</div>
+	<div class="col-auto">
+		<input type="submit" class="btn btn-primary" name="add" value="Ajouter aux pilotes"/>
+	</div><!-- col -->
 </form>
-</div><!-- row -->
 
 <script>
 function submitForm(id) {

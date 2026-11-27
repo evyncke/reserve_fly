@@ -45,7 +45,7 @@ $fmt = datefmt_create(
 ) ;
 $monthName = datefmt_format($fmt, $sinceDate) ;
 ?>
-<div class="page-header hidden-xs">
+<div class="pb-2 mb-3 border-bottom d-none d-sm-block">
 <h3>Statistiques mensuelles des vols effectués du <?=$since?> au <?=$monthAfterForTitleString?></h3>
 </div><!-- page header -->
 
@@ -61,16 +61,16 @@ $monthName = datefmt_format($fmt, $sinceDate) ;
 	</ul><!-- pagination -->
 </div><!-- row -->
 
-<ul class="nav nav-tabs">
-	<li class="active in"><a  data-toggle="tab" href="#summary">Résumé</a></li>
-	<li><a data-toggle="tab" href="#initFlights">Vols initiations</a></li>
-	<li><a data-toggle="tab" href="#ifFlights">Vols découvertes</a></li>
+<ul class="nav nav-tabs mb-3" role="tablist">
+	<li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#summary" role="tab">Résumé</a></li>
+	<li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#initFlights" role="tab">Vols initiations</a></li>
+	<li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ifFlights" role="tab">Vols découvertes</a></li>
 </ul>
 
 <div class="tab-content">
-<div id="summary" class="tab-pane fade active in">
+<div id="summary" class="tab-pane fade show active">
 
-<table class="table table-striped table-responsive col-md-6 col-xs-12">
+<div class="table-responsive col-md-6 col-12"><table class="table table-striped">
 <thead>
 <tr><th></th><th>Vols découvertes (IF)</th><th>Vols d'initiations (INIT)</th></tr>
 </thead>
@@ -119,12 +119,12 @@ while ($row = mysqli_fetch_array($result)) {
 <tr><td>Minutes</td><td><?=$minutes_if?></td><td><?=$minutes_init?></td></tr>
 <tr><td>Chiffre d'affaires</td><td><?=$revenue_if?> &euro;</td><td><?=$revenue_init?> &euro;</td></tr>
 </tbody>
-</table>
+</table></div>
 </div><!-- id=summary-->
 
 <div id="initFlights" class="tab-pane fade">
 <h2>Vols d'initiations (INIT)</h2>
-<table class="table table-striped table-responsive col-md-6 col-xs-12">
+<div class="table-responsive col-md-6 col-12"><table class="table table-striped">
 	<thead>
 		<tr><th>Date</th><th>Référence</th><th>Avion</th><th>Pilote</th><th>Prix du vol</th><th>Durée</th></tr>
 	</thead>
@@ -134,12 +134,12 @@ while ($row = mysqli_fetch_array($result)) {
 		print($tr) ;
 ?>
 	</tbody>
-</table>
+</table></div>
 </div><!-- id=initFlights-->
 
 <div id="ifFlights" class="tab-pane fade">
 <h2>Vols découvertes (IF)</h2>
-<table class="table table-striped table-responsive col-md-6 col-xs-12">
+<div class="table-responsive col-md-6 col-12"><table class="table table-striped">
 	<thead>
 		<tr><th>Date</th><th>Référence</th><th>Avion</th><th>Pilote</th><th>Prix du vol</th><th>Durée</th></tr>
 	</thead>
@@ -149,7 +149,7 @@ while ($row = mysqli_fetch_array($result)) {
 		print($tr) ;
 ?>
 	</tbody>
-</table>
+</table></div>
 </div><!-- id=ifFlights-->
 </div><!-- tab-content--> 
 <?php

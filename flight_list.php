@@ -56,37 +56,39 @@ if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == "true") {
 }
 ?>
 
-<div class="page-header hidden-xs">
+<div class="pb-2 mb-3 border-bottom d-none d-sm-block">
 <h3>Tous les vols <?=$title?></h3>
 </div><!-- page header -->
 
-<div class="row">
-<form class="" action="<?=$_SERVER['PHP_SELF']?>">
+<form class="row g-2 align-items-center mb-3" action="<?=$_SERVER['PHP_SELF']?>">
 	<input type="hidden" name="completed" value="<?=$completed?>"/>
-<!--div class="form-group"-->
-	<div class="checkbox col-md-offset-1 col-xs-6 col-md-2">
-			<label><input type="checkbox" name="deleted"<?=$deleted?> onchange="this.form.submit();">Inclure les vols annulés</label>
-		</div><!-- checkbox-->
-		<div class="checkbox col-xs-4 col-md-2">
-			<label><input type="checkbox" name="init_only"<?=$init_only?> onchange="this.form.submit();">Initiations seulement</label>
-		</div><!-- checkbox-->
-		<div class="checkbox col-xs-4 col-md-2">
-				<label><input type="checkbox" name="if_only"<?=$if_only?> onchange="this.form.submit();">Découvertes seulement</label>
-		</div><!-- checkbox-->
-		<div class="form-group">
-			<div class="col-xs-6 col-md-offset-1 col-md-4">
-				<input type="text" class="form-control" name="pattern" value="<?=db2web($pattern)?>"/>
-				</div>
-			</div> <!-- formgroup-->
-			<div class="form-group">
-				<div class="col-xs-3 col-md-1">
-					<input type="submit" class="btn btn-primary" name="add" value="Chercher"/>
-				</div><!-- col -->
-		</div><!-- formgroup-->
-	</form>
-</div><!-- row -->
+	<div class="col-auto">
+		<div class="form-check">
+			<input class="form-check-input" type="checkbox" id="idDeleted" name="deleted"<?=$deleted?> onchange="this.form.submit();">
+			<label class="form-check-label" for="idDeleted">Inclure les vols annulés</label>
+		</div>
+	</div><!-- col -->
+	<div class="col-auto">
+		<div class="form-check">
+			<input class="form-check-input" type="checkbox" id="idInitOnly" name="init_only"<?=$init_only?> onchange="this.form.submit();">
+			<label class="form-check-label" for="idInitOnly">Initiations seulement</label>
+		</div>
+	</div><!-- col -->
+	<div class="col-auto">
+		<div class="form-check">
+			<input class="form-check-input" type="checkbox" id="idIfOnly" name="if_only"<?=$if_only?> onchange="this.form.submit();">
+			<label class="form-check-label" for="idIfOnly">Découvertes seulement</label>
+		</div>
+	</div><!-- col -->
+	<div class="col-6 col-md-4">
+		<input type="text" class="form-control" name="pattern" value="<?=db2web($pattern)?>"/>
+	</div><!-- col -->
+	<div class="col-auto">
+		<input type="submit" class="btn btn-primary" name="add" value="Chercher"/>
+	</div><!-- col -->
+</form>
 
-<table class="table table-striped table-responsive table-hover" id="allFlights">
+<div class="table-responsive"><table class="table table-striped table-hover" id="allFlights">
 <thead>
 <tr><th>#</th><th>Réf</th><th>Actions</th><th>Créé le</th><th>Etat</th><th>Depuis</th><th>Vol</th><th id="pilots">Pilote</th><th>Type</th><th>Client</th><th>Passager</th><th>Remarque client</th><th>Notes club</th></tr>
 </thead>
@@ -103,13 +105,13 @@ $result = mysqli_query($mysqli_link, "SELECT *, SYSDATE() AS today, SUM(fl_amoun
 	$count=0;
 while ($row = mysqli_fetch_array($result)) {
 	$reference = db2web($row['f_reference']) ;
-	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"glyphicon glyphicon-envelope\" title=\"Envoyer un email\"></span></a>" : "" ; 
-	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"glyphicon glyphicon-earphone\" title=\"Téléphoner\"></span></a>" : "" ; 
-	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-pencil\" title=\"Modifier/Annuler\"></span></a> " ;
-	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\" target=\"_blank\"><span class=\"glyphicon glyphicon-print\" title=\"Imprimer sous format PDF\"></span></a> " ;
-	$pay =  ($row['payment'] > 0) ? "<span class=\"glyphicon glyphicon-euro\" style=\"color: green;\" title=\"Vol déjà payé\"></span>" :
-		" <a href=\"flight_create.php?flight_id=$row[f_id]&pay_open=true\"><span class=\"glyphicon glyphicon-euro\" style=\"color: red;\" title=\"Indiquer le paiement\"></span></a> " ;
-	$is_gift = ($row['f_gift'] != 0) ? '&nbsp;<span class="glyphicon glyphicon-gift" style="color: red;" title="Bon cadeau"></span>' : '' ;
+	$email = ($row['p_email']) ? " <a href=\"mailto:$row[p_email]\"><span class=\"bi bi-envelope\" title=\"Envoyer un email\"></span></a>" : "" ; 
+	$telephone = ($row['p_tel']) ? " <a href=\"tel:$row[p_tel]\"><span class=\"bi bi-telephone\" title=\"Téléphoner\"></span></a>" : "" ; 
+	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"bi bi-pencil\" title=\"Modifier/Annuler\"></span></a> " ;
+	$print =  " <a href=\"flight_pdf.php?flight_id=$row[f_id]\" target=\"_blank\"><span class=\"bi bi-printer\" title=\"Imprimer sous format PDF\"></span></a> " ;
+	$pay =  ($row['payment'] > 0) ? "<span class=\"bi bi-currency-euro\" style=\"color: green;\" title=\"Vol déjà payé\"></span>" :
+		" <a href=\"flight_create.php?flight_id=$row[f_id]&pay_open=true\"><span class=\"bi bi-currency-euro\" style=\"color: red;\" title=\"Indiquer le paiement\"></span></a> " ;
+	$is_gift = ($row['f_gift'] != 0) ? '&nbsp;<span class="bi bi-gift" style="color: red;" title="Bon cadeau"></span>' : '' ;
 	$type = ($row['f_type'] == 'D') ? 'découverte' : 'initiation' ;
 	$description = nl2br(db2web($row['f_description'])) ;
 	$notes = nl2br(db2web($row['f_notes'])) ;
@@ -160,7 +162,7 @@ while ($row = mysqli_fetch_array($result)) {
 }
 ?>
 </tbody>
-</table>
+</table></div>
 
 <script>
 	// Let sort the row by clicking on the header https://stackoverflow.com/questions/3160277/jquery-table-sort/19947532#19947532

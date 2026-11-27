@@ -24,9 +24,7 @@ MustBeLoggedIn() ;
 
 $header_postamble = '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <link href="https://' . SITE_HOST . '/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>';
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>';
 
 
 //require_once 'flight_header.php' ;

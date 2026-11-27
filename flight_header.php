@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2023 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,61 +24,61 @@ MustBeLoggedIn() ;
 
 if (! ($userIsFlightPilot or $userIsFlightManager)) 
 	journalise($userId, "F", "Vous n'êtes pas autorisé(e) sur cette page: il faut avoir les bons droits d'accès.") ;
-  $today_month = date('m') ;
-  $today_day = date('d') ;
-  
-  $christmas_theme = ($today_month == '12' and $today_day >= '15') or ($today_month == '01' and $today_day <= '08') ;  
+
+$today_month = date('m') ;
+$today_day = date('d') ;
+// Use || (and not "or") as "or" has a lower precedence than "="
+$christmas_theme = (($today_month == '12' and $today_day >= '15') || ($today_month == '01' and $today_day <= '08')) ;
+// Pages located in a sub-directory (e.g., voldecouverte/) set $flight_url_prefix = '../' before including this file
+$flight_url_prefix = $flight_url_prefix ?? '' ;
+// Highlight the current page in the menu
+$flight_current_page = basename($_SERVER['SCRIPT_NAME']) ;
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-<!-- TODO trim the CSS -->
-<link rel="stylesheet" type="text/css" href="css/flight.css">
-<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-<link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 <meta charset="utf-8">
-<!--meta name="viewport" content="width=320"-->
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- http://www.alsacreations.com/article/lire/1490-comprendre-le-viewport-dans-le-web-mobile.html -->
-<link href="<?=$favicon?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-<!-- http://www.w3schools.com/bootstrap/ -->
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<title>Vols découvertes et d'initiation</title>
+<link href="<?=htmlspecialchars($favicon)?>" rel="shortcut icon" type="image/vnd.microsoft.icon">
+<!-- Bootstrap 5 (pinned version + SRI) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<!-- Glyphicon replacement -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" integrity="sha384-4LISF5TTJX/fLmGSxO53rV4miRxdg84mZsxmO8Rx5jGtp/LbrixFETvWa5a6sESd" crossorigin="anonymous">
+<!-- jQuery is not needed by Bootstrap 5 but still used by some pages -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs" crossorigin="anonymous"></script>
+<!-- TODO trim the CSS -->
+<link rel="stylesheet" type="text/css" href="<?=$flight_url_prefix?>css/flight.css">
 <?php
 if ($christmas_theme) {
 ?>
 <!-- Christmas theme -->
-<link rel="stylesheet" href="css/mobile_christmas.css">
+<link rel="stylesheet" href="<?=$flight_url_prefix?>css/mobile_christmas.css">
 <?php
 } // $christmas theme
 ?>
-<title>Vols découvertes et d'initiation</title>
 <script>
-var
-	// preset Javascript constant fill with the right data from db.php PHP variables
-	userFullName = '<?=$userFullName?>' ;
-	userName = '<?=$userName?>' ;
-	userId = <?=$userId?> ;
-	userIsPilot = <?=($userIsPilot)? 'true' : 'false'?> ;
-	userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?> ;
-	userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ;
-	userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ;
-	userIsFlightPilot = <?=($userIsFlightPilot)? 'true' : 'false'?> ;
-	userIsFlightManager = <?=($userIsFlightManager)? 'true' : 'false'?> ;
-
+// preset Javascript constants filled with the right data from the dbi.php PHP variables
+var userFullName = <?=json_encode($userFullName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)?> ;
+var userName = <?=json_encode($userName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)?> ;
+var userId = <?=(int) $userId?> ;
+var userIsPilot = <?=($userIsPilot)? 'true' : 'false'?> ;
+var userIsAdmin = <?=($userIsAdmin)? 'true' : 'false'?> ;
+var userIsInstructor = <?=($userIsInstructor)? 'true' : 'false'?> ;
+var userIsMechanic = <?=($userIsMechanic)? 'true' : 'false'?> ;
+var userIsFlightPilot = <?=($userIsFlightPilot)? 'true' : 'false'?> ;
+var userIsFlightManager = <?=($userIsFlightManager)? 'true' : 'false'?> ;
 </script>
 <!-- Matomo -->
-<script type="text/javascript">
+<script>
   var _paq = window._paq = window._paq || [];
   /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-  _paq.push(['setUserId', '<?=$userName?>']);
+  _paq.push(['setUserId', userName]);
   _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
   _paq.push(["setDomains", ["*.spa-aviation.be","*.ebsp.be","*.m.ebsp.be","*.m.spa-aviation.be","*.resa.spa-aviation.be"]]);
   _paq.push(['enableHeartBeatTimer']);
-  _paq.push(['setCustomVariable', 1, "userID", <?=$userId?>, "visit"]);
+  _paq.push(['setCustomVariable', 1, "userID", userId, "visit"]);
   _paq.push(["setCookieDomain", "*.spa-aviation.be"]);
   _paq.push(['trackPageView']);
   _paq.push(['enableLinkTracking']);
@@ -145,53 +145,48 @@ if ($christmas_theme) {
 <?php
 } // $christmas theme
 ?>
-<nav class="navbar navbar-inverse bg-light navbar-light">
+<nav class="navbar navbar-expand-lg bg-black d-print-none" data-bs-theme="dark">
   <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>                        
-      </button>
-      <a class="navbar-brand" href="flight_home.php">Vols découvertes/initiations <!--span style="color:red; font-weight: bold; font-style: italic;">EN TEST !!!</span--></a>
-    </div><!-- navbar-header -->
+    <a class="navbar-brand" href="<?=$flight_url_prefix?>flight_home.php">Vols découvertes/initiations</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#myNavbar" aria-controls="myNavbar" aria-expanded="false" aria-label="Menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
     <div class="collapse navbar-collapse" id="myNavbar">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="flight_home.php">Home</a></li>
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#">Vols<span class="caret"></span></a>
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link<?=($flight_current_page == 'flight_home.php') ? ' active' : ''?>" href="<?=$flight_url_prefix?>flight_home.php">Home</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Vols</a>
           <ul class="dropdown-menu">
-            <!--li><a href="mobile.php">Ma prochaine</a></li-->
-            <li><a href="flight_create.php">Nouveau Vol</a></li>
-            <li><a href="flight_list.php?completed=false">Vols prévus</a></li>
-            <li><a href="flight_list.php?completed=true">Vols terminés</a></li>
-            <li><a href="flight_stats.php">Statistiques mensuelles</a></li>
-            <li><a href="https://www.tripadvisor.fr/Attraction_Review-g230026-d26689532-Reviews-Spa_Aviation-Spa_Liege_Province_The_Ardennes_Wallonia.html"><img src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg" height="15px"> &boxbox;</a></li>
-          </ul><!-- dropdown-menu -->
-        </li><!-- dropdown -->
-        
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#">Comptabilité<span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href="odoo_checkboncadeau.php">Bons cadeaux payés</a></li>
-            <li><a href="if_init_folio.php">Folio vols IF-INIT</a></li>
-            <li><a href="flight_bon_management.php">Désactiver bons</a></li>
-            <li><a href="flight_odoo.php">Export des bons vers Odoo</a></li>
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_create.php">Nouveau Vol</a></li>
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_list.php?completed=false">Vols prévus</a></li>
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_list.php?completed=true">Vols terminés</a></li>
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_stats.php">Statistiques mensuelles</a></li>
+            <li><a class="dropdown-item" href="https://www.tripadvisor.fr/Attraction_Review-g230026-d26689532-Reviews-Spa_Aviation-Spa_Liege_Province_The_Ardennes_Wallonia.html" target="_blank" rel="noopener"><img src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg" height="15" alt="Tripadvisor"> <i class="bi bi-box-arrow-up-right"></i></a></li>
           </ul><!-- dropdown-menu -->
         </li><!-- dropdown -->
 
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#">Pilotes<span class="caret"></span></a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Comptabilité</a>
           <ul class="dropdown-menu">
-            <!--li><a href="mobile.php">Ma prochaine</a></li-->
-            <li><a href="flight_pilot_rating.php">Qualifications</a></li>
-            <li><a href="flight_pilot_assign.php">Dernières assignations</a></li>
-            <li><a href="flight_list_mine.php">Mes vols à venir</a></li>
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>odoo_checkboncadeau.php">Bons cadeaux payés</a></li>
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>if_init_folio.php">Folio vols IF-INIT</a></li>
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_bon_management.php">Désactiver bons</a></li>
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_odoo.php">Export des bons vers Odoo</a></li>
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>voldecouverte/page_tarifs.php">Tarifs</a></li>
           </ul><!-- dropdown-menu -->
         </li><!-- dropdown -->
-        <li><a href="mobile_reservation.php">Mobile</a></li>
-        <li><a href="flight_help.php">Aide</a></li>
-      </ul><!-- av navbar-nav -->
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Pilotes</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_pilot_rating.php">Qualifications</a></li>
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_pilot_assign.php">Dernières assignations</a></li>
+            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_list_mine.php">Mes vols à venir</a></li>
+          </ul><!-- dropdown-menu -->
+        </li><!-- dropdown -->
+        <li class="nav-item"><a class="nav-link" href="<?=$flight_url_prefix?>mobile_reservation.php">Réservations</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?=$flight_url_prefix?>flight_help.php">Aide</a></li>
+      </ul><!-- navbar-nav -->
     </div><!-- myNavbar -->
   </div><!-- container fluid -->
 </nav>

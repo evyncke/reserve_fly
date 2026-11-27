@@ -124,7 +124,7 @@ function createFactureDHFFunction(PHP_Self,theSince, theReferences, theLogbookid
  
 </script>
 
-<center><h2>Folio du mois: vols IF-INIT du <?=$since?> au <?=$monthAfterForTitleString?></h2></center>
+<h2 class="text-center">Folio du mois: vols IF-INIT du <?=$since?> au <?=$monthAfterForTitleString?></h2>
 <?php
 print("Mois: <b><a href=$_SERVER[PHP_SELF]?since=$monthBeforeString>&lt;</a>&nbsp; $mounthName &nbsp;<a href=$_SERVER[PHP_SELF]?since=$monthAfterString>&gt;</a></b></br>\n") ;
 ?>

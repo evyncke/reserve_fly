@@ -2,10 +2,9 @@
 // This PHP script is fully integrated as a component of Joomla
 // Developped by Patrick Reginster in 2019
 require_once 'action_tools.php' ;
+$flight_url_prefix = '../' ; // the header is located in the parent directory
+require_once '../flight_header.php' ;
 ?>
-<!DOCTYPE html>
-<html>
-<body>
 	<script src="offrir_bons.js"></script>
 	<script src="offrir_circuits.js"></script>
 	<script src="tarifs.js"></script>
@@ -13,7 +12,8 @@ require_once 'action_tools.php' ;
 	<script>
 	<?php
 	 	function printJavaScriptVariableFromFile($theVarName,$theURL) {
-			$text=file_get_contents($theURL);
+			$text=file_get_contents($theURL) 
+				or journalise(0, "E", "Cannot access file $theURL");
 			print("var $theVarName=$text;\n");
 		}
 	  // Add in the file: var myTarifs = {content of the file};
@@ -24,97 +24,108 @@ require_once 'action_tools.php' ;
 //const fs = require('FS');
 	</script>
 	
-    <h1 style='text-align: center;'>Summary of all tarifs (2024)</h1>
+	<!-- TODO: is the hardcoded 2024 always valid ? -->
+    <h2 class="text-center">Summary of all tarifs (2024)</h2>
 	
 
 	<!-- Table des tarifs de base (Initiation, Prix a la minute vol decouverte, ...)-->
 	<h2>Basic Tarifs</h2>
-    <table style="width: 100%; margin-left: auto; margin-right: auto;" border="2" cellspacing="3">
-	<tbody>
-		<tr style='background-color: #23ccdb; text-align: center; width: 10%;'>
-		<td>Type</td>
-		<td>Name</td>
-		<td>Number of Passengers</td>
-		<td>Tarif</td>
+	<div class="table-responsive">
+		<table class="table table-bordered table-striped align-middle w-auto">
+	<thead class="table-info">
+		<tr class="text-center">
+		<th>Type</th>
+		<th>Name</th>
+		<th>Number of Passengers</th>
+		<th>Tarif</th>
 		</tr>
+	</thead>
+	<tbody>
 	<?php 
-	$tarifs = json_decode(file_get_contents("tarifs.json"), true);
+	$tarifs = json_decode(file_get_contents("tarifs.json"), true)
+		or journalise(0, "E", "Invalid JSON file: tarifs.json");
 	foreach ($tarifs as $tarif) {
 		//var_dump($tarif );
 		//print("tarif:$tarif[name]=$tarif[tarif]<br>");
 		print("<tr>");
-		$aType= $tarif["type"]; 
+		$aType= cleanHTML($tarif["type"]); 
 		print("<td>$aType</td>");
-		$aName=$tarif["name"];
+		$aName=cleanHTML($tarif["name"]);
 		print("<td>$aName</td>");
 		if(isset($tarif["passenger"])) {
-			$aNumberOfPassenger =  $tarif["passenger"] ;
-			print("<td style='text-align: right;'>$aNumberOfPassenger</td>");
+			$aNumberOfPassenger =  (float) $tarif["passenger"] ;
+			print("<td class=\"text-end\">$aNumberOfPassenger</td>");
 		}
 		else {
-			print("<td style='text-align: right;'>-</td>");
+			print("<td class=\"text-end\">-</td>");
 		}
-		$aTarif =  $tarif["tarif"];
-		print("<td style='text-align: right;'>$aTarif €</td>");
+		$aTarif =  (float) $tarif["tarif"];
+		print("<td class=\"text-end\">$aTarif €</td>");
 		print("</tr>");
-
 	  }
 	?>
 	</tbody>
 	</table>
-	
+	</div><!-- table responsive -->
 	
 	<!-- Table des circuits )-->
 	<h2>Circuits</h2>
-    <table style="width: 100%; margin-left: auto; margin-right: auto;" border="2" cellspacing="3">
-	<tbody>
-	<tr style='background-color: #23ccdb; text-align: center; width: 10%;'>
-		<td>Circuit</td>
-		<td>Time (Min)</td>
+	<div class="table-responsive">
+		<table class="table table-bordered table-striped align-middle w-auto">
+		<thead class="table-info">
+		<tr class="text-center">
+			<th>Circuit</th>
+			<th>Time (Min)</th>
 		</tr>
+		</thead>
+		<tbody>
 	<?php 
-	$circuits = json_decode(file_get_contents("circuits.json"), true);
+	$circuits = json_decode(file_get_contents("circuits.json"), true)
+		or journalise(0, "E", "Invalid JSON file: circuits.json");
 	foreach ($circuits as $circuit) {
-		//var_dump($circuit );
-		//print("tarif:$tarif[name]=$tarif[tarif]<br>");
-		$aName=$circuit["name"];
+		$aName=cleanHTML($circuit["name"]);
 		if($aName!="") {
 			print("<tr>");
 			print("<td>$aName</td>");
-			$aTime =  $circuit["duree"];
-			print("<td style='text-align: right;'>$aTime</td>");
+			$aTime =  (int) $circuit["duree"];
+			print("<td class=\"text-end\">$aTime</td>");
 			print("</tr>");
 		}
 	  }
 	?>
 	</tbody>
 	</table>
+</div><!-- table responsive-->
 	
 	
 	<!-- Table des bons a valoirs )-->
 	<h2>Vouchers</h2>
-    <table style="width: 100%; margin-left: auto; margin-right: auto;" border="2" cellspacing="3">
-	<tbody>
-		<tr style='background-color: #23ccdb; text-align: center; width: 10%;'>
-		<td>Voucher names</td>
-		<td>Tarif</td>
+	<div class="table-responsive">
+		<table class="table table-bordered table-striped align-middle w-auto">
+		<thead class="table-info">
+		<tr class="text-center">
+		<th>Voucher names</th>
+		<th>Tarif</th>
 		</tr>
+		</thead>
+		<tbody>
 	<?php 
-	$bons = json_decode(file_get_contents("bons.json"), true);
+	$bons = json_decode(file_get_contents("bons.json"), true)
+		or journalise(0, "E", "Invalid JSON file: bons.json");
 	foreach ($bons as $bon) {
-		$aName=$bon["name"];
+		$aName=cleanHTML($bon["name"]);
 		if($aName!="") {
 			print("<tr>");
 			print("<td>$aName</td>");
-			$aTarif =  $bon["tarif"];
-			print("<td style='text-align: right;'>$aTarif</td>");
+			$aTarif =  (float) $bon["tarif"];
+			print("<td class=\"text-end\">$aTarif</td>");
 			print("</tr>");
 		}
 	  }
 	?>
 	</tbody>
 	</table>
-		
+	</div><!-- responsive table -->		
 	
 	<!-- Table tarifs des circuits )-->
 	<h2>Circuits</h2>
@@ -127,5 +138,4 @@ require_once 'action_tools.php' ;
 	<!-- Table tarifs Vol libre par minute)-->
 	<h2>Vols libres Tarifs par minutes</h2>
  	<script src="table_vol_libre_par_minute.js"></script>
-</body>
-</html>
+<?php require_once '../flight_trailer.php' ; ?>

@@ -19,11 +19,11 @@ require_once 'flight_header.php' ;
 
 ?>
 <script src="data/pilots.js"></script>
-<div class="page-header hidden-xs">
+<div class="pb-2 mb-3 border-bottom d-none d-sm-block">
 <h3>Assignation des pilotes ces 90 derniers jours</h3>
 </div><!-- page header -->
 
-<table class="table table-striped table-responsive col-md-6 col-xs-12">
+<div class="table-responsive col-md-6 col-12"><table class="table table-striped">
 <thead>
 <tr><th>Assigné le</th><th>Date vol (LT)</th><th>Pilote</th><th>Type</th><th>Client</th><th>Date demande</th></tr>
 </thead>
@@ -43,14 +43,14 @@ while ($row = mysqli_fetch_array($result)) {
 		$date_vol = "<abbr title=\"Estimated Time of Departure\">ETD</abbr> $row[r_start] ($row[r_plane])"  ;
 	else
 		$date_vol = "à déterminer" ;
-	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"glyphicon glyphicon-pencil\"></span></a> " ;
+	$edit =  " <a href=\"flight_create.php?flight_id=$row[f_id]\"><span class=\"bi bi-pencil\"></span></a> " ;
 	print("<tr><td>$edit$row[f_date_assigned]</td><td>$date_vol</td><td><b>" . db2web($row['last_name']) . '</b> ' . db2web($row['first_name']) .
 		"</td><td>$row[f_type]</td><td>" . db2web($row['p_fname']) . " <b>" . db2web($row['p_lname']) . "</b></td>
 		<td>$row[f_date_created]</td></tr></form>\n") ;
 }
 ?>
 </tbody>
-</table>
+</table></div>
 
 
 <?php
