@@ -43,7 +43,7 @@ $body_attributes = 'onload=init();notedefraisMain();' ;
 require_once 'mobile_header5.php' ;
 require_once 'dto.class.php' ;
 
-if (isset($_REQUEST['delete'])) {
+if (isset($_REQUEST['delete']) and ($userIsAdmin or $userIsBoardMember)) {
     // TODO security, check that the file is related to a member expense note....
     $deleteFile = basename($_REQUEST['delete']) ;
     $deleteAttachedFile=substr($deleteFile,0,strlen($deleteFile)-4);
@@ -95,7 +95,6 @@ if (isset($_REQUEST['notedefrais_json'])) {
     $ndfJSON = $_REQUEST['notedefrais_json'] ;
     $uploadFileFolder="";
     $factureMailTo="";
-    //print("ndf in JSON=$ndfJSON<br>");
     $noteDeFraisPDF=OF_createNoteDeFrais($memberID, $ndfJSON, $remboursable,$_FILES, $uploadFileFolder, $factureMailTo);
     if($noteDeFraisPDF!="") { // TODO proposed by eric: to check whether "" or false is returned in the call function.
     	print("<div class=\"text-bg-info\">La note de frais <a href=\"$uploadFileFolder/$noteDeFraisPDF\">$noteDeFraisPDF</a> est créée et envoyée à $factureMailTo</div>");
@@ -116,7 +115,8 @@ if ($userIsAdmin or $userIsBoardMember)
 else
     $selectorDisabled="disabled";
 ?>
-<h2>Introduction d'une note de frais</h2>
+<h2>Note de frais</h2>
+<h3>Nouvelle note de frais</h3>
 <br>
 <form action="<?=$_SERVER['SCRIPT_NAME']?>" method="post" enctype="multipart/form-data">
 <div class="row">
@@ -206,12 +206,13 @@ if ($userIsAdmin or $userIsBoardMember) {
     $noteDeFraisCount=MT_GetNoteDeFraisFiles($theNotesDeFrais, $theAttachedFiles, $theUploadFolder);
 ?>
 <p></p>
-<h2>Gestion des fichiers associés aux notes de frais sur le serveur du club</h2>
+<h3>Gestion des fichiers associés aux notes de frais sur le serveur du club</h3>
+<p class="text-muted text-warning-emphasis">Réservé aux administrateurs.</p>
 <br>
 <div class="row">
 <div class="col-lg-7">
 <div>
-<table style="width:100%;" class="table table-striped" id="id_table_notedefrais2">
+<table class="table table-striped" id="id_table_notedefrais2">
 <thead class="text-center">
 <tr>
     <th>Action</th>
