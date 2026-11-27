@@ -22,8 +22,9 @@ require_once 'flight_header.php' ;
 require_once "dbi.php" ;
 require_once "odooFlight.class.php" ;
 
-//MustBeLoggedIn() ;
-// In the mobile_header.php, $header_postamble will be inserted in the actual <head>...</head> section
+if (!($userIsFlightManager or $userIsAdmin or $userIsBoardMember)) {
+	journalise($userId, "F", "Vous n'êtes pas autorisé(e) sur cette page: il faut avoir les bons droits d'accès.") ;
+}
 
 $since = "";
 if (isset($_REQUEST['since'])) $since =$_REQUEST['since'];

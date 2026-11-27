@@ -22,8 +22,9 @@ require_once "dbi.php" ;
 
 MustBeLoggedIn() ;
 
-if (! ($userIsFlightPilot or $userIsFlightManager)) 
+if (! ($userIsFlightPilot or $userIsFlightManager or $userIsInstructor or $userIsAdmin or $userIsBoardMember)) {
 	journalise($userId, "F", "Vous n'êtes pas autorisé(e) sur cette page: il faut avoir les bons droits d'accès.") ;
+}
 
 $today_month = date('m') ;
 $today_day = date('d') ;
@@ -39,7 +40,7 @@ $flight_current_page = basename($_SERVER['SCRIPT_NAME']) ;
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vols découvertes et d'initiation</title>
+<title><?=cleanHTML($page_title ?? "Vols découvertes et d'initiation")?></title>
 <link href="<?=htmlspecialchars($favicon)?>" rel="shortcut icon" type="image/vnd.microsoft.icon">
 <!-- Bootstrap 5 (pinned version + SRI) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
@@ -155,31 +156,47 @@ if ($christmas_theme) {
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link<?=($flight_current_page == 'flight_home.php') ? ' active' : ''?>" href="<?=$flight_url_prefix?>flight_home.php">Home</a></li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Vols</a>
+          <a class="nav-link dropdown-toggle" id="navFlights" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Vols</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_create.php">Nouveau Vol</a></li>
+<?php
+if ($userIsFlightManager or $userIsAdmin or $userIsBoardMember) {
+?>
+            <li><a class="dropdown-item text-warning" href="<?=$flight_url_prefix?>flight_create.php">Nouveau Vol</a></li>
+<?php
+} // $userIsFlightManager
+?>
             <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_list.php?completed=false">Vols prévus</a></li>
             <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_list.php?completed=true">Vols terminés</a></li>
             <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_stats.php">Statistiques mensuelles</a></li>
-            <li><a class="dropdown-item" href="https://www.tripadvisor.fr/Attraction_Review-g230026-d26689532-Reviews-Spa_Aviation-Spa_Liege_Province_The_Ardennes_Wallonia.html" target="_blank" rel="noopener"><img src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg" height="15" alt="Tripadvisor"> <i class="bi bi-box-arrow-up-right"></i></a></li>
+            <li><a class="dropdown-item" href="https://www.tripadvisor.fr/Attraction_Review-g230026-d26689532-Reviews-Spa_Aviation-Spa_Liege_Province_The_Ardennes_Wallonia.html" target="_blank" rel="noopener"><img src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg" height="15" alt="Tripadvisor"> <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a></li>
           </ul><!-- dropdown-menu -->
         </li><!-- dropdown -->
-
+<?php
+if ($userIsFlightManager or $userIsAdmin or $userIsBoardMember) {
+?>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Comptabilité</a>
+          <a class="nav-link dropdown-toggle text-warning" id="navAccounting" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Comptabilité</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>odoo_checkboncadeau.php">Bons cadeaux payés</a></li>
-            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>if_init_folio.php">Folio vols IF-INIT</a></li>
-            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_bon_management.php">Désactiver bons</a></li>
-            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_odoo.php">Export des bons vers Odoo</a></li>
-            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>voldecouverte/page_tarifs.php">Tarifs</a></li>
+            <li><a class="dropdown-item text-warning" href="<?=$flight_url_prefix?>odoo_checkboncadeau.php">Bons cadeaux payés</a></li>
+            <li><a class="dropdown-item text-warning" href="<?=$flight_url_prefix?>if_init_folio.php">Folio vols IF-INIT</a></li>
+            <li><a class="dropdown-item text-warning" href="<?=$flight_url_prefix?>flight_bon_management.php">Désactiver bons</a></li>
+            <li><a class="dropdown-item text-warning" href="<?=$flight_url_prefix?>flight_odoo.php">Export des bons vers Odoo</a></li>
+            <li><a class="dropdown-item text-warning" href="<?=$flight_url_prefix?>voldecouverte/page_tarifs.php">Tarifs</a></li>
           </ul><!-- dropdown-menu -->
         </li><!-- dropdown -->
-
+<?php
+} // $userIsFlightManager
+?>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Pilotes</a>
+          <a class="nav-link dropdown-toggle" id="navPilots" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Pilotes</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_pilot_rating.php">Qualifications</a></li>
+<?php
+if ($userIsFlightManager or $userIsInstructor or $userIsAdmin or $userIsBoardMember) {
+?>
+            <li><a class="dropdown-item text-warning" href="<?=$flight_url_prefix?>flight_pilot_rating.php">Qualifications</a></li>
+<?php
+} // $userIsFlightManager
+?>
             <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_pilot_assign.php">Dernières assignations</a></li>
             <li><a class="dropdown-item" href="<?=$flight_url_prefix?>flight_list_mine.php">Mes vols à venir</a></li>
           </ul><!-- dropdown-menu -->

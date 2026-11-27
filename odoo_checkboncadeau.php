@@ -21,6 +21,9 @@ require_once 'flight_header.php' ;
 require_once "dbi.php" ;
 require_once "odooFlight.class.php" ;
 MustBeLoggedIn() ;
+if (!($userIsFlightManager or $userIsAdmin or $userIsBoardMember)) {
+	journalise($userId, "F", "Vous n'êtes pas autorisé(e) sur cette page: il faut avoir les bons droits d'accès.") ;
+}
 
 $header_postamble = '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <link href="https://' . SITE_HOST . '/favicon32x32.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">

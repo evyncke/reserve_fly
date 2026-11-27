@@ -64,6 +64,10 @@ $header_postamble ='
 require_once 'flight_header.php' ;
 require_once "odooFlight.class.php" ;
 
+if (!($userIsFlightManager or $userIsAdmin or $userIsBoardMember)) {
+	journalise($userId, "F", "Vous n'êtes pas autorisé(e) sur cette page: il faut avoir les bons droits d'accès.") ;
+}
+
 $pattern="";
 if (isset($_REQUEST['pattern'])) {
 	$pattern = mysqli_real_escape_string($mysqli_link, web2db(trim($_REQUEST['pattern']))) ;

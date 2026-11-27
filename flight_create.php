@@ -24,6 +24,10 @@
 
 require_once 'flight_header.php' ;
 
+if (!($userIsFlightManager or $userIsAdmin or $userIsBoardMember)) {
+	journalise($userId, "F", "Vous n'êtes pas autorisé(e) sur cette page: il faut avoir les bons droits d'accès.") ;
+}
+
 // Check if the f_bbokingid is correctly defined.
 // sometimes, the f_bookingid is set but it is canceled. It means the f_bbokingid must be set to NULL 
 function checkBookingIDField( $theFlightID, $the_f_bookingid) {

@@ -19,11 +19,11 @@
 require_once 'flight_header.php' ;
 require_once 'odoo.class.php' ;
 
+if (!($userIsFlightManager or $userIsAdmin or $userIsBoardMember)) {
+	journalise($userId, "F", "Vous n'êtes pas autorisé(e) sur cette page: il faut avoir les bons droits d'accès.") ;
+}
+
 $odooClient = new OdooClient($odoo_host, $odoo_db, $odoo_username, $odoo_password) ;
-
-if (!($userIsAdmin or $userIsBoardMember or $userIsInstructor or $userId == 348)) // 348 = René Vandevelde
-    journalise($userId, "F", "This admin page is reserved to administrators") ;
-
 ?>
 <h2>Export des vols INIT/IF vers Odoo@<?=$odoo_host?></h2>
 <p>Recopie les données des personnes de contact des bons/vouchers du site vols IF/INIT (pas encore effectués) vers Odoo... 

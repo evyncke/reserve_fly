@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright 2014-2019 Eric Vyncke
+   Copyright 2014-2026 Eric Vyncke
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,6 +17,10 @@
 */
 require_once 'flight_header.php' ;
 
+if (!($userIsFlightManager or $userIsInstructor or $userIsAdmin or $userIsBoardMember)) {
+	journalise($userId, "F", "Vous n'êtes pas autorisé(e) sur cette page: il faut avoir les bons droits d'accès.") ;
+}
+	
 if (isset($_REQUEST['add']) and isset($_REQUEST['newPilot'])){
 	$pilot = intval($_REQUEST['newPilot']) ;
 	if (! is_numeric($pilot) or ($pilot <= 0)) die("ID Pilote incorrecte") ;
@@ -36,14 +40,14 @@ if (isset($_REQUEST['delete']) and isset($_REQUEST['pilot'])){
 
 if (isset($_REQUEST['edit_pilot']) and isset($_REQUEST['pilot'])){
 	$pilot = intval($_REQUEST['pilot']) ;
-	if (! is_numeric($pilot) or ($pilot <= 0)) die("ID Pilote incorrecte") ;
-	$weight = intval($_REQUEST['weight']) ;
-	if (! is_numeric($weight) or ($weight <= 40)) die("Poids Pilote incorrecte") ;
+	if ($pilot <= 0) die("ID Pilote incorrecte") ;
+	$weight = intval($_REQUEST['weight'] ?? 0) ;
+	if ($weight < 40 or $weight > 120) die("Poids Pilote incorrecte (entre 40 et 120 kg)") ;
 	$discovery = (isset($_REQUEST['discovery']) and $_REQUEST['discovery'] == 'on') ? 1 : 0;
 	$initiation = (isset($_REQUEST['initiation']) and $_REQUEST['initiation'] == 'on') ? 1 : 0 ;
 	mysqli_query($mysqli_link, "UPDATE $table_flights_pilots SET p_weight = $weight, p_discovery = $discovery, p_initiation = $initiation WHERE p_id = $pilot")
 		or die("Cannot update pilot: " . mysqli_error($mysqli_link)) ;
-	journalise($userId, "I", "New pilot rating for $pilot: discovery=$_REQUEST[discovery], initiation=$_REQUEST[initiation]") ;
+	journalise($userId, "I", "New pilot rating for $pilot: discovery=$discovery, initiation=$initiation, weight=$weight") ;
 }
 ?>
 <script src="data/pilots.js"></script>
