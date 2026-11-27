@@ -17,8 +17,10 @@
 */
 require_once 'flight_header.php' ;
 $pattern="";
-if (isset($_REQUEST['pattern'])) {
-	$pattern = mysqli_real_escape_string($mysqli_link, web2db(trim($_REQUEST['pattern']))) ;
+$pattern_raw = '' ; // Unescaped (for SQL) value, to be shown in the search box with cleanHTML()
+if (isset($_REQUEST['pattern']) and is_string($_REQUEST['pattern'])) {
+	$pattern_raw = trim($_REQUEST['pattern']) ;
+	$pattern = mysqli_real_escape_string($mysqli_link, web2db($pattern_raw)) ;
 	$other_filter = " AND (p_lname LIKE '%$pattern%' OR p_fname LIKE '%$pattern%' or f_description LIKE '%$pattern%' or f_reference LIKE '%$pattern%' or f_notes LIKE '%$pattern%' or p_email LIKE '%$pattern%' OR first_name LIKE '%$pattern%' OR last_name LIKE '%$pattern%') " ;
 } else
 	$other_filter = '' ;
@@ -60,7 +62,7 @@ if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == "true") {
 <h3>Tous les vols <?=$title?></h3>
 </div><!-- page header -->
 
-<form class="row g-2 align-items-center mb-3" action="<?=$_SERVER['PHP_SELF']?>">
+<form class="row g-2 align-items-center mb-3" action="<?=cleanHTML($_SERVER['SCRIPT_NAME'])?>">
 	<input type="hidden" name="completed" value="<?=$completed?>"/>
 	<div class="col-auto">
 		<div class="form-check">
@@ -81,7 +83,7 @@ if (isset($_REQUEST['completed']) and $_REQUEST['completed'] == "true") {
 		</div>
 	</div><!-- col -->
 	<div class="col-6 col-md-4">
-		<input type="text" class="form-control" name="pattern" value="<?=db2web($pattern)?>"/>
+		<input type="text" class="form-control" name="pattern" value="<?=cleanHTML($pattern_raw)?>"/>
 	</div><!-- col -->
 	<div class="col-auto">
 		<input type="submit" class="btn btn-primary" name="add" value="Chercher"/>
