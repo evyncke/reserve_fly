@@ -29,7 +29,7 @@
 require_once "dbi.php" ;
 MustBeLoggedIn() ;
 $need_swiped_events = true ; // Allow swipe events on this page
-$header_postamble = '<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">' ;
+$header_postamble = '<link href="https://cdn.jsdelivr.net/npm/simple-datatables@10.3.0/dist/style.css" rel="stylesheet" type="text/css" integrity="sha384-CinX6s1UC1GpaQwL9eKshF7JhtC8H2xchDD0dWqlCgZ8t+GCCcjluxCgmsbVpdEh" crossorigin="anonymous">' ;
 require_once 'mobile_header5.php' ;
 
 if (!($userIsAdmin or $userIsBoardMember))
@@ -51,7 +51,8 @@ if (!($userIsAdmin or $userIsBoardMember))
 </thead>
 <tbody>
 <?php
-$start = (isset($_REQUEST['start']) and $_REQUEST['start'] > 0 and ctype_digit($_GET['start']) and $_GET['start'] > 0) ? $_REQUEST['start'] : DB_MAX_UINT ;
+// Only digits are accepted and the value is cast to an integer: it is used unquoted in the SQL query
+$start = (isset($_GET['start']) and is_string($_GET['start']) and ctype_digit($_GET['start']) and (int) $_GET['start'] > 0) ? (int) $_GET['start'] : DB_MAX_UINT ;
 $sql_filter = '' ;
 $filter_params = array() ; // The active filter, to be kept in the pagination and swipe links
 if (isset($_REQUEST['id']) and ctype_digit($_REQUEST['id'])) {
@@ -97,12 +98,16 @@ while ($row = mysqli_fetch_array($result)) {
 		$name = db2web('<strong>' . cleanHTML($row['last_name']) . '</strong><span class="d-none d-md-inline"> ' . cleanHTML($row['first_name']) . '</span>') ;
 	else
 		$name = cleanHTML(db2web($row['name'] ?? '')) ;
+	// The URI is the logged request URI, i.e., controlled by the visitor: escape it and link only local paths
+	$uri = db2web($row['j_uri'] ?? '') ;
+	$uri_html = cleanHTML($uri) ;
+	$uri_cell = (preg_match('#^/(?![/\\\\])#', $uri)) ? "<a href=\"$uri_html\">$uri_html</a>" : $uri_html ;
 	print("<tr>
 		<td class=\"text-nowrap$specialClass\">$date</td>
 		<td$nameStyle class=\"text-nowrap$specialClass\">$name</td>
 		<td class=\"d-none d-lg-table-cell$specialClass\">" . cleanHTML($row['j_address']) . "</td>
 		<td class=\"text-start$specialClass\">" . cleanHTML(db2web($row['j_message'])) . "</td>
-		<td class=\"text-start d-none d-lg-table-cell$specialClass\"><a href=\"" . db2web($row['j_uri']) . "\">" . db2web($row['j_uri']) . "</a></td>
+		<td class=\"text-start d-none d-lg-table-cell$specialClass\">$uri_cell</td>
 		</tr>\n") ;
 }
 // Pagination start ids (null when there is no such page). The journal ids have gaps when a filter is active,
@@ -140,7 +145,7 @@ function journalUrl($theFilterParams, $theStart = null) {
 </div> <!-- table responsive -->
 <p class="text-muted small">Les heures sont en heures locales.</p>
 </div><!-- container -->
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@10.3.0/dist/umd/simple-datatables.min.js" integrity="sha384-BEpG7sFvcL57u3OEtietm61i9CEIOFR3zR2mlbaAtw+CyHWKNNMEJ7lb852F1iNb" crossorigin="anonymous"></script>
 <script>
 	// Swipe to change to next webcam
 <?php if ($older_start !== null) { ?>
